@@ -1,0 +1,1079 @@
+/* Main Page Layout */
+.page {
+    min-height: 100vh;
+    padding-top: 80px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Date Selector */
+.dateSelector {
+    top: 0;
+    z-index: 10;
+    margin-bottom: var(--spacing-md);
+    background: transparent;
+    border-bottom: none;
+    position: relative;
+    padding: 0;
+}
+
+.dateSelectorInner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    margin: 0;
+    padding: var(--spacing-sm);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.dateNavBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.dateNavBtn:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.dateList {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: var(--spacing-xs) 0;
+}
+
+.dateList::-webkit-scrollbar {
+    display: none;
+}
+
+.dateItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-family: var(--font-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.dateItem:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.dateItem.today {
+    font-weight: 600;
+}
+
+.dateItem.active {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
+}
+
+.dateLabel {
+    text-transform: capitalize;
+}
+
+.calendarBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.calendarBtn:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+}
+
+/* Main Layout - 3 Columns (Left Sidebar + Main + Right Sidebar) */
+/* Main Layout - 3 Columns (Left Nav + Main + Right Extras) */
+.mainLayout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) 300px;
+    gap: var(--spacing-lg);
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+    padding: 0 var(--spacing-lg);
+}
+
+/* Sidebar Common Styles */
+/* Sidebar Common Styles */
+.sidebarLeft,
+.sidebarRight {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.sidebarLeft::-webkit-scrollbar,
+.sidebarRight::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+
+
+
+
+.sidebarList {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-xs) 0;
+}
+
+.sidebarItem {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.sidebarItem:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.sidebarItemIcon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.sidebarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    background: var(--color-bg-secondary);
+    z-index: 1;
+}
+
+.sidebarTitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-text-tertiary);
+}
+
+.sidebarLink {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent);
+}
+
+
+/* Unified Sidebar Styles (Flat List) */
+.sidebarUnifiedCard {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: var(--spacing-sm);
+}
+
+.sidebarMainTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 0 var(--spacing-xs) var(--spacing-xs);
+}
+
+.sidebarSearchArea {
+    background: transparent;
+    position: relative;
+    border: none;
+    padding: 0;
+    margin-bottom: var(--spacing-xs);
+}
+
+.sidebarSearchInput {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    /* Adjusted padding */
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: 0.85rem;
+    transition: all var(--transition-fast);
+}
+
+.sidebarSearchIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+    width: 14px;
+    height: 14px;
+}
+
+.sidebarSearchInput:focus {
+    border-color: var(--color-accent);
+    background: var(--color-bg-primary);
+    outline: none;
+}
+
+.accordionList {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.accordionItem {
+    border: none;
+    background: transparent;
+}
+
+.accordionHeader {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 4px;
+    transition: background-color var(--transition-fast);
+}
+
+.accordionHeader:hover,
+.accordionHeader.active {
+    background: var(--color-bg-tertiary);
+}
+
+.accordionHeaderContent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.accordionHeader.active .accordionHeaderContent {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.accordionContent {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    opacity: 0;
+}
+
+.accordionContent.open {
+    max-height: 1000px;
+    opacity: 1;
+}
+
+/* Level 2 Accordion Item (League) styling - Nested items */
+.accordionItemLinkWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.accordionItemHeader {
+    display: flex;
+    /* Changed from just link to flex/button container if expandable */
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px 5px 38px;
+    text-decoration: none;
+    color: var(--color-text-tertiary);
+    font-size: 0.85rem;
+    transition: all var(--transition-fast);
+    border-radius: 44px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.accordionItemHeader:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+}
+
+.accordionItemHeader.active {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.accordionItemContent {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.accordionItemContent.open {
+    max-height: 500px;
+    opacity: 1;
+}
+
+.accordionSubItemLink {
+    padding: 4px 8px 4px 54px;
+    /* Indented further */
+    text-decoration: none;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    transition: color var(--transition-fast);
+}
+
+.accordionSubItemLink:hover {
+    color: var(--color-text-primary);
+}
+
+/* Replaces old accordionItemLink */
+.accordionItemLink {
+    /* Kept for non-expandable items fallback */
+    display: flex;
+    align-items: center;
+    padding: 5px 8px 5px 38px;
+    text-decoration: none;
+    color: var(--color-text-tertiary);
+    font-size: 0.85rem;
+    transition: all var(--transition-fast);
+    border-radius: 4px;
+}
+
+.accordionItemLink:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+}
+
+.chevron {
+    transition: transform 0.2s ease;
+    color: var(--color-text-muted);
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.accordionHeader.active .chevron {
+    transform: rotate(90deg);
+    /* 90deg for caret style */
+    color: var(--color-text-primary);
+    opacity: 1;
+}
+
+.accordionItemHeader.active .chevron {
+    transform: rotate(90deg);
+    color: var(--color-accent);
+}
+
+.mainContent {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    /* Increased gap for better hierarchy */
+}
+
+/* Live Banner */
+.liveBanner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-error);
+}
+
+.liveDot {
+    width: 8px;
+    height: 8px;
+    background: var(--color-error);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Date Header */
+.dateHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+}
+
+.dateTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.matchCount {
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+}
+
+/* Matches Container */
+.matchesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* League Section */
+.leagueSection {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.leagueSectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-tertiary);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-fast);
+}
+
+.leagueSectionHeader:hover {
+    background: var(--color-bg-hover);
+}
+
+.leagueSectionHeader svg {
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-sm);
+    /* Clickable */
+}
+
+.leagueHeaderLink {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    /* flex-1 */
+    flex: 1;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    padding-right: var(--spacing-sm);
+    /* Ensure summary is pushed or handled properly */
+}
+
+.leagueFavoriteBtn {
+    background: transparent;
+    border: none;
+    padding: var(--spacing-xs);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    color: var(--color-text-tertiary);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+    margin-right: var(--spacing-xs);
+}
+
+.leagueFavoriteBtn:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-accent);
+    transform: scale(1.1);
+}
+
+.leagueFavoriteBtn svg {
+    transition: fill var(--transition-fast);
+}
+
+.leagueHeaderToggle {
+    background: transparent;
+    border: none;
+    padding: var(--spacing-xs);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    color: var(--color-text-tertiary);
+    transition: background-color var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.leagueHeaderToggle:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.leagueSectionHeader:hover {
+    background: var(--color-bg-secondary);
+    /* Hint interactive */
+    border-radius: var(--radius-sm);
+}
+
+.leagueInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.leagueFlag {
+    font-size: 1.25rem;
+}
+
+.leagueMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.leagueSectionName {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.leagueRound {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+}
+
+.leagueHeaderSummary {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.summaryLive {
+    color: var(--color-error);
+    font-weight: 600;
+}
+
+.chevronHeader {
+    transition: transform 0.2s ease;
+    color: var(--color-text-tertiary);
+}
+
+.leagueSectionHeader.collapsed .chevronHeader {
+    transform: rotate(-90deg);
+}
+
+/* Matches List */
+.matchesList {
+    display: flex;
+    flex-direction: column;
+}
+
+.matchRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-fast);
+}
+
+.matchRowLive {
+    background: rgba(239, 68, 68, 0.05);
+    /* Subtle red tint */
+    border-left: 3px solid var(--color-error);
+    padding-left: calc(var(--spacing-lg) - 3px);
+    /* Adjust padding for border */
+}
+
+.matchRow:last-child {
+    border-bottom: none;
+}
+
+.matchRow:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.matchTime {
+    min-width: 70px;
+    /* Increased from width: 50px to prevent wrapping */
+    text-align: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+    white-space: nowrap;
+    /* Prevent wrapping */
+    display: flex;
+    flex-direction: column;
+    /* Ensure vertical centering/stacking if needed */
+    align-items: center;
+    justify-content: center;
+}
+
+.matchLive {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    /* Increased gap */
+    color: var(--color-error);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.matchLiveDot {
+    width: 6px;
+    height: 6px;
+    background: var(--color-error);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.matchFinished {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.matchTeams {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Increased from 4px for better separation */
+    flex: 1;
+    justify-content: center;
+    /* Center vertically relative to time */
+}
+
+.matchTeam {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Increased from var(--spacing-sm) which might be small */
+}
+
+.teamLogo {
+    font-size: 1.25rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.teamLogoRound {
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.logoImgSquare {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.logoImgRound {
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.logoFallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.teamName {
+    flex: 1;
+    font-size: 0.9375rem;
+    /* Slight increase */
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.matchTeam.winner .teamName {
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+.teamScore {
+    font-size: 1rem;
+    /* Slight increase */
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    min-width: 24px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.matchTeam.winner .teamScore {
+    color: var(--color-text-primary);
+}
+
+.sidebarSectionTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    height: 48px;
+    /* Match typical card height for alignment */
+}
+
+/* No Matches */
+.noMatches {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+    color: var(--color-text-tertiary);
+}
+
+.noMatchesIcon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+}
+
+/* News List */
+.newsList {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-sm);
+}
+
+.newsCard {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-fast);
+}
+
+.newsCard:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.newsImage {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.newsContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.newsCategory {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-accent);
+}
+
+.newsTitle {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.newsExcerpt {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.newsTime {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .mainLayout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebarRight {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .mainLayout {
+        grid-template-columns: 1fr;
+        padding: 0 var(--spacing-md);
+    }
+
+    .dateSelector {
+        position: sticky;
+        top: 90px;
+    }
+}
+
+@media (max-width: 900px) {
+    .dateSelector {
+        top: 70px;
+    }
+
+    .mainContent {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .dateSelectorInner {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .dateItem {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.8125rem;
+    }
+
+    .dateNavBtn,
+    .calendarBtn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .mainContent {
+        padding: var(--spacing-md);
+    }
+
+    .matchRow {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+}
+
+/* Sport Switcher */
+.sportSwitch {
+    padding: 0 0 12px 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+    position: relative;
+}
+
+.sportSwitchBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+    /* More rounded */
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.sportSwitchBtn:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border-light);
+}
+
+.sportSwitchIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--color-accent);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.sportSwitchLabel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.sportSwitchName {
+    font-size: 13px;
+    font-weight: 800;
+    /* Bolder */
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1;
+}
+
+.sportSwitchHint {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sportSwitchChevron {
+    opacity: .4;
+    transition: transform var(--transition-fast);
+    width: 18px;
+    height: 18px;
+}
+
+.sportSwitchBtn[aria-expanded="true"] .sportSwitchChevron {
+    transform: rotate(180deg);
+}
+
+.sportMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    /* Align with container */
+    right: 0;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 6px;
+    z-index: 50;
+    box-shadow: var(--shadow-card);
+}
+
+.sportMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.sportMenuItem:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.sportMenuItemActive {
+    background: rgba(var(--color-accent-rgb), 0.14);
+    color: var(--color-accent);
+}

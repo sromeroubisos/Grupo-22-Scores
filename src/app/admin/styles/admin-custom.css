@@ -1,0 +1,2029 @@
+﻿/* ===== REGLA DE ORO LAYOUT SYSTEM ===== */
+
+:root {
+    --font: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Escala Tipográfica Fija */
+    --text-xs: 12px;
+    --text-sm: 13px;
+    --text-md: 15px;
+    --text-lg: 18px;
+    --text-xl: 22px;
+    --text-2xl: 28px;
+    --text-3xl: 36px;
+
+    /* Colores */
+    --muted: rgba(255, 255, 255, .68);
+    --muted2: rgba(255, 255, 255, .55);
+
+    --accent: #00a365;
+    --accent2: rgba(0, 163, 101, .25);
+    --accent-hover: #008f58;
+
+    /* Cards & Glass */
+    --card-bg: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+    --border: rgba(255, 255, 255, .09);
+    --shadow: 0 12px 40px rgba(0, 0, 0, .55);
+
+    /* Regla de Oro Radios */
+    --radius-sm: 6px;
+    /* inputs, filas, listas */
+    --radius-md: 10px;
+    /* cards chicas, modales */
+    --radius-lg: 16px;
+    /* cards grandes */
+}
+
+/* 1. Layout Base */
+.page {
+    min-height: 100vh;
+    background:
+        radial-gradient(1200px 700px at 20% 0%, rgba(0, 163, 101, .12), transparent 60%),
+        radial-gradient(900px 600px at 80% 0%, rgba(0, 46, 75, .18), transparent 55%),
+        #07090b;
+    color: rgba(255, 255, 255, .92);
+    font-family: var(--font);
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    z-index: 50;
+}
+
+.container {
+    width: min(1280px, calc(100% - 64px));
+    margin: 0 auto;
+    padding: 28px 0 64px;
+}
+
+.gridMain {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .gridMain {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 2. Tipografía */
+.h1 {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0;
+}
+
+.h2 {
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.h3 {
+    font-size: var(--text-xl);
+    font-weight: 750;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.p {
+    font-size: var(--text-md);
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.label {
+    font-size: var(--text-xs);
+    color: var(--muted2);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* 3. Cards */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    min-width: 0;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.cardTitle {
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    margin: 0;
+}
+
+/* 4. Botones */
+.btn {
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, .05);
+    color: rgba(255, 255, 255, .9);
+    font-weight: 650;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, .1);
+}
+
+.btnPrimary {
+    background: linear-gradient(180deg, rgba(0, 163, 101, 1), rgba(0, 133, 85, 1));
+    border-color: rgba(0, 163, 101, .7);
+    box-shadow: 0 10px 30px rgba(0, 163, 101, .18);
+    color: white;
+}
+
+.btnPrimary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btnGhost {
+    background: rgba(255, 255, 255, .03);
+    border-color: transparent;
+}
+
+.btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btnSecondary {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 163, 101, 0.05);
+}
+
+/* 5. Phase Selector (Las 3 tarjetas) */
+.phaseTypes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+@media (max-width: 900px) {
+    .phaseTypes {
+        grid-template-columns: 1fr;
+    }
+}
+
+.phaseCard {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, .04);
+    padding: 16px;
+    min-height: 140px;
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    cursor: pointer;
+}
+
+.phaseCard:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, .16);
+    background: rgba(255, 255, 255, .06);
+}
+
+.phaseCardSelected {
+    border-color: rgba(0, 163, 101, .65);
+    box-shadow: 0 0 0 4px rgba(0, 163, 101, .12);
+    background: rgba(0, 163, 101, .05);
+}
+
+.phaseTitle {
+    font-size: var(--text-xl);
+    font-weight: 800;
+    line-height: 1.05;
+}
+
+.phaseDesc {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+/* 6. Sidebar & Utils */
+.sidebarTitle {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+}
+
+.checkItem {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+    align-items: start;
+    font-size: 14px;
+    color: var(--muted);
+    padding: 8px 0;
+}
+
+.checkItem strong {
+    color: rgba(255, 255, 255, .9);
+    font-weight: 650;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.input {
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: white;
+    font-family: inherit;
+    width: 100%;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.tabs {
+    display: flex;
+    gap: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+}
+
+.tab {
+    padding: 12px 0;
+    color: var(--muted);
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.tab.active {
+    color: white;
+    border-bottom-color: var(--accent);
+}
+
+.mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* 7. Team Selector (Lista de Equipos) */
+.modal {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: #0a0d10;
+    box-shadow: var(--shadow);
+}
+
+.teamList {
+    display: grid;
+    gap: 4px;
+}
+
+.teamItem {
+    border-radius: 8px;
+    /* Regla de Oro para items */
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, .04),
+            rgba(255, 255, 255, .02));
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.teamItem:hover {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .15);
+}
+
+.teamItemSelected {
+    border-color: rgba(0, 163, 101, .6);
+    background: linear-gradient(180deg,
+            rgba(0, 163, 101, .12),
+            rgba(0, 163, 101, .06));
+}
+
+.teamCheck {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    /* no circulo */
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: all 0.1s ease;
+}
+
+.teamItem:hover .teamCheck {
+    border-color: rgba(255, 255, 255, .3);
+}
+
+.teamItemSelected .teamCheck {
+    background: #00a365;
+    border-color: #00a365;
+    color: #000;
+}
+
+.teamBadge {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    /* coherente con filas */
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 8. Participants Bar & Chips */
+.participantsBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.participantsLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.participantsIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 163, 101, .12);
+    border: 1px solid rgba(0, 163, 101, .25);
+    color: var(--accent);
+}
+
+.participantsText {
+    min-width: 0;
+}
+
+.participantsCount {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.participantsSub {
+    font-size: 12px;
+    opacity: .65;
+    margin-top: 2px;
+}
+
+.chipsWrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .18);
+    margin-bottom: 18px;
+}
+
+.chip {
+    max-width: 220px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1;
+    color: rgba(255, 255, 255, .85);
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .10);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chipMore {
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    background: rgba(0, 163, 101, .14);
+    border: 1px solid rgba(0, 163, 101, .35);
+    color: rgba(255, 255, 255, .92);
+    cursor: pointer;
+}
+
+.chipMore:hover {
+    background: rgba(0, 163, 101, .20);
+}
+
+/* 9. Table Labels Editor */
+.labelsHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.blockTitle {
+    font-size: var(--text-2xl);
+    font-weight: 900;
+    margin: 0;
+}
+
+.blockHelp {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    opacity: .65;
+}
+
+.labelsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.labelRow {
+    display: grid;
+    grid-template-columns: 220px 1fr 80px 40px;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .18);
+}
+
+.rangeCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.miniLabel {
+    font-size: 12px;
+    opacity: .6;
+}
+
+.miniInput {
+    width: 56px;
+    height: 34px;
+    border-radius: 10px;
+    padding: 0 10px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .10);
+    color: rgba(255, 255, 255, .9);
+    outline: none;
+    text-align: center;
+}
+
+.miniInput:focus {
+    border-color: rgba(0, 163, 101, .55);
+    box-shadow: 0 0 0 3px rgba(0, 163, 101, .18);
+}
+
+.labelName {
+    height: 34px;
+    border-radius: 10px;
+    padding: 0 12px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .10);
+    color: rgba(255, 255, 255, .92);
+    outline: none;
+    min-width: 0;
+    width: 100%;
+}
+
+.labelName:focus {
+    border-color: rgba(0, 163, 101, .55);
+    box-shadow: 0 0 0 3px rgba(0, 163, 101, .18);
+}
+
+.colorCell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.colorInput {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.colorDot {
+    width: 16px;
+    height: 16px;
+    border-radius: 6px;
+    background: var(--c);
+    border: 1px solid rgba(255, 255, 255, .18);
+    pointer-events: none;
+}
+
+.iconBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .10);
+    color: rgba(255, 255, 255, .7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconBtn:hover {
+    background: rgba(255, 255, 255, .10);
+    color: rgba(255, 255, 255, .9);
+}
+
+@media (max-width: 900px) {
+    .labelRow {
+        grid-template-columns: 1fr;
+    }
+
+    .colorCell {
+        justify-content: flex-start;
+    }
+}
+
+/* 10. Preview Card & Rows (Sidebar Standings) */
+.previewGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+@media (min-width: 1400px) {
+    .previewGrid {
+        grid-template-columns: 1fr 1fr;
+        /* dos columnas en pantallas muy anchas */
+    }
+}
+
+.previewCard {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.previewHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.previewTitle {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.previewChip {
+    font-size: 11px;
+    opacity: .7;
+    border: 1px solid rgba(255, 255, 255, .10);
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+}
+
+.previewList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* GRID: [puesto] [equipo] [puntos] */
+.previewRow {
+    display: grid;
+    grid-template-columns: 34px 1fr 34px;
+    /* puesto fijo, puntos fijo */
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .04);
+    background: rgba(0, 0, 0, .25);
+}
+
+/* Puesto (siempre visible) */
+.rankBadge {
+    width: 34px;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: rgba(255, 255, 255, .9);
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .10);
+}
+
+/* Equipo */
+.teamCell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.teamBadgeMini {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 10px;
+    flex: 0 0 auto;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.teamNameMini {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, .9);
+}
+
+.pts {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 13px;
+    color: rgba(255, 255, 255, .55);
+    /* neutro */
+}
+
+/* 11. Fixture Generation & Preview (Redesigned) */
+.fixtureSection {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 16px;
+    align-items: stretch;
+}
+
+@media (max-width: 1000px) {
+    .fixtureSection {
+        grid-template-columns: 1fr;
+    }
+}
+
+.block {
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .20);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.blockInner {
+    padding: 18px;
+}
+
+.blockHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 18px 0 18px;
+}
+
+/* .blockTitle usa la regla que ya definí arriba */
+
+.controlList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.controlRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.controlLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.controlIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 163, 101, .12);
+    border: 1px solid rgba(0, 163, 101, .22);
+    color: var(--accent);
+}
+
+.controlLabel {
+    font-size: 13px;
+    font-weight: 700;
+    opacity: .85;
+}
+
+.controlValue {
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, .92);
+}
+
+.fixtureActions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dropBox {
+    flex: 1;
+    min-height: 98px;
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .03);
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dropBox:hover {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .3);
+}
+
+.dropBoxContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: .75;
+}
+
+.dropBoxTitle {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+/* Preview Table Styles - specific to fixture card */
+.badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    background: rgba(0, 163, 101, .14);
+    border: 1px solid rgba(0, 163, 101, .30);
+    color: rgba(255, 255, 255, .9);
+}
+
+.previewCardTable {
+    margin-top: 12px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .18);
+}
+
+.previewTopRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(255, 255, 255, .04);
+}
+
+.previewRound {
+    font-size: 12px;
+    font-weight: 900;
+    opacity: .7;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.previewDate {
+    font-size: 12px;
+    font-weight: 800;
+    opacity: .85;
+}
+
+.previewTable {
+    display: flex;
+    flex-direction: column;
+}
+
+.previewMatch {
+    display: grid;
+    grid-template-columns: 1fr 72px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.previewMatch:last-child {
+    border-bottom: none;
+}
+
+.teamL {
+    text-align: right;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+}
+
+.time {
+    text-align: center;
+    font-weight: 900;
+    opacity: .8;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 2px 0;
+    color: white;
+}
+
+.teamR {
+    text-align: left;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+}
+
+/* 12. Rules & TieBreakers */
+.g22Block {
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .22);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.g22BlockHeader {
+    padding: 18px 18px 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.g22Title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+/* Tabla */
+.scoreTable {
+    padding: 0 18px 18px 18px;
+}
+
+.scoreHead {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 12px;
+    font-weight: 900;
+    opacity: .7;
+}
+
+.scoreHeadRight {
+    text-align: right;
+}
+
+.scoreRow {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.scoreRow:last-child {
+    border-bottom: none;
+}
+
+.scoreLabel {
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, .92);
+}
+
+.scorePill {
+    justify-self: end;
+    min-width: 64px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .10);
+    color: rgba(255, 255, 255, .92);
+}
+
+.scorePillAccent {
+    background: rgba(0, 163, 101, .14);
+    border-color: rgba(0, 163, 101, .32);
+    color: rgba(255, 255, 255, .92);
+}
+
+/* Tie Breakers */
+.reorderHint {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    opacity: .55;
+    white-space: nowrap;
+}
+
+.tieBody {
+    padding: 0 18px 18px 18px;
+}
+
+.tieList {
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    margin-top: 4px;
+}
+
+.tieItem {
+    display: grid;
+    grid-template-columns: 44px 1fr 88px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.tieIdx {
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .12em;
+    opacity: .55;
+}
+
+.tieName {
+    font-size: 14px;
+    font-weight: 850;
+    color: rgba(255, 255, 255, .92);
+}
+
+.tieActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.tieDivider {
+    height: 1px;
+    background: rgba(255, 255, 255, .08);
+    margin: 14px 0;
+}
+
+.tieSubTitle {
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 12px;
+    font-weight: 900;
+    opacity: .6;
+    margin-bottom: 10px;
+}
+
+.linkAccent {
+    margin-top: 10px;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: rgba(0, 163, 101, .95);
+    font-weight: 900;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.linkAccent:hover {
+    text-decoration: underline;
+}
+
+/* bloque base (si ya lo tenés, solo ajustá radios) */
+.g22Block {
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .22);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    overflow: hidden;
+}
+
+.g22BlockHeader {
+    padding: 18px 18px 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.g22Title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: white;
+}
+
+.pillSmall {
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 10px;
+    /* más recto */
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .05);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    opacity: .85;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+/* ===== PLAYOFF ===== */
+
+.playoffGrid {
+    padding: 0 18px 18px 18px;
+    display: grid;
+    gap: 12px;
+    /* responsive “pro”: 1 columna mobile / 2 en desktop */
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 960px) {
+    .playoffGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Card de cada llave */
+.matchupCard {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(255, 255, 255, .03);
+    overflow: hidden;
+}
+
+.matchupHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 12px 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.matchupTitle {
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    opacity: .75;
+    color: white;
+}
+
+.matchupMeta {
+    font-size: 12px;
+    font-weight: 850;
+    opacity: .55;
+    white-space: nowrap;
+    color: white;
+}
+
+/* Filas de equipos */
+.teamRow {
+    display: grid;
+    grid-template-columns: 44px 1fr 34px;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, .04);
+}
+
+.teamRow:first-of-type {
+    border-top: none;
+}
+
+.teamRowAlt {
+    background: rgba(255, 255, 255, .02);
+}
+
+/* “Escudo / iniciales” */
+.teamBadge {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 950;
+    font-size: 12px;
+    background: rgba(255, 255, 255, .10);
+    border: 1px solid rgba(255, 255, 255, .10);
+    color: white;
+}
+
+/* Nombre sin romper layout */
+.teamName {
+    font-size: 14px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, .92);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* L / V a la derecha, nunca pegado al borde */
+.seedTag {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .08em;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .05);
+    color: rgba(255, 255, 255, .75);
+}
+
+.seedHome {
+    border-color: rgba(0, 163, 101, .25);
+    background: rgba(0, 163, 101, .10);
+    color: rgba(255, 255, 255, .88);
+}
+
+.seedAway {
+    border-color: rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .04);
+}
+
+/* Footer */
+.playoffFooter {
+    padding: 0 18px 16px 18px;
+}
+
+.mutedNote {
+    font-size: 12px;
+    opacity: .65;
+    color: white;
+}
+
+/* =========================
+   SUBHEADER & LAYOUT SYSTEM
+   ========================= */
+
+:root {
+    --container: 1280px;
+
+    --bg-obsidian: #0a0a0a;
+    --glass: rgba(10, 10, 10, .55);
+    --glass-2: rgba(12, 12, 12, .65);
+
+    --border-white-08: rgba(255, 255, 255, .08);
+    --border-white-10: rgba(255, 255, 255, .10);
+
+    --text-white-92: rgba(255, 255, 255, .92);
+    --text-white-55: rgba(255, 255, 255, .55);
+
+    --accent-base: #22C55E;
+    --accent-glow-sm: rgba(34, 197, 94, .18);
+
+    /* 🔧 radius más “recto” */
+    --r-xl: 16px;
+    --r-lg: 14px;
+    --r-md: 12px;
+    --r-sm: 10px;
+}
+
+.subheader {
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+    width: 100%;
+    height: 48px;
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-white-08);
+}
+
+.subheader::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-base), transparent);
+    opacity: .18;
+}
+
+.subheader__inner {
+    max-width: var(--container);
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+/* Breadcrumbs */
+.crumbs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-white-55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crumbs .sep {
+    opacity: .28;
+}
+
+.crumbs .current {
+    color: var(--accent-base);
+    text-shadow: 0 0 14px var(--accent-glow-sm);
+}
+
+/* Acciones */
+.subheader__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* Botones Subheader */
+.subheader .btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--r-md);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--border-white-08);
+    background: rgba(255, 255, 255, .03);
+    color: var(--text-white-92);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    font-size: 13px;
+    transition: 180ms ease;
+    cursor: pointer;
+}
+
+.subheader .btn:hover {
+    border-color: var(--border-white-10);
+    background: rgba(255, 255, 255, .06);
+    transform: translateY(-1px);
+}
+
+.subheader .btn--ghost {
+    background: rgba(255, 255, 255, .02);
+}
+
+.subheader .btn--primary {
+    border-color: rgba(34, 197, 94, .35);
+    background: linear-gradient(180deg, rgba(34, 197, 94, .25), rgba(34, 197, 94, .14));
+    box-shadow: 0 10px 28px rgba(34, 197, 94, .16);
+    color: #fff;
+}
+
+.subheader .btn--primary:hover {
+    border-color: rgba(34, 197, 94, .55);
+    box-shadow: 0 14px 34px rgba(34, 197, 94, .22);
+}
+
+.subheader .btn__icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, .35);
+    border: 1px solid rgba(255, 255, 255, .10);
+    font-size: 10px;
+}
+
+/* Layout Helpers */
+.page {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.page--withSubheader {
+    padding-top: 24px;
+}
+
+/* =========================
+   STICKY SYSTEM GLOBAL
+   ========================= */
+
+:root {
+    --g22-global-h: 64px;
+    /* header global */
+    --admin-sub-h: 44px;
+    /* breadcrumb + acciones (Editar/Publicar) */
+    --admin-tabs-h: 52px;
+    /* tabs (Información/Participantes/...) */
+    --tournament-tabs-h: 52px;
+    /* alias para admin-tabs-h */
+    --sticky-top: calc(var(--g22-global-h) + var(--admin-sub-h) + var(--admin-tabs-h));
+    --glass: blur(14px);
+    --border: rgba(255, 255, 255, .08);
+}
+
+/* Header global arriba de todo */
+.g22-header {
+    position: sticky;
+    top: 0;
+    z-index: 3000;
+}
+
+/* ✅ evita bugs de sticky por transforms en ancestros */
+.adminPage,
+.AdminWrapper,
+.adminWrapper,
+.adminLayout {
+    transform: none !important;
+    filter: none;
+    perspective: none;
+    overflow: visible !important;
+    position: relative;
+}
+
+/* ✅ SUBHEADER (breadcrumb + acciones) */
+.adminSubheader {
+    position: sticky;
+    top: var(--g22-global-h);
+    z-index: 2500;
+    height: var(--admin-sub-h);
+
+    background: rgba(10, 10, 10, .72);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
+    border-bottom: 1px solid var(--border);
+    isolation: isolate;
+}
+
+.adminSubheaderInner {
+    max-width: 1280px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.adminBreadcrumb {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255, 255, 255, .55);
+    white-space: nowrap;
+}
+
+.adminBreadcrumb span {
+    color: rgba(255, 255, 255, .9);
+}
+
+.adminActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ✅ TABS (Información/Participantes/...) */
+.adminTabs {
+    position: sticky;
+    top: calc(var(--g22-global-h) + var(--admin-sub-h));
+    z-index: 2400;
+    height: var(--admin-tabs-h);
+
+    background: rgba(10, 10, 10, .62);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    isolation: isolate;
+}
+
+.adminTabsInner {
+    max-width: 1280px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+}
+
+/* ✅ CONTENIDO: evita que el H1 se meta "debajo" de las barras */
+.adminMain {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 18px 24px 48px;
+    padding-top: 18px;
+}
+
+/* Si tu layout mete el contenido inmediatamente después de las barras */
+.adminPage {
+    padding-top: 0;
+}
+
+/* Si tus tabs son links/botones */
+.adminTab {
+    padding: 14px 2px 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, .7);
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.adminTab:hover {
+    color: rgba(255, 255, 255, .9);
+}
+
+.adminTab.isActive {
+    color: #fff;
+    border-bottom-color: #22C55E;
+}
+
+/* Botones del subheader */
+.adminBtn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(255, 255, 255, .03);
+    color: rgba(255, 255, 255, .92);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    font-size: 13px;
+    transition: 180ms ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.adminBtn:hover {
+    border-color: rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, .06);
+    transform: translateY(-1px);
+}
+
+.adminBtn--ghost {
+    background: rgba(255, 255, 255, .02);
+}
+
+.adminBtn--primary {
+    border-color: rgba(34, 197, 94, .35);
+    background: linear-gradient(180deg, rgba(34, 197, 94, .25), rgba(34, 197, 94, .14));
+    box-shadow: 0 10px 28px rgba(34, 197, 94, .16);
+    color: #fff;
+}
+
+.adminBtn--primary:hover {
+    border-color: rgba(34, 197, 94, .55);
+    box-shadow: 0 14px 34px rgba(34, 197, 94, .22);
+}
+
+/* ============================================
+   HEADERS DE PÁGINA (NO STICKY)
+   ============================================ */
+
+/* Header del page (Crear fase, etc): NO flotante */
+.pageHeader {
+    position: static;
+    /* clave */
+    top: auto;
+    z-index: auto;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 0;
+    padding: 18px 0 10px;
+}
+
+/* Opcional: que el bloque se vea integrado (si querés "card feel") */
+.pageHeader.isCard {
+    background: rgba(15, 15, 15, .45);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 18px;
+    padding: 18px 18px 12px;
+}
+
+/* Override específico para PhaseCreator header si es necesario */
+.phaseHeader,
+.phaseCreatorHeader {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* ============================================
+   STICKY ANIDADO PARA PHASE CREATOR
+   ============================================ */
+
+/* 1) Tabs del torneo sticky (debajo del header global + subheader) */
+.tournamentTabsSticky {
+    position: sticky;
+    top: calc(var(--g22-global-h) + var(--admin-sub-h));
+    z-index: 2400;
+    background: rgba(0, 0, 0, .55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+/* 2) Header "Crear fase" NO sticky */
+.phasePageHeader {
+    position: static;
+    padding: 16px 0 10px;
+    background: transparent;
+}
+
+/* 3) Tabs internos de fase sticky (debajo de tabs del torneo) */
+.phaseTabsSticky {
+    position: sticky;
+    top: var(--sticky-top);
+    z-index: 2300;
+    background: rgba(0, 0, 0, .55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    padding-top: 6px;
+}
+
+/* Para que el contenido no "pegue" debajo del sticky */
+.adminMain {
+    padding-top: 14px;
+}
+
+/* ===== TOURNAMENT PAGE ARCHITECTURE ===== */
+/* 3 Layers: Global Header → Tournament Tabs → Content */
+
+.tournamentPage {
+    transform: none !important;
+    filter: none;
+    perspective: none;
+    overflow: visible !important;
+    position: relative;
+}
+
+/* Tournament Subheader (Editar/Publicar) - Solo visible fuera de fases */
+.tournamentSubheader {
+    position: sticky;
+    top: var(--g22-global-h);
+    z-index: 2500;
+    height: var(--admin-sub-h);
+    background: rgba(10, 10, 10, .72);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
+    border-bottom: 1px solid var(--border);
+    isolation: isolate;
+}
+
+.tournamentSubheaderInner {
+    max-width: 1280px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.tournamentActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Tournament Tabs (Información/Participantes/Fases/...) - STICKY */
+.tournamentTabs {
+    position: sticky;
+    top: var(--g22-global-h);
+    /* Cuando no hay subheader (en fases) */
+    z-index: 2400;
+    height: var(--tournament-tabs-h);
+    background: rgba(10, 10, 10, .85);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    isolation: isolate;
+}
+
+/* Cuando hay subheader, tabs van debajo */
+.tournamentSubheader+.tournamentTabs {
+    top: calc(var(--g22-global-h) + var(--admin-sub-h));
+}
+
+.tournamentTabsInner {
+    max-width: 1280px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+}
+
+.tournamentTab {
+    padding: 14px 2px 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, .7);
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.tournamentTab:hover {
+    color: rgba(255, 255, 255, .9);
+}
+
+.tournamentTab.isActive {
+    color: #fff;
+    border-bottom-color: #22C55E;
+}
+
+/* Tournament Main Content - Debajo de tabs */
+.tournamentMain {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 18px 24px 48px;
+}
+
+/* ===== PHASE CREATOR LAYOUT ===== */
+/* El contenido de fases NO debe flotar, debe arrancar debajo de tabs */
+
+.phasePage {
+    padding-top: 0;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 40px;
+}
+
+/* Header "Crear fase" - NO sticky, posición normal */
+.phaseHeader {
+    position: relative;
+    padding: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+}
+
+.phaseHeaderInner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.phaseTitleBlock {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.phaseTitle {
+    font-size: 28px;
+    line-height: 1.1;
+    margin: 0;
+    font-weight: 700;
+    color: white;
+}
+
+.phaseActions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* Tabs internos de fase (Configuración/Reglas/Fixture) - sticky debajo de tournament tabs */
+.phaseTabsBar {
+    position: sticky;
+    top: calc(var(--g22-global-h) + var(--tournament-tabs-h));
+    z-index: 2300;
+    background: rgba(10, 10, 10, .92);
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.phaseTabsInner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 0;
+    display: flex;
+    gap: 24px;
+    height: 48px;
+    align-items: flex-end;
+}
+
+/* Phase Content - Debajo de todos los sticky elements */
+.phaseContent {
+    padding-top: 24px;
+}
+
+/* Scroll margin for anchors */
+.phaseContent [id] {
+    scroll-margin-top: calc(var(--g22-global-h) + var(--tournament-tabs-h) + 48px + 24px);
+}
+
+/* Phase Creator Root - NO position absolute, flujo normal */
+.phaseCreatorRoot {
+    position: relative;
+    min-height: auto;
+    background: transparent;
+    color: rgba(255, 255, 255, .92);
+    font-family: var(--font);
+}
+
+/* Action Button Style (requested by user) */
+.btnActionGreen {
+    background: rgba(0, 163, 101, 0.12);
+    border: 1px solid var(--accent);
+    color: white;
+    font-weight: 800;
+    padding: 0 32px;
+    height: 52px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 163, 101, 0.15);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btnActionGreen:hover {
+    background: rgba(0, 163, 101, 0.22);
+    box-shadow: 0 8px 24px rgba(0, 163, 101, 0.25);
+    transform: translateY(-2px);
+    border-color: #00c479;
+    /* slightly brighter */
+}
+
+.btnActionGreen svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* ===== OBSIDIAN LIGHT THEME OVERRIDES ===== */
+[data-theme="light"] {
+    --muted: rgba(15, 23, 42, 0.7);
+    --muted2: rgba(15, 23, 42, 0.5);
+    --accent: #00a365;
+    --accent2: rgba(0, 163, 101, 0.18);
+    --accent-hover: #008f58;
+    --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+    --border: rgba(15, 23, 42, 0.12);
+    --shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .page {
+    background:
+        radial-gradient(1200px 700px at 20% 0%, rgba(0, 163, 101, 0.12), transparent 60%),
+        radial-gradient(900px 600px at 80% 0%, rgba(15, 23, 42, 0.08), transparent 55%),
+        #f6f7f9;
+    color: #0f172a;
+}
+
+[data-theme="light"] .card,
+[data-theme="light"] .block,
+[data-theme="light"] .g22Block,
+[data-theme="light"] .previewCard,
+[data-theme="light"] .matchupCard,
+[data-theme="light"] .modal {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+}
+
+[data-theme="light"] .cardHeader,
+[data-theme="light"] .blockHeader,
+[data-theme="light"] .previewTopRow,
+[data-theme="light"] .matchupHeader {
+    background: rgba(15, 23, 42, 0.04);
+    border-bottom-color: var(--border);
+}
+
+[data-theme="light"] .teamItem,
+[data-theme="light"] .labelRow,
+[data-theme="light"] .previewRow,
+[data-theme="light"] .controlRow,
+[data-theme="light"] .previewMatch,
+[data-theme="light"] .teamRow,
+[data-theme="light"] .dropBox,
+[data-theme="light"] .chipsWrap,
+[data-theme="light"] .chip,
+[data-theme="light"] .previewCardTable {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: var(--border);
+}
+
+[data-theme="light"] .btn {
+    background: rgba(15, 23, 42, 0.04);
+    color: #0f172a;
+    border-color: var(--border);
+}
+
+[data-theme="light"] .btnSecondary {
+    color: rgba(15, 23, 42, 0.7);
+}
+
+[data-theme="light"] .input,
+[data-theme="light"] .labelName,
+[data-theme="light"] .miniInput {
+    background: rgba(255, 255, 255, 0.9);
+    color: #0f172a;
+    border-color: var(--border);
+}
+
+[data-theme="light"] .tab {
+    color: var(--muted);
+}
+
+[data-theme="light"] .tab.active {
+    color: #0f172a;
+}
+
+[data-theme="light"] .phaseTitle,
+[data-theme="light"] .teamName,
+[data-theme="light"] .teamNameMini,
+[data-theme="light"] .previewTitle,
+[data-theme="light"] .g22Title,
+[data-theme="light"] .controlValue,
+[data-theme="light"] .blockTitle,
+[data-theme="light"] .tieName,
+[data-theme="light"] .participantsCount,
+[data-theme="light"] .teamL,
+[data-theme="light"] .teamR {
+    color: #0f172a;
+}
+
+[data-theme="light"] .rankBadge,
+[data-theme="light"] .seedTag,
+[data-theme="light"] .teamBadge,
+[data-theme="light"] .teamBadgeMini {
+    background: rgba(15, 23, 42, 0.08);
+    border-color: var(--border);
+    color: #0f172a;
+}
+
+[data-theme="light"] .pts,
+[data-theme="light"] .miniLabel,
+[data-theme="light"] .blockHelp,
+[data-theme="light"] .previewChip,
+[data-theme="light"] .mutedNote {
+    color: rgba(15, 23, 42, 0.6);
+}

@@ -1,0 +1,29 @@
+'use client';
+
+import SectionShell from '../components/SectionShell';
+import styles from '../page.module.css';
+
+export default function ClubDivisionesPage() {
+    return (
+        <SectionShell
+            title="Divisiones / Equipos"
+            subtitle="Gestión de categorías, deportes y configuraciones por temporada."
+            actions={
+                <button className={styles.btn} type="button">
+                    Crear división
+                </button>
+            }
+        >
+            <div className={styles.sectionGrid}>
+                <div className={styles.glassCard}>
+                    <h2 className={styles.cardTitle}>Listado de divisiones</h2>
+                    <p className={styles.cardMeta}>Orden, categoría, rama, competencias y sedes asociadas.</p>
+                </div>
+                <div className={styles.glassCard}>
+                    <h2 className={styles.cardTitle}>Configuración de roster</h2>
+                    <p className={styles.cardMeta}>Mínimos, máximos, dorsales y staff asignado.</p>
+                </div>
+            </div>
+        </SectionShell>
+    );
+}

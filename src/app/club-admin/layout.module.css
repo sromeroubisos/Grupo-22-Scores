@@ -1,0 +1,163 @@
+.page {
+    position: relative;
+    min-height: 100vh;
+    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    --club-grid: rgba(255, 255, 255, 0.03);
+    --club-glow: rgba(var(--color-accent-rgb), 0.12);
+    --club-panel: var(--color-glass);
+    --club-panel-inner: rgba(255, 255, 255, 0.04);
+    --club-stroke: var(--color-glass-border);
+    --club-stroke-soft: rgba(255, 255, 255, 0.08);
+    --club-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+    --club-sidebar-bg: rgba(8, 10, 12, 0.5);
+}
+
+:global([data-theme="light"]) .page {
+    --club-grid: rgba(15, 23, 42, 0.06);
+    --club-glow: rgba(var(--color-accent-rgb), 0.18);
+    --club-panel-inner: rgba(15, 23, 42, 0.04);
+    --club-stroke-soft: rgba(15, 23, 42, 0.08);
+    --club-shadow: 0 28px 60px -24px rgba(15, 23, 42, 0.18);
+    --club-sidebar-bg: rgba(255, 255, 255, 0.8);
+}
+
+.background {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% -20%, var(--club-glow), transparent 60%),
+        linear-gradient(var(--club-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--club-grid) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    padding: 36px 24px;
+    border-right: 1px solid var(--club-stroke);
+    background: var(--club-sidebar-bg);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-left: 10px;
+}
+
+.brandLogo {
+    width: 32px;
+    height: 32px;
+    background: var(--color-accent);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.25);
+}
+
+.brandName {
+    font-weight: 700;
+    letter-spacing: -1px;
+    font-size: 20px;
+}
+
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    transition: 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.navItem:hover,
+.navItemActive {
+    color: var(--color-text-primary);
+    background: var(--club-panel-inner);
+    border-color: var(--club-stroke);
+}
+
+.navIcon {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--club-stroke);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.sidebarFooter {
+    margin-top: auto;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+    overflow: visible;
+    padding: 40px 60px;
+}
+
+@media (max-width: 1200px) {
+    .main {
+        padding: 32px 32px;
+    }
+}
+
+@media (max-width: 980px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+        padding: 24px;
+    }
+
+    .nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .sidebarFooter {
+        margin-top: 0;
+        margin-left: auto;
+    }
+
+    .main {
+        height: auto;
+    }
+}

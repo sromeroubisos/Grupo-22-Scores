@@ -1,0 +1,143 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.dropZone {
+    position: relative;
+    width: 100%;
+    min-height: 180px;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.dropZone:hover {
+    border-color: var(--accent, #00ccff);
+    background: rgba(0, 204, 255, 0.05);
+}
+
+.dragging {
+    border-color: var(--accent, #00ccff);
+    background: rgba(0, 204, 255, 0.1);
+    transform: scale(1.02);
+}
+
+.status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #4b5563;
+}
+
+.spinner {
+    animation: rotate 2s linear infinite;
+    color: var(--accent, #00ccff);
+}
+
+.previewContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.preview {
+    max-width: 100%;
+    max-height: 140px;
+    object-fit: contain;
+}
+
+.changeOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: white;
+}
+
+.previewContainer:hover .changeOverlay {
+    opacity: 1;
+}
+
+.placeholder {
+    padding: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.iconCircle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    transition: all 0.3s;
+}
+
+.dropZone:hover .iconCircle {
+    background: var(--accent, #00ccff);
+    color: white;
+    transform: translateY(-5px);
+}
+
+.textMain {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.95rem;
+}
+
+.textSub {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.successTag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #10b981;
+    margin-top: 4px;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
