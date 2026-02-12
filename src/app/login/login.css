@@ -1,0 +1,128 @@
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--color-bg-primary);
+}
+
+.login-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.login-card h1 {
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.login-card p {
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+}
+
+.role-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.role-buttons .btn {
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.btn-fan {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+}
+
+.btn-fan:hover {
+    background: var(--color-bg-hover);
+}
+
+.btn-admin {
+    background: var(--color-accent);
+    color: white;
+}
+
+.btn-admin:hover {
+    background: var(--color-accent-dark);
+}
+
+.btn-union {
+    background: transparent;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.btn-union:hover {
+    background: rgba(var(--color-accent-rgb), 0.1);
+}
+
+.btn-torneo,
+.btn-operator {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.btn-torneo:hover,
+.btn-operator:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.btn-club {
+    background: transparent;
+    border-color: #3B82F6;
+    color: #3B82F6;
+}
+
+.btn-club:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-player {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+}
+
+.btn-player:hover {
+    background: var(--color-bg-hover);
+}
+
+.btn-coach {
+    background: transparent;
+    border-color: #10B981;
+    color: #10B981;
+}
+
+.btn-coach:hover {
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.back-link {
+    color: var(--color-text-tertiary);
+    font-size: 0.875rem;
+    text-decoration: underline;
+}
+
+.back-link:hover {
+    color: var(--color-text-primary);
+}

@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
+
+.layout {
+    --basalt-950: #0a0a0b;
+    --basalt-900: #121214;
+    --basalt-800: #1c1c1f;
+    --basalt-700: #2a2a2e;
+    --basalt-600: #3f3f46;
+    --basalt-400: #a1a1aa;
+    --magma-primary: var(--color-accent);
+    --magma-glow: rgba(255, 77, 0, 0.15);
+    --cyanite: #00f2ff;
+    --surface-edge: rgba(255, 255, 255, 0.05);
+    --font-sans: 'Geist', sans-serif;
+    --font-mono: 'Geist Mono', monospace;
+    --slab-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    display: flex;
+    min-height: 100vh;
+    background: var(--basalt-950);
+    color: #ececec;
+    font-family: var(--font-sans);
+    overflow: hidden;
+    position: relative;
+}
+
+.layout::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.layout > * {
+    position: relative;
+    z-index: 1;
+}
+
+.main {
+    flex: 1;
+    overflow-y: auto;
+    background: radial-gradient(circle at 0% 0%, var(--basalt-800) 0%, var(--basalt-950) 100%);
+    padding: 40px;
+}
+
+.topbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    background: var(--basalt-900);
+    border: 1px solid var(--surface-edge);
+    padding: 16px 20px;
+    box-shadow: var(--slab-shadow);
+}
+
+.topbarLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.topbarTitle {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.topbarSubtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--basalt-400);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.topbarControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.topbarInput,
+.topbarSelect {
+    background: var(--basalt-800);
+    border: 1px solid var(--surface-edge);
+    color: #ececec;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.topbarInput::placeholder {
+    color: var(--basalt-600);
+    text-transform: none;
+    font-family: var(--font-sans);
+    letter-spacing: normal;
+}
+
+.topbarBtn {
+    background: var(--magma-primary);
+    border: none;
+    color: #0a0a0b;
+    font-weight: 800;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.topbarBtn:hover {
+    background: #ff6a2a;
+    box-shadow: 0 0 16px var(--magma-glow);
+}
+
+.topbarAlert {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 77, 0, 0.08);
+    border: 1px solid rgba(255, 77, 0, 0.3);
+    color: var(--magma-primary);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+@media (max-width: 900px) {
+    .main {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .main {
+        padding: 20px;
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:rapidapi.com)",
+      "WebSearch",
+      "mcp__ide__getDiagnostics",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(del \"C:\\\\Users\\\\srome\\\\OneDrive\\\\Escritorio\\\\Grupo-22-Scores\\\\tmp_match.json\")",
+      "Bash(node -e:*)",
+      "Bash(npx next dev --turbopack)"
+    ]
+  }
+}

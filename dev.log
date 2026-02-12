@@ -1,0 +1,29 @@
+
+> rapid-prominence@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.174:3000
+
+✓ Starting...
+✓ Ready in 779ms
+ GET /torneos/fs-tc0vksj6 200 in 2.2s (compile: 2.1s, render: 182ms)
+ GET /api/tournaments?id=fs-tc0vksj6&sport=football 200 in 18.1s (compile: 199ms, render: 17.9s)
+ GET / 200 in 462ms (compile: 431ms, render: 31ms)
+ GET /api/matches?date=2026-02-08&sport=rugby&external=true 200 in 1150ms (compile: 178ms, render: 972ms)
+ GET /api/matches?date=2026-02-09&sport=rugby&external=true 200 in 1286ms (compile: 167ms, render: 1119ms)
+ GET /api/matches?date=2026-02-10&sport=rugby&external=true 200 in 1291ms (compile: 181ms, render: 1110ms)
+ GET /%F0%9F%90%98 404 in 478ms (compile: 313ms, render: 165ms)
+ GET /%F0%9F%94%B5%E2%9A%AA 404 in 487ms (compile: 306ms, render: 181ms)
+ GET /%E2%9A%AA%E2%9A%AB 404 in 491ms (compile: 290ms, render: 201ms)
+ GET /%F0%9F%A4%8E 404 in 487ms (compile: 401ms, render: 86ms)
+ GET /api/matches?date=2026-02-08&sport=rugby&external=true 200 in 7ms (compile: 4ms, render: 3ms)
+ GET /api/matches?date=2026-02-09&sport=rugby&external=true 200 in 19ms (compile: 12ms, render: 7ms)
+ GET /%F0%9F%9B%91 404 in 97ms (compile: 11ms, render: 86ms)
+ GET /%F0%9F%94%B4%E2%9A%AA 404 in 99ms (compile: 55ms, render: 44ms)
+ GET /api/matches?date=2026-02-07&sport=rugby&external=true 200 in 932ms (compile: 7ms, render: 925ms)
+ GET /torneos/fs-tc0vksj6 200 in 39ms (compile: 18ms, render: 21ms)
+ GET /api/tournaments?id=fs-tc0vksj6&sport=football 200 in 30ms (compile: 24ms, render: 5ms)
+ GET /api/tournaments?id=fs-tc0vksj6&sport=football 200 in 2.3s (compile: 2ms, render: 2.3s)
+^C^C

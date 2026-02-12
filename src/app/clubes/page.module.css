@@ -1,0 +1,297 @@
+.page {
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+/* Header */
+.header {
+    padding: var(--spacing-3xl) 0 var(--spacing-xl);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.headerContent {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-xl);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-xl);
+}
+
+.title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+    font-size: 1.0625rem;
+    color: var(--color-text-secondary);
+}
+
+.headerStats {
+    display: flex;
+    gap: var(--spacing-xl);
+}
+
+.headerStat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+}
+
+.headerStatValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-accent);
+}
+
+.headerStatLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+}
+
+/* Search */
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    max-width: 400px;
+    color: var(--color-text-tertiary);
+}
+
+.searchInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.searchInput::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* Content */
+.content {
+    padding: var(--spacing-2xl) 0;
+}
+
+/* Clubs Grid */
+.clubsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+/* Club Card */
+.clubCard {
+    --card-accent: #9be15d;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-xl);
+    background:
+        radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.18), transparent 35%),
+        linear-gradient(135deg, rgba(20, 20, 22, 0.96), rgba(8, 8, 9, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    text-decoration: none;
+    color: #f8fafc;
+    transition: all var(--transition-base);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+
+.clubCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 10px);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.clubCard::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 15% 0%, var(--card-accent), transparent 55%);
+    opacity: 0.22;
+    pointer-events: none;
+}
+
+.clubCard:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+}
+
+.cardTop {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+}
+
+.cardDots {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.dotAccent {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #ef4444;
+}
+
+.cardTag {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 700;
+}
+
+.clubHeader {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.clubLogo {
+    font-size: 3rem;
+}
+
+.clubInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.clubName {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.clubCity {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.8125rem;
+    color: rgba(248, 250, 252, 0.7);
+}
+
+.clubStats {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: var(--spacing-md);
+}
+
+.clubStat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.statValue {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.statLabel {
+    font-size: 0.6875rem;
+    color: rgba(248, 250, 252, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.clubRecord {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.clubRecord span {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+}
+
+.recordWins {
+    background: rgba(34, 197, 94, 0.18);
+    color: #bbf7d0;
+}
+
+.recordDraws {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(248, 250, 252, 0.7);
+}
+
+.recordLosses {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fecaca;
+}
+
+.clubAction {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--card-accent);
+    transition: gap var(--transition-fast);
+}
+
+.clubCard:hover .clubAction {
+    gap: var(--spacing-sm);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .headerContent {
+        flex-direction: column;
+    }
+
+    .clubsGrid {
+        grid-template-columns: 1fr;
+    }
+}

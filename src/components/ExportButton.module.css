@@ -1,0 +1,338 @@
+.container {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.exportButton {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: linear-gradient(135deg, #00a365, #22c55e);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: white;
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.exportButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 163, 101, 0.3);
+}
+
+.exportButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.iconButton:hover:not(:disabled) {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.iconButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    width: 100%;
+    max-width: 480px;
+    background: linear-gradient(180deg, #18181f 0%, #0f0f14 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modalTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-align: center;
+    background: linear-gradient(135deg, #fff, #a1a1aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modalSection {
+    margin-bottom: 20px;
+}
+
+.modalLabel {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.formatOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.formatBtn {
+    flex: 1;
+    min-width: 90px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.formatBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.formatBtn.active {
+    background: rgba(0, 163, 101, 0.2);
+    border-color: #00a365;
+    color: white;
+}
+
+.columnOptions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+}
+
+.columnCheckbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.columnCheckbox:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.columnCheckbox input {
+    width: 16px;
+    height: 16px;
+    accent-color: #00a365;
+}
+
+.columnCheckbox span {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+.columnCheckbox:has(input:checked) {
+    background: rgba(0, 163, 101, 0.15);
+    border-color: rgba(0, 163, 101, 0.4);
+}
+
+.columnCheckbox:has(input:checked) span {
+    color: white;
+}
+
+.modalActions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cancelBtn {
+    flex: 1;
+    padding: 14px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.cancelBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.exportBtn {
+    flex: 1;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #00a365, #22c55e);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.exportBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 163, 101, 0.3);
+}
+
+.exportBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modalInput {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.modalInput:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #00a365;
+    box-shadow: 0 0 0 4px rgba(0, 163, 101, 0.1);
+}
+
+.modalInput::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.presetGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.presetBtn {
+    height: 40px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.presetBtn:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+}
+
+.customColors {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.colorInp {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.colorInp span {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.colorInp input[type="color"] {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+}
+
+.colorPicker {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+    overflow: hidden;
+}
+
+.colorPicker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.colorPicker::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+    opacity: 0;
+    /* Only show the background gradient */
+}
