@@ -3,8 +3,8 @@
     --obsidian-base: #0a0a0a;
     --obsidian-surface: rgba(20, 20, 20, 0.7);
     --obsidian-border: rgba(255, 255, 255, 0.08);
-    --g22-emerald: #22C55E;
-    --g22-emerald-glow: rgba(34, 197, 94, 0.15);
+    --g22-emerald: var(--color-accent);
+    --g22-emerald-glow: rgba(var(--color-accent-rgb), 0.15);
     --text-main: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.55);
     --glass-blur: blur(14px);
@@ -16,14 +16,10 @@
 }
 
 body {
-    background-color: var(--obsidian-base);
-    font-family: 'Inter', sans-serif;
-    color: var(--text-main);
-    background-image:
-        radial-gradient(circle at 50% -20%, var(--g22-emerald-glow), transparent 40%),
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-color: var(--color-bg-primary);
+    font-family: var(--font-primary);
+    color: var(--color-text-primary);
+    background-image: radial-gradient(circle at 50% 0%, var(--grid-glow) 0%, transparent 70%);
     min-height: 100vh;
     background-attachment: fixed;
 }
@@ -31,15 +27,12 @@ body {
 /* HEADER ROOT */
 .g22-header {
     width: 100%;
-    height: var(--h-header);
-    background: rgba(10, 10, 10, 0.6);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-bottom: 1px solid var(--obsidian-border);
+    height: 60px;
+    background: #050505;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     position: sticky;
     top: 0;
     z-index: 1000;
-    display: block;
 }
 
 .g22-header::after {
@@ -74,16 +67,14 @@ body {
 
 /* LOGO ZONE */
 .g22-logo {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: white;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: var(--transition-smooth);
-    flex-shrink: 0;
+    letter-spacing: -0.03em;
+}
+.g22-logo span {
+    color: var(--color-accent);
 }
 
 .g22-logo span {
@@ -136,16 +127,12 @@ body {
 .g22-user {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--obsidian-border);
-    padding: 6px 14px 6px 6px;
+    gap: 8px;
+    background: #121212;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
     border-radius: 999px;
     color: white;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    user-select: none;
-    outline: none;
 }
 
 .g22-user:hover,
@@ -370,8 +357,8 @@ body {
     --obsidian-base: #f6f7f9;
     --obsidian-surface: rgba(255, 255, 255, 0.75);
     --obsidian-border: rgba(15, 23, 42, 0.12);
-    --g22-emerald: #00a365;
-    --g22-emerald-glow: rgba(0, 163, 101, 0.18);
+    --g22-emerald: var(--color-accent);
+    --g22-emerald-glow: rgba(var(--color-accent-rgb), 0.18);
     --text-main: #0f172a;
     --text-muted: rgba(15, 23, 42, 0.55);
 }
@@ -386,8 +373,13 @@ body {
 }
 
 [data-theme="light"] .g22-header {
-    background: rgba(255, 255, 255, 0.8);
-    border-bottom: 1px solid var(--obsidian-border);
+    width: 100%;
+    height: 60px;
+    background: #050505;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 [data-theme="light"] .g22-header::after {
@@ -395,7 +387,14 @@ body {
 }
 
 [data-theme="light"] .g22-logo {
-    color: var(--text-main);
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: -0.03em;
+}
+.g22-logo span {
+    color: var(--color-accent);
 }
 
 [data-theme="light"] .g22-header-center {
@@ -407,9 +406,14 @@ body {
 }
 
 [data-theme="light"] .g22-user {
-    background: rgba(15, 23, 42, 0.04);
-    border-color: var(--obsidian-border);
-    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #121212;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
+    border-radius: 999px;
+    color: white;
 }
 
 [data-theme="light"] .g22-user:hover,

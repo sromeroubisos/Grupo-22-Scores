@@ -8,6 +8,8 @@ import styles from './page.module.css';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { ArrowLeft, Calendar, Trophy, Users, MapPin, ChevronRight, Share2, Star, Download } from 'lucide-react';
 import ExportImage from '@/components/ExportImage';
+import { useFavorites } from '@/hooks/useFavorites';
+import { setCachedLogo } from '@/lib/utils/logoCache';
 
 // Tabs configuration
 const TABS = [
@@ -22,6 +24,7 @@ const TABS = [
 export default function TournamentDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
+    const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
 
     const [activeTab, setActiveTab] = useState('summary');
     const [loading, setLoading] = useState(true);
@@ -139,6 +142,19 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
                 if (payload.details) {
                     setDetails(payload.details);
+
+                    // Persistence: Save discovered logo to cache
+                    const discoveredLogo =
+                        payload.details.image_path ||
+                        payload.details.logo ||
+                        payload.details.logo_path ||
+                        payload.details.tournament_logo ||
+                        payload.details.tournament_image_path;
+
+                    if (discoveredLogo) {
+                        setCachedLogo(id, discoveredLogo);
+                    }
+
                     const detailsName =
                         payload.details?.name ||
                         payload.details?.tournament?.name ||
@@ -252,42 +268,53 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
     };
     const renderStandingsHeader = () => (
         <div className={styles.tableHeader}>
-            <div className={styles.thPos}>#</div>
-            <div className={styles.thTeam}>Equipo</div>
-            <div className={styles.thVal}>Pts</div>
-            <div className={styles.thVal}>PJ</div>
-            <div className={styles.thVal}>G</div>
-            <div className={styles.thVal}>E</div>
-            <div className={styles.thVal}>P</div>
-            <div className={styles.thVal}>Dif</div>
+            <div className={styles.colPos}>#</div>
+            <div className={styles.colTeam}>Equipo</div>
+            <div className={`${styles.colVal} styles.colValPJ`}>J</div>
+            <div className={styles.colVal}>G</div>
+            <div className={styles.colVal}>E</div>
+            <div className={styles.colVal}>P</div>
+            <div className={`${styles.colVal} styles.colValDG`}>DG</div>
+            <div className={styles.colPts}>PTS</div>
         </div>
     );
 
-    const renderStandingsRow = (row: any, idx: number) => (
-        <div key={idx} className={styles.tableRow}>
-            <div className={styles.tdPos}>{row.position || (idx + 1)}</div>
-            <div className={styles.tdTeam}>
-                {(row.team?.logo || row.team?.image_path || row.team?.small_image_path || row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo) ? (
-                    <img
-                        src={row.team?.logo || row.team?.image_path || row.team?.small_image_path || row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo}
-                        alt={row.team?.name || row.participant?.name || row.name}
-                        className={styles.teamLogoTable}
-                    />
-                ) : (
-                    <div className={styles.teamLogoPlaceholder} style={{ width: 24, height: 24, fontSize: '0.7rem' }}></div>
-                )}
-                <span>{row.team?.name || row.participant?.name || row.name}</span>
+    const renderStandingsRow = (row: any, idx: number) => {
+        const pos = row.position || (idx + 1);
+        const borderColor = pos <= 4 ? styles.borderGreen : pos <= 6 ? styles.borderYellow : '';
+        const logo = row.team?.logo || row.team?.image_path || row.team?.small_image_path || row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo;
+        const teamName = row.team?.name || row.participant?.name || row.name;
+        const teamId = row.team?.id || row.team?.team_id || row.participant?.id || row.team_id;
+
+        return (
+            <div key={idx} className={styles.tableRow}>
+                {borderColor && <div className={`${styles.rowBorder} ${borderColor}`} />}
+                <div className={styles.colPos}>{pos}</div>
+                <div className={styles.colTeam}>
+                    {logo ? (
+                        <img src={logo} alt={teamName} className={styles.teamLogo} />
+                    ) : (
+                        <div className={styles.teamLogoPlaceholder} style={{ width: 24, height: 24 }}></div>
+                    )}
+                    {teamId ? (
+                        <Link href={`/clubes/fs-team-${teamId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                            {teamName}
+                        </Link>
+                    ) : (
+                        <span>{teamName}</span>
+                    )}
+                </div>
+                <div className={`${styles.colVal} styles.colValPJ`}>{row.matches_total || row.matches_played}</div>
+                <div className={styles.colVal}>{row.wins_total || row.wins}</div>
+                <div className={styles.colVal}>{row.draws_total || row.draws}</div>
+                <div className={styles.colVal}>{row.losses_total || row.losses}</div>
+                <div className={`${styles.colVal} styles.colValDG`}>
+                    {(row.goals_for && row.goals_against) ? (row.goals_for - row.goals_against) : (row.goal_difference || '0')}
+                </div>
+                <div className={styles.colPts}>{row.points_total || row.points}</div>
             </div>
-            <div className={`${styles.tdVal} ${styles.tdPoints}`}>{row.points_total || row.points}</div>
-            <div className={styles.tdVal}>{row.matches_total || row.matches_played}</div>
-            <div className={styles.tdVal}>{row.wins_total || row.wins}</div>
-            <div className={styles.tdVal}>{row.draws_total || row.draws}</div>
-            <div className={styles.tdVal}>{row.losses_total || row.losses}</div>
-            <div className={styles.tdVal}>
-                {(row.goals_for && row.goals_against) ? (row.goals_for - row.goals_against) : (row.goal_difference || '-')}
-            </div>
-        </div>
-    );
+        );
+    };
 
     const normalizeStandingsRows = (raw: any[]): any[] => {
         if (!Array.isArray(raw) || raw.length === 0) return [];
@@ -366,9 +393,9 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
         <div className={styles.page}>
             {/* Header / Hero */}
             <header className={styles.header}>
-                <div className="container">
+                <div className="g22-container">
                     <div className={styles.breadcrumb}>
-                        <Link href="/">Inicio</Link>
+                        <Link href="/">Partidos</Link>
                         <span className={styles.separator}>/</span>
                         <span className={styles.breadcrumbActive}>{tournamentData?.name}</span>
                     </div>
@@ -382,33 +409,36 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                             )}
                         </div>
                         <div className={styles.headerInfo}>
-                            <h1 className={styles.title}>{details?.name || details?.tournament?.name || tournamentData?.name}</h1>
-                            <div className={styles.meta}>
-                                <span className={styles.country}>
-                                    {countryFlag && <img src={countryFlag} alt="" className={styles.countryFlag} />}
-                                    {countryName}
-                                </span>
-                                <span className={styles.year}>{yearDisplay}</span>
-                            </div>
+                            <h1>{details?.name || details?.tournament?.name || tournamentData?.name}</h1>
+                            <div className={styles.countryLabel}>{countryName}</div>
                         </div>
+                        <button
+                            className={`${styles.followBtn} ${isLeagueFavorite(id) ? styles.followBtnActive : ''}`}
+                            onClick={() => toggleLeagueFavorite(id)}
+                            type="button"
+                        >
+                            {isLeagueFavorite(id) ? 'Siguiendo' : 'Seguir'}
+                        </button>
                     </div>
 
                     {/* Navigation Tabs */}
-                    <nav className={styles.navTabs}>
-                        {TABS.map(tab => (
-                            <button
-                                key={tab.id}
-                                className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
-                                onClick={() => setActiveTab(tab.id)}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </nav>
+                    <div className={styles.tabsContainer}>
+                        <nav className={styles.navTabs}>
+                            {TABS.map(tab => (
+                                <button
+                                    key={tab.id}
+                                    className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
+                                    onClick={() => setActiveTab(tab.id)}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
                 </div>
             </header>
 
-            <main className="container" style={{ paddingTop: '24px', paddingBottom: '40px' }}>
+            <main className="g22-container" style={{ paddingTop: '24px', paddingBottom: '40px' }}>
                 <div className={styles.contentLayout}>
                     {/* Main Feed */}
                     <div className={styles.mainColumn}>
@@ -529,8 +559,30 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                         {activeTab === 'standings' && (
                             <div className={styles.section}>
                                 <div className={styles.standingsToolbar}>
-                                    <h2 className={styles.pageTitle}>Tabla de Posiciones</h2>
+                                    <div className={styles.pillsGroup}>
+                                        <button
+                                            className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`}
+                                            onClick={() => setStandingsView('overall')}
+                                        >
+                                            Resumida
+                                        </button>
+                                        <button
+                                            className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`}
+                                            onClick={() => setStandingsView('overall')}
+                                        >
+                                            Completa
+                                        </button>
+                                        <button
+                                            className={`${styles.pillBtn} ${standingsView === 'form' ? styles.pillBtnActive : ''}`}
+                                            onClick={() => setStandingsView('form')}
+                                        >
+                                            Forma
+                                        </button>
+                                    </div>
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <button className={styles.dropdownBtn}>
+                                            Global <ChevronRight size={14} style={{ transform: 'rotate(90deg)' }} />
+                                        </button>
                                         <ExportImage
                                             template="standings"
                                             filename={`tabla-${tournamentData?.name}`}
@@ -548,32 +600,6 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                                                 }))
                                             }}
                                         />
-                                        <div className={styles.standingsToggleGroup}>
-                                            <button
-                                                className={`${styles.standingsToggle} ${standingsView === 'overall' ? styles.standingsToggleActive : ''}`}
-                                                onClick={() => setStandingsView('overall')}
-                                            >
-                                                General
-                                            </button>
-                                            <button
-                                                className={`${styles.standingsToggle} ${standingsView === 'form' ? styles.standingsToggleActive : ''}`}
-                                                onClick={() => setStandingsView('form')}
-                                            >
-                                                Forma
-                                            </button>
-                                            <button
-                                                className={`${styles.standingsToggle} ${standingsView === 'htft' ? styles.standingsToggleActive : ''}`}
-                                                onClick={() => setStandingsView('htft')}
-                                            >
-                                                HT/FT
-                                            </button>
-                                            <button
-                                                className={`${styles.standingsToggle} ${standingsView === 'overunder' ? styles.standingsToggleActive : ''}`}
-                                                onClick={() => setStandingsView('overunder')}
-                                            >
-                                                Over/Under
-                                            </button>
-                                        </div>
                                     </div>
                                 </div>
 

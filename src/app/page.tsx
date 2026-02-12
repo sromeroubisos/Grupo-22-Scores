@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { ArrowLeft, Calendar, Trophy, Users, MapPin, ChevronRight, ChevronLeft, Share2, Star, Download } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
@@ -8,8 +9,10 @@ import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib
 import { getCountryById } from '@/lib/data/countries';
 import { getActiveSports } from '@/lib/data/sports';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
-import { db } from '@/lib/mock-db'; // Import mock-db
 import { useFavorites } from '@/hooks/useFavorites';
+import { useMatchesStore } from '@/hooks/useMatchesStore';
+import TournamentLeader from '@/components/TournamentLeader';
+import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -25,7 +28,7 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
   tournaments.forEach(tournament => {
     const country = getCountryById(tournament.countryId);
     const countryName = country?.name || tournament.countryId;
-    const flagEmoji = country?.flagEmoji || '🌍';
+    const flagEmoji = country?.flagEmoji || '';
 
     if (!groups[tournament.countryId]) {
       groups[tournament.countryId] = { countryName, flagEmoji, tournaments: [] };
@@ -70,7 +73,7 @@ const news = [
     id: 1,
     title: 'Los Pumas anuncian convocatoria para el Rugby Championship',
     excerpt: 'El entrenador Felipe Contepomi dio a conocer la lista de 35 jugadores que comenzarán la preparación...',
-    image: '🏉',
+    image: '',
     time: 'Hace 2 horas',
     category: 'Selección',
   },
@@ -78,7 +81,7 @@ const news = [
     id: 2,
     title: 'Club Atlético sigue líder invicto en el UAR Top 12',
     excerpt: 'Con la victoria de hoy, el equipo capitalino suma 32 puntos y mantiene el primer puesto...',
-    image: '🏆',
+    image: '',
     time: 'Hace 4 horas',
     category: 'UAR Top 12',
   },
@@ -86,7 +89,7 @@ const news = [
     id: 3,
     title: 'Martín García, goleador del torneo con 12 tries',
     excerpt: 'El wing de Club Atlético sigue imparable y amplía su ventaja como máximo anotador...',
-    image: '⭐',
+    image: '',
     time: 'Hace 6 horas',
     category: 'Estadísticas',
   },
@@ -94,47 +97,43 @@ const news = [
     id: 4,
     title: 'URBA confirma fechas de playoffs',
     excerpt: 'Los cuartos de final se jugarán el 15 de marzo en cancha del mejor ubicado...',
-    image: '📅',
+    image: '',
     time: 'Ayer',
     category: 'URBA',
   },
 ];
 
-// Generate dates for the date picker
-const generateDates = () => {
-  const dates = [];
+// Generate dates for the date picker (timezone-aware)
+function generateDates(timeZone: string) {
+  const entries = generateLocalDateKeys(timeZone, -3, 7);
   const today = new Date();
 
-  for (let i = -3; i <= 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
+  return entries.map(({ dateKey, offset }) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + offset);
 
     let label = '';
-    if (i === -1) label = 'Ayer';
-    else if (i === 0) label = 'Hoy';
-    else if (i === 1) label = 'Mañana';
+    if (offset === -1) label = 'Ayer';
+    else if (offset === 0) label = 'Hoy';
+    else if (offset === 1) label = 'Mañana';
     else {
-      label = date.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric' });
+      label = d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', timeZone });
     }
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const dateString = `${year}-${month}-${day}`;
-
-    dates.push({
-      date: dateString,
+    return {
+      date: dateKey,
       label,
-      dayName: date.toLocaleDateString('es-AR', { weekday: 'long' }),
-      fullDate: date.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' }),
-      isToday: i === 0,
-    });
-  }
+      dayName: d.toLocaleDateString('es-AR', { weekday: 'long', timeZone }),
+      fullDate: d.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', timeZone }),
+      isToday: offset === 0,
+    };
+  });
+}
 
-  return dates;
-};
+
 
 export default function HomePage() {
+
   const [selectedDate, setSelectedDate] = useState('');
   const [dates, setDates] = useState<ReturnType<typeof generateDates>>([]);
 
@@ -144,6 +143,11 @@ export default function HomePage() {
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<string>>(new Set()); // Main Content Collapse
   const [searchQuery, setSearchQuery] = useState('');
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
+  const dateListRef = useRef<HTMLDivElement>(null);
+  const activeDateRef = useRef<HTMLButtonElement>(null);
+
+  // Detect user timezone once (stable across re-renders)
+  const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
 
   // Favorites hook
   const { toggleLeagueFavorite, isLeagueFavorite } = useFavorites();
@@ -186,57 +190,23 @@ export default function HomePage() {
     return filtered;
   }, [groupedTournaments, searchQuery]);
 
-  // Matches State
-  const [matches, setMatches] = useState<any[]>([]); // Using any for enriched match structure
-  const [loading, setLoading] = useState(false);
+  // Matches via unified hook (cache + prefetch 7 days + live polling)
+  const { matches, loading, liveCount: hookLiveCount } = useMatchesStore(selectedDate, selectedSport.id);
 
-  // Fetch matches from API
+  // Live timer: tick every second so live match minutes update in real-time
+  const [liveTick, setLiveTick] = useState(0);
   useEffect(() => {
-    async function fetchMatches() {
-      if (!selectedDate) return;
-
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/matches?date=${selectedDate}&sport=${selectedSport.id}&external=true`);
-        if (response.ok) {
-          const data = await response.json();
-          setMatches(data);
-        }
-      } catch (error) {
-        console.error('Error fetching matches:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchMatches();
-  }, [selectedDate, selectedSport.id]);
-
-  // Prefetch adjacent dates for faster navigation
-  useEffect(() => {
-    if (!selectedDate) return;
-
-    const currentIndex = dates.findIndex(d => d.date === selectedDate);
-    if (currentIndex === -1) return;
-
-    // Prefetch previous and next day in background
-    const prefetchDates = [
-      dates[currentIndex - 1]?.date,
-      dates[currentIndex + 1]?.date
-    ].filter(Boolean);
-
-    prefetchDates.forEach(date => {
-      // Silent prefetch - don't wait for results
-      fetch(`/api/matches?date=${date}&sport=${selectedSport.id}&external=true`)
-        .catch(() => {
-          // Silently fail - it's just a prefetch
-        });
-    });
-  }, [selectedDate, selectedSport.id, dates]);
+    const hasLive = matches.some(m => m.status === 'live');
+    if (!hasLive) return;
+    const id = setInterval(() => setLiveTick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [matches]);
 
   // --- Dynamic Matches Data Implementation ---
+  // liveTick is included so live minute displays update every second
   const matchesByLeague = useMemo<LeagueMatches[]>(() => {
     const groups: Record<string, LeagueMatches> = {};
+    const now = Date.now();
 
     matches.forEach(match => {
       // API returns enriched data (match.homeTeam, match.tournament, etc.)
@@ -249,28 +219,37 @@ export default function HomePage() {
         groups[tournament.id] = {
           league: tournament.name,
           leagueId: tournament.id,
-          country: 'Argentina', // API doesn't fully return country yet, keep default or enhance API
-          flag: '🇦🇷',
+          country: 'Argentina',
+          flag: '',
           round: match.roundId?.startsWith('F') ? match.roundId.replace('F', 'Fecha ') : (match.roundId || 'General'),
           matches: []
         };
       }
 
-      // Format time
-      const dateObj = new Date(match.dateTime);
-      const timeStr = dateObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+      // Convert UTC->local using the centralized timezone utility
+      const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
 
       // Map status
       let status: 'live' | 'scheduled' | 'finished' = 'scheduled';
       if (match.status === 'live') status = 'live';
       if (match.status === 'final') status = 'finished';
 
-      // Format minute logic
+      // Format minute logic - for live matches, compute from kickoff time
       let minuteDisplay = '';
-      if (match.clock?.running) {
-        minuteDisplay = `${Math.floor(match.clock.seconds / 60)}'`;
-      } else {
-        minuteDisplay = match.clock?.period || '';
+      if (status === 'live') {
+        const period = match.clock?.period || '';
+        if (period === 'HT' || period === 'ET' || period === 'Final') {
+          minuteDisplay = period;
+        } else if (match.clock?.running && match.clock?.seconds > 0) {
+          minuteDisplay = `${Math.floor(match.clock.seconds / 60)}'`;
+        } else {
+          // Compute minute from kickoff timestamp
+          const kickoff = new Date(match.dateTime).getTime();
+          const elapsed = Math.max(0, Math.floor((now - kickoff) / 60000));
+          minuteDisplay = elapsed > 0 ? `${elapsed}'` : (period || 'En Vivo');
+        }
+      } else if (match.clock?.period && status === 'finished') {
+        minuteDisplay = match.clock.period;
       }
 
       groups[tournament.id].matches.push({
@@ -298,7 +277,8 @@ export default function HomePage() {
       if (!aIsFavorite && bIsFavorite) return 1;
       return a.league.localeCompare(b.league);
     });
-  }, [matches, isLeagueFavorite]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matches, isLeagueFavorite, userTimeZone, liveTick]);
 
   const toggleCountry = (countryId: string) => {
     setExpandedCountries(prev => {
@@ -335,19 +315,63 @@ export default function HomePage() {
   );
 
   useEffect(() => {
-    const generatedDates = generateDates();
+    const generatedDates = generateDates(userTimeZone);
     setDates(generatedDates);
     const today = generatedDates.find(d => d.isToday)?.date || '';
     setSelectedDate(today);
-  }, []);
+  }, [userTimeZone]);
+
+  // Precise scroll centering logic
+  const centerActiveDate = () => {
+    if (activeDateRef.current && dateListRef.current) {
+      const container = dateListRef.current;
+      const target = activeDateRef.current;
+
+      const targetCenter = target.offsetLeft + (target.offsetWidth / 2);
+      const containerCenter = container.offsetWidth / 2;
+
+      container.scrollTo({
+        left: targetCenter - containerCenter,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Initial scroll
+    const timer = setTimeout(centerActiveDate, 150);
+
+    // Centering on resize
+    const observer = new ResizeObserver(() => {
+      centerActiveDate();
+    });
+
+    if (dateListRef.current) {
+      observer.observe(dateListRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [selectedDate, dates]);
 
   const selectedDateInfo = dates.find(d => d.date === selectedDate);
 
-  const liveMatchesCount = matchesByLeague
-    .flatMap(l => l.matches)
-    .filter(m => m.status === 'live').length;
-
+  const liveMatchesCount = hookLiveCount;
   const isIndividualSport = INDIVIDUAL_SPORTS.has(selectedSport.id);
+
+  const navigateDate = (direction: 'prev' | 'next') => {
+    if (!selectedDate || dates.length === 0) return;
+    const currentIndex = dates.findIndex(d => d.date === selectedDate);
+    if (currentIndex === -1) return;
+
+    if (direction === 'prev' && currentIndex > 0) {
+      setSelectedDate(dates[currentIndex - 1].date);
+    } else if (direction === 'next' && currentIndex < dates.length - 1) {
+      setSelectedDate(dates[currentIndex + 1].date);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -425,7 +449,7 @@ export default function HomePage() {
                     className={`${styles.accordionHeader} ${expandedCountries.has('international') ? styles.active : ''}`}
                   >
                     <div className={styles.accordionHeaderContent}>
-                      <span>🌍</span>
+                      <span></span>
                       <span>Internacional</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -574,20 +598,36 @@ export default function HomePage() {
 
         {/* Main Content - Matches */}
         <main className={styles.mainContent}>
+          {/* Sport Selector (Mobile) */}
+          <div className={styles.mobileSportSelector}>
+            {activeSports.map(sport => (
+              <button
+                key={sport.id}
+                className={`${styles.sportChip} ${selectedSport.id === sport.id ? styles.active : ''}`}
+                onClick={() => setSelectedSport(sport)}
+              >
+                <span className={styles.sportIcon}>{sport.icon}</span>
+                <span className={styles.sportName}>{sport.nameEs}</span>
+              </button>
+            ))}
+          </div>
 
-          {/* Date Selector (Moved Inside) */}
+          {/* Date Selector */}
           <section className={styles.dateSelector}>
             <div className={styles.dateSelectorInner}>
-              <button className={styles.dateNavBtn} aria-label="Fecha anterior">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
+              <button
+                className={styles.dateNavBtn}
+                onClick={() => navigateDate('prev')}
+                aria-label="Día anterior"
+              >
+                <ChevronLeft size={20} />
               </button>
 
-              <div className={styles.dateList}>
+              <div className={styles.dateList} ref={dateListRef}>
                 {dates.map((date) => (
                   <button
                     key={date.date}
+                    ref={selectedDate === date.date ? activeDateRef : null}
                     className={`${styles.dateItem} ${selectedDate === date.date ? styles.active : ''} ${date.isToday ? styles.today : ''}`}
                     onClick={() => setSelectedDate(date.date)}
                   >
@@ -596,19 +636,12 @@ export default function HomePage() {
                 ))}
               </div>
 
-              <button className={styles.dateNavBtn} aria-label="Fecha siguiente">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-
-              <button className={styles.calendarBtn}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
+              <button
+                className={styles.dateNavBtn}
+                onClick={() => navigateDate('next')}
+                aria-label="Día siguiente"
+              >
+                <ChevronRight size={20} />
               </button>
             </div>
           </section>
@@ -647,7 +680,7 @@ export default function HomePage() {
 
             {!loading && matchesByLeague.length === 0 && (
               <div className={styles.noMatches}>
-                <div className={styles.noMatchesIcon}>📅</div>
+                <div className={styles.noMatchesIcon}></div>
                 <h3>No hay partidos programados</h3>
                 <p>No se encontraron encuentros para esta fecha.</p>
               </div>
@@ -661,28 +694,25 @@ export default function HomePage() {
 
               return (
                 <div key={league.leagueId} className={styles.leagueSection}>
-                  <div
-                    className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
-                  >
-                    {/* Navigation Link - Takes most space */}
+                  <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}>
                     <Link href={`/tournaments/${league.leagueId}`} className={styles.leagueHeaderLink}>
                       <div className={styles.leagueInfo}>
                         <span className={styles.leagueFlag}>{league.flag}</span>
                         <div className={styles.leagueMeta}>
                           <span className={styles.leagueSectionName}>{league.league}</span>
                           <span className={styles.leagueRound}>{league.round}</span>
+                          <TournamentLeader leagueId={league.leagueId} />
                         </div>
                       </div>
 
                       {isCollapsed && (
                         <div className={styles.leagueHeaderSummary} style={{ marginLeft: 'auto' }}>
                           <span>{matchesCount} partidos</span>
-                          {liveCount > 0 && <span className={styles.summaryLive}>• {liveCount} en vivo</span>}
+                          {liveCount > 0 && <span className={styles.summaryLive}> {liveCount} en vivo</span>}
                         </div>
                       )}
                     </Link>
 
-                    {/* Favorite Button - Star Icon */}
                     <button
                       className={styles.leagueFavoriteBtn}
                       onClick={(e) => {
@@ -693,21 +723,11 @@ export default function HomePage() {
                       aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
                       title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
                     >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill={isFavorite ? "currentColor" : "none"}
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                       </svg>
                     </button>
 
-                    {/* Toggle Button - Only Caret */}
                     <button
                       className={styles.leagueHeaderToggle}
                       onClick={(e) => {
@@ -818,9 +838,8 @@ export default function HomePage() {
             })}
           </div>
 
-          {/* Show message if no matches */}
-          {matchesByLeague.length === 0 && (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted2)', opacity: 0.7 }}>
+          {!loading && matchesByLeague.length === 0 && (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)', opacity: 0.7 }}>
               No hay partidos programados para esta fecha.
             </div>
           )}
@@ -844,8 +863,7 @@ export default function HomePage() {
             </div>
           </div>
         </aside>
-
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }

@@ -1,32 +1,30 @@
 /* Main Page Layout */
 .page {
     min-height: 100vh;
-    padding-top: 80px;
+    padding-top: 60px;
     display: flex;
     flex-direction: column;
+    padding-bottom: 80px;
+    /* Space for bottom nav */
+}
+
+.mobileSportSelector {
+    display: none;
 }
 
 /* Date Selector */
-.dateSelector {
-    top: 0;
-    z-index: 10;
-    margin-bottom: var(--spacing-md);
-    background: transparent;
-    border-bottom: none;
-    position: relative;
-    padding: 0;
-}
+
 
 .dateSelectorInner {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
     width: 100%;
-    margin: 0;
-    padding: var(--spacing-sm);
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    margin: 0 auto;
+    padding: 0;
+    max-width: 100%;
+    position: relative;
+    background: transparent;
+    border: none;
 }
 
 .dateNavBtn {
@@ -35,29 +33,32 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: var(--color-bg-tertiary);
+    background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
     flex-shrink: 0;
+    margin: 0 4px;
 }
 
 .dateNavBtn:hover {
-    background: var(--color-bg-hover);
+    background: var(--color-bg-tertiary);
     color: var(--color-text-primary);
 }
 
 .dateList {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 20px;
     flex: 1;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: var(--spacing-xs) 0;
+    padding: 12px 0;
+    scroll-behavior: smooth;
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
 }
 
 .dateList::-webkit-scrollbar {
@@ -65,20 +66,21 @@
 }
 
 .dateItem {
+    position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-sm) var(--spacing-lg);
+    min-width: 80px;
     background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    font-family: var(--font-primary);
-    font-size: 0.875rem;
+    border: none;
+    font-size: 0.9rem;
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
     white-space: nowrap;
+    scroll-snap-align: center;
 }
 
 .dateItem:hover {
@@ -91,9 +93,31 @@
 }
 
 .dateItem.active {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.dateItem.active::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 25%;
+    right: 25%;
+    height: 3px;
     background: var(--color-accent);
-    color: white;
-    border-color: var(--color-accent);
+    border-radius: 999px;
+    box-shadow: 0 0 10px var(--color-accent-glow);
+}
+
+.dateItem.active::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 20%;
+    right: 20%;
+    height: 3px;
+    background: var(--color-accent);
+    border-radius: 2px;
 }
 
 .dateLabel {
@@ -103,7 +127,7 @@
 .calendarBtn {
     display: flex;
     align-items: center;
-    justify-content: center;
+
     width: 36px;
     height: 36px;
     background: var(--color-bg-tertiary);
@@ -123,31 +147,12 @@
 
 /* Main Layout - 3 Columns (Left Sidebar + Main + Right Sidebar) */
 /* Main Layout - 3 Columns (Left Nav + Main + Right Extras) */
-.mainLayout {
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr) 300px;
-    gap: var(--spacing-lg);
-    max-width: 1300px;
-    margin: 0 auto;
-    width: 100%;
-    flex: 1;
-    padding: 0 var(--spacing-lg);
-}
+
 
 /* Sidebar Common Styles */
 /* Sidebar Common Styles */
 .sidebarLeft,
-.sidebarRight {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-    position: sticky;
-    top: 100px;
-    height: calc(100vh - 100px);
-    overflow-y: auto;
-    scrollbar-width: none;
-    /* Firefox */
-}
+
 
 .sidebarLeft::-webkit-scrollbar,
 .sidebarRight::-webkit-scrollbar {
@@ -187,7 +192,7 @@
     height: 20px;
     display: flex;
     align-items: center;
-    justify-content: center;
+
     font-size: 1.1rem;
 }
 
@@ -434,28 +439,22 @@
     color: var(--color-accent);
 }
 
-.mainContent {
-    min-height: auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-    /* Increased gap for better hierarchy */
-}
+
 
 /* Live Banner */
 .liveBanner {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
+    gap: 8px;
+    padding: 6px 12px;
     background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--spacing-lg);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-error);
+    border-radius: 999px;
+    margin-bottom: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #ff4d4d;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .liveDot {
@@ -486,29 +485,24 @@
 }
 
 /* Matches Container */
-.matchesContainer {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
+
 
 /* League Section */
 .leagueSection {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
+    background: #111111;
+    border-radius: 12px;
+    margin-bottom: 24px;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .leagueSectionHeader {
+    padding: 14px 16px;
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: var(--color-bg-tertiary);
-    text-decoration: none;
-    color: inherit;
-    transition: all var(--transition-fast);
+    gap: 12px;
 }
 
 .leagueSectionHeader:hover {
@@ -541,7 +535,7 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
+
     border-radius: var(--radius-full);
     color: var(--color-text-tertiary);
     transition: all var(--transition-fast);
@@ -566,7 +560,7 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
+
     border-radius: var(--radius-full);
     color: var(--color-text-tertiary);
     transition: background-color var(--transition-fast);
@@ -611,6 +605,42 @@
     font-weight: 500;
 }
 
+.leagueLeader {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+.leaderLabel {
+    color: var(--color-accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+}
+
+.leaderName {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.leaderPoints {
+    background: rgba(255, 107, 0, 0.1);
+    color: var(--color-accent);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+
+
+
+
+
+
 .leagueHeaderSummary {
     font-size: 0.8125rem;
     color: var(--color-text-tertiary);
@@ -642,14 +672,20 @@
 }
 
 .matchRow {
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
-    text-decoration: none;
-    color: inherit;
-    transition: all var(--transition-fast);
+    gap: 12px;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.matchRow:hover {
+    background: #161616;
+}
+
+.matchRow:last-child {
+    border-bottom: none;
 }
 
 .matchRowLive {
@@ -682,7 +718,7 @@
     flex-direction: column;
     /* Ensure vertical centering/stacking if needed */
     align-items: center;
-    justify-content: center;
+
 }
 
 .matchLive {
@@ -716,7 +752,7 @@
     gap: 8px;
     /* Increased from 4px for better separation */
     flex: 1;
-    justify-content: center;
+
     /* Center vertically relative to time */
 }
 
@@ -733,7 +769,7 @@
     height: 24px;
     display: flex;
     align-items: center;
-    justify-content: center;
+
     text-align: center;
     flex-shrink: 0;
     position: relative;
@@ -761,7 +797,7 @@
 .logoFallback {
     display: flex;
     align-items: center;
-    justify-content: center;
+
     width: 100%;
     height: 100%;
 }
@@ -813,7 +849,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+
     padding: var(--spacing-3xl);
     text-align: center;
     color: var(--color-text-tertiary);
@@ -850,7 +886,7 @@
     height: 48px;
     display: flex;
     align-items: center;
-    justify-content: center;
+
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-md);
     font-size: 1.5rem;
@@ -903,63 +939,20 @@
     margin-top: 4px;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-    .mainLayout {
-        grid-template-columns: 1fr;
-    }
 
-    .sidebarRight {
-        display: none;
-    }
-}
 
-@media (max-width: 900px) {
-    .mainLayout {
-        grid-template-columns: 1fr;
-        padding: 0 var(--spacing-md);
-    }
 
-    .dateSelector {
-        position: sticky;
-        top: 90px;
-    }
-}
 
-@media (max-width: 900px) {
-    .dateSelector {
-        top: 70px;
-    }
 
-    .mainContent {
-        min-height: auto;
-    }
-}
+/* Tablet */
 
-@media (max-width: 600px) {
-    .dateSelectorInner {
-        padding: var(--spacing-xs) var(--spacing-sm);
-    }
 
-    .dateItem {
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: 0.8125rem;
-    }
+/* Small Tablet / Phone */
 
-    .dateNavBtn,
-    .calendarBtn {
-        width: 32px;
-        height: 32px;
-    }
 
-    .mainContent {
-        padding: var(--spacing-md);
-    }
 
-    .matchRow {
-        padding: var(--spacing-sm) var(--spacing-md);
-    }
-}
+
+/* Sport Switcher & Other remaining elements are preserved above */
 
 /* Sport Switcher */
 .sportSwitch {
@@ -976,7 +969,6 @@
     gap: 12px;
     padding: 12px;
     border-radius: 16px;
-    /* More rounded */
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     cursor: pointer;
@@ -1013,7 +1005,6 @@
 .sportSwitchName {
     font-size: 13px;
     font-weight: 800;
-    /* Bolder */
     color: var(--color-text-primary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1043,7 +1034,6 @@
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
-    /* Align with container */
     right: 0;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
@@ -1068,9 +1058,287 @@
     letter-spacing: 0.02em;
 }
 
-.sportMenuItem:hover {
-    background: var(--color-bg-hover);
+.sportMenuItemActive {
+    background: rgba(var(--color-accent-rgb), 0.14);
+    color: var(--color-accent);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- ROBUST GRID SYSTEM --- */
+.mainLayout {
+    display: grid;
+    grid-template-columns: 260px 1fr 340px;
+    gap: 32px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 32px;
+    box-sizing: border-box;
+    min-height: calc(100vh - 80px);
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+    /* Prevents grid breakout */
+}
+
+.matchesContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 24px;
+    width: 100%;
+    align-items: start;
+}
+
+.sidebarLeft,
+.sidebarRight {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.sidebarLeft::-webkit-scrollbar,
+.sidebarRight::-webkit-scrollbar {
+    display: none;
+}
+
+/* Breakpoints */
+
+/* Desktop Narrow / Tablet Landscape */
+@media (max-width: 1500px) {
+    .mainLayout {
+        grid-template-columns: 250px 1fr;
+        padding: 0 24px;
+    }
+
+    .sidebarRight {
+        display: none;
+    }
+}
+
+/* Tablet Portrait */
+@media (max-width: 1100px) {
+    .mainLayout {
+        grid-template-columns: 1fr;
+        padding: 0 20px;
+    }
+
+    .sidebarLeft {
+        display: none;
+    }
+
+    .mobileSportSelector {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 16px 4px;
+        margin-bottom: 8px;
+        scrollbar-width: none;
+    }
+
+    .mobileSportSelector::-webkit-scrollbar {
+        display: none;
+    }
+
+    .sportChip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        background: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        padding: 10px;
+        min-width: 70px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--color-text-tertiary);
+    }
+
+    .sportChip.active {
+        background: var(--color-accent);
+        background: linear-gradient(135deg, var(--color-accent) 0%, #22c55e 100%);
+        border-color: transparent;
+        color: #000;
+        box-shadow: 0 4px 12px rgba(48, 209, 88, 0.2);
+    }
+
+    .sportIcon {
+        font-size: 1.25rem;
+    }
+
+    .sportName {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .matchesContainer {
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    }
+}
+
+/* Mobile */
+@media (max-width: 850px) {
+    .matchesContainer {
+        grid-template-columns: 1fr;
+    }
+
+    .mainLayout {
+        padding: 0 12px;
+    }
+
+    .dateSelector {
+        position: sticky;
+        top: 60px;
+        z-index: 100;
+        background: rgba(10, 10, 10, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 500px) {
+    .mainLayout {
+        padding: 0 8px;
+    }
+
+    .matchesContainer {
+        gap: 16px;
+    }
+
+    .leagueSection {
+        background: #111111;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* Sport Switcher */
+.sportSwitch {
+    padding: 0 0 12px 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+    position: relative;
+}
+
+.sportSwitchBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.sportSwitchBtn:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border-light);
+}
+
+.sportSwitchIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--color-accent);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.sportSwitchLabel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.sportSwitchName {
+    font-size: 13px;
+    font-weight: 800;
     color: var(--color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1;
+}
+
+.sportSwitchHint {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sportSwitchChevron {
+    opacity: .4;
+    transition: transform var(--transition-fast);
+    width: 18px;
+    height: 18px;
+}
+
+.sportSwitchBtn[aria-expanded="true"] .sportSwitchChevron {
+    transform: rotate(180deg);
+}
+
+.sportMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 6px;
+    z-index: 50;
+    box-shadow: var(--shadow-card);
+}
+
+.sportMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .sportMenuItemActive {
