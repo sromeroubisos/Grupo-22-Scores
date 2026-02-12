@@ -60,8 +60,8 @@ async function syncFile(filename: string) {
                     }
                 }
             }
-        } catch (err) {
-            console.error(`    ❌ Error fetching ${id}:`, err.message);
+        } catch (err: any) {
+            console.error(`    ❌ Error fetching ${id}:`, err?.message || 'Unknown error');
         }
     }
 
