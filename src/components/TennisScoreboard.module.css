@@ -1,0 +1,213 @@
+.tennisScoreboard {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* Main Score Section */
+.mainScore {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+.teamSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.teamLogo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.teamName {
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.scoreDisplay {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.teamSets {
+    font-family: var(--font-mono);
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+    transition: color 0.3s ease;
+}
+
+.teamSets.leading {
+    color: var(--accent);
+}
+
+.scoreSep {
+    font-size: 32px;
+    color: var(--muted);
+    font-weight: 300;
+}
+
+/* Sets Table */
+.setsTable {
+    margin-bottom: 20px;
+}
+
+.setsTable table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.setsTable thead {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.setsTable th {
+    padding: 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: center;
+}
+
+.setsTable th:first-child {
+    text-align: left;
+    padding-left: 16px;
+}
+
+.setsTable td {
+    padding: 12px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+.playerName {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left !important;
+    padding-left: 16px !important;
+}
+
+.setScore {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Current Game Score */
+.currentGame {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+}
+
+.gameLabel {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+}
+
+.gameScore {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.gameScoreItem {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--stroke);
+    border-radius: 8px;
+    padding: 8px 16px;
+    min-width: 60px;
+}
+
+.gamePts {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.gameScoreSep {
+    font-size: 18px;
+    color: var(--muted);
+}
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+    .tennisScoreboard {
+        padding: 16px;
+    }
+
+    .mainScore {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .teamSection {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .teamLogo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .teamSets {
+        font-size: 36px;
+    }
+
+    .scoreSep {
+        font-size: 24px;
+    }
+
+    .setsTable th,
+    .setsTable td {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    .playerName {
+        font-size: 11px;
+        padding-left: 12px !important;
+    }
+
+    .setScore {
+        font-size: 12px;
+    }
+
+    .gamePts {
+        font-size: 20px;
+    }
+
+    .gameScoreItem {
+        padding: 6px 12px;
+        min-width: 50px;
+    }
+}

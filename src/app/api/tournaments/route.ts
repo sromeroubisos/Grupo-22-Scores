@@ -209,7 +209,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id') || '';
     let url = searchParams.get('url') || '';
-    const sport = searchParams.get('sport') || searchParams.get('sportId') || 'rugby';
+    const sport = searchParams.get('sport') || searchParams.get('sportId') || 'football'; // Default to football instead of rugby
 
     let tournamentId = searchParams.get('tournament_id') || searchParams.get('tournamentId') || undefined;
     let stageId = searchParams.get('tournament_stage_id') || searchParams.get('tournamentStageId') || searchParams.get('stageId') || undefined;

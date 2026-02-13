@@ -154,6 +154,43 @@ export function useMatchesStore(
     return () => controller.abort();
   }, [selectedDate, sportId, timeZone, fetchDate]);
 
+  // Immediate live fetch when sport changes
+  useEffect(() => {
+    const controller = new AbortController();
+
+    // Fetch live matches immediately when sport changes
+    fetchLive(controller.signal).then(liveData => {
+      if (controller.signal.aborted || liveData.length === 0) return;
+
+      // If we're on today's date, merge with current matches
+      const todayKey = getTodayKey(timeZone);
+      if (selectedDate === todayKey) {
+        const key = cacheKey(selectedDate, sportId);
+        const current = matchesCache.get(key) || [];
+        const liveMap = new Map(liveData.map(m => [m.id, m]));
+
+        const merged = current.map(match => {
+          const liveMatch = liveMap.get(match.id);
+          if (liveMatch) {
+            return {
+              ...match,
+              status: 'live',
+              score: liveMatch.score,
+              clock: liveMatch.clock
+            };
+          }
+          return match;
+        });
+
+        matchesCache.set(key, merged);
+        lastFetchedAt.set(key, Date.now());
+        setMatches(merged);
+      }
+    });
+
+    return () => controller.abort();
+  }, [sportId, selectedDate, timeZone, fetchLive]);
+
   // LIVE polling: only when selectedDate is today
   useEffect(() => {
     if (!selectedDate) return;

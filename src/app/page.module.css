@@ -617,9 +617,31 @@
     color: var(--color-text-tertiary);
 }
 
-.leagueLeader {
-    display: none;
-    /* Hide leader on mobile if too crowded, or refine */
+/* League Section Matches Animation */
+.matchesListWrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    overflow: hidden;
+    opacity: 1;
+}
+
+.matchesListWrapper.collapsed {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.matchesList {
+    min-height: 0;
+}
+
+.chevronHeader {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.leagueSectionHeader.collapsed .chevronHeader {
+    transform: rotate(-90deg);
 }
 
 /* Match Row - FotMob Style (Time | Teams Stack) */
@@ -1045,7 +1067,7 @@
     gap: 24px;
     width: 100%;
     align-items: start;
-    margin-top: 0;
+    margin-top: 64px;
     /* Separación debajo del selector de días */
 }
 
@@ -1230,113 +1252,4 @@
         overflow: hidden;
         border: 1px solid var(--color-border);
     }
-}
-
-/* Sport Switcher */
-.sportSwitch {
-    padding: 0 0 12px 0;
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--color-border);
-    position: relative;
-}
-
-.sportSwitchBtn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 16px;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    position: relative;
-    overflow: hidden;
-}
-
-.sportSwitchBtn:hover {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-border-light);
-}
-
-.sportSwitchIcon {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    background: rgba(var(--color-accent-rgb), 0.12);
-    color: var(--color-accent);
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-
-.sportSwitchLabel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-}
-
-.sportSwitchName {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--color-text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    line-height: 1;
-}
-
-.sportSwitchHint {
-    font-size: 10px;
-    color: var(--color-text-tertiary);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.sportSwitchChevron {
-    opacity: .4;
-    transition: transform var(--transition-fast);
-    width: 18px;
-    height: 18px;
-}
-
-.sportSwitchBtn[aria-expanded="true"] .sportSwitchChevron {
-    transform: rotate(180deg);
-}
-
-.sportMenu {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    right: 0;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: 14px;
-    padding: 6px;
-    z-index: 50;
-    box-shadow: var(--shadow-card);
-}
-
-.sportMenuItem {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-}
-
-.sportMenuItemActive {
-    background: rgba(var(--color-accent-rgb), 0.14);
-    color: var(--color-accent);
 }

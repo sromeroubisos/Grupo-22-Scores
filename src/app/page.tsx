@@ -728,14 +728,13 @@ export default function HomePage() {
                       <svg
                         className={styles.chevronHeader}
                         width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                        style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}
                       >
                         <path d="M6 9l6 6 6-6" />
                       </svg>
                     </div>
                   </div>
 
-                  {!isCollapsed && (
+                  <div className={`${styles.matchesListWrapper} ${isCollapsed ? styles.collapsed : ''}`}>
                     <div className={styles.matchesList}>
                       {league.matches.map((match) => (
                         <Link
@@ -819,7 +818,7 @@ export default function HomePage() {
                         </Link>
                       ))}
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}

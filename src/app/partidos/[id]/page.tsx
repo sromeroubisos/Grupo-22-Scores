@@ -110,6 +110,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const [activeTab, setActiveTab] = useState('summary');
     const statusRef = useRef<string>('scheduled');
     const [showDebug, setShowDebug] = useState(false);
+    const [showAllEvents, setShowAllEvents] = useState(false);
 
     const isFlashScore = useMemo(() => /^[A-Za-z0-9]{8}$/.test(id) || id.length === 8, [id]);
 
@@ -620,7 +621,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                         const aPct = total > 0 ? (aVal / total) * 100 : 50;
 
                                         return (
-                                            <div key={i} className={styles.statItem} style={{ marginBottom: '16px' }}>
+                                            <div key={i} className={styles.statItem}>
                                                 <div className={styles.statRow}>
                                                     <span className={styles.statVal}>{stat.home}</span>
                                                     <span className={styles.statLabel}>{stat.label}</span>
@@ -638,14 +639,14 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 )}
 
                                 {eventsData.length > 0 && (
-                                    <div style={{ marginTop: '32px' }}>
+                                    <div className={styles.summaryEvents}>
                                         <div className={styles.panelTitle}>Sucesos Recientes</div>
-                                        <div className={styles.timelineContainer} style={{ padding: '20px 0' }}>
+                                        <div className={styles.timelineContainer}>
                                             {eventsData.slice(-3).reverse().map((evt, i) => (
-                                                <div key={i} className={styles.timelineItem} style={{ marginBottom: '12px' }}>
-                                                    <div className={styles.eventMinuteBadge} style={{ width: '30px', height: '30px', fontSize: '11px' }}>{evt.time}'</div>
+                                                <div key={i} className={styles.timelineItem}>
+                                                    <div className={styles.eventMinuteBadge}>{evt.time}'</div>
                                                     <div className={`${styles.eventSide} ${evt.team === 'home' ? styles.eventLeft : styles.eventRight}`}>
-                                                        <div className={styles.eventIcon} style={{ fontSize: '14px' }}>•</div>
+                                                        <div className={styles.eventIcon}>•</div>
                                                         <div className={styles.eventDetail}>
                                                             <div className={styles.eventPlayer} style={{ fontSize: '12px' }}>{evt.player}</div>
                                                             <div className={styles.eventSubInfo}>{evt.type}</div>
@@ -663,52 +664,82 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             <div className={styles.timelineContainer}>
                                 <div className={styles.panelTitle} style={{ textAlign: 'center', display: 'block' }}>Eventos</div>
 
-                                {eventsData.map((evt, i) => {
-                                    const isHome = evt.team === 'home';
+                                {/* Mobile: Show limited events by default */}
+                                <div className={`${styles.timelineWrapper} ${showAllEvents ? styles.expanded : ''}`}>
+                                    {eventsData.map((evt, i) => {
+                                        const isHome = evt.team === 'home';
 
-                                    // Event Icon Logic - Sport Aware
-                                    let icon = '•';
-                                    const typeLower = evt.type?.toLowerCase() || '';
+                                        // Event Icon Logic - Sport Aware
+                                        let icon = '•';
+                                        const typeLower = evt.type?.toLowerCase() || '';
 
-                                    if (typeLower.includes('goal') || typeLower.includes('try') || typeLower.includes('point')) {
-                                        icon = matchData.sportId === 1 ? '⚽' : '🏉';
-                                    } else if (typeLower.includes('card')) {
-                                        icon = typeLower.includes('yellow') ? '🟨' : '🟥';
-                                    } else if (typeLower.includes('subst')) {
-                                        icon = '🔄';
-                                    } else if (typeLower.includes('var')) {
-                                        icon = '🖥️';
-                                    } else if (typeLower.includes('penalty')) {
-                                        icon = '🎯';
-                                    }
+                                        if (typeLower.includes('goal') || typeLower.includes('try') || typeLower.includes('point')) {
+                                            icon = matchData.sportId === 1 ? '⚽' : '🏉';
+                                        } else if (typeLower.includes('card')) {
+                                            icon = typeLower.includes('yellow') ? '🟨' : '🟥';
+                                        } else if (typeLower.includes('subst')) {
+                                            icon = '🔄';
+                                        } else if (typeLower.includes('var')) {
+                                            icon = '🖥️';
+                                        } else if (typeLower.includes('penalty')) {
+                                            icon = '🎯';
+                                        }
 
-                                    return (
-                                        <div key={i} className={styles.timelineItem}>
-                                            <div className={styles.eventMinuteBadge}>{evt.time}'</div>
+                                        return (
+                                            <div key={i} className={styles.timelineItem}>
+                                                <div className={styles.eventMinuteBadge}>{evt.time}'</div>
 
-                                            <div className={`${styles.eventSide} ${isHome ? styles.eventLeft : styles.eventRight}`}>
-                                                <div className={styles.eventIcon}>{icon}</div>
-                                                <div className={styles.eventDetail}>
-                                                    <div className={styles.eventPlayer}>
-                                                        {evt.playerId ? <Link href={`/jugadores/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}
+                                                <div className={`${styles.eventSide} ${isHome ? styles.eventLeft : styles.eventRight}`}>
+                                                    <div className={styles.eventIcon}>{icon}</div>
+                                                    <div className={styles.eventDetail}>
+                                                        <div className={styles.eventPlayer}>
+                                                            {evt.playerId ? <Link href={`/jugadores/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}
+                                                        </div>
+                                                        {evt.type?.toLowerCase().includes('subst') ? (
+                                                            <div className={styles.eventSubInfo}>
+                                                                <span className={styles.playerIn}>{evt.playerId ? <Link href={`/jugadores/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}</span><br />
+                                                                <span className={styles.playerOut}>{evt.subPlayerId ? <Link href={`/jugadores/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className={styles.eventSubInfo}>
+                                                                {evt.subPlayer && <span className={styles.assistText}>asistencia de {evt.subPlayerId ? <Link href={`/jugadores/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>}
+                                                                {evt.description && <span> ({evt.description})</span>}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {evt.type?.toLowerCase().includes('subst') ? (
-                                                        <div className={styles.eventSubInfo}>
-                                                            <span className={styles.playerIn}>{evt.playerId ? <Link href={`/jugadores/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}</span><br />
-                                                            <span className={styles.playerOut}>{evt.subPlayerId ? <Link href={`/jugadores/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div className={styles.eventSubInfo}>
-                                                            {evt.subPlayer && <span className={styles.assistText}>asistencia de {evt.subPlayerId ? <Link href={`/jugadores/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>}
-                                                            {evt.description && <span> ({evt.description})</span>}
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
+
                                 {eventsData.length === 0 && <p className={styles.placeholderText}>Aún no han ocurrido eventos significativos.</p>}
+
+                                {/* Mobile: Show expand/collapse button only if there are more than 10 events */}
+                                {eventsData.length > 10 && (
+                                    <div className={styles.timelineToggleWrapper}>
+                                        <button
+                                            className={styles.timelineToggleBtn}
+                                            onClick={() => setShowAllEvents(!showAllEvents)}
+                                        >
+                                            {showAllEvents ? (
+                                                <>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M18 15l-6-6-6 6" />
+                                                    </svg>
+                                                    Mostrar menos
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M6 9l6 6 6-6" />
+                                                    </svg>
+                                                    Mostrar todos ({eventsData.length} eventos)
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
