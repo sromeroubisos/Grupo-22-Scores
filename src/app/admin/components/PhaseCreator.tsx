@@ -24,6 +24,7 @@ import {
     Eye,
     Search
 } from 'lucide-react';
+import styles from './PhaseCreator.module.css';
 
 
 
@@ -129,6 +130,15 @@ export default function PhaseCreator({
     const [showTeamSelector, setShowTeamSelector] = useState(false);
     const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>(initialConfig?.selectedTeamIds || []);
     const [teamSearch, setTeamSearch] = useState('');
+
+    // Create Team State
+    const [showCreateTeam, setShowCreateTeam] = useState(false);
+    const [newTeamData, setNewTeamData] = useState({
+        name: '',
+        short: '',
+        color: '#1a73e8',
+        city: ''
+    });
 
     // Group Manual Assignments: Record<string teamId, number groupIndexs>
     const [groupAssignments, setGroupAssignments] = useState<Record<string, number>>(initialConfig?.groupAssignments || {});
@@ -414,7 +424,17 @@ export default function PhaseCreator({
     };
 
     const updateTag = (id: string, field: keyof StandingsTag, value: any) => {
-        setTags(tags.map(t => t.id === id ? { ...t, [field]: value } : t));
+        setTags(tags.map(t => {
+            if (t.id !== id) return t;
+
+            // Handle number fields specially to avoid NaN
+            if (field === 'fromPosition' || field === 'toPosition') {
+                const numValue = parseInt(value);
+                return { ...t, [field]: isNaN(numValue) ? 1 : numValue };
+            }
+
+            return { ...t, [field]: value };
+        }));
     };
 
     const removeTag = (id: string) => {
@@ -455,16 +475,42 @@ export default function PhaseCreator({
         t.short.toLowerCase().includes(teamSearch.toLowerCase())
     );
 
+    const handleCreateTeam = () => {
+        if (!newTeamData.name.trim() || !newTeamData.short.trim()) {
+            alert('Por favor completa el nombre y nombre corto del equipo');
+            return;
+        }
+
+        // Create new team object
+        const newTeam: Team = {
+            id: `team-${Date.now()}`,
+            name: newTeamData.name.trim(),
+            short: newTeamData.short.trim(),
+            color: newTeamData.color
+        };
+
+        // Add to teams list (this would normally be done via API)
+        teams.push(newTeam);
+
+        // Auto-select the newly created team
+        setSelectedTeamIds(prev => [...prev, newTeam.id]);
+
+        // Reset form and close modal
+        setNewTeamData({ name: '', short: '', color: '#1a73e8', city: '' });
+        setShowCreateTeam(false);
+    };
+
     return (
         <div className="phaseCreatorRoot">
 
             {/* Team Selector Modal */}
+            {/* Team Selector Modal */}
             {showTeamSelector && (
-                <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="modal w-full max-w-lg flex flex-col max-h-[85vh] overflow-hidden">
-                        <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
-                            <h3 className="h3">Seleccionar Equipos</h3>
-                            <button onClick={() => setShowTeamSelector(false)} className="p-1 text-[var(--muted)] hover:text-white">
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContainerLarge}>
+                        <div className={styles.modalHeader}>
+                            <h3 className={styles.modalTitle}>Seleccionar Equipos</h3>
+                            <button onClick={() => setShowTeamSelector(false)} className={styles.closeButton}>
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -477,26 +523,26 @@ export default function PhaseCreator({
                                     placeholder="Buscar equipo..."
                                     value={teamSearch}
                                     onChange={(e) => setTeamSearch(e.target.value)}
-                                    className="input pl-10"
+                                    className={styles.input}
                                     style={{ paddingLeft: '40px' }}
                                 />
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                            <div className="teamList">
+                        <div className={styles.modalBodyScrollable}>
+                            <div className={styles.teamList}>
                                 {filteredTeams.map(team => {
                                     const isSelected = selectedTeamIds.includes(team.id);
                                     return (
                                         <div
                                             key={team.id}
                                             onClick={() => toggleTeam(team.id)}
-                                            className={`teamItem ${isSelected ? 'teamItemSelected' : ''}`}
+                                            className={`${styles.teamItem} ${isSelected ? styles.teamItemSelected : ''}`}
                                         >
-                                            <div className="teamCheck">
+                                            <div className={`${styles.teamCheck} ${isSelected ? styles.teamCheckSelected : ''}`}>
                                                 {isSelected && <Check className="w-3 h-3" />}
                                             </div>
-                                            <div className="teamBadge" style={{ backgroundColor: team.color }}>
+                                            <div className={styles.teamBadge} style={{ backgroundColor: team.color }}>
                                                 {team.short}
                                             </div>
                                             <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-[var(--muted)]'}`}>
@@ -508,12 +554,146 @@ export default function PhaseCreator({
                             </div>
                         </div>
 
-                        <div className="p-4 border-t border-[var(--border)] bg-[rgba(255,255,255,0.02)] flex justify-between items-center">
-                            <span className="text-sm text-[var(--muted)]">
-                                {selectedTeamIds.length} seleccionados
-                            </span>
-                            <button onClick={() => setShowTeamSelector(false)} className="btn btnPrimary">
-                                Confirmar
+
+                        <div className={styles.modalFooter}>
+                            <button
+                                onClick={() => setShowCreateTeam(true)}
+                                className={styles.btnSecondary}
+                            >
+                                <Plus className="w-4 h-4" />
+                                Crear Equipo
+                            </button>
+                            <div className={styles.footerActions}>
+                                <span className={styles.footerInfo}>
+                                    {selectedTeamIds.length} seleccionados
+                                </span>
+                                <button onClick={() => setShowTeamSelector(false)} className={styles.btnCreate}>
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* CREATE TEAM MODAL */}
+            {showCreateTeam && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContainer}>
+                        {/* Header */}
+                        <div className={styles.modalHeader}>
+                            <div>
+                                <h3 className={styles.modalTitle}>Crear Nuevo Equipo</h3>
+                                <p className={styles.modalSubtitle}>Configuración básica del equipo</p>
+                            </div>
+                            <button
+                                onClick={() => setShowCreateTeam(false)}
+                                className={styles.closeButton}
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Form Content */}
+                        <div className={styles.modalBody}>
+                            {/* Team Name */}
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>
+                                    Nombre del Equipo
+                                </label>
+                                <div className={styles.inputWrapper}>
+                                    <input
+                                        type="text"
+                                        value={newTeamData.name}
+                                        onChange={(e) => setNewTeamData({ ...newTeamData, name: e.target.value })}
+                                        placeholder="Ej: Club Atlético San Isidro"
+                                        className={styles.input}
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Short Name */}
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>
+                                    Nombre Corto / Sigla
+                                </label>
+                                <div className={styles.inputWrapper}>
+                                    <input
+                                        type="text"
+                                        value={newTeamData.short}
+                                        onChange={(e) => setNewTeamData({ ...newTeamData, short: e.target.value.toUpperCase() })}
+                                        placeholder="Ej: CASI"
+                                        maxLength={5}
+                                        className={styles.input}
+                                        style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                                    />
+                                </div>
+                                <p className={styles.helperText}>
+                                    Máximo 5 caracteres · Se visualizará en los badges
+                                </p>
+                            </div>
+
+                            {/* Team Color */}
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>
+                                    Color del Equipo
+                                </label>
+                                <div className={styles.colorPickerRow}>
+                                    {/* Color Picker Box */}
+                                    <div
+                                        className={styles.colorPreview}
+                                        style={{ backgroundColor: newTeamData.color }}
+                                    >
+                                        <input
+                                            type="color"
+                                            value={newTeamData.color}
+                                            onChange={(e) => setNewTeamData({ ...newTeamData, color: e.target.value })}
+                                            className={styles.colorInputHidden}
+                                        />
+                                    </div>
+
+                                    {/* Hex Input */}
+                                    <input
+                                        type="text"
+                                        value={newTeamData.color}
+                                        onChange={(e) => setNewTeamData({ ...newTeamData, color: e.target.value })}
+                                        placeholder="#1a73e8"
+                                        className={`${styles.input} ${styles.hexInput}`}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Preview */}
+                            <div className={styles.previewArea}>
+                                <span className={styles.previewLabel}>Vista previa:</span>
+                                <div
+                                    className={styles.previewBadge}
+                                    style={{
+                                        backgroundColor: newTeamData.color,
+                                        color: 'white',
+                                        textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+                                    }}
+                                >
+                                    {newTeamData.short || 'XXX'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className={styles.modalFooter}>
+                            <button
+                                onClick={() => setShowCreateTeam(false)}
+                                className={styles.btnCancel}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleCreateTeam}
+                                className={styles.btnCreate}
+                            >
+                                <Plus className="w-4 h-4" />
+                                Crear Equipo
                             </button>
                         </div>
                     </div>

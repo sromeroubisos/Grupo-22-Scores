@@ -1,0 +1,381 @@
+/* PhaseCreator.module.css */
+
+/* --- Modal Base --- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 1rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modalContainer {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(10, 10, 10, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: translateY(0);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalContainerLarge {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(10, 10, 10, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: translateY(0);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 600px;
+    max-height: 85vh;
+}
+
+/* --- Header --- */
+.modalHeader {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.03), transparent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalTitle {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.modalSubtitle {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    margin-top: 0.125rem;
+}
+
+.closeButton {
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    color: var(--color-text-tertiary);
+    transition: all 0.2s;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.closeButton:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- Body --- */
+.modalBody {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.modalBodyScrollable {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+}
+
+.inputWrapper {
+    position: relative;
+}
+
+.input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-lg);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    outline: none;
+    font-family: var(--font-primary);
+}
+
+.input:focus {
+    border-color: var(--color-accent);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.1);
+}
+
+.input::placeholder {
+    color: var(--color-text-tertiary);
+    opacity: 0.7;
+}
+
+.helperText {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    margin-top: 0.375rem;
+}
+
+/* --- Color Picker --- */
+.colorPickerRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.colorPreview {
+    position: relative;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-lg);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.colorPreview:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.colorInputHidden {
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hexInput {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+}
+
+/* --- Preview Badge --- */
+.previewArea {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.previewLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+}
+
+.previewBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 3rem;
+    text-align: center;
+}
+
+/* --- Footer --- */
+.modalFooter {
+    padding: 1.25rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.footerInfo {
+    margin-right: auto;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.footerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btnCancel {
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnCancel:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btnCreate {
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--color-accent);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(var(--color-accent-rgb), 0.3);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btnCreate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(var(--color-accent-rgb), 0.4);
+    filter: brightness(1.1);
+}
+
+.btnCreate:active {
+    transform: translateY(0);
+}
+
+.btnSecondary {
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btnSecondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Team List Specifics --- */
+.teamList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.teamItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.teamItem:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.teamItemSelected {
+    background: rgba(var(--color-accent-rgb), 0.15);
+    border-color: rgba(var(--color-accent-rgb), 0.3);
+}
+
+.teamCheck {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: transparent;
+    transition: all 0.2s;
+}
+
+
+.teamItemSelected .teamCheck,
+.teamCheckSelected {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+}
+
+.teamBadge {
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
