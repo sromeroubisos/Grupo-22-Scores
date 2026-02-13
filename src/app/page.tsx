@@ -403,23 +403,21 @@ export default function HomePage() {
                 </svg>
               </button>
 
-              {isSportMenuOpen && (
-                <div className={styles.sportMenu}>
-                  {activeSports.map(sport => (
-                    <div
-                      key={sport.id}
-                      className={`${styles.sportMenuItem} ${selectedSport.id === sport.id ? styles.sportMenuItemActive : ''}`}
-                      onClick={() => {
-                        setSelectedSport(sport);
-                        setIsSportMenuOpen(false);
-                      }}
-                    >
-                      <span>{sport.icon}</span>
-                      <span>{sport.nameEs}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className={`${styles.sportMenu} ${isSportMenuOpen ? styles.sportMenuOpen : ''}`}>
+                {activeSports.map(sport => (
+                  <div
+                    key={sport.id}
+                    className={`${styles.sportMenuItem} ${selectedSport.id === sport.id ? styles.sportMenuItemActive : ''}`}
+                    onClick={() => {
+                      setSelectedSport(sport);
+                      setIsSportMenuOpen(false);
+                    }}
+                  >
+                    <span>{sport.icon}</span>
+                    <span>{sport.nameEs}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
 
@@ -615,14 +613,7 @@ export default function HomePage() {
           {/* Date Selector */}
           <section className={styles.dateSelector}>
             <div className={styles.dateSelectorInner}>
-              <button
-                className={styles.dateNavBtn}
-                onClick={() => navigateDate('prev')}
-                aria-label="Día anterior"
-              >
-                <ChevronLeft size={20} />
-              </button>
-
+              {/* Desktop/Tablet Scrolling List */}
               <div className={styles.dateList} ref={dateListRef}>
                 {dates.map((date) => (
                   <button
@@ -636,26 +627,41 @@ export default function HomePage() {
                 ))}
               </div>
 
-              <button
-                className={styles.dateNavBtn}
-                onClick={() => navigateDate('next')}
-                aria-label="Día siguiente"
-              >
-                <ChevronRight size={20} />
-              </button>
+              {/* Mobile Arrows Navigation */}
+              <div className={styles.mobileDateNav}>
+                <button
+                  className={styles.mobileNavArrow}
+                  onClick={() => navigateDate('prev')}
+                  disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) <= 0}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                <span className={styles.mobileCurrentDate}>
+                  {selectedDateInfo?.label || selectedDate}
+                </span>
+
+                <button
+                  className={styles.mobileNavArrow}
+                  onClick={() => navigateDate('next')}
+                  disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) >= dates.length - 1}
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
             </div>
           </section>
 
-          {/* Live Banner */}
-          {liveMatchesCount > 0 && (
-            <div className={styles.liveBanner}>
-              <span className={styles.liveDot}></span>
-              <span>{liveMatchesCount} partido{liveMatchesCount > 1 ? 's' : ''} en vivo</span>
-            </div>
-          )}
-
           {/* Matches by League */}
           <div className={styles.matchesContainer}>
+            {/* Live Banner - Moved Inside Container for Consistent Spacing */}
+            {liveMatchesCount > 0 && (
+              <div className={styles.liveBanner}>
+                <span className={styles.liveDot}></span>
+                <span>{liveMatchesCount} partido{liveMatchesCount > 1 ? 's' : ''} en vivo</span>
+              </div>
+            )}
+
             {loading && (
               <div className={styles.noMatches}>
                 <div
@@ -694,58 +700,39 @@ export default function HomePage() {
 
               return (
                 <div key={league.leagueId} className={styles.leagueSection}>
-                  <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}>
-                    <Link href={`/tournaments/${league.leagueId}`} className={styles.leagueHeaderLink}>
-                      <div className={styles.leagueInfo}>
-                        <span className={styles.leagueFlag}>{league.flag}</span>
-                        <div className={styles.leagueMeta}>
-                          <span className={styles.leagueSectionName}>{league.league}</span>
-                          <span className={styles.leagueRound}>{league.round}</span>
-                          <TournamentLeader leagueId={league.leagueId} />
-                        </div>
+                  <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
+                    onClick={() => toggleCompetitionCollapse(league.leagueId)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className={styles.leagueInfo}>
+                      <span className={styles.leagueFlag}>{league.flag}</span>
+                      <div className={styles.leagueMeta}>
+                        <span className={styles.leagueSectionName}>{league.league}</span>
+                        {/* <span className={styles.leagueRound}>{league.round}</span> */}
                       </div>
+                    </div>
 
-                      {isCollapsed && (
-                        <div className={styles.leagueHeaderSummary} style={{ marginLeft: 'auto' }}>
-                          <span>{matchesCount} partidos</span>
-                          {liveCount > 0 && <span className={styles.summaryLive}> {liveCount} en vivo</span>}
-                        </div>
-                      )}
-                    </Link>
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <button
+                        className={styles.leagueFavoriteBtn}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleLeagueFavorite(league.leagueId);
+                        }}
+                        aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                      >
+                        <Star size={18} fill={isFavorite ? "currentColor" : "none"} strokeWidth={isFavorite ? 0 : 2} />
+                      </button>
 
-                    <button
-                      className={styles.leagueFavoriteBtn}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleLeagueFavorite(league.leagueId);
-                      }}
-                      aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-                      title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                    </button>
-
-                    <button
-                      className={styles.leagueHeaderToggle}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleCompetitionCollapse(league.leagueId);
-                      }}
-                      aria-label={isCollapsed ? "Ver partidos" : "Ocultar partidos"}
-                      aria-expanded={!isCollapsed}
-                    >
                       <svg
                         className={styles.chevronHeader}
                         width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                        style={{ transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)' }}
+                        style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}
                       >
                         <path d="M6 9l6 6 6-6" />
                       </svg>
-                    </button>
+                    </div>
                   </div>
 
                   {!isCollapsed && (

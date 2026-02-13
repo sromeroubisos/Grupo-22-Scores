@@ -137,7 +137,7 @@ function normalizeDetails(raw: any) {
     return data;
 }
 
-async function resolveIdsFromTournamentId(tournamentId: string, sportId: string = 'football'): Promise<ResolvedIds> {
+async function resolveIdsFromTournamentId(tournamentId: string, sportId: string = 'rugby'): Promise<ResolvedIds> {
     const offsets = [0, -1, 1, -2, 2, -3, 3, -5, 5, -7, 7];
     let resolved: ResolvedIds = { tournamentId };
 
@@ -209,7 +209,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id') || '';
     let url = searchParams.get('url') || '';
-    const sport = searchParams.get('sport') || searchParams.get('sportId') || 'football';
+    const sport = searchParams.get('sport') || searchParams.get('sportId') || 'rugby';
 
     let tournamentId = searchParams.get('tournament_id') || searchParams.get('tournamentId') || undefined;
     let stageId = searchParams.get('tournament_stage_id') || searchParams.get('tournamentStageId') || searchParams.get('stageId') || undefined;

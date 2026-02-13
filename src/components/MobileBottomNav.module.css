@@ -9,8 +9,8 @@
     align-items: center;
     justify-content: space-around;
     height: 65px;
-    background: #0a0a0a;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
     padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -47,7 +47,7 @@
 }
 
 .navItemActive {
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .navItemActive .navDot {

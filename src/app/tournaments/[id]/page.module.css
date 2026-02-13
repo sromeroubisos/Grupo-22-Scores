@@ -347,18 +347,142 @@
 .matchList {
     display: flex;
     flex-direction: column;
-    gap: 2px;
     background: var(--color-bg-secondary);
     border-radius: 16px;
     overflow: hidden;
+    border: 1px solid var(--color-border);
 }
 
 .matchRow {
-    display: grid;
-    grid-template-columns: 80px 1fr 60px;
-    padding: 16px;
+    padding: 8px 12px;
+    display: flex;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    gap: 12px;
+    border-bottom: 1px solid var(--color-border);
+    min-height: 64px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.matchRow:last-child {
+    border-bottom: none;
+}
+
+.matchRow:hover {
+    background-color: var(--color-bg-tertiary);
+}
+
+.matchTime {
+    width: 45px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+}
+
+.matchTimeText {
+    font-variant-numeric: tabular-nums;
+}
+
+.matchLive {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-error);
+    font-weight: 700;
+}
+
+.matchLiveDot {
+    width: 6px;
+    height: 6px;
+    background-color: currentColor;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.matchFinished {
+    color: var(--color-text-tertiary);
+    font-weight: 700;
+}
+
+.matchTeams {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+    /* Important for text-overflow to work */
+}
+
+.matchTeam {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 24px;
+}
+
+.teamLogo {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.logoImgSquare {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.teamName {
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.matchTeam.winner .teamName {
+    font-weight: 600;
+}
+
+.teamScore {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    width: 20px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.matchTeam.winner .teamScore {
+    color: var(--color-accent);
 }
 
 /* Sidebar */

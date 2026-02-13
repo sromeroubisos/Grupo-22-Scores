@@ -1,148 +1,204 @@
 /* Main Page Layout */
 .page {
     min-height: 100vh;
-    padding-top: 60px;
+    padding-top: 0;
+    /* Removed redundant header height padding */
     display: flex;
     flex-direction: column;
-    padding-bottom: 80px;
-    /* Space for bottom nav */
+    padding-bottom: 70px;
+    /* Reduced bottom nav space */
 }
 
+/* Mobile Sport Selector - Visible on Mobile by default */
 .mobileSportSelector {
+    display: none;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 0 16px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: sticky;
+    top: var(--h-header, 52px);
+    z-index: 101;
+    margin-top: 0;
+}
+
+.mobileSportSelector::-webkit-scrollbar {
     display: none;
 }
 
-/* Date Selector */
+.sportChip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 6px 14px;
+    background: var(--color-bg-tertiary);
+    /* Chip background */
+    border: 1px solid transparent;
+    border-radius: 99px;
+    /* Pill shape */
+    white-space: nowrap;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 36px;
+    /* Explicit height */
+}
 
+.sportChip.active {
+    background: rgba(var(--color-accent-rgb), 0.15);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 0 8px rgba(var(--color-accent-rgb), 0.15);
+    /* Green glow */
+}
+
+.sportIcon {
+    font-size: 1rem;
+}
+
+/* Ocultar el texto del deporte en los chips, mostrar solo icono */
+.sportName {
+    display: none !important;
+}
+
+/* Date Selector - Pill Style */
+.dateSelector {
+    background: var(--color-bg-primary);
+    position: sticky;
+    top: var(--h-header, 52px);
+    z-index: 100;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+    margin-top: 12px;
+}
 
 .dateSelectorInner {
     display: flex;
     align-items: center;
     width: 100%;
     margin: 0 auto;
-    padding: 0;
-    max-width: 100%;
-    position: relative;
-    background: transparent;
-    border: none;
+    padding: 0 8px;
 }
 
 .dateNavBtn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-tertiary);
     cursor: pointer;
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
-    margin: 0 4px;
-}
-
-.dateNavBtn:hover {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
 }
 
 .dateList {
-    display: flex;
+    display: none;
     align-items: center;
-    gap: 20px;
+    gap: 8px;
+    /* Closer gaps */
     flex: 1;
     overflow-x: auto;
     scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 12px 0;
+    padding: 0 4px;
     scroll-behavior: smooth;
-    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-}
-
-.dateList::-webkit-scrollbar {
-    display: none;
 }
 
 .dateItem {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 80px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    /* Pill */
+    min-width: auto;
+    /* Allow shrink */
     background: transparent;
     border: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
-    white-space: nowrap;
-    scroll-snap-align: center;
 }
 
 .dateItem:hover {
     background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-}
-
-.dateItem.today {
-    font-weight: 600;
 }
 
 .dateItem.active {
-    color: var(--color-accent);
+    background: var(--color-text-primary);
+    /* White pill or Accent */
+    color: var(--color-bg-primary);
+    /* Inverted text */
     font-weight: 700;
 }
 
+/* Remove old underline style override */
+/* Remove old underline style override */
 .dateItem.active::after {
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    left: 25%;
-    right: 25%;
-    height: 3px;
-    background: var(--color-accent);
-    border-radius: 999px;
-    box-shadow: 0 0 10px var(--color-accent-glow);
+    display: none;
 }
 
-.dateItem.active::after {
-    content: "";
-    position: absolute;
-    bottom: -8px;
-    left: 20%;
-    right: 20%;
-    height: 3px;
-    background: var(--color-accent);
-    border-radius: 2px;
+/* Mobile Date Navigation (Hidden on Desktop) */
+.mobileDateNav {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+.mobileNavArrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    /* Slightly rounded square */
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobileNavArrow:hover:not(:disabled) {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.mobileNavArrow:disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.mobileCurrentDate {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-transform: capitalize;
+    letter-spacing: 0.02em;
 }
 
 .dateLabel {
+    font-size: 0.85rem;
+    white-space: nowrap;
     text-transform: capitalize;
 }
 
 .calendarBtn {
-    display: flex;
-    align-items: center;
-
-    width: 36px;
-    height: 36px;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
-}
-
-.calendarBtn:hover {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: white;
+    /* Hide if not needed or style same as nav */
+    display: none;
 }
 
 /* Main Layout - 3 Columns (Left Sidebar + Main + Right Sidebar) */
@@ -455,6 +511,10 @@
     color: #ff4d4d;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    grid-column: 1 / -1;
+    /* Span full width in grid container */
+    width: fit-content;
+    /* Don't stretch */
 }
 
 .liveDot {
@@ -489,317 +549,179 @@
 
 /* League Section */
 .leagueSection {
-    background: #111111;
+    background: var(--color-bg-secondary);
     border-radius: 12px;
     margin-bottom: 24px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
 }
 
+/* League Section Header - Compact */
 .leagueSectionHeader {
-    padding: 14px 16px;
+    padding: 8px 12px;
+    /* reduced padding */
     background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--color-border);
+    /* subtler border */
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-.leagueSectionHeader:hover {
-    background: var(--color-bg-hover);
-}
-
-.leagueSectionHeader svg {
-    color: var(--color-text-muted);
-    margin-bottom: var(--spacing-sm);
-    /* Clickable */
+    height: 48px;
+    /* Fixed height goal */
 }
 
 .leagueHeaderLink {
     text-decoration: none;
     color: inherit;
     display: flex;
-    /* flex-1 */
     flex: 1;
     align-items: center;
-    justify-content: flex-start;
     min-width: 0;
-    padding-right: var(--spacing-sm);
-    /* Ensure summary is pushed or handled properly */
-}
-
-.leagueFavoriteBtn {
-    background: transparent;
-    border: none;
-    padding: var(--spacing-xs);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-
-    border-radius: var(--radius-full);
-    color: var(--color-text-tertiary);
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
-    margin-right: var(--spacing-xs);
-}
-
-.leagueFavoriteBtn:hover {
-    background-color: var(--color-bg-tertiary);
-    color: var(--color-accent);
-    transform: scale(1.1);
-}
-
-.leagueFavoriteBtn svg {
-    transition: fill var(--transition-fast);
-}
-
-.leagueHeaderToggle {
-    background: transparent;
-    border: none;
-    padding: var(--spacing-xs);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-
-    border-radius: var(--radius-full);
-    color: var(--color-text-tertiary);
-    transition: background-color var(--transition-fast);
-    flex-shrink: 0;
-}
-
-.leagueHeaderToggle:hover {
-    background-color: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-}
-
-.leagueSectionHeader:hover {
-    background: var(--color-bg-secondary);
-    /* Hint interactive */
-    border-radius: var(--radius-sm);
 }
 
 .leagueInfo {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: 8px;
+    overflow: hidden;
 }
 
 .leagueFlag {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
+    /* slightly smaller */
+    line-height: 1;
 }
 
 .leagueMeta {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Vertical separator "•" can be added in JS or pseudo element if needed */
+
 .leagueSectionName {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 0.9rem;
+    font-weight: 600;
     color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .leagueRound {
-    font-size: 0.8125rem;
+    font-size: 0.8rem;
     color: var(--color-text-tertiary);
-    font-weight: 500;
 }
 
 .leagueLeader {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    margin-top: 4px;
+    display: none;
+    /* Hide leader on mobile if too crowded, or refine */
 }
 
-.leaderLabel {
-    color: var(--color-accent);
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.65rem;
-    letter-spacing: 0.05em;
-}
-
-.leaderName {
-    font-weight: 600;
-    color: var(--color-text-secondary);
-}
-
-.leaderPoints {
-    background: rgba(255, 107, 0, 0.1);
-    color: var(--color-accent);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 0.7rem;
-}
-
-
-
-
-
-
-.leagueHeaderSummary {
-    font-size: 0.8125rem;
-    color: var(--color-text-tertiary);
-    font-weight: 500;
-    margin-right: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.summaryLive {
-    color: var(--color-error);
-    font-weight: 600;
-}
-
-.chevronHeader {
-    transition: transform 0.2s ease;
-    color: var(--color-text-tertiary);
-}
-
-.leagueSectionHeader.collapsed .chevronHeader {
-    transform: rotate(-90deg);
-}
-
-/* Matches List */
-.matchesList {
-    display: flex;
-    flex-direction: column;
-}
-
+/* Match Row - FotMob Style (Time | Teams Stack) */
 .matchRow {
-    padding: 12px 16px;
+    padding: 8px 12px;
+    /* reduced padding */
     display: flex;
     align-items: center;
+    /* Center vertically */
     gap: 12px;
-    transition: background 0.2s;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.matchRow:hover {
-    background: #161616;
-}
-
-.matchRow:last-child {
-    border-bottom: none;
-}
-
-.matchRowLive {
-    background: rgba(239, 68, 68, 0.05);
-    /* Subtle red tint */
-    border-left: 3px solid var(--color-error);
-    padding-left: calc(var(--spacing-lg) - 3px);
-    /* Adjust padding for border */
-}
-
-.matchRow:last-child {
-    border-bottom: none;
-}
-
-.matchRow:hover {
-    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--color-border);
+    min-height: 64px;
+    /* Target row height */
 }
 
 .matchTime {
-    min-width: 70px;
-    /* Increased from width: 50px to prevent wrapping */
+    width: 45px;
+    /* Fixed width */
     text-align: center;
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 500;
     color: var(--color-text-secondary);
     flex-shrink: 0;
-    white-space: nowrap;
-    /* Prevent wrapping */
     display: flex;
     flex-direction: column;
-    /* Ensure vertical centering/stacking if needed */
+    justify-content: center;
     align-items: center;
-
+    gap: 2px;
 }
 
-.matchLive {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    /* Increased gap */
-    color: var(--color-error);
-    font-size: 0.75rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.matchLiveDot {
-    width: 6px;
-    height: 6px;
-    background: var(--color-error);
-    border-radius: 50%;
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-.matchFinished {
-    color: var(--color-text-muted);
-    font-size: 0.75rem;
+.matchTimeText {
+    font-variant-numeric: tabular-nums;
 }
 
 .matchTeams {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    /* Increased from 4px for better separation */
+    gap: 4px;
+    /* space between rows */
     flex: 1;
-
-    /* Center vertically relative to time */
+    justify-content: center;
 }
 
 .matchTeam {
     display: flex;
     align-items: center;
-    gap: 12px;
-    /* Increased from var(--spacing-sm) which might be small */
+    justify-content: space-between;
+    /* Name left, Score right */
+    gap: 8px;
+    height: 24px;
+    /* Fixed height per team row */
 }
 
 .teamLogo {
-    font-size: 1.25rem;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
-
-    text-align: center;
+    justify-content: center;
     flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
-}
-
-.teamLogoRound {
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .logoImgSquare {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     object-fit: contain;
 }
 
-.logoImgRound {
-    width: 24px;
-    height: 24px;
-    object-fit: cover;
-    border-radius: 50%;
+.teamName {
+    font-size: 0.95rem;
+    /* ~15px */
+    color: var(--color-text-primary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
 }
 
-.logoFallback {
-    display: flex;
-    align-items: center;
+.winner .teamName {
+    font-weight: 600;
+    /* Bold winner */
+}
 
-    width: 100%;
-    height: 100%;
+.teamScore {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    width: 20px;
+    /* alignments */
+    text-align: right;
+}
+
+.winner .teamScore {
+    color: var(--color-accent);
+    /* Highlight score */
+}
+
+/* Live specific */
+.matchLive {
+    color: var(--color-error);
+    font-weight: 700;
 }
 
 .teamName {
@@ -835,7 +757,7 @@
 .sidebarSectionTitle {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-text-tertiary);
     margin-bottom: 16px;
     text-transform: capitalize;
     display: flex;
@@ -1041,6 +963,21 @@
     padding: 6px;
     z-index: 50;
     box-shadow: var(--shadow-card);
+
+    /* Animation Properties */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.96);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top center;
+}
+
+.sportMenu.sportMenuOpen {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
 }
 
 .sportMenuItem {
@@ -1087,6 +1024,13 @@
     min-height: calc(100vh - 80px);
 }
 
+@media (max-width: 768px) {
+    .mainLayout {
+        min-height: auto;
+        gap: 0;
+    }
+}
+
 .mainContent {
     display: flex;
     flex-direction: column;
@@ -1101,6 +1045,8 @@
     gap: 24px;
     width: 100%;
     align-items: start;
+    margin-top: 0;
+    /* Separación debajo del selector de días */
 }
 
 .sidebarLeft,
@@ -1141,6 +1087,10 @@
         padding: 0 20px;
     }
 
+    .mainContent {
+        gap: 0;
+    }
+
     .sidebarLeft {
         display: none;
     }
@@ -1149,9 +1099,17 @@
         display: flex;
         gap: 12px;
         overflow-x: auto;
-        padding: 16px 4px;
-        margin-bottom: 8px;
+        padding: 4px 12px;
+        margin: 0;
         scrollbar-width: none;
+        flex-wrap: nowrap;
+        height: auto;
+        position: sticky;
+        top: var(--h-header, 52px);
+        z-index: 101;
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
 
     .mobileSportSelector::-webkit-scrollbar {
@@ -1162,12 +1120,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         gap: 6px;
         background: var(--color-bg-secondary);
         border: 1px solid var(--color-border);
         border-radius: 12px;
         padding: 10px;
-        min-width: 70px;
+        min-width: 72px;
+        /* Bloques un poco más anchos */
+        text-align: center;
         cursor: pointer;
         transition: all 0.2s ease;
         color: var(--color-text-tertiary);
@@ -1209,13 +1170,47 @@
 
     .dateSelector {
         position: sticky;
-        top: 60px;
+        top: calc(var(--h-header, 52px) + 52px);
+        /* Adjusted top to match tighter sport selector */
         z-index: 100;
-        background: rgba(10, 10, 10, 0.8);
+        background: var(--color-bg-primary);
+        /* Use solid bg-primary for best results */
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        margin-bottom: 20px;
+        border-bottom: 1px solid var(--color-border);
+        margin-bottom: 0;
+    }
+}
+
+/* Specific Mobile Spacing Adjustments (≤768px) */
+@media (max-width: 768px) {
+    .mobileSportSelector {
+        margin-top: 0;
+        /* Sin separación extra: más pegado al header */
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .dateSelector {
+        margin-top: 14px;
+        /* mt-4 (~14-16px) separation from sports */
+        margin-bottom: 32px;
+        /* mb-8 (32px) large separation */
+    }
+
+    /* Switch to Arrow Navigation on Mobile */
+    .dateList {
+        display: none;
+    }
+
+    .mobileDateNav {
+        display: flex;
+    }
+
+    .matchesContainer {
+        margin-top: 0;
+        padding-top: 48px;
+        /* Force distinct visual gap */
     }
 }
 
@@ -1229,11 +1224,11 @@
     }
 
     .leagueSection {
-        background: #111111;
+        background: var(--color-bg-secondary);
         border-radius: 12px;
         margin-bottom: 24px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--color-border);
     }
 }
 

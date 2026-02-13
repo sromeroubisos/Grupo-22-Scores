@@ -14,7 +14,9 @@ const SportContext = createContext<SportContextType | undefined>(undefined);
 
 export function SportProvider({ children }: { children: ReactNode }) {
     const activeSports = getActiveSports();
-    const [selectedSport, setSelectedSport] = useState<Sport>(activeSports[0]);
+    const [selectedSport, setSelectedSport] = useState<Sport>(
+        activeSports.find(s => s.id === 'rugby') || activeSports[0]
+    );
 
     const selectSportById = (id: SportId) => {
         const sport = getSportById(id);

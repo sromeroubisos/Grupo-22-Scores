@@ -117,7 +117,7 @@ const CountryAccordion = React.memo(({
 export default function TorneosPage() {
     const { isLeagueFavorite } = useFavorites();
     const [search, setSearch] = useState('');
-    const [selectedSport, setSelectedSport] = useState<SportId>('football');
+    const [selectedSport, setSelectedSport] = useState<SportId>('rugby');
     const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
 
     const activeSports = getActiveSports();

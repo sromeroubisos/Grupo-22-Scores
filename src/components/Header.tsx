@@ -111,7 +111,6 @@ export default function Header() {
     return (
         <header className="g22-header">
             <div className="g22-header-inner">
-
                 {/* LOGO: Left Zone */}
                 <Link href="/" className="g22-logo">
                     G22<span>Scores</span>
@@ -122,6 +121,13 @@ export default function Header() {
 
                 {/* USER + THEME: Right Zone */}
                 <div className="g22-header-actions">
+                    <button className="g22-mobile-search-btn" aria-label="Buscar" style={{ background: 'transparent', border: 'none', padding: '8px', cursor: 'pointer', color: 'inherit', display: 'flex' }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+
                     <ThemeToggle />
                     <div className="g22-user-wrapper" ref={menuRef}>
                         <button
@@ -196,4 +202,3 @@ export default function Header() {
         </header >
     );
 }
-

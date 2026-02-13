@@ -159,14 +159,14 @@ export async function GET(request: Request) {
 
                 // Parallel fetch if today, otherwise just list
                 let [externalMatches, liveMatches] = await Promise.all([
-                    getFlashScoreMatches(localDate, sport || 'football', {
+                    getFlashScoreMatches(localDate, sport || 'rugby', {
                         timeZone,
                         targetDateKey: date || undefined
                     }).catch(e => {
                         console.error('getFlashScoreMatches failed:', e);
                         return [];
                     }),
-                    isToday ? getFlashScoreLiveMatches(sport || 'football').catch(e => {
+                    isToday ? getFlashScoreLiveMatches(sport || 'rugby').catch(e => {
                         console.error('getFlashScoreLiveMatches failed:', e);
                         return [];
                     }) : Promise.resolve([])
@@ -232,7 +232,7 @@ export async function GET(request: Request) {
                         tournament: {
                             id: m.tournamentId,
                             name: (m as any).leagueName || 'Liga (EXT)',
-                            sport: (sport || 'football') as any,
+                            sport: (sport || 'rugby') as any,
                             status: 'published' as const
                         },
                         liveEnabled: false
@@ -242,7 +242,7 @@ export async function GET(request: Request) {
                 enrichedMatches = [...enrichedMatches, ...enrichedExternalMatches];
 
                 if (externalMatches && externalMatches.length > 0) {
-                    persistFromExternalMatches(externalMatches, sport || 'football');
+                    persistFromExternalMatches(externalMatches, sport || 'rugby');
                 }
             } catch (e) {
                 console.error('External section processing failed:', e);

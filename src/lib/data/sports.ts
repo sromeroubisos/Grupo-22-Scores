@@ -7,7 +7,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Fútbol',
         icon: '⚽',
         isActive: true,
-        priority: 1,
+        priority: 10,
     },
     'tennis': {
         id: 'tennis',
@@ -65,7 +65,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Rugby',
         icon: '🏉',
         isActive: true,
-        priority: 8,
+        priority: 1,
     },
     'american-football': {
         id: 'american-football',

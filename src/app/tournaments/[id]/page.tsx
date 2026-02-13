@@ -210,6 +210,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
         // Handle various timestamp formats
         const timestamp = match.timestamp || match.start_time || match.time;
         const date = timestamp ? new Date(timestamp * 1000) : new Date();
+        const timeStr = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
 
         // Handle various score formats
         const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score ?? '-';
@@ -223,45 +224,50 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
         const awayLogo = getTeamLogo(match.away_team) || match.away_team_logo || match.away_team_logo_path || '';
 
         // Determine winner
-        let homeClass = '';
-        let awayClass = '';
-        if (typeof scoreHome === 'number' && typeof scoreAway === 'number') {
-            if (scoreHome > scoreAway) homeClass = styles.winnerName;
-            if (scoreAway > scoreHome) awayClass = styles.winnerName;
-        }
+        const homeWon = typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreHome > scoreAway;
+        const awayWon = typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreAway > scoreHome;
+
+        const isLive = match.status === 'live' || match.status === 'in_play';
+        const isFinished = match.status === 'finished' || match.status === 'ft' || isResult;
 
         return (
-            <Link href={`/partidos/${match.event_key || match.match_id}`} key={match.event_key || match.match_id} className={styles.matchItem}>
+            <Link
+                href={`/partidos/${match.event_key || match.match_id}`}
+                key={match.event_key || match.match_id}
+                className={styles.matchRow}
+            >
                 <div className={styles.matchTime}>
-                    <span className={styles.matchDateStr}>{date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', weekday: 'short' })}</span>
-                    <span className={styles.matchTimeStr}>{date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    {isLive ? (
+                        <span className={styles.matchLive}>
+                            <span className={styles.matchLiveDot}></span>
+                            {match.minute || 'Live'}
+                        </span>
+                    ) : isFinished ? (
+                        <span className={styles.matchFinished}>FT</span>
+                    ) : (
+                        <span className={styles.matchTimeText}>{timeStr}</span>
+                    )}
                 </div>
+
                 <div className={styles.matchTeams}>
-                    <div className={styles.teamRow}>
-                        <div className={styles.teamInfo}>
+                    <div className={`${styles.matchTeam} ${homeWon ? styles.winner : ''}`}>
+                        <span className={styles.teamLogo}>
                             {homeLogo ? (
-                                <img src={homeLogo} alt={homeName} className={styles.teamLogoSmall} />
-                            ) : (
-                                <div className={styles.teamLogoPlaceholder} />
-                            )}
-                            <span className={homeClass}>{homeName}</span>
-                        </div>
-                        <span className={styles.score}>{scoreHome}</span>
+                                <img src={homeLogo} alt={homeName} className={styles.logoImgSquare} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                            ) : null}
+                        </span>
+                        <span className={styles.teamName}>{homeName}</span>
+                        <span className={styles.teamScore}>{scoreHome}</span>
                     </div>
-                    <div className={styles.teamRow}>
-                        <div className={styles.teamInfo}>
+                    <div className={`${styles.matchTeam} ${awayWon ? styles.winner : ''}`}>
+                        <span className={styles.teamLogo}>
                             {awayLogo ? (
-                                <img src={awayLogo} alt={awayName} className={styles.teamLogoSmall} />
-                            ) : (
-                                <div className={styles.teamLogoPlaceholder} />
-                            )}
-                            <span className={awayClass}>{awayName}</span>
-                        </div>
-                        <span className={styles.score}>{scoreAway}</span>
+                                <img src={awayLogo} alt={awayName} className={styles.logoImgSquare} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                            ) : null}
+                        </span>
+                        <span className={styles.teamName}>{awayName}</span>
+                        <span className={styles.teamScore}>{scoreAway}</span>
                     </div>
-                </div>
-                <div className={styles.matchMeta}>
-                    <ChevronRight size={16} />
                 </div>
             </Link>
         );

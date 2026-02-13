@@ -20,11 +20,14 @@ function isActive(pathname: string | null, href: string) {
     return pathname.startsWith(href);
 }
 
-function NavIcon({ name }: { name: string }) {
+function NavIcon({ name, active }: { name: string; active?: boolean }) {
+    const strokeWidth = active ? 3 : 2;
+    const fill = active ? "currentColor" : "none";
+
     switch (name) {
         case 'matches':
             return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}>
                     <path d="M3 6h18" />
                     <path d="M6 10h12" />
                     <path d="M8 14h8" />
@@ -33,7 +36,7 @@ function NavIcon({ name }: { name: string }) {
             );
         case 'news':
             return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
                     <path d="M4 7h12" />
                     <path d="M4 11h16" />
                     <path d="M4 15h10" />
@@ -42,7 +45,7 @@ function NavIcon({ name }: { name: string }) {
             );
         case 'trophy':
             return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
                     <path d="M8 4h8v3a4 4 0 0 1-8 0V4z" />
                     <path d="M6 4h-2a2 2 0 0 0-2 2v1a5 5 0 0 0 5 5" />
                     <path d="M18 4h2a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5" />
@@ -52,13 +55,13 @@ function NavIcon({ name }: { name: string }) {
             );
         case 'star':
             return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
                     <path d="M12 3l3.1 6.3 7 1-5 4.9 1.2 6.9L12 18l-6.3 3.1 1.2-6.9-5-4.9 7-1L12 3z" />
                 </svg>
             );
         case 'search':
             return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}>
                     <circle cx="11" cy="11" r="7" />
                     <path d="M20 20l-3.5-3.5" />
                 </svg>
@@ -86,7 +89,7 @@ export default function MobileBottomNav() {
                             href={item.href}
                             className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
                         >
-                            <NavIcon name={item.icon} />
+                            <NavIcon name={item.icon} active={active} />
                             <span>{item.label}</span>
                             <span className={styles.navDot} />
                         </Link>
