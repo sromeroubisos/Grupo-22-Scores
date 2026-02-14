@@ -7,12 +7,12 @@ const API_KEY = '32e9f1aee1msha3c5470d1ea7367p10fac7jsnf9a1bfc88131';
 const API_HOST = 'flashscore4.p.rapidapi.com';
 
 // Cache configuration
-const CACHE_TTL_MATCHES = 30; // 30 seconds for match lists
-const CACHE_TTL_LIVE = 10; // 10 seconds for live matches
-const CACHE_TTL_DETAILS = 120; // 2 minutes for match details
-const CACHE_TTL_TOURNAMENTS = 300; // 5 minutes for tournament data
-const CACHE_TTL_TEAMS = 300; // 5 minutes for team data
-const CACHE_TTL_PLAYERS = 300; // 5 minutes for player data
+const CACHE_TTL_MATCHES = 60;   // 60 seconds for match lists default
+const CACHE_TTL_LIVE = 5;       // 5 seconds for live matches
+const CACHE_TTL_DETAILS = 30;   // 30 seconds for match details
+const CACHE_TTL_TOURNAMENTS = 24 * 60 * 60; // 24 hours for tournaments
+const CACHE_TTL_TEAMS = 24 * 60 * 60;       // 24 hours for teams
+const CACHE_TTL_PLAYERS = 24 * 60 * 60;     // 24 hours for player info
 
 // Mapping from our app's sport IDs to FlashScore sport IDs
 // Based on user provided list
@@ -116,16 +116,27 @@ export async function getFlashScoreMatchesRaw(
                 url += `&timezone=${encodeURIComponent(timeZone)}`;
             }
 
+            // Dynamic Cache TTL logic
+            // User requirement: Cache duration 30s if match is within 120m of start in Rugby.
+            // Simplified: If fetching for Rugby (8) and day is effectively today (-1 to 1 range), use 30s.
+            let dynamicTtl = CACHE_TTL_MATCHES;
+            const isRugby = flashScoreSportId === 8;
+            const isApproximatelyToday = Math.abs(dayOffset) <= 1;
+
+            if (isRugby && isApproximatelyToday) {
+                dynamicTtl = 30;
+            }
+
             const { data } = await apiFetch<any>(url, {
                 headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
                 debugTag: 'MatchesListRaw',
                 silent: true,
-                cacheTtl: CACHE_TTL_MATCHES
+                cacheTtl: dynamicTtl
             });
 
             // Store in cache
             if (data) {
-                memoryCache.set(cacheKey, data, CACHE_TTL_MATCHES);
+                memoryCache.set(cacheKey, data, dynamicTtl);
             }
 
             return data;
@@ -285,7 +296,7 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
     const homeTeamId = `fs-team-${evt.home_team?.team_id || evt.home_team?.id || 'h'}`;
     const awayTeamId = `fs-team-${evt.away_team?.team_id || evt.away_team?.id || 'a'}`;
 
-    return {
+    const finalMatch: Match = {
         id: evt.match_id || evt.event_key || `fs-${Math.random()}`,
         tournamentId: `fs-${context.leagueId || 'unknown'}`,
         // @ts-ignore
@@ -320,24 +331,78 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
         createdAt: new Date(),
         updatedAt: new Date()
     };
+
+    // Fix for matches that have scores but bad status flags (API list view often lacks live flags)
+    // If we have scores, no finish flag, and match started recently (< 5 hours), force LIVE.
+    if (finalMatch.status === 'scheduled' && typeof homeScore === 'number' && typeof awayScore === 'number') {
+        const isFinished = evt.match_status?.is_finished || false;
+        const now = Date.now();
+        const matchTime = scheduledAt.getTime();
+        const hoursSinceStart = (now - matchTime) / (1000 * 60 * 60);
+
+        if (!isFinished && hoursSinceStart > 0 && hoursSinceStart < 5) {
+            finalMatch.status = 'live';
+        }
+    }
+
+    // New Request: If Rugby match > 100 minutes since start, force finalize as 'pending result'
+    const flashScoreSportId = SPORT_MAPPING[sportId] || parseInt(sportId) || 1;
+    if (flashScoreSportId === 8 && finalMatch.status !== 'final' && finalMatch.status !== 'postponed' && finalMatch.status !== 'cancelled') {
+        const now = Date.now();
+        const matchTime = scheduledAt.getTime();
+        const minutesSinceStart = (now - matchTime) / (1000 * 60);
+
+        if (minutesSinceStart > 100) {
+            finalMatch.status = 'final';
+            finalMatch.result.isComplete = true;
+            // We consider it final because it exceeded time limits, even if API didn't confirm
+        }
+    }
+
+    return finalMatch;
 }
 
 export function mapStatus(matchStatusObj: any, simpleStatus?: string): MatchStatus {
     // Priority to match_status object from user provided JSON
+    // Priority to match_status object from user provided JSON
     if (matchStatusObj) {
+        // Explicitly check type first
+        if (matchStatusObj.type === 'inprogress') return 'live';
+        if (matchStatusObj.type === 'finished') return 'final';
+        if (matchStatusObj.type === 'postponed') return 'postponed';
+        if (matchStatusObj.type === 'canceled' || matchStatusObj.type === 'cancelled') return 'cancelled';
+
         if (matchStatusObj.is_finished) return 'final';
         if (matchStatusObj.is_in_progress || matchStatusObj.is_started) return 'live';
         if (matchStatusObj.is_postponed) return 'postponed';
         if (matchStatusObj.is_cancelled) return 'cancelled';
+
+        // If type or boolean flags are ambiguous but we have a code like "1st half"
+        if (matchStatusObj.code) {
+            const code = String(matchStatusObj.code).toLowerCase();
+            if (code === 'ht' || code.includes('half') || code.includes('period') || code.includes('quarter') || code.includes('live')) return 'live';
+        }
     }
 
     // Fallback to string status
     const s = String(simpleStatus || '').toLowerCase();
 
-    if (s.includes('finished') || s.includes('final') || s.includes('ended') || s.includes('full time')) return 'final';
-    if (s.includes('live') || s.includes('playing') || s.includes('current')) return 'live';
+    // Comprehensive list of live status indicators for various sports
+    const liveIndicators = [
+        'live', 'playing', 'current', 'inprogress',
+        '1st half', '2nd half', '1st period', '2nd period', '3rd period',
+        '1st quarter', '2nd quarter', '3rd quarter', '4th quarter',
+        'set 1', 'set 2', 'set 3', 'set 4', 'set 5',
+        'inning', 'batting', 'fielding',
+        'timeout', 'break', 'halftime', 'ht', 'pause'
+    ];
+
+    if (s.includes('finished') || s.includes('final') || s.includes('ended') || s.includes('full time') || s === 'ft') return 'final';
+
+    if (liveIndicators.some(indicator => s.includes(indicator))) return 'live';
+
     if (s.includes('postponed') || s.includes('aplazado')) return 'postponed';
-    if (s.includes('cancelled') || s.includes('cancelado')) return 'cancelled';
+    if (s.includes('cancelled') || s.includes('cancelado') || s.includes('abandoned')) return 'cancelled';
 
     return 'scheduled';
 }

@@ -9,8 +9,8 @@ interface MatchesStoreResult {
   liveCount: number;
 }
 
-const STALE_TTL = 2 * 60 * 1000;    // 2 minutes · background refresh
-const LIVE_POLL_INTERVAL = 30_000;   // 30 seconds
+const STALE_TTL = 60 * 1000;    // 1 minute · background refresh
+const LIVE_POLL_INTERVAL = 10_000;   // 10 seconds
 const PREFETCH_BATCH_SIZE = 3;
 
 // Module-level cache shared across hook instances
