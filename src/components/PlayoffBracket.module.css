@@ -1,0 +1,221 @@
+/* Obsidian Style Playoff Bracket */
+.container {
+    padding: 0;
+    margin-top: 1rem;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-text-tertiary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.title::after {
+    content: "BRACKET";
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    background: linear-gradient(135deg, var(--color-accent), #00cc82);
+    color: #000;
+    padding: 4px 10px;
+    border-radius: 99px;
+}
+
+.bracketScroll {
+    overflow-x: auto;
+    padding-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+.bracketScroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.bracketScroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 99px;
+}
+
+.bracketScroll::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-accent-rgb), 0.28);
+    border-radius: 99px;
+}
+
+.bracketGrid {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    min-width: max-content;
+}
+
+.roundColumn {
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    position: relative;
+}
+
+.roundColumn:not(:last-child) .matchesList::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: repeating-linear-gradient(to bottom,
+            var(--color-border) 0px,
+            var(--color-border) 4px,
+            transparent 4px,
+            transparent 8px);
+}
+
+.roundTitle {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-accent);
+    padding: 10px 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    background: var(--color-bg-primary);
+    /* Fallback */
+    z-index: 2;
+}
+
+.matchesList {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 12px;
+    flex: 1;
+    padding: 0 8px;
+}
+
+.matchCard {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    position: relative;
+    box-shadow: none;
+}
+
+.matchCard:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.matchDate {
+    padding: 6px 12px;
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-align: right;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.matchStatus {
+    font-weight: 800;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.participant {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    gap: 8px;
+    transition: background 0.15s ease;
+    border-radius: 0;
+}
+
+.participant:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.winner {
+    background: rgba(var(--color-accent-rgb), 0.06);
+}
+
+.winner .name {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.winner .score {
+    color: var(--color-accent);
+}
+
+.participantInfo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.logo {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 3px;
+}
+
+.name {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-primary);
+}
+
+.score {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 800;
+    min-width: 20px;
+    text-align: right;
+    color: var(--color-text-tertiary);
+}
+
+.emptyState {
+    padding: 3rem;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+}
+
+@media (max-width: 768px) {
+    .roundColumn {
+        min-width: 180px;
+    }
+
+    .name {
+        font-size: 11px;
+    }
+
+    .roundTitle {
+        font-size: 10px;
+    }
+}

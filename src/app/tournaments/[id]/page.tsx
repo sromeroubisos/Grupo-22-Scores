@@ -10,6 +10,7 @@ import { ArrowLeft, Calendar, Trophy, Users, MapPin, ChevronRight, Share2, Star,
 import ExportImage from '@/components/ExportImage';
 import { useFavorites } from '@/hooks/useFavorites';
 import { setCachedLogo } from '@/lib/utils/logoCache';
+import PlayoffBracket from '@/components/PlayoffBracket';
 
 // Tabs configuration
 const TABS = [
@@ -17,6 +18,7 @@ const TABS = [
     { id: 'results', label: 'Resultados' },
     { id: 'fixtures', label: 'Fixture' },
     { id: 'standings', label: 'Clasificación' },
+    { id: 'playoff', label: 'Playoff' },
     { id: 'teams', label: 'Equipos' },
     { id: 'stats', label: 'Estadísticas' }, // Future
 ];
@@ -40,6 +42,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
     const [fixtures, setFixtures] = useState<any[]>([]);
     const [details, setDetails] = useState<any>(null);
     const [topScorers, setTopScorers] = useState<any[]>([]);
+    const [draw, setDraw] = useState<any[]>([]);
     const [standingsView, setStandingsView] = useState<'overall' | 'form' | 'htft' | 'overunder'>('overall');
 
     const getTeamLogo = (team: any) => {
@@ -173,6 +176,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                 setStandingsForm(payload.standingsForm || []);
                 setStandingsHtFt(payload.standingsHtFt || []);
                 setStandingsOverUnder(payload.standingsOverUnder || []);
+                setDraw(payload.draw || []);
                 setArchives(payload.archives || []);
             } catch (err) {
                 console.error('Error fetching tournament data:', err);
@@ -729,6 +733,12 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                                 ) : (
                                     <p className={styles.emptyState}>Equipos no disponibles.</p>
                                 )}
+                            </div>
+                        )}
+
+                        {activeTab === 'playoff' && (
+                            <div className={styles.section}>
+                                <PlayoffBracket data={draw} title={`Cuadro - ${tournamentData?.name}`} />
                             </div>
                         )}
 

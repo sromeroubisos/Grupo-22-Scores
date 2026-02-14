@@ -91,6 +91,7 @@ function extractIds(data: any) {
         drawStageId:
             normalizeId(d.draw_stage_id) ||
             normalizeId(d.drawStageId) ||
+            normalizeId(d.cur_draw_stage_id) || // Added generic check
             (Array.isArray(d.draw_stages) && d.draw_stages.length > 0 ? (
                 typeof d.draw_stages[0] === 'object'
                     ? (normalizeId(d.draw_stages[0].draw_stage_id) || normalizeId(d.draw_stages[0].stage_id))
@@ -116,6 +117,7 @@ type ResolvedIds = {
     stageId?: string;
     templateId?: string;
     seasonId?: string;
+    drawStageId?: string;
     tournamentUrl?: string;
 };
 
@@ -125,6 +127,7 @@ function mergeResolvedIds(base: ResolvedIds, next: ResolvedIds): ResolvedIds {
         stageId: base.stageId || next.stageId,
         templateId: base.templateId || next.templateId,
         seasonId: base.seasonId || next.seasonId,
+        drawStageId: base.drawStageId || next.drawStageId,
         tournamentUrl: base.tournamentUrl || next.tournamentUrl
     };
 }
@@ -166,10 +169,11 @@ async function resolveIdsFromTournamentId(tournamentId: string, sportId: string 
                 stageId: extracted.stageId,
                 templateId: extracted.templateId,
                 seasonId: extracted.seasonId,
+                drawStageId: extracted.drawStageId,
                 tournamentUrl: urlFromTournament
             });
 
-            if (resolved.stageId && resolved.templateId && resolved.seasonId) {
+            if (resolved.stageId && resolved.templateId && resolved.seasonId && resolved.drawStageId) {
                 return resolved;
             }
 
@@ -190,6 +194,7 @@ async function resolveIdsFromTournamentId(tournamentId: string, sportId: string 
                     stageId: extractedFromMatch.stageId,
                     templateId: extractedFromMatch.templateId,
                     seasonId: extractedFromMatch.seasonId,
+                    drawStageId: extractedFromMatch.drawStageId,
                     tournamentUrl: urlFromMatch
                 });
             }
@@ -296,6 +301,7 @@ export async function GET(request: Request) {
             seasonId = resolved.seasonId || seasonId;
             templateId = resolved.templateId || templateId;
             stageId = resolved.stageId || stageId;
+            drawStageId = resolved.drawStageId || drawStageId;
             if (resolved.tournamentUrl) {
                 url = url || resolved.tournamentUrl;
             }
