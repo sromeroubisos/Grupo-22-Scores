@@ -653,8 +653,8 @@ export default function HomePage() {
           </section>
 
           {/* Matches by League */}
-          <div className={styles.matchesContainer}>
-            {/* Live Banner - Moved Inside Container for Consistent Spacing */}
+          <div className={styles.matchesSection}>
+            {/* Live Banner - Outside Grid for Layout Consistency */}
             {liveMatchesCount > 0 && (
               <div className={styles.liveBanner}>
                 <span className={styles.liveDot}></span>
@@ -662,173 +662,169 @@ export default function HomePage() {
               </div>
             )}
 
-            {loading && (
-              <div className={styles.noMatches}>
-                <div
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    border: '3px solid rgba(255,255,255,0.1)',
-                    borderTopColor: 'var(--color-accent)',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                    marginBottom: '16px'
-                  }}
-                />
-                <style jsx>{`
-                  @keyframes spin {
-                    to { transform: rotate(360deg); }
-                  }
-                `}</style>
-                <p>Cargando partidos...</p>
-              </div>
-            )}
+            <div className={styles.matchesContainer}>
+              {loading && (
+                <div className={styles.noMatches}>
+                  <div
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      border: '3px solid rgba(255,255,255,0.1)',
+                      borderTopColor: 'var(--color-accent)',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      marginBottom: '16px'
+                    }}
+                  />
+                  <style jsx>{`
+                    @keyframes spin {
+                      to { transform: rotate(360deg); }
+                    }
+                  `}</style>
+                  <p>Cargando partidos...</p>
+                </div>
+              )}
 
-            {!loading && matchesByLeague.length === 0 && (
-              <div className={styles.noMatches}>
-                <div className={styles.noMatchesIcon}></div>
-                <h3>No hay partidos programados</h3>
-                <p>No se encontraron encuentros para esta fecha.</p>
-              </div>
-            )}
+              {!loading && matchesByLeague.length === 0 && (
+                <div className={styles.noMatches}>
+                  <div className={styles.noMatchesIcon}></div>
+                  <h3>No hay partidos programados</h3>
+                  <p>No se encontraron encuentros para esta fecha.</p>
+                </div>
+              )}
 
-            {!loading && matchesByLeague.map((league) => {
-              const isCollapsed = collapsedLeagues.has(league.leagueId);
-              const matchesCount = league.matches.length;
-              const liveCount = league.matches.filter(m => m.status === 'live').length;
-              const isFavorite = isLeagueFavorite(league.leagueId);
+              {!loading && matchesByLeague.map((league) => {
+                const isCollapsed = collapsedLeagues.has(league.leagueId);
+                const matchesCount = league.matches.length;
+                const liveCount = league.matches.filter(m => m.status === 'live').length;
+                const isFavorite = isLeagueFavorite(league.leagueId);
 
-              return (
-                <div key={league.leagueId} className={styles.leagueSection}>
-                  <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
-                    onClick={() => toggleCompetitionCollapse(league.leagueId)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className={styles.leagueInfo}>
-                      <span className={styles.leagueFlag}>{league.flag}</span>
-                      <div className={styles.leagueMeta}>
-                        <span className={styles.leagueSectionName}>{league.league}</span>
-                        {/* <span className={styles.leagueRound}>{league.round}</span> */}
+                return (
+                  <div key={league.leagueId} className={styles.leagueSection}>
+                    <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
+                      onClick={() => toggleCompetitionCollapse(league.leagueId)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className={styles.leagueInfo}>
+                        <span className={styles.leagueFlag}>{league.flag}</span>
+                        <div className={styles.leagueMeta}>
+                          <span className={styles.leagueSectionName}>{league.league}</span>
+                          {/* <span className={styles.leagueRound}>{league.round}</span> */}
+                        </div>
+                      </div>
+
+                      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button
+                          className={styles.leagueFavoriteBtn}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleLeagueFavorite(league.leagueId);
+                          }}
+                          aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                        >
+                          <Star size={18} fill={isFavorite ? "currentColor" : "none"} strokeWidth={isFavorite ? 0 : 2} />
+                        </button>
+
+                        <svg
+                          className={styles.chevronHeader}
+                          width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
                       </div>
                     </div>
 
-                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <button
-                        className={styles.leagueFavoriteBtn}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleLeagueFavorite(league.leagueId);
-                        }}
-                        aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-                      >
-                        <Star size={18} fill={isFavorite ? "currentColor" : "none"} strokeWidth={isFavorite ? 0 : 2} />
-                      </button>
+                    <div className={`${styles.matchesListWrapper} ${isCollapsed ? styles.collapsed : ''}`}>
+                      <div className={styles.matchesList}>
+                        {league.matches.map((match) => (
+                          <Link
+                            key={match.id}
+                            href={`/partidos/${match.id}`}
+                            className={`${styles.matchRow} ${match.status === 'live' ? styles.matchRowLive : ''}`}
+                          >
+                            <div className={styles.matchTime}>
+                              {match.status === 'live' ? (
+                                <span className={styles.matchLive}>
+                                  <span className={styles.matchLiveDot}></span>
+                                  {match.minute}
+                                </span>
+                              ) : match.status === 'finished' ? (
+                                <span className={styles.matchFinished}>FT</span>
+                              ) : (
+                                <span className={styles.matchTimeText}>{match.time}</span>
+                              )}
+                            </div>
 
-                      <svg
-                        className={styles.chevronHeader}
-                        width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                      >
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
+                            <div className={styles.matchTeams}>
+                              <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : ''}`}>
+                                <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
+                                  {match.homeLogo ? (
+                                    <img
+                                      src={match.homeLogo}
+                                      alt={match.home}
+                                      className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
+                                      onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.style.display = 'none';
+                                        (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
+                                      }}
+                                    />
+                                  ) : null}
+                                  <span className={styles.logoFallback} style={match.homeLogo ? { display: 'none' } : {}}>
+                                    {isIndividualSport ? (
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                                      </svg>
+                                    ) : (
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                      </svg>
+                                    )}
+                                  </span>
+                                </span>
+                                <span className={styles.teamName}>{match.home}</span>
+                                <span className={styles.teamScore}>{match.homeScore ?? '-'}</span>
+                              </div>
+                              <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : ''}`}>
+                                <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
+                                  {match.awayLogo ? (
+                                    <img
+                                      src={match.awayLogo}
+                                      alt={match.away}
+                                      className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
+                                      onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.style.display = 'none';
+                                        (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
+                                      }}
+                                    />
+                                  ) : null}
+                                  <span className={styles.logoFallback} style={match.awayLogo ? { display: 'none' } : {}}>
+                                    {isIndividualSport ? (
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                                      </svg>
+                                    ) : (
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                      </svg>
+                                    )}
+                                  </span>
+                                </span>
+                                <span className={styles.teamName}>{match.away}</span>
+                                <span className={styles.teamScore}>{match.awayScore ?? '-'}</span>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   </div>
-
-                  <div className={`${styles.matchesListWrapper} ${isCollapsed ? styles.collapsed : ''}`}>
-                    <div className={styles.matchesList}>
-                      {league.matches.map((match) => (
-                        <Link
-                          key={match.id}
-                          href={`/partidos/${match.id}`}
-                          className={`${styles.matchRow} ${match.status === 'live' ? styles.matchRowLive : ''}`}
-                        >
-                          <div className={styles.matchTime}>
-                            {match.status === 'live' ? (
-                              <span className={styles.matchLive}>
-                                <span className={styles.matchLiveDot}></span>
-                                {match.minute}
-                              </span>
-                            ) : match.status === 'finished' ? (
-                              <span className={styles.matchFinished}>FT</span>
-                            ) : (
-                              <span className={styles.matchTimeText}>{match.time}</span>
-                            )}
-                          </div>
-
-                          <div className={styles.matchTeams}>
-                            <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : ''}`}>
-                              <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-                                {match.homeLogo ? (
-                                  <img
-                                    src={match.homeLogo}
-                                    alt={match.home}
-                                    className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
-                                    onError={(e) => {
-                                      e.currentTarget.onerror = null;
-                                      e.currentTarget.style.display = 'none';
-                                      (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
-                                    }}
-                                  />
-                                ) : null}
-                                <span className={styles.logoFallback} style={match.homeLogo ? { display: 'none' } : {}}>
-                                  {isIndividualSport ? (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                                    </svg>
-                                  ) : (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                    </svg>
-                                  )}
-                                </span>
-                              </span>
-                              <span className={styles.teamName}>{match.home}</span>
-                              <span className={styles.teamScore}>{match.homeScore ?? '-'}</span>
-                            </div>
-                            <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : ''}`}>
-                              <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-                                {match.awayLogo ? (
-                                  <img
-                                    src={match.awayLogo}
-                                    alt={match.away}
-                                    className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
-                                    onError={(e) => {
-                                      e.currentTarget.onerror = null;
-                                      e.currentTarget.style.display = 'none';
-                                      (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
-                                    }}
-                                  />
-                                ) : null}
-                                <span className={styles.logoFallback} style={match.awayLogo ? { display: 'none' } : {}}>
-                                  {isIndividualSport ? (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                                    </svg>
-                                  ) : (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                    </svg>
-                                  )}
-                                </span>
-                              </span>
-                              <span className={styles.teamName}>{match.away}</span>
-                              <span className={styles.teamScore}>{match.awayScore ?? '-'}</span>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {!loading && matchesByLeague.length === 0 && (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-tertiary)', opacity: 0.7 }}>
-              No hay partidos programados para esta fecha.
+                );
+              })}
             </div>
-          )}
+          </div>
         </main>
 
         {/* Right Sidebar - News Only */}
@@ -849,7 +845,7 @@ export default function HomePage() {
             </div>
           </div>
         </aside>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

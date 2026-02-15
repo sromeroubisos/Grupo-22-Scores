@@ -76,8 +76,12 @@
     position: sticky;
     top: var(--h-header, 52px);
     z-index: 100;
-    padding: 20px 0 8px 0;
-    border-bottom: 1px solid var(--color-border);
+    padding: 12px 0;
+    /* Adjusted padding for contained look */
+    border: 1px solid var(--color-border);
+    /* Full border */
+    border-radius: 16px;
+    /* Rounded corners */
     margin-top: 0;
 }
 
@@ -87,6 +91,17 @@
     width: 100%;
     margin: 0 auto;
     padding: 0 8px;
+}
+
+
+/* Wrapper for Matches List + Live Banner */
+.matchesSection {
+    display: flex;
+    flex-direction: column;
+    margin-top: 64px;
+    /* Increased margin for better separation from sticky dateSelector */
+    gap: 24px;
+    width: 100%;
 }
 
 .dateNavBtn {
@@ -505,16 +520,14 @@
     padding: 6px 12px;
     background: rgba(239, 68, 68, 0.1);
     border-radius: 999px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
     font-size: 0.75rem;
     font-weight: 700;
     color: #ff4d4d;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    grid-column: 1 / -1;
-    /* Span full width in grid container */
     width: fit-content;
-    /* Don't stretch */
+    /* Removed grid specific properties */
 }
 
 .liveDot {
@@ -1067,8 +1080,8 @@
     gap: 24px;
     width: 100%;
     align-items: start;
-    margin-top: 64px;
-    /* Separación debajo del selector de días */
+    margin-top: 0;
+    /* Spacing now handled by matchesSection wrapper */
 }
 
 .sidebarLeft,
@@ -1199,13 +1212,21 @@
         /* Use solid bg-primary for best results */
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--color-border);
+        border: 1px solid var(--color-border);
+        /* Ensure full border on mobile too */
+        border-radius: 16px;
+        /* Ensure radius on mobile */
         margin-bottom: 0;
     }
 }
 
 /* Specific Mobile Spacing Adjustments (≤768px) */
 @media (max-width: 768px) {
+    .matchesSection {
+        margin-top: 0;
+        /* Reset desktop margin on mobile */
+    }
+
     .mobileSportSelector {
         margin-top: 0;
         /* Sin separación extra: más pegado al header */
