@@ -234,10 +234,12 @@
         opacity: 1;
         transform: scale(1);
     }
+
     50% {
         opacity: 0.5;
         transform: scale(1.1);
     }
+
     100% {
         opacity: 1;
         transform: scale(1);
@@ -544,19 +546,70 @@
 
 @media (max-width: 640px) {
     .dashboard :global(.horizontal-nav) {
-        padding: 0 var(--spacing-md);
+        padding: 0 var(--spacing-sm);
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        height: 50px;
+        gap: 4px;
+    }
+
+    .dashboard :global(.horizontal-nav::-webkit-scrollbar) {
+        display: none;
+    }
+
+    .dashboard :global(.nav-item) {
+        font-size: 0.8rem;
+        padding: 0 12px;
+        white-space: nowrap;
     }
 
     .dashboard :global(.main-content) {
-        padding: var(--spacing-lg) var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    .dashboard :global(.module-header) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .dashboard :global(.module-actions) {
+        width: 100%;
+    }
+
+    .dashboard :global(.btn-primary) {
+        width: 100%;
     }
 
     .dashboard :global(.grid-12) {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .dashboard :global(.span-3),
+    .dashboard :global(.span-4),
+    .dashboard :global(.span-6) {
+        width: 100%;
+    }
+
+    .dashboard :global(.kpi-value) {
+        font-size: 1.75rem;
+    }
+
+    .dashboard :global(.reportes-grid) {
         grid-template-columns: 1fr;
     }
 
-    .dashboard :global(.span-3) {
-        grid-column: span 1;
+    .dashboard :global(.reportes-list) {
+        max-height: 300px;
+    }
+
+    .dashboard :global(.reportes-editor-body) {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
     }
 }

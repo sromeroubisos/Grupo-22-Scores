@@ -115,38 +115,58 @@ function Icon({ path }: { path: string }) {
     );
 }
 
-export default function SuperSidebar() {
+export default function SuperSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
     const pathname = usePathname();
 
     return (
-        <aside className={styles.sidebar}>
-            <div className={styles.brand}>
-                <span className={styles.brandDot} />
-                TECTONIC <span className={styles.brandTag}>V1</span>
-            </div>
+        <>
+            {/* Mobile Overlay */}
+            <div
+                className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
+                onClick={onClose}
+                aria-hidden="true"
+            />
 
-            <nav className={styles.nav}>
-                {navGroups.map((group) => (
-                    <div key={group.id} className={styles.navGroup}>
-                        <div className={styles.navLabel}>{group.label}</div>
-                        {group.items.map((item) => {
-                            const isActive =
-                                pathname === item.href ||
-                                (item.href !== '/admin/super' && pathname.startsWith(item.href));
-                            return (
-                                <Link
-                                    key={item.id}
-                                    href={item.href}
-                                    className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
-                                >
-                                    <Icon path={item.iconPath} />
-                                    <span>{item.label}</span>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                ))}
-            </nav>
-        </aside>
+            <aside
+                className={`
+                    ${styles.sidebar}
+                    fixed inset-y-0 left-0 z-50
+                    w-[85vw] max-w-[320px]
+                    transform transition-transform duration-300 ease-in-out
+                    ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+                    lg:relative lg:translate-x-0 lg:w-[260px] lg:inset-auto lg:z-0 lg:shadow-none
+                `}
+            >
+                <div className={styles.brand}>
+                    <span className={styles.brandDot} />
+                    TECTONIC <span className={styles.brandTag}>V1</span>
+                </div>
+
+                <nav className={styles.nav}>
+                    {navGroups.map((group) => (
+                        <div key={group.id} className={styles.navGroup}>
+                            <div className={styles.navLabel}>{group.label}</div>
+                            {group.items.map((item) => {
+                                const isActive =
+                                    pathname === item.href ||
+                                    (item.href !== '/admin/super' && pathname.startsWith(item.href));
+                                return (
+                                    <Link
+                                        key={item.id}
+                                        href={item.href}
+                                        onClick={onClose} // Auto-close on link click
+                                        className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+                                    >
+                                        <Icon path={item.iconPath} />
+                                        <span>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </nav>
+            </aside>
+        </>
     );
 }

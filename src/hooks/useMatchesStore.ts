@@ -9,7 +9,7 @@ interface MatchesStoreResult {
   liveCount: number;
 }
 
-const STALE_TTL = 60 * 1000;    // 1 minute · background refresh
+const STALE_TTL = 5 * 1000;    // 5 seconds · fast stale-while-revalidate
 const LIVE_POLL_INTERVAL = 10_000;   // 10 seconds
 const PREFETCH_BATCH_SIZE = 3;
 

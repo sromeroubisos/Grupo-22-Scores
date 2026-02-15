@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { db } from '@/lib/mock-db';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
+import { useRouter } from 'next/navigation';
 
 const countryFlags: Record<string, string> = {
     Argentina: '🇦🇷',
@@ -22,37 +23,45 @@ const folderOptions = ['Sudamerica', 'Juveniles', 'Top 5', 'En desarrollo'];
 
 export default function SuperadminTorneosPage() {
     const { filters } = useSuperConsole();
+    const router = useRouter();
     const [seasonFilter, setSeasonFilter] = useState('all');
     const [folderFilter, setFolderFilter] = useState('all');
+
+    // Force re-render trick for mock updates
+    const [tick, setTick] = useState(0);
 
     const tournaments = useMemo(() => {
         return db.tournaments.map((t, index) => {
             const matchesCount = db.matches.filter((m) => m.tournamentId === t.id).length;
-            const country = t.unionId === 'uar' ? 'Argentina' : 'Uruguay';
-            const status = index === 0 ? 'Activo' : index === 1 ? 'Finalizado' : 'Archivado';
-            const statusKey = status === 'Activo' ? 'activo' : status === 'Finalizado' ? 'finalizado' : 'archivado';
-            const source = index % 2 === 0 ? 'API' : 'Manual';
+            // Handle null unionId for country logic (or fallback)
+            const union = db.unions.find(u => u.id === t.unionId);
+            const country = union ? (union.id === 'uar' ? 'Argentina' : 'Uruguay') : 'Global (No Union)';
+
+            const status = t.status === 'published' ? 'Activo' : 'Borrador'; // Simplified mapping
+            const statusKey = status === 'Activo' ? 'activo' : 'borrador';
+            const source = t.slug.includes('api') ? 'API' : 'Manual';
 
             return {
                 id: t.id,
                 unionId: t.unionId,
+                unionName: union ? union.name : 'Sin Vínculo', // Display text
                 name: t.name,
                 season: t.seasonId,
                 sport: t.sport,
-                sportLabel: sportLabels[t.sport] || 'Deporte',
+                sportLabel: sportLabels[t.sport] || t.sport,
                 country,
                 status,
                 statusKey,
                 source,
-                updated: index === 0 ? 'Hace 2 h' : 'Hace 1 d',
+                updated: 'Hace 1 d',
                 followers: 1280 + index * 210,
                 views: 32400 + index * 890,
                 matches: matchesCount,
-                folders: index === 0 ? ['Sudamerica', 'Top 5'] : ['En desarrollo'],
-                logo: '🏆'
+                folders: ['En desarrollo'],
+                logo: t.unionId ? '🏆' : '❓'
             };
         });
-    }, []);
+    }, [tick]); // Re-compute when tick changes
 
     const filtered = tournaments.filter((t) => {
         if (filters.sport !== 'all' && t.sport !== filters.sport) return false;
@@ -71,25 +80,38 @@ export default function SuperadminTorneosPage() {
         return acc;
     }, {});
 
-    const createUnionId = db.unions[0]?.id;
+    const [linkingTournamentId, setLinkingTournamentId] = useState<string | null>(null);
+    const [selectedUnionId, setSelectedUnionId] = useState<string>('');
+
+    const openLinkModal = (id: string) => {
+        setLinkingTournamentId(id);
+        setSelectedUnionId('');
+    };
+
+    const confirmLink = () => {
+        if (linkingTournamentId && selectedUnionId) {
+            const tournamentIndex = db.tournaments.findIndex(t => t.id === linkingTournamentId);
+            if (tournamentIndex !== -1) {
+                const union = db.unions.find(u => u.id === selectedUnionId);
+                db.tournaments[tournamentIndex].unionId = selectedUnionId;
+                alert(`Torneo vinculado a ${union?.name}`);
+                setTick(t => t + 1);
+                setLinkingTournamentId(null);
+            }
+        }
+    };
 
     return (
-        <div style={{ paddingBottom: '40px' }}>
+        <div style={{ paddingBottom: '40px', position: 'relative' }}>
             <div className={styles.consoleHeader}>
                 <div>
                     <div className={styles.consoleTitle}>Torneos</div>
-                    <div className={styles.consoleSubtitle}>Cartas + metricas mensuales</div>
+                    <div className={styles.consoleSubtitle}>Gestión global de competiciones</div>
                 </div>
                 <div className={styles.consoleActions}>
-                    {createUnionId ? (
-                        <Link href={`/admin/union/${createUnionId}/torneos/crear?from=super`} className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
-                            + Crear
-                        </Link>
-                    ) : (
-                        <button className={`${styles.cardAction} ${styles.cardActionPrimary}`} disabled>
-                            + Crear
-                        </button>
-                    )}
+                    <Link href="/admin/super/torneos/crear" className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
+                        + Nuevo Torneo
+                    </Link>
                 </div>
             </div>
 
@@ -99,12 +121,6 @@ export default function SuperadminTorneosPage() {
                     <option value="all">Temporada</option>
                     <option value="2026">2026</option>
                     <option value="2025">2025</option>
-                </select>
-                <select className={styles.filterControl} value={folderFilter} onChange={(event) => setFolderFilter(event.target.value)}>
-                    <option value="all">Carpeta</option>
-                    {folderOptions.map((folder) => (
-                        <option key={folder} value={folder}>{folder}</option>
-                    ))}
                 </select>
             </div>
 
@@ -126,11 +142,16 @@ export default function SuperadminTorneosPage() {
                                     <div className={styles.cardLogo}>{tournament.logo}</div>
                                     <div>
                                         <div className={styles.cardTitle}>{tournament.name}</div>
-                                        <div className={styles.cardMeta}>{tournament.season} · {tournament.sportLabel}</div>
+                                        <div className={styles.cardMeta}>
+                                            {tournament.season} · {tournament.sportLabel} ·
+                                            <span style={{ color: tournament.unionId ? '#22c55e' : '#eab308', marginLeft: 6 }}>
+                                                {tournament.unionName}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className={styles.badgeRow}>
-                                    <span className={`${styles.badgePill} ${tournament.status === 'Activo' ? styles.badgeActive : tournament.status === 'Finalizado' ? styles.badgeFinal : styles.badgeArchived}`}>
+                                    <span className={`${styles.badgePill} ${tournament.status === 'Activo' ? styles.badgeActive : styles.badgeArchived}`}>
                                         {tournament.status}
                                     </span>
                                     <span className={`${styles.badgePill} ${tournament.source === 'API' ? styles.badgeApiAlt : styles.badgeManualAlt}`}>
@@ -139,30 +160,24 @@ export default function SuperadminTorneosPage() {
                                 </div>
                                 <div className={styles.metricsGrid}>
                                     <div className={styles.metricItem}>
-                                        <span className={styles.metricLabel}>Seguidores</span>
-                                        <span className={styles.metricValue}>{tournament.followers}</span>
-                                    </div>
-                                    <div className={styles.metricItem}>
-                                        <span className={styles.metricLabel}>Views mes</span>
-                                        <span className={styles.metricValue}>{tournament.views}</span>
-                                    </div>
-                                    <div className={styles.metricItem}>
-                                        <span className={styles.metricLabel}>Partidos</span>
+                                        <span className={styles.metricLabel}>Matches</span>
                                         <span className={styles.metricValue}>{tournament.matches}</span>
                                     </div>
                                 </div>
-                                <div className={styles.badgeRow}>
-                                    {tournament.folders.map((folder) => (
-                                        <span key={folder} className={styles.badgePill}>{folder}</span>
-                                    ))}
-                                    <span className={styles.cardMeta}>Actualizado {tournament.updated}</span>
-                                </div>
                                 <div className={styles.cardActions}>
                                     <Link href={`/admin/super/torneos/${tournament.id}`} className={styles.cardAction}>Ver</Link>
-                                    <Link href={`/admin/union/${tournament.unionId}/torneos/crear?tournamentId=${tournament.id}&from=super`} className={styles.cardAction}>
+                                    <Link href={`/admin/super/torneos/crear?tournamentId=${tournament.id}`} className={styles.cardAction}>
                                         Editar
                                     </Link>
-                                    <button className={styles.cardAction}>Vincular</button>
+                                    {!tournament.unionId && (
+                                        <button
+                                            className={styles.cardAction}
+                                            style={{ color: '#eab308' }}
+                                            onClick={() => openLinkModal(tournament.id)}
+                                        >
+                                            Vincular
+                                        </button>
+                                    )}
                                     <button className={`${styles.cardAction} ${styles.cardActionPrimary}`}>Sync</button>
                                 </div>
                             </div>
@@ -170,6 +185,49 @@ export default function SuperadminTorneosPage() {
                     </div>
                 </section>
             ))}
+
+            {linkingTournamentId && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100
+                }}>
+                    <div style={{
+                        background: '#0b1016', border: '1px solid rgba(255,255,255,0.1)',
+                        padding: 24, borderRadius: 12, minWidth: 320, maxWidth: 400
+                    }}>
+                        <h3 style={{ margin: '0 0 16px', color: 'white' }}>Vincular Unión</h3>
+                        <p style={{ color: '#aaa', fontSize: 13, marginBottom: 16 }}>
+                            Selecciona una unión existente para vincular este torneo.
+                        </p>
+                        <select
+                            value={selectedUnionId}
+                            onChange={(e) => setSelectedUnionId(e.target.value)}
+                            style={{ width: '100%', padding: 12, borderRadius: 6, background: '#1a1d24', border: '1px solid #333', color: 'white', marginBottom: 20 }}
+                        >
+                            <option value="">Seleccionar Unión...</option>
+                            {db.unions.map(u => (
+                                <option key={u.id} value={u.id}>{u.name}</option>
+                            ))}
+                        </select>
+                        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => setLinkingTournamentId(null)}
+                                style={{ background: 'transparent', border: '1px solid #333', color: '#ccc', padding: '8px 16px', borderRadius: 6, cursor: 'pointer' }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmLink}
+                                disabled={!selectedUnionId}
+                                style={{ background: selectedUnionId ? '#22c55e' : '#333', border: 'none', color: selectedUnionId ? 'black' : '#666', padding: '8px 16px', borderRadius: 6, cursor: selectedUnionId ? 'pointer' : 'not-allowed', fontWeight: 600 }}
+                            >
+                                Vincular
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

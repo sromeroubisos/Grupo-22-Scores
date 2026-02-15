@@ -6,9 +6,9 @@
 }
 
 /* Main */
+/* Main handled by layout */
 .main {
     flex: 1;
-    margin-left: 260px;
     display: flex;
     flex-direction: column;
 }
@@ -790,77 +790,15 @@
     color: var(--magma-primary);
 }
 
-.fullBtn {
-    width: 100%;
-    justify-content: center;
+.newsCard {
+    border-right: none;
+    padding-right: 0;
 }
 
 @media (max-width: 1200px) {
     .col4 {
         grid-column: span 6;
     }
-
-    .col8 {
-        grid-column: span 12;
-    }
-
-    .newsCard {
-        border-right: none;
-        padding-right: 0;
-    }
-}
-
-@media (max-width: 900px) {
-    .tectonicPage {
-        padding: 24px;
-    }
-
-    .tectonicGrid {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-    }
-
-    .col4 {
-        grid-column: span 6;
-    }
-
-    .col12 {
-        grid-column: span 6;
-    }
-}
-
-@media (max-width: 640px) {
-    .tectonicPage {
-        padding: 20px;
-    }
-
-    .tectonicHeader {
-        align-items: flex-start;
-    }
-
-    .statusSync {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .tectonicGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .col4,
-    .col8,
-    .col12 {
-        grid-column: span 1;
-    }
-
-    .newsSide {
-        width: 100%;
-    }
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
 }
 
 .consoleHeader {
@@ -1153,4 +1091,368 @@
 
 .statusError {
     color: var(--color-accent);
+}
+
+@media (max-width: 900px) {
+    .tectonicPage {
+        padding: 24px;
+    }
+
+    .tectonicGrid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .col4 {
+        grid-column: span 12;
+    }
+
+    .col8 {
+        grid-column: span 12;
+    }
+
+    .col12 {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 768px) {
+    .tectonicPage {
+        padding: 0;
+        padding-bottom: 96px;
+        /* Space for bottom nav */
+    }
+
+    /* Filters Mobile */
+    .filterBar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        background: var(--basalt-900);
+        padding: 16px;
+        border-bottom: 1px solid var(--surface-edge);
+        margin-bottom: 16px;
+    }
+
+    .filterControl {
+        width: 100%;
+        height: 44px;
+        /* Touch target */
+    }
+
+    .consoleHeader {
+        padding: 16px 16px 0;
+        margin-bottom: 16px;
+    }
+
+    .consoleTitle {
+        font-size: 20px;
+    }
+
+    .consoleActions {
+        width: 100%;
+    }
+
+    .consoleActions .cardAction {
+        flex: 1;
+        justify-content: center;
+        height: 44px;
+        /* Touch target */
+        display: flex;
+        align-items: center;
+    }
+
+    /* Grid Mobile */
+    .cardGrid {
+        grid-template-columns: 1fr;
+        /* 1 col */
+        padding: 0 16px;
+    }
+
+    .groupSection {
+        padding: 0 16px;
+    }
+
+    .metricsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Table to Card List transformation */
+    .tectonicTable {
+        display: block;
+        border: none;
+    }
+
+    .tectonicTable thead {
+        display: none;
+    }
+
+    .tectonicTable tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .tectonicTable tr {
+        display: flex;
+        flex-direction: column;
+        background: var(--basalt-900);
+        border: 1px solid var(--surface-edge);
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .tectonicTable td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--surface-edge);
+        text-align: right;
+    }
+
+    .tectonicTable td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-top: 8px;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    /* First cell is usually title */
+    .tectonicTable td:first-child {
+        font-size: 16px;
+        font-weight: 700;
+        color: #ececec;
+        border-bottom: 1px solid var(--surface-edge);
+        /* Keep separator */
+        margin-bottom: 4px;
+        text-align: left;
+    }
+
+    /* Dasboard specific */
+    .tectonicGrid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 0 16px;
+    }
+
+    .slab {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .col4,
+    .col8,
+    .col12 {
+        grid-column: auto;
+        width: 100%;
+    }
+
+    .newsGrid {
+        flex-direction: column;
+    }
+
+    .newsCard,
+    .newsSide {
+        width: 100%;
+        border-right: none;
+        padding-right: 0;
+    }
+
+    .headerInfo h1 {
+        font-size: 20px;
+    }
+
+    .statusSync {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 8px;
+    }
+
+    /* Ensure Bottom Nav Visible functionality interaction */
+    .bottomNav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 64px;
+        background: rgba(10, 10, 11, 0.95);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid var(--surface-edge);
+        z-index: 100;
+        justify-content: space-around;
+        align-items: center;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .navItem {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        color: var(--basalt-600);
+        font-size: 10px;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        text-decoration: none;
+        padding: 8px;
+        flex: 1;
+    }
+
+    .navItem.active {
+        color: var(--magma-primary);
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .tectonicGrid {
+        grid-template-columns: 1fr;
+        gap: var(--gap, 12px);
+    }
+
+    .col4,
+    .col8,
+    .col12 {
+        grid-column: span 1 !important;
+    }
+
+    .tectonicHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .headerInfo h1 {
+        font-size: var(--fs-title, 24px);
+    }
+
+    .headerInfo p {
+        font-size: 11px;
+    }
+
+    .slab {
+        padding: 16px;
+    }
+
+    .slabTitle {
+        font-size: var(--fs-title, 18px);
+        /* slightly smaller for slab titles */
+    }
+
+    .statValue {
+        font-size: 28px;
+    }
+
+    .statSub {
+        font-size: 11px;
+    }
+
+    .btn {
+        padding: 8px 14px;
+        font-size: 11px;
+        width: auto;
+        justify-content: center;
+    }
+
+    .statusSync {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .statusPill {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 10px;
+    }
+
+    /* Transform Table to Card-like List */
+    .tectonicTable,
+    .tectonicTable tbody,
+    .tectonicTable tr {
+        display: block;
+        width: 100%;
+    }
+
+    .tectonicTable thead {
+        display: none;
+    }
+
+    .tectonicTable tr {
+        margin-bottom: 12px;
+        border: 1px solid var(--surface-edge);
+        background: var(--basalt-800);
+        padding: 12px;
+        border-radius: var(--card-radius, 12px);
+        position: relative;
+    }
+
+    .tectonicTable td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--surface-edge);
+        text-align: right;
+        /* Values right aligned */
+    }
+
+    .tectonicTable td:last-child {
+        border-bottom: none;
+        justify-content: flex-end;
+        padding-top: 12px;
+        gap: 8px;
+    }
+
+    .tectonicTable td:first-child {
+        font-weight: 700;
+        font-size: 15px;
+        color: #ececec;
+        display: block;
+        /* Title on its own line */
+        text-align: left;
+        border-bottom: 1px solid var(--surface-edge);
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+
+    /* News Grid */
+    .newsGrid {
+        flex-direction: column;
+    }
+
+    .newsCard {
+        border-right: none;
+        border-bottom: 1px solid var(--surface-edge);
+        padding-right: 0;
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+    }
+
+    .newsSide {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
 }

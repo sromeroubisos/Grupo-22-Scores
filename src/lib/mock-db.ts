@@ -28,7 +28,7 @@ export interface Union {
 
 export interface Tournament {
     id: string;
-    unionId: string;
+    unionId: string | null;
     seasonId: string;
     name: string;
     slug: string; // Added slug
@@ -62,7 +62,7 @@ export interface Match {
 
 export interface Club {
     id: string;
-    unionId: string;
+    unionId: string | null;
     name: string;
     shortName: string;
     city: string;

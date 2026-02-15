@@ -174,7 +174,7 @@ export default function AdminPage() {
                             <span className={styles.slabLabel}>Scope de publicacion</span>
                             <span className={`${styles.badge} ${styles.badgeManual}`}>Global</span>
                             <span className={`${styles.badge} ${styles.badgeManual}`}>Torneo XV</span>
-                            <button className={`${styles.btn} ${styles.btnPrimary} ${styles.fullBtn}`}>Publicar</button>
+                            <button className={`${styles.btn} ${styles.btnPrimary} ${styles.fullBtn}`} style={{ width: '100%', justifyContent: 'center' }}>Publicar</button>
                         </div>
                     </div>
                 </div>
@@ -193,7 +193,7 @@ export default function AdminPage() {
                                 </div>
                             </div>
                         ))}
-                        <button className={`${styles.btn} ${styles.fullBtn}`}>Gestionar permisos</button>
+                        <button className={`${styles.btn}`} style={{ width: '100%', justifyContent: 'center' }}>Gestionar permisos</button>
                     </div>
                 </div>
             </div>

@@ -23,7 +23,7 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
     const isTournamentAdmin = pathname?.startsWith('/admin/torneo/');
     const isUnionAdmin = pathname?.startsWith('/admin/union/');
     const isDiscipline = pathname?.startsWith('/admin/disciplina/');
-    const isSuperAdmin = pathname?.startsWith('/admin/super');
+    const isSuperAdmin = pathname?.includes('/admin/super');
     const isDashboard = pathname === '/admin';
 
     const isAllowed = user && ['admin_general'].includes(user.role);
