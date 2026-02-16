@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/mock-db';
+import { Trash2, Eye, EyeOff, FolderPlus, Folder as FolderIcon, MoreVertical, Plus } from 'lucide-react';
+import { db, Folder } from '@/lib/mock-db';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { useRouter } from 'next/navigation';
@@ -19,7 +20,7 @@ const sportLabels: Record<string, string> = {
     hockey: 'Hockey'
 };
 
-const folderOptions = ['Sudamerica', 'Juveniles', 'Top 5', 'En desarrollo'];
+
 
 export default function SuperadminTorneosPage() {
     const { filters } = useSuperConsole();
@@ -41,6 +42,8 @@ export default function SuperadminTorneosPage() {
             const statusKey = status === 'Activo' ? 'activo' : 'borrador';
             const source = t.slug.includes('api') ? 'API' : 'Manual';
 
+            const folder = db.folders.find(f => f.id === t.folderId);
+
             return {
                 id: t.id,
                 unionId: t.unionId,
@@ -57,7 +60,10 @@ export default function SuperadminTorneosPage() {
                 followers: 1280 + index * 210,
                 views: 32400 + index * 890,
                 matches: matchesCount,
-                folders: ['En desarrollo'],
+                folderId: t.folderId,
+                folderName: folder?.name,
+                folderColor: folder?.color,
+                isVisible: t.isVisible !== false, // Default to true
                 logo: t.unionId ? '🏆' : '❓'
             };
         });
@@ -70,7 +76,8 @@ export default function SuperadminTorneosPage() {
         if (filters.source !== 'all' && t.source !== filters.source) return false;
         if (filters.search && !t.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
         if (seasonFilter !== 'all' && t.season !== seasonFilter) return false;
-        if (folderFilter !== 'all' && !t.folders.includes(folderFilter)) return false;
+        if (seasonFilter !== 'all' && t.season !== seasonFilter) return false;
+        if (folderFilter !== 'all' && t.folderId !== folderFilter) return false;
         return true;
     });
 
@@ -101,6 +108,51 @@ export default function SuperadminTorneosPage() {
         }
     };
 
+    // --- Actions ---
+    const handleDelete = (id: string) => {
+        if (confirm('¿Seguro que deseas eliminar este torneo?')) {
+            const idx = db.tournaments.findIndex(t => t.id === id);
+            if (idx !== -1) {
+                db.tournaments.splice(idx, 1);
+                setTick(t => t + 1);
+            }
+        }
+    };
+
+    const handleToggleVisibility = (id: string, current: boolean) => {
+        const t = db.tournaments.find(x => x.id === id);
+        if (t) {
+            t.isVisible = !current;
+            setTick(t => t + 1);
+        }
+    };
+
+    const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
+    const [newFolderName, setNewFolderName] = useState('');
+    const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null); // For overflow menu
+
+    const handleCreateFolder = () => {
+        if (!newFolderName.trim()) return;
+        const newId = newFolderName.toLowerCase().replace(/\s+/g, '-');
+        db.folders.push({ id: newId, name: newFolderName, color: '#888' });
+        setNewFolderName('');
+        setIsCreateFolderOpen(false);
+        setTick(t => t + 1);
+    };
+
+    const handleMoveToFolder = (tournamentId: string, folderId: string) => {
+        const t = db.tournaments.find(x => x.id === tournamentId);
+        if (t) {
+            t.folderId = folderId === 'none' ? undefined : folderId;
+            setTick(t => t + 1);
+            setActionMenuOpenId(null); // Close menu
+        }
+    };
+
+    const toggleActionMenu = (id: string) => {
+        setActionMenuOpenId(actionMenuOpenId === id ? null : id);
+    };
+
     return (
         <div style={{ paddingBottom: '40px', position: 'relative' }}>
             <div className={styles.consoleHeader}>
@@ -122,7 +174,37 @@ export default function SuperadminTorneosPage() {
                     <option value="2026">2026</option>
                     <option value="2025">2025</option>
                 </select>
+
+                {/* Folder Filter */}
+                <select className={styles.filterControl} value={folderFilter} onChange={(e) => setFolderFilter(e.target.value)}>
+                    <option value="all">Todas las carpetas</option>
+                    {db.folders.map(f => (
+                        <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                </select>
+
+                <button
+                    className={styles.filterControl}
+                    onClick={() => setIsCreateFolderOpen(true)}
+                    style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                    <Plus size={14} /> Nueva Carpeta
+                </button>
             </div>
+
+            {isCreateFolderOpen && (
+                <div style={{ padding: '0 20px 20px', display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <input
+                        type="text"
+                        placeholder="Nombre de carpeta"
+                        value={newFolderName}
+                        onChange={e => setNewFolderName(e.target.value)}
+                        style={{ padding: '8px 12px', borderRadius: 6, background: '#1a1d24', border: '1px solid #333', color: 'white' }}
+                    />
+                    <button onClick={handleCreateFolder} className={styles.cardActionPrimary} style={{ padding: '8px 16px', fontSize: 13 }}>Crear</button>
+                    <button onClick={() => setIsCreateFolderOpen(false)} className={styles.cardAction} style={{ padding: '8px 16px', fontSize: 13 }}>Cancelar</button>
+                </div>
+            )}
 
             {Object.keys(grouped).length === 0 && (
                 <div className={styles.cardItem}>No se encontraron torneos con los filtros actuales.</div>
@@ -142,14 +224,78 @@ export default function SuperadminTorneosPage() {
                                     <div className={styles.cardLogo}>{tournament.logo}</div>
                                     <div>
                                         <div className={styles.cardTitle}>{tournament.name}</div>
-                                        <div className={styles.cardMeta}>
-                                            {tournament.season} · {tournament.sportLabel} ·
-                                            <span style={{ color: tournament.unionId ? '#22c55e' : '#eab308', marginLeft: 6 }}>
-                                                {tournament.unionName}
+                                        <div className={styles.cardContext}>
+                                            <span className={styles.contextLinePrimary}>
+                                                {tournament.season} · {tournament.sportLabel} · {countryFlags[tournament.country] || '🌐'}
+                                            </span>
+                                            <span className={styles.contextLineSecondary}>
+                                                Union: {tournament.unionName}
                                             </span>
                                         </div>
                                     </div>
+
+                                    {/* Overflow Menu Trigger */}
+                                    <button
+                                        className={styles.moreMenuBtn}
+                                        onClick={(e) => { e.stopPropagation(); toggleActionMenu(tournament.id); }}
+                                    >
+                                        <MoreVertical size={16} />
+                                    </button>
+
+                                    {/* Menu Overlay */}
+                                    {actionMenuOpenId === tournament.id && (
+                                        <div className={styles.menuDropdown}>
+                                            <button
+                                                className={styles.menuItem}
+                                                onClick={() => handleToggleVisibility(tournament.id, tournament.isVisible)}
+                                            >
+                                                {tournament.isVisible ? <EyeOff size={14} style={{ marginRight: 8 }} /> : <Eye size={14} style={{ marginRight: 8 }} />}
+                                                {tournament.isVisible ? 'Ocultar' : 'Mostrar'}
+                                            </button>
+
+                                            {!tournament.unionId && (
+                                                <button
+                                                    className={`${styles.menuItem} ${styles.warning}`}
+                                                    onClick={() => { setLinkingTournamentId(tournament.id); setActionMenuOpenId(null); }}
+                                                >
+                                                    Link Union
+                                                </button>
+                                            )}
+
+                                            <div className={styles.menuDivider} />
+                                            <div className={styles.menuLabel}>Mover a carpeta</div>
+
+                                            {db.folders.map(f => (
+                                                <button
+                                                    key={f.id}
+                                                    className={styles.menuItem}
+                                                    onClick={() => handleMoveToFolder(tournament.id, f.id)}
+                                                >
+                                                    <FolderIcon size={14} style={{ marginRight: 8, color: f.color || '#888' }} />
+                                                    {f.name}
+                                                </button>
+                                            ))}
+                                            <button
+                                                className={styles.menuItem}
+                                                onClick={() => handleMoveToFolder(tournament.id, 'none')}
+                                            >
+                                                <FolderIcon size={14} style={{ marginRight: 8, opacity: 0.5 }} />
+                                                Sin carpeta
+                                            </button>
+
+                                            <div className={styles.menuDivider} />
+
+                                            <button
+                                                className={`${styles.menuItem} ${styles.danger}`}
+                                                onClick={() => handleDelete(tournament.id)}
+                                            >
+                                                <Trash2 size={14} style={{ marginRight: 8 }} />
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
+
                                 <div className={styles.badgeRow}>
                                     <span className={`${styles.badgePill} ${tournament.status === 'Activo' ? styles.badgeActive : styles.badgeArchived}`}>
                                         {tournament.status}
@@ -157,28 +303,28 @@ export default function SuperadminTorneosPage() {
                                     <span className={`${styles.badgePill} ${tournament.source === 'API' ? styles.badgeApiAlt : styles.badgeManualAlt}`}>
                                         {tournament.source}
                                     </span>
+                                    {tournament.folderId && (
+                                        <span className={styles.badgePill} style={{ borderColor: tournament.folderColor, color: tournament.folderColor }}>
+                                            📁 {tournament.folderName}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className={styles.metricsGrid}>
-                                    <div className={styles.metricItem}>
-                                        <span className={styles.metricLabel}>Matches</span>
-                                        <span className={styles.metricValue}>{tournament.matches}</span>
-                                    </div>
+
+                                <div className={styles.metricPrimary}>
+                                    <span className={styles.metricValueBig}>{tournament.matches}</span>
+                                    <span className={styles.metricLabelSmall}>PARTIDOS</span>
                                 </div>
+
                                 <div className={styles.cardActions}>
-                                    <Link href={`/admin/super/torneos/${tournament.id}`} className={styles.cardAction}>Ver</Link>
-                                    <Link href={`/admin/super/torneos/crear?tournamentId=${tournament.id}`} className={styles.cardAction}>
+                                    <Link href={`/admin/super/torneos/${tournament.id}`} className={styles.actionBtn}>
+                                        Ver
+                                    </Link>
+                                    <Link href={`/admin/super/torneos/crear?tournamentId=${tournament.id}`} className={styles.actionBtn}>
                                         Editar
                                     </Link>
-                                    {!tournament.unionId && (
-                                        <button
-                                            className={styles.cardAction}
-                                            style={{ color: '#eab308' }}
-                                            onClick={() => openLinkModal(tournament.id)}
-                                        >
-                                            Vincular
-                                        </button>
-                                    )}
-                                    <button className={`${styles.cardAction} ${styles.cardActionPrimary}`}>Sync</button>
+                                    <button className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
+                                        Sync
+                                    </button>
                                 </div>
                             </div>
                         ))}

@@ -8,6 +8,13 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '⚽',
         isActive: true,
         priority: 10,
+        matchRules: {
+            periods: 2,
+            periodDurationMinutes: 45,
+            breakDurationMinutes: 15,
+            overtimePeriods: 2,
+            overtimeDurationMinutes: 15,
+        }
     },
     'tennis': {
         id: 'tennis',
@@ -26,6 +33,13 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '🏀',
         isActive: true,
         priority: 3,
+        matchRules: {
+            periods: 4,
+            periodDurationMinutes: 12, // NBA standard, FIBA is 10
+            breakDurationMinutes: 15, // Halftime
+            overtimePeriods: 1, // Usually unlimited OT until winner
+            overtimeDurationMinutes: 5,
+        }
     },
     'hockey': {
         id: 'hockey',
@@ -34,6 +48,13 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '🏒',
         isActive: true,
         priority: 4,
+        matchRules: {
+            periods: 3,
+            periodDurationMinutes: 20,
+            breakDurationMinutes: 15,
+            overtimePeriods: 1,
+            overtimeDurationMinutes: 5,
+        }
     },
     'volleyball': {
         id: 'volleyball',
@@ -66,6 +87,13 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '🏉',
         isActive: true,
         priority: 1,
+        matchRules: {
+            periods: 2,
+            periodDurationMinutes: 40,
+            breakDurationMinutes: 15,
+            overtimePeriods: 2,
+            overtimeDurationMinutes: 10,
+        }
     },
     'american-football': {
         id: 'american-football',
@@ -74,6 +102,13 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '🏈',
         isActive: true,
         priority: 9,
+        matchRules: {
+            periods: 4,
+            periodDurationMinutes: 15,
+            breakDurationMinutes: 13,
+            overtimePeriods: 1,
+            overtimeDurationMinutes: 10,
+        }
     },
     'field-hockey': {
         id: 'field-hockey',
@@ -82,6 +117,12 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '🏑',
         isActive: true,
         priority: 10,
+        matchRules: {
+            periods: 4,
+            periodDurationMinutes: 15,
+            breakDurationMinutes: 5, // Halftime is 5m, quarter breaks are 2m (logic needs to handle this)
+            hasShootout: true,
+        }
     },
     'cricket': {
         id: 'cricket',

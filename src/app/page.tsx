@@ -13,6 +13,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import TournamentLeader from '@/components/TournamentLeader';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
+import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -243,10 +244,15 @@ export default function HomePage() {
         } else if (match.clock?.running && match.clock?.seconds > 0) {
           minuteDisplay = `${Math.floor(match.clock.seconds / 60)}'`;
         } else {
-          // Compute minute from kickoff timestamp
-          const kickoff = new Date(match.dateTime).getTime();
-          const elapsed = Math.max(0, Math.floor((now - kickoff) / 60000));
-          minuteDisplay = elapsed > 0 ? `${elapsed}'` : (period || 'En Vivo');
+          // Compute minute from kickoff timestamp using the new Virtual Clock logic
+          // This handles halves, quarters, overtimes, and breaks per sport
+          minuteDisplay = calculateVirtualMatchTime(match.dateTime, selectedSport, 'live');
+          if (!minuteDisplay) {
+            // Fallback if virtual clock returns empty for some reason
+            const kickoff = new Date(match.dateTime).getTime();
+            const elapsed = Math.max(0, Math.floor((now - kickoff) / 60000));
+            minuteDisplay = elapsed > 0 ? `${elapsed}'` : 'En Vivo';
+          }
         }
       } else if (match.clock?.period && status === 'finished') {
         minuteDisplay = match.clock.period;

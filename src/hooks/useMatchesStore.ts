@@ -9,8 +9,8 @@ interface MatchesStoreResult {
   liveCount: number;
 }
 
-const STALE_TTL = 5 * 1000;    // 5 seconds · fast stale-while-revalidate
-const LIVE_POLL_INTERVAL = 10_000;   // 10 seconds
+const STALE_TTL = 60 * 1000;      // 60 seconds · Cache standard (matches request)
+const LIVE_POLL_INTERVAL = 10_000;   // 10 seconds - Live polling
 const PREFETCH_BATCH_SIZE = 3;
 
 // Module-level cache shared across hook instances
@@ -106,6 +106,10 @@ export function useMatchesStore(
     } else {
       // No cache · show loading
       setLoading(true);
+
+      // If we are switching sports, clear previous matches immediately
+      setMatches([]);
+
       fetchDate(selectedDate, controller.signal).then(data => {
         if (!controller.signal.aborted) {
           setMatches(data);
@@ -136,7 +140,8 @@ export function useMatchesStore(
     const toFetch = allDates.filter(d => d !== selectedDate);
 
     // Batch prefetch with delay to avoid API rate limiting
-    (async () => {
+    // Debounce the start of prefetching by 3 seconds to ensure user stays on the sport
+    const prefetchTimeout = setTimeout(async () => {
       for (let i = 0; i < toFetch.length; i += PREFETCH_BATCH_SIZE) {
         if (controller.signal.aborted) break;
         // Wait between batches so the main fetch completes first
@@ -149,47 +154,13 @@ export function useMatchesStore(
           batch.map(d => fetchDate(d, controller.signal))
         );
       }
-    })();
+    }, 3000);
 
-    return () => controller.abort();
+    return () => {
+      clearTimeout(prefetchTimeout);
+      controller.abort();
+    };
   }, [selectedDate, sportId, timeZone, fetchDate]);
-
-  // Immediate live fetch when sport changes
-  useEffect(() => {
-    const controller = new AbortController();
-
-    // Fetch live matches immediately when sport changes
-    fetchLive(controller.signal).then(liveData => {
-      if (controller.signal.aborted || liveData.length === 0) return;
-
-      // If we're on today's date, merge with current matches
-      const todayKey = getTodayKey(timeZone);
-      if (selectedDate === todayKey) {
-        const key = cacheKey(selectedDate, sportId);
-        const current = matchesCache.get(key) || [];
-        const liveMap = new Map(liveData.map(m => [m.id, m]));
-
-        const merged = current.map(match => {
-          const liveMatch = liveMap.get(match.id);
-          if (liveMatch) {
-            return {
-              ...match,
-              status: 'live',
-              score: liveMatch.score,
-              clock: liveMatch.clock
-            };
-          }
-          return match;
-        });
-
-        matchesCache.set(key, merged);
-        lastFetchedAt.set(key, Date.now());
-        setMatches(merged);
-      }
-    });
-
-    return () => controller.abort();
-  }, [sportId, selectedDate, timeZone, fetchLive]);
 
   // LIVE polling: only when selectedDate is today
   useEffect(() => {
@@ -239,7 +210,7 @@ export function useMatchesStore(
         setMatches(merged);
       }
 
-      // Also do a full background refresh every other tick (~ every 60s)
+      // Refresh full data if STALE_TTL exceeded
       const lastFull = lastFetchedAt.get(cacheKey(selectedDate, sportId)) || 0;
       if (Date.now() - lastFull > STALE_TTL) {
         const freshData = await fetchDate(selectedDate, controller.signal);

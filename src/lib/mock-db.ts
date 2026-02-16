@@ -37,6 +37,15 @@ export interface Tournament {
     category: string;
     format: string;
     createdAt: string;
+    isVisible?: boolean;
+    folderId?: string;
+}
+
+export interface Folder {
+    id: string;
+    name: string;
+    description?: string;
+    color?: string;
 }
 
 export interface Match {
@@ -68,6 +77,8 @@ export interface Club {
     city: string;
     logoUrl: string;
     primaryColor?: string;
+    folderId?: string;
+    isVisible?: boolean;
 }
 
 export interface ExternalTournament {
@@ -182,6 +193,21 @@ export interface TabSnapshot {
     fetchStatus: 'ok' | 'error';
 }
 
+export interface NewsItem {
+    id: string;
+    title: string;
+    summary?: string;
+    content: string;
+    imageUrl?: string;
+    scope: 'global' | 'tournament' | 'club';
+    scopeId?: string; // ID of the related entity
+    authorId: string;
+    status: 'draft' | 'published' | 'scheduled';
+    publishedAt?: string;
+    sport?: string;
+    folderId?: string;
+}
+
 // Global Mock State Container
 class MockDB {
     private static instance: MockDB;
@@ -195,11 +221,13 @@ class MockDB {
     public externalPlayers: ExternalPlayer[] = [];
     private _extraMatches: Match[] = []; // manually added matches via POST
     public auditLogs: AuditLog[] = [];
+    public folders: Folder[] = [];
     public phaseConfigurations: Record<string, PhaseConfiguration[]> = {};
     public disciplineIncidents: DisciplineIncident[] = [];
     public disciplineSanctions: DisciplineSanction[] = [];
     public regulations: Regulation[] = [];
     public tabSnapshots: TabSnapshot[] = [];
+    public news: NewsItem[] = [];
 
     /** Matches are computed dynamically so timestamps stay fresh relative to Date.now() */
     public get matches(): Match[] {
@@ -273,7 +301,7 @@ class MockDB {
             this.externalClubs[index] = {
                 ...existing,
                 ...payload,
-                sports: Array.from(new Set([...(existing.sports || []), ...(payload.sports || [])]))
+                ...{ sports: Array.from(new Set([...(existing.sports || []), ...(payload.sports || [])])) }
             };
             return;
         }
@@ -329,12 +357,12 @@ class MockDB {
 
         // Clubs
         this.clubs = [
-            { id: 'sic', unionId: 'uar', name: 'San Isidro Club', shortName: 'SIC', city: 'San Isidro', logoUrl: '🔵⚪', primaryColor: '#00ccff' },
-            { id: 'casi', unionId: 'uar', name: 'Club Atlético San Isidro', shortName: 'CASI', city: 'San Isidro', logoUrl: '⚪⚫', primaryColor: '#000000' },
-            { id: 'hindu', unionId: 'uar', name: 'Hindu Club', shortName: 'HIN', city: 'Don Torcuato', logoUrl: '🐘', primaryColor: '#fbbf24' },
-            { id: 'belgrano', unionId: 'uar', name: 'Belgrano Athletic', shortName: 'BAC', city: 'CABA', logoUrl: '🤎', primaryColor: '#78350f' },
-            { id: 'alumni', unionId: 'uar', name: 'Alumni', shortName: 'ALU', city: 'Tortuguitas', logoUrl: '🔴⚪', primaryColor: '#dc2626' },
-            { id: 'newman', unionId: 'uar', name: 'Newman', shortName: 'NEW', city: 'Benavidez', logoUrl: '🛑', primaryColor: '#b91c1c' },
+            { id: 'sic', unionId: 'uar', name: 'San Isidro Club', shortName: 'SIC', city: 'San Isidro', logoUrl: '🔵⚪', primaryColor: '#00ccff', isVisible: true, folderId: 'urba' },
+            { id: 'casi', unionId: 'uar', name: 'Club Atlético San Isidro', shortName: 'CASI', city: 'San Isidro', logoUrl: '⚪⚫', primaryColor: '#000000', isVisible: true, folderId: 'urba' },
+            { id: 'hindu', unionId: 'uar', name: 'Hindu Club', shortName: 'HIN', city: 'Don Torcuato', logoUrl: '🐘', primaryColor: '#fbbf24', isVisible: true },
+            { id: 'belgrano', unionId: 'uar', name: 'Belgrano Athletic', shortName: 'BAC', city: 'CABA', logoUrl: '🤎', primaryColor: '#78350f', isVisible: true },
+            { id: 'alumni', unionId: 'uar', name: 'Alumni', shortName: 'ALU', city: 'Tortuguitas', logoUrl: '🔴⚪', primaryColor: '#dc2626', isVisible: true },
+            { id: 'newman', unionId: 'uar', name: 'Newman', shortName: 'NEW', city: 'Benavidez', logoUrl: '🛑', primaryColor: '#b91c1c', isVisible: true },
         ];
 
         // Tournaments
@@ -349,7 +377,9 @@ class MockDB {
                 sport: 'rugby',
                 category: 'Primera',
                 format: 'League + Playoffs',
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                isVisible: true,
+                folderId: 'sudamerica'
             },
             {
                 id: '1',
@@ -361,7 +391,9 @@ class MockDB {
                 sport: 'rugby',
                 category: 'Primera',
                 format: 'League + Playoffs',
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                isVisible: true,
+                folderId: 'desarrollo'
             }
         ];
 
@@ -417,6 +449,13 @@ class MockDB {
             }
         ];
 
+        // Folders
+        this.folders = [
+            { id: 'urba', name: 'URBA', color: '#00ccff' },
+            { id: 'sudamerica', name: 'Sudamérica', color: '#f59e0b' },
+            { id: 'desarrollo', name: 'Desarrollo', color: '#10b981' }
+        ];
+
         // Discipline Sanctions
         this.disciplineSanctions = [
             {
@@ -431,6 +470,61 @@ class MockDB {
                 startDate: '2023-10-23',
                 endDate: '2023-10-30',
                 status: 'active'
+            }
+        ];
+
+        // News
+        this.news = [
+            {
+                id: 'n1',
+                title: 'Comunicado Oficial de Torneo',
+                summary: 'Resolución sobre la fecha suspendida por clima.',
+                content: 'Debido a las condiciones climáticas...',
+                scope: 'global',
+                imageUrl: 'https://placehold.co/600x400/10b981/ffffff?text=UAR',
+                authorId: 'u1',
+                status: 'published',
+                publishedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+                sport: 'rugby'
+            },
+            {
+                id: 'n2',
+                title: 'Fixture Confirmado URBA Top 12',
+                summary: 'Se definieron los cruces de la primera fase.',
+                content: 'El fixture oficial ya está disponible...',
+                scope: 'tournament',
+                scopeId: 'uar-top-12',
+                imageUrl: 'https://placehold.co/600x400/00ccff/ffffff?text=URBA',
+                authorId: 'u2',
+                status: 'published',
+                publishedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+                sport: 'rugby',
+                folderId: 'urba'
+            },
+            {
+                id: 'n3',
+                title: 'Anuncio de Club SIC',
+                summary: 'Renovación de autoridades.',
+                content: 'La comisión directiva informa...',
+                scope: 'club',
+                scopeId: 'sic',
+                imageUrl: 'https://placehold.co/600x400/000000/ffffff?text=SIC',
+                authorId: 'u3',
+                status: 'draft',
+                sport: 'rugby',
+                folderId: 'urba'
+            },
+            {
+                id: 'n4',
+                title: 'Actualización Hockey',
+                summary: 'Cambio de reglamento para 2026.',
+                content: 'Nuevas reglas de corner corto...',
+                scope: 'global',
+                imageUrl: 'https://placehold.co/600x400/f59e0b/ffffff?text=HOCKEY',
+                authorId: 'u1',
+                status: 'published',
+                publishedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+                sport: 'hockey'
             }
         ];
     }

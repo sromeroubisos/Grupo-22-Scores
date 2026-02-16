@@ -45,6 +45,14 @@ export interface Sport {
     priority: number;
     groupLabel?: string; // e.g., 'Countries', 'Categories'
     groupLabelEs?: string; // e.g., 'Países', 'Categorías'
+    matchRules?: {
+        periods: number;
+        periodDurationMinutes: number;
+        breakDurationMinutes: number;
+        overtimePeriods?: number;
+        overtimeDurationMinutes?: number;
+        hasShootout?: boolean;
+    };
 }
 
 // ===== COUNTRY TYPES =====
@@ -87,6 +95,8 @@ export interface Tournament {
     isWomen?: boolean;
     isYouth?: boolean;
     ageGroup?: string;
+    isVisible?: boolean;
+    folderId?: string;
 }
 
 // ===== TEAM TYPES =====
