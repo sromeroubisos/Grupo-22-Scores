@@ -271,6 +271,32 @@ class MockDB {
                 clock: { running: false, seconds: 4800, period: 'Final' },
                 liveEnabled: true
             },
+            {
+                id: 'm4',
+                tournamentId: 'uar-top-12',
+                roundId: 'F1',
+                dateTime: new Date(Date.now() + 7200000).toISOString(),
+                venue: 'Villa de Mayo',
+                homeClubId: 'cuba',
+                awayClubId: 'newman',
+                status: 'scheduled',
+                score: { home: 0, away: 0 },
+                clock: { running: false, seconds: 0, period: '1T' },
+                liveEnabled: true
+            },
+            {
+                id: 'm5',
+                tournamentId: 'uar-top-12',
+                roundId: 'F1',
+                dateTime: new Date(Date.now() + 10800000).toISOString(),
+                venue: 'Bella Vista',
+                homeClubId: 'regatas',
+                awayClubId: 'pucara',
+                status: 'scheduled',
+                score: { home: 0, away: 0 },
+                clock: { running: false, seconds: 0, period: '1T' },
+                liveEnabled: true
+            },
             ...this._extraMatches
         ];
     }
@@ -359,10 +385,13 @@ class MockDB {
         this.clubs = [
             { id: 'sic', unionId: 'uar', name: 'San Isidro Club', shortName: 'SIC', city: 'San Isidro', logoUrl: '🔵⚪', primaryColor: '#00ccff', isVisible: true, folderId: 'urba' },
             { id: 'casi', unionId: 'uar', name: 'Club Atlético San Isidro', shortName: 'CASI', city: 'San Isidro', logoUrl: '⚪⚫', primaryColor: '#000000', isVisible: true, folderId: 'urba' },
-            { id: 'hindu', unionId: 'uar', name: 'Hindu Club', shortName: 'HIN', city: 'Don Torcuato', logoUrl: '🐘', primaryColor: '#fbbf24', isVisible: true },
-            { id: 'belgrano', unionId: 'uar', name: 'Belgrano Athletic', shortName: 'BAC', city: 'CABA', logoUrl: '🤎', primaryColor: '#78350f', isVisible: true },
-            { id: 'alumni', unionId: 'uar', name: 'Alumni', shortName: 'ALU', city: 'Tortuguitas', logoUrl: '🔴⚪', primaryColor: '#dc2626', isVisible: true },
-            { id: 'newman', unionId: 'uar', name: 'Newman', shortName: 'NEW', city: 'Benavidez', logoUrl: '🛑', primaryColor: '#b91c1c', isVisible: true },
+            { id: 'hindu', unionId: 'uar', name: 'Hindu Club', shortName: 'HIN', city: 'Don Torcuato', logoUrl: '🐘', primaryColor: '#fbbf24', isVisible: true, folderId: 'urba' },
+            { id: 'belgrano', unionId: 'uar', name: 'Belgrano Athletic', shortName: 'BAC', city: 'CABA', logoUrl: '🤎', primaryColor: '#78350f', isVisible: true, folderId: 'urba' },
+            { id: 'alumni', unionId: 'uar', name: 'Alumni', shortName: 'ALU', city: 'Tortuguitas', logoUrl: '🔴⚪', primaryColor: '#dc2626', isVisible: true, folderId: 'urba' },
+            { id: 'newman', unionId: 'uar', name: 'Newman', shortName: 'NEW', city: 'Benavidez', logoUrl: '🛑', primaryColor: '#b91c1c', isVisible: true, folderId: 'urba' },
+            { id: 'cuba', unionId: 'uar', name: 'Club Universitario de Buenos Aires', shortName: 'CUBA', city: 'Villa de Mayo', logoUrl: '🔵⚫', primaryColor: '#1e3a8a', isVisible: true, folderId: 'urba' },
+            { id: 'regatas', unionId: 'uar', name: 'Regatas Bella Vista', shortName: 'REG', city: 'Bella Vista', logoUrl: '🟡🔵', primaryColor: '#fbbf24', isVisible: true, folderId: 'urba' },
+            { id: 'pucara', unionId: null, name: 'Club Pucara', shortName: 'PUC', city: 'Burzaco', logoUrl: '🔴', primaryColor: '#b91c1c', isVisible: true, folderId: 'desarrollo' } // Intentionally unlinked for conflict demo
         ];
 
         // Tournaments
@@ -385,16 +414,22 @@ class MockDB {
                 id: '1',
                 unionId: 'uar',
                 seasonId: '2026',
-                name: 'Torneo Demo',
-                slug: 'torneo-demo',
+                name: 'Torneo Nacional de Clubes',
+                slug: 'nacional-clubes',
                 status: 'draft',
                 sport: 'rugby',
                 category: 'Primera',
-                format: 'League + Playoffs',
+                format: 'Knockout',
                 createdAt: new Date().toISOString(),
                 isVisible: true,
                 folderId: 'desarrollo'
             }
+        ];
+
+        // Unlinked external data for conflicts
+        this.externalClubs = [
+            { id: 'ext-pucara', name: 'Club Pucara', country: 'Argentina', sports: ['rugby'], source: 'API', provider: 'FlashScore', updatedAt: new Date().toISOString() },
+            { id: 'ext-sic', name: 'San Isidro Club', country: 'Argentina', sports: ['rugby'], source: 'API', provider: 'FlashScore', updatedAt: new Date().toISOString() }
         ];
 
         // Matches are now computed dynamically via the getter above.

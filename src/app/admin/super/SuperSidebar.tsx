@@ -122,21 +122,13 @@ export default function SuperSidebar({ isOpen, onClose }: { isOpen?: boolean; on
         <>
             {/* Mobile Overlay */}
             <div
-                className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                className={`${styles.overlay} ${isOpen ? styles.open : ''}`}
                 onClick={onClose}
                 aria-hidden="true"
             />
 
             <aside
-                className={`
-                    ${styles.sidebar}
-                    fixed inset-y-0 left-0 z-50
-                    w-[85vw] max-w-[320px]
-                    transform transition-transform duration-300 ease-in-out
-                    ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
-                    lg:relative lg:translate-x-0 lg:w-[260px] lg:inset-auto lg:z-0 lg:shadow-none
-                `}
+                className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}
             >
                 <div className={styles.brand}>
                     <span className={styles.brandDot} />

@@ -395,11 +395,39 @@ export default function CreateTournament() {
         }
     };
 
+    const handleSave = () => {
+        const newTournament = {
+            id: isEdit && tournamentId ? tournamentId : Math.random().toString(36).substr(2, 9),
+            unionId: unionId,
+            seasonId: formData.season || '2026',
+            name: formData.name || 'Borrador',
+            slug: (formData.name || 'borrador').toLowerCase().replace(/\s+/g, '-'),
+            status: 'draft' as const,
+            sport: formData.sport.toLowerCase().includes('rugby') ? 'rugby' : 'football' as any,
+            category: formData.category,
+            format: formData.format,
+            createdAt: new Date().toISOString(),
+        };
+
+        if (isEdit) {
+            const index = db.tournaments.findIndex(t => t.id === tournamentId);
+            if (index !== -1) {
+                db.tournaments[index] = { ...db.tournaments[index], ...newTournament };
+            }
+            alert('Cambios guardados correctamente.');
+        } else {
+            db.tournaments.push(newTournament);
+            alert('Borrador guardado.');
+            router.push(`/admin/union/${unionId}/torneos`);
+        }
+    };
+
     const handleNext = () => {
         if (currentStep < 5) {
             setCurrentStep(prev => prev + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
+            // Save logic also here for consistency if needed, but keeping existing alert for now
             if (isEdit) {
                 alert('Torneo actualizado.');
             } else {
@@ -546,9 +574,9 @@ export default function CreateTournament() {
                     content: '';
                     position: absolute;
                     bottom: 0;
-                    left: 0;
                     width: 100%;
                     height: 2px;
+                    left: 0;
                     background: var(--accent-green);
                     box-shadow: 0 0 10px var(--accent-green);
                 }
@@ -646,10 +674,12 @@ export default function CreateTournament() {
                 }
 
                 .dropzone {
-                    width: 120px;
-                    height: 120px;
+                    width: 100%;
+                    height: auto;
+                    min-height: 120px;
+                    padding: 24px;
                     border: 2px dashed var(--glass-border);
-                    border-radius: 50%;
+                    border-radius: var(--radius-md);
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -849,19 +879,242 @@ export default function CreateTournament() {
                 }
 
                 @media (max-width: 768px) {
-                    .step-grid { grid-template-columns: 1fr; gap: 32px; }
-                    .header-actions .btn-secondary { display: none; }
-                    .steps-container { gap: 15px; }
-                    .step-label { display: none; }
+                    .create-tournament-page { padding-top: 0; }
+                    .app-container { padding: 0; max-width: 100%; }
+                    
+                    /* Hide Desktop Elements */
+                    .back-button, 
+                    .page-header, 
+                    .wizard-nav { 
+                        display: none !important; 
+                    }
+
+                    /* Mobile Header */
+                    .mobile-only-header {
+                        display: flex !important;
+                        align-items: center;
+                        justify-content: flex-start;
+                        gap: 12px;
+                        height: 56px;
+                        padding: 0 16px;
+                        background: rgba(11, 16, 22, 0.95);
+                        backdrop-filter: blur(12px);
+                        position: sticky;
+                        top: 0;
+                        z-index: 100;
+                        border-bottom: 1px solid var(--glass-border);
+                        margin-bottom: 0px;
+                    }
+
+                    .mobile-back-btn {
+                        background: transparent;
+                        border: none;
+                        color: var(--text-primary);
+                        padding: 8px;
+                        margin-left: -8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .mobile-header-title {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        line-height: 1.2;
+                        flex: 1;
+                    }
+
+                    .mobile-header-title h1 {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: var(--text-primary);
+                        margin: 0;
+                    }
+
+                    .mobile-step {
+                        font-size: 11px;
+                        color: var(--accent-green);
+                        font-family: 'JetBrains Mono', monospace;
+                        opacity: 0.9;
+                    }
+
+                    .mobile-save-btn {
+                        font-size: 13px;
+                        color: var(--accent-green);
+                        background: transparent;
+                        border: none;
+                        font-weight: 600;
+                        padding: 8px 0;
+                        margin-right: -4px;
+                    }
+
+                    /* Form Density */
+                    .glass-card {
+                        background: transparent;
+                        border: none;
+                        box-shadow: none;
+                        padding: 16px 16px 80px 16px; /* Bottom padding for footer */
+                        border-radius: 0;
+                    }
+                    
+                    .section-title {
+                        font-size: 11px;
+                        margin-bottom: 16px;
+                        color: var(--text-muted);
+                        font-weight: 600;
+                    }
+
+                    .form-group {
+                        margin-bottom: 16px;
+                    }
+
+                    label {
+                        font-size: 11px;
+                        margin-bottom: 6px;
+                        color: var(--text-secondary);
+                    }
+
+                    input[type="text"], 
+                    input[type="number"], 
+                    select {
+                        background: var(--bg-surface);
+                        border: 1px solid rgba(255, 255, 255, 0.15);
+                        padding: 10px 12px;
+                        font-size: 14px; /* Prevent IOS zoom */
+                        height: 40px;
+                        border-radius: 6px;
+                    }
+
+                    /* Helper text compact */
+                    .form-group div[style*="font-size: 10px"] {
+                        margin-top: 4px;
+                        font-size: 10px !important; 
+                        opacity: 0.7;
+                    }
+
+                    /* Compact Chips */
+                    .chip-group {
+                        display: flex;
+                        gap: 8px;
+                        overflow-x: auto;
+                        padding-bottom: 4px;
+                        margin-bottom: 8px !important;
+                    }
+                    
+                    .chip-select {
+                        padding: 6px 12px;
+                        font-size: 12px;
+                        white-space: nowrap;
+                        flex-shrink: 0;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                    }
+
+                    /* Logo Dropzone Compact */
+                    .dropzone {
+                        width: 100%;
+                        height: 60px;
+                        flex-direction: row;
+                        padding: 0 16px;
+                        gap: 12px;
+                        justify-content: flex-start;
+                        border-style: solid;
+                        background: rgba(255,255,255,0.03);
+                    }
+                    
+                    .dropzone svg {
+                        width: 20px;
+                        height: 20px;
+                    }
+                    
+                    .dropzone span {
+                        margin-top: 0;
+                        font-size: 12px;
+                    }
+
+                    .step-grid {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0;
+                    }
+                    
+                    .col {
+                        display: contents;
+                    }
+
+                    /* Footer Mobile Fixed */
+                    .mobile-footer {
+                        display: flex !important;
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        width: 100%;
+                        padding: 12px 16px;
+                        background: rgba(7, 9, 12, 0.95);
+                        backdrop-filter: blur(12px);
+                        border-top: 1px solid var(--glass-border);
+                        z-index: 200;
+                        gap: 12px;
+                        padding-bottom: max(12px, env(safe-area-inset-bottom));
+                    }
+                    
+                    .btn-mobile-secondary {
+                        background: rgba(255, 255, 255, 0.05);
+                        color: var(--text-secondary);
+                        border: 1px solid var(--glass-border);
+                        border-radius: 8px;
+                        padding: 0 16px; 
+                        height: 48px;
+                        font-weight: 600;
+                        font-family: inherit;
+                        flex: 1;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    
+                    .btn-mobile-primary {
+                        background: var(--accent-green);
+                        color: #07090c;
+                        border: none;
+                        border-radius: 8px;
+                        padding: 0 16px;
+                        height: 48px;
+                        font-weight: 700;
+                        font-family: inherit;
+                        flex: 2;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    }
                 }
+                
+                .mobile-only-header, .mobile-footer { display: none; }
             `}</style>
 
             <div className="create-tournament-page">
+                {/* Mobile Header Native */}
+                <div className="mobile-only-header">
+                    <button onClick={() => router.push(`/admin/union/${unionId}/torneos`)} className="mobile-back-btn">
+                        <ArrowLeft size={20} />
+                    </button>
+                    <div className="mobile-header-title">
+                        <h1>{isEdit ? 'Editar Torneo' : 'Crear Torneo'}</h1>
+                        <span className="mobile-step">PASO {currentStep}/5</span>
+                    </div>
+                    {/* Botón Guardar movido al footer */}
+                </div>
+
                 <div className="app-container">
                     <button onClick={() => router.push(`/admin/union/${unionId}/torneos`)} className="back-button">
                         <ArrowLeft size={16} />
                         Volver a Torneos
                     </button>
+
+                    {/* Desktop Header & Nav remain here... */}
 
                     <header className="page-header">
                         <div className="title-area">
@@ -895,127 +1148,7 @@ export default function CreateTournament() {
                         <section className={`glass-card ${currentStep === 1 ? 'active' : ''}`}>
                             <div className="step-grid">
                                 <div className="col">
-                                    <h3 className="section-title">Identidad del Torneo</h3>
-
-                                    <div className="form-group">
-                                        <label>LOGO / IMAGEN</label>
-
-                                        {/* Method selector */}
-                                        <div className="chip-group" style={{ marginBottom: '12px' }}>
-                                            <div
-                                                onClick={() => {
-                                                    setLogoMethod('url');
-                                                    clearLogo();
-                                                }}
-                                                className={`chip-select ${logoMethod === 'url' ? 'active' : ''}`}
-                                            >
-                                                URL
-                                            </div>
-                                            <div
-                                                onClick={() => {
-                                                    setLogoMethod('file');
-                                                    clearLogo();
-                                                }}
-                                                className={`chip-select ${logoMethod === 'file' ? 'active' : ''}`}
-                                            >
-                                                Subir archivo
-                                            </div>
-                                        </div>
-
-                                        {/* URL input */}
-                                        {logoMethod === 'url' && (
-                                            <div>
-                                                <input
-                                                    type="text"
-                                                    placeholder="https://ejemplo.com/logo.png"
-                                                    value={logoUrl}
-                                                    onChange={(e) => handleUrlChange(e.target.value)}
-                                                    style={{ marginBottom: '8px' }}
-                                                />
-                                                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                                                    Ingresá la URL completa de la imagen
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* File upload */}
-                                        {logoMethod === 'file' && (
-                                            <div>
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileSelect}
-                                                    style={{ display: 'none' }}
-                                                />
-                                                <div
-                                                    className="dropzone"
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    style={{ width: '100%', height: 'auto', padding: '24px', borderRadius: '8px' }}
-                                                >
-                                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                                        <circle cx="8.5" cy="8.5" r="1.5" />
-                                                        <polyline points="21 15 16 10 5 21" />
-                                                    </svg>
-                                                    <span style={{ marginTop: '12px' }}>
-                                                        {logoFile ? logoFile.name : 'Click para seleccionar archivo'}
-                                                    </span>
-                                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                                        PNG, JPG, GIF hasta 5MB
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Logo Preview */}
-                                        {logoPreview && (
-                                            <div style={{
-                                                marginTop: '16px',
-                                                padding: '16px',
-                                                background: 'rgba(255,255,255,0.02)',
-                                                borderRadius: '8px',
-                                                border: '1px solid var(--glass-border)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px'
-                                            }}>
-                                                <img
-                                                    src={logoPreview}
-                                                    alt="Preview"
-                                                    style={{
-                                                        width: '64px',
-                                                        height: '64px',
-                                                        objectFit: 'cover',
-                                                        borderRadius: '8px',
-                                                        border: '1px solid var(--glass-border)'
-                                                    }}
-                                                />
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontSize: '12px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                                                        Vista previa del logo
-                                                    </div>
-                                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                                        {logoMethod === 'file' ? logoFile?.name : 'Desde URL'}
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={clearLogo}
-                                                    style={{
-                                                        background: 'rgba(239,68,68,0.1)',
-                                                        border: '1px solid rgba(239,68,68,0.2)',
-                                                        borderRadius: '6px',
-                                                        padding: '6px 12px',
-                                                        color: '#ef4444',
-                                                        cursor: 'pointer',
-                                                        fontSize: '12px'
-                                                    }}
-                                                >
-                                                    Eliminar
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <h3 className="section-title">Información Principal</h3>
 
                                     <div className="form-group">
                                         <label>NOMBRE DEL TORNEO *</label>
@@ -1042,36 +1175,6 @@ export default function CreateTournament() {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>VISIBILIDAD</label>
-                                        <div className="chip-group">
-                                            {['public', 'private', 'unlisted'].map((vis) => (
-                                                <div
-                                                    key={vis}
-                                                    onClick={() => updateFormData('visibility', vis)}
-                                                    className={`chip-select ${formData.visibility === vis ? 'active' : ''}`}
-                                                >
-                                                    {vis === 'public' ? 'Público' : vis === 'private' ? 'Privado' : 'No listado'}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>SEXO</label>
-                                        <div className="chip-group">
-                                            {['Masculino', 'Femenino', 'Mixto'].map((gender) => (
-                                                <div
-                                                    key={gender}
-                                                    onClick={() => updateFormData('gender', gender)}
-                                                    className={`chip-select ${formData.gender === gender ? 'active' : ''}`}
-                                                >
-                                                    {gender}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="form-group">
                                         <label>CATEGORÍA</label>
                                         <select value={formData.category} onChange={(e) => updateFormData('category', e.target.value)}>
                                             <option>Profesional</option>
@@ -1081,19 +1184,162 @@ export default function CreateTournament() {
                                             <option>Amistoso Recreativo</option>
                                         </select>
                                     </div>
+
+                                    {/* GRID: Sexo y Visibilidad */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label>SEXO</label>
+                                            <div className="chip-group" style={{ flexDirection: 'column', gap: '6px' }}>
+                                                {['Masculino', 'Femenino', 'Mixto'].map((gender) => (
+                                                    <div
+                                                        key={gender}
+                                                        onClick={() => updateFormData('gender', gender)}
+                                                        className={`chip-select ${formData.gender === gender ? 'active' : ''}`}
+                                                        style={{ textAlign: 'center', fontSize: '12px', padding: '8px' }}
+                                                    >
+                                                        {gender}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label>VISIBILIDAD</label>
+                                            <div className="chip-group" style={{ flexDirection: 'column', gap: '6px' }}>
+                                                {['public', 'private', 'unlisted'].map((vis) => (
+                                                    <div
+                                                        key={vis}
+                                                        onClick={() => updateFormData('visibility', vis)}
+                                                        className={`chip-select ${formData.visibility === vis ? 'active' : ''}`}
+                                                        style={{ textAlign: 'center', fontSize: '12px', padding: '8px' }}
+                                                    >
+                                                        {vis === 'public' ? 'Público' : vis === 'private' ? 'Privado' : 'No Listado'}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* LOGO: Bloque completo para preview */}
+                                    <div className="form-group" style={{ marginTop: '16px' }}>
+                                        <label>LOGO / IMAGEN</label>
+                                        <div className="chip-group" style={{ marginBottom: '12px' }}>
+                                            <div
+                                                onClick={() => { setLogoMethod('url'); clearLogo(); }}
+                                                className={`chip-select ${logoMethod === 'url' ? 'active' : ''}`}
+                                                style={{ flex: 1, textAlign: 'center' }}
+                                            >
+                                                URL
+                                            </div>
+                                            <div
+                                                onClick={() => { setLogoMethod('file'); clearLogo(); }}
+                                                className={`chip-select ${logoMethod === 'file' ? 'active' : ''}`}
+                                                style={{ flex: 1, textAlign: 'center' }}
+                                            >
+                                                Subir archivo
+                                            </div>
+                                        </div>
+
+                                        {logoMethod === 'url' && (
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    placeholder="https://ejemplo.com/logo.png"
+                                                    value={logoUrl}
+                                                    onChange={(e) => handleUrlChange(e.target.value)}
+                                                />
+                                                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                                    Ingresá la URL de la imagen
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {logoMethod === 'file' && (
+                                            <div>
+                                                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
+                                                <div className="dropzone" onClick={() => fileInputRef.current?.click()}>
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '8px' }}>
+                                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                                        <polyline points="21 15 16 10 5 21" />
+                                                    </svg>
+                                                    <span style={{ fontSize: '13px' }}>{logoFile ? logoFile.name : 'Click para subir imagen'}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Preview amplia */}
+                                        {logoPreview && (
+                                            <div style={{
+                                                marginTop: '16px',
+                                                padding: '16px',
+                                                background: 'rgba(255,255,255,0.02)',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--glass-border)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '16px'
+                                            }}>
+                                                <img
+                                                    src={logoPreview}
+                                                    alt="Preview"
+                                                    style={{
+                                                        width: '80px',
+                                                        height: '80px',
+                                                        objectFit: 'contain',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid var(--glass-border)',
+                                                        background: 'rgba(0,0,0,0.2)'
+                                                    }}
+                                                />
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 600 }}>Vista Previa</div>
+                                                    <button
+                                                        onClick={clearLogo}
+                                                        style={{
+                                                            marginTop: '8px',
+                                                            background: 'rgba(239,68,68,0.1)',
+                                                            border: '1px solid rgba(239,68,68,0.2)',
+                                                            borderRadius: '6px',
+                                                            padding: '6px 12px',
+                                                            color: '#ef4444',
+                                                            cursor: 'pointer',
+                                                            fontSize: '12px'
+                                                        }}
+                                                    >
+                                                        Eliminar Logo
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="col">
                                     <h3 className="section-title">Contexto y Fechas</h3>
-                                    <div className="form-group">
-                                        <label>TEMPORADA</label>
-                                        <input
-                                            type="text"
-                                            placeholder="2026"
-                                            value={formData.season}
-                                            onChange={(e) => updateFormData('season', e.target.value)}
-                                        />
+
+                                    {/* Pairs: Season & Country */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label>TEMPORADA</label>
+                                            <input
+                                                type="text"
+                                                placeholder="2026"
+                                                value={formData.season}
+                                                onChange={(e) => updateFormData('season', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label>PAÍS</label>
+                                            <input
+                                                type="text"
+                                                placeholder="ARG"
+                                                value={formData.country}
+                                                onChange={(e) => updateFormData('country', e.target.value)}
+                                            />
+                                        </div>
                                     </div>
+
                                     <div className="form-group">
                                         <label>UBICACIÓN (CIUDAD/PROVINCIA)</label>
                                         <input
@@ -1103,21 +1349,13 @@ export default function CreateTournament() {
                                             onChange={(e) => updateFormData('location', e.target.value)}
                                         />
                                     </div>
-                                    <div className="form-group">
-                                        <label>PAÍS</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Argentina"
-                                            value={formData.country}
-                                            onChange={(e) => updateFormData('country', e.target.value)}
-                                        />
-                                    </div>
+
                                     <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                         <div>
                                             <label>INICIO</label>
                                             <input
                                                 type="text"
-                                                placeholder="DD/MM/AAAA"
+                                                placeholder="DD/MM"
                                                 value={formData.startDate}
                                                 onChange={(e) => updateFormData('startDate', e.target.value)}
                                             />
@@ -1126,15 +1364,15 @@ export default function CreateTournament() {
                                             <label>FIN</label>
                                             <input
                                                 type="text"
-                                                placeholder="DD/MM/AAAA"
+                                                placeholder="DD/MM"
                                                 value={formData.endDate}
                                                 onChange={(e) => updateFormData('endDate', e.target.value)}
                                             />
                                         </div>
                                     </div>
-                                    <div style={{ padding: '16px', borderRadius: '8px', background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.1)', marginTop: '32px' }}>
-                                        <p style={{ fontSize: '12px', color: 'var(--accent-green)' }}>
-                                            TIP: Podés dejar las fechas vacías y se mostrará como <strong>"SIN FECHA"</strong> hasta que el fixture esté listo.
+                                    <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.1)', marginTop: '24px' }}>
+                                        <p style={{ fontSize: '11px', color: 'var(--accent-green)', lineHeight: '1.4' }}>
+                                            TIP: Dejalo vacío para "SIN FECHA".
                                         </p>
                                     </div>
                                 </div>
@@ -1695,6 +1933,28 @@ export default function CreateTournament() {
                             </div>
                         </footer>
                     </main>
+                </div>
+
+                {/* Footer Mobile Fixed Navigation */}
+                <div className="mobile-footer">
+                    <button
+                        className="btn-mobile-secondary"
+                        onClick={handleSave}
+                        style={{ flex: '1' }}
+                    >
+                        Guardar
+                    </button>
+                    {currentStep > 1 && (
+                        <button className="btn-mobile-secondary" onClick={handlePrev}>
+                            Atrás
+                        </button>
+                    )}
+                    <button
+                        className="btn-mobile-primary"
+                        onClick={handleNext}
+                    >
+                        {currentStep === 5 ? (isEdit ? 'Guardar Cambios' : 'Publicar Torneo') : 'Siguiente'}
+                    </button>
                 </div>
             </div>
 

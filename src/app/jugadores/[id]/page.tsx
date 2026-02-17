@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { ArrowLeft, Star } from 'lucide-react';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useFavorite } from '@/hooks/useFavorites';
 
 const TABS = [
     { id: 'summary', label: 'Resumen' },
@@ -20,7 +20,8 @@ const getTeamLogo = (team: any) => {
 export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
-    const { isPlayerFavorite, togglePlayerFavorite } = useFavorites();
+    const playerId = id.trim();
+    const { isFavorited, toggle: toggleFavorite } = useFavorite('player', playerId);
 
     const [activeTab, setActiveTab] = useState('summary');
     const [loading, setLoading] = useState(true);
@@ -28,8 +29,6 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
     const [details, setDetails] = useState<any>(null);
     const [career, setCareer] = useState<any[]>([]);
-
-    const playerId = id.trim();
 
     useEffect(() => {
         async function fetchData() {
@@ -132,12 +131,12 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                             </div>
                         </div>
                         <button
-                            className={`${styles.followBtn} ${isPlayerFavorite(playerId) ? styles.followBtnActive : ''}`}
-                            onClick={() => togglePlayerFavorite(playerId, { name: playerName, team: currentTeamName, position })}
+                            className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
+                            onClick={() => toggleFavorite()}
                             type="button"
                         >
-                            <Star size={16} fill={isPlayerFavorite(playerId) ? 'currentColor' : 'none'} />
-                            {isPlayerFavorite(playerId) ? 'Siguiendo' : 'Seguir'}
+                            <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                            {isFavorited ? 'Siguiendo' : 'Seguir'}
                         </button>
                     </div>
 

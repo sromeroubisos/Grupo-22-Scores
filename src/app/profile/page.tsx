@@ -1,253 +1,197 @@
-'use client';
+'use client'
 
-import { useMemo, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useFavorites } from '@/hooks/useFavorites';
-import { getTournamentById } from '@/lib/data/tournaments';
-import styles from './page.module.css';
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { User, Favorite, EntityType } from '@/lib/types/user'
+import { Star, User as UserIcon, Settings, LogOut, Trophy, Users, Shield } from 'lucide-react'
+import styles from './profile.module.css'
+import { useRouter } from 'next/navigation'
 
-type TabKey = 'favoritos' | 'configuracion' | 'actividad';
-
-
+type Tab = 'all' | 'league' | 'club' | 'tournament' | 'team' | 'player'
 
 export default function ProfilePage() {
-    const { user } = useAuth();
-    const { favorites, toggleLeagueFavorite, toggleTeamFavorite, togglePlayerFavorite } = useFavorites();
-    const [activeTab, setActiveTab] = useState<TabKey>('favoritos');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [user, setUser] = useState<User | null>(null)
+    const [favorites, setFavorites] = useState<Favorite[]>([])
+    const [activeTab, setActiveTab] = useState<Tab>('all')
+    const [loading, setLoading] = useState(true)
+    const router = useRouter()
+    const supabase = createClient()
 
-    const profile = useMemo(() => {
-        const baseName = user?.name || 'Usuario Regular';
-        const avatar = baseName
-            .split(' ')
-            .map((chunk) => chunk[0])
-            .join('')
-            .slice(0, 2)
-            .toUpperCase();
+    useEffect(() => {
+        loadProfile()
+    }, [])
 
-        return {
-            name: baseName,
-            username: user?.email ? user.email.split('@')[0] : 'usuario',
-            location: 'Buenos Aires, AR',
-            favoriteSport: 'Rugby',
-            avatar
-        };
-    }, [user]);
+    useEffect(() => {
+        loadFavorites()
+    }, [activeTab])
 
-    const teams = useMemo(() => {
-        return Array.from(favorites.teams.entries()).map(([id, info]) => ({
-            id,
-            name: info.name,
-            logo: info.logo,
-        }));
-    }, [favorites.teams]);
+    async function loadProfile() {
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
 
-    const leagues = useMemo(() => {
-        return Array.from(favorites.leagues)
-            .map(id => getTournamentById(id))
-            .filter((t): t is NonNullable<typeof t> => t != null);
-    }, [favorites.leagues]);
+            if (!session) {
+                router.push('/login')
+                return
+            }
 
-    const players = useMemo(() => {
-        return Array.from(favorites.players.entries()).map(([id, info]) => ({
-            id,
-            name: info.name,
-            team: info.team,
-            position: info.position,
-        }));
-    }, [favorites.players]);
+            const { data: userData } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', session.user.id)
+                .single()
+
+            setUser(userData)
+        } catch (error) {
+            console.error('Error loading profile:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    async function loadFavorites() {
+        try {
+            const entityType = activeTab === 'all' ? null : activeTab
+
+            const { data } = await supabase
+                .rpc('get_user_favorites', {
+                    p_entity_type: entityType
+                })
+
+            setFavorites(data || [])
+        } catch (error) {
+            console.error('Error loading favorites:', error)
+        }
+    }
+
+    async function handleSignOut() {
+        await supabase.auth.signOut()
+        router.push('/')
+        router.refresh()
+    }
+
+    if (loading) {
+        return (
+            <div className={styles.page}>
+                <div className={styles.loading}>Cargando perfil...</div>
+            </div>
+        )
+    }
+
+    if (!user) {
+        return null
+    }
+
+    const tabs: Array<{ id: Tab; label: string; icon: any }> = [
+        { id: 'all', label: 'Todos', icon: Star },
+        { id: 'league', label: 'Ligas', icon: Trophy },
+        { id: 'club', label: 'Clubes', icon: Users },
+        { id: 'tournament', label: 'Torneos', icon: Trophy },
+        { id: 'team', label: 'Equipos', icon: Shield },
+        { id: 'player', label: 'Jugadores', icon: UserIcon },
+    ]
+
+    const filteredFavorites = activeTab === 'all'
+        ? favorites
+        : favorites.filter(f => f.entity_type === activeTab)
 
     return (
         <div className={styles.page}>
             <div className={styles.container}>
-                <section className={`${styles.headerCard} ${activeTab === 'favoritos' ? styles.hideOnMobile : ''}`}>
-                    <div className={styles.profileRow}>
-                        <div className={styles.avatar}>{profile.avatar}</div>
-                        <div className={styles.profileInfo}>
-                            <div className={styles.name}>{profile.name}</div>
-                            <div className={styles.meta}>@{profile.username} · {profile.location}</div>
-                            <div className={styles.badgeRow}>
-                                <span className={styles.badge}>Deporte favorito</span>
-                                <span className={`${styles.badge} ${styles.badgeHighlight}`}>{profile.favoriteSport}</span>
+                {/* Header with profile info */}
+                <div className={styles.profileHeader}>
+                    <div className={styles.avatarSection}>
+                        {user.avatar_url ? (
+                            <img src={user.avatar_url} alt={user.name || 'User'} className={styles.avatar} />
+                        ) : (
+                            <div className={styles.avatarPlaceholder}>
+                                <UserIcon size={48} />
                             </div>
-                        </div>
-                    </div>
-                    <div className={styles.headerActions}>
-                        <button className="btn btn-secondary" type="button">Editar perfil</button>
-                    </div>
-                </section>
-
-                <section className={styles.tabs}>
-                    <button
-                        className={`${styles.tab} ${activeTab === 'favoritos' ? styles.tabActive : ''}`}
-                        type="button"
-                        onClick={() => setActiveTab('favoritos')}
-                    >
-                        Favoritos
-                    </button>
-                    <button
-                        className={`${styles.tab} ${activeTab === 'configuracion' ? styles.tabActive : ''}`}
-                        type="button"
-                        onClick={() => setActiveTab('configuracion')}
-                    >
-                        Configuración
-                    </button>
-                    <button
-                        className={`${styles.tab} ${activeTab === 'actividad' ? styles.tabActive : ''}`}
-                        type="button"
-                        onClick={() => setActiveTab('actividad')}
-                    >
-                        Actividad
-                    </button>
-                </section>
-
-                {activeTab === 'favoritos' && (
-                    <section className={styles.section}>
-                        <div className={styles.followingHeader}>
-                            <div className={styles.listSectionHeader}>
-                                <h2 className={styles.listSectionTitle}>Siguiendo</h2>
-                                <span className={styles.listAction}>Editar</span>
-                            </div>
-                            <div className={styles.searchArea}>
-                                <div className={styles.mainSearchField}>
-                                    <span className={styles.searchIcon}>🔍</span>
-                                    <input
-                                        type="text"
-                                        className={styles.searchInput}
-                                        placeholder="Buscar torneo, país o deporte..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Mixed Results / Filtered View */}
-                        <div className={styles.followingList}>
-                            {/* Filtered Teams */}
-                            {teams
-                                .filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                                .map((team) => (
-                                    <div key={team.id} className={styles.followingListItem}>
-                                        <div className={styles.listIcon}>
-                                            {team.logo ? <img src={team.logo} alt={team.name} /> : <span>🛡️</span>}
-                                        </div>
-                                        <div className={styles.listInfo}>
-                                            <div className={styles.listTitle}>{team.name}</div>
-                                            <div className={styles.listMeta}>Equipo</div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                            {/* Filtered Leagues */}
-                            {leagues
-                                .filter(l => (l.nameEs || l.name).toLowerCase().includes(searchQuery.toLowerCase()))
-                                .map((league) => (
-                                    <div key={league.id} className={styles.followingListItem}>
-                                        <div className={styles.listIcon}>
-                                            <span>🏆</span>
-                                        </div>
-                                        <div className={styles.listInfo}>
-                                            <div className={styles.listTitle}>{league.nameEs || league.name}</div>
-                                            <div className={styles.listMeta}>Torneo</div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                            {/* Filtered Players */}
-                            {players
-                                .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                                .map((player) => (
-                                    <div key={player.id} className={styles.followingListItem}>
-                                        <div className={styles.listIcon}>
-                                            <span>👤</span>
-                                        </div>
-                                        <div className={styles.listInfo}>
-                                            <div className={styles.listTitle}>{player.name}</div>
-                                            <div className={styles.listMeta}>{player.team} · Jugador</div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                            {searchQuery &&
-                                teams.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 &&
-                                leagues.filter(l => (l.nameEs || l.name).toLowerCase().includes(searchQuery.toLowerCase())).length === 0 &&
-                                players.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-                                    <div className={styles.emptyState}>No se han encontrado resultados para "{searchQuery}"</div>
-                                )}
-
-                            {!searchQuery && teams.length === 0 && leagues.length === 0 && players.length === 0 && (
-                                <div className={styles.emptyState}>No tienes elementos siguiendo.</div>
+                        )}
+                        <div className={styles.userInfo}>
+                            <h1 className={styles.userName}>{user.name || user.email}</h1>
+                            <p className={styles.userEmail}>{user.email}</p>
+                            {user.role === 'super_admin' && (
+                                <span className={styles.superAdminBadge}>
+                                    <Shield size={14} /> Super Admin
+                                </span>
                             )}
                         </div>
-                    </section>
-                )}
+                    </div>
 
-                {activeTab === 'configuracion' && (
-                    <section className={styles.section}>
-                        <div className={styles.sectionHeader}>
-                            <div>
-                                <h2 className={styles.sectionTitle}>Configuración básica</h2>
-                                <p className={styles.sectionSubtitle}>Gestión mínima de tu cuenta y preferencias.</p>
-                            </div>
+                    <div className={styles.actions}>
+                        <button className={styles.btnSecondary}>
+                            <Settings size={16} /> Configuración
+                        </button>
+                        <button className={styles.btnDanger} onClick={handleSignOut}>
+                            <LogOut size={16} /> Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+
+                {/* Stats */}
+                <div className={styles.statsGrid}>
+                    <div className={styles.statCard}>
+                        <Star size={24} />
+                        <div>
+                            <div className={styles.statValue}>{favorites.length}</div>
+                            <div className={styles.statLabel}>Favoritos</div>
                         </div>
+                    </div>
+                </div>
 
-                        <div className={styles.configGrid}>
-                            <div className={styles.configCard}>
-                                <h3 className={styles.groupTitle}>Cuenta</h3>
-                                <div className={styles.configItem}>
-                                    <div>
-                                        <div className={styles.itemTitle}>Foto de perfil</div>
-                                        <div className={styles.itemMeta}>Actualiza tu avatar.</div>
-                                    </div>
-                                    <button className="btn btn-secondary" type="button">Cambiar foto</button>
-                                </div>
-                                <div className={styles.configItem}>
-                                    <div>
-                                        <div className={styles.itemTitle}>Contraseña</div>
-                                        <div className={styles.itemMeta}>Gestiona tu nivel de seguridad.</div>
-                                    </div>
-                                    <button className="btn btn-secondary" type="button">Cambiar</button>
-                                </div>
-                            </div>
+                {/* Favorites Section */}
+                <div className={styles.favoritesSection}>
+                    <h2 className={styles.sectionTitle}>Mis Favoritos</h2>
 
-                            <div className={styles.configCard}>
-                                <h3 className={styles.groupTitle}>Notificaciones</h3>
-                                <div className={styles.toggleList}>
-                                    <div className={styles.toggleItem}>
-                                        <span>Partidos en vivo</span>
-                                        <button className={styles.switch} aria-pressed="true" type="button" />
-                                    </div>
-                                    <div className={styles.toggleItem}>
-                                        <span>Resultados</span>
-                                        <button className={styles.switch} aria-pressed="true" type="button" />
-                                    </div>
-                                    <div className={styles.toggleItem}>
-                                        <span>Noticias</span>
-                                        <button className={styles.switch} aria-pressed="false" type="button" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                )
-                }
+                    {/* Tabs */}
+                    <div className={styles.tabs}>
+                        {tabs.map(tab => {
+                            const Icon = tab.icon
+                            const count = tab.id === 'all'
+                                ? favorites.length
+                                : favorites.filter(f => f.entity_type === tab.id).length
 
-                {
-                    activeTab === 'actividad' && (
-                        <section className={styles.section}>
-                            <div className={styles.sectionHeader}>
-                                <div>
-                                    <h2 className={styles.sectionTitle}>Actividad reciente</h2>
-                                    <p className={styles.sectionSubtitle}>Próximamente: Historial de interacciones y comentarios.</p>
-                                </div>
+                            return (
+                                <button
+                                    key={tab.id}
+                                    className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`}
+                                    onClick={() => setActiveTab(tab.id)}
+                                >
+                                    <Icon size={16} />
+                                    {tab.label}
+                                    <span className={styles.tabCount}>({count})</span>
+                                </button>
+                            )
+                        })}
+                    </div>
+
+                    {/* Favorites List */}
+                    <div className={styles.favoritesList}>
+                        {filteredFavorites.length === 0 ? (
+                            <div className={styles.emptyState}>
+                                <Star size={48} />
+                                <p>No tenés favoritos aún</p>
+                                <small>Empezá a marcar tus ligas, clubes y equipos favoritos</small>
                             </div>
-                            <div className={styles.emptyState}>Disponible en la siguiente versión.</div>
-                        </section>
-                    )
-                }
-            </div >
-        </div >
-    );
+                        ) : (
+                            <div className={styles.favoritesGrid}>
+                                {filteredFavorites.map((fav) => (
+                                    <div key={fav.id} className={styles.favoriteCard}>
+                                        <div className={styles.favoriteHeader}>
+                                            <span className={styles.favoriteType}>{fav.entity_type}</span>
+                                            <Star size={16} fill="var(--color-accent)" color="var(--color-accent)" />
+                                        </div>
+                                        <div className={styles.favoriteId}>ID: {fav.entity_id}</div>
+                                        <div className={styles.favoriteDate}>
+                                            Agregado: {new Date(fav.created_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 }
-

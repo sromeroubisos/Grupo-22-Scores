@@ -1,0 +1,342 @@
+/* LOGIN MODULE CSS */
+.tectonicPage {
+    /* Font setup */
+    --font-sans: 'Geist', sans-serif;
+    --font-mono: 'Geist Mono', monospace;
+
+    /* Variables locales que mapean a globales o defaults */
+    min-height: 100vh;
+    color: var(--color-text-primary);
+    font-family: var(--font-primary, var(--font-sans));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Background adaptable */
+    background-color: var(--color-bg-primary);
+    background-image: radial-gradient(circle at 50% 0%, var(--grid-glow, rgba(0, 163, 101, 0.08)) 0%, transparent 70%);
+
+    padding: 24px;
+    padding-top: 80px;
+    /* Spacer for header */
+}
+
+.loginCard {
+    width: 100%;
+    max-width: 440px;
+
+    /* Glass / Card background adaptable */
+    background: var(--color-bg-elevated);
+    /* Optional: si quieres efecto glass más fuerte en light mode, podrías usar var(--color-glass) */
+
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: var(--shadow-card, 0 20px 40px rgba(0, 0, 0, 0.2));
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.loginCard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
+.cardHeader {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+.socialButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.socialBtn {
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.socialBtn:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-light);
+}
+
+.socialBtn:active {
+    transform: scale(0.98);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.emailForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--color-bg-surface, var(--color-bg-tertiary));
+    /* Fallback to tertiary */
+    border: 1px solid var(--color-border);
+    padding: 0 16px;
+    color: var(--color-text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-glow);
+    background: var(--color-bg-primary);
+}
+
+.togglePass {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.togglePass:hover {
+    color: var(--color-text-primary);
+}
+
+.submitBtn {
+    height: 48px;
+    border-radius: 12px;
+    background: var(--color-accent);
+    color: #fff;
+    /* Always white for visibility on accent color */
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.submitBtn:hover {
+    background: var(--color-accent-light);
+    box-shadow: 0 0 20px var(--color-accent-glow);
+}
+
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+}
+
+.secondaryLinks {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.link {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.link:hover {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+}
+
+.errorBanner {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--color-error, #ef4444);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.configWarning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: var(--color-warning, #f59e0b);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.successBanner {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--color-success, #34d399);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.loginCard {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Icons */
+.icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* responsive */
+@media (max-width: 600px) {
+    .tectonicPage {
+        padding: 16px;
+        align-items: flex-start;
+        /* Start from top */
+        padding-top: 24px;
+        /* Reduced top padding */
+    }
+
+    .loginCard {
+        border: none;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        backdrop-filter: none;
+        max-width: 100%;
+    }
+
+    .loginCard::before {
+        display: none;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .socialBtn {
+        height: 52px;
+        /* Tappaable target bigger */
+    }
+
+    .input {
+        height: 52px;
+    }
+
+    .submitBtn {
+        height: 52px;
+    }
+}

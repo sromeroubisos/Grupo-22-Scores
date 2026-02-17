@@ -10,6 +10,15 @@ export default function AdminPage() {
     const { user } = useAuth();
     // Force re-render for updates
     const [tick, setTick] = useState(0);
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSync = () => {
+        setIsSyncing(true);
+        setTimeout(() => {
+            setIsSyncing(false);
+            setTick(t => t + 1);
+        }, 1500);
+    };
 
     const stats = useMemo(() => {
         const today = new Date().toISOString().split('T')[0];
@@ -22,25 +31,29 @@ export default function AdminPage() {
 
         return {
             matches: { value: todayMatches.length, sub: `/ ${liveMatches.length} live` },
-            conflicts: { value: potentialConflicts.length, sub: 'Duplicados' },
-            latency: { value: '42ms', sub: 'v4.2' }
+            conflicts: { value: potentialConflicts.length, sub: 'Duplicados detectados' },
+            latency: { value: `${Math.floor(Math.random() * 40) + 20}ms`, sub: 'v0.1' }
         };
+    }, [tick]);
+
+    const latestNews = useMemo(() => {
+        return db.news.length > 0 ? db.news[0] : null;
     }, [tick]);
 
     const catalogRows = useMemo(() => {
         return db.tournaments.map(t => {
             const union = db.unions.find(u => u.id === t.unionId);
             const isLinked = !!union;
-            const source = t.slug.includes('api') ? 'API PROVIDER #1' : 'MANUAL / CLUB';
-            const isSourceApi = source.includes('API');
+            const source = t.slug.includes('api') || t.slug.includes('top-12') ? 'FlashScore' : 'MANUAL / CLUB';
+            const isSourceApi = source === 'FlashScore';
 
             // Sync status mock - random for demo or static
-            const lastSync = isSourceApi ? '14:02:11' : '--';
+            const lastSync = isSourceApi ? new Date(Date.now() - Math.floor(Math.random() * 900000)).toLocaleTimeString() : '--';
 
             return {
                 id: t.id,
                 name: t.name,
-                season: t.category || t.seasonId, // Fallback to showcase something
+                season: t.category || t.seasonId,
                 sport: t.sport === 'rugby' ? 'Rugby' : t.sport,
                 federation: isLinked ? 'VINCULADA' : 'SIN VINCULO',
                 source,
@@ -53,9 +66,9 @@ export default function AdminPage() {
     }, [tick]);
 
     const conflictsMessage = useMemo(() => {
-        const clubConflicts = db.clubs.filter(c => !c.unionId).length; // Mock logic for "manual entities needing link"
-        if (clubConflicts > 0) {
-            return `${clubConflicts} clubes creados manualmente podrian coincidir con registros de API.`;
+        const clubConflicts = db.clubs.filter(c => !c.unionId && db.externalClubs.some(ec => ec.name === c.name));
+        if (clubConflicts.length > 0) {
+            return `${clubConflicts.length} clubes locales coinciden con registros de FlashScore.`;
         }
         return 'No se detectaron conflictos de datos pendientes.';
     }, [tick]);
@@ -71,8 +84,8 @@ export default function AdminPage() {
                 </div>
                 <div className={styles.statusSync}>
                     <div className={styles.statusPill}>
-                        <span className={styles.statusIndicator}></span>
-                        API: STABLE
+                        <span className={`${styles.statusIndicator} ${isSyncing ? styles.blink : ''}`}></span>
+                        API: {isSyncing ? 'SYNCING...' : 'STABLE'}
                     </div>
                     <Link href="/admin/super/torneos/crear" className={`${styles.btn} ${styles.btnPrimary}`}>
                         + Nuevo torneo
@@ -86,7 +99,7 @@ export default function AdminPage() {
                     <div className={styles.statValue}>
                         {stats.matches.value}
                         <span className={styles.statSub}>{stats.matches.sub}</span>
-                        {stats.matches.value > 0 && <span className={styles.liveIndicator}></span>}
+                        {stats.matches.value > 0 && <span className={styles.liveIndicator} style={{ marginLeft: 10 }}></span>}
                     </div>
                 </div>
                 <div className={`${styles.slab} ${styles.col4}`}>
@@ -114,8 +127,12 @@ export default function AdminPage() {
                         </div>
                         <div className={styles.slabActions}>
                             <button className={styles.btn}>Filtrar</button>
-                            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setTick(t => t + 1)}>
-                                Forzar sync general
+                            <button
+                                className={`${styles.btn} ${styles.btnPrimary}`}
+                                onClick={handleSync}
+                                disabled={isSyncing}
+                            >
+                                {isSyncing ? 'Sincronizando...' : 'Forzar sync general'}
                             </button>
                         </div>
                     </div>
@@ -178,20 +195,47 @@ export default function AdminPage() {
 
             <div className={styles.tectonicGrid}>
                 <div className={`${styles.slab} ${styles.col8}`}>
-                    <span className={styles.slabLabel}>News CMS</span>
-                    <div className={styles.newsGrid}>
-                        <div className={styles.newsCard}>
-                            <div className={styles.newsPreview}>DRAFT_COVER.JPG</div>
-                            <h3 className={styles.newsTitle}>Nueva reglamentacion Sub-21</h3>
-                            <p className={styles.newsBody}>El consejo directivo ha definido nuevos parametros para el registro de jugadores y protocolo medico.</p>
-                        </div>
-                        <div className={styles.newsSide}>
-                            <span className={styles.slabLabel}>Scope de publicacion</span>
-                            <span className={`${styles.badge} ${styles.badgeManual}`}>Global</span>
-                            <span className={`${styles.badge} ${styles.badgeManual}`}>Torneo XV</span>
-                            <button className={`${styles.btn} ${styles.btnPrimary} ${styles.fullBtn}`} style={{ width: '100%', justifyContent: 'center' }}>Publicar</button>
-                        </div>
+                    <div className={styles.slabHeader}>
+                        <span className={styles.slabLabel}>News CMS</span>
+                        {/* Go to news page */}
+                        <Link href="/admin/super/noticias" className={styles.btn}>
+                            Gestionar Noticias
+                        </Link>
                     </div>
+                    {latestNews ? (
+                        <div className={styles.newsGrid}>
+                            <div className={styles.newsCard}>
+                                <div
+                                    className={styles.newsPreview}
+                                    style={{
+                                        backgroundImage: latestNews.imageUrl ? `url(${latestNews.imageUrl})` : 'none',
+                                        backgroundSize: 'cover',
+                                        color: latestNews.imageUrl ? 'transparent' : 'inherit'
+                                    }}
+                                >
+                                    {!latestNews.imageUrl && 'SIN IMAGEN'}
+                                </div>
+                                <h3 className={styles.newsTitle}>{latestNews.title}</h3>
+                                <p className={styles.newsBody}>{latestNews.summary || latestNews.content.slice(0, 100)}</p>
+                            </div>
+                            <div className={styles.newsSide}>
+                                <span className={styles.slabLabel}>Scope de publicacion</span>
+                                <span className={`${styles.badge} ${latestNews.scope === 'global' ? styles.badgeApi : styles.badgeManual}`}>
+                                    {latestNews.scope.toUpperCase()}
+                                </span>
+                                <span className={`${styles.badge} ${latestNews.status === 'published' ? styles.badgeApi : styles.badgeManual}`}>
+                                    {latestNews.status.toUpperCase()}
+                                </span>
+                                <div className={styles.rowMeta} style={{ marginTop: 10 }}>
+                                    {new Date(latestNews.publishedAt || Date.now()).toLocaleDateString()}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div style={{ padding: 20, textAlign: 'center', color: '#666', fontSize: '0.9rem' }}>
+                            No hay noticias recientes en el sistema.
+                        </div>
+                    )}
                 </div>
 
                 <div className={`${styles.slab} ${styles.col4}`}>

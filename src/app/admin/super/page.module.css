@@ -801,6 +801,24 @@
     }
 }
 
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
 .consoleHeader {
     display: flex;
     align-items: flex-end;
@@ -1603,4 +1621,663 @@
     font-weight: 600;
     letter-spacing: 0.05em;
     user-select: none;
+}
+
+/* Metrics Styles */
+.metricsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding-top: 16px;
+    margin-top: auto;
+    border-top: 1px solid var(--surface-edge);
+}
+
+.metricItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metricLabel {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--basalt-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metricValue {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ececec;
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Status Badges */
+.badgeLive {
+    background: rgba(255, 77, 0, 0.15);
+    color: var(--magma-primary);
+    border: 1px solid rgba(255, 77, 0, 0.2);
+    box-shadow: 0 0 10px rgba(255, 77, 0, 0.1);
+}
+
+.badgeActive {
+    background: var(--basalt-800);
+    color: var(--basalt-400);
+    border: 1px solid var(--surface-edge);
+}
+
+.badgeArchived {
+    background: var(--basalt-900);
+    color: var(--basalt-600);
+    border: 1px solid var(--surface-edge);
+}
+
+/* Source Badges */
+.badgeApiAlt {
+    background: rgba(0, 242, 255, 0.1);
+    color: var(--cyanite);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+}
+
+.badgeManualAlt {
+    background: var(--basalt-800);
+    color: var(--basalt-600);
+    border: 1px solid var(--surface-edge);
+}
+
+.badgeRow {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.badgePill {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.05em;
+    height: 24px;
+}
+
+/* Tab Navigation */
+.tabInfo {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--basalt-400);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-mono);
+}
+
+.tabInfo:hover {
+    color: #fff;
+}
+
+/* ============================================ */
+/* MOBILE RESPONSIVE OPTIMIZATION */
+/* ============================================ */
+
+/* Tablet and below (≤1024px) */
+@media (max-width: 1024px) {
+    .tectonicGrid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .col4 {
+        grid-column: span 6;
+    }
+
+    .col8 {
+        grid-column: span 6;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .splitGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile (≤768px) Specific Optimizations */
+@media (max-width: 768px) {
+
+    /* Header adjustments */
+    .header,
+    .tectonicHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .title {
+        font-size: 24px;
+        /* Reduced from Desktop */
+        margin-bottom: 4px;
+    }
+
+    .subtitle {
+        font-size: 11px;
+    }
+
+    /* Filters Grid - Compact Mode */
+    .filtersGrid {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        gap: 8px;
+        margin-bottom: 20px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .filtersGrid::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Force filters to be compact pills */
+    .filterBtn {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 6px 12px;
+        font-size: 11px;
+        height: 32px;
+    }
+
+    /* Cards - Switch to single column stack */
+    .tectonicGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Compact News Card style for Mobile */
+    .newsCard {
+        display: flex;
+        flex-direction: row;
+        /* Horizontal layout */
+        height: auto;
+        min-height: 100px;
+        align-items: stretch;
+    }
+
+    .newsImage {
+        width: 100px;
+        /* Fixed width sidebar image */
+        height: auto;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .newsContent {
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .newsTitle {
+        font-size: 14px;
+        line-height: 1.3;
+        margin-bottom: 6px;
+    }
+
+    .newsDate {
+        font-size: 10px;
+    }
+
+    /* Table adjustments */
+    .table th:nth-child(n+3),
+    .table td:nth-child(n+3) {
+        display: none;
+        /* Hide extra columns aggressively */
+    }
+
+    .table th,
+    .table td {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    /* Action Buttons */
+    .actionButton {
+        padding: 8px 12px;
+        width: 100%;
+        /* Full width actions */
+        justify-content: center;
+    }
+
+
+
+
+    /* Content spacing */
+    .content {
+        padding: 16px;
+    }
+
+    /* Stats Grid */
+    .statsGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Tectonic Grid */
+    .tectonicGrid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    /* Slab */
+    .slab {
+        padding: 16px;
+    }
+
+    .slabHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .slabActions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .slabActions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Tables */
+    .table {
+        font-size: 13px;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .table th {
+        font-size: 10px;
+    }
+
+    /* Hide less important columns on mobile */
+    .table th:nth-child(n+4),
+    .table td:nth-child(n+4) {
+        display: none;
+    }
+
+    /* Show important columns */
+    .table th:first-child,
+    .table td:first-child,
+    .table th:last-child,
+    .table td:last-child {
+        display: table-cell;
+    }
+
+    /* Cards */
+    .card,
+    .newsCard,
+    .statCard {
+        margin-bottom: 12px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* News Grid */
+    .newsGrid {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .newsCard {
+        border-right: none;
+        padding-right: 0;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--surface-edge);
+    }
+
+    .newsCard:last-child {
+        border-bottom: none;
+    }
+
+    .newsSide {
+        width: 100%;
+    }
+
+    /* Section Headers */
+    .sectionHeaderRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .sectionHeaderRow .btn,
+    .sectionHeaderRow .pill {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Toolbar */
+    .toolbar {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .toolbar .pill,
+    .toolbar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Filters */
+    .filterInput {
+        width: 100%;
+    }
+
+    /* Badges mobile optimization */
+    .badgeRow {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    /* Role list mobile */
+    .rolesList {
+        gap: 8px;
+    }
+
+    .roleRow {
+        padding: 8px 0;
+    }
+
+    /* Activity items */
+    .activityItem,
+    .matchItem {
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Card rows */
+    .cardRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Mobile Native Categories */
+    .categoryBar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 0 4px;
+        /* Sticky behavior for mobile */
+        position: sticky;
+        top: 104px;
+        /* Header (48) + Tabs (40) roughly */
+        z-index: 60;
+        background: #0a0a0b;
+        /* Match bg to hide scrolling content behind */
+        padding-top: 8px;
+        margin: 0 -16px 16px -16px;
+        /* Bleed to edges */
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .categoryScroll {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .categoryScroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .categoryChip {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        padding: 6px 12px;
+        background: var(--basalt-900);
+        border: 1px solid var(--surface-edge);
+        border-radius: 20px;
+        /* Pill shape */
+        color: var(--basalt-400);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        height: 32px;
+        flex-shrink: 0;
+    }
+
+    .categoryChipActive {
+        background: var(--basalt-800);
+        color: #fff;
+        border-color: var(--magma-primary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Compact Search */
+    .compactSearch {
+        display: flex;
+        align-items: center;
+        background: var(--basalt-900);
+        border: 1px solid var(--surface-edge);
+        border-radius: 8px;
+        padding: 0 10px;
+        height: 36px;
+        width: 100%;
+    }
+
+    .compactSearch input {
+        background: transparent;
+        border: none;
+        color: #ececec;
+        font-size: 13px;
+        width: 100%;
+        outline: none;
+        margin-left: 8px;
+    }
+
+    /* Mobile Actions Bar */
+    .mobileActionsBar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding: 0 4px;
+    }
+
+    .statusDot {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--color-success);
+        font-weight: 600;
+        text-transform: uppercase;
+        background: rgba(34, 197, 94, 0.1);
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+
+    .compactCreateBtn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--color-accent);
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+    }
+
+}
+
+/* Small Mobile (≤500px) */
+@media (max-width: 500px) {
+
+    /* Compact header */
+    .header,
+    .tectonicHeader {
+        padding: 12px;
+    }
+
+    .headerInfo h1,
+    .pageTitle {
+        font-size: 20px;
+    }
+
+    .headerInfo p,
+    .pageSubtitle {
+        font-size: 11px;
+    }
+
+    /* Ultra compact content */
+    .content {
+        padding: 12px;
+        gap: 16px;
+    }
+
+    /* Smaller stat cards */
+    .statCard {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .statValue {
+        font-size: 24px;
+    }
+
+    .statLabel {
+        font-size: 11px;
+    }
+
+    /* Smaller slabs */
+    .slab {
+        padding: 12px;
+    }
+
+    .slabLabel {
+        font-size: 9px;
+    }
+
+    .slabTitle {
+        font-size: 16px;
+    }
+
+    /* Compact table */
+    .table {
+        font-size: 12px;
+    }
+
+    .table th,
+    .table td {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    /* Smaller buttons */
+    .btn,
+    .btnPrimary {
+        padding: 8px 14px;
+        font-size: 10px;
+    }
+
+    /* Compact pills */
+    .pill {
+        padding: 3px 8px;
+        font-size: 10px;
+    }
+
+    /* News preview smaller */
+    .newsPreview {
+        height: 100px;
+    }
+
+    .newsTitle {
+        font-size: 13px;
+    }
+
+    .newsBody {
+        font-size: 11px;
+    }
+
+    /* Compact badges */
+    .badge,
+    .badgePill {
+        font-size: 9px;
+        padding: 3px 8px;
+        height: 20px;
+    }
+}
+
+/* Extra Small Mobile (≤375px) */
+@media (max-width: 375px) {
+    .page {
+        padding-bottom: 60px;
+    }
+
+    .content {
+        padding: 8px;
+    }
+
+    .header,
+    .tectonicHeader {
+        padding: 8px;
+    }
+
+    .headerInfo h1,
+    .pageTitle {
+        font-size: 18px;
+    }
+
+    /* Hide table completely, show cards instead */
+    .table {
+        display: none;
+    }
+
+    /* Convert to card view automatically */
+    .cardList {
+        display: grid;
+        gap: 8px;
+    }
+
+    .cardRow {
+        padding: 10px;
+    }
 }

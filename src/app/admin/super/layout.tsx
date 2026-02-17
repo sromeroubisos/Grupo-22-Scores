@@ -31,82 +31,87 @@ function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
     return (
         <>
             <div className={styles.topbar}>
-                <button className={styles.mobileMenuBtn} onClick={onToggleSidebar} aria-label="Abrir menú">
-                    <svg className={styles.mobileMenuIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-
-                <div className={styles.topbarLeft}>
-                    <div className={styles.topbarTitle}>Consola Superadmin</div>
-                    <div className={styles.topbarSubtitle}>Catalogo maestro y operacion de datos</div>
-                </div>
-
-                <div className={styles.mobileControls}>
-                    <button className={styles.topbarBtn} onClick={() => setIsFilterOpen(true)} style={{ padding: '8px', borderRadius: '50%' }}>
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                <div className={styles.topbarRow}>
+                    <button className={styles.mobileMenuBtn} onClick={onToggleSidebar} aria-label="Abrir menú">
+                        <svg className={styles.mobileMenuIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
                     </button>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a2a2e' }} />
+
+                    <div className={styles.topbarLeft}>
+                        <div className={styles.topbarTitle}>
+                            {/* Dynamic Title based on Path */}
+                            {mobileTabs.find(t => isActive(t.href))?.label || 'Consola Superadmin'}
+                        </div>
+                        <div className={styles.topbarSubtitle}>Catalogo maestro y operacion de datos</div>
+                    </div>
+
+                    <div className={styles.mobileControls}>
+                        <button className={styles.topbarBtn} onClick={() => setIsFilterOpen(true)} style={{ padding: '8px', borderRadius: '50%', background: 'transparent' }}>
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        </button>
+                    </div>
+
+                    <div className={styles.topbarControls}>
+                        <select
+                            className={styles.topbarSelect}
+                            value={filters.sport}
+                            onChange={(event) => setFilters((prev) => ({ ...prev, sport: event.target.value }))}
+                        >
+                            <option value="all">Todos los deportes</option>
+                            <option value="rugby">Rugby</option>
+                            <option value="football">Futbol</option>
+                            <option value="hockey">Hockey</option>
+                        </select>
+                        <input
+                            className={styles.topbarInput}
+                            placeholder="Buscar en toda la consola..."
+                            value={filters.search}
+                            onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
+                        />
+                        <select
+                            className={styles.topbarSelect}
+                            value={filters.country}
+                            onChange={(event) => setFilters((prev) => ({ ...prev, country: event.target.value }))}
+                        >
+                            <option value="all">Pais</option>
+                            <option value="Argentina">Argentina</option>
+                            <option value="Uruguay">Uruguay</option>
+                            <option value="Chile">Chile</option>
+                        </select>
+                        <select
+                            className={styles.topbarSelect}
+                            value={filters.status}
+                            onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
+                        >
+                            <option value="all">Estado</option>
+                            <option value="activo">Activo</option>
+                            <option value="finalizado">Finalizado</option>
+                            <option value="archivado">Archivado</option>
+                            <option value="pendiente">Pendiente</option>
+                        </select>
+                        <select
+                            className={styles.topbarSelect}
+                            value={filters.source}
+                            onChange={(event) => setFilters((prev) => ({ ...prev, source: event.target.value }))}
+                        >
+                            <option value="all">Fuente</option>
+                            <option value="API">API</option>
+                            <option value="Manual">Manual</option>
+                        </select>
+                        <button className={styles.topbarBtn}>+ Crear</button>
+                        <div className={styles.topbarAlert}>3 conflictos</div>
+                    </div>
                 </div>
 
-                <div className={styles.topbarControls}>
-                    <select
-                        className={styles.topbarSelect}
-                        value={filters.sport}
-                        onChange={(event) => setFilters((prev) => ({ ...prev, sport: event.target.value }))}
-                    >
-                        <option value="all">Todos los deportes</option>
-                        <option value="rugby">Rugby</option>
-                        <option value="football">Futbol</option>
-                        <option value="hockey">Hockey</option>
-                    </select>
-                    <input
-                        className={styles.topbarInput}
-                        placeholder="Buscar en toda la consola..."
-                        value={filters.search}
-                        onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-                    />
-                    <select
-                        className={styles.topbarSelect}
-                        value={filters.country}
-                        onChange={(event) => setFilters((prev) => ({ ...prev, country: event.target.value }))}
-                    >
-                        <option value="all">Pais</option>
-                        <option value="Argentina">Argentina</option>
-                        <option value="Uruguay">Uruguay</option>
-                        <option value="Chile">Chile</option>
-                    </select>
-                    <select
-                        className={styles.topbarSelect}
-                        value={filters.status}
-                        onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
-                    >
-                        <option value="all">Estado</option>
-                        <option value="activo">Activo</option>
-                        <option value="finalizado">Finalizado</option>
-                        <option value="archivado">Archivado</option>
-                        <option value="pendiente">Pendiente</option>
-                    </select>
-                    <select
-                        className={styles.topbarSelect}
-                        value={filters.source}
-                        onChange={(event) => setFilters((prev) => ({ ...prev, source: event.target.value }))}
-                    >
-                        <option value="all">Fuente</option>
-                        <option value="API">API</option>
-                        <option value="Manual">Manual</option>
-                    </select>
-                    <button className={styles.topbarBtn}>+ Crear</button>
-                    <div className={styles.topbarAlert}>3 conflictos</div>
+                {/* Mobile Tabs Embedded in Header */}
+                <div className={styles.mobileTabs}>
+                    {mobileTabs.map(tab => (
+                        <Link key={tab.id} href={tab.href} className={`${styles.mobileTab} ${isActive(tab.href) ? styles.mobileTabActive : ''}`}>
+                            {tab.label}
+                        </Link>
+                    ))}
                 </div>
-            </div>
-
-            <div className={styles.mobileTabs}>
-                {mobileTabs.map(tab => (
-                    <Link key={tab.id} href={tab.href} className={`${styles.mobileTab} ${isActive(tab.href) ? styles.mobileTabActive : ''}`}>
-                        {tab.label}
-                    </Link>
-                ))}
             </div>
 
             {/* Filter Sheet for Mobile */}

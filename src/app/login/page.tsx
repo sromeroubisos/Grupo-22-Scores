@@ -1,43 +1,78 @@
-'use client';
+'use client'
 
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import Link from 'next/link';
-import './login.css';
+import styles from './login.module.css'
+import OAuthButtons from './components/OAuthButtons'
+import EmailLoginForm from './components/EmailLoginForm'
+import AuthErrorBanner from './components/AuthErrorBanner'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
-export default function LoginPage() {
-    const { login, isAuthenticated, user } = useAuth();
-    const router = useRouter();
+
+function LoginContent() {
+    const searchParams = useSearchParams()
+    const errorParam = searchParams.get('error')
+    const [error, setError] = useState<string | null>(null)
+    const [configError, setConfigError] = useState(false)
 
     useEffect(() => {
-        if (isAuthenticated && user) {
-            router.push('/');
+        if (errorParam) {
+            if (errorParam === 'auth-code-error') {
+                setError('No pudimos verificar tu sesión. Intenta nuevamente.')
+            } else {
+                setError('Ocurrió un error de autenticación.')
+            }
         }
-    }, [isAuthenticated, user, router]);
 
+        // Check for configuration
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+            setConfigError(true)
+        }
+    }, [errorParam])
 
-    const handleLogin = (role: any) => {
-        login(role);
-    };
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <h1>Iniciar Sesión</h1>
-                <p>Selecciona un rol para simular el inicio de sesión:</p>
-
-                <div className="role-buttons">
-                    <button onClick={() => handleLogin('fan')} className="btn btn-fan">
-                        Fan (Usuario común)
-                    </button>
-                    <button onClick={() => handleLogin('admin_general')} className="btn btn-admin">
-                        Super Administrador
-                    </button>
+        <div className={styles.loginCard}>
+            {configError && (
+                <div className={styles.configWarning}>
+                    ⚠️ Configuración incompleta: Revisa .env.local
                 </div>
+            )}
+            <AuthErrorBanner message={error} />
 
-                <Link href="/" className="back-link">Volver al inicio</Link>
+            <div className={styles.cardHeader}>
+                <span className={styles.logo}>G22SCORES</span>
+                <h1 className={styles.title}>Iniciar sesión</h1>
+                <p className={styles.subtitle}>Elegí un método para continuar</p>
+            </div>
+
+            <OAuthButtons />
+
+            <div className={styles.divider}>o</div>
+
+            <EmailLoginForm onError={setError} />
+
+            <div className={styles.secondaryLinks}>
+                <Link href="/auth/reset" className={styles.link}>
+                    Olvidé mi contraseña
+                </Link>
+                {/* <Link href="/signup" className={styles.link}>Crear cuenta</Link> */}
+            </div>
+
+            <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--basalt-600)', marginTop: '16px' }}>
+                Al continuar, aceptás nuestros <Link href="/terms" className={styles.link}>Términos</Link> y <Link href="/privacy" className={styles.link}>Privacidad</Link>.
             </div>
         </div>
-    );
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <div className={styles.tectonicPage}>
+            <Suspense fallback={<div style={{ color: '#fff' }}>Cargando...</div>}>
+                <LoginContent />
+            </Suspense>
+        </div>
+    )
 }

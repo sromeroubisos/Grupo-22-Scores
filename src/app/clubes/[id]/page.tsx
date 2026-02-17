@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { ArrowLeft, ChevronRight, Star } from 'lucide-react';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useFavorite } from '@/hooks/useFavorites';
 
 const TABS = [
     { id: 'summary', label: 'Resumen' },
@@ -111,7 +111,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
     const sp = useSearchParams();
-    const { isTeamFavorite, toggleTeamFavorite } = useFavorites();
+    const { isFavorited, toggle: toggleFavorite } = useFavorite('team', id);
 
     const [activeTab, setActiveTab] = useState('summary');
     const [loading, setLoading] = useState(true);
@@ -294,12 +294,12 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                             </div>
                         </div>
                         <button
-                            className={`${styles.followBtn} ${isTeamFavorite(id) ? styles.followBtnActive : ''}`}
-                            onClick={() => toggleTeamFavorite(id, { name: teamName, logo: teamLogoUrl })}
+                            className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
+                            onClick={() => toggleFavorite()}
                             type="button"
                         >
-                            <Star size={16} fill={isTeamFavorite(id) ? 'currentColor' : 'none'} />
-                            {isTeamFavorite(id) ? 'Siguiendo' : 'Seguir'}
+                            <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                            {isFavorited ? 'Siguiendo' : 'Seguir'}
                         </button>
                     </div>
 
