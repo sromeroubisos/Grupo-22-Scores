@@ -2,7 +2,7 @@
 
 import styles from './login.module.css'
 import OAuthButtons from './components/OAuthButtons'
-
+import EmailLoginForm from './components/EmailLoginForm'
 import AuthErrorBanner from './components/AuthErrorBanner'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -49,7 +49,17 @@ function LoginContent() {
 
             <OAuthButtons />
 
-            <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--basalt-600)', marginTop: '16px' }}>
+            <div className={styles.divider}>
+                <span>o con email</span>
+            </div>
+
+            <EmailLoginForm onError={setError} />
+
+            <div className={styles.footerLink}>
+                ¿No tenés cuenta? <Link href="/register" className={styles.linkAccent}>Registrate</Link>
+            </div>
+
+            <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--basalt-600)', marginTop: '24px' }}>
                 Al continuar, aceptás nuestros <Link href="/terms" className={styles.link}>Términos</Link> y <Link href="/privacy" className={styles.link}>Privacidad</Link>.
             </div>
         </div>

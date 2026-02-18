@@ -340,3 +340,22 @@
         height: 52px;
     }
 }
+
+.footerLink {
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-top: 16px;
+}
+
+.linkAccent {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.linkAccent:hover {
+    color: var(--color-accent-light);
+    text-decoration: underline;
+}
