@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
 import { db } from '@/lib/mock-db';
+import { createClient } from '@/lib/supabase/client';
 
 export default function CreateTournament() {
     const params = useParams();
@@ -395,30 +396,50 @@ export default function CreateTournament() {
         }
     };
 
-    const handleSave = () => {
-        const newTournament = {
-            id: isEdit && tournamentId ? tournamentId : Math.random().toString(36).substr(2, 9),
-            unionId: unionId,
-            seasonId: formData.season || '2026',
+    const handleSave = async () => {
+        const supabase = createClient();
+
+        // Prepare payload for Supabase
+        // Note: Using underscores for DB columns as per our recent SQL schema
+        const payload = {
+            union_id: unionId,
+            season_id: formData.season || '2026',
             name: formData.name || 'Borrador',
             slug: (formData.name || 'borrador').toLowerCase().replace(/\s+/g, '-'),
-            status: 'draft' as const,
-            sport: formData.sport.toLowerCase().includes('rugby') ? 'rugby' : 'football' as any,
+            status: 'draft',
+            sport: formData.sport.toLowerCase().includes('rugby') ? 'rugby' : 'football',
             category: formData.category,
             format: formData.format,
-            createdAt: new Date().toISOString(),
+            is_visible: formData.visibility === 'public',
         };
 
-        if (isEdit) {
-            const index = db.tournaments.findIndex(t => t.id === tournamentId);
-            if (index !== -1) {
-                db.tournaments[index] = { ...db.tournaments[index], ...newTournament };
+        if (isEdit && tournamentId) {
+            const { error } = await supabase
+                .from('tournaments')
+                .update(payload)
+                .eq('id', tournamentId);
+
+            if (error) {
+                console.error('Error saving draft:', error);
+                alert('Error al guardar: ' + error.message);
+            } else {
+                alert('Cambios guardados correctamente en Supabase.');
             }
-            alert('Cambios guardados correctamente.');
         } else {
-            db.tournaments.push(newTournament);
-            alert('Borrador guardado.');
-            router.push(`/admin/union/${unionId}/torneos`);
+            const { data, error } = await supabase
+                .from('tournaments')
+                .insert([payload])
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error creating draft:', error);
+                alert('Error al crear borrador: ' + error.message);
+            } else {
+                alert('Borrador guardado en Supabase.');
+                // Optionally redirect to edit mode or refresh list
+                router.push(`/admin/union/${unionId}/torneos`);
+            }
         }
     };
 
