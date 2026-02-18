@@ -517,17 +517,19 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px;
-    background: rgba(239, 68, 68, 0.1);
+    padding: 8px 16px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: 999px;
     margin-bottom: 0;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: #ff4d4d;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
     width: fit-content;
-    /* Removed grid specific properties */
+    align-self: center;
+    /* Center it on mobile/desktop by default if needed */
 }
 
 .liveDot {
@@ -1224,7 +1226,8 @@
 @media (max-width: 768px) {
     .matchesSection {
         margin-top: 0;
-        /* Reset desktop margin on mobile */
+        padding-top: 48px;
+        /* Push the entire section (including live banner) down below sticky header */
     }
 
     .mobileSportSelector {
@@ -1252,8 +1255,8 @@
 
     .matchesContainer {
         margin-top: 0;
-        padding-top: 48px;
-        /* Force distinct visual gap */
+        padding-top: 0;
+        /* Padding removed here, moved to parent matchesSection */
     }
 }
 

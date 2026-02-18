@@ -11,7 +11,7 @@ const navItems = [
     { href: '/noticias', label: 'Noticias', icon: 'news' },
     { href: '/tournaments', label: 'Ligas', icon: 'trophy' },
     { href: '/profile', label: 'Siguiendo', icon: 'star' },
-    { href: '/clubes', label: 'Buscar', icon: 'search' },
+    { href: '/search', label: 'Buscar', icon: 'search' },
 ];
 
 function isActive(pathname: string | null, href: string) {

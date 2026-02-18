@@ -111,7 +111,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
     const sp = useSearchParams();
-    const { isFavorited, toggle: toggleFavorite } = useFavorite('team', id);
+    const { isFavorited, toggle: toggleFavorite } = useFavorite('club', id);
 
     const [activeTab, setActiveTab] = useState('summary');
     const [loading, setLoading] = useState(true);

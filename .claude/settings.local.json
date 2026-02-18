@@ -16,7 +16,11 @@
       "Bash(taskkill:*)",
       "Bash(npx next dev:*)",
       "Bash(git add:*)",
-      "Bash(git commit --no-verify -m \"$\\(cat <<''EOF''\nfeat: Add Supabase auth, favorites system, setup endpoint & fix build errors\n\n- Integrate Supabase auth with email/password and OAuth login\n- Add useFavorite/useFavorites hooks with Supabase RPC functions\n- Fix broken isTeamFavorite/isPlayerFavorite/isLeagueFavorite references\n- Fix createServerClient import in auth/server.ts\n- Add /api/setup endpoint for DB connection check and super admin creation\n- Add user profile page, UserMenu, FavoriteButton components\n- Add Supabase schema with users, favorites tables and RLS policies\n- Refactor Super Admin dashboard sidebar and layout\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit --no-verify -m \"$\\(cat <<''EOF''\nfeat: Add Supabase auth, favorites system, setup endpoint & fix build errors\n\n- Integrate Supabase auth with email/password and OAuth login\n- Add useFavorite/useFavorites hooks with Supabase RPC functions\n- Fix broken isTeamFavorite/isPlayerFavorite/isLeagueFavorite references\n- Fix createServerClient import in auth/server.ts\n- Add /api/setup endpoint for DB connection check and super admin creation\n- Add user profile page, UserMenu, FavoriteButton components\n- Add Supabase schema with users, favorites tables and RLS policies\n- Refactor Super Admin dashboard sidebar and layout\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(npx tsc:*)",
+      "Bash(npx supabase:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
