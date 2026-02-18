@@ -2,7 +2,7 @@
 
 import styles from './login.module.css'
 import OAuthButtons from './components/OAuthButtons'
-import EmailLoginForm from './components/EmailLoginForm'
+
 import AuthErrorBanner from './components/AuthErrorBanner'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -48,17 +48,6 @@ function LoginContent() {
             </div>
 
             <OAuthButtons />
-
-            <div className={styles.divider}>o</div>
-
-            <EmailLoginForm onError={setError} />
-
-            <div className={styles.secondaryLinks}>
-                <Link href="/auth/reset" className={styles.link}>
-                    Olvidé mi contraseña
-                </Link>
-                {/* <Link href="/signup" className={styles.link}>Crear cuenta</Link> */}
-            </div>
 
             <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--basalt-600)', marginTop: '16px' }}>
                 Al continuar, aceptás nuestros <Link href="/terms" className={styles.link}>Términos</Link> y <Link href="/privacy" className={styles.link}>Privacidad</Link>.

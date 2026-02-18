@@ -129,8 +129,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     const urlDetails = `https://flashscore4.p.rapidapi.com/api/flashscore/v2/matches/details?match_id=${id}`;
                     const { data: detailsRes, debug: debugDetails } = await apiFetch<any>(urlDetails, {
                         headers: {
-                            'x-rapidapi-host': 'flashscore4.p.rapidapi.com',
-                            'x-rapidapi-key': '32e9f1aee1msha3c5470d1ea7367p10fac7jsnf9a1bfc88131'
+                            'x-rapidapi-host': process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com',
+                            'x-rapidapi-key': process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '32e9f1aee1msha3c5470d1ea7367p10fac7jsnf9a1bfc88131'
                         },
                         debugTag: 'MatchPageInit'
                     });
