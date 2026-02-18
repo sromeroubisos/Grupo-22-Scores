@@ -1,0 +1,216 @@
+.nf {
+    min-height: 100vh;
+    padding: 18px 16px 88px;
+    /* 88px para que no choque con la bottom bar */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+}
+
+.nf__wrap {
+    width: 100%;
+    max-width: 520px;
+    display: grid;
+    gap: 18px;
+}
+
+.nf__hero {
+    padding: 18px 16px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .02);
+    text-align: center;
+}
+
+.nf__icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .06);
+    margin: 0 auto 16px;
+    font-size: 24px;
+}
+
+.nf__title {
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    font-weight: 800;
+}
+
+.nf__desc {
+    margin: 0 0 24px;
+    font-size: 14px;
+    opacity: .78;
+    color: var(--color-text-secondary);
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.nf__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.btn {
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    width: 100%;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn--primary {
+    background: var(--color-accent);
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background: var(--color-accent-light);
+}
+
+.btn--ghost {
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    background: transparent;
+}
+
+.btn--ghost:hover {
+    background: var(--color-bg-secondary);
+}
+
+.nf__quick {
+    border-top: 1px solid var(--color-border);
+    padding-top: 16px;
+    text-align: left;
+}
+
+.nf__quickTitle {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: .7;
+    margin: 0 0 12px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+}
+
+.nf__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.chip {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.chip:hover {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-light);
+}
+
+.nf__news {
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .02);
+}
+
+.nf__newsHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.nf__newsTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.nf__newsMore {
+    font-size: 13px;
+    opacity: .8;
+    text-decoration: none;
+    color: var(--color-accent);
+}
+
+.nf__newsList {
+    display: grid;
+    gap: 10px;
+}
+
+.card {
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    display: block;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.card:hover {
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+}
+
+.card__meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card__title {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+.tag {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.card--empty {
+    text-align: center;
+    padding: 24px;
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+    background: transparent;
+    border: 1px dashed var(--color-border);
+}
