@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useState, useEffect } from 'react';
+import React, { use, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -72,6 +72,8 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
     };
 
     useEffect(() => {
+        const controller = new AbortController();
+
         async function fetchData() {
             setLoading(true);
             try {
@@ -93,13 +95,17 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                             priority: 0
                         } as any;
                     } else {
-                        setError('Torneo no encontrado en nuestra base de datos.');
-                        setLoading(false);
+                        if (!controller.signal.aborted) {
+                            setError('Torneo no encontrado en nuestra base de datos.');
+                            setLoading(false);
+                        }
                         return;
                     }
                 }
 
-                setTournamentData(localTournament);
+                if (!controller.signal.aborted) {
+                    setTournamentData(localTournament);
+                }
 
                 const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
                 const overrideTournamentId = sp.get('tournament_id') || sp.get('tournamentId');
@@ -115,10 +121,16 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                 if (overrideStageId) query.set('tournament_stage_id', overrideStageId);
 
                 const res = await fetch(`/api/tournaments?${query.toString()}`, {
-                    cache: 'no-store'
+                    cache: 'no-store',
+                    signal: controller.signal
                 });
+
+                if (!entry.ok) throw new Error(res.statusText);
+
                 const payload = await res.json();
                 console.log('TOURNAMENT API PAYLOAD:', payload);
+
+                if (controller.signal.aborted) return;
 
                 const detailsValid = Array.isArray(payload?.details)
                     ? payload.details.length > 0
@@ -178,15 +190,21 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                 setStandingsOverUnder(payload.standingsOverUnder || []);
                 setDraw(payload.draw || []);
                 setArchives(payload.archives || []);
-            } catch (err) {
+            } catch (err: any) {
+                if (err.name === 'AbortError') return;
                 console.error('Error fetching tournament data:', err);
-                setError('Error al cargar datos del torneo.');
+                if (!controller.signal.aborted) {
+                    setError('Error al cargar datos del torneo.');
+                }
             } finally {
-                setLoading(false);
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
         }
 
         fetchData();
+        return () => controller.abort();
     }, [id]);
 
     if (loading) {
@@ -424,7 +442,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                         </div>
                         <button
                             className={`${styles.followBtn} ${isLeagueFavorite(id) ? styles.followBtnActive : ''}`}
-                            onClick={() => toggleLeagueFavorite(id)}
+                            onClick={() => toggleLeagueFavorite(id, details?.name || details?.tournament?.name || tournamentData?.name)}
                             type="button"
                         >
                             {isLeagueFavorite(id) ? 'Siguiendo' : 'Seguir'}

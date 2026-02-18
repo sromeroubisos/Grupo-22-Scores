@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Star } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { EntityType } from '@/lib/types/user'
-import styles from './FavoriteButton.module.css'
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Star } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { EntityType } from '@/lib/types/user';
+import styles from './FavoriteButton.module.css';
 
 interface FavoriteButtonProps {
-    entityType: EntityType
-    entityId: string
-    size?: number
-    className?: string
-    showLabel?: boolean
+    entityType: EntityType;
+    entityId: string;
+    size?: number;
+    className?: string;
+    showLabel?: boolean;
 }
 
 export default function FavoriteButton({
@@ -21,62 +21,90 @@ export default function FavoriteButton({
     className = '',
     showLabel = false
 }: FavoriteButtonProps) {
-    const [isFavorited, setIsFavorited] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const supabase = createClient()
+    const [isFavorited, setIsFavorited] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    // Memoize client creation
+    const supabase = useMemo(() => createClient(), []);
+    const isMounted = useRef(true);
 
     // Check auth status and if item is favorited
     useEffect(() => {
-        checkAuthAndFavorite()
-    }, [entityType, entityId])
+        isMounted.current = true;
+        checkAuthAndFavorite();
+        return () => { isMounted.current = false; };
+    }, [entityType, entityId]);
 
     async function checkAuthAndFavorite() {
-        const { data: { session } } = await supabase.auth.getSession()
+        try {
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-        if (!session) {
-            setIsAuthenticated(false)
-            return
+            if (!isMounted.current) return;
+
+            // Ignore session errors that might be abort-related
+            if (sessionError) return;
+
+            if (!session) {
+                setIsAuthenticated(false);
+                return;
+            }
+
+            setIsAuthenticated(true);
+
+            // Check if favorited
+            const { data, error } = await supabase
+                .rpc('is_favorited', {
+                    p_entity_type: entityType,
+                    p_entity_id: entityId
+                });
+
+            if (!isMounted.current) return;
+
+            if (!error && data !== null) {
+                setIsFavorited(data);
+            }
+        } catch (error: any) {
+            // Ignore AbortErrors
+            if (error.name === 'AbortError' || error.message?.includes('abort')) return;
+            console.error('Error checking favorite:', error);
         }
-
-        setIsAuthenticated(true)
-
-        // Check if favorited
-        const { data } = await supabase
-            .rpc('is_favorited', {
-                p_entity_type: entityType,
-                p_entity_id: entityId
-            })
-
-        setIsFavorited(data || false)
     }
 
     async function toggleFavorite(e: React.MouseEvent) {
-        e.preventDefault()
-        e.stopPropagation()
+        e.preventDefault();
+        e.stopPropagation();
 
         if (!isAuthenticated) {
             // Redirect to login
-            window.location.href = '/login?returnTo=' + encodeURIComponent(window.location.pathname)
-            return
+            if (typeof window !== 'undefined') {
+                window.location.href = '/login?returnTo=' + encodeURIComponent(window.location.pathname);
+            }
+            return;
         }
 
-        setIsLoading(true)
+        if (!isMounted.current) return;
+        setIsLoading(true);
 
         try {
             const { data, error } = await supabase
                 .rpc('toggle_favorite', {
                     p_entity_type: entityType,
                     p_entity_id: entityId
-                })
+                });
 
-            if (error) throw error
+            if (error) throw error;
 
-            setIsFavorited(data)
-        } catch (error) {
-            console.error('Error toggling favorite:', error)
+            if (isMounted.current) {
+                setIsFavorited(data);
+            }
+        } catch (error: any) {
+            if (error.name === 'AbortError' || error.message?.includes('abort')) return;
+            console.error('Error toggling favorite:', error);
         } finally {
-            setIsLoading(false)
+            if (isMounted.current) {
+                setIsLoading(false);
+            }
         }
     }
 
@@ -103,5 +131,5 @@ export default function FavoriteButton({
                 </span>
             )}
         </button>
-    )
+    );
 }

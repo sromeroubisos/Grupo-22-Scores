@@ -167,32 +167,52 @@ export default function Header() {
                         <div className={`g22-user-menu ${isUserMenuOpen ? 'show' : ''}`} style={isUserMenuOpen ? { opacity: 1, visibility: 'visible', transform: 'translateY(0)' } : {}}>
                             {user && (
                                 <>
-                                    <Link href="/profile" onClick={() => setIsUserMenuOpen(false)}>
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                        Mi Perfil
-                                    </Link>
-                                    {adminRoles.includes(user.role) && (
-                                        <Link
-                                            href="/admin/super"
-                                            onClick={() => setIsUserMenuOpen(false)}
-                                        >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                                            Panel Admin
+                                    <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                                            {user.avatarUrl ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={user.avatarUrl} alt={user.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--color-border)' }} />
+                                            ) : (
+                                                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)', fontWeight: 'bold', border: '1px solid var(--color-border)' }}>
+                                                    {getInitials(user.name || '')}
+                                                </div>
+                                            )}
+                                            <div style={{ minWidth: 0, flex: 1 }}>
+                                                <div style={{ fontWeight: 700, color: 'var(--color-text-primary)', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name || 'Usuario'}</div>
+                                                <div style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>@{user.email?.split('@')[0] || 'usuario'}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>{user.email}</div>
+                                        <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', background: 'var(--color-bg-tertiary)', fontSize: '11px', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                                            {user.role === 'admin_general' ? 'Administrador' : 'Usuario'}
+                                        </div>
+                                        <Link href="/profile" onClick={() => setIsUserMenuOpen(false)} style={{ display: 'block', marginTop: '12px', textAlign: 'center', background: 'var(--color-button-primary, #00C853)', color: 'white', padding: '8px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                                            Editar perfil
                                         </Link>
-                                    )}
+                                    </div>
+
+                                    <div style={{ padding: '8px 0' }}>
+                                        <Link href="/favorites" onClick={() => setIsUserMenuOpen(false)}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l3.1 6.3 7 1-5 4.9 1.2 6.9L12 18l-6.3 3.1 1.2-6.9-5-4.9 7-1L12 3z" /></svg>
+                                            Mis Seguidos
+                                        </Link>
+
+                                        {adminRoles.includes(user.role) && (
+                                            <Link href="/admin/super" onClick={() => setIsUserMenuOpen(false)}>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                                                Panel Admin
+                                            </Link>
+                                        )}
+                                    </div>
+
+                                    <hr />
+                                    <button className="logout" onClick={handleLogout}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                        Cerrar Sesión
+                                    </button>
                                 </>
                             )}
-                            <Link href="/" onClick={() => setIsUserMenuOpen(false)}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                                Ir al Inicio
-                            </Link>
-                            <hr />
-                            {user ? (
-                                <button className="logout" onClick={handleLogout}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                                    Cerrar Sesión
-                                </button>
-                            ) : (
+                            {!user && (
                                 <Link href="/login" className="logout" onClick={() => setIsUserMenuOpen(false)} style={{ color: 'var(--color-text-primary)' }}>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
                                     Iniciar Sesión

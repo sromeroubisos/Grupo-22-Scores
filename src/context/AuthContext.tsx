@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
+    const isMounted = useRef(true);
 
     const fetchAndSetUser = async (sbUser: SupabaseUser) => {
         try {
@@ -40,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .select('*')
                 .eq('id', sbUser.id)
                 .single();
+
+            if (!isMounted.current) return;
 
             if (profile) {
                 // Map Supabase 'super_admin' to context 'admin_general' for compatibility
@@ -62,27 +65,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     avatarUrl: sbUser.user_metadata?.avatar_url,
                 });
             }
-        } catch (err) {
+        } catch (err: any) {
+            if (err.name === 'AbortError' || err.message?.includes('abort')) return;
             console.error('Error fetching user profile:', err);
         }
     };
 
     useEffect(() => {
+        isMounted.current = true;
+
         // Initial session check
         const initAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                await fetchAndSetUser(session.user);
-            } else {
-                setUser(null);
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+
+                if (isMounted.current) {
+                    if (session) {
+                        await fetchAndSetUser(session.user);
+                    } else {
+                        setUser(null);
+                    }
+                }
+            } catch (err: any) {
+                if (err.name === 'AbortError' || err.message?.includes('abort')) return;
+                console.error('Error initializing auth:', err);
+            } finally {
+                if (isMounted.current) {
+                    setIsLoading(false);
+                }
             }
-            setIsLoading(false);
         };
 
         initAuth();
 
         // Listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!isMounted.current) return;
+
             if (session?.user) {
                 await fetchAndSetUser(session.user);
             } else {
@@ -92,18 +112,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            isMounted.current = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const login = (role: UserRole = 'fan') => {
         // Redirect to login page
-        window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+        }
     };
 
     const logout = async () => {
-        await supabase.auth.signOut();
-        setUser(null);
-        localStorage.removeItem('g22_user');
+        try {
+            await supabase.auth.signOut();
+            if (isMounted.current) {
+                setUser(null);
+                localStorage.removeItem('g22_user');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
     };
 
     return (
