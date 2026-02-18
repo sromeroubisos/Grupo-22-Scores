@@ -125,7 +125,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                     signal: controller.signal
                 });
 
-                if (!entry.ok) throw new Error(res.statusText);
+                if (!res.ok) throw new Error(res.statusText);
 
                 const payload = await res.json();
                 console.log('TOURNAMENT API PAYLOAD:', payload);
