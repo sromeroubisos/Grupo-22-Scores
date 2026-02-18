@@ -711,13 +711,19 @@ export default function HomePage() {
                       onClick={() => toggleCompetitionCollapse(league.leagueId)}
                       style={{ cursor: 'pointer' }}
                     >
-                      <div className={styles.leagueInfo}>
-                        <span className={styles.leagueFlag}>{league.flag}</span>
-                        <div className={styles.leagueMeta}>
-                          <span className={styles.leagueSectionName}>{league.league}</span>
-                          {/* <span className={styles.leagueRound}>{league.round}</span> */}
+                      <Link
+                        href={`/tournaments/${league.leagueId}`}
+                        className={styles.leagueHeaderLink}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className={styles.leagueInfo}>
+                          <span className={styles.leagueFlag}>{league.flag}</span>
+                          <div className={styles.leagueMeta}>
+                            <span className={styles.leagueSectionName}>{league.league}</span>
+                            {/* <span className={styles.leagueRound}>{league.round}</span> */}
+                          </div>
                         </div>
-                      </div>
+                      </Link>
 
                       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <button
