@@ -8,13 +8,20 @@ export default function OAuthButtons() {
     const [loading, setLoading] = useState<string | null>(null)
     const supabase = createClient()
 
+    const getCallbackUrl = (provider: 'google' | 'apple' | 'facebook') => {
+        if (provider === 'google') {
+            return `${window.location.origin}/api/auth/callback/google`
+        }
+        return `${window.location.origin}/auth/callback`
+    }
+
     const handleLogin = async (provider: 'google' | 'apple' | 'facebook') => {
         setLoading(provider)
         try {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${window.location.origin}/auth/callback`,
+                    redirectTo: getCallbackUrl(provider),
                 },
             })
             if (error) throw error

@@ -1,6 +1,6 @@
 // User types for G22 Scores
 
-export type UserRole = 'user' | 'super_admin';
+export type UserRole = 'fan' | 'user' | 'super_admin' | 'operator' | 'club_admin';
 
 export type EntityType = 'league' | 'club' | 'tournament' | 'team' | 'player';
 
@@ -45,5 +45,5 @@ export function isSuperAdmin(user: User | null): boolean {
 
 // Helper to check if user can access admin panel
 export function canAccessAdminPanel(user: User | null): boolean {
-    return user?.role === 'super_admin';
+    return user?.role === 'super_admin' || user?.role === 'operator' || user?.role === 'club_admin';
 }

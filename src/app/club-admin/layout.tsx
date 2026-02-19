@@ -28,14 +28,25 @@ export default function ClubAdminLayout({ children }: { children: React.ReactNod
     const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
+    const hasClubMembership = Boolean(
+        user?.memberships?.some((membership) =>
+            membership.scopeType === 'club' && ['admin', 'operator', 'editor'].includes(membership.role)
+        )
+    );
+    const canAccessClubPanel = Boolean(
+        user?.role === 'admin_club' ||
+        user?.role === 'admin_general' ||
+        user?.role === 'entrenador' ||
+        hasClubMembership
+    );
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             router.push('/login');
-        } else if (!isLoading && isAuthenticated && user?.role !== 'admin_club' && user?.role !== 'admin_general' && user?.role !== 'entrenador') {
+        } else if (!isLoading && isAuthenticated && !canAccessClubPanel) {
             router.push('/');
         }
-    }, [isLoading, isAuthenticated, user, router]);
+    }, [isLoading, isAuthenticated, canAccessClubPanel, router]);
 
     if (isLoading || !isAuthenticated) {
         return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Cargando...</div>;

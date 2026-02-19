@@ -7,11 +7,13 @@ import { useAuth } from '@/context/AuthContext';
 import { db } from '@/lib/mock-db';
 import mammoth from 'mammoth';
 import styles from './page.module.css';
+import { resolveAdminPanel } from '@/lib/auth/roles';
 
 export default function AdminDashboard() {
     const { user } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
+    const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
     const [activeTab, setActiveTab] = useState(searchParams?.get('tab') || 'dashboard');
     const [myTournaments, setMyTournaments] = useState<any[]>([]);
     const [myUnions, setMyUnions] = useState<any[]>([]);
@@ -151,10 +153,11 @@ export default function AdminDashboard() {
     const activeReport = reportNews.find((item) => item.id === activeReportId) || reportNews[0];
 
     useEffect(() => {
-        if (user?.role === 'admin_general') {
-            router.replace('/admin/super');
+        if (!user || !adminPanel?.href) return;
+        if (adminPanel.href !== '/admin') {
+            router.replace(adminPanel.href);
         }
-    }, [user, router]);
+    }, [adminPanel, user, router]);
 
     useEffect(() => {
         if (!user) return;
@@ -170,7 +173,7 @@ export default function AdminDashboard() {
         t.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (user?.role === 'admin_general') {
+    if (adminPanel?.href && adminPanel.href !== '/admin') {
         return null;
     }
 

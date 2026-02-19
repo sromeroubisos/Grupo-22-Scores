@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import { resolveAdminPanel } from '@/lib/auth/roles';
 
 export default function Header() {
     const { user, logout } = useAuth();
@@ -106,7 +107,7 @@ export default function Header() {
         );
     };
 
-    const adminRoles = ['admin_general'];
+    const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
 
     return (
         <header className="g22-header">
@@ -184,7 +185,7 @@ export default function Header() {
                                         </div>
                                         <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>{user.email}</div>
                                         <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', background: 'var(--color-bg-tertiary)', fontSize: '11px', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
-                                            {user.role === 'admin_general' ? 'Administrador' : 'Usuario'}
+                                            {adminPanel ? 'Administrador' : 'Usuario'}
                                         </div>
                                         <Link href="/profile" onClick={() => setIsUserMenuOpen(false)} style={{ display: 'block', marginTop: '12px', textAlign: 'center', background: 'var(--color-button-primary, #00C853)', color: 'white', padding: '8px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
                                             Editar perfil
@@ -197,10 +198,10 @@ export default function Header() {
                                             Mis Seguidos
                                         </Link>
 
-                                        {adminRoles.includes(user.role) && (
-                                            <Link href="/admin/super" onClick={() => setIsUserMenuOpen(false)}>
+                                        {adminPanel && (
+                                            <Link href={adminPanel.href} onClick={() => setIsUserMenuOpen(false)}>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                                                Panel Admin
+                                                {adminPanel.label}
                                             </Link>
                                         )}
                                     </div>

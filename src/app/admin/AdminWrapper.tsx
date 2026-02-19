@@ -6,6 +6,7 @@ import AccessDenied from './components/AccessDenied';
 import Sidebar from './components/Sidebar';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { resolveAdminPanel } from '@/lib/auth/roles';
 
 export default function AdminWrapper({ children }: { children: React.ReactNode }) {
     const { user, isAuthenticated } = useAuth();
@@ -26,7 +27,17 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
     const isSuperAdmin = pathname?.includes('/admin/super');
     const isDashboard = pathname === '/admin';
 
-    const isAllowed = user && ['admin_general'].includes(user.role);
+    const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
+    const isFederationAdmin = Boolean(adminPanel && adminPanel.href.startsWith('/admin'));
+    const isAllowed = user && isFederationAdmin;
+
+    useEffect(() => {
+        if (!isAuthenticated || !adminPanel || isMatchConsole) return;
+
+        if (adminPanel.href === '/club-admin' && pathname?.startsWith('/admin')) {
+            router.replace('/club-admin');
+        }
+    }, [adminPanel, isAuthenticated, isMatchConsole, pathname, router]);
 
     if (!isAuthenticated && !isMatchConsole) {
         return <LoginScreen />;
@@ -37,7 +48,7 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
             <div style={{ padding: '100px', textAlign: 'center' }}>
                 <h1>Acceso Denegado</h1>
                 <p>No tienes permisos para acceder al Panel de Federación.</p>
-                {user?.role === 'admin_club' && (
+                {adminPanel?.href === '/club-admin' && (
                     <button
                         onClick={() => router.push('/club-admin')}
                         style={{ marginTop: '20px', padding: '10px 20px', background: 'var(--accent-bio)', color: '#000', borderRadius: '8px', border: 'none', fontWeight: 700, cursor: 'pointer' }}

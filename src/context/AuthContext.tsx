@@ -3,25 +3,25 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-
-type UserRole = 'fan' | 'jugador' | 'entrenador' | 'admin_general' | 'admin_union' | 'admin_torneo' | 'operador' | 'admin_club';
+import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 
 interface User {
     id: string;
     name: string;
     email: string;
-    role: UserRole;
+    role: AppUserRole;
     avatarUrl?: string;
     unionId?: string;
     tournamentId?: string;
     clubId?: string;
+    memberships?: MembershipLike[];
 }
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (role?: UserRole) => void;
+    login: (role?: AppUserRole) => void;
     logout: () => void;
 }
 
@@ -45,8 +45,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!isMounted.current) return;
 
             if (profile) {
-                // Map Supabase 'super_admin' to context 'admin_general' for compatibility
-                const contextRole: UserRole = profile.role === 'super_admin' ? 'admin_general' : 'fan';
+                const { data: membershipsData, error: membershipsError } = await supabase
+                    .from('memberships')
+                    .select('scope_type, scope_id, role')
+                    .eq('user_id', sbUser.id);
+
+                if (membershipsError) {
+                    console.warn('Error fetching memberships:', membershipsError.message);
+                }
+
+                const memberships: MembershipLike[] = (membershipsData || []).map((membership: any) => ({
+                    scopeType: membership.scope_type,
+                    scopeId: membership.scope_id,
+                    role: membership.role,
+                }));
+
+                const contextRole: AppUserRole = normalizeRole(profile.role);
 
                 setUser({
                     id: profile.id,
@@ -54,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     email: profile.email || sbUser.email || '',
                     role: contextRole,
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
+                    memberships,
                 });
             } else {
                 // Fallback to auth metadata if profile can't be fetched
@@ -63,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     email: sbUser.email || '',
                     role: 'fan',
                     avatarUrl: sbUser.user_metadata?.avatar_url,
+                    memberships: [],
                 });
             }
         } catch (err: any) {
@@ -118,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const login = (role: UserRole = 'fan') => {
+    const login = (role: AppUserRole = 'fan') => {
         // Redirect to login page
         if (typeof window !== 'undefined') {
             window.location.href = '/login';

@@ -20,7 +20,8 @@
       "Bash(npx tsc:*)",
       "Bash(npx supabase:*)",
       "Bash(npm run dev:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
