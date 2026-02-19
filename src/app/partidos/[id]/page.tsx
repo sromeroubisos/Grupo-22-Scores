@@ -115,6 +115,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const isFlashScore = useMemo(() => /^[A-Za-z0-9]{8}$/.test(id) || id.length === 8, [id]);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         async function fetchData() {
             // Only set loading on first fetch
             if (state.kind === 'loading') {
@@ -132,7 +134,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             'x-rapidapi-host': process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com',
                             'x-rapidapi-key': process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '32e9f1aee1msha3c5470d1ea7367p10fac7jsnf9a1bfc88131'
                         },
-                        debugTag: 'MatchPageInit'
+                        debugTag: 'MatchPageInit',
+                        signal: controller.signal
                     });
 
                     const evt = detailsRes?.DATA?.EVENT || detailsRes;
@@ -416,7 +419,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
             }
         }, 60000);
 
-        return () => clearInterval(interval);
+        return () => {
+            controller.abort();
+            clearInterval(interval);
+        };
     }, [id, isFlashScore]);
 
     if (state.kind === 'loading') return <div className={styles.page}><div className={styles.appContainer}>Cargando datos...</div></div>;

@@ -30,7 +30,15 @@ export async function apiFetch<T = unknown>(
 
     // Set a timeout to prevent hanging requests
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+    const TIMEOUT_MS = 25000; // 25s timeout
+    const timeoutId = setTimeout(() => controller.abort(new Error("Request timeout")), TIMEOUT_MS);
+
+    // Chain external signal if provided
+    if (opts.signal) {
+        opts.signal.addEventListener('abort', () => {
+            controller.abort(opts.signal?.reason);
+        });
+    }
 
     try {
         const res = await fetch(url, {

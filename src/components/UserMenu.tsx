@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { User, Settings, Star, LogOut, Shield } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { User as UserType } from '@/lib/types/user'
+import { User as UserType, isSuperAdmin } from '@/lib/types/user'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import styles from './UserMenu.module.css'
@@ -92,7 +92,7 @@ export default function UserMenu() {
                         {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
                     </div>
                 )}
-                {user.role === 'super_admin' && (
+                {isSuperAdmin(user) && (
                     <div className={styles.adminBadge}>
                         <Shield size={12} />
                     </div>
@@ -106,7 +106,7 @@ export default function UserMenu() {
                             <div className={styles.userName}>{user.name || user.email}</div>
                             <div className={styles.userEmail}>{user.email}</div>
                         </div>
-                        {user.role === 'super_admin' && (
+                        {isSuperAdmin(user) && (
                             <span className={styles.superAdminTag}>
                                 Super Admin
                             </span>
@@ -125,7 +125,7 @@ export default function UserMenu() {
                         Favoritos
                     </Link>
 
-                    {user.role === 'super_admin' && (
+                    {isSuperAdmin(user) && (
                         <>
                             <div className={styles.dropdownDivider} />
                             <Link href="/admin/super" className={styles.menuItemAdmin} onClick={() => setIsOpen(false)}>

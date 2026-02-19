@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { User } from '@/lib/types/user'
+import { User, isSuperAdmin } from '@/lib/types/user'
 
 /**
  * Hook to get and manage current user
@@ -79,7 +79,7 @@ export function useUser() {
         loading,
         updateProfile,
         signOut,
-        isSuperAdmin: user?.role === 'super_admin',
+        isSuperAdmin: isSuperAdmin(user),
         isAuthenticated: !!user
     }
 }

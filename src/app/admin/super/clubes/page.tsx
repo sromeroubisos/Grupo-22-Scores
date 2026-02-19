@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/mock-db';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { Eye, EyeOff, Folder, FolderIcon, MoreVertical, Plus, Trash2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 const countryFlags: Record<string, string> = {
     Argentina: '🇦🇷',
@@ -13,35 +14,85 @@ const countryFlags: Record<string, string> = {
     Chile: '🇨🇱'
 };
 
-const clubSports: Record<string, string[]> = {
-    sic: ['rugby', 'hockey'],
-    casi: ['rugby'],
-    hindu: ['rugby'],
-    belgrano: ['rugby', 'football'],
-    alumni: ['rugby'],
-    newman: ['rugby', 'hockey']
-};
+import { SPORTS } from '@/lib/data/sports';
 
-const sportLabels: Record<string, string> = {
-    rugby: 'Rugby',
-    football: 'Futbol',
-    hockey: 'Hockey'
-};
+const sportLabels: Record<string, string> = Object.fromEntries(
+    Object.entries(SPORTS).map(([id, s]) => [id, s.nameEs])
+);
 
 export default function SuperadminClubesPage() {
     const { filters } = useSuperConsole();
     const [folderFilter, setFolderFilter] = useState('all');
-    const [tick, setTick] = useState(0);
     const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
+
+    // State for Supabase data
+    const [clubs, setClubs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const supabase = createClient();
 
     const toggleActionMenu = (id: string) => {
         if (actionMenuOpenId === id) setActionMenuOpenId(null);
         else setActionMenuOpenId(id);
     };
 
+    const fetchData = async () => {
+        setLoading(true);
+        setErrorMsg(null);
+
+        // Safety timeout
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timed out after 5s')), 5000)
+        );
+
+        try {
+            console.log('Fetching clubs...');
+
+            // Race the query against the timeout
+            const { data, error } = await Promise.race([
+                supabase
+                    .from('clubs')
+                    .select('*')
+                    .order('name'),
+                timeoutPromise
+            ]) as any;
+
+            if (error) {
+                console.error('Error fetching clubs from Supabase:', error);
+                throw error;
+            } else {
+                console.log('Clubs data loaded from DB:', data?.length);
+                setClubs(data || []);
+            }
+        } catch (err: any) {
+            console.error('Failed to fetch clubs from DB, fallback to empty/mock:', err);
+            setErrorMsg(`Error de conexión: ${err.message}. Mostrando datos locales.`);
+            // Fallback to mock data from db.clubs temporarily
+            // This ensures the UI doesn't break if DB is down
+            // Mapping mock-db structure to Supabase structure
+            const mockClubs = db.clubs.map(c => ({
+                id: c.id,
+                name: c.name,
+                short_name: c.shortName,
+                city: c.city,
+                logo_url: c.logoUrl,
+                union_id: c.unionId,
+                country_id: 'ARG' // Default
+            }));
+            setClubs(mockClubs);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     const handleCreateFolder = () => {
+        // Mock folder creation for now
         if (!newFolderName.trim()) return;
         const newFolder = {
             id: newFolderName.toLowerCase().replace(/\s+/g, '-'),
@@ -51,78 +102,86 @@ export default function SuperadminClubesPage() {
         db.folders.push(newFolder);
         setNewFolderName('');
         setIsCreateFolderOpen(false);
-        setTick(t => t + 1);
     };
 
-    const handleMoveToFolder = (clubId: string, folderId: string) => {
-        const club = db.clubs.find(c => c.id === clubId);
-        if (club) {
-            club.folderId = folderId === 'none' ? undefined : folderId;
-            setTick(t => t + 1);
-            setActionMenuOpenId(null);
+    const handleMoveToFolder = async (clubId: string, folderId: string) => {
+        // Feature depends on folder_id column, which might not exist yet.
+        console.log('Move to folder not implemented in DB yet', clubId, folderId);
+        setActionMenuOpenId(null);
+    };
+
+    const handleToggleVisibility = async (clubId: string, current: boolean | undefined) => {
+        try {
+            // Check if is_visible column exists update otherwise mock
+            console.log('Toggling visibility', clubId, !current);
+            // Optimistic update if we were to implement
+            // await supabase.from('clubs').update({ is_visible: !current }).eq('id', clubId);
+            // fetchData();
+        } catch (err) {
+            console.error('Error toggling visibility', err);
         }
     };
 
-    const handleToggleVisibility = (clubId: string, current: boolean | undefined) => {
-        const club = db.clubs.find(c => c.id === clubId);
-        if (club) {
-            club.isVisible = !current;
-            setTick((t) => t + 1);
-        }
-    };
-
-    const handleDelete = (clubId: string) => {
+    const handleDelete = async (clubId: string) => {
         if (confirm('¿Estás seguro de eliminar este club?')) {
-            const idx = db.clubs.findIndex(c => c.id === clubId);
-            if (idx !== -1) {
-                db.clubs.splice(idx, 1);
-                setTick(t => t + 1);
+            try {
+                const { error } = await supabase
+                    .from('clubs')
+                    .delete()
+                    .eq('id', clubId);
+
+                if (error) {
+                    alert('Error al eliminar club');
+                    console.error(error);
+                } else {
+                    fetchData();
+                }
+            } catch (err) {
+                console.error(err);
             }
         }
     };
 
-    const clubs = useMemo(() => {
-        return db.clubs.map((c, index) => {
-            const tournaments = new Set<string>();
-            db.matches.filter((m) => m.homeClubId === c.id || m.awayClubId === c.id).forEach((m) => {
-                tournaments.add(m.tournamentId);
-            });
+    const formattedClubs = useMemo(() => {
+        return clubs.map((c, index) => {
+            // Default mappings since columns might be missing
+            const sports = [c.sport || 'rugby'];
+            const country = c.country_id === 'URY' ? 'Uruguay' : 'Argentina'; // Simple mapping
+            const verified = true; // Assume DB clubs are verified/created by admin
+            const apiLinked = false;
+            const statusKey = 'activo';
+            const source = 'Manual';
 
-            const sports = clubSports[c.id] || ['rugby'];
-            const country = c.unionId === 'uar' ? 'Argentina' : 'Uruguay';
-            const verified = index % 2 === 0;
-            const apiLinked = index % 3 !== 0;
-            const statusKey = verified ? 'activo' : 'pendiente';
-            const source = apiLinked ? 'API' : 'Manual';
-
-            const folder = db.folders.find(f => f.id === c.folderId);
+            // Folders are mock for now
+            const folderId = c.folder_id; // If exists
+            const folder = db.folders.find(f => f.id === folderId);
 
             return {
                 id: c.id,
-                unionId: c.unionId,
+                unionId: c.union_id,
                 name: c.name,
-                shortName: c.shortName,
-                city: c.city,
-                logo: c.logoUrl || '⚽',
+                shortName: c.short_name || c.name,
+                city: c.city || 'Ubicación desconocida',
+                logo: c.logo_url || '🛡️',
                 sports,
-                sportLabels: sports.map(s => sportLabels[s] || s).join(' · '),
+                sportLabels: sportLabels[c.sport || 'rugby'] || c.sport || 'Rugby',
                 country,
                 verified,
                 apiLinked,
                 statusKey,
                 source,
-                followers: 980 + index * 140,
-                views: 14600 + index * 530,
-                matchesThisMonth: tournaments.size * 2 + 3,
-                folderId: c.folderId,
+                followers: 100 + index * 10, // Mock
+                views: 500 + index * 50, // Mock
+                matchesThisMonth: 0, // Need relation to calculate
+                folderId,
                 folderName: folder?.name,
                 folderColor: folder?.color,
-                isVisible: c.isVisible !== false // Default to true if undefined
+                isVisible: true
             };
         });
-    }, [tick]);
+    }, [clubs]);
 
-    const filtered = clubs.filter((club) => {
+    const filtered = formattedClubs.filter((club) => {
         if (filters.sport !== 'all' && !club.sports.includes(filters.sport)) return false;
         if (filters.country !== 'all' && club.country !== filters.country) return false;
         if (filters.status !== 'all' && club.statusKey !== filters.status) return false;
@@ -147,7 +206,7 @@ export default function SuperadminClubesPage() {
         return acc;
     }, {});
 
-    const createUnionId = db.unions[0]?.id;
+    const createUnionId = 'any'; // Simplification
 
     return (
         <div style={{ paddingBottom: '40px' }} onClick={() => setActionMenuOpenId(null)}>
@@ -172,22 +231,9 @@ export default function SuperadminClubesPage() {
                         </select>
                     </div>
 
-                    <button
-                        className={styles.actionBtn}
-                        onClick={() => setIsCreateFolderOpen(!isCreateFolderOpen)}
-                    >
-                        <Plus size={14} /> Carpeta
-                    </button>
-
-                    {createUnionId ? (
-                        <Link href={`/admin/union/${createUnionId}/clubes/crear?from=super`} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
-                            + Crear Club
-                        </Link>
-                    ) : (
-                        <button className={`${styles.actionBtn} ${styles.actionBtnPrimary}`} disabled>
-                            + Crear Club
-                        </button>
-                    )}
+                    <Link href="/admin/super/clubes/crear" className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
+                        + Crear Club
+                    </Link>
                 </div>
             </div>
 
@@ -207,13 +253,21 @@ export default function SuperadminClubesPage() {
                 </div>
             )}
 
-            {Object.keys(grouped).length === 0 && (
+            {loading && <div className={styles.slab} style={{ padding: 40, textAlign: 'center' }}>Cargando clubes...</div>}
+
+            {errorMsg && (
+                <div className={styles.slab} style={{ padding: '12px', textAlign: 'center', color: '#f59e0b', border: '1px solid #f59e0b', marginBottom: '16px', fontSize: '14px' }}>
+                    Warning: {errorMsg}
+                </div>
+            )}
+
+            {!loading && Object.keys(grouped).length === 0 && (
                 <div className={styles.cardItem} style={{ padding: 24, textAlign: 'center', color: '#666' }}>
                     No se encontraron clubes con los filtros actuales.
                 </div>
             )}
 
-            {Object.entries(grouped).map(([sport, countries]) => (
+            {!loading && Object.entries(grouped).map(([sport, countries]) => (
                 <section key={sport} className={styles.groupSection}>
                     <div className={styles.groupHeader}>
                         <span className={styles.groupTitle}>{sportLabels[sport] || sport}</span>
@@ -229,7 +283,12 @@ export default function SuperadminClubesPage() {
                                 {items.map((club) => (
                                     <div key={`${sport}-${club.id}`} className={styles.cardItem}>
                                         <div className={styles.cardHeader}>
-                                            <div className={styles.cardLogo}>{club.logo}</div>
+                                            <div className={styles.cardLogo}>
+                                                {club.logo && (club.logo.startsWith('http') || club.logo.startsWith('/')) ?
+                                                    <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> :
+                                                    club.logo
+                                                }
+                                            </div>
                                             <div>
                                                 <div className={styles.cardTitle}>{club.name}</div>
                                                 <div className={styles.cardContext}>
@@ -318,7 +377,7 @@ export default function SuperadminClubesPage() {
                                             <Link href={`/admin/super/clubes/${club.id}`} className={styles.actionBtn}>
                                                 Ver
                                             </Link>
-                                            <Link href={`/admin/union/${club.unionId}/clubes/crear?clubId=${club.id}&from=super`} className={styles.actionBtn}>
+                                            <Link href={`/admin/super/clubes/${club.id}/editar`} className={styles.actionBtn}>
                                                 Editar
                                             </Link>
                                             <button className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>

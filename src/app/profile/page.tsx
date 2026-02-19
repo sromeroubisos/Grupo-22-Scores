@@ -6,109 +6,162 @@ import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import {
     FileText, User, LogOut, Camera,
-    ChevronRight, Globe, Lock, Bell, Trophy, Plus, ShieldCheck
+    ChevronRight, Globe, Lock, Bell, Trophy, ShieldCheck, Star,
 } from 'lucide-react';
 import styles from './profile.module.css';
-import { SafeBox } from '@/components/SafeBox';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
-type TabKey = 'settings' | 'admin' | 'news';
+type MainTab = 'seguidos' | 'competiciones' | 'clubes' | 'actividad' | 'ajustes';
 
-// ─── MAIN PAGE COMPONENT ─────────────────────────────────────────────────────
+interface FavoriteItem {
+    id: string;
+    entity_id: string;
+    entity_type: string;
+    name: string;
+    logo_url?: string;
+    color?: string;
+}
+
+interface ProfileStats {
+    total: number;
+    clubes: number;
+    torneos: number;
+}
+
+// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
     const { user, logout } = useAuth();
-    const [activeTab, setActiveTab] = useState<TabKey>('settings');
+    const [activeTab, setActiveTab] = useState<MainTab>('seguidos');
     const [isDesktop, setIsDesktop] = useState(false);
+    const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+    const [favLoading, setFavLoading] = useState(true);
+    const supabase = createClient();
 
-    // Initial desktop check and window listener
     useEffect(() => {
-        const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
-        checkDesktop();
-        window.addEventListener('resize', checkDesktop);
-        return () => window.removeEventListener('resize', checkDesktop);
+        const check = () => setIsDesktop(window.innerWidth >= 1024);
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
     }, []);
+
+    useEffect(() => {
+        if (!user?.id) { setFavLoading(false); return; }
+        let alive = true;
+        (async () => {
+            try {
+                const { data, error } = await supabase.rpc(
+                    'get_my_favorites_enriched_v2',
+                    { p_limit: 50, p_cursor: null },
+                );
+                if (!alive) return;
+                if (!error) setFavorites(Array.isArray(data) ? data : []);
+            } catch (err: any) {
+                if (err?.name === 'AbortError') return;
+            } finally {
+                if (alive) setFavLoading(false);
+            }
+        })();
+        return () => { alive = false; };
+    }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const stats: ProfileStats = {
+        total: favorites.length,
+        clubes: favorites.filter(f => f.entity_type === 'club').length,
+        torneos: favorites.filter(f => ['league', 'tournament'].includes(f.entity_type)).length,
+    };
+
+    const sportsTabs: { key: MainTab; label: string }[] = [
+        { key: 'seguidos', label: 'Seguidos' },
+        { key: 'competiciones', label: 'Competiciones' },
+        { key: 'clubes', label: 'Clubes' },
+        { key: 'actividad', label: 'Actividad' },
+    ];
+    // On mobile, settings live in a tab. On desktop they live in the sidebar.
+    const visibleTabs = isDesktop
+        ? sportsTabs
+        : [...sportsTabs, { key: 'ajustes' as MainTab, label: 'Ajustes' }];
 
     return (
         <div className={styles.page}>
             <div className={styles.container}>
 
-                {/* Header Section (Full Width) */}
-                <ProfileHeader user={user} />
+                {/* ── Header (full width) ── */}
+                <ProfileHeader user={user} stats={stats} />
 
-                {/* Main Content Column (Left on Desktop) */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-
-                    {/* Tabs Navigation */}
-                    <nav className={styles.tabsContainer} aria-label="Sección de perfil">
-                        <button
-                            className={`${styles.tab} ${activeTab === 'settings' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('settings')}
-                        >
-                            Configuración
-                        </button>
-                        <button
-                            className={`${styles.tab} ${activeTab === 'admin' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('admin')}
-                        >
-                            Aplicar a Staff
-                        </button>
-                        <button
-                            className={`${styles.tab} ${activeTab === 'news' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('news')}
-                        >
-                            Mis Noticias
-                        </button>
+                {/* ── Main column ── */}
+                <div className={styles.mainColumn}>
+                    <nav className={styles.tabsContainer} aria-label="Secciones del perfil">
+                        {visibleTabs.map(({ key, label }) => (
+                            <button
+                                key={key}
+                                className={`${styles.tab} ${activeTab === key ? styles.active : ''}`}
+                                onClick={() => setActiveTab(key)}
+                            >
+                                {label}
+                            </button>
+                        ))}
                     </nav>
 
-                    {/* Content Area */}
-                    <main className={styles.mainContent}>
-                        {activeTab === 'settings' && <SettingsPanel logout={logout} />}
-                        {activeTab === 'admin' && <AdminApplicationForm user={user} />}
-                        {activeTab === 'news' && <NewsDashboard />}
-                    </main>
+                    <div className={styles.mainContent}>
+                        {activeTab === 'seguidos' && (
+                            <SeguridosPanel favorites={favorites} loading={favLoading} />
+                        )}
+                        {activeTab === 'competiciones' && (
+                            <EmptySection
+                                icon={<Trophy size={40} color="var(--color-text-tertiary)" />}
+                                title="Competiciones"
+                                message="Las competiciones que sigas aparecerán acá."
+                            />
+                        )}
+                        {activeTab === 'clubes' && (
+                            <EmptySection
+                                icon={<ShieldCheck size={40} color="var(--color-text-tertiary)" />}
+                                title="Clubes"
+                                message="Los clubes que sigas aparecerán acá."
+                            />
+                        )}
+                        {activeTab === 'actividad' && (
+                            <EmptySection
+                                icon={<FileText size={40} color="var(--color-text-tertiary)" />}
+                                title="Actividad"
+                                message="Tu actividad reciente aparecerá acá."
+                            />
+                        )}
+                        {activeTab === 'ajustes' && !isDesktop && (
+                            <SettingsPanel logout={logout} />
+                        )}
+                    </div>
                 </div>
 
-                {/* Sidebar Column (Desktop Only) */}
+                {/* ── Sidebar (desktop only) ── */}
                 {isDesktop && (
                     <aside className={styles.sidebar}>
-                        <div className={styles.sidebarTitle}>
-                            <span>Mis Seguidos</span>
-                            <Link href="/favorites" style={{ fontSize: '12px', color: 'var(--color-accent)' }}>
-                                Ver todos →
-                            </Link>
-                        </div>
-                        <SafeBox fallback={<div style={{ fontSize: '12px', color: 'var(--color-error)' }}>No se pudo cargar el preview</div>}>
-                            <DesktopFavoritesPreview userId={user?.id} />
-                        </SafeBox>
+                        <SettingsPanel logout={logout} />
                     </aside>
                 )}
+
+
 
             </div>
         </div>
     );
 }
 
-// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
+// ─── PROFILE HEADER ───────────────────────────────────────────────────────────
 
-function ProfileHeader({ user }: { user: any }) {
+function ProfileHeader({ user, stats }: { user: any; stats: ProfileStats }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleAvatarClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            alert('Funcionalidad de subida de imagen en desarrollo.');
-        }
-    };
 
     return (
         <header className={styles.profileHeader}>
-            <div className={styles.avatarContainer} onClick={handleAvatarClick} role="button" aria-label="Cambiar foto de perfil">
+            <div
+                className={styles.avatarContainer}
+                onClick={() => fileInputRef.current?.click()}
+                role="button"
+                aria-label="Cambiar foto de perfil"
+            >
                 {user?.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={user.avatarUrl} alt="Avatar" className={styles.avatar} />
@@ -117,25 +170,28 @@ function ProfileHeader({ user }: { user: any }) {
                         <User size={32} color="#aaa" />
                     </div>
                 )}
-                <div className={styles.avatarOverlay}>
-                    <Camera size={24} />
-                </div>
+                <div className={styles.avatarOverlay}><Camera size={24} /></div>
                 <input
                     type="file"
                     ref={fileInputRef}
                     style={{ display: 'none' }}
                     accept="image/*"
-                    onChange={handleFileChange}
+                    onChange={() => alert('Funcionalidad de subida de imagen en desarrollo.')}
                 />
             </div>
 
             <div className={styles.userInfo}>
-                <h1 className={styles.userName}>
-                    {user?.name || 'Usuario'}
-                </h1>
+                <h1 className={styles.userName}>{user?.name || 'Usuario'}</h1>
                 <div className={styles.userHandle}>@{user?.email?.split('@')[0] || 'usuario'}</div>
                 <div className={styles.userStatusPill}>
-                    {user?.role === 'admin_general' ? 'Administrador' : 'Usuario'}
+                    {user?.role === 'super_admin' || user?.role === 'admin_general' ? 'Administrador' : 'Usuario'}
+                </div>
+                <div className={styles.statsRow}>
+                    <span className={styles.stat}><strong>{stats.total}</strong> Seguidos</span>
+                    <span className={styles.statDivider}>·</span>
+                    <span className={styles.stat}><strong>{stats.clubes}</strong> Clubes</span>
+                    <span className={styles.statDivider}>·</span>
+                    <span className={styles.stat}><strong>{stats.torneos}</strong> Torneos</span>
                 </div>
             </div>
 
@@ -146,10 +202,99 @@ function ProfileHeader({ user }: { user: any }) {
     );
 }
 
-function SettingsPanel({ logout }: { logout: () => void }) {
+// ─── SEGUIDOS PANEL ───────────────────────────────────────────────────────────
+
+function SeguridosPanel({ favorites, loading }: { favorites: FavoriteItem[]; loading: boolean }) {
+    if (loading) {
+        return (
+            <div className={styles.skeletonGrid}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className={styles.skeletonCard} />
+                ))}
+            </div>
+        );
+    }
+
+    if (favorites.length === 0) {
+        return (
+            <EmptySection
+                icon={<Star size={40} color="var(--color-text-tertiary)" />}
+                title="Sin seguidos"
+                message="Seguí clubes y torneos para verlos acá."
+                action={<Link href="/" className={styles.btnAccent}>Explorar</Link>}
+            />
+        );
+    }
+
     return (
         <div>
-            <h2 className={styles.sectionTitle}>Preferencias</h2>
+            <div className={styles.seguridosHeader}>
+                <span className={styles.seguridosCount}>{favorites.length} seguidos</span>
+                <Link href="/favorites" className={styles.linkAccent}>Gestionar →</Link>
+            </div>
+            <div className={styles.seguridosGrid}>
+                {favorites.map(fav => (
+                    <Link key={fav.entity_id} href="/favorites" className={styles.seguridoCard}>
+                        {fav.logo_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={fav.logo_url} alt={fav.name} className={styles.seguridoImg} />
+                        ) : (
+                            <div className={styles.seguridoImg} style={{ background: fav.color || 'var(--color-bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {fav.entity_type === 'club'
+                                    ? <ShieldCheck size={20} color="var(--color-text-tertiary)" />
+                                    : <Trophy size={20} color="var(--color-text-tertiary)" />
+                                }
+                            </div>
+                        )}
+                        <span className={styles.seguridoName}>{fav.name}</span>
+                        <span className={styles.seguridoType}>
+                            {fav.entity_type === 'club' ? 'Club' : 'Liga'}
+                        </span>
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ─── EMPTY SECTION ────────────────────────────────────────────────────────────
+
+function EmptySection({ icon, title, message, action }: {
+    icon: React.ReactNode;
+    title?: string;
+    message: string;
+    action?: React.ReactNode;
+}) {
+    return (
+        <div className={styles.emptySection}>
+            {icon}
+            {title && <h3 className={styles.emptySectionTitle}>{title}</h3>}
+            <p className={styles.emptySectionMsg}>{message}</p>
+            {action}
+        </div>
+    );
+}
+
+// ─── SETTINGS PANEL (sidebar / mobile tab) ────────────────────────────────────
+
+function SettingsPanel({ logout }: { logout: () => void }) {
+    const [showStaffForm, setShowStaffForm] = useState(false);
+
+    if (showStaffForm) {
+        return (
+            <div>
+                <button className={styles.backBtn} onClick={() => setShowStaffForm(false)}>
+                    ← Volver
+                </button>
+                <AdminApplicationForm />
+            </div>
+        );
+    }
+
+    return (
+        <div className={styles.settingsList}>
+            <h3 className={styles.sidebarSectionTitle}>Configuración</h3>
+
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
                     <h4>Idioma</h4>
@@ -157,6 +302,7 @@ function SettingsPanel({ logout }: { logout: () => void }) {
                 </div>
                 <ChevronRight size={16} color="var(--color-text-tertiary)" />
             </div>
+
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
                     <h4>Zona Horaria</h4>
@@ -164,39 +310,50 @@ function SettingsPanel({ logout }: { logout: () => void }) {
                 </div>
                 <ChevronRight size={16} color="var(--color-text-tertiary)" />
             </div>
+
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
                     <h4>Notificaciones</h4>
-                    <p>Resultados en vivo, noticias importantes</p>
+                    <p>Resultados en vivo</p>
                 </div>
                 <Bell size={16} color="var(--color-text-tertiary)" />
             </div>
 
-            <h2 className={styles.sectionTitle} style={{ marginTop: '32px' }}>Cuenta</h2>
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
-                    <h4>Privacidad del Perfil</h4>
+                    <h4>Privacidad</h4>
                     <p>Público</p>
                 </div>
                 <Globe size={16} color="var(--color-text-tertiary)" />
             </div>
+
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
                     <h4>Cambiar Contraseña</h4>
-                    <p>Última modificación: hace 3 meses</p>
                 </div>
                 <Lock size={16} color="var(--color-text-tertiary)" />
             </div>
 
-            <button className={styles.btnLogout} onClick={logout} style={{ marginTop: '24px' }}>
+            <div className={styles.settingsDivider} />
+
+            <button className={styles.settingItemBtn} onClick={() => setShowStaffForm(true)}>
+                <div className={styles.settingInfo}>
+                    <h4>Aplicar a Staff</h4>
+                    <p>Colaborar con el equipo</p>
+                </div>
+                <ChevronRight size={16} color="var(--color-text-tertiary)" />
+            </button>
+
+            <div className={styles.settingsDivider} />
+
+            <button className={styles.btnLogout} onClick={logout}>
                 <LogOut size={18} />
                 Cerrar Sesión
             </button>
 
             <button
-                className={styles.btnLogout}
+                className={styles.btnDanger}
                 onClick={() => alert('Para eliminar tu cuenta, contactá a soporte.')}
-                style={{ color: 'var(--color-text-tertiary)', borderBottom: 'none', fontSize: '13px' }}
             >
                 Eliminar cuenta
             </button>
@@ -204,7 +361,9 @@ function SettingsPanel({ logout }: { logout: () => void }) {
     );
 }
 
-function AdminApplicationForm({ user: _user }: { user: any }) {
+// ─── ADMIN APPLICATION FORM ───────────────────────────────────────────────────
+
+function AdminApplicationForm() {
     const [selectedRole, setSelectedRole] = useState('');
     const [reason, setReason] = useState('');
 
@@ -222,15 +381,10 @@ function AdminApplicationForm({ user: _user }: { user: any }) {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '20px' }}>
-                <h2 className={styles.sectionTitle}>Aplicar para Staff</h2>
-                <p className={styles.sectionDesc}>
-                    Unite al equipo de colaboradores. Elegí el rol y contanos por qué querés sumarte.
-                </p>
-            </div>
+            <h3 className={styles.sidebarSectionTitle} style={{ marginBottom: '12px' }}>Aplicar para Staff</h3>
+            <p className={styles.sectionDesc}>Elegí el rol y contanos por qué querés sumarte.</p>
 
             <div className={styles.formGroup}>
-                <span className={styles.label}>Roles disponibles</span>
                 {roles.map(role => (
                     <div
                         key={role.id}
@@ -242,7 +396,7 @@ function AdminApplicationForm({ user: _user }: { user: any }) {
                             name="role"
                             checked={selectedRole === role.id}
                             onChange={() => setSelectedRole(role.id)}
-                            style={{ margin: 0, width: 20, height: 20, accentColor: 'var(--color-accent)' }}
+                            style={{ margin: 0, width: 18, height: 18, accentColor: 'var(--color-accent)', flexShrink: 0 }}
                         />
                         <div>
                             <span className={styles.roleTitle}>{role.title}</span>
@@ -254,12 +408,11 @@ function AdminApplicationForm({ user: _user }: { user: any }) {
 
             {selectedRole && (
                 <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="reason">Contanos por qué querés aplicar</label>
+                    <label className={styles.label} htmlFor="reason">¿Por qué querés aplicar?</label>
                     <textarea
                         id="reason"
                         className={styles.textarea}
                         rows={3}
-                        style={{ minHeight: '100px' }}
                         placeholder="Tu experiencia, motivación..."
                         value={reason}
                         onChange={e => setReason(e.target.value)}
@@ -269,134 +422,9 @@ function AdminApplicationForm({ user: _user }: { user: any }) {
                 </div>
             )}
 
-            <div className={styles.stickyAction}>
-                <button type="submit" className={styles.btnPrimary} disabled={!selectedRole || reason.length < 20}>
-                    Enviar solicitud
-                </button>
-            </div>
-        </form>
-    );
-}
-
-function NewsDashboard() {
-    const hasNews = false;
-
-    return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h2 className={styles.sectionTitle}>Mis Noticias</h2>
-            </div>
-
-            {hasNews ? (
-                <div className={styles.newsList}>
-                    <div className={styles.newsItem}>
-                        <div className={styles.newsTitle}>Gran final del torneo apertura</div>
-                        <div className={styles.newsMeta}>18 feb · Publicada</div>
-                    </div>
-                    <div className={styles.newsItem}>
-                        <div className={styles.newsTitle}>Entrevista al DT de San Martín</div>
-                        <div className={styles.newsMeta}>Borrador</div>
-                    </div>
-                </div>
-            ) : (
-                <div style={{ textAlign: 'center', padding: '32px 0', border: '1px dashed var(--color-border)', borderRadius: '12px' }}>
-                    <FileText size={40} color="var(--color-text-tertiary)" style={{ marginBottom: '12px' }} />
-                    <p style={{ color: 'var(--color-text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
-                        Todavía no publicaste noticias.
-                    </p>
-                </div>
-            )}
-
-            <button className={styles.btnCreateNews}>
-                <Plus size={18} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '8px' }} />
-                Crear noticia
+            <button type="submit" className={styles.btnPrimary} disabled={!selectedRole || reason.length < 20}>
+                Enviar solicitud
             </button>
-        </div>
-    );
-}
-
-interface FavoritePreviewItem {
-    id: string;
-    entity_id: string;
-    entity_type: string;
-    name: string;
-    logo_url?: string;
-    color?: string;
-}
-
-function DesktopFavoritesPreview({ userId }: { userId?: string }) {
-    const [items, setItems] = useState<FavoritePreviewItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const supabase = createClient();
-
-    useEffect(() => {
-        if (!userId) {
-            setLoading(false);
-            return;
-        }
-
-        let alive = true;
-        // In this environment, we handle AbortError via try-catch manually since Supabase 
-        // doesn't support outside AbortControllers for RPC in all versions perfectly.
-
-        const fetchPreview = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                // v2: RETURNS TABLE — data is always an array, no JSON.parse needed
-                const { data, error: rpcError } = await supabase.rpc(
-                    'get_my_favorites_enriched_v2',
-                    { p_limit: 6, p_cursor: null },
-                );
-
-                if (rpcError) {
-                    if (rpcError.name === 'AbortError' || rpcError.message?.toLowerCase().includes('abort')) return;
-                    throw rpcError;
-                }
-
-                if (!alive) return;
-
-                setItems(Array.isArray(data) ? data : []);
-            } catch (err: any) {
-                if (err?.name === 'AbortError' || err?.message?.toLowerCase().includes('abort')) return;
-                if (!alive) return;
-                console.error('Favorites preview error:', err);
-                setError(err.message || 'Error cargando favoritos');
-            } finally {
-                if (alive) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        fetchPreview();
-
-        return () => {
-            alive = false;
-        };
-    }, [userId]); // Only depend on userId, not the whole user object
-
-    if (loading) return <div style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', padding: '12px 0' }}>Cargando seguidos...</div>;
-    if (error) return <div style={{ fontSize: '12px', color: 'var(--color-error)', padding: '12px 0' }}>No se pudo cargar. Reintentar</div>;
-    if (items.length === 0) return <div style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', padding: '12px 0' }}>Sin seguidos aún</div>;
-
-    return (
-        <div className={styles.favoritesCompactList}>
-            {items.slice(0, 6).map(fav => (
-                <Link key={fav.entity_id} href={`/favorites`} className={styles.compactFavItem}>
-                    {fav.logo_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={fav.logo_url} alt={fav.name} className={styles.compactFavImg} />
-                    ) : (
-                        <div className={styles.compactFavImg} style={{ background: fav.color || '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {fav.entity_type === 'club' ? <ShieldCheck size={16} /> : <Trophy size={16} />}
-                        </div>
-                    )}
-                    <span className={styles.compactFavName}>{fav.name}</span>
-                </Link>
-            ))}
-        </div>
+        </form>
     );
 }

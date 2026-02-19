@@ -3,6 +3,7 @@ export type AppUserRole =
     | 'jugador'
     | 'entrenador'
     | 'admin_general'
+    | 'super_admin' // Added explicitly
     | 'admin_union'
     | 'admin_torneo'
     | 'operador'
@@ -26,6 +27,7 @@ const APP_ROLES: AppUserRole[] = [
     'jugador',
     'entrenador',
     'admin_general',
+    'super_admin',
     'admin_union',
     'admin_torneo',
     'operador',
@@ -33,7 +35,7 @@ const APP_ROLES: AppUserRole[] = [
 ];
 
 const ROLE_ALIASES: Record<string, AppUserRole> = {
-    super_admin: 'admin_general',
+    super_admin: 'super_admin', // Identity mapping
     admin_general: 'admin_general',
     admin_union: 'admin_union',
     admin_torneo: 'admin_torneo',
@@ -77,7 +79,7 @@ export function resolveAdminPanel(
 ): AdminPanelConfig | null {
     const normalized = normalizeRole(role);
 
-    if (normalized === 'admin_general') {
+    if (normalized === 'admin_general' || normalized === 'super_admin') {
         return { href: '/admin/super', label: 'Super Admin' };
     }
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link'; // Added Link import
+import { isSuperAdmin } from '@/lib/types/user';
 import SuperSidebar from './SuperSidebar';
 import styles from './layout.module.css';
 import { SuperConsoleProvider, useSuperConsole } from './SuperConsoleContext';
@@ -198,13 +199,18 @@ export default function GlobalAdminLayout({ children }: { children: React.ReactN
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [isAuthorized, setIsAuthorized] = React.useState(false);
 
+
+
     useEffect(() => {
         if (!isAuthenticated) {
             router.push('/login');
             return;
         }
 
-        if (user?.role === 'admin_general') {
+        // Check if user is super admin using the shared helper
+        // We cast user to any because useAuth returns AppUserRole but isSuperAdmin expects UserRole
+        // However, we just added super_admin to AppUserRole in roles.ts so it should be compatible soon
+        if (isSuperAdmin(user as any)) {
             setIsAuthorized(true);
         } else {
             router.push('/');

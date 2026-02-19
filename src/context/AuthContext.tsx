@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 
 interface User {
@@ -27,6 +27,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const isAbortError = (err: any) => {
+    return (
+        err?.name === 'AbortError' ||
+        err?.message?.includes('abort') ||
+        err?.message?.includes('signal is aborted')
+    );
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     .select('scope_type, scope_id, role')
                     .eq('user_id', sbUser.id);
 
-                if (membershipsError) {
+                if (membershipsError && !isAbortError(membershipsError)) {
                     console.warn('Error fetching memberships:', membershipsError.message);
                 }
 
@@ -82,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 });
             }
         } catch (err: any) {
-            if (err.name === 'AbortError' || err.message?.includes('abort')) return;
+            if (isAbortError(err)) return;
             console.error('Error fetching user profile:', err);
         }
     };
@@ -90,7 +98,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         isMounted.current = true;
 
-        // Initial session check
         const initAuth = async () => {
             try {
                 const { data: { session }, error } = await supabase.auth.getSession();
@@ -104,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     }
                 }
             } catch (err: any) {
-                if (err.name === 'AbortError' || err.message?.includes('abort')) return;
+                if (isAbortError(err)) return;
                 console.error('Error initializing auth:', err);
             } finally {
                 if (isMounted.current) {
@@ -113,20 +120,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         };
 
-        initAuth();
-
-        // Listen for auth state changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
             if (!isMounted.current) return;
 
-            if (session?.user) {
-                await fetchAndSetUser(session.user);
-            } else {
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                if (session?.user) {
+                    await fetchAndSetUser(session.user);
+                }
+            } else if (event === 'SIGNED_OUT') {
                 setUser(null);
                 localStorage.removeItem('g22_user');
             }
             setIsLoading(false);
         });
+
+        // Initialize last to ensure listener is ready
+        initAuth();
 
         return () => {
             isMounted.current = false;
@@ -135,7 +144,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = (role: AppUserRole = 'fan') => {
-        // Redirect to login page
         if (typeof window !== 'undefined') {
             window.location.href = '/login';
         }

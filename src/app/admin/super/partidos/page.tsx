@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/mock-db';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
+import { createClient } from '@/lib/supabase/client';
 
 function formatDateTime(value: string) {
     try {
@@ -26,38 +27,78 @@ const sportLabels: Record<string, string> = {
 export default function SuperadminPartidosPage() {
     const { filters } = useSuperConsole();
     const [viewMode, setViewMode] = useState<'cards' | 'calendar'>('cards');
+    const [matches, setMatches] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const supabase = createClient();
 
-    const matches = useMemo(() => {
-        return db.matches.map((m, index) => {
-            const tournament = db.tournaments.find((t) => t.id === m.tournamentId);
-            const union = db.unions.find((u) => u.id === tournament?.unionId);
-            const home = db.clubs.find((c) => c.id === m.homeClubId);
-            const away = db.clubs.find((c) => c.id === m.awayClubId);
-            const sport = tournament?.sport || 'rugby';
-            const country = tournament?.unionId === 'uar' ? 'Argentina' : 'Uruguay';
-            const source = index % 2 === 0 ? 'API' : 'Manual';
-            const syncStatus = index % 3 === 0 ? 'Error' : 'OK';
+    useEffect(() => {
+        const fetchMatches = async () => {
+            setLoading(true);
+            try {
+                // Fetch matches with related data
+                // Note: relational queries depend on foreign key names being correct in Supabase
+                const { data, error } = await supabase
+                    .from('matches')
+                    .select(`
+                        *,
+                        tournament:tournaments(id, name, season_id, union_id, sport),
+                        home_team:clubs!home_club_id(id, name, logo_url),
+                        away_team:clubs!away_club_id(id, name, logo_url)
+                    `)
+                    .order('date_time', { ascending: true });
 
-            return {
-                id: m.id,
-                tournamentId: tournament?.id || 'unknown',
-                tournamentName: tournament?.name || 'Torneo Desconocido',
-                tournamentLogo: union?.branding.logoUrl,
-                season: tournament?.seasonId || 'General',
-                round: m.roundId || 'Fase Regular',
-                homeName: home?.name || 'Local',
-                awayName: away?.name || 'Visitante',
-                homeLogo: home?.logoUrl || '🏠',
-                awayLogo: away?.logoUrl || '🚌',
-                dateTime: m.dateTime,
-                status: m.status,
-                sport,
-                country,
-                source,
-                views: 1200 + index * 340,
-                syncStatus
-            };
-        });
+                if (error) {
+                    console.error('Error fetching matches:', error);
+                    // Fallback to empty array or handle error visually
+                } else {
+                    console.log('Matches data:', data);
+                    // Start transforming data
+                    // We also need unions for logos if tournament doesn't have one
+                    // For now, let's fetch unions to map logos
+                    const { data: unions } = await supabase.from('unions').select('id, branding');
+                    const unionMap = new Map<string, any>(unions?.map((u: any) => [u.id, u]) || []);
+
+                    const formattedMatches = (data || []).map((m: any, index: number) => {
+                        const tournament = m.tournament; // joined data
+                        const home = m.home_team;
+                        const away = m.away_team;
+
+                        const union = tournament?.union_id ? unionMap.get(tournament.union_id) : null;
+                        // Use union logo as fallback tournament logo
+                        const tournamentLogo = union?.branding?.logoUrl || union?.branding?.logo_url;
+
+                        const country = 'Argentina'; // default for now, can be improved with proper relations
+
+                        return {
+                            id: m.id,
+                            tournamentId: tournament?.id || 'unknown',
+                            tournamentName: tournament?.name || 'Torneo Desconocido',
+                            tournamentLogo: tournamentLogo,
+                            season: tournament?.season_id || m.season_id || '2026',
+                            round: m.round_id || m.round || 'Fase Regular',
+                            homeName: home?.name || 'Local',
+                            awayName: away?.name || 'Visitante',
+                            homeLogo: home?.logo_url || '🏠',
+                            awayLogo: away?.logo_url || '🚌',
+                            dateTime: m.date || m.datetime || new Date().toISOString(), // Fallback
+                            status: m.status || 'scheduled',
+                            sport: tournament?.sport || 'rugby',
+                            country,
+                            source: m.source || 'Manual',
+                            views: 1200 + index * 340, // Mock metric
+                            syncStatus: 'OK'
+                        };
+                    });
+                    setMatches(formattedMatches);
+                }
+            } catch (err) {
+                console.error('Unexpected error fetching matches:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMatches();
     }, []);
 
     const filtered = matches.filter((match) => {
@@ -86,7 +127,7 @@ export default function SuperadminPartidosPage() {
         <div style={{ paddingBottom: '40px' }}>
             <div className={styles.consoleHeader}>
                 <div>
-                    <div className={styles.consoleTitle}>Partidos</div>
+                    <div className={styles.consoleTitle}>Partidos (DB)</div>
                     <div className={styles.consoleSubtitle}>Vista calendario + cards</div>
                 </div>
                 <div className={styles.consoleActions}>
@@ -116,7 +157,9 @@ export default function SuperadminPartidosPage() {
                 </div>
             )}
 
-            {viewMode === 'cards' && Object.keys(grouped).length === 0 && (
+            {loading && <div className={styles.slab}><div style={{ textAlign: 'center', padding: 40 }}>Cargando partidos...</div></div>}
+
+            {!loading && viewMode === 'cards' && Object.keys(grouped).length === 0 && (
                 <div className={styles.slab}>
                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--basalt-400)' }}>
                         No se encontraron partidos con los filtros actuales.
@@ -124,7 +167,7 @@ export default function SuperadminPartidosPage() {
                 </div>
             )}
 
-            {viewMode === 'cards' && Object.entries(grouped).map(([tournamentName, seasons]) => (
+            {!loading && viewMode === 'cards' && Object.entries(grouped).map(([tournamentName, seasons]) => (
                 <div key={tournamentName} className={styles.slab} style={{ marginBottom: '24px' }}>
                     <div className={styles.slabHeader}>
                         <div>
@@ -201,7 +244,11 @@ export default function SuperadminPartidosPage() {
                                                     {/* Home Team */}
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
                                                         <div style={{ fontSize: '32px', lineHeight: 1, height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                            {match.homeLogo}
+                                                            {match.homeLogo && (match.homeLogo.startsWith('http') || match.homeLogo.startsWith('/')) ? (
+                                                                <img src={match.homeLogo} alt={match.homeName} style={{ height: '100%', objectFit: 'contain' }} />
+                                                            ) : (
+                                                                <span>{match.homeLogo}</span>
+                                                            )}
                                                         </div>
                                                         <span style={{
                                                             fontSize: '12px',
@@ -235,7 +282,11 @@ export default function SuperadminPartidosPage() {
                                                     {/* Away Team */}
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
                                                         <div style={{ fontSize: '32px', lineHeight: 1, height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                            {match.awayLogo}
+                                                            {match.awayLogo && (match.awayLogo.startsWith('http') || match.awayLogo.startsWith('/')) ? (
+                                                                <img src={match.awayLogo} alt={match.awayName} style={{ height: '100%', objectFit: 'contain' }} />
+                                                            ) : (
+                                                                <span>{match.awayLogo}</span>
+                                                            )}
                                                         </div>
                                                         <span style={{
                                                             fontSize: '12px',

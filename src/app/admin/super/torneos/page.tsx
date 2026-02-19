@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Trash2, Eye, EyeOff, FolderPlus, Folder as FolderIcon, MoreVertical, Plus } from 'lucide-react';
 import { db, Folder } from '@/lib/mock-db';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 const countryFlags: Record<string, string> = {
     Argentina: '🇦🇷',
@@ -14,60 +15,93 @@ const countryFlags: Record<string, string> = {
     Chile: '🇨🇱'
 };
 
-const sportLabels: Record<string, string> = {
-    rugby: 'Rugby',
-    football: 'Futbol',
-    hockey: 'Hockey'
-};
+import { SPORTS } from '@/lib/data/sports';
+
+const sportLabels: Record<string, string> = Object.fromEntries(
+    Object.entries(SPORTS).map(([id, s]) => [id, s.nameEs])
+);
 
 
 
 export default function SuperadminTorneosPage() {
     const { filters } = useSuperConsole();
     const router = useRouter();
+    const supabase = createClient();
     const [seasonFilter, setSeasonFilter] = useState('all');
     const [folderFilter, setFolderFilter] = useState('all');
 
-    // Force re-render trick for mock updates
-    const [tick, setTick] = useState(0);
+    // State for real data
+    const [rawTournaments, setRawTournaments] = useState<any[]>([]);
+    const [unions, setUnions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch data from Supabase
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [tournamentsResult, unionsResult] = await Promise.all([
+                supabase.from('tournaments').select('*').order('created_at', { ascending: false }),
+                supabase.from('unions').select('*')
+            ]);
+
+            if (tournamentsResult.error) throw tournamentsResult.error;
+            if (unionsResult.error) throw unionsResult.error;
+
+            setRawTournaments(tournamentsResult.data || []);
+            setUnions(unionsResult.data || []);
+        } catch (error) {
+            console.error('Error fetching tournaments:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const tournaments = useMemo(() => {
-        return db.tournaments.map((t, index) => {
+        return rawTournaments.map((t, index) => {
+            // Count matches (using mock matches only if ID matches, likely 0 for real data)
             const matchesCount = db.matches.filter((m) => m.tournamentId === t.id).length;
-            // Handle null unionId for country logic (or fallback)
-            const union = db.unions.find(u => u.id === t.unionId);
-            const country = union ? (union.id === 'uar' ? 'Argentina' : 'Uruguay') : 'Global (No Union)';
 
-            const status = t.status === 'published' ? 'Activo' : 'Borrador'; // Simplified mapping
-            const statusKey = status === 'Activo' ? 'activo' : 'borrador';
-            const source = t.slug.includes('api') ? 'API' : 'Manual';
+            // Resolve Union
+            const union = unions.find(u => u.id === t.union_id);
+            // Default country logic based on union or default
+            const country = union ? 'Argentina' : 'Global (No Union)'; // Simplified for now
 
-            const folder = db.folders.find(f => f.id === t.folderId);
+            // Resolve fields from DB or provide defaults
+            const status = 'Activo'; // Default to active as DB might not have status yet
+            const statusKey = 'activo';
+            const source = t.slug?.includes('api') ? 'API' : 'Manual';
+
+            // Folders still mock
+            const folder = db.folders.find(f => f.id === t.folder_id);
 
             return {
                 id: t.id,
-                unionId: t.unionId,
-                unionName: union ? union.name : 'Sin Vínculo', // Display text
+                unionId: t.union_id,
+                unionName: union ? union.name : 'Sin Vínculo',
                 name: t.name,
-                season: t.seasonId,
-                sport: t.sport,
-                sportLabel: sportLabels[t.sport] || t.sport,
+                season: t.season_id,
+                sport: t.sport || 'rugby',
+                sportLabel: sportLabels[t.sport || 'rugby'] || t.sport || 'Rugby',
                 country,
                 status,
                 statusKey,
                 source,
-                updated: 'Hace 1 d',
-                followers: 1280 + index * 210,
-                views: 32400 + index * 890,
+                updated: new Date(t.created_at || Date.now()).toLocaleDateString(),
+                followers: 1280 + index * 210, // Mock metric
+                views: 32400 + index * 890, // Mock metric
                 matches: matchesCount,
-                folderId: t.folderId,
+                folderId: t.folder_id, // Assuming snake_case in DB if it existed, or undefined
                 folderName: folder?.name,
                 folderColor: folder?.color,
-                isVisible: t.isVisible !== false, // Default to true
-                logo: t.unionId ? '🏆' : '❓'
+                isVisible: true, // Default
+                logo: t.union_id ? '🏆' : '❓'
             };
         });
-    }, [tick]); // Re-compute when tick changes
+    }, [rawTournaments, unions]);
 
     const filtered = tournaments.filter((t) => {
         if (filters.sport !== 'all' && t.sport !== filters.sport) return false;
@@ -89,64 +123,73 @@ export default function SuperadminTorneosPage() {
 
     const [linkingTournamentId, setLinkingTournamentId] = useState<string | null>(null);
     const [selectedUnionId, setSelectedUnionId] = useState<string>('');
+    const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
+    const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
+    const [newFolderName, setNewFolderName] = useState('');
 
     const openLinkModal = (id: string) => {
         setLinkingTournamentId(id);
         setSelectedUnionId('');
     };
 
-    const confirmLink = () => {
+    const confirmLink = async () => {
         if (linkingTournamentId && selectedUnionId) {
-            const tournamentIndex = db.tournaments.findIndex(t => t.id === linkingTournamentId);
-            if (tournamentIndex !== -1) {
-                const union = db.unions.find(u => u.id === selectedUnionId);
-                db.tournaments[tournamentIndex].unionId = selectedUnionId;
-                alert(`Torneo vinculado a ${union?.name}`);
-                setTick(t => t + 1);
+            try {
+                const { error } = await supabase
+                    .from('tournaments')
+                    .update({ union_id: selectedUnionId })
+                    .eq('id', linkingTournamentId);
+
+                if (error) throw error;
+
+                alert(`Torneo vinculado correctamente`);
+                fetchData(); // Refresh list
                 setLinkingTournamentId(null);
+            } catch (err) {
+                console.error('Error vincular torneo:', err);
+                alert('Error al vincular torneo');
             }
         }
     };
 
     // --- Actions ---
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('¿Seguro que deseas eliminar este torneo?')) {
-            const idx = db.tournaments.findIndex(t => t.id === id);
-            if (idx !== -1) {
-                db.tournaments.splice(idx, 1);
-                setTick(t => t + 1);
+            try {
+                const { error } = await supabase
+                    .from('tournaments')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+                fetchData(); // Refresh
+            } catch (err) {
+                console.error('Error deleting tournament', err);
+                alert('Error al eliminar');
             }
         }
     };
 
     const handleToggleVisibility = (id: string, current: boolean) => {
-        const t = db.tournaments.find(x => x.id === id);
-        if (t) {
-            t.isVisible = !current;
-            setTick(t => t + 1);
-        }
+        // Implement Update to DB if column exists, else mock toggle local logic? 
+        // For now just alert or log
+        console.log('Toggle visibility not implemented in DB yet');
     };
 
-    const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-    const [newFolderName, setNewFolderName] = useState('');
-    const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null); // For overflow menu
 
     const handleCreateFolder = () => {
         if (!newFolderName.trim()) return;
+        // Mock folders for now as DB table likely missing
         const newId = newFolderName.toLowerCase().replace(/\s+/g, '-');
         db.folders.push({ id: newId, name: newFolderName, color: '#888' });
         setNewFolderName('');
         setIsCreateFolderOpen(false);
-        setTick(t => t + 1);
     };
 
     const handleMoveToFolder = (tournamentId: string, folderId: string) => {
-        const t = db.tournaments.find(x => x.id === tournamentId);
-        if (t) {
-            t.folderId = folderId === 'none' ? undefined : folderId;
-            setTick(t => t + 1);
-            setActionMenuOpenId(null); // Close menu
-        }
+        // Implement Update to DB if column exists
+        console.log('Folders not in DB yet');
+        setActionMenuOpenId(null);
     };
 
     const toggleActionMenu = (id: string) => {
@@ -158,7 +201,7 @@ export default function SuperadminTorneosPage() {
             <div className={styles.consoleHeader}>
                 <div>
                     <div className={styles.consoleTitle}>Torneos</div>
-                    <div className={styles.consoleSubtitle}>Gestión global de competiciones</div>
+                    <div className={styles.consoleSubtitle}>Gestión global de competiciones (DB)</div>
                 </div>
                 <div className={styles.consoleActions}>
                     <Link href="/admin/super/torneos/crear" className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
@@ -175,7 +218,6 @@ export default function SuperadminTorneosPage() {
                     <option value="2025">2025</option>
                 </select>
 
-                {/* Folder Filter */}
                 <select className={styles.filterControl} value={folderFilter} onChange={(e) => setFolderFilter(e.target.value)}>
                     <option value="all">Todas las carpetas</option>
                     {db.folders.map(f => (
@@ -206,11 +248,13 @@ export default function SuperadminTorneosPage() {
                 </div>
             )}
 
-            {Object.keys(grouped).length === 0 && (
+            {loading && <div style={{ padding: 20 }}>Cargando torneos...</div>}
+
+            {!loading && Object.keys(grouped).length === 0 && (
                 <div className={styles.cardItem}>No se encontraron torneos con los filtros actuales.</div>
             )}
 
-            {Object.entries(grouped).map(([country, items]) => (
+            {!loading && Object.entries(grouped).map(([country, items]) => (
                 <section key={country} className={styles.groupSection}>
                     <div className={styles.groupHeader}>
                         <span className={styles.groupFlag}>{countryFlags[country] || '🌐'}</span>
@@ -234,7 +278,6 @@ export default function SuperadminTorneosPage() {
                                         </div>
                                     </div>
 
-                                    {/* Overflow Menu Trigger */}
                                     <button
                                         className={styles.moreMenuBtn}
                                         onClick={(e) => { e.stopPropagation(); toggleActionMenu(tournament.id); }}
@@ -242,7 +285,6 @@ export default function SuperadminTorneosPage() {
                                         <MoreVertical size={16} />
                                     </button>
 
-                                    {/* Menu Overlay */}
                                     {actionMenuOpenId === tournament.id && (
                                         <div className={styles.menuDropdown}>
                                             <button
@@ -352,7 +394,7 @@ export default function SuperadminTorneosPage() {
                             style={{ width: '100%', padding: 12, borderRadius: 6, background: '#1a1d24', border: '1px solid #333', color: 'white', marginBottom: 20 }}
                         >
                             <option value="">Seleccionar Unión...</option>
-                            {db.unions.map(u => (
+                            {unions.map(u => (
                                 <option key={u.id} value={u.id}>{u.name}</option>
                             ))}
                         </select>

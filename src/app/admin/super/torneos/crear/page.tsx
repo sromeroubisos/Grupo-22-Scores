@@ -4,22 +4,61 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
-import { db } from '@/lib/mock-db';
+import { createClient } from '@/lib/supabase/client';
+import { SPORTS, getActiveSports } from '@/lib/data/sports';
+
+const activeSports = getActiveSports();
+
+// Match rules per sport for the form defaults
+const sportDefaults: Record<string, { duration: number; win: number; draw: number; loss: number }> = {
+    'football':          { duration: 90,  win: 3, draw: 1, loss: 0 },
+    'rugby':             { duration: 80,  win: 4, draw: 2, loss: 0 },
+    'rugby-union':       { duration: 80,  win: 4, draw: 2, loss: 0 },
+    'rugby-league':      { duration: 80,  win: 2, draw: 1, loss: 0 },
+    'basketball':        { duration: 40,  win: 2, draw: 0, loss: 1 },
+    'hockey':            { duration: 60,  win: 3, draw: 1, loss: 0 },
+    'field-hockey':      { duration: 60,  win: 3, draw: 1, loss: 0 },
+    'volleyball':        { duration: 90,  win: 3, draw: 0, loss: 0 },
+    'beach-volleyball':  { duration: 60,  win: 3, draw: 0, loss: 0 },
+    'tennis':            { duration: 120, win: 2, draw: 0, loss: 0 },
+    'table-tennis':      { duration: 30,  win: 2, draw: 0, loss: 0 },
+    'badminton':         { duration: 45,  win: 2, draw: 0, loss: 0 },
+    'handball':          { duration: 60,  win: 2, draw: 1, loss: 0 },
+    'futsal':            { duration: 40,  win: 3, draw: 1, loss: 0 },
+    'beach-soccer':      { duration: 36,  win: 3, draw: 1, loss: 0 },
+    'baseball':          { duration: 180, win: 1, draw: 0, loss: 0 },
+    'cricket':           { duration: 300, win: 1, draw: 0, loss: 0 },
+    'american-football': { duration: 60,  win: 1, draw: 0, loss: 0 },
+    'aussie-rules':      { duration: 80,  win: 4, draw: 2, loss: 0 },
+    'snooker':           { duration: 60,  win: 1, draw: 0, loss: 0 },
+    'darts':             { duration: 30,  win: 1, draw: 0, loss: 0 },
+    'boxing':            { duration: 36,  win: 1, draw: 0, loss: 0 },
+    'mma':               { duration: 25,  win: 1, draw: 0, loss: 0 },
+    'esports':           { duration: 45,  win: 1, draw: 0, loss: 0 },
+    'water-polo':        { duration: 32,  win: 2, draw: 1, loss: 0 },
+    'floorball':         { duration: 60,  win: 3, draw: 1, loss: 0 },
+    'bandy':             { duration: 90,  win: 3, draw: 1, loss: 0 },
+    'netball':           { duration: 60,  win: 2, draw: 0, loss: 0 },
+    'kabaddi':           { duration: 40,  win: 2, draw: 0, loss: 0 },
+};
 
 export default function SuperCreateTournament() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tournamentId = searchParams?.get('tournamentId');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const supabase = createClient();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [isEdit, setIsEdit] = useState(false);
+    const [unions, setUnions] = useState<any[]>([]);
+    const [saving, setSaving] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
-        sport: 'Rugby Union',
+        sport: 'rugby',
         visibility: 'public',
-        season: '',
+        season: '2026',
         location: '',
         startDate: '',
         endDate: '',
@@ -28,148 +67,93 @@ export default function SuperCreateTournament() {
         pointsDraw: 2,
         pointsLoss: 0,
         matchDuration: 80,
-        rulePreset: 'standard',
         gender: 'Masculino',
         category: 'Profesional',
         country: '',
-        unionId: 'null', // 'null' string to represent no selection in select element
+        unionId: '',
     });
 
+    // Fetch unions from Supabase
+    useEffect(() => {
+        supabase.from('unions').select('*').order('name').then(({ data }) => {
+            setUnions(data || []);
+        });
+    }, []);
+
+    // Load existing tournament for edit
     useEffect(() => {
         if (!tournamentId) return;
-        // Find tournament across all unions (since we are super admin)
-        const tournament = db.tournaments.find(t => t.id === tournamentId);
-        if (!tournament) return;
-
-        setIsEdit(true);
-
-        const mappedSport = tournament.sport === 'rugby'
-            ? 'Rugby Union'
-            : tournament.sport === 'football'
-                ? 'Football'
-                : tournament.sport === 'hockey'
-                    ? 'Hockey'
-                    : tournament.sport;
-
-        setFormData(prev => ({
-            ...prev,
-            name: tournament.name,
-            sport: mappedSport,
-            season: tournament.seasonId,
-            category: tournament.category || prev.category,
-            format: tournament.format?.toLowerCase().includes('league') ? 'league' : prev.format,
-            unionId: tournament.unionId || 'null',
-        }));
-    }, [tournamentId]);
-
-    // All available tiebreaker criteria
-    const allTiebreakers = [
-        'Puntos', 'Victorias', 'Empates', 'Pérdidas', 'Partidos jugados',
-        'Victorias en prórroga', 'Empates en prórroga', 'Pérdidas en prórroga',
-        'Partidos con prórroga', 'Clasificación', 'Porcentaje', 'Enfrentamiento directo',
-        'Diferencia de puntos', 'Puntos a favor', 'Puntaje en contra', 'Try',
-        'Conversión', 'Gol de penal', 'Drop goals', 'Tackle', 'Carrera'
-    ];
-
-    const [selectedTiebreakers, setSelectedTiebreakers] = useState<string[]>(['Puntos', 'Diferencia de puntos', 'Puntos a favor']);
-    const [positionLabels, setPositionLabels] = useState<Array<{ from: number; to: number; label: string; color: string }>>([
-        { from: 1, to: 4, label: 'Clasifican a Playoffs', color: '#22c55e' },
-        { from: 5, to: 8, label: 'Repechaje', color: '#eab308' },
-    ]);
-
-    // Logo states
-    const [logoMethod, setLogoMethod] = useState<'url' | 'file'>('url');
-    const [logoUrl, setLogoUrl] = useState('');
-    const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
-    // Sports and their statistics
-    const sportsData = {
-        'Football': {
-            stats: ['Gol', 'Asistencia', 'Tarjeta Amarilla', 'Tarjeta Roja', 'Penal', 'Autogol'],
-            defaultDuration: 90,
-            defaultPoints: { win: 3, draw: 1, loss: 0 }
-        },
-        'Tennis': {
-            stats: ['Aces', 'Doble Falta', 'Winners', 'Errores No Forzados', 'Break Points'],
-            defaultDuration: 120,
-            defaultPoints: { win: 2, draw: 0, loss: 0 }
-        },
-        'Basketball': {
-            stats: ['Puntos', 'Rebotes', 'Asistencias', 'Falta Personal', 'Falta Técnica', 'Falta Antideportiva'],
-            defaultDuration: 40,
-            defaultPoints: { win: 2, draw: 0, loss: 1 }
-        },
-        'Hockey': {
-            stats: ['Gol', 'Asistencia', 'Tarjeta Amarilla', 'Tarjeta Roja', 'Tiros a Portería'],
-            defaultDuration: 60,
-            defaultPoints: { win: 3, draw: 1, loss: 0 }
-        },
-        'Rugby Union': {
-            stats: ['Try (5pts)', 'Conversión (2pts)', 'Penal (3pts)', 'Drop Goal (3pts)', 'Tarjeta Amarilla', 'Tarjeta Roja'],
-            defaultDuration: 80,
-            defaultPoints: { win: 4, draw: 2, loss: 0 }
-        }
-    };
-
-    const handleSportChange = (sport: string) => {
-        // @ts-ignore
-        const sportData = sportsData[sport];
-        if (sportData) {
+        supabase.from('tournaments').select('*').eq('id', tournamentId).single().then(({ data }) => {
+            if (!data) return;
+            setIsEdit(true);
+            const defaults = sportDefaults[data.sport] || {};
             setFormData(prev => ({
                 ...prev,
-                sport,
-                matchDuration: sportData.defaultDuration,
-                pointsWin: sportData.defaultPoints.win,
-                pointsDraw: sportData.defaultPoints.draw,
-                pointsLoss: sportData.defaultPoints.loss,
+                name: data.name || '',
+                sport: data.sport || 'rugby',
+                season: data.season_id || '2026',
+                category: data.category || prev.category,
+                format: data.format || prev.format,
+                country: data.country || '',
+                unionId: data.union_id || '',
+                pointsWin: defaults.win ?? prev.pointsWin,
+                pointsDraw: defaults.draw ?? prev.pointsDraw,
+                pointsLoss: defaults.loss ?? prev.pointsLoss,
+                matchDuration: defaults.duration ?? prev.matchDuration,
             }));
-        }
+        });
+    }, [tournamentId]);
+
+    const handleSportChange = (sportId: string) => {
+        const d = sportDefaults[sportId];
+        setFormData(prev => ({
+            ...prev,
+            sport: sportId,
+            ...(d ? {
+                matchDuration: d.duration,
+                pointsWin: d.win,
+                pointsDraw: d.draw,
+                pointsLoss: d.loss,
+            } : {}),
+        }));
     };
 
-
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setLogoFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setLogoPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentStep < 5) {
             setCurrentStep(prev => prev + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            // Save logic
-            const newTournament = {
-                id: isEdit && tournamentId ? tournamentId : Math.random().toString(36).substr(2, 9),
-                unionId: formData.unionId === 'null' ? null : formData.unionId,
-                seasonId: formData.season || '2026',
+            return;
+        }
+
+        // Final step: save to Supabase
+        setSaving(true);
+        try {
+            const payload = {
                 name: formData.name,
-                slug: formData.name.toLowerCase().replace(/ /g, '-'),
+                sport: formData.sport,
+                season_id: formData.season || '2026',
+                category: formData.category || null,
+                format: formData.format || null,
+                country: formData.country || null,
+                union_id: formData.unionId || null,
                 status: 'published' as const,
-                sport: formData.sport.toLowerCase().includes('rugby') ? 'rugby' : 'football' as any, // Simplified mapping
-                category: formData.category,
-                format: formData.format,
-                createdAt: new Date().toISOString()
+                is_visible: formData.visibility === 'public',
+                slug: formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now(),
             };
 
-            if (isEdit) {
-                const index = db.tournaments.findIndex(t => t.id === tournamentId);
-                if (index !== -1) {
-                    db.tournaments[index] = newTournament;
-                }
-                alert('Torneo actualizado.');
+            let error: any;
+            if (isEdit && tournamentId) {
+                ({ error } = await supabase.from('tournaments').update(payload).eq('id', tournamentId));
             } else {
-                db.tournaments.push(newTournament);
-                alert('Torneo creado exitosamente sin vincular (o vinculado).');
+                ({ error } = await supabase.from('tournaments').insert([payload]));
             }
-            router.push(`/admin/super/torneos`);
+
+            if (error) throw error;
+            router.push('/admin/super/torneos');
+        } catch (err: any) {
+            alert('Error al guardar el torneo: ' + err.message);
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -247,7 +231,7 @@ export default function SuperCreateTournament() {
                     background: var(--accent-green);
                     color: black;
                 }
-                
+
                 .btn-secondary {
                     background: transparent;
                     border: 1px solid var(--glass-border);
@@ -258,6 +242,33 @@ export default function SuperCreateTournament() {
                     display: flex;
                     justify-content: space-between;
                     margin-top: 40px;
+                }
+
+                .sport-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                    gap: 10px;
+                    margin-top: 8px;
+                }
+
+                .sport-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 12px;
+                    border-radius: var(--radius-md);
+                    border: 1px solid var(--glass-border);
+                    background: var(--bg-surface);
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    font-size: 13px;
+                    transition: var(--transition);
+                }
+
+                .sport-btn.selected {
+                    border-color: var(--accent-green);
+                    color: var(--accent-green);
+                    background: rgba(34, 197, 94, 0.08);
                 }
             `}</style>
 
@@ -289,13 +300,58 @@ export default function SuperCreateTournament() {
 
                 <div className="form-group">
                     <label>Deporte</label>
-                    <select
-                        value={formData.sport}
-                        onChange={e => handleSportChange(e.target.value)}
-                    >
-                        {Object.keys(sportsData).map(sport => (
-                            <option key={sport} value={sport}>{sport}</option>
+                    <div className="sport-grid">
+                        {activeSports.map(sport => (
+                            <button
+                                key={sport.id}
+                                type="button"
+                                className={`sport-btn${formData.sport === sport.id ? ' selected' : ''}`}
+                                onClick={() => handleSportChange(sport.id)}
+                            >
+                                <span>{sport.icon}</span>
+                                <span>{sport.nameEs}</span>
+                            </button>
                         ))}
+                    </div>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+                        Deporte seleccionado: <strong style={{ color: 'var(--text-secondary)' }}>{SPORTS[formData.sport as keyof typeof SPORTS]?.nameEs || formData.sport}</strong>
+                    </p>
+                </div>
+
+                <div className="form-group">
+                    <label>Temporada</label>
+                    <select
+                        value={formData.season}
+                        onChange={e => setFormData({ ...formData, season: e.target.value })}
+                    >
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                    <label>Categoría</label>
+                    <input
+                        type="text"
+                        value={formData.category}
+                        onChange={e => setFormData({ ...formData, category: e.target.value })}
+                        placeholder="Ej: Primera División, U19, Femenino..."
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>País</label>
+                    <select
+                        value={formData.country}
+                        onChange={e => setFormData({ ...formData, country: e.target.value })}
+                    >
+                        <option value="">Global (sin país)</option>
+                        <option value="Argentina">Argentina</option>
+                        <option value="Uruguay">Uruguay</option>
+                        <option value="Chile">Chile</option>
+                        <option value="Brasil">Brasil</option>
+                        <option value="Colombia">Colombia</option>
                     </select>
                 </div>
 
@@ -305,8 +361,8 @@ export default function SuperCreateTournament() {
                         value={formData.unionId}
                         onChange={e => setFormData({ ...formData, unionId: e.target.value })}
                     >
-                        <option value="null">Sin vínculo (Unlinked)</option>
-                        {db.unions.map(u => (
+                        <option value="">Sin vínculo (Unlinked)</option>
+                        {unions.map(u => (
                             <option key={u.id} value={u.id}>{u.name}</option>
                         ))}
                     </select>
@@ -315,10 +371,23 @@ export default function SuperCreateTournament() {
                     </p>
                 </div>
 
+                <div className="form-group">
+                    <label>Visibilidad</label>
+                    <select
+                        value={formData.visibility}
+                        onChange={e => setFormData({ ...formData, visibility: e.target.value })}
+                    >
+                        <option value="public">Público</option>
+                        <option value="private">Privado (borrador)</option>
+                    </select>
+                </div>
+
                 <div className="wizard-footer">
-                    <button className="btn btn-secondary" disabled={currentStep === 1}>Anterior</button>
-                    <button className="btn btn-primary" onClick={handleNext}>
-                        {currentStep === 5 ? (isEdit ? 'Guardar Cambios' : 'Publicar Torneo') : 'Siguiente'}
+                    <button className="btn btn-secondary" disabled={currentStep === 1} onClick={() => setCurrentStep(p => p - 1)}>
+                        Anterior
+                    </button>
+                    <button className="btn btn-primary" onClick={handleNext} disabled={saving || !formData.name}>
+                        {saving ? 'Guardando...' : currentStep === 5 ? (isEdit ? 'Guardar Cambios' : 'Publicar Torneo') : 'Siguiente'}
                     </button>
                 </div>
             </div>
