@@ -1,4 +1,14 @@
 import { resolveEntity, EntityType } from '@/lib/services/entityResolver';
+import { EntityHeader } from '@/components/admin/entities/EntityHeader';
+import { TournamentEditor } from '@/components/admin/entities/editors/TournamentEditor';
+import { ClubEditor } from '@/components/admin/entities/editors/ClubEditor';
+import { MatchEditor } from '@/components/admin/entities/editors/MatchEditor';
+import { PlayerEditor, PlayerData } from '@/components/admin/entities/editors/PlayerEditor';
+import { Database } from '@/lib/database.types';
+
+type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
+type ClubRow = Database['public']['Tables']['clubs']['Row'];
+type MatchRow = Database['public']['Tables']['matches']['Row'];
 
 interface ManagePageProps {
     params: Promise<{ id: string }>;
@@ -46,21 +56,13 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     return (
         <div className="space-y-6">
-            <header>
-                <h1 className="text-3xl font-bold capitalize">Manage {entityType}</h1>
-                <p className="text-system-secondary mt-1">ID: {id}</p>
-                <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-surface border border-divider">
-                    Source: {result.source.toUpperCase()}
-                </div>
-            </header>
+            <EntityHeader entity={result} />
 
             <section className="bg-surface border border-divider rounded-xl p-6 shadow-sm">
-                <h2 className="text-xl font-semibold mb-4 text-foreground">Editor Genérico (Stub)</h2>
-                <div className="p-6 bg-background rounded-lg border border-divider border-dashed flex items-center justify-center">
-                    <p className="text-system-secondary">
-                        Aquí se renderizará el formulario de administración de <strong>{entityType}</strong>.
-                    </p>
-                </div>
+                {entityType === 'tournament' && <TournamentEditor data={result.data as TournamentRow} />}
+                {entityType === 'club' && <ClubEditor data={result.data as ClubRow} />}
+                {entityType === 'match' && <MatchEditor data={result.data as MatchRow} />}
+                {entityType === 'player' && <PlayerEditor data={result.data as PlayerData} />}
             </section>
         </div>
     );
