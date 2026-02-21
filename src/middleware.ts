@@ -14,14 +14,7 @@ export async function middleware(request: NextRequest) {
     const host = request.headers.get('host') || ''
     const isProd = process.env.NODE_ENV === 'production'
 
-    // 1. Unify Canonical Domain (www -> non-www)
-    // Only in production to avoid localhost issues
-    if (isProd && host.startsWith('www.')) {
-        const newUrl = new URL(request.url)
-        newUrl.host = 'g22scores.com'
-        // Preserves protocol (http/https) and path/query
-        return NextResponse.redirect(newUrl, { status: 301 })
-    }
+
 
     // 2. Auth Code Redirect Handler
     // Supabase redirects to site URL. If root and code present, forward to API handler.
