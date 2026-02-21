@@ -7,17 +7,22 @@ const nextConfig: NextConfig = {
       {
         source: '/torneos/:id',
         destination: '/tournaments/:id',
-        permanent: false, // 307 Temporal redirects per Phase 0 spec
+        permanent: true,
       },
       {
         source: '/clubes/:id',
         destination: '/clubs/:id',
-        permanent: false,
+        permanent: true,
       },
       {
         source: '/jugadores/:id',
         destination: '/players/:id',
-        permanent: false,
+        permanent: true,
+      },
+      {
+        source: '/partidos/:id',
+        destination: '/matches/:id',
+        permanent: true,
       },
       {
         source: '/admin/super/torneos/:id',

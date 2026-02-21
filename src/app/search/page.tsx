@@ -95,7 +95,7 @@ function buildResults(query: string): ResultRow[] {
             type: 'CLUB' as EntityType,
             title: c.name,
             subtitle: `${(c as any).country ?? 'Argentina'} · ${c.city}`,
-            href: `/clubes/${c.id}`,
+            href: `/clubs/${c.id}`,
             color: c.primaryColor,
         }));
 

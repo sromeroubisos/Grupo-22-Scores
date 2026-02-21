@@ -127,7 +127,7 @@ export default function FixturesPage() {
                         </div>
                         <div className={styles.liveMatches}>
                             {liveMatches.map(match => (
-                                <Link key={match.id} href={`/partidos/${match.id}`} className={styles.liveCard}>
+                                <Link key={match.id} href={`/matches/${match.id}`} className={styles.liveCard}>
                                     <div className={styles.liveCardHeader}>
                                         <span className={styles.liveTournament}>{match.tournament}</span>
                                         <span className={styles.liveMinute}>{match.minute}</span>
@@ -157,7 +157,7 @@ export default function FixturesPage() {
                     {filteredMatches.length > 0 ? (
                         <div className={styles.matchesList}>
                             {filteredMatches.map(match => (
-                                <Link key={match.id} href={`/partidos/${match.id}`} className={styles.matchCard}>
+                                <Link key={match.id} href={`/matches/${match.id}`} className={styles.matchCard}>
                                     <div className={styles.matchTime}>
                                         {match.status === 'live' ? (
                                             <span className={styles.matchLive}>

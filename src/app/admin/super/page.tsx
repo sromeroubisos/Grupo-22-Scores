@@ -174,7 +174,7 @@ export default function AdminPage() {
                                     </td>
                                     <td className={styles.mono}>{row.sync}</td>
                                     <td>
-                                        <Link href={`/admin/super/torneos/${row.id}`} className={styles.btn}>
+                                        <Link href={`/admin/entities/${row.id}/manage?type=tournament`} className={styles.btn}>
                                             {row.action}
                                         </Link>
                                     </td>

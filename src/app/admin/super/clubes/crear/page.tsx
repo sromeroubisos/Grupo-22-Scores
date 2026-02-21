@@ -55,15 +55,15 @@ export default function CreateClubSuper() {
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     const [form, setForm] = useState({
-        name:         '',
-        shortName:    '',
-        sport:        'rugby',
-        slug:         '',
-        union_id:     'uar',
-        city:         '',
-        website:      '',
+        name: '',
+        shortName: '',
+        sport: 'rugby',
+        slug: '',
+        union_id: 'uar',
+        city: '',
+        website: '',
         primaryColor: '#10b981',
-        logo_url:     '',
+        logo_url: '',
     });
 
     const showToast = (message: string, type: 'success' | 'error') => {
@@ -99,9 +99,9 @@ export default function CreateClubSuper() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name:     form.name.trim(),
-                    slug:     form.slug,
-                    sport:    form.sport,
+                    name: form.name.trim(),
+                    slug: form.slug,
+                    sport: form.sport,
                     union_id: form.union_id,
                 }),
             });
@@ -137,11 +137,11 @@ export default function CreateClubSuper() {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    short_name:    form.shortName,
-                    city:          form.city,
+                    short_name: form.shortName,
+                    city: form.city,
                     primary_color: form.primaryColor,
-                    logo_url:      form.logo_url,
-                    website:       form.website,
+                    logo_url: form.logo_url,
+                    website: form.website,
                 }),
             });
 
@@ -161,7 +161,7 @@ export default function CreateClubSuper() {
     // ── PASO 3 → Ir a manage ───────────────────────────────────────────────
     const handleGoToManage = () => {
         if (createdClubId) {
-            router.push(`/admin/super/clubes/${createdClubId}/manage`);
+            router.push(`/admin/entities/${createdClubId}/manage?type=club`);
         }
     };
 
@@ -378,7 +378,7 @@ export default function CreateClubSuper() {
                                     className="btn-glass"
                                     onClick={() => {
                                         showToast('Podés completar la identidad desde el panel de gestión', 'success');
-                                        router.push(`/admin/super/clubes/${createdClubId}/manage`);
+                                        router.push(`/admin/entities/${createdClubId}/manage?type=club`);
                                     }}
                                 >
                                     Saltar por ahora

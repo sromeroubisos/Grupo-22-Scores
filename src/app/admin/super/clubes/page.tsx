@@ -362,10 +362,10 @@ export default function SuperadminClubesPage() {
                                         </div>
 
                                         <div className={styles.cardActions}>
-                                            <Link href={`/admin/super/clubes/${club.id}`} className={styles.actionBtn}>
+                                            <Link href={`/admin/entities/${club.id}/manage?type=club`} className={styles.actionBtn}>
                                                 Ver
                                             </Link>
-                                            <Link href={`/admin/super/clubes/${club.id}/editar`} className={styles.actionBtn}>
+                                            <Link href={`/admin/entities/${club.id}/manage?type=club`} className={styles.actionBtn}>
                                                 Editar
                                             </Link>
                                             <button className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>

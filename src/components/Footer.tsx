@@ -10,8 +10,8 @@ const footerLinks = {
         { href: '/rankings', label: 'Rankings' },
     ],
     recursos: [
-        { href: '/clubes', label: 'Clubes' },
-        { href: '/jugadores', label: 'Jugadores' },
+        { href: '/clubs', label: 'Clubes' },
+        { href: '/players', label: 'Jugadores' },
         { href: '/estadisticas', label: 'Estadísticas' },
         { href: '/exportar', label: 'Exportar contenido' },
     ],

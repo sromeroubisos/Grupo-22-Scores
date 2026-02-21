@@ -139,7 +139,7 @@ export default function RankingsPage() {
                             {rankings.map((player, index) => (
                                 <Link
                                     key={player.pos}
-                                    href={`/jugadores/${player.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                    href={`/players/${player.name.toLowerCase().replace(/\s+/g, '-')}`}
                                     className={`${styles.rankingItem} ${index < 3 ? styles.topThree : ''}`}
                                 >
                                     <span className={`${styles.rankingPos} ${styles[`pos${player.pos}`]}`}>

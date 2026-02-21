@@ -165,7 +165,7 @@ export default function ClubesPage() {
 
                                                 <div className="g22-cardActions">
                                                     <button className="g22-actionBtn" type="button">Editar</button>
-                                                    <Link href={`/clubes/${club.id}`} className="g22-actionBtn primary">
+                                                    <Link href={`/clubs/${club.id}`} className="g22-actionBtn primary">
                                                         Ver
                                                     </Link>
                                                 </div>

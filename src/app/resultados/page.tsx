@@ -97,7 +97,7 @@ export default function ResultadosPage() {
 
                             <div className={styles.matchesList}>
                                 {dateGroup.matches.map(match => (
-                                    <Link key={match.id} href={`/partidos/${match.id}`} className={styles.resultCard}>
+                                    <Link key={match.id} href={`/matches/${match.id}`} className={styles.resultCard}>
                                         <div className={styles.resultMeta}>
                                             <span className={styles.resultTournament}>{match.tournament}</span>
                                             <span className={styles.resultCategory}>{match.category}</span>

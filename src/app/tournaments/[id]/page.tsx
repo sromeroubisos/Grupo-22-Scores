@@ -254,7 +254,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
         return (
             <Link
-                href={`/partidos/${match.event_key || match.match_id}`}
+                href={`/matches/${match.event_key || match.match_id}`}
                 key={match.event_key || match.match_id}
                 className={styles.matchRow}
             >
@@ -325,7 +325,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                         <div className={styles.teamLogoPlaceholder} style={{ width: 24, height: 24 }}></div>
                     )}
                     {teamId ? (
-                        <Link href={`/clubes/fs-team-${teamId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                        <Link href={`/clubs/fs-team-${teamId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                             {teamName}
                         </Link>
                     ) : (

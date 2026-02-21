@@ -155,7 +155,7 @@ export default function JugadoresPage() {
                                                 <div className="g22-cardActions">
                                                     <button className="g22-actionBtn" type="button">Editar</button>
                                                     <button className="g22-actionBtn" type="button">Estadisticas</button>
-                                                    <Link href={`/jugadores/${player.id}`} className="g22-actionBtn primary">
+                                                    <Link href={`/players/${player.id}`} className="g22-actionBtn primary">
                                                         Ver perfil
                                                     </Link>
                                                 </div>

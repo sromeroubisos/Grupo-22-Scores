@@ -144,7 +144,7 @@ export default function TablasPage() {
                                                 </span>
                                             </td>
                                             <td>
-                                                <Link href={`/clubes/${row.team.toLowerCase().replace(/\s+/g, '-')}`} className={styles.teamCell}>
+                                                <Link href={`/clubs/${row.team.toLowerCase().replace(/\s+/g, '-')}`} className={styles.teamCell}>
                                                     <span className={styles.teamLogo}>{row.logo}</span>
                                                     <span className={styles.teamName}>{row.team}</span>
                                                 </Link>

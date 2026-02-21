@@ -752,7 +752,7 @@ export default function HomePage() {
                         {league.matches.map((match) => (
                           <Link
                             key={match.id}
-                            href={`/partidos/${match.id}`}
+                            href={`/matches/${match.id}`}
                             className={`${styles.matchRow} ${match.status === 'live' ? styles.matchRowLive : ''}`}
                           >
                             <div className={styles.matchTime}>

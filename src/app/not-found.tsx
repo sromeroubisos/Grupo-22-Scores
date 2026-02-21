@@ -38,7 +38,7 @@ export default function NotFound() {
                     <div className={styles.nf__quick}>
                         <p className={styles.nf__quickTitle}>Accesos rápidos</p>
                         <div className={styles.nf__grid}>
-                            <Link className={styles.chip} href="/partidos">🏉 Partidos</Link>
+                            <Link className={styles.chip} href="/matches">🏉 Partidos</Link>
                             <Link className={styles.chip} href="/tournaments">🏆 Ligas</Link>
                             <Link className={styles.chip} href="/favorites">⭐ Favoritos</Link>
                             <Link className={styles.chip} href="/search">🔎 Buscar</Link>

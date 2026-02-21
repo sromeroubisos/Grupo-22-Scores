@@ -111,7 +111,7 @@ export default function UnionTournaments() {
                                 <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                         <Link
-                                            href={`/admin/torneo/${t.id}`}
+                                            href={`/admin/entities/${t.id}/manage?type=tournament`}
                                             style={{
                                                 fontSize: '0.875rem',
                                                 padding: '6px 12px',

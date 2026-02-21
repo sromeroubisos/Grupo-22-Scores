@@ -328,7 +328,7 @@ export default function SuperadminPartidosPage() {
                                                 </div>
 
                                                 <div className={styles.cardActions}>
-                                                    <Link href={`/admin/super/partidos/${match.id}`} className={styles.actionBtn}>
+                                                    <Link href={`/admin/entities/${match.id}/manage?type=match`} className={styles.actionBtn}>
                                                         Gestionar
                                                     </Link>
                                                     <button className={styles.actionBtn} title="Sincronizar ahora">

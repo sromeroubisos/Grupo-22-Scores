@@ -358,10 +358,10 @@ export default function SuperadminTorneosPage() {
                                 </div>
 
                                 <div className={styles.cardActions}>
-                                    <Link href={`/admin/super/torneos/${tournament.id}`} className={styles.actionBtn}>
+                                    <Link href={`/admin/entities/${tournament.id}/manage?type=tournament`} className={styles.actionBtn}>
                                         Ver
                                     </Link>
-                                    <Link href={`/admin/super/torneos/crear?tournamentId=${tournament.id}`} className={styles.actionBtn}>
+                                    <Link href={`/admin/entities/${tournament.id}/manage?type=tournament`} className={styles.actionBtn}>
                                         Editar
                                     </Link>
                                     <button className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>

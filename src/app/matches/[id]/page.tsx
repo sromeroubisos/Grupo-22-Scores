@@ -30,7 +30,7 @@ function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }) {
     if (team.name) params.set('name', team.name);
     if (team.teamUrl) params.set('team_url', team.teamUrl);
     const qs = params.toString();
-    return `/clubes/fs-team-${team.id}${qs ? `?${qs}` : ''}`;
+    return `/clubs/fs-team-${team.id}${qs ? `?${qs}` : ''}`;
 }
 
 function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamName?: string }) {
@@ -699,16 +699,16 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                     <div className={styles.eventIcon}>{icon}</div>
                                                     <div className={styles.eventDetail}>
                                                         <div className={styles.eventPlayer}>
-                                                            {evt.playerId ? <Link href={`/jugadores/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}
+                                                            {evt.playerId ? <Link href={`/players/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}
                                                         </div>
                                                         {evt.type?.toLowerCase().includes('subst') ? (
                                                             <div className={styles.eventSubInfo}>
-                                                                <span className={styles.playerIn}>{evt.playerId ? <Link href={`/jugadores/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}</span><br />
-                                                                <span className={styles.playerOut}>{evt.subPlayerId ? <Link href={`/jugadores/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>
+                                                                <span className={styles.playerIn}>{evt.playerId ? <Link href={`/players/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}</span><br />
+                                                                <span className={styles.playerOut}>{evt.subPlayerId ? <Link href={`/players/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>
                                                             </div>
                                                         ) : (
                                                             <div className={styles.eventSubInfo}>
-                                                                {evt.subPlayer && <span className={styles.assistText}>asistencia de {evt.subPlayerId ? <Link href={`/jugadores/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>}
+                                                                {evt.subPlayer && <span className={styles.assistText}>asistencia de {evt.subPlayerId ? <Link href={`/players/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>}
                                                                 {evt.description && <span> ({evt.description})</span>}
                                                             </div>
                                                         )}
@@ -784,7 +784,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                         <div key={i} className={styles.playerItem}>
                                                             <span>
                                                                 <span className={styles.playerNumber}>{p.PLAYER_NUMBER || p.player_number}</span>{' '}
-                                                                {pId ? <Link href={`/jugadores/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                             </span>
                                                             <span style={{ opacity: 0.5, fontSize: '11px' }}>{p.PLAYER_POSITION || p.player_position}</span>
                                                         </div>
@@ -802,7 +802,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                         <div key={i} className={styles.playerItem}>
                                                             <span>
                                                                 <span className={styles.playerNumber}>{p.PLAYER_NUMBER || p.player_number}</span>{' '}
-                                                                {pId ? <Link href={`/jugadores/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                             </span>
                                                             <span style={{ opacity: 0.5, fontSize: '11px' }}>{p.PLAYER_POSITION || p.player_position}</span>
                                                         </div>
@@ -995,7 +995,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                         <tr key={i} className={isCurrent ? styles.currentTeam : ''}>
                                                             <td><span className={styles.rankBadge}>{row.rank || i + 1}</span></td>
                                                             <td style={isCurrent ? { color: 'var(--accent)', fontWeight: '700' } : {}}>
-                                                                {row.team_id ? <Link href={`/clubes/fs-team-${row.team_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{rowName}</Link> : rowName}
+                                                                {row.team_id ? <Link href={`/clubs/fs-team-${row.team_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{rowName}</Link> : rowName}
                                                             </td>
                                                             <td>{row.matches_played || row.PLAYED || row.played || 0}</td>
                                                             <td>{row.goal_difference || row.GOAL_DIFF || row.goal_diff || 0}</td>
@@ -1031,7 +1031,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                                     return (
                                                                         <>
                                                                             <span className={styles.playerStatName}>
-                                                                                {s.home_team.player_id ? <Link href={`/jugadores/${s.home_team.player_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{homePlayerName}</Link> : homePlayerName}
+                                                                                {s.home_team.player_id ? <Link href={`/players/${s.home_team.player_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{homePlayerName}</Link> : homePlayerName}
                                                                             </span>
                                                                             <span className={styles.playerStatVal}>{s.home_team.value}</span>
                                                                         </>
@@ -1046,7 +1046,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                                         <>
                                                                             <span className={styles.playerStatVal}>{s.away_team.value}</span>
                                                                             <span className={styles.playerStatName}>
-                                                                                {s.away_team.player_id ? <Link href={`/jugadores/${s.away_team.player_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{awayPlayerName}</Link> : awayPlayerName}
+                                                                                {s.away_team.player_id ? <Link href={`/players/${s.away_team.player_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{awayPlayerName}</Link> : awayPlayerName}
                                                                             </span>
                                                                         </>
                                                                     );
