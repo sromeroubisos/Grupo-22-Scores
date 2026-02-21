@@ -9,8 +9,17 @@ export function EntityHeader({ entity }: { entity: ResolvedEntityResult }) {
     const status = data.status || 'active'; // Default to active if missing
 
     return (
-        <header className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 border-b border-divider">
+        <header className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 px-4 pt-4 sm:pt-0">
             <div>
+                <nav className="flex text-sm text-system-secondary mb-3 gap-2 items-center" aria-label="Breadcrumb">
+                    <Link href="/admin" className="hover:text-foreground hover:underline transition-colors">Admin</Link>
+                    <span className="text-system-secondary/50">/</span>
+                    <span className="cursor-default">Entities</span>
+                    <span className="text-system-secondary/50">/</span>
+                    <span className="capitalize cursor-default">{entity.entityType}s</span>
+                    <span className="text-system-secondary/50">/</span>
+                    <span className="font-medium text-foreground max-w-[200px] truncate" title={name}>{name}</span>
+                </nav>
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <h1 className="text-3xl font-bold">{name}</h1>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent-blue/10 text-accent-blue border border-accent-blue/20 uppercase tracking-wider">
@@ -18,8 +27,8 @@ export function EntityHeader({ entity }: { entity: ResolvedEntityResult }) {
                     </span>
                     {(data.status || entity.entityType === 'tournament' || entity.entityType === 'match') && (
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border lowercase ${status === 'active' || status === 'published' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                status === 'draft' || status === 'scheduled' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                    'bg-system-secondary/10 text-system-secondary border-system-secondary/20'
+                            status === 'draft' || status === 'scheduled' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                'bg-system-secondary/10 text-system-secondary border-system-secondary/20'
                             }`}>
                             {status}
                         </span>

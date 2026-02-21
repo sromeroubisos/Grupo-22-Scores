@@ -34,7 +34,21 @@ export async function updateEntity(type: EntityType, id: string, updates: Record
         if (!allowed.includes(key)) {
             throw new Error(`Security Error: Modification of field '${key}' is not allowed for ${type}.`);
         }
-        cleanUpdates[key] = updates[key];
+
+        let value = updates[key];
+
+        // Per-field FK UUID validation
+        const isFkField = ['union_id', 'club_id', 'season_id', 'home_club_id', 'away_club_id'].includes(key);
+        if (isFkField) {
+            // Normalize empty string to null to avoid DB errors
+            if (value === '') value = null;
+
+            if (value !== null && !UUID_REGEX.test(value)) {
+                throw new Error(`Validation Error: Field '${key}' must be a valid UUID or null.`);
+            }
+        }
+
+        cleanUpdates[key] = value;
     }
 
     let table = '';
