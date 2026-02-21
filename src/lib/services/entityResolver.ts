@@ -1,16 +1,30 @@
 import { createClient } from '@/lib/supabase/server';
+import { Database } from '@/lib/database.types';
 
 export type EntityType = 'club' | 'tournament' | 'player' | 'match';
 
+export type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
+export type ClubRow = Database['public']['Tables']['clubs']['Row'];
+export type MatchRow = Database['public']['Tables']['matches']['Row'];
+export interface PlayerData {
+    id: string;
+    name?: string;
+    displayName?: string;
+    club_id?: string;
+    teamId?: string;
+    position?: string;
+    nationality?: string;
+    [key: string]: unknown;
+}
+
+export type ResolvedEntityOk =
+    | { kind: 'ok'; entityType: 'tournament'; source: 'db'; data: TournamentRow; canonicalPath: string; adminPath: string }
+    | { kind: 'ok'; entityType: 'club'; source: 'db'; data: ClubRow; canonicalPath: string; adminPath: string }
+    | { kind: 'ok'; entityType: 'match'; source: 'db'; data: MatchRow; canonicalPath: string; adminPath: string }
+    | { kind: 'ok'; entityType: 'player'; source: 'db'; data: PlayerData; canonicalPath: string; adminPath: string };
+
 export type ResolvedEntityResult =
-    | {
-        kind: 'ok';
-        entityType: EntityType;
-        source: 'db';
-        data: unknown;
-        canonicalPath: string;
-        adminPath: string;
-    }
+    | ResolvedEntityOk
     | { kind: 'not_found' }
     | { kind: 'forbidden' }
     | { kind: 'error'; message: string };
