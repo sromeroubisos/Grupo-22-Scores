@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Star } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { EntityType } from '@/lib/types/user';
+import { getFavoriteSet, updateFavoriteSet } from '@/lib/favoritesCache';
 import styles from './FavoriteButton.module.css';
 
 interface FavoriteButtonProps {
@@ -24,6 +25,8 @@ export default function FavoriteButton({
     const [isFavorited, setIsFavorited] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const [userId, setUserId] = useState<string | null>(null);
 
     // Memoize client creation
     const supabase = useMemo(() => createClient(), []);
@@ -47,22 +50,20 @@ export default function FavoriteButton({
 
             if (!session) {
                 setIsAuthenticated(false);
+                setUserId(null); // Clear userId
                 return;
             }
 
             setIsAuthenticated(true);
+            const uid = session.user.id;
+            setUserId(uid); // Save to bypass getSession in toggleFavorite
 
-            // Check if favorited
-            const { data, error } = await supabase
-                .rpc('is_favorited', {
-                    p_entity_type: entityType,
-                    p_entity_id: entityId
-                });
+            const favSet = await getFavoriteSet(supabase, uid, entityType);
 
             if (!isMounted.current) return;
 
-            if (!error && data !== null) {
-                setIsFavorited(data);
+            if (favSet) {
+                setIsFavorited(favSet.has(entityId));
             }
         } catch (error: any) {
             // Ignore AbortErrors
@@ -97,6 +98,11 @@ export default function FavoriteButton({
 
             if (isMounted.current) {
                 setIsFavorited(data);
+            }
+
+            // Update cache locally avoiding DB fetch
+            if (userId) {
+                updateFavoriteSet(userId, entityType, entityId, data);
             }
         } catch (error: any) {
             if (error.name === 'AbortError' || error.message?.includes('abort')) return;

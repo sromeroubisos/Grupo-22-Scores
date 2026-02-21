@@ -53,10 +53,12 @@ export default function ProfilePage() {
             try {
                 const { data, error } = await supabase.rpc(
                     'get_my_favorites_enriched_v2',
-                    { p_limit: 50, p_cursor: null },
+                    { p_limit: 50, p_cursor: undefined },
                 );
                 if (!alive) return;
-                if (!error) setFavorites(Array.isArray(data) ? data : []);
+                if (!error) {
+                    setFavorites(Array.isArray(data) ? data.map(d => ({ ...d, id: d.favorite_id })) : []);
+                }
             } catch (err: any) {
                 if (err?.name === 'AbortError') return;
             } finally {

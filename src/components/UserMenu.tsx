@@ -19,7 +19,7 @@ export default function UserMenu() {
         loadUser()
 
         // Subscribe to auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
             if (event === 'SIGNED_OUT') {
                 setUser(null)
             } else if (event === 'SIGNED_IN' && session) {

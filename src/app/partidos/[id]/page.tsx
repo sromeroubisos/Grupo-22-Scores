@@ -400,14 +400,14 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     } else {
                         setState(prev => ({
                             ...prev,
-                            kind: 'error',
-                            message: 'No se encontró el partido (ID no reconocido como API ni Local)'
+                            kind: 'empty',
+                            message: 'No hay datos disponibles todavía'
                         }));
                     }
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                setState(prev => ({ ...prev, kind: 'error', message: String(error) }));
+                setState(prev => ({ ...prev, kind: 'error', message: 'Error cargando datos' }));
             }
         }
 
@@ -431,9 +431,9 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         return (
             <div className={styles.page}>
                 <div className={styles.appContainer}>
-                    <div style={{ padding: '40px', textAlign: 'center', background: 'rgba(255,0,0,0.1)', borderRadius: '12px' }}>
-                        <h2>{state.kind === 'error' ? 'Error al cargar' : 'No se encontró información parseable'}</h2>
-                        <p>{state.message}</p>
+                    <div style={{ padding: '40px', textAlign: 'center', background: state.kind === 'error' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                        <h2>{state.kind === 'error' ? 'Error cargando datos' : 'No hay datos disponibles todavía'}</h2>
+                        <p style={{ margin: '16px 0', opacity: 0.8 }}>{state.message}</p>
                         <button className={styles.tab} onClick={() => window.location.reload()} style={{ marginTop: '20px' }}>Reintentar</button>
 
                         <div style={{ marginTop: '40px', textAlign: 'left' }}>

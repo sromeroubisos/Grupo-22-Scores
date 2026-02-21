@@ -62,11 +62,11 @@ function mapRow(f: any): FavoriteItem {
 export function useFavorites() {
     // Initialize directly from localStorage — avoids blank frame before first fetch
     const [favorites, setFavorites] = useState<FavoriteItem[]>(() => readLS());
-    const [hasMore, setHasMore]     = useState(false);
-    const [loading, setLoading]     = useState(true);
-    const [error, setError]         = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const supabase    = useMemo(() => createClient(), []);
+    const supabase = useMemo(() => createClient(), []);
     // Incrementing requestId lets us discard responses from stale fetches.
     // This replaces the isFetching guard which could leave loading=true forever.
     const requestIdRef = useRef(0);
@@ -128,7 +128,7 @@ export function useFavorites() {
     useEffect(() => {
         fetchFavorites();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any) => {
             if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                 fetchFavorites();
             } else if (event === 'SIGNED_OUT') {

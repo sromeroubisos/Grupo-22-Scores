@@ -1,8 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## Local Development
 
-First, run the development server:
+To run the development server:
 
 ```bash
 npm run dev
@@ -17,6 +17,31 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+## Generate DB Types
+
+To reconstruct `database.types.ts` precisely from the remote database schema, open your terminal and specify your Supabase Personal Access Token before executing the script:
+
+**PowerShell:**
+
+```powershell
+$env:SUPABASE_ACCESS_TOKEN="<TU_TOKEN_ACA>"
+npm run gen:db-types
+```
+
+**CMD:**
+
+```cmd
+set SUPABASE_ACCESS_TOKEN=<TU_TOKEN_ACA>
+npm run gen:db-types
+```
+
+**Bash/Zsh (Mac/Linux):**
+
+```bash
+export SUPABASE_ACCESS_TOKEN="<TU_TOKEN_ACA>"
+npm run gen:db-types
+```
 
 ## Learn More
 

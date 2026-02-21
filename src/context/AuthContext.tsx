@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, useRef } fro
 import { createClient } from '@/lib/supabase/client';
 import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
+import { clearFavoritesCache } from '@/lib/favoritesCache';
 
 interface User {
     id: string;
@@ -43,8 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const fetchAndSetUser = async (sbUser: SupabaseUser) => {
         try {
-            // Fetch profile from 'users' table
-            const { data: profile, error } = await supabase
+            const { data: profile } = await supabase
                 .from('users')
                 .select('*')
                 .eq('id', sbUser.id)
@@ -53,40 +53,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!isMounted.current) return;
 
             if (profile) {
-                const { data: membershipsData, error: membershipsError } = await supabase
+                const { data: membershipsData } = await supabase
                     .from('memberships')
                     .select('scope_type, scope_id, role')
                     .eq('user_id', sbUser.id);
 
-                if (membershipsError && !isAbortError(membershipsError)) {
-                    console.warn('Error fetching memberships:', membershipsError.message);
-                }
+                if (!isMounted.current) return;
 
-                const memberships: MembershipLike[] = (membershipsData || []).map((membership: any) => ({
-                    scopeType: membership.scope_type,
-                    scopeId: membership.scope_id,
-                    role: membership.role,
+                const memberships: MembershipLike[] = (membershipsData || []).map((m: any) => ({
+                    scopeType: m.scope_type,
+                    scopeId: m.scope_id,
+                    role: m.role,
                 }));
-
-                const contextRole: AppUserRole = normalizeRole(profile.role);
 
                 setUser({
                     id: profile.id,
                     name: profile.name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: profile.email || sbUser.email || '',
-                    role: contextRole,
+                    role: normalizeRole(profile.role),
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
                     memberships,
                 });
             } else {
-                // Fallback to auth metadata if profile can't be fetched
+                // Fallback to auth metadata si el perfil no existe todavía
                 setUser({
                     id: sbUser.id,
                     name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: sbUser.email || '',
                     role: 'fan',
                     avatarUrl: sbUser.user_metadata?.avatar_url,
-                    memberships: [],
                 });
             }
         } catch (err: any) {
@@ -131,6 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(null);
                 localStorage.removeItem('g22_user');
             }
+
+            // Defensively clear favorites cache on sign out/in/update
+            if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+                clearFavoritesCache(`Auth event: ${event}`);
+            }
+
             setIsLoading(false);
         });
 

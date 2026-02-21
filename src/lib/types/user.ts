@@ -1,21 +1,14 @@
 // User types for G22 Scores
 
+import { Database } from "../database.types";
+
 export type UserRole = 'fan' | 'user' | 'super_admin' | 'operator' | 'club_admin' | 'admin_general';
 
 export type EntityType = 'league' | 'club' | 'tournament' | 'team' | 'player';
 
-export interface User {
-    id: string;
-    email: string;
-    name: string | null;
-    avatar_url: string | null;
-    role: UserRole;
-    country: string | null;
-    favorite_sport: string | null;
-    created_at: string;
-    last_login_at: string;
-    updated_at: string;
-}
+export type DbUser = Database["public"]["Tables"]["users"]["Row"];
+
+export type User = DbUser;
 
 export interface Favorite {
     id: string;

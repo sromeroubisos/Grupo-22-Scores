@@ -1,498 +1,422 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { ArrowLeft, Trash2, Edit2, Star, Plus, X } from 'lucide-react';
 import LogoUploader from '@/components/LogoUploader';
 import { getActiveSports } from '@/lib/data/sports';
+import { ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 
 const activeSports = getActiveSports();
 
+type StepId = 1 | 2 | 3 | 4 | 5;
+
+const steps = [
+    { id: 1, name: 'Básico' },
+    { id: 2, name: 'Identidad' },
+    { id: 3, name: 'Revisión' },
+] as const;
+
+function slugify(value: string) {
+    return value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60);
+}
+
+// ─── Toast mínimo ─────────────────────────────────────────────────────────────
+
+function Toast({ message, type }: { message: string; type: 'success' | 'error' }) {
+    return (
+        <div style={{
+            position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999,
+            background: type === 'success' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+            border: `1px solid ${type === 'success' ? '#10b981' : '#ef4444'}`,
+            borderRadius: '10px', padding: '12px 20px',
+            display: 'flex', alignItems: 'center', gap: '10px',
+            color: 'white', fontSize: '14px', maxWidth: '360px',
+        }}>
+            {type === 'success'
+                ? <CheckCircle size={18} color="#10b981" />
+                : <AlertCircle size={18} color="#ef4444" />}
+            {message}
+        </div>
+    );
+}
+
 export default function CreateClubSuper() {
     const router = useRouter();
-    const supabase = createClient();
 
-    // Upload refs
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const bannerInputRef = useRef<HTMLInputElement>(null);
+    const [currentStep, setCurrentStep] = useState<number>(1);
+    const [createdClubId, setCreatedClubId] = useState<string | null>(null);
+    const [creating, setCreating] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-    // Helper functions
-    const toBase64 = (value: string) => {
-        try {
-            return window.btoa(unescape(encodeURIComponent(value)));
-        } catch {
-            return window.btoa(value);
-        }
-    };
-
-    const toDataUrl = (logoData: string) => {
-        if (!logoData) return '';
-        if (logoData.startsWith('data:image/')) return logoData;
-        const trimmed = logoData.trim();
-        if (trimmed.startsWith('<svg')) {
-            return `data:image/svg+xml;base64,${toBase64(trimmed)}`;
-        }
-        return logoData;
-    };
-
-    const [currentStep, setCurrentStep] = useState(1);
-    const [loading, setLoading] = useState(false);
-
-    const [formData, setFormData] = useState({
-        name: '',
-        shortName: '',
-        sport: 'rugby',
-        slug: '',
-        country: 'Argentina', // Country Name for UI
-        country_id: 'ARG',    // ID for DB
-        union_id: 'uar',      // Default Text ID
-        city: '',
-        website: '',
-        instagram: '',
-        twitter: '',
+    const [form, setForm] = useState({
+        name:         '',
+        shortName:    '',
+        sport:        'rugby',
+        slug:         '',
+        union_id:     'uar',
+        city:         '',
+        website:      '',
         primaryColor: '#10b981',
-        secondaryColor: '#000000',
-        logo_url: '',
-        mainVenue: {
-            name: '',
-            address: '',
-            city: '',
-            mapsLink: ''
-        },
-        visibility: 'public'
+        logo_url:     '',
     });
 
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
-    const [bannerFile, setBannerFile] = useState<File | null>(null);
-    const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-
-    // Division state (mock for now as DB schema might not support it yet fully)
-    const [divisions, setDivisions] = useState([
-        { id: 1, name: 'Primera', sport: 'Rugby Union', gender: 'Masculino', category: 'Senior', status: 'active', featured: true },
-        { id: 2, name: 'Reserva', sport: 'Rugby Union', gender: 'Masculino', category: 'Senior', status: 'active', featured: false },
-    ]);
-
-    const [showDivisionModal, setShowDivisionModal] = useState(false);
-    const [newDivision, setNewDivision] = useState({
-        name: '',
-        sport: 'Rugby Union',
-        gender: 'Masculino',
-        category: 'Senior',
-        status: 'active',
-        featured: false
-    });
-
-    const updateFormData = (field: string, value: any) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3500);
     };
+
+    const update = (field: string, value: string) =>
+        setForm(prev => ({ ...prev, [field]: value }));
 
     const handleNameChange = (name: string) => {
-        const slug = name
-            .toLowerCase()
-            .replace(/ /g, '-')
-            .replace(/[^\w-]+/g, '');
-        updateFormData('name', name);
-        updateFormData('slug', slug);
+        setForm(prev => ({ ...prev, name, slug: slugify(name) }));
     };
 
-    const handleLogoUpload = (logoData: string) => {
-        setLogoPreview(toDataUrl(logoData));
-        updateFormData('logo_url', logoData); // In a real app we'd upload file to Storage
-    };
+    const handleLogoUpload = useCallback((logoData: string) => {
+        update('logo_url', logoData);
+    }, []);
 
-    const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setBannerFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setBannerPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+    // ── PASO 1 → Crea el club en DB inmediatamente ──────────────────────────
+    const handleCreateClub = async () => {
+        if (!form.name.trim()) {
+            showToast('El nombre del club es requerido', 'error');
+            return;
         }
-    };
+        if (!form.slug) {
+            showToast('El slug es inválido', 'error');
+            return;
+        }
 
-    const handleSave = async () => {
-        setLoading(true);
-
-        // Prepare payload matching DB schema
-        const payload = {
-            id: formData.slug, // Using slug as ID for text-based ID compatibility
-            name: formData.name,
-            short_name: formData.shortName,
-            sport: formData.sport,
-            city: formData.city || formData.mainVenue.city,
-            logo_url: formData.logo_url, // For now storing base64/svg string or URL
-            union_id: formData.union_id,
-            primary_color: formData.primaryColor,
-            external_id: `manual-${Date.now()}` // Unique external ID
-        };
-
+        setCreating(true);
         try {
-            const { error } = await supabase.from('clubs').insert([payload]);
-            if (error) throw error;
-            router.push('/admin/super/clubes');
-        } catch (error: any) {
-            alert('Error creating club: ' + error.message);
+            const res = await fetch('/api/clubs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name:     form.name.trim(),
+                    slug:     form.slug,
+                    sport:    form.sport,
+                    union_id: form.union_id,
+                }),
+            });
+
+            const json = await res.json();
+
+            if (res.status === 409) {
+                showToast('El slug ya está en uso. Modificá el nombre o el slug.', 'error');
+                return;
+            }
+
+            if (!res.ok) {
+                showToast(json.error || 'Error al crear el club', 'error');
+                return;
+            }
+
+            const clubId = json.data.id;
+            setCreatedClubId(clubId);
+            showToast('Club creado. Completá los datos de identidad.', 'success');
+            setCurrentStep(2);
+        } catch {
+            showToast('Error de red al crear el club', 'error');
         } finally {
-            setLoading(false);
+            setCreating(false);
         }
     };
 
-    const steps = [
-        { id: 1, name: 'Básico' },
-        { id: 2, name: 'Identidad' },
-        { id: 3, name: 'Sedes' },
-        { id: 4, name: 'Divisiones' },
-        { id: 5, name: 'Revisión' },
-    ];
+    // ── PASO 2 → Guarda identidad vía PATCH ────────────────────────────────
+    const handleSaveIdentity = async () => {
+        if (!createdClubId) return;
+        try {
+            const res = await fetch(`/api/clubs/${createdClubId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    short_name:    form.shortName,
+                    city:          form.city,
+                    primary_color: form.primaryColor,
+                    logo_url:      form.logo_url,
+                    website:       form.website,
+                }),
+            });
+
+            if (!res.ok) {
+                const j = await res.json();
+                showToast(j.error || 'Error al guardar identidad', 'error');
+                return;
+            }
+
+            showToast('Identidad guardada', 'success');
+            setCurrentStep(3);
+        } catch {
+            showToast('Error de red', 'error');
+        }
+    };
+
+    // ── PASO 3 → Ir a manage ───────────────────────────────────────────────
+    const handleGoToManage = () => {
+        if (createdClubId) {
+            router.push(`/admin/super/clubes/${createdClubId}/manage`);
+        }
+    };
+
+    const css = `
+        :root { --accent:#10b981; --border:rgba(255,255,255,0.08); --glass:rgba(15,15,15,0.7); }
+        .glass-card { background:var(--glass); backdrop-filter:blur(16px); border:1px solid var(--border); border-radius:12px; }
+        .form-input { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; padding:12px 16px; border-radius:8px; width:100%; font-size:14px; box-sizing:border-box; }
+        .form-input:focus { outline:none; border-color:var(--accent); }
+        .btn-primary { background:var(--accent); color:black; padding:12px 28px; border-radius:8px; font-weight:700; border:none; cursor:pointer; font-size:14px; }
+        .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+        .btn-glass { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:14px; }
+        .step-pill { padding:6px 16px; border-radius:999px; font-size:12px; font-weight:600; border:1px solid var(--border); background:transparent; color:#6b7280; cursor:pointer; }
+        .step-pill.active { border-color:var(--accent); color:var(--accent); background:rgba(16,185,129,0.08); }
+        .step-pill.done { border-color:#10b981; color:#10b981; }
+        @media(max-width:768px) { .form-grid-2 { grid-template-columns:1fr !important; } }
+    `;
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white">
-            <style jsx global>{`
-                :root {
-                    --accent: #10b981;
-                    --accent-glow: rgba(16, 185, 129, 0.3);
-                    --glass: rgba(15, 15, 15, 0.7);
-                    --border: rgba(255, 255, 255, 0.08);
-                }
-                .bg-vignette {
-                    position: fixed;
-                    inset: 0;
-                    background: 
-                        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 0% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-                        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
-                    z-index: -1;
-                }
-                .glass-card {
-                    background: var(--glass);
-                    backdrop-filter: blur(16px);
-                    border: 1px solid var(--border);
-                    border-radius: 12px;
-                }
-                .form-input {
-                    background: rgba(255, 255, 255, 0.05);
-                    border: 1px solid var(--border);
-                    color: white;
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    width: 100%;
-                    font-size: 14px;
-                }
-                .form-input:focus {
-                    outline: none;
-                    border-color: var(--accent);
-                    background: rgba(16, 185, 129, 0.05);
-                }
-                .btn-primary {
-                    background: var(--accent);
-                    color: black;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    border: none;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    transition: all 0.2s;
-                }
-                .btn-glass {
-                    background: rgba(255,255,255,0.05);
-                    border: 1px solid var(--border);
-                    color: white;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                
-                /* Desktop Stepper */
-                .stepper-desktop {
-                    display: flex;
-                    justify-content: center;
-                    gap: 48px;
-                    margin-bottom: 48px;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                    padding-bottom: 12px;
-                }
-                .step-underline {
-                    font-size: 14px;
-                    font-weight: 500;
-                    color: #6b7280;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    padding-bottom: 8px;
-                    transition: color 0.3s;
-                }
-                .step-underline.active {
-                    color: var(--accent);
-                    border-bottom: 2px solid var(--accent); 
-                }
+        <div style={{ minHeight: '100vh', background: '#050505', color: 'white' }}>
+            <style>{css}</style>
 
-                /* Mobile Optimizations */
-                @media (max-width: 768px) {
-                    .container-custom {
-                        padding: 20px 16px !important;
-                    }
-                    .glass-card {
-                        padding: 20px !important;
-                        border: none;
-                        background: transparent;
-                        box-shadow: none;
-                    }
-                    .form-grid {
-                        grid-template-columns: 1fr !important;
-                        gap: 24px !important;
-                    }
-                    .stepper-desktop {
-                        display: none;
-                    }
-                    .mobile-header {
-                        margin-bottom: 24px !important;
-                    }
-                    .mobile-cta-bar {
-                        position: fixed;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        background: #0b0b0b;
-                        border-top: 1px solid #222;
-                        padding: 16px;
-                        z-index: 50;
-                        display: flex;
-                        justify-content: space-between;
-                        gap: 12px;
-                    }
-                    .content-spacer {
-                        padding-bottom: 80px; 
-                    }
-                    .identidad-layout {
-                        flex-direction: column !important;
-                        align-items: center;
-                    }
-                    /* Ocultar botones desktop en mobile */
-                    .desktop-cta { 
-                        display: none !important; 
-                    }
-                }
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 24px' }}>
 
-                /* Ocultar elementos mobile en desktop */
-                @media (min-width: 769px) {
-                   .mobile-stepper {
-                       display: none !important;
-                   }
-                   .mobile-cta-bar {
-                       display: none !important;
-                   }
-                }
-            `}</style>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '40px' }}>
+                    <button
+                        onClick={() => router.push('/admin/super/clubes')}
+                        style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                        <ArrowLeft size={18} /> Clubes
+                    </button>
+                    <span style={{ color: '#333' }}>/</span>
+                    <span style={{ color: 'white', fontWeight: 600 }}>Nuevo Club</span>
+                </div>
 
-            <div className="bg-vignette"></div>
-
-            <div className="container-custom" style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px' }}>
-
-                {/* HEADER */}
-                <header className="mobile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
-                    <div>
-                        <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6b7280', textTransform: 'uppercase', marginBottom: '8px' }}>
-                            <button onClick={() => router.push('/admin/super/clubes')} className="hover:text-white">Clubes</button>
-                            <span>/</span>
-                            <span style={{ color: 'white' }}>Crear Nuevo</span>
-                        </nav>
-                        <h1 style={{ fontSize: '30px', fontWeight: 'bold' }}>Nuevo Club</h1>
-                    </div>
-                </header>
-
-                {/* DESKTOP STEPPER */}
-                <div className="stepper-desktop">
+                {/* Stepper */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '40px', flexWrap: 'wrap' }}>
                     {steps.map(step => (
                         <button
                             key={step.id}
-                            onClick={() => setCurrentStep(step.id)}
-                            className={`step-underline ${currentStep === step.id ? 'active' : ''}`}
+                            className={`step-pill ${currentStep === step.id ? 'active' : ''} ${createdClubId && step.id < currentStep ? 'done' : ''}`}
+                            onClick={() => {
+                                // Solo retroceder, no saltar adelante sin crear
+                                if (step.id < currentStep || (step.id === 2 && createdClubId)) {
+                                    setCurrentStep(step.id);
+                                }
+                            }}
                         >
-                            {step.id}. {step.name}
+                            {createdClubId && step.id < currentStep ? '✓ ' : `${step.id}. `}
+                            {step.name}
                         </button>
                     ))}
                 </div>
 
-                {/* MOBILE STEPPER (Simple breadcrumb style) */}
-                <div className="mobile-stepper" style={{ marginBottom: '24px', color: '#888', fontSize: '13px' }}>
-                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>Paso {currentStep} de 5</span>
-                    <span style={{ margin: '0 8px' }}>•</span>
-                    <span style={{ color: 'white' }}>{steps[currentStep - 1].name}</span>
-                </div>
+                {/* ── STEP 1: Básico ──────────────────────────────────────── */}
+                {currentStep === 1 && (
+                    <div className="glass-card" style={{ padding: '32px' }}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Datos del Club</h2>
+                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '32px' }}>
+                            Al confirmar, el club se crea en la base de datos. Podés agregar divisiones inmediatamente.
+                        </p>
 
-                <div className="content-spacer">
-                    {/* STEP 1: BASICO */}
-                    {currentStep === 1 && (
-                        <div className="glass-card" style={{ maxWidth: '800px', margin: '0 auto', padding: '32px' }}>
-                            <div style={{ display: 'grid', gap: '32px' }}>
-                                <section>
-                                    <h3 style={{ fontSize: '14px', color: '#6b7280', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '0.05em' }}>Información Básica</h3>
-                                    <div style={{ display: 'grid', gap: '24px' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>NOMBRE DEL CLUB</label>
-                                            <input className="form-input" value={formData.name} onChange={e => handleNameChange(e.target.value)} placeholder="Ej: San Isidro Club" />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>DEPORTE</label>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px' }}>
-                                                {activeSports.map(sport => (
-                                                    <button
-                                                        key={sport.id}
-                                                        type="button"
-                                                        onClick={() => updateFormData('sport', sport.id)}
-                                                        style={{
-                                                            display: 'flex', alignItems: 'center', gap: '8px',
-                                                            padding: '10px 12px', borderRadius: '8px', fontSize: '13px',
-                                                            border: formData.sport === sport.id ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.08)',
-                                                            background: formData.sport === sport.id ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.03)',
-                                                            color: formData.sport === sport.id ? 'var(--accent)' : '#9ca3af',
-                                                            cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        <span>{sport.icon}</span><span>{sport.nameEs}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>SIGLA</label>
-                                                <input className="form-input" value={formData.shortName} onChange={e => updateFormData('shortName', e.target.value)} placeholder="Ej: SIC" />
-                                            </div>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>SLUG (ID)</label>
-                                                <input className="form-input" value={formData.slug} onChange={e => updateFormData('slug', e.target.value)} style={{ color: 'var(--accent)' }} readOnly />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)' }}></div>
-
-                                <section>
-                                    <h3 style={{ fontSize: '14px', color: '#6b7280', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '0.05em' }}>Ubicación</h3>
-                                    <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>UNIÓN ID</label>
-                                            <input className="form-input" value={formData.union_id} onChange={e => updateFormData('union_id', e.target.value)} placeholder="uar" />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>CIUDAD</label>
-                                            <input className="form-input" value={formData.city} onChange={e => updateFormData('city', e.target.value)} placeholder="San Isidro" />
-                                        </div>
-                                    </div>
-                                </section>
+                        <div style={{ display: 'grid', gap: '24px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                    NOMBRE DEL CLUB *
+                                </label>
+                                <input
+                                    className="form-input"
+                                    value={form.name}
+                                    onChange={e => handleNameChange(e.target.value)}
+                                    placeholder="Ej: San Isidro Club"
+                                />
                             </div>
 
-                            {/* Desktop CTA */}
-                            <div className="desktop-cta" style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end' }}>
-                                <button className="btn-primary" onClick={() => setCurrentStep(2)}>Siguiente: Identidad</button>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                    SLUG (ID en sistema) *
+                                </label>
+                                <input
+                                    className="form-input"
+                                    value={form.slug}
+                                    onChange={e => update('slug', e.target.value)}
+                                    style={{ color: '#10b981', fontFamily: 'monospace' }}
+                                />
+                                <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '6px' }}>
+                                    Solo minúsculas, números y guiones. Ej: san-isidro-club
+                                </p>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '12px', textTransform: 'uppercase' }}>
+                                    DEPORTE
+                                </label>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
+                                    {activeSports.map(sport => (
+                                        <button
+                                            key={sport.id}
+                                            type="button"
+                                            onClick={() => update('sport', sport.id)}
+                                            style={{
+                                                padding: '10px 12px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer',
+                                                border: form.sport === sport.id ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                                                background: form.sport === sport.id ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.03)',
+                                                color: form.sport === sport.id ? '#10b981' : '#9ca3af',
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                            }}
+                                        >
+                                            <span>{sport.icon}</span><span>{sport.nameEs}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                        UNIÓN ID
+                                    </label>
+                                    <input
+                                        className="form-input"
+                                        value={form.union_id}
+                                        onChange={e => update('union_id', e.target.value)}
+                                        placeholder="uar"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                        CIUDAD
+                                    </label>
+                                    <input
+                                        className="form-input"
+                                        value={form.city}
+                                        onChange={e => update('city', e.target.value)}
+                                        placeholder="Buenos Aires"
+                                    />
+                                </div>
                             </div>
                         </div>
-                    )}
 
-                    {/* STEP 2: IDENTIDAD */}
-                    {currentStep === 2 && (
-                        <div className="glass-card" style={{ padding: '32px', maxWidth: '800px', margin: '0 auto' }}>
-                            <div className="identidad-layout" style={{ display: 'flex', gap: '40px' }}>
-                                <div style={{ width: '200px', flexShrink: 0 }}>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '12px' }}>ESCUDO</label>
-                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                        <LogoUploader onUpload={handleLogoUpload} accentColor="#10b981" />
-                                    </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px' }}>
+                            <button
+                                className="btn-primary"
+                                onClick={handleCreateClub}
+                                disabled={creating || !form.name.trim() || !form.slug}
+                            >
+                                {creating ? 'Creando club...' : 'Crear Club y Continuar →'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── STEP 2: Identidad ────────────────────────────────────── */}
+                {currentStep === 2 && createdClubId && (
+                    <div className="glass-card" style={{ padding: '32px' }}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Identidad Visual</h2>
+                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '32px' }}>
+                            Podés completar esto ahora o más tarde desde el panel de gestión.
+                        </p>
+
+                        <div style={{ display: 'grid', gap: '24px' }}>
+                            <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '12px', textTransform: 'uppercase' }}>
+                                        ESCUDO
+                                    </label>
+                                    <LogoUploader onUpload={handleLogoUpload} accentColor="#10b981" />
                                 </div>
-                                <div style={{ flex: 1, display: 'grid', gap: '24px', width: '100%' }}>
+                                <div style={{ flex: 1, minWidth: '200px', display: 'grid', gap: '16px' }}>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>COLOR PRIMARIO</label>
-                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                                            <input type="color" value={formData.primaryColor} onChange={e => updateFormData('primaryColor', e.target.value)} style={{ width: '40px', height: '40px', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} />
-                                            <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>{formData.primaryColor}</span>
+                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                            SIGLA / NOMBRE CORTO
+                                        </label>
+                                        <input
+                                            className="form-input"
+                                            value={form.shortName}
+                                            onChange={e => update('shortName', e.target.value)}
+                                            placeholder="SIC"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                            COLOR PRIMARIO
+                                        </label>
+                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                            <input
+                                                type="color"
+                                                value={form.primaryColor}
+                                                onChange={e => update('primaryColor', e.target.value)}
+                                                style={{ width: '40px', height: '40px', border: 'none', background: 'none', cursor: 'pointer' }}
+                                            />
+                                            <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>{form.primaryColor}</span>
                                         </div>
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>WEBSITE OFICIAL</label>
-                                        <input className="form-input" value={formData.website} onChange={e => updateFormData('website', e.target.value)} placeholder="https://..." />
+                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                            WEBSITE
+                                        </label>
+                                        <input
+                                            className="form-input"
+                                            value={form.website}
+                                            onChange={e => update('website', e.target.value)}
+                                            placeholder="https://..."
+                                        />
                                     </div>
                                 </div>
                             </div>
-                            <div className="desktop-cta" style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
-                                <button className="btn-glass" onClick={() => setCurrentStep(1)}>Atrás</button>
-                                <button className="btn-primary" onClick={() => setCurrentStep(3)}>Siguiente: Sedes</button>
-                            </div>
                         </div>
-                    )}
 
-                    {/* STEP 3 & 4: Placeholder */}
-                    {(currentStep === 3 || currentStep === 4) && (
-                        <div className="glass-card" style={{ padding: '32px', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-                            <p style={{ color: '#888', marginBottom: '20px' }}>Configuración avanzada de Sedes y Divisiones disponible tras la creación.</p>
-                            <div className="desktop-cta" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <button className="btn-glass" onClick={() => setCurrentStep(prev => prev - 1)}>Atrás</button>
-                                <button className="btn-primary" onClick={() => setCurrentStep(5)}>Ir a Revisión</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 5: REVIEW & SAVE */}
-                    {currentStep === 5 && (
-                        <div className="glass-card" style={{ padding: '32px', maxWidth: '800px', margin: '0 auto' }}>
-                            <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px' }}>Resumen</h2>
-
-                            <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#666' }}>NOMBRE</label>
-                                    <div style={{ fontSize: '16px' }}>{formData.name}</div>
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#666' }}>ID (SLUG)</label>
-                                    <div style={{ fontSize: '16px', color: 'var(--accent)' }}>{formData.slug}</div>
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#666' }}>CIUDAD</label>
-                                    <div style={{ fontSize: '16px' }}>{formData.city || '-'}</div>
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#666' }}>UNIÓN ID</label>
-                                    <div style={{ fontSize: '16px' }}>{formData.union_id}</div>
-                                </div>
-                            </div>
-
-                            <div className="desktop-cta" style={{ display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
-                                <button className="btn-glass" onClick={() => setCurrentStep(4)}>Atrás</button>
-                                <button className="btn-primary" style={{ flex: 1 }} onClick={handleSave} disabled={loading}>
-                                    {loading ? 'Creando...' : 'Confirmar y Crear Club'}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', gap: '16px' }}>
+                            <button className="btn-glass" onClick={() => setCurrentStep(1)}>← Atrás</button>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button
+                                    className="btn-glass"
+                                    onClick={() => {
+                                        showToast('Podés completar la identidad desde el panel de gestión', 'success');
+                                        router.push(`/admin/super/clubes/${createdClubId}/manage`);
+                                    }}
+                                >
+                                    Saltar por ahora
+                                </button>
+                                <button className="btn-primary" onClick={handleSaveIdentity}>
+                                    Guardar Identidad →
                                 </button>
                             </div>
                         </div>
-                    )}
-
-                    {/* MOBILE STICKY CTA */}
-                    <div className="mobile-cta-bar">
-                        {currentStep > 1 && (
-                            <button className="btn-glass" style={{ flex: 1, padding: '12px', fontSize: '14px', justifyContent: 'center' }} onClick={() => setCurrentStep(prev => prev - 1)}>
-                                Atrás
-                            </button>
-                        )}
-                        {currentStep < 5 ? (
-                            <button className="btn-primary" style={{ flex: 2, padding: '12px', fontSize: '14px' }} onClick={() => setCurrentStep(prev => prev + 1)}>
-                                Siguiente
-                            </button>
-                        ) : (
-                            <button className="btn-primary" style={{ flex: 2, padding: '12px', fontSize: '14px' }} onClick={handleSave} disabled={loading}>
-                                {loading ? 'Creando...' : 'Crear Club'}
-                            </button>
-                        )}
                     </div>
-                </div>
+                )}
+
+                {/* ── STEP 3: Confirmación / Ir a Manage ───────────────────── */}
+                {currentStep === 3 && createdClubId && (
+                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏆</div>
+                        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>
+                            ¡Club creado exitosamente!
+                        </h2>
+                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '8px' }}>
+                            <span style={{ color: '#10b981', fontFamily: 'monospace' }}>{createdClubId}</span>
+                        </p>
+                        <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '32px' }}>
+                            Ahora podés agregar divisiones, sedes y configurar permisos directamente desde el panel de gestión.
+                        </p>
+                        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <button className="btn-glass" onClick={() => router.push('/admin/super/clubes')}>
+                                Volver a la lista
+                            </button>
+                            <button className="btn-primary" onClick={handleGoToManage}>
+                                Ir al Panel de Gestión →
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {toast && <Toast message={toast.message} type={toast.type} />}
         </div>
     );
 }

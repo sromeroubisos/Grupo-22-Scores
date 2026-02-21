@@ -47,7 +47,7 @@ export function useMatchesStore(
         const res = await fetch(url, { signal });
         if (!res.ok) return [];
         const data = await res.json();
-        const arr = Array.isArray(data) ? data : [];
+        const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
         matchesCache.set(cacheKey(date, sportId), arr);
         lastFetchedAt.set(cacheKey(date, sportId), Date.now());
         return arr;
@@ -68,7 +68,7 @@ export function useMatchesStore(
         const res = await fetch(url, { signal });
         if (!res.ok) return [];
         const data = await res.json();
-        return Array.isArray(data) ? data : [];
+        return Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
       } catch (e: any) {
         if (e?.name === 'AbortError') return [];
         return [];

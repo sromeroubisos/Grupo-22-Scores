@@ -84,10 +84,10 @@ export async function GET(request: Request) {
                 if (liveMatches && liveMatches.length > 0) {
                     persistFromExternalMatches(liveMatches, sport);
                 }
-                return NextResponse.json(enrichedLive);
+                return NextResponse.json({ data: enrichedLive });
             } catch (e) {
                 console.error('Live-only fetch failed:', e);
-                return NextResponse.json([]);
+                return NextResponse.json({ data: [] });
             }
         }
 
@@ -259,7 +259,7 @@ export async function GET(request: Request) {
             });
         }
 
-        return NextResponse.json(enrichedMatches);
+        return NextResponse.json({ data: enrichedMatches });
     } catch (error) {
         console.error('Fatal API Error [GET /api/matches]:', error);
         return NextResponse.json({ error: 'Internal Server Error', details: String(error) }, { status: 500 });
@@ -290,7 +290,7 @@ export async function POST(request: Request) {
         // In a real DB we would save here
         db.addMatch(newMatch);
 
-        return NextResponse.json(newMatch, { status: 201 });
+        return NextResponse.json({ data: newMatch }, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }

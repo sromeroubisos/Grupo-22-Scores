@@ -6,40 +6,41 @@ import { ArrowLeft } from 'lucide-react';
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
 import { createClient } from '@/lib/supabase/client';
 import { SPORTS, getActiveSports } from '@/lib/data/sports';
+import { mapExternalSportToInternalSport } from '@/lib/sports';
 
 const activeSports = getActiveSports();
 
 // Match rules per sport for the form defaults
 const sportDefaults: Record<string, { duration: number; win: number; draw: number; loss: number }> = {
-    'football':          { duration: 90,  win: 3, draw: 1, loss: 0 },
-    'rugby':             { duration: 80,  win: 4, draw: 2, loss: 0 },
-    'rugby-union':       { duration: 80,  win: 4, draw: 2, loss: 0 },
-    'rugby-league':      { duration: 80,  win: 2, draw: 1, loss: 0 },
-    'basketball':        { duration: 40,  win: 2, draw: 0, loss: 1 },
-    'hockey':            { duration: 60,  win: 3, draw: 1, loss: 0 },
-    'field-hockey':      { duration: 60,  win: 3, draw: 1, loss: 0 },
-    'volleyball':        { duration: 90,  win: 3, draw: 0, loss: 0 },
-    'beach-volleyball':  { duration: 60,  win: 3, draw: 0, loss: 0 },
-    'tennis':            { duration: 120, win: 2, draw: 0, loss: 0 },
-    'table-tennis':      { duration: 30,  win: 2, draw: 0, loss: 0 },
-    'badminton':         { duration: 45,  win: 2, draw: 0, loss: 0 },
-    'handball':          { duration: 60,  win: 2, draw: 1, loss: 0 },
-    'futsal':            { duration: 40,  win: 3, draw: 1, loss: 0 },
-    'beach-soccer':      { duration: 36,  win: 3, draw: 1, loss: 0 },
-    'baseball':          { duration: 180, win: 1, draw: 0, loss: 0 },
-    'cricket':           { duration: 300, win: 1, draw: 0, loss: 0 },
-    'american-football': { duration: 60,  win: 1, draw: 0, loss: 0 },
-    'aussie-rules':      { duration: 80,  win: 4, draw: 2, loss: 0 },
-    'snooker':           { duration: 60,  win: 1, draw: 0, loss: 0 },
-    'darts':             { duration: 30,  win: 1, draw: 0, loss: 0 },
-    'boxing':            { duration: 36,  win: 1, draw: 0, loss: 0 },
-    'mma':               { duration: 25,  win: 1, draw: 0, loss: 0 },
-    'esports':           { duration: 45,  win: 1, draw: 0, loss: 0 },
-    'water-polo':        { duration: 32,  win: 2, draw: 1, loss: 0 },
-    'floorball':         { duration: 60,  win: 3, draw: 1, loss: 0 },
-    'bandy':             { duration: 90,  win: 3, draw: 1, loss: 0 },
-    'netball':           { duration: 60,  win: 2, draw: 0, loss: 0 },
-    'kabaddi':           { duration: 40,  win: 2, draw: 0, loss: 0 },
+    'football': { duration: 90, win: 3, draw: 1, loss: 0 },
+    'rugby': { duration: 80, win: 4, draw: 2, loss: 0 },
+    'rugby-union': { duration: 80, win: 4, draw: 2, loss: 0 },
+    'rugby-league': { duration: 80, win: 2, draw: 1, loss: 0 },
+    'basketball': { duration: 40, win: 2, draw: 0, loss: 1 },
+    'hockey': { duration: 60, win: 3, draw: 1, loss: 0 },
+    'field-hockey': { duration: 60, win: 3, draw: 1, loss: 0 },
+    'volleyball': { duration: 90, win: 3, draw: 0, loss: 0 },
+    'beach-volleyball': { duration: 60, win: 3, draw: 0, loss: 0 },
+    'tennis': { duration: 120, win: 2, draw: 0, loss: 0 },
+    'table-tennis': { duration: 30, win: 2, draw: 0, loss: 0 },
+    'badminton': { duration: 45, win: 2, draw: 0, loss: 0 },
+    'handball': { duration: 60, win: 2, draw: 1, loss: 0 },
+    'futsal': { duration: 40, win: 3, draw: 1, loss: 0 },
+    'beach-soccer': { duration: 36, win: 3, draw: 1, loss: 0 },
+    'baseball': { duration: 180, win: 1, draw: 0, loss: 0 },
+    'cricket': { duration: 300, win: 1, draw: 0, loss: 0 },
+    'american-football': { duration: 60, win: 1, draw: 0, loss: 0 },
+    'aussie-rules': { duration: 80, win: 4, draw: 2, loss: 0 },
+    'snooker': { duration: 60, win: 1, draw: 0, loss: 0 },
+    'darts': { duration: 30, win: 1, draw: 0, loss: 0 },
+    'boxing': { duration: 36, win: 1, draw: 0, loss: 0 },
+    'mma': { duration: 25, win: 1, draw: 0, loss: 0 },
+    'esports': { duration: 45, win: 1, draw: 0, loss: 0 },
+    'water-polo': { duration: 32, win: 2, draw: 1, loss: 0 },
+    'floorball': { duration: 60, win: 3, draw: 1, loss: 0 },
+    'bandy': { duration: 90, win: 3, draw: 1, loss: 0 },
+    'netball': { duration: 60, win: 2, draw: 0, loss: 0 },
+    'kabaddi': { duration: 40, win: 2, draw: 0, loss: 0 },
 };
 
 export default function SuperCreateTournament() {
@@ -73,24 +74,23 @@ export default function SuperCreateTournament() {
         unionId: '',
     });
 
-    // Fetch unions from Supabase
     useEffect(() => {
         supabase.from('unions').select('*').order('name').then(({ data }) => {
             setUnions(data || []);
         });
-    }, []);
+    }, [supabase]);
 
-    // Load existing tournament for edit
     useEffect(() => {
         if (!tournamentId) return;
         supabase.from('tournaments').select('*').eq('id', tournamentId).single().then(({ data }) => {
             if (!data) return;
             setIsEdit(true);
-            const defaults = sportDefaults[data.sport] || {};
+            const sportVal = data.sport ? mapExternalSportToInternalSport(data.sport) : 'rugby';
+            const defaults = sportDefaults[sportVal] || {};
             setFormData(prev => ({
                 ...prev,
                 name: data.name || '',
-                sport: data.sport || 'rugby',
+                sport: sportVal,
                 season: data.season_id || '2026',
                 category: data.category || prev.category,
                 format: data.format || prev.format,

@@ -16,7 +16,7 @@ export function useUser() {
         loadUser()
 
         // Subscribe to auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
             if (event === 'SIGNED_IN' && session) {
                 // Sync user with database
                 await fetch('/api/auth/sync-user', { method: 'POST' })

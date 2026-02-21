@@ -85,12 +85,6 @@ function useSearchHistory() {
 
 // ─── Search logic (mock DB) ───────────────────────────────────────────────────
 
-const MOCK_LEAGUES: ResultRow[] = [
-    { id: 't1', type: 'LIGA', title: 'URBA Top 12', subtitle: 'Argentina · Rugby', href: '/tournaments/t1' },
-    { id: 't2', type: 'LIGA', title: 'Super Rugby', subtitle: 'Global · Rugby', href: '/tournaments/t2' },
-    { id: 't3', type: 'LIGA', title: 'Metropolitano A', subtitle: 'Argentina · Hockey', href: '/tournaments/t3' },
-];
-
 function buildResults(query: string): ResultRow[] {
     const lq = query.toLowerCase();
 
@@ -105,9 +99,15 @@ function buildResults(query: string): ResultRow[] {
             color: c.primaryColor,
         }));
 
-    const leagues: ResultRow[] = MOCK_LEAGUES.filter(l =>
-        l.title.toLowerCase().includes(lq) || l.subtitle.toLowerCase().includes(lq)
-    );
+    const leagues: ResultRow[] = db.tournaments
+        .filter(l => l.name.toLowerCase().includes(lq) || l.category.toLowerCase().includes(lq))
+        .map(l => ({
+            id: `tour-${l.id}`,
+            type: 'LIGA' as EntityType,
+            title: l.name,
+            subtitle: `${l.sport} · ${l.category}`,
+            href: `/tournaments/${l.id}`,
+        }));
 
     return [...leagues, ...clubs];
 }
@@ -275,8 +275,10 @@ export default function SearchPage() {
                         </div>
                     ) : (
                         <div className={styles.noResults}>
-                            <p>No encontramos resultados para <strong>&quot;{debouncedQuery}&quot;</strong></p>
-                            <p className={styles.noResultsHint}>Probá con partidos de hoy o noticias.</p>
+                            <p>No hay datos disponibles todavía</p>
+                            <button className={styles.clearBtn} onClick={() => window.location.reload()} style={{ marginTop: '20px', padding: '8px 16px', background: 'var(--color-surface-hover)', borderRadius: '8px', color: 'var(--color-text)' }}>
+                                Reintentar
+                            </button>
                         </div>
                     )
                 )}

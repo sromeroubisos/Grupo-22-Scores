@@ -67,21 +67,9 @@ export default function SuperadminClubesPage() {
                 setClubs(data || []);
             }
         } catch (err: any) {
-            console.error('Failed to fetch clubs from DB, fallback to empty/mock:', err);
-            setErrorMsg(`Error de conexión: ${err.message}. Mostrando datos locales.`);
-            // Fallback to mock data from db.clubs temporarily
-            // This ensures the UI doesn't break if DB is down
-            // Mapping mock-db structure to Supabase structure
-            const mockClubs = db.clubs.map(c => ({
-                id: c.id,
-                name: c.name,
-                short_name: c.shortName,
-                city: c.city,
-                logo_url: c.logoUrl,
-                union_id: c.unionId,
-                country_id: 'ARG' // Default
-            }));
-            setClubs(mockClubs);
+            console.error('Failed to fetch clubs from DB:', err);
+            setErrorMsg(`Error cargando datos: ${err.message}`);
+            setClubs([]);
         } finally {
             setLoading(false);
         }

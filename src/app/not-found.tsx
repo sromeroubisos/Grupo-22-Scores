@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link";
 import { db } from "@/lib/mock-db";
 import styles from "./not-found.module.css";
@@ -64,8 +66,9 @@ export default function NotFound() {
                             </Link>
                         ))}
                         {!news?.length && (
-                            <div className={`${styles.card} ${styles['card--empty']}`}>
-                                No hay noticias publicadas todavía.
+                            <div className={`${styles.card} ${styles['card--empty']}`} style={{ textAlign: 'center' }}>
+                                <p style={{ marginBottom: '16px' }}>No hay datos disponibles todavía</p>
+                                <button className={styles.btn} onClick={() => window.location.reload()}>Reintentar</button>
                             </div>
                         )}
                     </div>

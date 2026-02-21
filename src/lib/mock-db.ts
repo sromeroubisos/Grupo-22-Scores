@@ -1,3 +1,5 @@
+import { isProd, USE_MOCK_DATA } from './mock-config';
+
 export type UserRole = 'admin' | 'operator' | 'viewer';
 export type ScopeType = 'union' | 'tournament' | 'club';
 
@@ -344,7 +346,11 @@ class MockDB {
     }
 
     private constructor() {
-        this.seed();
+        if (USE_MOCK_DATA) {
+            this.seed();
+        } else if (!isProd) {
+            console.warn('MockDB is disabled in this environment (NEXT_PUBLIC_USE_MOCK_DATA=false). Devuelve estructuras vacías.');
+        }
     }
 
     public static getInstance(): MockDB {

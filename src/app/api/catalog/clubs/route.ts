@@ -23,6 +23,6 @@ export async function GET() {
     }));
 
     return NextResponse.json({
-        items: [...manual, ...external]
+        data: [...manual, ...external]
     });
 }

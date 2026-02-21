@@ -94,9 +94,9 @@ export default function PersonasRolesPage() {
             userId: u.id,
             userName: u.name || 'Usuario',
             email: u.email || '',
-            role: u.role,
+            role: u.role || 'user',
             scope: u.role === 'super_admin' ? 'Global' : 'N/A', // Simple scope logic for now
-            assignedAt: u.created_at, // Using created_at as proxy
+            assignedAt: u.created_at || new Date().toISOString(), // Using created_at as proxy
             status: 'active'
         }));
 
@@ -230,10 +230,10 @@ export default function PersonasRolesPage() {
                                                         background: user.role === 'super_admin' ? 'var(--color-accent)' : 'var(--basalt-800)',
                                                         color: user.role === 'super_admin' ? '#000' : '#fff'
                                                     }}>
-                                                        {user.role}
+                                                        {user.role || 'User'}
                                                     </span>
                                                 </td>
-                                                <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                                                <td>{user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
                                                 <td>{user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : '-'}</td>
                                                 <td>
                                                     <span
