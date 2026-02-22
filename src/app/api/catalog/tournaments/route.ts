@@ -1,29 +1,30 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/mock-db';
+import { createClient } from '@/lib/supabase/server';
 
-export async function GET() {
-    const manual = db.tournaments.map(t => ({
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search') || '';
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+
+    const supabase = await createClient();
+    let query = supabase.from('tournaments').select('id, name');
+
+    if (search) {
+        query = query.ilike('name', `%${search}%`);
+    }
+
+    query = query.limit(limit);
+
+    const { data, error } = await query;
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const results = data.map(t => ({
         id: t.id,
-        name: t.name,
-        sport: t.sport,
-        seasonId: t.seasonId,
-        source: 'Manual',
-        country: undefined,
-        updatedAt: t.createdAt
+        label: t.name,
+        meta: t.id.split('-')[0]
     }));
 
-    const external = db.externalTournaments.map(t => ({
-        id: t.id,
-        name: t.name,
-        sport: t.sport,
-        seasonId: t.seasonId,
-        source: t.source,
-        country: t.country,
-        updatedAt: t.updatedAt,
-        logoUrl: t.logoUrl
-    }));
-
-    return NextResponse.json({
-        data: [...manual, ...external]
-    });
+    return NextResponse.json({ data: results });
 }

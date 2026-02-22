@@ -9,6 +9,7 @@ import { ClubEditor } from '@/components/admin/entities/editors/ClubEditor';
 import { MatchEditor } from '@/components/admin/entities/editors/MatchEditor';
 import { PlayerEditor } from '@/components/admin/entities/editors/PlayerEditor';
 import { RelatedSection } from '@/components/admin/entities/related/RelatedSection';
+import { AuditSection } from '@/components/admin/entities/audit/AuditSection';
 
 interface ManagePageProps {
     params: Promise<{ id: string }>;
@@ -53,13 +54,40 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
     }
 
     if (result.kind === 'not_found') {
+        if (!type) {
+            return (
+                <div className="max-w-5xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
+                    <div className="p-12 text-center bg-surface border border-divider rounded-xl min-h-[50vh] flex flex-col justify-center items-center shadow-sm">
+                        <svg className="w-12 h-12 text-accent-blue/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h1 className="text-2xl font-bold mb-4">Especificar tipo de entidad</h1>
+                        <p className="text-system-secondary mb-8 max-w-md">
+                            No logramos identificar automáticamente la entidad con ID <code className="bg-background px-1.5 py-0.5 rounded text-foreground">{id}</code>. Selecciona qué quieres gestionar:
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl">
+                            {(['club', 'tournament', 'match', 'player'] as const).map(t => (
+                                <a
+                                    key={t}
+                                    href={`/admin/entities/${id}/manage?type=${t}`}
+                                    className="px-6 py-8 bg-surface border border-divider rounded-xl hover:border-accent-blue hover:text-accent-blue hover:bg-surface-hover transition-all flex flex-col items-center gap-3 group"
+                                >
+                                    <span className="text-sm font-semibold capitalize group-hover:underline">{t}</span>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div className="p-12 text-center bg-surface border border-divider rounded-xl m-6 min-h-[50vh] flex flex-col justify-center items-center shadow-sm">
                 <svg className="w-12 h-12 text-system-secondary mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <h1 className="text-2xl font-bold mb-2">Entidad no encontrada</h1>
-                <p className="text-system-secondary">No se encontró ninguna entidad con el ID o el Tipo seleccionado.</p>
+                <p className="text-system-secondary">No se encontró ninguna entidad con el ID <code className="bg-background px-1 rounded">{id}</code> y el Tipo <code className="bg-background px-1 rounded">{type}</code>.</p>
             </div>
         );
     }
@@ -78,7 +106,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     // Construct base URL params for pagination inside RelatedSection
     const baseUrlParams = new URLSearchParams();
-    if (type) baseUrlParams.set('type', type);
+    baseUrlParams.set('type', result.entityType);
     baseUrlParams.set('tab', 'related');
 
     return (
@@ -138,16 +166,12 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                 )}
 
                 {currentTab === 'audit' && (
-                    <div className="text-system-secondary">
-                        <h3 className="font-semibold text-lg text-foreground mb-2">Audit & History</h3>
-                        <p>No recent activity logs found.</p>
-                        <div className="mt-4 border-l-2 border-divider pl-4 space-y-4">
-                            <div className="relative">
-                                <div className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-accent-blue/50 ring-4 ring-background"></div>
-                                <p className="text-sm font-medium text-foreground">Entity created</p>
-                                <p className="text-xs text-system-secondary">System • Initial import</p>
-                            </div>
+                    <div className="animate-in fade-in duration-300">
+                        <div className="mb-6 border-b border-divider pb-4">
+                            <h3 className="font-semibold text-lg text-foreground">Audit & History</h3>
+                            <p className="text-system-secondary text-sm">Registro inmutable de mutaciones en esta entidad.</p>
                         </div>
+                        <AuditSection entityType={result.entityType} entityId={id} />
                     </div>
                 )}
             </div>

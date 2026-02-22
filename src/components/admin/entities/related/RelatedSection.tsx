@@ -1,4 +1,5 @@
-'use client';
+
+
 
 import { RelatedSectionData } from '@/lib/services/relatedResolver';
 import { RelatedList } from './RelatedList';

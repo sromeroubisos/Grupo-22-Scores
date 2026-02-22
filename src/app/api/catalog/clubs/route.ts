@@ -1,28 +1,30 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/mock-db';
+import { createClient } from '@/lib/supabase/server';
 
-export async function GET() {
-    const manual = db.clubs.map(c => ({
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search') || '';
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+
+    const supabase = await createClient();
+    let query = supabase.from('clubs').select('id, name, logo_url');
+
+    if (search) {
+        query = query.ilike('name', `%${search}%`);
+    }
+
+    query = query.limit(limit);
+
+    const { data, error } = await query;
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const results = data.map(c => ({
         id: c.id,
-        name: c.name,
-        sport: undefined,
-        country: undefined,
-        logoUrl: c.logoUrl,
-        source: 'Manual',
-        updatedAt: new Date().toISOString()
+        label: c.name,
+        meta: c.id.split('-')[0] // short UUID or external ID helper
     }));
 
-    const external = db.externalClubs.map(c => ({
-        id: c.id,
-        name: c.name,
-        sport: c.sports,
-        country: c.country,
-        logoUrl: c.logoUrl,
-        source: c.source,
-        updatedAt: c.updatedAt
-    }));
-
-    return NextResponse.json({
-        data: [...manual, ...external]
-    });
+    return NextResponse.json({ data: results });
 }

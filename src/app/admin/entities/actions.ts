@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { EntityType } from '@/lib/services/entityResolver';
 
@@ -59,6 +60,9 @@ export async function updateEntity(type: EntityType, id: string, updates: Record
         case 'match': table = 'matches'; break;
     }
 
+    // Fetch pre-state
+    const { data: preData } = await supabase.from(table as any).select('*').eq('id', id).single();
+
     // 4. Update via Supabase (RLS is strictly enforced here based on the active user session)
     const { error } = await supabase
         .from(table)
@@ -68,6 +72,48 @@ export async function updateEntity(type: EntityType, id: string, updates: Record
     if (error) {
         console.error(`Error updating ${type}:`, error);
         throw new Error(error.message);
+    }
+
+    // Fetch post-state
+    const { data: postData } = await supabase.from(table as any).select('*').eq('id', id).single();
+
+    // Calculate deterministic diff
+    const changes: Record<string, any> = {};
+    if (preData && postData) {
+        for (const key of allowed) {
+            const oldVal = preData[key];
+            const newVal = postData[key];
+            if (oldVal !== newVal) {
+                changes[key] = { old: oldVal, new: newVal };
+            }
+        }
+    } else {
+        // Fallback: log what we tried to update
+        for (const key of Object.keys(cleanUpdates)) {
+            changes[key] = { new: cleanUpdates[key] };
+        }
+    }
+
+    if (Object.keys(changes).length > 0) {
+        try {
+            // Use admin client (service_role) for audit inserts:
+            // - bypasses RLS → guaranteed write regardless of user JWT state
+            // - entity updates above still use user session (RLS enforced)
+            const supabaseAdmin = createAdminClient();
+            const { error: auditError } = await supabaseAdmin.from('admin_audit_log').insert({
+                actor_user_id: user.id,
+                entity_type: type,
+                entity_id: id,
+                action: 'update',
+                changes,
+                source: 'unified-admin'
+            });
+            if (auditError) throw auditError;
+        } catch (err: unknown) {
+            // fail-open: log error server-side but never block the update
+            const msg = err instanceof Error ? err.message : String(err);
+            console.error('[audit] Failed to write audit log:', msg);
+        }
     }
 
     // Revalidate the manage page and the public page

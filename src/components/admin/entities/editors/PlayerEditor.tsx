@@ -3,6 +3,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateEntity } from '@/app/admin/entities/actions';
+import { EntitySelect, EntityOption } from '../fields/EntitySelect';
+import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
+
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+const fetchClubs = async (q: string, limit: number): Promise<EntityOption[]> => {
+    const res = await fetch(`/api/catalog/clubs?search=${encodeURIComponent(q)}&limit=${limit}`);
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data;
+};
 
 export interface PlayerData {
     id: string;
@@ -20,22 +31,49 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState('');
 
+    const [formState, setFormState] = useState({
+        name: data.name || data.displayName || '',
+        club_id: data.club_id || data.teamId || '',
+        position: data.position || '',
+        nationality: data.nationality || ''
+    });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isDirty, setIsDirty] = useState(false);
+
+    useLeaveConfirm(isDirty);
+
+    const updateField = (key: string, value: string | null) => {
+        setFormState(prev => ({ ...prev, [key]: value || '' }));
+        setIsDirty(true);
+        if (errors[key]) setErrors(prev => ({ ...prev, [key]: '' }));
+    };
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+
+        const newErrors: Record<string, string> = {};
+        if (formState.club_id && !UUID_REGEX.test(formState.club_id)) {
+            newErrors.club_id = 'Debe ser un UUID válido';
+        }
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         setIsSaving(true);
         setMessage('');
 
-        const formData = new FormData(e.currentTarget);
         const updates = {
-            name: formData.get('name') as string,
-            club_id: formData.get('club_id') as string,
-            position: formData.get('position') as string,
-            nationality: formData.get('nationality') as string,
+            name: formState.name,
+            club_id: formState.club_id || null,
+            position: formState.position,
+            nationality: formState.nationality,
         };
 
         try {
             await updateEntity('player', data.id, updates);
             setMessage('Guardado exitosamente.');
+            setIsDirty(false);
             router.refresh();
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : String(err);
@@ -47,7 +85,10 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <h2 className="text-xl font-semibold mb-4 text-foreground">Editar Jugador</h2>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-foreground">Editar Jugador</h2>
+                {isDirty && <span className="text-xs px-2 py-1 bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 rounded-full font-medium">Unsaved changes</span>}
+            </div>
 
             {message && (
                 <div className={`p-4 rounded-lg text-sm font-medium ${message.startsWith('Error') ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
@@ -60,29 +101,29 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
                     <label className="text-sm font-medium text-system-secondary">Nombre</label>
                     <input
                         type="text"
-                        name="name"
-                        defaultValue={data.name || data.displayName || ''}
+                        value={formState.name}
+                        onChange={e => updateField('name', e.target.value)}
                         required
                         className="w-full bg-background border border-divider rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-accent-blue"
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-system-secondary">Club (ID)</label>
-                    <input
-                        type="text"
-                        name="club_id"
-                        defaultValue={data.club_id || data.teamId || ''}
-                        className="w-full bg-background border border-divider rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-accent-blue font-mono text-sm"
-                    />
-                </div>
+                <EntitySelect
+                    label="Club (ID)"
+                    value={formState.club_id}
+                    onChange={(val) => updateField('club_id', val)}
+                    fetcher={fetchClubs}
+                    placeholder="Buscar club..."
+                    allowNull
+                    error={errors.club_id}
+                />
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-system-secondary">Posición</label>
                     <input
                         type="text"
-                        name="position"
-                        defaultValue={data.position || ''}
+                        value={formState.position}
+                        onChange={e => updateField('position', e.target.value)}
                         className="w-full bg-background border border-divider rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-accent-blue"
                     />
                 </div>
@@ -91,17 +132,17 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
                     <label className="text-sm font-medium text-system-secondary">Nacionalidad</label>
                     <input
                         type="text"
-                        name="nationality"
-                        defaultValue={data.nationality || ''}
+                        value={formState.nationality}
+                        onChange={e => updateField('nationality', e.target.value)}
                         className="w-full bg-background border border-divider rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-accent-blue"
                     />
                 </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-divider">
+            <div className="flex justify-end pt-4 border-t border-divider gap-3">
                 <button
                     type="submit"
-                    disabled={isSaving}
+                    disabled={isSaving || !isDirty}
                     className="px-6 py-2 bg-accent-blue text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
                 >
                     {isSaving ? 'Guardando...' : 'Guardar Cambios'}

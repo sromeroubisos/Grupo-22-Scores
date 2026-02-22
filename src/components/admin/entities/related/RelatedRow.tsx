@@ -10,9 +10,13 @@ import { MatchRow, TournamentRow } from '@/lib/services/entityResolver';
 interface RelatedRowProps {
     item: RelatedItem;
     getIcon: (type: string) => string;
+    /** Selection props — only present when bulk-mode is active on the list */
+    selectable?: boolean;
+    selected?: boolean;
+    onToggleSelect?: (id: string) => void;
 }
 
-export function RelatedRow({ item, getIcon }: RelatedRowProps) {
+export function RelatedRow({ item, getIcon, selectable = false, selected = false, onToggleSelect }: RelatedRowProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +29,6 @@ export function RelatedRow({ item, getIcon }: RelatedRowProps) {
 
     const isEditable = editableType !== null;
 
-    // Controlled inputs for inline editing
     const [status, setStatus] = useState(() => {
         if (item.raw?.status) return item.raw.status;
         return 'active';
@@ -67,10 +70,10 @@ export function RelatedRow({ item, getIcon }: RelatedRowProps) {
 
             setIsEditing(false);
             router.refresh();
-        } catch (error: any) {
-            console.error('Update failed:', error);
-            // Ideally toast.error(error.message) here, using simple alert for atomic scope
-            alert(`Error: ${error.message}`);
+        } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            console.error('Update failed:', msg);
+            alert(`Error: ${msg}`);
         } finally {
             setIsLoading(false);
         }
@@ -78,7 +81,20 @@ export function RelatedRow({ item, getIcon }: RelatedRowProps) {
 
     if (!isEditing) {
         return (
-            <div className="flex items-center justify-between px-4 py-3 sm:px-6 hover:bg-surface-hover transition-colors group">
+            <div className={`flex items-center justify-between px-4 py-3 sm:px-6 hover:bg-surface-hover transition-colors group ${selected ? 'bg-accent-blue/5 border-l-2 border-accent-blue' : ''}`}>
+                {/* Checkbox (only for match items in bulk mode) */}
+                {selectable && item.entityType === 'match' && (
+                    <div className="mr-3 shrink-0">
+                        <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => onToggleSelect?.(item.id)}
+                            className="w-4 h-4 accent-accent-blue cursor-pointer rounded"
+                            aria-label={`Seleccionar ${item.label}`}
+                        />
+                    </div>
+                )}
+
                 <Link
                     href={item.href}
                     className="flex flex-col min-w-0 flex-1 focus:outline-none"
