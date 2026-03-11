@@ -27,7 +27,7 @@ export default function PersonasRolesPage() {
     const [activeTab, setActiveTab] = useState<'all' | 'roles'>('all');
 
     // Data state
-    const [users, setUsers] = useState<ExtendedUser[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +57,7 @@ export default function PersonasRolesPage() {
             if (error) throw error;
 
             // Map and enhance user data (defaulting status to active for now)
-            const mappedUsers: ExtendedUser[] = (data || []).map((u: any) => ({
+            const mappedUsers: any[] = (data || []).map((u: any) => ({
                 ...u,
                 status: 'active' // In a real app field could be 'status' or 'banned_at'
             }));

@@ -105,10 +105,15 @@ body {
 }
 
 /* CONTEXT CENTER */
+.g22-header-center-zone {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+}
+
 .g22-header-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     align-items: center;
     gap: 10px;

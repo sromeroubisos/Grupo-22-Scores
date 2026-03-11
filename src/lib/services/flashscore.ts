@@ -799,12 +799,12 @@ export async function getTournamentArchives(stageId: string) {
     return data;
 }
 
-export async function getTournamentDraw(tournamentId: string, drawStageId: string) {
-    const cacheKey = `tournament-draw-${tournamentId}-${drawStageId}`;
+export async function getTournamentDraw(tournamentId: string, stageId: string) {
+    const cacheKey = `tournament-draw-${tournamentId}-${stageId}`;
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;
 
-    const url = `https://${API_HOST}/api/flashscore/v2/tournaments/draw?tournament_id=${tournamentId}&draw_stage_id=${drawStageId}`;
+    const url = `https://${API_HOST}/api/flashscore/v2/tournaments/draw?tournament_id=${tournamentId}&tournament_stage_id=${stageId}`;
     const { data } = await apiFetch<any>(url, {
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentDraw',

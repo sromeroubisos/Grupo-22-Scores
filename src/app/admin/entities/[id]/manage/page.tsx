@@ -1,31 +1,48 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { resolveEntity, EntityType } from '@/lib/services/entityResolver';
+import { resolveEntity, EntityType, ClubRow as ResolvedClubRow } from '@/lib/services/entityResolver';
 import { getRelatedItems } from '@/lib/services/relatedResolver';
 import { EntityHeader } from '@/components/admin/entities/EntityHeader';
 import { EntityTabs } from '@/components/admin/entities/EntityTabs';
-import { TournamentEditor } from '@/components/admin/entities/editors/TournamentEditor';
-import { ClubEditor } from '@/components/admin/entities/editors/ClubEditor';
-import { MatchEditor } from '@/components/admin/entities/editors/MatchEditor';
 import { PlayerEditor } from '@/components/admin/entities/editors/PlayerEditor';
 import { RelatedSection } from '@/components/admin/entities/related/RelatedSection';
 import { AuditSection } from '@/components/admin/entities/audit/AuditSection';
+import { TournamentSummaryTab } from '@/components/admin/entities/tournament/TournamentSummaryTab';
+import { TournamentDetailsTab } from '@/components/admin/entities/tournament/TournamentDetailsTab';
+import { TournamentFormatTab } from '@/components/admin/entities/tournament/TournamentFormatTab';
+import { TournamentMediaTab } from '@/components/admin/entities/tournament/TournamentMediaTab';
+import { TournamentPublishTab } from '@/components/admin/entities/tournament/TournamentPublishTab';
+import { TournamentManageShell } from '@/components/admin/entities/tournament/TournamentManageShell';
+import { TournamentStructureTab } from '@/components/admin/entities/tournament/TournamentStructureTab';
+import { ClubManageShell } from '@/components/admin/entities/club/ClubManageShell';
+import { TournamentParticipantsTab } from '@/components/admin/entities/tournament/TournamentParticipantsTab';
+import { TournamentOperationTab } from '@/components/admin/entities/tournament/TournamentOperationTab';
+import { TournamentRelatedTab } from '@/components/admin/entities/tournament/TournamentRelatedTab';
+import { Database } from '@/lib/database.types';
+import { getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
+
+type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 
 interface ManagePageProps {
     params: Promise<{ id: string }>;
-    searchParams: Promise<{ type?: string; tab?: string; offset?: string }>;
+    searchParams: Promise<{ type?: string; tab?: string; offset?: string; from?: string }>;
 }
 
 export default async function ManageEntityPage({ params, searchParams }: ManagePageProps) {
     const { id } = await params;
-    const { type, tab, offset: offsetParam } = await searchParams;
+    const { type, tab, offset: offsetParam, from } = await searchParams;
     const currentTab = tab || 'overview';
     const offset = parseInt(offsetParam || '0', 10);
     const limit = 20;
 
-    if (process.env.NEXT_PUBLIC_DEBUG_ADMIN === 'true') {
-        console.debug('Admin [ManageEntityPage] mounted for id:', id, 'type:', type, 'tab:', currentTab);
+    // ── Legacy redirect: old crear path & new entity creation ───────────────
+    if (id === 'crear' || id === 'new') {
+        const target = type
+            ? `/admin/entities/new?type=${type}`
+            : `/admin/entities/new`;
+        redirect(target);
     }
+
 
     // 1. Check Auth & Permissions (Basic check, RLS enforces mutations later)
     const supabase = await createClient();
@@ -40,6 +57,11 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         type: type as EntityType | undefined
     });
 
+    // 2. Specialized Redirects: matches use the new dedicated Match Center
+    if (result.kind === 'ok' && result.entityType === 'match') {
+        redirect(`/admin/super/partidos/${id}`);
+    }
+
     // Standardize error handling
     if (result.kind === 'forbidden') {
         return (
@@ -48,7 +70,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m-2-4v2m0 0v2m0-2h2m-2 0H6a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2h-4z" />
                 </svg>
                 <h1 className="text-2xl font-bold text-foreground mb-2">No permissions</h1>
-                <p className="text-system-secondary">You don't have permission to view or edit this entity.</p>
+                <p className="text-system-secondary">You don&apos;t have permission to view or edit this entity.</p>
             </div>
         );
     }
@@ -101,21 +123,134 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         );
     }
 
-    const isRelatedTab = currentTab === 'related';
-    const relatedData = isRelatedTab ? await getRelatedItems(result.entityType, id, offset, limit) : null;
+    const isTournament = result.entityType === 'tournament';
+
+    // For tournament tabs: fetch unions + match count in parallel
+    let tournamentUnions: Array<{ id: string; name: string }> = [];
+    let tournamentMatchCount = 0;
+    let tournamentUnionName: string | undefined;
+    if (isTournament) {
+        const tournamentData = result.data as TournamentRow;
+        const [{ data: unionsData }, { count }] = await Promise.all([
+            supabase.from('unions').select('id, name').order('name'),
+            supabase.from('matches').select('id', { count: 'exact', head: true }).eq('tournament_id', id),
+        ]);
+        tournamentUnions = unionsData ?? [];
+        tournamentMatchCount = count ?? 0;
+        if (tournamentData.union_id) {
+            tournamentUnionName = tournamentUnions.find(u => u.id === (result.data as TournamentRow).union_id)?.name;
+        }
+    }
+
+    // Default tab: tournaments use 'resumen', others use 'overview'
+    const effectiveTab = currentTab === 'overview' && isTournament ? 'resumen' : currentTab;
+
+    const isRelatedTab = effectiveTab === 'related';
+    const relatedData = isRelatedTab && !isTournament ? await getRelatedItems(result.entityType, id, offset, limit) : null;
+    const tournamentRelatedData = isRelatedTab && isTournament ? await getTournamentRelatedTabData(id) : null;
 
     // Construct base URL params for pagination inside RelatedSection
     const baseUrlParams = new URLSearchParams();
     baseUrlParams.set('type', result.entityType);
     baseUrlParams.set('tab', 'related');
 
+    const isClub = result.entityType === 'club';
+    if (isClub) {
+        const { data: unionsData } = await supabase.from('unions').select('id, name').order('name');
+        return (
+            <ClubManageShell
+                id={id}
+                data={result.data as ResolvedClubRow}
+                unions={unionsData ?? []}
+            />
+        );
+    }
+
+    // ── Tournament: full-screen shell (no sidebar, logo header, mobile pager) ──
+    if (isTournament) {
+        return (
+            <TournamentManageShell
+                id={id}
+                data={result.data as TournamentRow}
+                currentTab={effectiveTab}
+                backHref={from ?? '/admin/super/torneos'}
+                matchCount={tournamentMatchCount}
+            >
+                <div className="min-h-[300px] animate-in fade-in duration-300">
+                    {effectiveTab === 'resumen' && (
+                        <TournamentSummaryTab
+                            data={result.data as TournamentRow}
+                            id={id}
+                            unionName={tournamentUnionName}
+                            matchCount={tournamentMatchCount}
+                        />
+                    )}
+                    {effectiveTab === 'detalles' && (
+                        <TournamentDetailsTab
+                            data={result.data as TournamentRow}
+                            id={id}
+                            unions={tournamentUnions}
+                        />
+                    )}
+                    {effectiveTab === 'estructura' && (
+                        <TournamentStructureTab data={result.data as TournamentRow} id={id} />
+                    )}
+                    {effectiveTab === 'participantes' && (
+                        <TournamentParticipantsTab data={result.data as TournamentRow} id={id} />
+                    )}
+                    {(effectiveTab === 'operacion' ||
+                        effectiveTab === 'fixture' ||
+                        effectiveTab === 'tabla' ||
+                        effectiveTab === 'estadisticas') && (
+                            <TournamentOperationTab data={result.data as TournamentRow} id={id} />
+                        )}
+                    {effectiveTab === 'formato' && (
+                        <TournamentFormatTab
+                            data={result.data as TournamentRow}
+                            id={id}
+                            matchCount={tournamentMatchCount}
+                        />
+                    )}
+                    {effectiveTab === 'medios' && (
+                        <TournamentMediaTab
+                            data={result.data as TournamentRow}
+                            id={id}
+                        />
+                    )}
+                    {effectiveTab === 'publicacion' && (
+                        <TournamentPublishTab
+                            data={result.data as TournamentRow}
+                            id={id}
+                            matchCount={tournamentMatchCount}
+                        />
+                    )}
+                    {effectiveTab === 'related' && tournamentRelatedData && (
+                        <div className="animate-in fade-in duration-300">
+                            <TournamentRelatedTab tournamentId={id} data={tournamentRelatedData} />
+                        </div>
+                    )}
+                    {effectiveTab === 'audit' && (
+                        <div className="animate-in fade-in duration-300">
+                            <div className="mb-6 border-b border-divider pb-4">
+                                <h3 className="font-semibold text-lg text-foreground">Auditoría e historial</h3>
+                                <p className="text-system-secondary text-sm">Registro inmutable de mutaciones en esta entidad.</p>
+                            </div>
+                            <AuditSection entityType={result.entityType} entityId={id} />
+                        </div>
+                    )}
+                </div>
+            </TournamentManageShell>
+        );
+    }
+
+    // ── Non-tournament: standard entity layout with sidebar + header + tabs ──
     return (
         <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
-            <EntityHeader entity={result} />
-            <EntityTabs id={id} type={result.entityType} currentTab={currentTab} />
+            <EntityHeader entity={result} fromContext={from} />
+            <EntityTabs id={id} type={result.entityType} currentTab={effectiveTab} />
 
-            <div className="bg-surface border border-divider rounded-xl p-6 shadow-sm min-h-[300px]">
-                {currentTab === 'overview' && (
+            <div className="bg-surface border border-divider rounded-xl p-6 shadow-sm min-h-[300px] animate-in fade-in duration-300">
+                {effectiveTab === 'overview' && (
                     <div className="text-system-secondary">
                         <h3 className="font-semibold text-lg text-foreground mb-2">Overview</h3>
                         <p>Resumen de la entidad. Vista de sólo lectura.</p>
@@ -125,12 +260,9 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                     </div>
                 )}
 
-                {currentTab === 'edit' && (
+                {effectiveTab === 'edit' && (
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        {result.entityType === 'tournament' && <TournamentEditor data={result.data} />}
-                        {result.entityType === 'club' && <ClubEditor data={result.data} />}
-                        {result.entityType === 'match' && <MatchEditor data={result.data} />}
-                        {result.entityType === 'player' && <PlayerEditor data={result.data} />}
+                        {result.entityType === 'player' && <PlayerEditor data={result.data} id={id} />}
                     </div>
                 )}
 
@@ -146,29 +278,26 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                                 limit={limit}
                             />
                         ))}
-
                         {relatedData.notSupported.length > 0 && (
                             <div className="mt-8 pt-6 border-t border-divider">
                                 <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                                     <svg className="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Not available in schema
+                                    No disponible en el esquema
                                 </h4>
                                 <ul className="list-disc pl-5 text-sm text-system-secondary space-y-1">
-                                    {relatedData.notSupported.map((msg, i) => (
-                                        <li key={i}>{msg}</li>
-                                    ))}
+                                    {relatedData.notSupported.map((msg, i) => <li key={i}>{msg}</li>)}
                                 </ul>
                             </div>
                         )}
                     </div>
                 )}
 
-                {currentTab === 'audit' && (
+                {effectiveTab === 'audit' && (
                     <div className="animate-in fade-in duration-300">
                         <div className="mb-6 border-b border-divider pb-4">
-                            <h3 className="font-semibold text-lg text-foreground">Audit & History</h3>
+                            <h3 className="font-semibold text-lg text-foreground">Auditoría e historial</h3>
                             <p className="text-system-secondary text-sm">Registro inmutable de mutaciones en esta entidad.</p>
                         </div>
                         <AuditSection entityType={result.entityType} entityId={id} />

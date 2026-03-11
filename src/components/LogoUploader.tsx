@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import Script from 'next/script';
 import { Upload, Check, Loader2, Image as ImageIcon } from 'lucide-react';
 import styles from './LogoUploader.module.css';
 
@@ -114,39 +113,12 @@ export default function LogoUploader({
             setIsAnalyzing(true);
             try {
                 const rawData = await readAsDataUrl(file);
-                const imageData = await resizeImageData(rawData, 512);
+                const imageData = await resizeImageData(rawData, 600);
 
-                if (window.ImageTracer) {
-                    window.ImageTracer.imageToSVG(
-                        imageData,
-                        (svgString: string) => {
-                            const processedSvg = normalizeSvg(svgString);
-                            const svgDataUrl = svgToDataUrl(processedSvg);
-                            setPreview(svgDataUrl);
-                            onUpload(svgDataUrl);
-                            setIsAnalyzing(false);
-                        },
-                        {
-                            ltres: 0.5,
-                            qtres: 1,
-                            pathomit: 8,
-                            scale: 1,
-                            strokewidth: 0,
-                            colorsampling: 2,
-                            numberofcolors: 12,
-                            mincolorratio: 0.02,
-                            colorquantcycles: 3,
-                            blurradius: 0,
-                            blurdelta: 20,
-                            rightangleenhance: true
-                        }
-                    );
-                } else {
-                    console.error('ImageTracer not loaded');
-                    setPreview(imageData);
-                    onUpload(imageData);
-                    setIsAnalyzing(false);
-                }
+                // Guardamos directamente como PNG para mantener la máxima fidelidad
+                setPreview(imageData);
+                onUpload(imageData);
+                setIsAnalyzing(false);
             } catch (error) {
                 console.error('Error processing image:', error);
                 setIsAnalyzing(false);
@@ -178,12 +150,6 @@ export default function LogoUploader({
 
     return (
         <div className={styles.container}>
-            <Script
-                src="https://unpkg.com/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"
-                strategy="lazyOnload"
-                onLoad={() => console.log('ImageTracer loaded')}
-            />
-
             <label className={styles.label}>{label}</label>
 
             <div
@@ -205,7 +171,7 @@ export default function LogoUploader({
                 {isAnalyzing ? (
                     <div className={styles.status}>
                         <Loader2 className={styles.spinner} />
-                        <span>Analizando y vectorizando...</span>
+                        <span>Procesando imagen...</span>
                     </div>
                 ) : preview ? (
                     <div className={styles.previewContainer}>
@@ -221,7 +187,7 @@ export default function LogoUploader({
                             <ImageIcon size={32} />
                         </div>
                         <div className={styles.textMain}>Arrastra tu logo aquí</div>
-                        <div className={styles.textSub}>PNG, JPG o SVG (auto-vectorización)</div>
+                        <div className={styles.textSub}>PNG, JPG o SVG</div>
                     </div>
                 )}
             </div>

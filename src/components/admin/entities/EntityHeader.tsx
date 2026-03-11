@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ResolvedEntityResult } from '@/lib/services/entityResolver';
 
-export function EntityHeader({ entity }: { entity: ResolvedEntityResult }) {
+export function EntityHeader({ entity, fromContext }: { entity: ResolvedEntityResult; fromContext?: string }) {
     if (entity.kind !== 'ok') return null;
 
     const data = entity.data as any;
@@ -11,36 +11,52 @@ export function EntityHeader({ entity }: { entity: ResolvedEntityResult }) {
     return (
         <header className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 px-4 pt-4 sm:pt-0">
             <div>
-                <nav className="flex text-sm text-system-secondary mb-3 gap-2 items-center" aria-label="Breadcrumb">
-                    <Link href="/admin" className="hover:text-foreground hover:underline transition-colors">Admin</Link>
-                    <span className="text-system-secondary/50">/</span>
+                <nav className="flex text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4 gap-2 items-center italic" aria-label="Breadcrumb">
+                    <Link href="/admin" className="hover:text-primary-accent transition-colors">Admin</Link>
+                    <span className="opacity-30">/</span>
                     <span className="cursor-default">Entities</span>
-                    <span className="text-system-secondary/50">/</span>
-                    <span className="capitalize cursor-default">{entity.entityType}s</span>
-                    <span className="text-system-secondary/50">/</span>
-                    <span className="font-medium text-foreground max-w-[200px] truncate" title={name}>{name}</span>
+                    <span className="opacity-30">/</span>
+                    <span className="cursor-default">{entity.entityType}s</span>
+                    <span className="opacity-30">/</span>
+                    <span className="text-white not-italic max-w-[200px] truncate" title={name}>{name}</span>
                 </nav>
-                <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h1 className="text-3xl font-bold">{name}</h1>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent-blue/10 text-accent-blue border border-accent-blue/20 uppercase tracking-wider">
-                        {entity.entityType}
-                    </span>
-                    {(data.status || entity.entityType === 'tournament' || entity.entityType === 'match') && (
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border lowercase ${status === 'active' || status === 'published' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                            status === 'draft' || status === 'scheduled' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                'bg-system-secondary/10 text-system-secondary border-system-secondary/20'
-                            }`}>
-                            {status}
+
+                {fromContext && (
+                    <div className="mb-4">
+                        <Link
+                            href={`/admin/entities/${fromContext.split(':')[1]}/manage?type=${fromContext.split(':')[0]}&tab=related`}
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-blue hover:underline"
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Volver a {fromContext.split(':')[0]} previo
+                        </Link>
+                    </div>
+                )}
+                <div className="flex items-center gap-4 mb-3 flex-wrap">
+                    <h1 className="text-4xl font-black text-white italic uppercase tracking-tight">{name}</h1>
+                    <div className="flex gap-2">
+                        <span className="px-3 py-1 rounded-lg text-[10px] font-black bg-primary-accent/10 text-primary-accent border border-primary-accent/20 uppercase tracking-[0.15em] italic">
+                            {entity.entityType}
                         </span>
-                    )}
+                        {(data.status || entity.entityType === 'tournament' || entity.entityType === 'match') && (
+                            <span className={`px-3 py-1 rounded-lg text-[10px] font-black border uppercase tracking-[0.15em] italic ${status === 'active' || status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' :
+                                    status === 'draft' || status === 'scheduled' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                        'bg-slate-800 text-slate-400 border-white/5'
+                                }`}>
+                                {status}
+                            </span>
+                        )}
+                    </div>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-system-secondary mt-3">
-                    <span className="font-mono bg-surface px-1.5 py-0.5 rounded text-xs select-all border border-divider">
-                        {data.id}
+                <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 mt-4">
+                    <span className="bg-white/5 px-2 py-1 rounded-md select-all border border-white/5 font-mono text-slate-400 tracking-normal not-italic">
+                        ID: {data.id}
                     </span>
-                    <span className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-accent-blue opacity-80 mt-0.5"></span>
-                        {entity.source.toUpperCase()}
+                    <span className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary-accent shadow-[0_0_8px_rgba(0,255,136,0.6)] animate-pulse"></span>
+                        ORIGEN: {entity.source}
                     </span>
                 </div>
             </div>
@@ -49,11 +65,9 @@ export function EntityHeader({ entity }: { entity: ResolvedEntityResult }) {
                 <Link
                     href={entity.canonicalPath}
                     target="_blank"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-surface border border-divider rounded-lg hover:bg-surface-hover hover:text-foreground transition-colors text-sm font-medium shadow-sm"
+                    className="inline-flex items-center gap-3 px-6 py-2.5 bg-slate-900 border border-white/5 rounded-xl text-slate-400 hover:text-white hover:border-white/20 transition-all text-[10px] font-black uppercase tracking-widest shadow-xl group"
                 >
-                    <svg className="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
+                    <span className="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 group-hover:text-primary-accent transition-all">open_in_new</span>
                     Ver Vista Pública
                 </Link>
             </div>

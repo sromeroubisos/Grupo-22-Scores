@@ -1,19 +1,16 @@
-// TODO (Next.js 16/Turbopack): 
-// "The middleware file convention is deprecated. Please use proxy instead."
-// This middleware currently handles heavy Auth initialization via Supabase SSR (updateSession).
-// Because auth requires cookie interception on requests, migrating from middleware to proxy
-// is a major change that needs careful rewriting so we don't break existing login state.
-// Left as TODO to not break current features/build.
+// Migrated to proxy.ts (Next.js 16 format)
+// This proxy handles Auth initialization via Supabase SSR (updateSession).
+// Because auth requires cookie interception on requests, this is kept here.
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-    const { pathname, searchParams } = request.nextUrl
+    console.log('[Middleware] Request to:', request.nextUrl.pathname);
+    const { pathname, searchParams } = request.nextUrl;
     const host = request.headers.get('host') || ''
     const isProd = process.env.NODE_ENV === 'production'
-
 
 
     // 2. Auth Code Redirect Handler

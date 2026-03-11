@@ -1,70 +1,69 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 type Club = {
     id: string;
     name: string;
-    logo: string;
+    logo_url?: string;
     country: string;
     city: string;
-    founded: number;
-    sports: string[];
-    followers: number;
-    viewsMonth: number;
-    matchesMonth: number;
-    folders: string[];
+    sport: string;
+    categories?: string[];
+    is_visible: boolean;
 };
-
-const clubs: Club[] = [
-    { id: 'club-atletico', name: 'Club Atletico', logo: 'CA', country: 'Argentina', city: 'Buenos Aires', founded: 1908, sports: ['Rugby', 'Futbol'], followers: 18320, viewsMonth: 230100, matchesMonth: 8, folders: ['Top 5'] },
-    { id: 'racing-club', name: 'Racing Club', logo: 'RC', country: 'Argentina', city: 'Avellaneda', founded: 1903, sports: ['Rugby', 'Hockey'], followers: 14210, viewsMonth: 180400, matchesMonth: 7, folders: ['Top 5'] },
-    { id: 'san-lorenzo', name: 'San Lorenzo', logo: 'SL', country: 'Argentina', city: 'Buenos Aires', founded: 1908, sports: ['Rugby', 'Futbol'], followers: 15680, viewsMonth: 150200, matchesMonth: 6, folders: ['Monitorear'] },
-    { id: 'casi', name: 'CASI', logo: 'CA', country: 'Argentina', city: 'San Isidro', founded: 1920, sports: ['Rugby'], followers: 9800, viewsMonth: 98200, matchesMonth: 5, folders: ['Rugby Internacional'] },
-    { id: 'hindu-club', name: 'Hindu Club', logo: 'HC', country: 'Argentina', city: 'Don Torcuato', founded: 1919, sports: ['Rugby'], followers: 11200, viewsMonth: 110500, matchesMonth: 6, folders: ['Rugby Internacional'] },
-    { id: 'newman', name: 'Newman', logo: 'NW', country: 'Argentina', city: 'Benavidez', founded: 1917, sports: ['Rugby'], followers: 8400, viewsMonth: 64000, matchesMonth: 4, folders: ['En revision API'] },
-    { id: 'belgrano-ac', name: 'Belgrano AC', logo: 'BA', country: 'Argentina', city: 'Buenos Aires', founded: 1896, sports: ['Rugby'], followers: 10250, viewsMonth: 74000, matchesMonth: 5, folders: ['Rugby Internacional'] },
-    { id: 'pucara', name: 'Pucara', logo: 'PC', country: 'Argentina', city: 'Burzaco', founded: 1955, sports: ['Rugby'], followers: 6200, viewsMonth: 42000, matchesMonth: 3, folders: ['Juveniles'] },
-    { id: 'la-plata-rc', name: 'La Plata RC', logo: 'LP', country: 'Argentina', city: 'La Plata', founded: 1893, sports: ['Rugby'], followers: 7100, viewsMonth: 52000, matchesMonth: 4, folders: ['Juveniles'] },
-    { id: 'toulouse', name: 'Stade Toulousain', logo: 'ST', country: 'Francia', city: 'Toulouse', founded: 1907, sports: ['Rugby'], followers: 23200, viewsMonth: 195300, matchesMonth: 6, folders: ['Internacionales'] },
-];
 
 const formatNumber = (value: number) => value.toLocaleString('es-AR');
 
 export default function ClubesPage() {
+    const [clubs, setClubs] = useState<Club[]>([]);
     const [search, setSearch] = useState('');
     const [sport, setSport] = useState('all');
     const [country, setCountry] = useState('all');
-    const [folder, setFolder] = useState('all');
+    const [loading, setLoading] = useState(true);
 
-    const sports = useMemo(() => Array.from(new Set(clubs.flatMap(c => c.sports))), []);
-    const countries = useMemo(() => Array.from(new Set(clubs.map(c => c.country))), []);
-    const folders = useMemo(() => {
-        const all = new Set<string>();
-        clubs.forEach(c => c.folders.forEach(f => all.add(f)));
-        return Array.from(all);
+    useEffect(() => {
+        async function fetchClubs() {
+            setLoading(true);
+            try {
+                const res = await fetch('/api/clubs');
+                const { data } = await res.json();
+                if (data) {
+                    setClubs(data);
+                }
+            } catch (err) {
+                console.error('Error fetching clubs:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchClubs();
     }, []);
+
+    const sports = useMemo(() => Array.from(new Set(clubs.map(c => c.sport).filter(Boolean))), [clubs]);
+    const countries = useMemo(() => Array.from(new Set(clubs.map(c => c.country).filter(Boolean))), [clubs]);
 
     const filtered = useMemo(() => {
         const query = search.trim().toLowerCase();
         return clubs.filter((club) => {
-            const matchesSearch = !query || club.name.toLowerCase().includes(query) || club.city.toLowerCase().includes(query);
-            const matchesSport = sport === 'all' || club.sports.includes(sport);
+            const nameMatch = club.name.toLowerCase().includes(query);
+            const cityMatch = club.city?.toLowerCase().includes(query);
+            const matchesSearch = !query || nameMatch || cityMatch;
+            const matchesSport = sport === 'all' || club.sport === sport;
             const matchesCountry = country === 'all' || club.country === country;
-            const matchesFolder = folder === 'all' || club.folders.includes(folder);
-            return matchesSearch && matchesSport && matchesCountry && matchesFolder;
+            return matchesSearch && matchesSport && matchesCountry;
         });
-    }, [search, sport, country, folder]);
+    }, [clubs, search, sport, country]);
 
     const grouped = useMemo(() => {
         const map: Record<string, Record<string, Club[]>> = {};
         filtered.forEach((club) => {
-            club.sports.forEach((s) => {
-                if (!map[s]) map[s] = {};
-                if (!map[s][club.country]) map[s][club.country] = [];
-                map[s][club.country].push(club);
-            });
+            const s = club.sport || 'Rugby';
+            const c = club.country || 'Otros';
+            if (!map[s]) map[s] = {};
+            if (!map[s][c]) map[s][c] = [];
+            map[s][c].push(club);
         });
         return map;
     }, [filtered]);
@@ -74,7 +73,7 @@ export default function ClubesPage() {
             <section className="g22-header">
                 <div className="container">
                     <div className="g22-headerTitle">Clubes</div>
-                    <div className="g22-headerSub">Cards unificadas · Agrupacion por deporte y pais</div>
+                    <div className="g22-headerSub">Directorio oficial de clubes y uniones registradas.</div>
 
                     <div className="g22-filterBar">
                         <div className="g22-search">
@@ -96,15 +95,9 @@ export default function ClubesPage() {
                                 ))}
                             </select>
                             <select className="g22-select" value={country} onChange={(e) => setCountry(e.target.value)}>
-                                <option value="all">Pais</option>
+                                <option value="all">País</option>
                                 {countries.map((c) => (
                                     <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                            <select className="g22-select" value={folder} onChange={(e) => setFolder(e.target.value)}>
-                                <option value="all">Carpeta</option>
-                                {folders.map((f) => (
-                                    <option key={f} value={f}>{f}</option>
                                 ))}
                             </select>
                         </div>
@@ -112,72 +105,93 @@ export default function ClubesPage() {
                 </div>
             </section>
 
-            <div className="container">
-                {Object.entries(grouped).length === 0 && (
-                    <div className="g22-card">No hay clubes con los filtros seleccionados.</div>
-                )}
-
-                {Object.entries(grouped).map(([sportName, byCountry]) => (
-                    <section key={sportName} className="g22-section">
-                        <div className="g22-sectionTitle">{sportName.toUpperCase()}</div>
-                        {Object.entries(byCountry).map(([countryName, list]) => (
-                            <details key={countryName} className="g22-collapsible" open>
-                                <summary>
-                                    <span>{countryName}</span>
-                                    <span className="g22-summaryMeta">{list.length} clubes</span>
-                                    <svg className="g22-summaryChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M6 9l6 6 6-6" />
-                                    </svg>
-                                </summary>
-                                <div className="g22-collapsibleContent">
-                                    <div className="g22-cardGrid">
-                                        {list.map((club) => (
-                                            <div key={`${sportName}-${club.id}`} className="g22-card">
-                                                <div className="g22-cardTop">
-                                                    <div>
-                                                        <div className="g22-cardTitle">{club.name}</div>
-                                                        <div className="g22-cardSub">
-                                                            {club.country} · {club.city}
+            <div className="container" style={{ minHeight: '400px' }}>
+                {loading ? (
+                    <div className="g22-card" style={{ textAlign: 'center', padding: '60px' }}>Cargando clubes...</div>
+                ) : Object.entries(grouped).length === 0 ? (
+                    <div className="g22-card" style={{ textAlign: 'center', padding: '60px' }}>No hay clubes con los filtros seleccionados.</div>
+                ) : (
+                    Object.entries(grouped).map(([sportName, byCountry]) => (
+                        <section key={sportName} className="g22-section">
+                            <div className="g22-sectionTitle">{sportName.toUpperCase()}</div>
+                            {Object.entries(byCountry).map(([countryName, list]) => (
+                                <details key={countryName} className="g22-collapsible" open>
+                                    <summary>
+                                        <span>{countryName}</span>
+                                        <span className="g22-summaryMeta">{list.length} clubes</span>
+                                        <svg className="g22-summaryChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M6 9l6 6 6-6" />
+                                        </svg>
+                                    </summary>
+                                    <div className="g22-collapsibleContent">
+                                        <div className="g22-grid">
+                                            {list.map((club) => (
+                                                <div key={club.id} className="g22-card club-list-card">
+                                                    <div className="g22-card-content">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-12 h-12 flex-shrink-0 bg-neutral-800 rounded-lg overflow-hidden flex items-center justify-center border border-neutral-700">
+                                                                {club.logo_url ? (
+                                                                    <img src={club.logo_url} alt={club.name} className="w-10 h-10 object-contain" />
+                                                                ) : (
+                                                                    <span className="text-xl font-bold text-neutral-600">{club.name[0]}</span>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <div className="g22-cardTitle" style={{ textTransform: 'uppercase' }}>{club.name}</div>
+                                                                <div className="g22-cardSub">
+                                                                    {club.country} · {club.city || 'Ciudad no especificada'}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="g22-cardActions mt-4 pt-4 border-t border-neutral-800 flex justify-end gap-2">
+                                                            <Link href={`/clubs/${club.id}`} className="g22-actionBtn primary">
+                                                                Ver Ficha
+                                                            </Link>
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <div className="g22-chipRow">
-                                                    {club.sports.map((s) => (
-                                                        <span key={s} className="g22-chip">{s}</span>
-                                                    ))}
-                                                </div>
-
-                                                <div className="g22-metrics">
-                                                    <div className="g22-metric">
-                                                        <strong>{formatNumber(club.followers)}</strong>
-                                                        Seguidores
-                                                    </div>
-                                                    <div className="g22-metric">
-                                                        <strong>{formatNumber(club.viewsMonth)}</strong>
-                                                        Views mes
-                                                    </div>
-                                                    <div className="g22-metric">
-                                                        <strong>{club.matchesMonth}</strong>
-                                                        Partidos
-                                                    </div>
-                                                </div>
-
-                                                <div className="g22-cardActions">
-                                                    <button className="g22-actionBtn" type="button">Editar</button>
-                                                    <Link href={`/clubs/${club.id}`} className="g22-actionBtn primary">
-                                                        Ver
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            </details>
-                        ))}
-                    </section>
-                ))}
+                                </details>
+                            ))}
+                        </section>
+                    )
+                    ))}
             </div>
+
+            <style jsx>{`
+                .g22-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                    gap: 16px;
+                }
+                .club-list-card {
+                    padding: 16px;
+                    transition: transform 0.2s, border-color 0.2s;
+                    border: 1px solid var(--color-border);
+                }
+                .club-list-card:hover {
+                    transform: translateY(-2px);
+                    border-color: var(--color-accent);
+                }
+                .flex { display: flex; }
+                .items-center { align-items: center; }
+                .gap-4 { gap: 1rem; }
+                .gap-2 { gap: 0.5rem; }
+                .w-12 { width: 3rem; }
+                .h-12 { height: 3rem; }
+                .w-10 { width: 2.5rem; }
+                .h-10 { height: 2.5rem; }
+                .flex-shrink-0 { flex-shrink: 0; }
+                .rounded-lg { border-radius: 0.5rem; }
+                .overflow-hidden { overflow: hidden; }
+                .justify-center { justify-content: center; }
+                .justify-end { justify-content: end; }
+                .mt-4 { margin-top: 1rem; }
+                .pt-4 { padding-top: 1rem; }
+                .border-t { border-top-width: 1px; }
+            `}</style>
         </div>
     );
 }

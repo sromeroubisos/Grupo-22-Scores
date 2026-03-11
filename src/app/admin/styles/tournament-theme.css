@@ -1,0 +1,155 @@
+/* ===== TOURNAMENT OS — BASALT DARK THEME ===== */
+/* G22 Scores Admin — "Monolithic Basalt"
+   Accent: #00A365 emerald (G22 brand).
+   Inter + JetBrains Mono. Background grid lines. Basalt cards.
+*/
+
+:root {
+    /* Backgrounds */
+    --tm-bg:           #0B0D10;
+    --tm-surface:      #11151B;
+    --tm-surface-2:    #141A22;
+
+    /* Borders */
+    --tm-border:       rgba(31, 42, 55, 0.8);
+    --tm-border-solid: #1F2A37;
+
+    /* Accent (same as --color-accent) */
+    --tm-accent:       #00A365;
+    --tm-accent-dim:   rgba(0, 163, 101, 0.12);
+    --tm-accent-glow:  rgba(0, 163, 101, 0.25);
+    --tm-accent-hover: #008f58;
+
+    /* Text */
+    --tm-text:         #E8EDF2;
+    --tm-text-dim:     #6B7A8D;
+    --tm-text-muted:   #3D4A5C;
+
+    /* Status */
+    --tm-draft:        #64748B;
+    --tm-published:    #3B82F6;
+    --tm-active:       #00A365;
+    --tm-archived:     #78716C;
+    --tm-warning:      #D97706;
+    --tm-error:        #DC2626;
+
+    /* Misc */
+    --tm-radius:       8px;
+    --tm-radius-lg:    12px;
+    --tm-font-mono:    'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+/* Utility classes for tournament pages */
+.tm-card {
+    background: var(--tm-surface);
+    border: 1px solid var(--tm-border-solid);
+    border-radius: var(--tm-radius-lg);
+    padding: 1.5rem;
+}
+
+.tm-input {
+    background: var(--tm-bg);
+    border: 1px solid var(--tm-border-solid);
+    color: var(--tm-text);
+    border-radius: var(--tm-radius);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: border-color 0.15s ease;
+    outline: none;
+    width: 100%;
+}
+
+.tm-input:focus {
+    border-color: rgba(0, 163, 101, 0.5);
+}
+
+.tm-input::placeholder {
+    color: var(--tm-text-muted);
+}
+
+.tm-btn-primary {
+    background: var(--tm-accent);
+    color: white;
+    border: none;
+    border-radius: var(--tm-radius);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.tm-btn-primary:hover { background: var(--tm-accent-hover); }
+.tm-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.tm-btn-secondary {
+    background: var(--tm-surface-2);
+    color: var(--tm-text);
+    border: 1px solid var(--tm-border-solid);
+    border-radius: var(--tm-radius);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.tm-btn-secondary:hover {
+    background: var(--tm-border-solid);
+}
+
+.tm-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+}
+
+/* ── Basalt Background Grid ─────────────────────────────────────────── */
+/* Subtle 32px grid lines — the hallmark of the Basalt aesthetic.       */
+.tm-body {
+    background-color: var(--tm-bg);
+    background-image:
+        linear-gradient(rgba(31, 42, 55, 0.6) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(31, 42, 55, 0.6) 1px, transparent 1px);
+    background-size: 32px 32px;
+}
+
+/* ── Hero Identity Card — left accent border ────────────────────────── */
+.tm-hero-card {
+    border-left: 3px solid var(--tm-accent) !important;
+}
+
+/* ── Tab content area ────────────────────────────────────────────────── */
+.tm-content {
+    padding: 2rem 2.5rem;
+    max-width: 1400px;
+}
+
+/* ── Card grid helpers ───────────────────────────────────────────────── */
+.tm-grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
+
+.tm-col-8  { grid-column: span 8; }
+.tm-col-7  { grid-column: span 7; }
+.tm-col-5  { grid-column: span 5; }
+.tm-col-4  { grid-column: span 4; }
+.tm-col-full { grid-column: span 12; }
+
+@media (max-width: 768px) {
+    .tm-col-8, .tm-col-7, .tm-col-5, .tm-col-4 { grid-column: span 12; }
+}
+

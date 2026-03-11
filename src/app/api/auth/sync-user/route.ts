@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { SUPER_ADMIN_EMAIL } from '@/lib/types/user'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { isSuperAdminEmail } from '@/lib/types/user'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -14,6 +15,7 @@ export async function POST(request: Request) {
         }
 
         const user = session.user
+        const shouldBeSuperAdmin = isSuperAdminEmail(user.email)
 
         // Check if user exists in public.users
         const { data: existingUser } = await supabase
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
 
         if (!existingUser) {
             // Determine role
-            const role = user.email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'user'
+            const role = shouldBeSuperAdmin ? 'super_admin' : 'user'
 
             // Create user in public.users
             const { error: insertError } = await supabase
@@ -47,6 +49,18 @@ export async function POST(request: Request) {
                 .from('users')
                 .update({ last_login_at: new Date().toISOString() })
                 .eq('id', user.id)
+        }
+
+        if (shouldBeSuperAdmin) {
+            try {
+                const admin = createAdminClient()
+                await admin
+                    .from('users')
+                    .update({ role: 'super_admin' })
+                    .eq('id', user.id)
+            } catch (error) {
+                console.error('Error enforcing super admin role:', error)
+            }
         }
 
         return NextResponse.json({ success: true })

@@ -14,6 +14,7 @@ import { useMatchesStore } from '@/hooks/useMatchesStore';
 import TournamentLeader from '@/components/TournamentLeader';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
+import { createClient } from '@/lib/supabase/client';
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -27,19 +28,20 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
   const groups: Record<string, { countryName: string; flagEmoji: string; tournaments: Tournament[] }> = {};
 
   tournaments.forEach(tournament => {
-    const country = getCountryById(tournament.countryId);
-    const countryName = country?.name || tournament.countryId;
+    const safeCountryId = tournament.countryId || 'international';
+    const country = getCountryById(safeCountryId);
+    const countryName = country?.name || safeCountryId;
     const flagEmoji = country?.flagEmoji || '';
 
-    if (!groups[tournament.countryId]) {
-      groups[tournament.countryId] = { countryName, flagEmoji, tournaments: [] };
+    if (!groups[safeCountryId]) {
+      groups[safeCountryId] = { countryName, flagEmoji, tournaments: [] };
     }
-    groups[tournament.countryId].tournaments.push(tournament);
+    groups[safeCountryId].tournaments.push(tournament);
   });
 
   // Sort tournaments within each group by priority
   Object.values(groups).forEach(group => {
-    group.tournaments.sort((a, b) => b.priority - a.priority);
+    group.tournaments.sort((a, b) => (b.priority || 0) - (a.priority || 0));
   });
 
   return groups;
@@ -68,45 +70,11 @@ interface LeagueMatches {
   matches: Match[];
 }
 
-// Mock data - News (Unchanged)
-const news = [
-  {
-    id: 1,
-    title: 'Los Pumas anuncian convocatoria para el Rugby Championship',
-    excerpt: 'El entrenador Felipe Contepomi dio a conocer la lista de 35 jugadores que comenzarán la preparación...',
-    image: '',
-    time: 'Hace 2 horas',
-    category: 'Selección',
-  },
-  {
-    id: 2,
-    title: 'Club Atlético sigue líder invicto en el UAR Top 12',
-    excerpt: 'Con la victoria de hoy, el equipo capitalino suma 32 puntos y mantiene el primer puesto...',
-    image: '',
-    time: 'Hace 4 horas',
-    category: 'UAR Top 12',
-  },
-  {
-    id: 3,
-    title: 'Martín García, goleador del torneo con 12 tries',
-    excerpt: 'El wing de Club Atlético sigue imparable y amplía su ventaja como máximo anotador...',
-    image: '',
-    time: 'Hace 6 horas',
-    category: 'Estadísticas',
-  },
-  {
-    id: 4,
-    title: 'URBA confirma fechas de playoffs',
-    excerpt: 'Los cuartos de final se jugarán el 15 de marzo en cancha del mejor ubicado...',
-    image: '',
-    time: 'Ayer',
-    category: 'URBA',
-  },
-];
+// Types moved inside or imported if needed
 
 // Generate dates for the date picker (timezone-aware)
 function generateDates(timeZone: string) {
-  const entries = generateLocalDateKeys(timeZone, -3, 7);
+  const entries = generateLocalDateKeys(timeZone, -7, 7);
   const today = new Date();
 
   return entries.map(({ dateKey, offset }) => {
@@ -137,6 +105,8 @@ export default function HomePage() {
 
   const [selectedDate, setSelectedDate] = useState('');
   const [dates, setDates] = useState<ReturnType<typeof generateDates>>([]);
+  const [news, setNews] = useState<any[]>([]);
+  const [manualTournamentsList, setManualTournamentsList] = useState<Tournament[]>([]);
 
   const { selectedSport, setSelectedSport } = useSport();
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set(['international']));
@@ -162,8 +132,10 @@ export default function HomePage() {
 
   // Group local tournaments by country
   const localTournaments = useMemo(() => {
-    return allTournaments.filter(t => t.type === 'local' || t.type === 'cup');
-  }, [allTournaments]);
+    const sportManualTournaments = manualTournamentsList.filter(t => t.sportId === selectedSport.id);
+    const combined = [...sportManualTournaments, ...allTournaments];
+    return combined.filter(t => t.type === 'local' || t.type === 'cup');
+  }, [allTournaments, manualTournamentsList, selectedSport.id]);
 
   const groupedTournaments = useMemo(() => groupTournamentsByCountry(localTournaments), [localTournaments]);
 
@@ -192,7 +164,7 @@ export default function HomePage() {
   }, [groupedTournaments, searchQuery]);
 
   // Matches via unified hook (cache + prefetch 7 days + live polling)
-  const { matches, loading, liveCount: hookLiveCount } = useMatchesStore(selectedDate, selectedSport.id);
+  const { matches, loading, liveCount: hookLiveCount, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id);
 
   // Live timer: tick every second so live match minutes update in real-time
   const [liveTick, setLiveTick] = useState(0);
@@ -207,7 +179,21 @@ export default function HomePage() {
   // liveTick is included so live minute displays update every second
   const matchesByLeague = useMemo<LeagueMatches[]>(() => {
     const groups: Record<string, LeagueMatches> = {};
+    // Secondary index to deduplicate tournaments by country+name across different IDs
+    const dedupByKey = new Map<string, string>();
     const now = Date.now();
+
+    // Strip a redundant country prefix that FlashScore sometimes embeds in tournament names.
+    // e.g. countryName="South America", name="SOUTH AMERICA: Super Rugby Americas"
+    // → cleaned = "Super Rugby Americas"
+    function cleanLeagueName(name: string, country: string): string {
+      if (!name || !country) return name || '';
+      const prefix = country.toUpperCase() + ':';
+      if (name.toUpperCase().trimStart().startsWith(prefix)) {
+        return name.slice(name.indexOf(':') + 1).trim();
+      }
+      return name;
+    }
 
     matches.forEach(match => {
       // API returns enriched data (match.homeTeam, match.tournament, etc.)
@@ -216,15 +202,24 @@ export default function HomePage() {
       // Basic validation (API filters, but good to be safe)
       if (!tournament) return;
 
-      if (!groups[tournament.id]) {
-        groups[tournament.id] = {
-          league: tournament.name,
-          leagueId: tournament.id,
-          country: 'Argentina',
+      const countryName = (tournament as any).country || 'Internacional';
+      const cleanedName = cleanLeagueName(tournament.name, countryName);
+      const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
+
+      // Consolidate into an existing group when the same tournament arrives under a different ID
+      const existingId = dedupByKey.get(dedupKey);
+      const groupKey = existingId ?? tournament.id;
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = {
+          league: `${countryName}: ${cleanedName}`,
+          leagueId: groupKey,
+          country: countryName,
           flag: '',
           round: match.roundId?.startsWith('F') ? match.roundId.replace('F', 'Fecha ') : (match.roundId || 'General'),
           matches: []
         };
+        dedupByKey.set(dedupKey, groupKey);
       }
 
       // Convert UTC->local using the centralized timezone utility
@@ -258,7 +253,7 @@ export default function HomePage() {
         minuteDisplay = match.clock.period;
       }
 
-      groups[tournament.id].matches.push({
+      groups[groupKey].matches.push({
         id: match.id,
         time: timeStr,
         home: match.homeTeam?.name || 'Local',
@@ -325,6 +320,52 @@ export default function HomePage() {
     setDates(generatedDates);
     const today = generatedDates.find(d => d.isToday)?.date || '';
     setSelectedDate(today);
+
+    // Fetch real news
+    fetch('/api/news')
+      .then(res => res.json())
+      .then(json => {
+        if (json.data) setNews(json.data);
+      })
+      .catch(err => console.error('Error fetching news:', err));
+
+    // Fetch manual tournaments
+    async function fetchManualTournaments() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('tournaments')
+        .select('*')
+        .eq('status', 'published')
+        .eq('is_visible', true);
+
+      if (error) {
+        console.error('Error fetching manual tournaments:', error);
+        return;
+      }
+
+      if (data) {
+        const mapped: Tournament[] = data.map((t: any) => ({
+          id: t.id,
+          name: t.display_name || t.name,
+          nameEs: t.display_name || t.name,
+          url: `/tournaments/${t.id}`,
+          type: 'local',
+          sportId: t.sport as any,
+          countryId: (t.country || 'Argentina').toLowerCase(),
+          priority: 50,
+          logoUrl: t.custom_logo_url || t.logo_url,
+          categories: t.category ? [t.category.toLowerCase()] : [],
+          seasons: t.season_id ? [{ seasonId: String(t.season_id), teamsCount: 0, isActive: true }] : [],
+          isVisible: t.is_visible,
+          isWomen: t.category?.toLowerCase() === 'women',
+          isYouth: !!t.age_grade,
+          ageGroup: t.age_grade,
+          format: t.format,
+        }));
+        setManualTournamentsList(mapped);
+      }
+    }
+    fetchManualTournaments();
   }, [userTimeZone]);
 
   // Precise scroll centering logic
@@ -669,6 +710,26 @@ export default function HomePage() {
             )}
 
             <div className={styles.matchesContainer}>
+              {/* Source error indicator — shown when FlashScore or Supabase is down */}
+              {sourceError && (
+                <div style={{
+                  display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
+                  borderRadius: '6px', background: 'rgba(255,160,0,0.08)',
+                  border: '1px solid rgba(255,160,0,0.2)',
+                  fontSize: '0.75rem', color: 'var(--color-text-dim)',
+                  flexWrap: 'wrap', alignItems: 'center'
+                }}>
+                  <span style={{ opacity: 0.7 }}>Fuente con problemas:</span>
+                  {sourceError.flashscore && (
+                    <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,100,100,0.15)', color: '#ff8080' }}>FlashScore</span>
+                  )}
+                  {sourceError.supabase && (
+                    <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,100,100,0.15)', color: '#ff8080' }}>Base de datos</span>
+                  )}
+                  <span style={{ opacity: 0.5 }}>— los datos pueden estar incompletos</span>
+                </div>
+              )}
+
               {loading && (
                 <div className={styles.noMatches}>
                   <div
@@ -691,11 +752,19 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && matchesByLeague.length === 0 && (
+              {!loading && matchesByLeague.length === 0 && !sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
                   <h3>No hay partidos programados</h3>
                   <p>No se encontraron encuentros para esta fecha.</p>
+                </div>
+              )}
+
+              {!loading && matchesByLeague.length === 0 && sourceError && (
+                <div className={styles.noMatches}>
+                  <div className={styles.noMatchesIcon}></div>
+                  <h3>No se pudieron cargar los partidos</h3>
+                  <p>Hay un problema de conexión con una o más fuentes de datos.</p>
                 </div>
               )}
 
@@ -712,7 +781,7 @@ export default function HomePage() {
                       style={{ cursor: 'pointer' }}
                     >
                       <Link
-                        href={`/tournaments/${league.leagueId}`}
+                        href={`/tournaments/${league.leagueId}?sport=${selectedSport.id}`}
                         className={styles.leagueHeaderLink}
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -842,18 +911,35 @@ export default function HomePage() {
         {/* Right Sidebar - News Only */}
         <aside className={styles.sidebarRight}>
           <div className={styles.sidebarSection}>
-            <div className={styles.sidebarSectionTitle}>Noticias Recientes</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div className={styles.sidebarSectionTitle} style={{ marginBottom: 0 }}>Noticias Recientes</div>
+              <Link href="/noticias" style={{ fontSize: '0.8rem', color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 500 }}>
+                Ver noticias →
+              </Link>
+            </div>
             <div className={styles.newsList}>
-              {news.slice(0, 3).map((item) => (
+              {news.slice(0, 5).map((item) => (
                 <Link key={item.id} href={`/noticias/${item.id}`} className={styles.newsCard}>
-                  <div className={styles.newsImage}>{item.image}</div>
+                  <div
+                    className={styles.newsImage}
+                    style={{ backgroundImage: item.image_url ? `url(${item.image_url})` : 'none', backgroundSize: 'cover' }}
+                  >
+                    {!item.image_url && <Trophy size={16} style={{ opacity: 0.2 }} />}
+                  </div>
                   <div className={styles.newsContent}>
-                    <span className={styles.newsCategory}>{item.category}</span>
+                    <span className={styles.newsCategory}>Rugby</span>
                     <h3 className={styles.newsTitle}>{item.title}</h3>
-                    <span className={styles.newsTime}>{item.time}</span>
+                    <span className={styles.newsTime}>
+                      {item.published_at ? new Date(item.published_at).toLocaleDateString() : 'Reciente'}
+                    </span>
                   </div>
                 </Link>
               ))}
+              {news.length === 0 && (
+                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: '0.8rem' }}>
+                  No hay noticias.
+                </div>
+              )}
             </div>
           </div>
         </aside>

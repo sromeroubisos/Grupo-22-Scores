@@ -1,13 +1,20 @@
-'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import TeamsManager from './TeamsManager';
+import { supabase } from '@/lib/supabase';
+import { syncTournamentsAction } from './actions';
 
 interface Tournament {
     id: string;
     // 1. Identidad
     name: string;
+    display_name?: string | null;
+    logo_url?: string | null;
+    custom_logo_url?: string | null;
+    original_name?: string | null;
+    original_logo_url?: string | null;
+    is_api_managed?: boolean;
+    
     season: string;
     sport: string;
     organizer: string;
@@ -281,10 +288,70 @@ const availableSports = [
 ];
 
 export default function TorneosPage() {
-    const [tournaments, setTournaments] = useState<Tournament[]>(initialTournaments);
+    const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSyncing, setIsSyncing] = useState(false);
     const [selectedSport, setSelectedSport] = useState('Todos');
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        fetchTournaments();
+    }, []);
+
+    const fetchTournaments = async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('tournaments')
+                .select('*')
+                .order('name', { ascending: true });
+
+            if (error) throw error;
+
+            // Map database tournament back to UI structure
+            const mapped: Tournament[] = (data || []).map(t => ({
+                id: t.id,
+                name: t.name,
+                season: 'N/A', // Data not in table?
+                sport: t.sport_id,
+                organizer: t.country_id || 'N/A',
+                status: (t.status as any) || 'published',
+                categories: [],
+                zones: [],
+                stages: [],
+                teamsCount: 0,
+                teams: [],
+                hasFixture: false,
+                visibility: 'public',
+                country: t.country_id
+            }));
+
+            setTournaments(mapped);
+        } catch (error) {
+            console.error('Error fetching tournaments:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSync = async () => {
+        if (isSyncing) return;
+        setIsSyncing(true);
+        try {
+            const res = await syncTournamentsAction();
+            if (res.success) {
+                alert(`Sincronización completada!`);
+                await fetchTournaments();
+            } else {
+                alert(`Error: ${res.error}`);
+            }
+        } catch (e: any) {
+            alert(`Exception: ${e.message}`);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     // Edit Mode State - Expanded
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -360,7 +427,7 @@ export default function TorneosPage() {
         });
     };
 
-    const saveEditing = () => {
+    const saveEditing = async () => {
         if (!editForm) return;
 
         // Validation Rules:
@@ -377,10 +444,37 @@ export default function TorneosPage() {
             }
         }
 
-        setTournaments(tournaments.map(t => t.id === editForm.id ? editForm : t));
-        setEditingId(null);
-        setEditForm(null);
-        setShowTeamManager(false);
+        try {
+            const { error } = await supabase
+                .from('tournaments')
+                .update({
+                    name: editForm.name,
+                    display_name: editForm.display_name,
+                    custom_logo_url: editForm.custom_logo_url,
+                    logo_url: editForm.logo_url,
+                    status: editForm.status
+                    // Note: Season, Sport, Organizer, Teams, Categories, Zones, Stages, etc.
+                    // are part of complex relational schema and NOT simple columns on tournaments.
+                    // For now, this just saves the identity info.
+                })
+                .eq('id', editForm.id);
+
+            if (error) {
+                console.error("Save error:", error);
+                alert("Error guardando cambios.");
+                return;
+            }
+
+            setTournaments(tournaments.map(t => t.id === editForm.id ? editForm : t));
+            setEditingId(null);
+            setEditForm(null);
+            setShowTeamManager(false);
+            
+            // Reload the list to get fresh data
+            fetchTournaments();
+        } catch (e: any) {
+            alert(`Exception: ${e.message}`);
+        }
     };
 
     const cancelEditing = () => {
@@ -460,6 +554,25 @@ export default function TorneosPage() {
                     </div>
 
                     <div className={styles.content}>
+                        {(editForm as any).is_api_managed && (
+                            <div style={{ 
+                                background: 'rgba(59, 130, 246, 0.1)', 
+                                border: '1px solid #3b82f6', 
+                                padding: '1rem', 
+                                borderRadius: '8px', 
+                                marginBottom: '2rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem',
+                                color: '#93c5fd'
+                            }}>
+                                <span style={{ fontSize: '1.2rem' }}>ℹ️</span>
+                                <div>
+                                    <strong>Torneo gestionado por la API</strong>
+                                    <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>La estructura (categorías, zonas, etapas) y los metadatos base están sincronizados automáticamente. Puedes editar el nombre para mostrar y el estado.</p>
+                                </div>
+                            </div>
+                        )}
                         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem' }}>
                             {/* Left Column: General Info */}
                             <div className={styles.card} style={{ height: 'fit-content' }}>
@@ -467,44 +580,114 @@ export default function TorneosPage() {
                                     <h2 className={styles.cardTitle}>1. Identidad (Obligatorio)</h2>
                                 </div>
                                 <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                    {/* Nombre/Display Name */}
+                                    {(editForm as any).is_api_managed ? (
+                                        <>
+                                            <div>
+                                                <label className={styles.statLabel} style={{ color: 'var(--color-text-secondary)' }}>
+                                                    Nombre original API 🔒
+                                                </label>
+                                                <input
+                                                    disabled
+                                                    type="text"
+                                                    value={(editForm as any).original_name || editForm.name}
+                                                    className={styles.input}
+                                                    style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: 'var(--color-text-secondary)', cursor: 'not-allowed' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={styles.statLabel} style={{ color: '#60a5fa' }}>
+                                                    Nombre visible en web (Override)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={(editForm as any).display_name || ''}
+                                                    onChange={e => setEditForm({ ...editForm, display_name: e.target.value } as any)}
+                                                    className={styles.input}
+                                                    placeholder={(editForm as any).original_name || editForm.name}
+                                                    style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid #3b82f6', borderRadius: '6px', color: 'white' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={styles.statLabel} style={{ color: 'var(--color-text-secondary)' }}>
+                                                    Logo original API 🔒
+                                                </label>
+                                                <input
+                                                    disabled
+                                                    type="text"
+                                                    value={(editForm as any).original_logo_url || (editForm as any).logo_url || ''}
+                                                    className={styles.input}
+                                                    placeholder="Sin logo original"
+                                                    style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: 'var(--color-text-secondary)', cursor: 'not-allowed' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={styles.statLabel} style={{ color: '#60a5fa' }}>
+                                                    Logo visible en web (Override URL)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={(editForm as any).custom_logo_url || ''}
+                                                    onChange={e => setEditForm({ ...editForm, custom_logo_url: e.target.value } as any)}
+                                                    className={styles.input}
+                                                    placeholder="URL del logo opcional"
+                                                    style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid #3b82f6', borderRadius: '6px', color: 'white' }}
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div>
+                                                <label className={styles.statLabel}>Nombre</label>
+                                                <input
+                                                    type="text"
+                                                    value={editForm.name}
+                                                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                                    className={styles.input}
+                                                    style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: 'white' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={styles.statLabel}>Logo URL</label>
+                                                <input
+                                                    type="text"
+                                                    value={(editForm as any).logo_url || ''}
+                                                    onChange={e => setEditForm({ ...editForm, logo_url: e.target.value } as any)}
+                                                    className={styles.input}
+                                                    style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: 'white' }}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
                                     <div>
-                                        <label className={styles.statLabel}>Nombre</label>
+                                        <label className={styles.statLabel}>Temporada {(isPublished || (editForm as any).is_api_managed) && '🔒'}</label>
                                         <input
-                                            type="text"
-                                            value={editForm.name}
-                                            onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                            className={styles.input}
-                                            style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: 'white' }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className={styles.statLabel}>Temporada {isPublished && '🔒'}</label>
-                                        <input
-                                            disabled={isPublished}
+                                            disabled={isPublished || (editForm as any).is_api_managed}
                                             type="text"
                                             value={editForm.season}
                                             onChange={e => setEditForm({ ...editForm, season: e.target.value })}
-                                            style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: isPublished ? 'var(--color-text-secondary)' : 'white', cursor: isPublished ? 'not-allowed' : 'text' }}
+                                            style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: (isPublished || (editForm as any).is_api_managed) ? 'var(--color-text-secondary)' : 'white', cursor: (isPublished || (editForm as any).is_api_managed) ? 'not-allowed' : 'text' }}
                                         />
                                     </div>
                                     <div>
-                                        <label className={styles.statLabel}>Deporte {isPublished && '🔒'}</label>
+                                        <label className={styles.statLabel}>Deporte {(isPublished || (editForm as any).is_api_managed) && '🔒'}</label>
                                         <input
-                                            disabled={isPublished}
+                                            disabled={isPublished || (editForm as any).is_api_managed}
                                             type="text"
                                             value={editForm.sport}
                                             onChange={e => setEditForm({ ...editForm, sport: e.target.value })}
-                                            style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: isPublished ? 'var(--color-text-secondary)' : 'white', cursor: isPublished ? 'not-allowed' : 'text' }}
+                                            style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: (isPublished || (editForm as any).is_api_managed) ? 'var(--color-text-secondary)' : 'white', cursor: (isPublished || (editForm as any).is_api_managed) ? 'not-allowed' : 'text' }}
                                         />
                                     </div>
                                     <div>
-                                        <label className={styles.statLabel}>Organizador {isPublished && '🔒'}</label>
+                                        <label className={styles.statLabel}>Organizador {(isPublished || (editForm as any).is_api_managed) && '🔒'}</label>
                                         <input
-                                            disabled={isPublished}
+                                            disabled={isPublished || (editForm as any).is_api_managed}
                                             type="text"
                                             value={editForm.organizer}
                                             onChange={e => setEditForm({ ...editForm, organizer: e.target.value })}
-                                            style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: isPublished ? 'var(--color-text-secondary)' : 'white', cursor: isPublished ? 'not-allowed' : 'text' }}
+                                            style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '6px', color: (isPublished || (editForm as any).is_api_managed) ? 'var(--color-text-secondary)' : 'white', cursor: (isPublished || (editForm as any).is_api_managed) ? 'not-allowed' : 'text' }}
                                         />
                                     </div>
 
@@ -546,25 +729,25 @@ export default function TorneosPage() {
                                 {/* 2. Estructura */}
                                 <div className={styles.card}>
                                     <div className={styles.cardHeader} style={{ justifyContent: 'space-between', display: 'flex' }}>
-                                        <h2 className={styles.cardTitle}>2. Estructura Competitiva {isPublished && '🔒'}</h2>
+                                        <h2 className={styles.cardTitle}>2. Estructura Competitiva {(isPublished || (editForm as any).is_api_managed) && '🔒'}</h2>
                                     </div>
                                     <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
                                         {/* Categories */}
                                         <div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                 <h4 style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Categorías</h4>
-                                                {!isPublished && <button onClick={() => addArrayItem('categories')} style={{ cursor: 'pointer', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '3px', width: '20px' }}>+ </button>}
+                                                {!isPublished && !(editForm as any).is_api_managed && <button onClick={() => addArrayItem('categories')} style={{ cursor: 'pointer', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '3px', width: '20px' }}>+ </button>}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                                 {editForm.categories.map((cat, idx) => (
                                                     <div key={idx} style={{ display: 'flex', gap: '0.3rem' }}>
                                                         <input
-                                                            disabled={isPublished}
+                                                            disabled={isPublished || (editForm as any).is_api_managed}
                                                             value={cat}
                                                             onChange={(e) => updateArrayField('categories', idx, e.target.value)}
                                                             style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'white' }}
                                                         />
-                                                        {!isPublished && <button onClick={() => removeArrayItem('categories', idx)} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer' }}>×</button>}
+                                                        {!isPublished && !(editForm as any).is_api_managed && <button onClick={() => removeArrayItem('categories', idx)} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer' }}>×</button>}
                                                     </div>
                                                 ))}
                                             </div>
@@ -574,18 +757,18 @@ export default function TorneosPage() {
                                         <div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                 <h4 style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Zonas</h4>
-                                                {!isPublished && <button onClick={() => addArrayItem('zones')} style={{ cursor: 'pointer', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '3px', width: '20px' }}>+ </button>}
+                                                {!isPublished && !(editForm as any).is_api_managed && <button onClick={() => addArrayItem('zones')} style={{ cursor: 'pointer', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '3px', width: '20px' }}>+ </button>}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                                 {editForm.zones.map((zone, idx) => (
                                                     <div key={idx} style={{ display: 'flex', gap: '0.3rem' }}>
                                                         <input
-                                                            disabled={isPublished}
+                                                            disabled={isPublished || (editForm as any).is_api_managed}
                                                             value={zone}
                                                             onChange={(e) => updateArrayField('zones', idx, e.target.value)}
                                                             style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'white' }}
                                                         />
-                                                        {!isPublished && <button onClick={() => removeArrayItem('zones', idx)} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer' }}>×</button>}
+                                                        {!isPublished && !(editForm as any).is_api_managed && <button onClick={() => removeArrayItem('zones', idx)} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer' }}>×</button>}
                                                     </div>
                                                 ))}
                                             </div>
@@ -595,17 +778,18 @@ export default function TorneosPage() {
                                         <div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                                 <h4 style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Etapas</h4>
-                                                {!isPublished && <button onClick={() => addArrayItem('stages')} style={{ cursor: 'pointer', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '3px', width: '20px' }}>+ </button>}
+                                                {!isPublished && !(editForm as any).is_api_managed && <button onClick={() => addArrayItem('stages')} style={{ cursor: 'pointer', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '3px', width: '20px' }}>+ </button>}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                                 {editForm.stages.map((stage, idx) => (
                                                     <div key={idx} style={{ display: 'flex', gap: '0.3rem' }}>
                                                         <input
+                                                            disabled={isPublished || (editForm as any).is_api_managed}
                                                             value={stage}
                                                             onChange={(e) => updateArrayField('stages', idx, e.target.value)}
                                                             style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'white' }}
                                                         />
-                                                        <button onClick={() => removeArrayItem('stages', idx)} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer' }}>×</button>
+                                                        {!isPublished && !(editForm as any).is_api_managed && <button onClick={() => removeArrayItem('stages', idx)} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer' }}>×</button>}
                                                     </div>
                                                 ))}
                                             </div>
@@ -772,6 +956,18 @@ export default function TorneosPage() {
                                 <option key={s} value={s}>{s === 'Todos' ? 'Todos los Deportes' : s}</option>
                             ))}
                         </select>
+                        <button 
+                            className={styles.viewSiteBtn} 
+                            onClick={handleSync}
+                            disabled={isSyncing}
+                            style={{ 
+                                background: isSyncing ? 'var(--color-bg-tertiary)' : 'var(--color-accent)',
+                                opacity: isSyncing ? 0.7 : 1,
+                                marginRight: '1rem' 
+                            }}
+                        >
+                            {isSyncing ? '⌛ Sincronizando...' : '🔄 Sincronizar Datos'}
+                        </button>
                         <button className={styles.viewSiteBtn} onClick={() => setIsModalOpen(true)}>
                             + Crear Torneo
                         </button>
@@ -791,12 +987,22 @@ export default function TorneosPage() {
                                             <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{tournament.sport}</span>
                                         </div>
                                     </div>
-                                    <span className={styles.badge} style={{
-                                        background: tournament.status === 'published' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
-                                        color: tournament.status === 'published' ? '#22c55e' : '#ca8a04'
-                                    }}>
-                                        {tournament.status === 'published' ? 'PUBLICADO' : 'BORRADOR'}
-                                    </span>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <span className={styles.badge} style={{
+                                            background: tournament.status === 'published' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
+                                            color: tournament.status === 'published' ? '#22c55e' : '#ca8a04'
+                                        }}>
+                                            {tournament.status === 'published' ? 'PUBLICADO' : 'BORRADOR'}
+                                        </span>
+                                        {(tournament as any).is_api_managed && (
+                                            <span className={styles.badge} style={{
+                                                background: 'rgba(59, 130, 246, 0.15)',
+                                                color: '#3b82f6'
+                                            }}>
+                                                API
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
 

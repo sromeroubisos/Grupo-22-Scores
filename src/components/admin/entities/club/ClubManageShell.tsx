@@ -1,0 +1,325 @@
+'use client';
+
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { updateEntity, deleteEntity, createEntity, getClubDashboardData } from '@/app/admin/entities/actions';
+import { Database } from '@/lib/database.types';
+import { ClubContext } from './ClubContext';
+import { ClubManageHeader } from './ClubManageHeader';
+import { ClubManageTabs } from './ClubManageTabs';
+import { ClubManageSidebar } from './ClubManageSidebar';
+import { ClubSummaryHero } from './ClubSummaryHero';
+import { ClubSquadsCard } from './ClubSquadsCard';
+import { ClubNextMatchesCard } from './ClubNextMatchesCard';
+import { ClubDataHealthCard } from './ClubDataHealthCard';
+import { ClubStandingsCard } from './ClubStandingsCard';
+import { ClubIdentityTab } from './ClubIdentityTab';
+import { ClubSquadsTab } from './ClubSquadsTab';
+import { TabPlaceholder } from './TabPlaceholder';
+
+// Monolithic Basalt CSS integration
+import './vitreous-club.css';
+
+type ClubRow = Database['public']['Tables']['clubs']['Row'];
+
+interface ClubManageShellProps {
+    id: string;
+    data: ClubRow | null;
+    unions: { id: string, name: string }[];
+}
+
+export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
+    const isCreate = id === 'new';
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const currentTab = searchParams.get('tab') || 'resumen';
+
+    const [isDirty, setIsDirty] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [form, setForm] = useState<Partial<ClubRow>>(data || {
+        name: '',
+        short_name: '',
+        slug: '',
+        city: '',
+        region: '',
+        country: 'Argentina',
+        union_id: '',
+        logo_url: '',
+        primary_color: '#3b82f6',
+        is_visible: true,
+        categories: [],
+    });
+
+    const [dashboardData, setDashboardData] = useState<{ matches: any[] }>({ matches: [] });
+    const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+
+    useEffect(() => {
+        if (isCreate) return;
+
+        const loadDashboard = async () => {
+            setIsLoadingDashboard(true);
+            try {
+                const res = await getClubDashboardData(id);
+                setDashboardData(res);
+            } catch (err) {
+                console.error('Dashboard Load Error:', err);
+            } finally {
+                setIsLoadingDashboard(false);
+            }
+        };
+
+        loadDashboard();
+    }, [id, isCreate]);
+
+    const unionName = unions.find(u => u.id === form.union_id)?.name;
+
+    // Handle form updates via custom events
+    useEffect(() => {
+        const handler = (e: any) => {
+            if (e.detail) {
+                setForm(prev => ({ ...prev, ...e.detail }));
+                setIsDirty(true);
+            }
+        };
+        window.addEventListener('club:form-update', handler);
+        return () => window.removeEventListener('club:form-update', handler);
+    }, []);
+
+    // Global Shortcuts
+    useEffect(() => {
+        const handleKeys = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                e.preventDefault();
+                handleSave();
+            }
+        };
+        window.addEventListener('keydown', handleKeys);
+        return () => window.removeEventListener('keydown', handleKeys);
+    }, [form, isDirty, isSaving]);
+
+    const handleSave = async () => {
+        if (!form.name?.trim()) {
+            alert('❌ El nombre del club es obligatorio');
+            return;
+        }
+        setIsSaving(true);
+        try {
+            if (isCreate) {
+                const res = await createEntity('club', form as any);
+                setIsDirty(false);
+                router.push(`/admin/entities/${res.id}/manage?type=club&tab=resumen`);
+            } else {
+                await updateEntity('club', id, form);
+                setIsDirty(false);
+                window.dispatchEvent(new CustomEvent('club:save-success'));
+                router.refresh();
+            }
+        } catch (err: any) {
+            console.error('Save error:', err);
+            alert('Error al guardar: ' + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm('¿ELIMINAR ESTE CLUB? Esta acción es irreversible.')) return;
+        setIsSaving(true);
+        try {
+            await deleteEntity('club', id);
+            router.push('/admin/super/clubes');
+        } catch (err: any) {
+            alert(err instanceof Error ? err.message : String(err));
+            setIsSaving(false);
+        }
+    };
+
+    // Diagnostics
+    const diagnostics = {
+        hasName: !!form.name,
+        hasSlug: !!form.slug,
+        hasCountry: !!form.country,
+        hasLogo: !!form.logo_url,
+        hasUnion: !!form.union_id,
+    };
+
+    const completeness = Object.values(diagnostics).filter(Boolean).length / 5 * 100;
+
+    return (
+        <ClubContext.Provider value={{ isDirty, setDirty: setIsDirty }}>
+            <div className="flash-ui-container dark" style={{ '--accent': form.primary_color || '#3b82f6' } as React.CSSProperties}>
+                <div className="app-container">
+
+                    {/* Main Panel */}
+                    <main>
+                        <ClubManageHeader
+                            id={id}
+                            data={form}
+                            isDirty={isDirty}
+                            isSaving={isSaving}
+                            onSave={handleSave}
+                            unionName={unionName}
+                        />
+
+                        <Suspense fallback={<div className="h-14" />}>
+                            <ClubManageTabs
+                                id={id}
+                                currentTab={currentTab}
+                                squadCount={form.categories?.length || 0}
+                            />
+                        </Suspense>
+
+                        <div className="content-area">
+                            {currentTab === 'resumen' && (
+                                <>
+                                    <div className="card col-12">
+                                        <ClubSummaryHero data={form} unionName={unionName} />
+                                    </div>
+
+                                    <div className="card col-8">
+                                        <ClubSquadsCard categories={form.categories || []} />
+                                    </div>
+                                    <div className="card col-4">
+                                        <ClubDataHealthCard diagnostics={diagnostics} />
+                                    </div>
+
+                                    <div className="card col-8">
+                                        <ClubNextMatchesCard
+                                            categories={form.categories || []}
+                                            matches={dashboardData.matches}
+                                            loading={isLoadingDashboard}
+                                        />
+                                    </div>
+                                    <div className="card col-4">
+                                        <ClubStandingsCard
+                                            clubId={id}
+                                            tournamentName={dashboardData.matches[0]?.tournament?.name}
+                                            loading={isLoadingDashboard}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {currentTab === 'identidad' && (
+                                <div className="card col-12">
+                                    <ClubIdentityTab id={id} data={form as ClubRow} unions={unions} />
+                                </div>
+                            )}
+
+                            {currentTab === 'planteles' && (
+                                <div className="col-12">
+                                    <ClubSquadsTab id={id} data={form as ClubRow} />
+                                </div>
+                            )}
+
+                            {currentTab === 'staff' && (
+                                <div className="card col-12">
+                                    <div className="card-header">
+                                        <div className="card-title">Directiva y Cuerpo Técnico</div>
+                                        <button className="btn btn-primary">+ Vincular Miembro</button>
+                                    </div>
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Profesional</th>
+                                                <th>Rol / Cargo</th>
+                                                <th>Vinculación</th>
+                                                <th style={{ textAlign: 'right' }}>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colSpan={4} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                                                    No hay staff asociado a este club actualmente.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {currentTab === 'competencias' && (
+                                <div className="card col-12">
+                                    <div className="card-header">
+                                        <div className="card-title">Competencias Activas e Históricas</div>
+                                        <button className="btn">Inscribir en Torneo</button>
+                                    </div>
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Torneo / Campeonato</th>
+                                                <th>Categorías Anotadas</th>
+                                                <th>Estado</th>
+                                                <th style={{ textAlign: 'right' }}>Ver Detalles</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colSpan={4} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                                                    El club no ha sido inscrito en ninguna competencia.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {currentTab === 'partidos' && (
+                                <div className="card col-12">
+                                    <div className="card-header">
+                                        <div className="card-title">Fixture Global de Partidos</div>
+                                        <button className="btn">Filtrar por Temporada</button>
+                                    </div>
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha y Torneo</th>
+                                                <th>Local</th>
+                                                <th>Visitante</th>
+                                                <th style={{ textAlign: 'right' }}>Resultado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colSpan={4} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                                                    Sin partidos programados en el sistema general.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {currentTab === 'medios' && (
+                                <div className="card col-12">
+                                    <div className="card-header">
+                                        <div className="card-title">Galería Institucional (Medios)</div>
+                                        <button className="btn btn-primary">+ Subir Archivo</button>
+                                    </div>
+                                    <div style={{ padding: '4rem', textAlign: 'center', border: '1px dashed var(--border)', borderRadius: '8px', color: 'var(--text-muted)' }}>
+                                        No hay recursos multimedia cargados.
+                                    </div>
+                                </div>
+                            )}
+
+                            {['posiciones', 'estadisticas', 'relacionados', 'auditoria'].includes(currentTab) && (
+                                <div className="card col-12">
+                                    <TabPlaceholder name={currentTab} />
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    {/* Right Sidebar */}
+                    <aside className="sidebar hidden lg:flex">
+                        <ClubManageSidebar
+                            onDelete={handleDelete}
+                            completeness={completeness}
+                            diagnostics={diagnostics}
+                        />
+                    </aside>
+                </div>
+            </div>
+        </ClubContext.Provider>
+    );
+}

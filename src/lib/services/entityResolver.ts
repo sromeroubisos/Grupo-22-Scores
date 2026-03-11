@@ -1,11 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { Database } from '@/lib/database.types';
 
-export type EntityType = 'club' | 'tournament' | 'player' | 'match';
+export type EntityType = 'club' | 'tournament' | 'player' | 'match' | 'union';
 
 export type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 export type ClubRow = Database['public']['Tables']['clubs']['Row'];
 export type MatchRow = Database['public']['Tables']['matches']['Row'];
+export type UnionRow = Database['public']['Tables']['unions']['Row'];
 export interface PlayerData {
     id: string;
     name?: string;
@@ -18,10 +19,11 @@ export interface PlayerData {
 }
 
 export type ResolvedEntityOk =
-    | { kind: 'ok'; entityType: 'tournament'; source: 'db'; data: TournamentRow; canonicalPath: string; adminPath: string }
-    | { kind: 'ok'; entityType: 'club'; source: 'db'; data: ClubRow; canonicalPath: string; adminPath: string }
-    | { kind: 'ok'; entityType: 'match'; source: 'db'; data: MatchRow; canonicalPath: string; adminPath: string }
-    | { kind: 'ok'; entityType: 'player'; source: 'db'; data: PlayerData; canonicalPath: string; adminPath: string };
+    | { kind: 'ok'; entityType: 'tournament'; source: 'db'; data: TournamentRow & { union?: UnionRow }; canonicalPath: string; adminPath: string }
+    | { kind: 'ok'; entityType: 'club'; source: 'db'; data: ClubRow & { union?: UnionRow }; canonicalPath: string; adminPath: string }
+    | { kind: 'ok'; entityType: 'match'; source: 'db'; data: MatchRow & { tournament?: TournamentRow, home?: ClubRow, away?: ClubRow }; canonicalPath: string; adminPath: string }
+    | { kind: 'ok'; entityType: 'player'; source: 'db'; data: PlayerData; canonicalPath: string; adminPath: string }
+    | { kind: 'ok'; entityType: 'union'; source: 'db'; data: UnionRow; canonicalPath: string; adminPath: string };
 
 export type ResolvedEntityResult =
     | ResolvedEntityOk
@@ -38,16 +40,17 @@ function getPaths(type: EntityType, id: string) {
         case 'tournament': canonicalPath = `/tournaments/${id}`; break;
         case 'player': canonicalPath = `/players/${id}`; break;
         case 'match': canonicalPath = `/matches/${id}`; break;
+        case 'union': canonicalPath = `/unions/${id}`; break;
     }
     const adminPath = `/admin/entities/${id}/manage?type=${type}`;
     return { canonicalPath, adminPath };
 }
 
-export async function resolveEntity(params: { id: string; type?: EntityType }): Promise<ResolvedEntityResult> {
+export async function resolveEntity(params: { id: string; type?: EntityType, includeRelations?: boolean }): Promise<ResolvedEntityResult> {
     try {
         const supabase = await createClient();
-        const { id, type } = params;
-
+        const { id, type, includeRelations = false } = params;
+        const selector = includeRelations ? '*, tournament:tournaments(*), home:clubs!matches_home_club_id_fkey(*), away:clubs!matches_away_club_id_fkey(*)' : '*';
         const isUuid = UUID_REGEX.test(id);
 
         if (type) {
@@ -57,14 +60,16 @@ export async function resolveEntity(params: { id: string; type?: EntityType }): 
                 case 'tournament': table = 'tournaments'; break;
                 case 'player': table = 'players'; break;
                 case 'match': table = 'matches'; break;
+                case 'union': table = 'unions'; break;
             }
 
             // Database constraints check
-            if (table !== 'clubs' && !isUuid) {
+            const textBasedTables = ['clubs', 'unions'];
+            if (!textBasedTables.includes(table) && !isUuid) {
                 return { kind: 'not_found' };
             }
 
-            const { data, error } = await supabase.from(table).select('*').eq('id', id).single();
+            const { data, error } = await supabase.from(table).select(type === 'match' ? selector : '*').eq('id', id).single();
 
             if (error) {
                 if (error.code === 'PGRST116') return { kind: 'not_found' };
@@ -74,11 +79,11 @@ export async function resolveEntity(params: { id: string; type?: EntityType }): 
 
             return {
                 kind: 'ok',
-                entityType: type,
+                entityType: type as any,
                 source: 'db',
-                data,
+                data: data as any,
                 ...getPaths(type, id)
-            };
+            } as ResolvedEntityOk;
         }
 
         // Infer types since type was not provided
@@ -105,6 +110,12 @@ export async function resolveEntity(params: { id: string; type?: EntityType }): 
             const { data: cData, error: cError } = await supabase.from('clubs').select('*').eq('id', id).single();
             if (!cError && cData) {
                 return { kind: 'ok', entityType: 'club', source: 'db', data: cData, ...getPaths('club', id) };
+            }
+
+            // Try unions
+            const { data: uData, error: uError } = await supabase.from('unions').select('*').eq('id', id).single();
+            if (!uError && uData) {
+                return { kind: 'ok', entityType: 'union', source: 'db', data: uData, ...getPaths('union', id) };
             }
         }
 

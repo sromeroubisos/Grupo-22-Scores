@@ -73,6 +73,7 @@
 
 .breadcrumbActive {
     color: var(--color-text-primary);
+    text-transform: uppercase;
 }
 
 .headerContent {
@@ -113,6 +114,7 @@
     color: var(--color-text-primary);
     margin-bottom: 8px;
     letter-spacing: -0.02em;
+    text-transform: uppercase;
 }
 
 .meta {
@@ -567,18 +569,19 @@
 
 /* Responsive transfers table */
 @media (max-width: 768px) {
+
     .transferRow,
     .transferHeader {
         grid-template-columns: 1fr 1fr 80px;
     }
 
-    .transferRow > :nth-child(3),
-    .transferHeader > :nth-child(3) {
+    .transferRow> :nth-child(3),
+    .transferHeader> :nth-child(3) {
         display: none;
     }
 
-    .transferRow > :nth-child(5),
-    .transferHeader > :nth-child(5) {
+    .transferRow> :nth-child(5),
+    .transferHeader> :nth-child(5) {
         display: none;
     }
 
@@ -586,7 +589,7 @@
         grid-template-columns: 40px 1fr 60px;
     }
 
-    .playerRow > :nth-child(4) {
+    .playerRow> :nth-child(4) {
         display: none;
     }
 }

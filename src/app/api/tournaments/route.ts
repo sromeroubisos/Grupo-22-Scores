@@ -213,8 +213,8 @@ async function resolveIdsFromTournamentId(tournamentId: string, sportId: string 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id') || '';
-    let url = searchParams.get('url') || '';
-    const sport = searchParams.get('sport') || searchParams.get('sportId') || 'football'; // Default to football instead of rugby
+    let url = searchParams.get('url') || searchParams.get('tournament_url') || searchParams.get('tournamentUrl') || '';
+    const sport = searchParams.get('sport') || searchParams.get('sportId') || 'rugby'; // Default to rugby
 
     let tournamentId = searchParams.get('tournament_id') || searchParams.get('tournamentId') || undefined;
     let stageId = searchParams.get('tournament_stage_id') || searchParams.get('tournamentStageId') || searchParams.get('stageId') || undefined;
@@ -222,11 +222,52 @@ export async function GET(request: Request) {
     let seasonId = searchParams.get('season_id') || searchParams.get('seasonId') || undefined;
     let drawStageId = searchParams.get('draw_stage_id') || searchParams.get('drawStageId') || undefined;
 
+    // Try to get tournament from local data to check for flashScoreIds
+    let localTournament: any = null;
+    if (id) {
+        try {
+            const { getAllTournaments } = await import('@/lib/data/tournaments');
+            const allTournaments = getAllTournaments();
+
+            // Try to find by ID first
+            localTournament = allTournaments.find(t => t.id === id);
+
+            // If not found and ID has fs- prefix, try to match by flashScoreIds (case-insensitive)
+            if (!localTournament && id.toLowerCase().startsWith('fs-')) {
+                const rawId = id.slice(3).toLowerCase();
+                localTournament = allTournaments.find(t =>
+                    t.flashScoreIds && (
+                        t.flashScoreIds.tournamentId?.toLowerCase() === rawId ||
+                        t.flashScoreIds.tournamentStageId?.toLowerCase() === rawId ||
+                        t.flashScoreIds.tournamentTemplateId?.toLowerCase() === rawId
+                    )
+                );
+                console.log('Searching by fs- prefix (case-insensitive), found:', localTournament ? localTournament.id : 'none');
+            }
+
+            // If tournament has flashScoreIds, use them as defaults
+            if (localTournament?.flashScoreIds) {
+                console.log('Found flashScoreIds in tournament definition:', localTournament.flashScoreIds);
+                tournamentId = tournamentId || localTournament.flashScoreIds.tournamentId;
+                stageId = stageId || localTournament.flashScoreIds.tournamentStageId;
+                templateId = templateId || localTournament.flashScoreIds.tournamentTemplateId;
+                seasonId = seasonId || localTournament.flashScoreIds.seasonId;
+            }
+
+            // Use tournament URL if not provided
+            if (!url && localTournament?.url) {
+                url = localTournament.url;
+            }
+        } catch (err) {
+            console.log('Could not load tournament from local data:', err);
+        }
+    }
+
     tournamentId = stripFsPrefix(tournamentId);
     stageId = stripFsPrefix(stageId);
     drawStageId = stripFsPrefix(drawStageId);
 
-    console.log('TOURNAMENT API GET:', { id, url, sport, tournamentId, stageId, templateId, seasonId, drawStageId });
+    console.log('TOURNAMENT API GET:', { id, url, sport, tournamentId, stageId, templateId, seasonId, drawStageId, hasLocalTournament: !!localTournament });
 
     const hasFsPrefix = id.toLowerCase().startsWith('fs-');
     const rawId = hasFsPrefix ? id.slice(3) : id;
@@ -308,8 +349,40 @@ export async function GET(request: Request) {
         }
 
         if (url && (!templateId || !seasonId || !stageId || !tournamentId)) {
-            const idsRes = await getTournamentIds(url);
-            const idsData = idsRes?.DATA || idsRes;
+            let idsRes = await getTournamentIds(url);
+            let idsData = idsRes?.DATA || idsRes;
+
+            // --- PROACTIVE FIX: If no IDs found and URL is just a slug, try common patterns ---
+            const urlPath = url.startsWith('http') ? new URL(url).pathname : url;
+            const urlSegments = urlPath.split('/').filter(Boolean);
+
+            if ((!idsData || (Array.isArray(idsData) && idsData.length === 0)) && urlSegments.length <= 2) {
+                const slug = urlSegments[urlSegments.length - 1];
+                if (slug) {
+                    const attempts = [];
+                    if (sport === 'rugby') {
+                        attempts.push(`/rugby-union/south-america/${slug}/`);
+                        attempts.push(`/rugby-union/world/${slug}/`);
+                    } else if (sport === 'football') {
+                        attempts.push(`/football/europe/${slug}/`);
+                        attempts.push(`/football/world/${slug}/`);
+                    }
+
+                    for (const altUrl of attempts) {
+                        console.log(`[Tournament API] RETRY with alt URL: ${altUrl}`);
+                        const altRes = await getTournamentIds(altUrl);
+                        const altData = altRes?.DATA || altRes;
+                        if (altData && (!Array.isArray(altData) || altData.length > 0)) {
+                            console.log(`[Tournament API] Found data with alt URL: ${altUrl}`);
+                            idsRes = altRes;
+                            idsData = altData;
+                            url = altUrl;
+                            break;
+                        }
+                    }
+                }
+            }
+
             if (Array.isArray(idsData) && idsData.length > 0) {
                 const first = idsData[0];
                 tournamentId = first.tournament_id || tournamentId;
@@ -317,7 +390,7 @@ export async function GET(request: Request) {
                 templateId = first.tournament_template_id || templateId;
                 stageId = first.tournament_stage_id || stageId;
                 drawStageId = extractIds(first).drawStageId || drawStageId;
-            } else if (idsData && typeof idsData === 'object') {
+            } else if (idsData && typeof idsData === 'object' && Object.keys(idsData).length > 0) {
                 tournamentId = idsData.tournament_id || tournamentId;
                 seasonId = idsData.season_id || seasonId;
                 templateId = idsData.tournament_template_id || templateId;
@@ -331,7 +404,7 @@ export async function GET(request: Request) {
 
         const canFetchMatches = !!(templateId && seasonId);
         const canFetchStandings = !!(tournamentId && stageId);
-        const canFetchDraw = !!(tournamentId && drawStageId);
+        const canFetchDraw = !!(tournamentId && stageId); // Use stageId instead of drawStageId
         const canFetchArchives = !!stageId;
         const detailsPromise = stageId && !details ? getTournamentDetails(stageId) : Promise.resolve(details);
 
@@ -367,7 +440,7 @@ export async function GET(request: Request) {
             canFetchStandings ? getTournamentStandingsHtFt(tournamentId!, stageId!) : Promise.resolve([]),
             canFetchStandings ? getTournamentStandingsOverUnder(tournamentId!, stageId!) : Promise.resolve([]),
             detailsPromise,
-            canFetchDraw ? getTournamentDraw(tournamentId!, drawStageId!) : Promise.resolve([]),
+            canFetchDraw ? getTournamentDraw(tournamentId!, stageId!) : Promise.resolve([]),
             canFetchArchives ? getTournamentArchives(stageId!) : Promise.resolve([])
         ]);
 

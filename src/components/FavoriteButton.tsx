@@ -97,12 +97,12 @@ export default function FavoriteButton({
             if (error) throw error;
 
             if (isMounted.current) {
-                setIsFavorited(data);
+                setIsFavorited(data as boolean);
             }
 
             // Update cache locally avoiding DB fetch
             if (userId) {
-                updateFavoriteSet(userId, entityType, entityId, data);
+                updateFavoriteSet(userId, entityType, entityId, data as boolean);
             }
         } catch (error: any) {
             if (error.name === 'AbortError' || error.message?.includes('abort')) return;

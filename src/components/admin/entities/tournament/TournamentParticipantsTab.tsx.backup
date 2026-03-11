@@ -1,0 +1,447 @@
+'use client';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+    Users,
+    Search,
+    Filter,
+    Plus,
+    Download,
+    MoreHorizontal,
+    ChevronDown,
+    AlertCircle,
+    CheckCircle2,
+    Clock,
+    XCircle,
+    Trash2,
+    Pencil,
+    IdCard,
+    Hash,
+    MapPin,
+    Tag,
+    FileUp
+} from 'lucide-react';
+import { ParticipantStatusBadge, ParticipantStatus } from '../../ui/ParticipantStatusBadge';
+import { AddParticipantDrawer } from './AddParticipantDrawer';
+import { ImportParticipantsDrawer } from './ImportParticipantsDrawer';
+import { useAdminConsole } from '../../../../app/admin/AdminContext';
+
+interface Participant {
+    id: string;
+    tournament_id: string;
+    club_id: string | null;
+    name: string;
+    type: string;
+    status: ParticipantStatus;
+    seed: number | null;
+    group_id: string | null;
+    short_code: string | null;
+    clubs?: {
+        id: string;
+        name: string;
+        short_name: string | null;
+        logo_url: string | null;
+    };
+}
+
+interface TournamentParticipantsTabProps {
+    data?: any;
+    id?: string;
+}
+
+export function TournamentParticipantsTab({ data, id: tournamentId }: TournamentParticipantsTabProps) {
+    const [participants, setParticipants] = useState<Participant[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { clubs } = useAdminConsole();
+
+    // UI State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [typeFilter, setTypeFilter] = useState<string>('all');
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+    const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(false);
+
+    // Handlers for selection
+    const toggleAll = () => {
+        if (selectedIds.size === filteredParticipants.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(filteredParticipants.map(p => p.id)));
+        }
+    };
+
+    const toggleSelect = (id: string) => {
+        const next = new Set(selectedIds);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        setSelectedIds(next);
+    };
+
+    // Fetch data
+    useEffect(() => {
+        const fetchParticipants = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`/api/tournaments/${tournamentId}/participants?full=true`);
+                if (!response.ok) throw new Error('Error al cargar participantes');
+                const data = await response.json();
+                setParticipants(data);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (tournamentId) fetchParticipants();
+    }, [tournamentId]);
+
+    const handleAddParticipant = async (participant: any) => {
+        try {
+            const response = await fetch(`/api/tournaments/${tournamentId}/participants`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(participant),
+            });
+            if (!response.ok) throw new Error('Error al añadir participante');
+            const newParticipant = await response.json();
+            setParticipants(prev => [...prev, newParticipant]);
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+    const handleImportParticipants = async (newList: any[]) => {
+        try {
+            // For simplicity, we'll import one by one in parallel or batch if API supported it
+            // Here we'll do one by one for now
+            const promises = newList.map(p =>
+                fetch(`/api/tournaments/${tournamentId}/participants`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(p),
+                }).then(res => res.json())
+            );
+            const results = await Promise.all(promises);
+            setParticipants(prev => [...prev, ...results]);
+        } catch (err: any) {
+            alert('Error en la importación: ' + err.message);
+        }
+    };
+
+    const handleDeleteParticipant = async (participantId: string) => {
+        if (!confirm('¿Seguro que quieres eliminar este participante?')) return;
+        try {
+            const response = await fetch(`/api/tournaments/${tournamentId}/participants?id=${participantId}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Error al eliminar');
+            setParticipants(prev => prev.filter(p => p.id !== participantId));
+            setSelectedIds(prev => {
+                const next = new Set(prev);
+                next.delete(participantId);
+                return next;
+            });
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`¿Seguro que quieres eliminar ${selectedIds.size} participantes?`)) return;
+        try {
+            const promises = Array.from(selectedIds).map(id =>
+                fetch(`/api/tournaments/${tournamentId}/participants?id=${id}`, {
+                    method: 'DELETE',
+                })
+            );
+            await Promise.all(promises);
+            setParticipants(prev => prev.filter(p => !selectedIds.has(p.id)));
+            setSelectedIds(new Set());
+        } catch (err: any) {
+            alert('Error al eliminar lote: ' + err.message);
+        }
+    };
+
+    const handleExport = () => {
+        const csv = [
+            ['Nombre', 'Tipo', 'Código', 'Seed', 'Estado'].join(','),
+            ...participants.map(p => [
+                p.name,
+                p.type,
+                p.short_code || '',
+                p.seed || '',
+                p.status
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `participantes-torneo-${tournamentId}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // Derived state
+    const filteredParticipants = useMemo(() => {
+        return participants.filter(p => {
+            const matchesSearch = (p.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+                (p.short_code?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+            const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+            const matchesType = typeFilter === 'all' || p.type === typeFilter;
+            return matchesSearch && matchesStatus && matchesType;
+        });
+    }, [participants, searchQuery, statusFilter, typeFilter]);
+
+    const stats = useMemo(() => {
+        const total = participants.length;
+        const active = participants.filter(p => p.status === 'active').length;
+        const inactive = participants.filter(p => p.status === 'inactive').length;
+        const pending = participants.filter(p => p.status === 'pending').length;
+        return { total, active, inactive, pending };
+    }, [participants]);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-zinc-500 gap-4">
+                <div className="w-8 h-8 border-2 border-[#00a365] border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm font-medium">Cargando participantes...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+            {/* Header Bar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-[#0a0a0b]/80 backdrop-blur-md rounded-2xl border border-white/5">
+                <div className="flex items-center gap-6">
+                    <div className="flex flex-col">
+                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            <Users className="w-5 h-5 text-[#00a365]" />
+                            Participantes
+                        </h2>
+                        <p className="text-xs text-zinc-400 mt-1">Gestiona los equipos y competidores del torneo</p>
+                    </div>
+
+                    <div className="hidden lg:flex items-center gap-4 border-l border-white/10 pl-6">
+                        <StatCard label="Total" value={stats.total} />
+                        <StatCard label="Activos" value={stats.active} color="#10b981" />
+                        <StatCard label="Inactivos" value={stats.inactive} color="#9ca3af" />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-xl border border-white/10 transition-all"
+                    >
+                        <Download className="w-4 h-4" />
+                        <span className="hidden sm:inline">Exportar</span>
+                    </button>
+                    <button
+                        onClick={() => setIsImportDrawerOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-xl border border-white/10 transition-all"
+                    >
+                        <FileUp className="w-4 h-4" />
+                        <span className="hidden sm:inline">Importar</span>
+                    </button>
+                    <button
+                        onClick={() => setIsAddDrawerOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#00a365] hover:bg-[#008b56] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[#00a365]/20"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span className="hidden sm:inline">Nuevo</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                <div className="md:col-span-2 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <input
+                        type="text"
+                        placeholder="Buscar por nombre o descripción..."
+                        className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-xl text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#00a365]/50 transition-all"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                <select
+                    className="bg-black/40 border border-white/10 rounded-xl text-sm text-white px-3 py-2 focus:outline-none focus:border-[#00a365]/50 transition-all"
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                >
+                    <option value="all">Todos los Tipos</option>
+                    <option value="club">Club</option>
+                    <option value="national_team">Selección</option>
+                    <option value="individual">Individual</option>
+                </select>
+
+                <select
+                    className="bg-black/40 border border-white/10 rounded-xl text-sm text-white px-3 py-2 focus:outline-none focus:border-[#00a365]/50 transition-all"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                    <option value="all">Todos los Estados</option>
+                    <option value="active">Activos</option>
+                    <option value="inactive">Inactivos</option>
+                    <option value="pending">Pendientes</option>
+                </select>
+            </div>
+
+            {/* Data Table */}
+            <div className="bg-[#0a0a0b]/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-bottom border-white/5 bg-white/[0.02]">
+                                <th className="p-4 w-10">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded border-white/20 bg-transparent text-[#00a365] focus:ring-[#00a365] cursor-pointer"
+                                        checked={selectedIds.size === filteredParticipants.length && filteredParticipants.length > 0}
+                                        onChange={toggleAll}
+                                    />
+                                </th>
+                                <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-zinc-500">Participante</th>
+                                <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-zinc-500">Tipo</th>
+                                <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-zinc-500">Seed / Pos</th>
+                                <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-zinc-500">Estado</th>
+                                <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-zinc-500 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {filteredParticipants.length > 0 ? (
+                                filteredParticipants.map((p) => (
+                                    <tr key={p.id} className="group hover:bg-white/[0.02] transition-colors cursor-pointer" onClick={() => toggleSelect(p.id)}>
+                                        <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-white/20 bg-transparent text-[#00a365] focus:ring-[#00a365] cursor-pointer"
+                                                checked={selectedIds.has(p.id)}
+                                                onChange={() => toggleSelect(p.id)}
+                                            />
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
+                                                    {p.clubs?.logo_url ? (
+                                                        <img src={p.clubs.logo_url} alt={p.name} className="w-full h-full object-contain" />
+                                                    ) : (
+                                                        <IdCard className="w-5 h-5 text-zinc-600" />
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-semibold text-white group-hover:text-[#00a365] transition-colors">
+                                                        {p.name}
+                                                    </span>
+                                                    <span className="text-[10px] text-zinc-500 font-mono tracking-tight uppercase">
+                                                        {p.short_code || '---'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-4">
+                                            <span className="flex items-center gap-1.5 text-xs text-zinc-400">
+                                                {p.type === 'club' ? <Users className="w-3.5 h-3.5" /> : <Tag className="w-3.5 h-3.5" />}
+                                                {p.type === 'club' ? 'Club' : p.type === 'national_team' ? 'Selección' : 'Individual'}
+                                            </span>
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-1.5 font-mono text-xs text-zinc-300">
+                                                <Hash className="w-3.5 h-3.5 text-zinc-600" />
+                                                {p.seed || '-'}
+                                            </div>
+                                        </td>
+                                        <td className="p-4">
+                                            <ParticipantStatusBadge status={p.status} />
+                                        </td>
+                                        <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button className="p-2 hover:bg-white/5 text-zinc-400 hover:text-white rounded-lg transition-all" title="Editar">
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteParticipant(p.id)}
+                                                    className="p-2 hover:bg-red-500/10 text-zinc-400 hover:text-red-500 rounded-lg transition-all"
+                                                    title="Eliminar"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className="p-12 text-center">
+                                        <div className="flex flex-col items-center gap-3 text-zinc-500">
+                                            <Users className="w-12 h-12 opacity-10" />
+                                            <p className="text-sm">No se encontraron participantes</p>
+                                            <button
+                                                onClick={() => setSearchQuery('')}
+                                                className="text-xs text-[#00a365] hover:underline"
+                                            >
+                                                Limpiar filtros
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Footer Info */}
+                <div className="p-4 border-t border-white/5 bg-white/[0.01] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="text-xs text-zinc-500">
+                        Mostrando <span className="text-zinc-300 font-medium">{filteredParticipants.length}</span> de <span className="text-zinc-300 font-medium">{participants.length}</span> participantes
+                    </div>
+
+                    {selectedIds.size > 0 && (
+                        <div className="flex items-center gap-3 animate-in slide-in-from-bottom-2">
+                            <span className="text-xs font-medium text-[#00a365]">{selectedIds.size} seleccionados</span>
+                            <div className="h-4 w-px bg-white/10" />
+                            <button
+                                onClick={handleBulkDelete}
+                                className="text-xs px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg transition-all"
+                            >
+                                Eliminar seleccionados
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <AddParticipantDrawer
+                isOpen={isAddDrawerOpen}
+                onClose={() => setIsAddDrawerOpen(false)}
+                onAdd={handleAddParticipant}
+                clubs={clubs}
+            />
+
+            <ImportParticipantsDrawer
+                isOpen={isImportDrawerOpen}
+                onClose={() => setIsImportDrawerOpen(false)}
+                onImport={handleImportParticipants}
+            />
+        </div>
+    );
+}
+
+function StatCard({ label, value, color }: { label: string; value: number; color?: string }) {
+    return (
+        <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">{label}</span>
+            <span className="text-lg font-bold text-white leading-tight" style={{ color: color || 'white' }}>
+                {value}
+            </span>
+        </div>
+    );
+}

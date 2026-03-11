@@ -4,74 +4,67 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { useAuth } from '@/context/AuthContext';
-import { db } from '@/lib/mock-db';
+import { useSuperConsole } from './SuperConsoleContext';
 
 export default function AdminPage() {
     const { user } = useAuth();
-    // Force re-render for updates
-    const [tick, setTick] = useState(0);
+    const { tournaments, matches, clubs, unions, news, loading, refresh } = useSuperConsole();
     const [isSyncing, setIsSyncing] = useState(false);
 
-    const handleSync = () => {
+    const handleSync = async () => {
         setIsSyncing(true);
-        setTimeout(() => {
-            setIsSyncing(false);
-            setTick(t => t + 1);
-        }, 1500);
+        refresh(); // Re-fetch all
+        setTimeout(() => setIsSyncing(false), 1000);
     };
+
+    const latestNews = useMemo(() => {
+        return news && news.length > 0 ? news[0] : null;
+    }, [news]);
 
     const stats = useMemo(() => {
         const today = new Date().toISOString().split('T')[0];
-        const todayMatches = db.matches.filter(m => m.dateTime.startsWith(today));
+        const todayMatches = matches.filter(m => m.date_time.startsWith(today));
         const liveMatches = todayMatches.filter(m => m.status === 'live');
 
-        // Simple conflict detection: Clubs with same name but different Source/IDs
-        // For mock purposes, let's say conflicts are unlinked clubs that match external ones
-        const potentialConflicts = db.clubs.filter(c => !c.unionId && db.externalClubs.some(ec => ec.name === c.name));
+        // Conflicts: unlinked tournaments or clubs that might need attention
+        const unlinkedTournaments = tournaments.filter(t => !t.union_id);
+        const unlinkedClubs = clubs.filter(c => !c.union_id);
 
         return {
-            matches: { value: todayMatches.length, sub: `/ ${liveMatches.length} live` },
-            conflicts: { value: potentialConflicts.length, sub: 'Duplicados detectados' },
-            latency: { value: `${Math.floor(Math.random() * 40) + 20}ms`, sub: 'v0.1' }
+            matches: { value: todayMatches.length, sub: `/ ${liveMatches.length} en vivo` },
+            conflicts: { value: unlinkedTournaments.length + unlinkedClubs.length, sub: 'Sin vinculación' },
+            latency: { value: 'STABLE', sub: 'v3.0 Opt' }
         };
-    }, [tick]);
-
-    const latestNews = useMemo(() => {
-        return db.news.length > 0 ? db.news[0] : null;
-    }, [tick]);
+    }, [tournaments, matches, clubs]);
 
     const catalogRows = useMemo(() => {
-        return db.tournaments.map(t => {
-            const union = db.unions.find(u => u.id === t.unionId);
+        return tournaments.slice(0, 10).map(t => {
+            const union = unions.find(u => u.id === t.union_id);
             const isLinked = !!union;
-            const source = t.slug.includes('api') || t.slug.includes('top-12') ? 'FlashScore' : 'MANUAL / CLUB';
-            const isSourceApi = source === 'FlashScore';
-
-            // Sync status mock - random for demo or static
-            const lastSync = isSourceApi ? new Date(Date.now() - Math.floor(Math.random() * 900000)).toLocaleTimeString() : '--';
+            const source = t.external_id ? 'API / PROVIDER' : 'MANUAL';
 
             return {
                 id: t.id,
                 name: t.name,
-                season: t.category || t.seasonId,
-                sport: t.sport === 'rugby' ? 'Rugby' : t.sport,
-                federation: isLinked ? 'VINCULADA' : 'SIN VINCULO',
+                season: t.season_id,
+                sport: t.sport ?? 'N/A',
+                federation: isLinked ? (union?.name || 'VINCULADA') : 'SIN VINCULO',
                 source,
-                status: t.status === 'published' ? 'Activo' : 'Pendiente',
-                sync: lastSync,
+                status: t.status === 'published' ? 'Activo' : (t.status === 'draft' ? 'Borrador' : 'Pendiente'),
+                sync: t.updated_at ? new Date(t.updated_at).toLocaleTimeString() : '--',
                 action: isLinked ? 'Config' : 'Vincular',
                 highlight: !isLinked
             };
         });
-    }, [tick]);
+    }, [tournaments, unions]);
 
     const conflictsMessage = useMemo(() => {
-        const clubConflicts = db.clubs.filter(c => !c.unionId && db.externalClubs.some(ec => ec.name === c.name));
-        if (clubConflicts.length > 0) {
-            return `${clubConflicts.length} clubes locales coinciden con registros de FlashScore.`;
+        const unlinkedCount = tournaments.filter(t => !t.union_id).length;
+        if (unlinkedCount > 0) {
+            return `${unlinkedCount} torneos requieren vinculación con una Unión territorial.`;
         }
-        return 'No se detectaron conflictos de datos pendientes.';
-    }, [tick]);
+        return 'Sincronización de catálogos completa.';
+    }, [tournaments]);
 
     if (!user) return null;
 
@@ -208,26 +201,26 @@ export default function AdminPage() {
                                 <div
                                     className={styles.newsPreview}
                                     style={{
-                                        backgroundImage: latestNews.imageUrl ? `url(${latestNews.imageUrl})` : 'none',
+                                        backgroundImage: latestNews.image_url ? `url(${latestNews.image_url})` : 'none',
                                         backgroundSize: 'cover',
-                                        color: latestNews.imageUrl ? 'transparent' : 'inherit'
+                                        color: latestNews.image_url ? 'transparent' : 'inherit'
                                     }}
                                 >
-                                    {!latestNews.imageUrl && 'SIN IMAGEN'}
+                                    {!latestNews.image_url && 'SIN IMAGEN'}
                                 </div>
                                 <h3 className={styles.newsTitle}>{latestNews.title}</h3>
-                                <p className={styles.newsBody}>{latestNews.summary || latestNews.content.slice(0, 100)}</p>
+                                <p className={styles.newsBody}>{latestNews.summary || latestNews.content?.slice(0, 100)}</p>
                             </div>
                             <div className={styles.newsSide}>
                                 <span className={styles.slabLabel}>Scope de publicacion</span>
-                                <span className={`${styles.badge} ${latestNews.scope === 'global' ? styles.badgeApi : styles.badgeManual}`}>
-                                    {latestNews.scope.toUpperCase()}
+                                <span className={`${styles.badge} ${styles.badgeApi}`}>
+                                    GLOBAL
                                 </span>
                                 <span className={`${styles.badge} ${latestNews.status === 'published' ? styles.badgeApi : styles.badgeManual}`}>
-                                    {latestNews.status.toUpperCase()}
+                                    {latestNews.status?.toUpperCase() || 'DRAFT'}
                                 </span>
                                 <div className={styles.rowMeta} style={{ marginTop: 10 }}>
-                                    {new Date(latestNews.publishedAt || Date.now()).toLocaleDateString()}
+                                    {latestNews.published_at ? new Date(latestNews.published_at).toLocaleDateString() : 'Sin fecha'}
                                 </div>
                             </div>
                         </div>
@@ -239,27 +232,21 @@ export default function AdminPage() {
                 </div>
 
                 <div className={`${styles.slab} ${styles.col4}`}>
-                    <span className={styles.slabLabel}>Operadores y roles</span>
+                    <span className={styles.slabLabel}>Control de acceso</span>
                     <div className={styles.rolesList}>
                         <div className={styles.roleRow}>
-                            <div className={styles.roleAvatar} style={{ backgroundImage: `url(${db.users[1]?.avatarUrl})` }}></div>
+                            <div className={styles.roleAvatar} style={{ background: '#1a1d24', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>U</div>
                             <div>
-                                <div className={styles.roleName}>{db.users[1]?.name || 'Operador'}</div>
+                                <div className={styles.roleName}>{user.name}</div>
                                 <div className={`${styles.roleTag} ${styles.roleTagCyan}`}>
-                                    OPERADOR_TORNEO
+                                    {user.role?.toUpperCase()}
                                 </div>
                             </div>
                         </div>
-                        <div className={styles.roleRow}>
-                            <div className={styles.roleAvatar} style={{ backgroundImage: `url(${db.users[2]?.avatarUrl})` }}></div>
-                            <div>
-                                <div className={styles.roleName}>{db.users[2]?.name || 'Delegado'}</div>
-                                <div className={`${styles.roleTag} ${styles.roleTagMagma}`}>
-                                    ADMIN_CLUB
-                                </div>
-                            </div>
-                        </div>
-                        <button className={`${styles.btn}`} style={{ width: '100%', justifyContent: 'center' }}>Gestionar permisos</button>
+                        <p style={{ fontSize: '11px', color: '#666', marginTop: '12px', lineHeight: '1.4' }}>
+                            Tu sesión está autenticada con privilegios de administración global. Los cambios se registran en el audit log.
+                        </p>
+                        <button className={`${styles.btn}`} style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }}>Cerrar sesión</button>
                     </div>
                 </div>
             </div>

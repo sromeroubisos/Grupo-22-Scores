@@ -26,8 +26,9 @@ export async function GET(request: Request) {
                     .single()
 
                 if (!existingUser) {
+                    const { isSuperAdminEmail } = await import('@/lib/types/user')
                     // 'fan' is the correct default role (CHECK: role IN ('fan', 'super_admin'))
-                    const role = user.email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'fan'
+                    const role = isSuperAdminEmail(user.email) ? 'super_admin' : 'fan'
                     const { error: insertError } = await admin.from('users').insert({
                         id: user.id,
                         email: user.email!,

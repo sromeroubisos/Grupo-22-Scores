@@ -1,3 +1,4 @@
+import { createClient } from '@/lib/supabase/server';
 import {
     getTeamDetails,
     getTeamResults,
@@ -64,79 +65,103 @@ export async function GET(request: Request) {
         return Response.json({ ok: false, error: 'team_id is required' }, { status: 400 });
     }
 
+    // 1. Check Supabase for internal club info first
+    let details: any = null;
+    try {
+        const supabase = await createClient();
+        const { data: internalClub } = await supabase
+            .from('clubs')
+            .select('*')
+            .eq('id', rawTeamId)
+            .single();
+
+        if (internalClub) {
+            details = {
+                id: internalClub.id,
+                name: internalClub.name,
+                image_path: internalClub.logo_url,
+                logo: internalClub.logo_url,
+                logo_url: internalClub.logo_url,
+                country: internalClub.country,
+                city: internalClub.city,
+                region: internalClub.region,
+                is_internal: true
+            };
+        }
+    } catch (dbErr) {
+        // Silently continue if not found or DB error
+    }
+
     const teamId = stripFsTeamPrefix(rawTeamId);
+    const isExternalId = /^[a-zA-Z0-9]+$/.test(teamId) && !teamId.includes('-');
 
     try {
-        // Phase 1: Fetch endpoints that use team_id (always reliable)
-        const [resultsRes, fixturesRes, transfersRes] = await Promise.allSettled([
-            getTeamResults(teamId),
-            getTeamFixtures(teamId),
-            getTeamTransfers(teamId)
-        ]);
+        // Phase 1: Fetch endpoints that use team_id (only if it looks like an external ID)
+        let resultsArr: any[] = [];
+        let fixturesArr: any[] = [];
+        let transfers: any[] = [];
+        let resultsGrouped: any[] = [];
 
-        const resultsRaw = normalize(resultsRes);
-        const fixturesRaw = normalize(fixturesRes);
-        const transfers = normalize(transfersRes);
+        if (isExternalId) {
+            const [resultsRes, fixturesRes, transfersRes] = await Promise.allSettled([
+                getTeamResults(teamId),
+                getTeamFixtures(teamId),
+                getTeamTransfers(teamId)
+            ]);
 
-        // Results/fixtures come grouped by tournament: [{tournament_id, matches: [...]}, ...]
-        // Flatten to a simple array of matches for the frontend
-        const flattenMatches = (data: any): any[] => {
-            if (!Array.isArray(data)) return [];
-            // Check if already flat (each item has match_id)
-            if (data.length > 0 && data[0]?.match_id) return data;
-            // Grouped by tournament - flatten
-            const flat: any[] = [];
-            for (const group of data) {
-                const matches = group?.matches || [];
-                for (const m of matches) {
-                    flat.push({ ...m, tournament_name: group.name || group.full_name || '' });
+            const resultsRaw = normalize(resultsRes);
+            const fixturesRaw = normalize(fixturesRes);
+            transfers = normalize(transfersRes) || [];
+
+            const flattenMatches = (data: any): any[] => {
+                if (!Array.isArray(data)) return [];
+                if (data.length > 0 && data[0]?.match_id) return data;
+                const flat: any[] = [];
+                for (const group of data) {
+                    const matches = group?.matches || [];
+                    for (const m of matches) {
+                        flat.push({ ...m, tournament_name: group.name || group.full_name || '' });
+                    }
                 }
-            }
-            return flat;
-        };
+                return flat;
+            };
 
-        const resultsArr = flattenMatches(resultsRaw);
-        const fixturesArr = flattenMatches(fixturesRaw);
-        // Keep raw grouped data for team name extraction
-        const resultsGrouped = Array.isArray(resultsRaw) ? resultsRaw : [];
+            resultsArr = flattenMatches(resultsRaw);
+            fixturesArr = flattenMatches(fixturesRaw);
+            resultsGrouped = Array.isArray(resultsRaw) ? resultsRaw : [];
+        }
 
-        // Determine team_url for details/squad endpoints
-        // Priority: 1) explicit param from frontend, 2) build from team name
+        // Phase 2: Handle Details & Squad
         let teamUrl = teamUrlParam;
         let extractedName = teamName;
 
-        if (!teamUrl && !extractedName) {
-            // Try to extract the team name from results data (grouped format)
+        if (!teamUrl && !extractedName && isExternalId) {
             const info = extractTeamFromResults(teamId, resultsGrouped);
-            if (info?.name) {
-                extractedName = info.name;
-            }
+            if (info?.name) extractedName = info.name;
         }
 
-        if (!teamUrl && extractedName) {
+        if (!teamUrl && extractedName && isExternalId) {
             teamUrl = `/team/${slugify(extractedName)}/${teamId}/`;
         }
 
-        // Phase 2: Fetch details & squad (require team_url)
-        let details: any = null;
         let squad: any = null;
-
-        if (teamUrl) {
+        if (teamUrl && isExternalId) {
             const [detailsRes, squadRes] = await Promise.allSettled([
                 getTeamDetails(teamUrl),
                 getTeamSquad(teamUrl)
             ]);
 
-            details = normalize(detailsRes);
+            const remoteDetails = normalize(detailsRes);
             squad = normalize(squadRes);
 
-            // If details returned empty array (wrong slug), treat as null
-            if (Array.isArray(details) && details.length === 0) details = null;
-            if (Array.isArray(squad) && squad.length === 0) squad = null;
+            // Merge/Override details if external found and we don't have internal or want to prefer remote
+            if (remoteDetails && !Array.isArray(remoteDetails)) {
+                details = { ...details, ...remoteDetails };
+            }
         }
 
-        // Fallback: if details still null, build from results data
-        if (!details) {
+        // Final Fallback for details
+        if (!details && isExternalId) {
             const info = extractTeamFromResults(teamId, resultsGrouped);
             if (info) {
                 details = { name: info.name, image_path: info.image_path };

@@ -8,7 +8,11 @@ export type EntityType = 'league' | 'club' | 'tournament' | 'team' | 'player';
 
 export type DbUser = Database["public"]["Tables"]["users"]["Row"];
 
-export type User = DbUser;
+export interface User extends DbUser {
+    country?: string | null;
+    favorite_sport?: string | null;
+    updated_at?: string | null;
+}
 
 export interface Favorite {
     id: string;
@@ -25,10 +29,13 @@ export interface UserProfile {
 
 // Super Admin constant
 export const SUPER_ADMIN_EMAIL = 'superadmin@g22scores.com';
+const AUTHORIZED_SUPER_ADMINS = [SUPER_ADMIN_EMAIL, 'deportesgrupo@gmail.com', 'sromeroubisos@gmail.com'];
 
 // Helper to check if email is super admin
-export function isSuperAdminEmail(email: string): boolean {
-    return email === SUPER_ADMIN_EMAIL;
+export function isSuperAdminEmail(email?: string | null): boolean {
+    if (!email) return false;
+    const lowerEmail = email.toLowerCase();
+    return AUTHORIZED_SUPER_ADMINS.some(adminEmail => adminEmail.toLowerCase() === lowerEmail);
 }
 
 // Helper to check if user is super admin

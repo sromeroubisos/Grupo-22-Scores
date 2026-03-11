@@ -21,7 +21,6 @@ import {
 } from '@/lib/services/flashscore';
 import { parseAnyMatches, UIMatch, withStats } from '@/lib/matchSchema';
 import { apiFetch, ApiDebug } from '@/lib/apiFetch';
-import { db } from '@/lib/mock-db';
 
 const USER_TZ = typeof window !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC';
 
@@ -348,60 +347,74 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         debug: { ...state.debug, details: debugDetails }
                     });
                 } else {
-                    // LOCAL MATCH LOGIC
-                    const localMatch = db.matches.find(m => m.id === id);
-                    if (localMatch) {
-                        const tournament = db.tournaments.find(t => t.id === localMatch.tournamentId);
-                        const homeClub = db.clubs.find(c => c.id === localMatch.homeClubId);
-                        const awayClub = db.clubs.find(c => c.id === localMatch.awayClubId);
+                    // DATABASE MATCH LOGIC - Fetch from Supabase via API
+                    try {
+                        const res = await fetch(`/api/matches/${id}`, { signal: controller.signal });
+                        if (res.ok) {
+                            const matchData = await res.json();
 
-                        const sportId = tournament?.sport === 'football' ? 1 : 2; // Default to 2 (rugby) if not football
+                            const sportId = matchData.sportId || 2; // Default to 2 (rugby)
 
-                        const processedMatch = {
-                            id: localMatch.id,
-                            status: localMatch.status,
-                            sportId,
-                            date: localMatch.dateTime,
-                            time: new Date(localMatch.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ }),
-                            tournament: tournament?.name || 'Torneo Local',
-                            category: tournament?.category || 'General',
-                            venue: localMatch.venue,
-                            home: {
-                                id: homeClub?.id || 'home',
-                                name: homeClub?.name || 'Local',
-                                logo: homeClub?.logoUrl || null,
-                                score: localMatch.score.home
-                            },
-                            away: {
-                                id: awayClub?.id || 'away',
-                                name: awayClub?.name || 'Visitante',
-                                logo: awayClub?.logoUrl || null,
-                                score: localMatch.score.away
-                            },
-                            events: [],
-                            stats: [],
-                            lineups: null,
-                            standings: [],
-                            h2h: [],
-                            draw: []
-                        };
+                            const score = matchData.score || { home: 0, away: 0 };
 
-                        statusRef.current = localMatch.status;
-                        setState({
-                            kind: 'ok',
-                            matchData: processedMatch,
-                            eventsData: [],
-                            statsData: [],
-                            playerStats: null,
-                            commentaryData: [],
-                            issues: [],
-                            debug: {}
-                        });
-                    } else {
+                            const processedMatch = {
+                                id: matchData.id,
+                                status: matchData.status || 'scheduled',
+                                sportId,
+                                date: matchData.dateTime,
+                                time: matchData.dateTime
+                                    ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
+                                    : '--:--',
+                                tournament: matchData.tournament?.name || 'Partido Local',
+                                tournamentId: matchData.tournamentId || '',
+                                category: 'General',
+                                round: matchData.roundId || '',
+                                venue: matchData.venue || 'Por definir',
+                                referee: matchData.referee || null,
+                                home: {
+                                    id: matchData.homeClub?.id || matchData.homeClubId || 'home',
+                                    name: matchData.homeClub?.name || 'Local',
+                                    logo: matchData.homeClub?.logo || null,
+                                    score: score.home ?? 0
+                                },
+                                away: {
+                                    id: matchData.awayClub?.id || matchData.awayClubId || 'away',
+                                    name: matchData.awayClub?.name || 'Visitante',
+                                    logo: matchData.awayClub?.logo || null,
+                                    score: score.away ?? 0
+                                },
+                                events: matchData.events || [],
+                                lineups: matchData.lineups || null,
+                                standings: [],
+                                h2h: [],
+                                draw: []
+                            };
+
+                            statusRef.current = matchData.status || 'scheduled';
+                            setState({
+                                kind: 'ok',
+                                matchData: processedMatch,
+                                eventsData: matchData.events || [],
+                                statsData: [],
+                                playerStats: null,
+                                commentaryData: [],
+                                issues: [],
+                                debug: {}
+                            });
+                        } else {
+                            setState(prev => ({
+                                ...prev,
+                                kind: 'empty',
+                                message: 'No se encontró el partido en la base de datos'
+                            }));
+                        }
+                    } catch (fetchErr: any) {
+                        if (fetchErr?.name === 'AbortError') return;
+                        console.error('Error fetching DB match:', fetchErr);
                         setState(prev => ({
                             ...prev,
-                            kind: 'empty',
-                            message: 'No hay datos disponibles todavía'
+                            kind: 'error',
+                            message: 'Error al cargar el partido desde la base de datos'
                         }));
                     }
                 }

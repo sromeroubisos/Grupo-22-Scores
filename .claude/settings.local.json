@@ -22,7 +22,19 @@
       "Bash(npm run dev:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(grep:*)",
+      "Bash(cd /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores && supabase db push 2>&1)",
+      "Bash(tail:*)",
+      "Bash(git checkout src/components/admin/entities/club/ClubSquadsTab.tsx)",
+      "Bash(cat /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/components/admin/entities/club/ClubSquadsTab.tsx)",
+      "Bash(cat \"c:/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/components/admin/entities/club/ClubSquadsTab.tsx\")",
+      "Bash(node scripts/test-rugby-tournament.js)",
+      "Bash(node scripts/get-rugby-tournament-ids.js)",
+      "Bash(node scripts/test-all-rugby-tournaments.js)",
+      "Bash(node scripts/test-super-rugby.js)",
+      "Bash(node scripts/test-rugby-standings.js)",
+      "Bash(timeout 120 npm run build)"
     ]
   }
 }

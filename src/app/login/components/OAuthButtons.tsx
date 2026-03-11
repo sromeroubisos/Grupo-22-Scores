@@ -18,23 +18,34 @@ export default function OAuthButtons() {
     const handleLogin = async (provider: 'google' | 'apple' | 'facebook') => {
         setLoading(provider)
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
+            console.log('[OAuthButtons] Calling signInWithOAuth targeting:', getCallbackUrl(provider));
+            const { data, error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
                     redirectTo: getCallbackUrl(provider),
+                    skipBrowserRedirect: false,
                 },
             })
+
+            console.log('[OAuthButtons] signInWithOAuth result:', { data, error });
+
             if (error) throw error
+
+            // Defensively handle case where SDK doesn't redirect automatically
+            if (data?.url) {
+                console.log('[OAuthButtons] Manual redirect to:', data.url);
+                window.location.href = data.url;
+            }
         } catch (error) {
             console.error('OAuth error:', error)
             setLoading(null)
-            // Ideally dispatch error to parent or context
         }
     }
 
     return (
         <div className={styles.socialButtons}>
             <button
+                type="button"
                 className={styles.socialBtn}
                 onClick={() => handleLogin('google')}
                 disabled={!!loading}

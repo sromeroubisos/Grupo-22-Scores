@@ -1,0 +1,487 @@
+/* ============================================
+   FLASH UI SYSTEM - CLUB MANAGEMENT
+   Premium design system with refined hierarchy
+   ============================================ */
+
+:root {
+    /* Core Palette */
+    --bg-void: #0a0a0b;
+    --surface-panel: rgba(20, 20, 22, 0.55);
+    --surface-row: rgba(10, 10, 11, 0.35);
+    --surface-row-hover: rgba(10, 10, 11, 0.55);
+    --surface-elevated: #1c1c1f;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-standard: rgba(255, 255, 255, 0.08);
+    --border-heavy: rgba(255, 255, 255, 0.16);
+
+    /* Anodized metal tones */
+    --anodized-silver: #a1a1aa;
+    --anodized-dim: #71717a;
+    --anodized-dark: #52525b;
+
+    /* Accent system */
+    --accent-primary: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.3);
+    --accent-subtle: rgba(59, 130, 246, 0.1);
+
+    /* Semantic colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --draft: #94a3b8;
+
+    /* Typography */
+    --text-main: #f4f4f5;
+    --text-secondary: #d4d4d8;
+    --text-dim: rgba(244, 244, 245, 0.55);
+
+    /* Mono font */
+    --mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+
+    /* Grid overlay */
+    --grid-line: rgba(255, 255, 255, 0.025);
+}
+
+/* ============================================
+   GLOBAL CONTAINER
+   ============================================ */
+
+.squads-wrap {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-main);
+    background: var(--bg-void);
+    min-height: 100vh;
+    padding: 24px 24px 64px;
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   PAGE HEADER
+   ============================================ */
+
+.page-head {
+    margin-bottom: 24px;
+}
+
+.page-head h1 {
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.page-head .muted {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+}
+
+/* ============================================
+   MAIN PANEL
+   ============================================ */
+
+.panel {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px;
+    border: 1px solid var(--border-standard);
+    border-radius: 14px;
+    background: var(--surface-panel);
+    backdrop-filter: blur(10px);
+}
+
+/* ============================================
+   PANEL TOP BAR
+   ============================================ */
+
+.panel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 12px;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.panel-title h2 {
+    font-size: 18px;
+    font-weight: 650;
+    color: var(--text-main);
+}
+
+.chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 22px;
+    padding: 0 7px;
+    background: var(--accent-subtle);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--mono);
+    color: var(--accent-primary);
+}
+
+.panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ============================================
+   SEARCH INPUT
+   ============================================ */
+
+.search-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--anodized-dim);
+    pointer-events: none;
+}
+
+.search {
+    width: 260px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-standard);
+    color: var(--text-main);
+    padding: 10px 12px 10px 38px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search::placeholder {
+    color: var(--anodized-dim);
+}
+
+.search:hover {
+    border-color: var(--border-heavy);
+}
+
+.search:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(0, 0, 0, 0.35);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-standard);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+    border-color: var(--border-heavy);
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+    font-weight: 700;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #2563eb;
+    border-color: #2563eb;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* ============================================
+   GRID LAYOUT
+   ============================================ */
+
+.list {
+    display: grid;
+    gap: 10px;
+}
+
+.grid-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   ROW CARDS
+   ============================================ */
+
+.row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-standard);
+    background: var(--surface-row);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+
+.row:hover {
+    transform: translateY(-1px);
+    border-color: var(--border-heavy);
+    background: var(--surface-row-hover);
+}
+
+.row:active {
+    transform: translateY(0);
+}
+
+.row-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.row-title {
+    font-weight: 650;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.row-meta {
+    font-size: 12px;
+}
+
+.muted {
+    color: var(--text-dim);
+}
+
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   STATUS CHIPS
+   ============================================ */
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-family: var(--mono);
+    border: 1px solid;
+}
+
+.chip-ok {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.chip-draft {
+    background: rgba(148, 163, 184, 0.1);
+    color: var(--draft);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+.chip-archived {
+    background: rgba(82, 82, 91, 0.1);
+    color: var(--anodized-silver);
+    border-color: rgba(82, 82, 91, 0.2);
+}
+
+/* ============================================
+   KEBAB MENU BUTTON
+   ============================================ */
+
+.kebab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--border-standard);
+    border-radius: 8px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.kebab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-heavy);
+    color: var(--text-main);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 48px;
+    height: 48px;
+    opacity: 0.15;
+    margin-bottom: 16px;
+    color: var(--text-dim);
+}
+
+.empty-text {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .squads-wrap {
+        padding: 16px 16px 48px;
+    }
+
+    .panel {
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .panel-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .panel-title {
+        justify-content: space-between;
+    }
+
+    .panel-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search {
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .row-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+*:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================
+   TAB NAVIGATION OVERRIDES
+   ============================================ */
+
+.tab-item svg {
+    display: none !important;
+}
+
+.tab-item span[class*="ml-"] {
+    margin-left: 0.5rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: var(--mono);
+}

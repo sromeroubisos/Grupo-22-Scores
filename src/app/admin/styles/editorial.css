@@ -1,0 +1,277 @@
+/* ===== ALABASTER EDITORIAL CMS STYLES ===== */
+
+.editorialPage {
+    min-height: 100vh;
+    background: #07090b;
+    color: rgba(255, 255, 255, .92);
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    padding-top: 72px; /* For sticky header */
+}
+
+/* 1. Sticky Header Slab */
+.editorialHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: rgba(13, 14, 18, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    z-index: 1000;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 2. Layout Desktop Two Columns */
+.editorialContainer {
+    width: min(1440px, calc(100% - 64px));
+    margin: 0 auto;
+    padding: 40px 0;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 48px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .editorialContainer {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+}
+
+/* 3. Main Editor (Left Column) */
+.mainContent {
+    background: transparent;
+}
+
+.titleInput {
+    background: transparent;
+    border: none;
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: white;
+    width: 100%;
+    margin-bottom: 24px;
+    padding: 0;
+    outline: none;
+    line-height: 1.1;
+}
+
+.titleInput::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.bodyEditor {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+    width: 100%;
+    min-height: 600px;
+    resize: none;
+    outline: none;
+    padding: 0;
+}
+
+.bodyEditor::placeholder {
+    color: rgba(255, 255, 255, 0.15);
+}
+
+/* 4. Sidebar (Right Column) */
+.sidebar {
+    position: sticky;
+    top: 112px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.panel {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.panelTitle {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 16px;
+    display: block;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field:last-child {
+    margin-bottom: 0;
+}
+
+.label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 8px;
+}
+
+.input, .select, .textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: white;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.input:focus, .select:focus, .textarea:focus {
+    border-color: var(--color-accent, #3b82f6);
+    background: rgba(255, 255, 255, 0.08);
+    outline: none;
+}
+
+.textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* 5. Image Drop/Preview */
+.imagePreview {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
+    border: 1px dashed rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.imagePreview:hover {
+    border-color: rgba(255,255,255,0.3);
+}
+
+.imagePreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.imageEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* 6. Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btnPrimary {
+    background: var(--color-accent, #2563eb);
+    color: white;
+}
+
+.btnPrimary:hover {
+    background: var(--color-accent-dark, #1d4ed8);
+}
+
+.btnSecondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btnSecondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btnGhost {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.btnGhost:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btnDanger {
+    color: #ef4444;
+}
+
+.btnDanger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Status Indicator */
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.statusDraft {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.statusPublished {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.statusIndicatorCircle {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}

@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateEntity } from '@/app/admin/entities/actions';
+import { createEntity, updateEntity } from '@/app/admin/entities/actions';
 import { EntitySelect, EntityOption } from '../fields/EntitySelect';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
+import { useAdminConsole } from '@/app/admin/AdminContext';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
@@ -26,8 +27,10 @@ export interface PlayerData {
     [key: string]: unknown;
 }
 
-export function PlayerEditor({ data }: { data: PlayerData }) {
+export function PlayerEditor({ data, id }: { data: PlayerData; id: string }) {
+    const isCreate = id === 'new';
     const router = useRouter();
+    const { refresh } = useAdminConsole();
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState('');
 
@@ -52,9 +55,7 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
         e.preventDefault();
 
         const newErrors: Record<string, string> = {};
-        if (formState.club_id && !UUID_REGEX.test(formState.club_id)) {
-            newErrors.club_id = 'Debe ser un UUID válido';
-        }
+        // Club IDs are TEXT (slugs/uuids both allowed in backend), removing client-side UUID enforcement.
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
@@ -71,10 +72,22 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
         };
 
         try {
-            await updateEntity('player', data.id, updates);
-            setMessage('Guardado exitosamente.');
-            setIsDirty(false);
-            router.refresh();
+            if (isCreate) {
+                const result = await createEntity('player', updates);
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log('[CREATE_RESULT]', { type: 'player', id: result.id });
+                }
+                setMessage('Jugador creado exitosamente.');
+                setIsDirty(false);
+                refresh();
+                router.replace(`/admin/entities/${result.id}/manage`);
+            } else {
+                await updateEntity('player', id, updates);
+                setMessage('Guardado exitosamente.');
+                setIsDirty(false);
+                refresh();
+                router.refresh();
+            }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : String(err);
             setMessage('Error: ' + errorMessage);
@@ -86,7 +99,9 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-foreground">Editar Jugador</h2>
+                <h2 className="text-xl font-semibold text-foreground">
+                    {isCreate ? 'Crear Nuevo Jugador' : 'Editar Jugador'}
+                </h2>
                 {isDirty && <span className="text-xs px-2 py-1 bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 rounded-full font-medium">Unsaved changes</span>}
             </div>
 
@@ -142,10 +157,10 @@ export function PlayerEditor({ data }: { data: PlayerData }) {
             <div className="flex justify-end pt-4 border-t border-divider gap-3">
                 <button
                     type="submit"
-                    disabled={isSaving || !isDirty}
+                    disabled={isSaving || (!isCreate && !isDirty)}
                     className="px-6 py-2 bg-accent-blue text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
                 >
-                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                    {isSaving ? 'Guardando...' : (isCreate ? 'Crear Jugador' : 'Guardar Cambios')}
                 </button>
             </div>
         </form>

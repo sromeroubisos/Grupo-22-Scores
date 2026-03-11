@@ -22,7 +22,7 @@ interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (role?: AppUserRole) => void;
+    login: (role?: AppUserRole, returnTo?: string) => void;
     logout: () => void;
 }
 
@@ -43,8 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isMounted = useRef(true);
 
     const fetchAndSetUser = async (sbUser: SupabaseUser) => {
+        console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
         try {
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
                 .from('users')
                 .select('*')
                 .eq('id', sbUser.id)
@@ -52,11 +53,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (!isMounted.current) return;
 
+            if (profileError && profileError.code !== 'PGRST116') {
+                console.warn('[AuthContext] Profile fetch error:', profileError.message);
+            }
+
             if (profile) {
-                const { data: membershipsData } = await supabase
+                console.log('[AuthContext] Profile found in DB');
+                const { data: membershipsData, error: membershipError } = await supabase
                     .from('memberships')
                     .select('scope_type, scope_id, role')
                     .eq('user_id', sbUser.id);
+
+                if (membershipError) {
+                    console.warn('[AuthContext] Memberships fetch error:', membershipError.message);
+                }
 
                 if (!isMounted.current) return;
 
@@ -66,27 +76,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     role: m.role,
                 }));
 
-                setUser({
+                const finalUser = {
                     id: profile.id,
                     name: profile.name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: profile.email || sbUser.email || '',
                     role: normalizeRole(profile.role),
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
                     memberships,
-                });
+                };
+                console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role);
+                setUser(finalUser);
             } else {
+                const { isSuperAdminEmail } = await import('@/lib/types/user');
+                const fallbackRole = isSuperAdminEmail(sbUser.email) ? 'super_admin' : 'fan';
+
+                console.log('[AuthContext] No profile in DB, using fallback metadata with role:', fallbackRole);
                 // Fallback to auth metadata si el perfil no existe todavía
                 setUser({
                     id: sbUser.id,
                     name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: sbUser.email || '',
-                    role: 'fan',
+                    role: fallbackRole,
                     avatarUrl: sbUser.user_metadata?.avatar_url,
                 });
             }
         } catch (err: any) {
             if (isAbortError(err)) return;
-            console.error('Error fetching user profile:', err);
+            console.error('[AuthContext] Error fetching user profile:', err);
+            // On error, still set fallback user so they are "authenticated"
+            setUser({
+                id: sbUser.id,
+                name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
+                email: sbUser.email || '',
+                role: 'fan',
+                avatarUrl: sbUser.user_metadata?.avatar_url,
+            });
+        } finally {
+            if (isMounted.current) {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -100,39 +128,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (isMounted.current) {
                     if (session) {
+                        console.log('[AuthContext] initAuth: Session found');
                         await fetchAndSetUser(session.user);
                     } else {
+                        console.log('[AuthContext] initAuth: No session');
                         setUser(null);
+                        setIsLoading(false);
                     }
                 }
             } catch (err: any) {
                 if (isAbortError(err)) return;
-                console.error('Error initializing auth:', err);
-            } finally {
-                if (isMounted.current) {
-                    setIsLoading(false);
-                }
+                console.error('[AuthContext] initAuth error:', err);
+                if (isMounted.current) setIsLoading(false);
             }
         };
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+            console.log('[AuthContext] onAuthStateChange event:', event, 'Has session:', !!session);
             if (!isMounted.current) return;
 
-            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-                if (session?.user) {
-                    await fetchAndSetUser(session.user);
+            try {
+                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || (event as string) === 'INITIAL_SESSION') {
+                    if (session?.user) {
+                        console.log('[AuthContext] Event result: fetching user for event:', event);
+                        // Do NOT await here, to prevent deadlocks in the Supabase client internal lock
+                        fetchAndSetUser(session.user).catch(err => {
+                            console.error('[AuthContext] Background fetchAndSetUser failed:', err);
+                        });
+                    } else if (event !== 'INITIAL_SESSION') {
+                        // If we get SIGNED_IN but no session/user, that's an error state
+                        console.warn('[AuthContext] SIGNED_IN event received but no user present in session');
+                        setUser(null);
+                        setIsLoading(false);
+                    }
+                } else if (event === 'SIGNED_OUT') {
+                    console.log('[AuthContext] Event result: signing out');
+                    setUser(null);
+                    setIsLoading(false);
+                    localStorage.removeItem('g22_user');
                 }
-            } else if (event === 'SIGNED_OUT') {
-                setUser(null);
-                localStorage.removeItem('g22_user');
-            }
 
-            // Defensively clear favorites cache on sign out/in/update
-            if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-                clearFavoritesCache(`Auth event: ${event}`);
+                // Defensively clear favorites cache on sign out/in/update
+                if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+                    clearFavoritesCache(`Auth event: ${event}`);
+                }
+            } catch (err) {
+                console.error('[AuthContext] Error handling auth state change:', err);
             }
-
-            setIsLoading(false);
         });
 
         // Initialize last to ensure listener is ready
@@ -144,9 +186,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const login = (role: AppUserRole = 'fan') => {
+    const login = (role: AppUserRole = 'fan', returnTo?: string) => {
+        // Redirect to the real login page, preserving returnTo so EmailLoginForm
+        // can router.replace() back after authentication.
         if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            const url = new URL('/login', window.location.origin);
+            if (returnTo) {
+                // Encode so ?type=... inside returnTo survives as a single param
+                url.searchParams.set('returnTo', returnTo);
+            }
+            // Use location.replace (not href) to avoid adding to back-stack
+            window.location.replace(url.toString());
         }
     };
 

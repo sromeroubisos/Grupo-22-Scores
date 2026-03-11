@@ -147,7 +147,7 @@ export interface LocalDateEntry {
  */
 export function generateLocalDateKeys(
   timeZone: string,
-  from: number = -3,
+  from: number = -7,
   to: number = 7
 ): LocalDateEntry[] {
   const entries: LocalDateEntry[] = [];

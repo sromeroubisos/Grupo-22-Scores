@@ -53,56 +53,7 @@ function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
                         </button>
                     </div>
 
-                    <div className={styles.topbarControls}>
-                        <select
-                            className={styles.topbarSelect}
-                            value={filters.sport}
-                            onChange={(event) => setFilters((prev) => ({ ...prev, sport: event.target.value }))}
-                        >
-                            <option value="all">Todos los deportes</option>
-                            <option value="rugby">Rugby</option>
-                            <option value="football">Futbol</option>
-                            <option value="hockey">Hockey</option>
-                        </select>
-                        <input
-                            className={styles.topbarInput}
-                            placeholder="Buscar en toda la consola..."
-                            value={filters.search}
-                            onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-                        />
-                        <select
-                            className={styles.topbarSelect}
-                            value={filters.country}
-                            onChange={(event) => setFilters((prev) => ({ ...prev, country: event.target.value }))}
-                        >
-                            <option value="all">Pais</option>
-                            <option value="Argentina">Argentina</option>
-                            <option value="Uruguay">Uruguay</option>
-                            <option value="Chile">Chile</option>
-                        </select>
-                        <select
-                            className={styles.topbarSelect}
-                            value={filters.status}
-                            onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
-                        >
-                            <option value="all">Estado</option>
-                            <option value="activo">Activo</option>
-                            <option value="finalizado">Finalizado</option>
-                            <option value="archivado">Archivado</option>
-                            <option value="pendiente">Pendiente</option>
-                        </select>
-                        <select
-                            className={styles.topbarSelect}
-                            value={filters.source}
-                            onChange={(event) => setFilters((prev) => ({ ...prev, source: event.target.value }))}
-                        >
-                            <option value="all">Fuente</option>
-                            <option value="API">API</option>
-                            <option value="Manual">Manual</option>
-                        </select>
-                        <button className={styles.topbarBtn}>+ Crear</button>
-                        <div className={styles.topbarAlert}>3 conflictos</div>
-                    </div>
+                    {/* Controles superiores removidos a petición del usuario */}
                 </div>
 
                 {/* Mobile Tabs Embedded in Header */}
@@ -194,14 +145,14 @@ function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 }
 
 export default function GlobalAdminLayout({ children }: { children: React.ReactNode }) {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [isAuthorized, setIsAuthorized] = React.useState(false);
 
-
-
     useEffect(() => {
+        if (isLoading) return; // Wait until auth state is resolved
+
         if (!isAuthenticated) {
             router.push('/login');
             return;
@@ -215,7 +166,7 @@ export default function GlobalAdminLayout({ children }: { children: React.ReactN
         } else {
             router.push('/');
         }
-    }, [isAuthenticated, user, router]);
+    }, [isAuthenticated, user, router, isLoading]);
 
     // Lock body scroll when mobile sidebar is open
     useEffect(() => {

@@ -33,11 +33,12 @@ export interface Tournament {
     unionId: string | null;
     seasonId: string;
     name: string;
-    slug: string; // Added slug
+    slug: string;
     status: 'draft' | 'published';
-    sport: 'rugby' | 'football' | 'hockey';
+    sport: string;
     category: string;
     format: string;
+    country: string | null; // Added
     createdAt: string;
     isVisible?: boolean;
     folderId?: string;
@@ -77,6 +78,7 @@ export interface Club {
     name: string;
     shortName: string;
     city: string;
+    country: string | null; // Added
     logoUrl: string;
     primaryColor?: string;
     folderId?: string;
@@ -389,15 +391,15 @@ class MockDB {
 
         // Clubs
         this.clubs = [
-            { id: 'sic', unionId: 'uar', name: 'San Isidro Club', shortName: 'SIC', city: 'San Isidro', logoUrl: '🔵⚪', primaryColor: '#00ccff', isVisible: true, folderId: 'urba' },
-            { id: 'casi', unionId: 'uar', name: 'Club Atlético San Isidro', shortName: 'CASI', city: 'San Isidro', logoUrl: '⚪⚫', primaryColor: '#000000', isVisible: true, folderId: 'urba' },
-            { id: 'hindu', unionId: 'uar', name: 'Hindu Club', shortName: 'HIN', city: 'Don Torcuato', logoUrl: '🐘', primaryColor: '#fbbf24', isVisible: true, folderId: 'urba' },
-            { id: 'belgrano', unionId: 'uar', name: 'Belgrano Athletic', shortName: 'BAC', city: 'CABA', logoUrl: '🤎', primaryColor: '#78350f', isVisible: true, folderId: 'urba' },
-            { id: 'alumni', unionId: 'uar', name: 'Alumni', shortName: 'ALU', city: 'Tortuguitas', logoUrl: '🔴⚪', primaryColor: '#dc2626', isVisible: true, folderId: 'urba' },
-            { id: 'newman', unionId: 'uar', name: 'Newman', shortName: 'NEW', city: 'Benavidez', logoUrl: '🛑', primaryColor: '#b91c1c', isVisible: true, folderId: 'urba' },
-            { id: 'cuba', unionId: 'uar', name: 'Club Universitario de Buenos Aires', shortName: 'CUBA', city: 'Villa de Mayo', logoUrl: '🔵⚫', primaryColor: '#1e3a8a', isVisible: true, folderId: 'urba' },
-            { id: 'regatas', unionId: 'uar', name: 'Regatas Bella Vista', shortName: 'REG', city: 'Bella Vista', logoUrl: '🟡🔵', primaryColor: '#fbbf24', isVisible: true, folderId: 'urba' },
-            { id: 'pucara', unionId: null, name: 'Club Pucara', shortName: 'PUC', city: 'Burzaco', logoUrl: '🔴', primaryColor: '#b91c1c', isVisible: true, folderId: 'desarrollo' } // Intentionally unlinked for conflict demo
+            { id: 'sic', unionId: 'uar', name: 'San Isidro Club', shortName: 'SIC', city: 'San Isidro', country: 'Argentina', logoUrl: '🔵⚪', primaryColor: '#00ccff', isVisible: true, folderId: 'urba' },
+            { id: 'casi', unionId: 'uar', name: 'Club Atlético San Isidro', shortName: 'CASI', city: 'San Isidro', country: 'Argentina', logoUrl: '⚪⚫', primaryColor: '#000000', isVisible: true, folderId: 'urba' },
+            { id: 'hindu', unionId: 'uar', name: 'Hindu Club', shortName: 'HIN', city: 'Don Torcuato', country: 'Argentina', logoUrl: '🐘', primaryColor: '#fbbf24', isVisible: true, folderId: 'urba' },
+            { id: 'belgrano', unionId: 'uar', name: 'Belgrano Athletic', shortName: 'BAC', city: 'CABA', country: 'Argentina', logoUrl: '🤎', primaryColor: '#78350f', isVisible: true, folderId: 'urba' },
+            { id: 'alumni', unionId: 'uar', name: 'Alumni', shortName: 'ALU', city: 'Tortuguitas', country: 'Argentina', logoUrl: '🔴⚪', primaryColor: '#dc2626', isVisible: true, folderId: 'urba' },
+            { id: 'newman', unionId: 'uar', name: 'Newman', shortName: 'NEW', city: 'Benavidez', country: 'Argentina', logoUrl: '🛑', primaryColor: '#b91c1c', isVisible: true, folderId: 'urba' },
+            { id: 'cuba', unionId: 'uar', name: 'Club Universitario de Buenos Aires', shortName: 'CUBA', city: 'Villa de Mayo', country: 'Argentina', logoUrl: '🔵⚫', primaryColor: '#1e3a8a', isVisible: true, folderId: 'urba' },
+            { id: 'regatas', unionId: 'uar', name: 'Regatas Bella Vista', shortName: 'REG', city: 'Bella Vista', country: 'Argentina', logoUrl: '🟡🔵', primaryColor: '#fbbf24', isVisible: true, folderId: 'urba' },
+            { id: 'pucara', unionId: null, name: 'Club Pucara', shortName: 'PUC', city: 'Burzaco', country: 'Argentina', logoUrl: '🔴', primaryColor: '#b91c1c', isVisible: true, folderId: 'desarrollo' } // Intentionally unlinked for conflict demo
         ];
 
         // Tournaments
@@ -412,6 +414,7 @@ class MockDB {
                 sport: 'rugby',
                 category: 'Primera',
                 format: 'League + Playoffs',
+                country: 'Argentina',
                 createdAt: new Date().toISOString(),
                 isVisible: true,
                 folderId: 'sudamerica'
@@ -426,6 +429,7 @@ class MockDB {
                 sport: 'rugby',
                 category: 'Primera',
                 format: 'Knockout',
+                country: 'Argentina',
                 createdAt: new Date().toISOString(),
                 isVisible: true,
                 folderId: 'desarrollo'

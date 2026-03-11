@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
     // if "next" is in param, use it as the redirect URL
-    const next = searchParams.get('next') ?? '/dashboard'
+    const next = searchParams.get('next') ?? '/'
 
     if (code) {
         const cookieStore = await cookies()
@@ -49,8 +49,9 @@ export async function GET(request: Request) {
                     .single()
 
                 if (!existingUser) {
+                    const { isSuperAdminEmail } = await import('@/lib/types/user')
                     // Determine role
-                    const role = user.email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'user'
+                    const role = isSuperAdminEmail(user.email) ? 'super_admin' : 'fan'
 
                     // Create user
                     await supabase.from('users').insert({

@@ -45,41 +45,67 @@ export async function GET() {
         results.connection = `EXCEPTION: ${e.message}`
     }
 
-    // 2. Create super admin user
+    // 2. Create / reset super admin user
     try {
-        // Try signUp (works with anon key)
-        const { data, error } = await supabase.auth.signUp({
-            email: SUPER_ADMIN_EMAIL,
-            password: SUPER_ADMIN_PASSWORD,
-            options: {
-                data: { full_name: 'Super Admin' },
-            },
-        })
+        if (serviceKey) {
+            // With service role we can safely upsert auth user + reset password
+            const { data: authUser, error: authLookupError } = await supabase
+                .schema('auth')
+                .from('users')
+                .select('id, email')
+                .eq('email', SUPER_ADMIN_EMAIL)
+                .maybeSingle()
 
-        if (error) {
-            if (error.message.includes('already registered') || error.message.includes('already been registered')) {
-                results.super_admin = 'Already exists'
+            if (authLookupError) {
+                results.super_admin = `Auth lookup error: ${authLookupError.message}`
+            } else if (!authUser) {
+                const { data, error } = await supabase.auth.admin.createUser({
+                    email: SUPER_ADMIN_EMAIL,
+                    password: SUPER_ADMIN_PASSWORD,
+                    email_confirm: true,
+                    user_metadata: { full_name: 'Super Admin' },
+                })
+                if (error) {
+                    results.super_admin = `Admin create error: ${error.message}`
+                } else if (data.user) {
+                    results.super_admin = `Created (id: ${data.user.id})`
+                }
+                results.auto_confirmed = true
             } else {
-                results.super_admin = `SignUp error: ${error.message}`
+                const { error: updateError } = await supabase.auth.admin.updateUserById(authUser.id, {
+                    password: SUPER_ADMIN_PASSWORD,
+                    email_confirm: true,
+                })
+                results.super_admin = updateError
+                    ? `Password update error: ${updateError.message}`
+                    : `Password reset (id: ${authUser.id})`
+                results.auto_confirmed = !updateError
             }
-        } else if (data.user) {
-            // Check if user was actually created or if it's a fake response (email confirmation required)
-            if (data.user.identities && data.user.identities.length === 0) {
-                results.super_admin = 'Already exists (email taken)'
-            } else {
-                results.super_admin = `Created (id: ${data.user.id})`
+        } else {
+            // Fallback to signUp with anon key
+            const { data, error } = await supabase.auth.signUp({
+                email: SUPER_ADMIN_EMAIL,
+                password: SUPER_ADMIN_PASSWORD,
+                options: {
+                    data: { full_name: 'Super Admin' },
+                },
+            })
 
-                // If we have service key, auto-confirm the user
-                if (serviceKey) {
-                    const { error: updateError } = await supabase.auth.admin.updateUserById(data.user.id, {
-                        email_confirm: true,
-                    })
-                    results.auto_confirmed = updateError ? `Error: ${updateError.message}` : true
+            if (error) {
+                if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+                    results.super_admin = 'Already exists'
                 } else {
-                    results.auto_confirmed = false
-                    results.note = 'Without SUPABASE_SERVICE_ROLE_KEY the user may need email confirmation. Add the key to .env.local or confirm the user in the Supabase dashboard.'
+                    results.super_admin = `SignUp error: ${error.message}`
+                }
+            } else if (data.user) {
+                if (data.user.identities && data.user.identities.length === 0) {
+                    results.super_admin = 'Already exists (email taken)'
+                } else {
+                    results.super_admin = `Created (id: ${data.user.id})`
                 }
             }
+            results.auto_confirmed = false
+            results.note = 'Without SUPABASE_SERVICE_ROLE_KEY the user may need email confirmation. Add the key to .env.local or confirm the user in the Supabase dashboard.'
         }
     } catch (e: any) {
         results.super_admin = `EXCEPTION: ${e.message}`
@@ -102,6 +128,30 @@ export async function GET() {
         }
     } catch (e: any) {
         results.users_table = `EXCEPTION: ${e.message}`
+    }
+
+    // 4. Ensure super admin role is set (requires service role key)
+    if (serviceKey) {
+        try {
+            const { data: roleData, error: roleError } = await supabase
+                .from('users')
+                .update({ role: 'super_admin' })
+                .eq('email', SUPER_ADMIN_EMAIL)
+                .select('id, role')
+                .maybeSingle()
+
+            if (roleError) {
+                results.super_admin_role = `Update error: ${roleError.message}`
+            } else if (roleData) {
+                results.super_admin_role = `OK (${roleData.role})`
+            } else {
+                results.super_admin_role = 'User not found to update role'
+            }
+        } catch (e: any) {
+            results.super_admin_role = `EXCEPTION: ${e.message}`
+        }
+    } else {
+        results.super_admin_role = 'Skipped (no service role key)'
     }
 
     return NextResponse.json({

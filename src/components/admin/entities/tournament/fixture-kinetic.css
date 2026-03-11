@@ -1,0 +1,727 @@
+/* ============================================
+   KINETIC POLYCARBONATE - Fixture Management
+   ============================================ */
+
+:root {
+  --fixture-bg: #05070a;
+  --fixture-poly-surface: rgba(20, 25, 35, 0.65);
+  --fixture-poly-border: rgba(255, 255, 255, 0.08);
+  --fixture-poly-shine: rgba(255, 255, 255, 0.12);
+  --fixture-accent-cyan: #00f2ff;
+  --fixture-accent-green: #39ff14;
+  --fixture-accent-red: #ff3131;
+  --fixture-accent-yellow: #faff00;
+  --fixture-text-main: #e2e8f0;
+  --fixture-text-dim: #94a3b8;
+  --fixture-suspension-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── AMBIENT MESH BACKGROUND ─────────────────────────────────────────── */
+
+.fixture-ambient-mesh {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.4;
+  pointer-events: none;
+  background-image: radial-gradient(
+      circle at 20% 20%,
+      rgba(0, 242, 255, 0.03) 0%,
+      transparent 40%
+    ),
+    radial-gradient(circle at 80% 80%, rgba(57, 255, 20, 0.02) 0%, transparent 40%);
+}
+
+/* ─── POLYCARBONATE GLASS EFFECT ──────────────────────────────────────── */
+
+.fixture-poly-panel {
+  background: var(--fixture-poly-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--fixture-poly-border);
+  border-radius: 16px;
+  box-shadow: var(--fixture-suspension-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.fixture-poly-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--fixture-poly-shine),
+    transparent
+  );
+}
+
+/* ─── LAYOUT STRUCTURE ────────────────────────────────────────────────── */
+
+.fixture-app-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: calc(100vh - 120px);
+  padding: 20px;
+  gap: 20px;
+  background-color: var(--fixture-bg);
+}
+
+/* ─── HEADER ──────────────────────────────────────────────────────────── */
+
+.fixture-top-bar {
+  grid-column: 1 / -1;
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fixture-tournament-info h1 {
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--fixture-text-main);
+  margin: 0;
+}
+
+.fixture-tournament-info h1 span {
+  color: var(--fixture-text-dim);
+  font-weight: 300;
+}
+
+.fixture-badge-status {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: rgba(0, 242, 255, 0.1);
+  border: 1px solid var(--fixture-accent-cyan);
+  color: var(--fixture-accent-cyan);
+  margin-left: 10px;
+  letter-spacing: 0.1em;
+}
+
+.fixture-tournament-info p {
+  font-size: 0.8rem;
+  color: var(--fixture-text-dim);
+  margin-top: 4px;
+}
+
+.fixture-global-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────────────────── */
+
+.fixture-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.fixture-btn-primary {
+  background: var(--fixture-text-main);
+  color: var(--fixture-bg);
+}
+
+.fixture-btn-primary:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+.fixture-btn-ghost {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--fixture-poly-border);
+  color: var(--fixture-text-main);
+}
+
+.fixture-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.fixture-btn-danger {
+  background: rgba(255, 49, 49, 0.1);
+  border-color: var(--fixture-accent-red);
+  color: var(--fixture-accent-red);
+}
+
+.fixture-btn-danger:hover {
+  background: rgba(255, 49, 49, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ─── SIDEBAR NAVIGATION ──────────────────────────────────────────────── */
+
+.fixture-sidebar-nav {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.fixture-nav-section-title {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: var(--fixture-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.fixture-nav-group {
+  margin-bottom: 32px;
+}
+
+.fixture-nav-item {
+  list-style: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--fixture-text-dim);
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fixture-nav-item:hover {
+  color: var(--fixture-text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.fixture-nav-item.active {
+  color: var(--fixture-accent-cyan);
+  background: rgba(0, 242, 255, 0.05);
+  font-weight: 600;
+}
+
+.fixture-nav-item .count {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+/* ─── MAIN CONTENT ────────────────────────────────────────────────────── */
+
+.fixture-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding-right: 5px;
+  max-height: calc(100vh - 200px);
+}
+
+.fixture-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+
+.fixture-content-header h2 {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--fixture-text-main);
+  margin: 0;
+}
+
+.fixture-view-switch {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  border-radius: 8px;
+  display: flex;
+  border: 1px solid var(--fixture-poly-border);
+}
+
+.fixture-view-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--fixture-text-dim);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.fixture-view-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--fixture-text-main);
+}
+
+/* ─── MATCH TABLE ─────────────────────────────────────────────────────── */
+
+.fixture-match-list {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.fixture-match-list thead th {
+  text-align: left;
+  padding: 0 20px 10px 20px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: var(--fixture-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.fixture-match-row {
+  background: rgba(255, 255, 255, 0.02);
+  transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.fixture-match-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: scale(1.005) translateX(4px);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.fixture-match-row td {
+  padding: 18px 20px;
+  font-size: 0.9rem;
+  border-top: 1px solid var(--fixture-poly-border);
+  border-bottom: 1px solid var(--fixture-poly-border);
+  color: var(--fixture-text-main);
+}
+
+.fixture-match-row td:first-child {
+  border-left: 1px solid var(--fixture-poly-border);
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+.fixture-match-row td:last-child {
+  border-right: 1px solid var(--fixture-poly-border);
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.fixture-team-cell {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fixture-team-logo {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.fixture-match-date-minor {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ─── STATUS INDICATORS ───────────────────────────────────────────────── */
+
+.fixture-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.fixture-status-scheduled {
+  color: var(--fixture-text-dim);
+  background: var(--fixture-text-dim);
+}
+
+.fixture-status-live {
+  color: var(--fixture-accent-yellow);
+  background: var(--fixture-accent-yellow);
+  animation: fixture-pulse 1.5s infinite;
+}
+
+.fixture-status-final {
+  color: var(--fixture-accent-green);
+  background: var(--fixture-accent-green);
+}
+
+.fixture-status-suspended,
+.fixture-status-postponed {
+  color: var(--fixture-accent-red);
+  background: var(--fixture-accent-red);
+}
+
+@keyframes fixture-pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── EDITOR PANEL (SLIDE-IN) ─────────────────────────────────────────── */
+
+.fixture-editor-panel {
+  position: fixed;
+  right: -450px;
+  top: 20px;
+  bottom: 20px;
+  width: 400px;
+  z-index: 1000;
+  transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fixture-editor-panel.open {
+  right: 20px;
+}
+
+.fixture-editor-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+  color: var(--fixture-text-main);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fixture-editor-close {
+  background: none;
+  border: none;
+  color: var(--fixture-text-dim);
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: 0.2s;
+}
+
+.fixture-editor-close:hover {
+  color: var(--fixture-text-main);
+}
+
+.fixture-form-group {
+  margin-bottom: 20px;
+}
+
+.fixture-form-label {
+  display: block;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.65rem;
+  color: var(--fixture-text-dim);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.fixture-form-input,
+.fixture-form-select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--fixture-poly-border);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--fixture-text-main);
+  font-family: inherit;
+  outline: none;
+  transition: 0.2s;
+}
+
+.fixture-form-input:focus,
+.fixture-form-select:focus {
+  border-color: var(--fixture-accent-cyan);
+  background: rgba(0, 242, 255, 0.05);
+}
+
+.fixture-form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.fixture-form-actions {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ─── MASS ACTIONS BAR ────────────────────────────────────────────────── */
+
+.fixture-mass-actions-bar {
+  margin-top: auto;
+  display: flex;
+  padding: 16px;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px dashed var(--fixture-poly-border);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fixture-mass-actions-bar span {
+  font-size: 0.75rem;
+  color: var(--fixture-text-dim);
+  margin-right: 10px;
+}
+
+.fixture-mass-actions-bar .fixture-btn {
+  padding: 6px 12px;
+  font-size: 0.7rem;
+}
+
+/* ─── EMPTY STATE ─────────────────────────────────────────────────────── */
+
+.fixture-empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--fixture-text-dim);
+}
+
+.fixture-empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.fixture-empty-state-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--fixture-text-main);
+}
+
+.fixture-empty-state-text {
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+/* ─── SCROLLBAR CUSTOMIZATION ─────────────────────────────────────────── */
+
+.fixture-sidebar-nav::-webkit-scrollbar,
+.fixture-main-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.fixture-sidebar-nav::-webkit-scrollbar-track,
+.fixture-main-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fixture-sidebar-nav::-webkit-scrollbar-thumb,
+.fixture-main-content::-webkit-scrollbar-thumb {
+  background: var(--fixture-poly-border);
+  border-radius: 10px;
+}
+
+.fixture-sidebar-nav::-webkit-scrollbar-thumb:hover,
+.fixture-main-content::-webkit-scrollbar-thumb:hover {
+  background: var(--fixture-text-dim);
+}
+
+/* ─── ANIMATIONS FOR SETUP COMPONENTS ─────────────────────────────────── */
+
+@keyframes setup-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes setup-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes setup-stagger-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.setup-grid-animate {
+  animation: setup-fade-in 0.6s ease-out;
+}
+
+.setup-card-fade {
+  animation: setup-fade-in 0.7s ease-out backwards;
+}
+
+.form-slide-in {
+  animation: setup-slide-in 0.4s ease-out;
+}
+
+.phase-item-stagger {
+  animation: setup-stagger-fade 0.5s ease-out backwards;
+}
+
+.phase-item-stagger:nth-child(1) { animation-delay: 0s; }
+.phase-item-stagger:nth-child(2) { animation-delay: 0.05s; }
+.phase-item-stagger:nth-child(3) { animation-delay: 0.1s; }
+.phase-item-stagger:nth-child(4) { animation-delay: 0.15s; }
+.phase-item-stagger:nth-child(5) { animation-delay: 0.2s; }
+.phase-item-stagger:nth-child(6) { animation-delay: 0.25s; }
+
+.participant-item-stagger {
+  animation: setup-stagger-fade 0.4s ease-out backwards;
+}
+
+.participant-item-stagger:nth-child(1) { animation-delay: 0s; }
+.participant-item-stagger:nth-child(2) { animation-delay: 0.03s; }
+.participant-item-stagger:nth-child(3) { animation-delay: 0.06s; }
+.participant-item-stagger:nth-child(4) { animation-delay: 0.09s; }
+.participant-item-stagger:nth-child(5) { animation-delay: 0.12s; }
+.participant-item-stagger:nth-child(6) { animation-delay: 0.15s; }
+.participant-item-stagger:nth-child(7) { animation-delay: 0.18s; }
+.participant-item-stagger:nth-child(8) { animation-delay: 0.21s; }
+.participant-item-stagger:nth-child(9) { animation-delay: 0.24s; }
+.participant-item-stagger:nth-child(10) { animation-delay: 0.27s; }
+
+/* Custom scrollbar for participant list */
+.fixture-poly-panel > div::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fixture-poly-panel > div::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.fixture-poly-panel > div::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.fixture-poly-panel > div::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ─── RESPONSIVE SETUP UTILITIES ──────────────────────────────────────── */
+
+/* Responsive grid for setup */
+@media (min-width: 768px) {
+  .setup-responsive-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .setup-header-responsive {
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .setup-btn-responsive {
+    width: auto !important;
+  }
+
+  .setup-footer-buttons {
+    flex-direction: row !important;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+/* Tablet and desktop adjustments */
+@media (min-width: 640px) {
+  .setup-header-responsive {
+    flex-direction: row !important;
+    align-items: center;
+  }
+}
+
+/* Mobile padding adjustments */
+@media (max-width: 640px) {
+  .fixture-poly-panel {
+    padding: 24px !important;
+  }
+
+  .setup-card-fade {
+    padding: 24px !important;
+  }
+
+  .fixture-top-bar {
+    padding: 20px !important;
+  }
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .fixture-app-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .fixture-sidebar-nav {
+    max-height: none;
+  }
+
+  .fixture-editor-panel {
+    width: 100%;
+    right: -100%;
+  }
+
+  .fixture-editor-panel.open {
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+}

@@ -1,22 +1,56 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { db } from '@/lib/mock-db';
-import mammoth from 'mammoth';
-import styles from './page.module.css';
 import { resolveAdminPanel } from '@/lib/auth/roles';
+import { useAdminConsole } from './AdminContext';
+import styles from './page.module.css';
+import mammoth from 'mammoth';
+import {
+    Users,
+    Trophy,
+    Calendar,
+    Settings,
+    ChevronRight,
+    Plus,
+    Search,
+    Filter,
+    MoreHorizontal,
+    FileText,
+    Download,
+    Eye,
+    Bell,
+    CheckCircle,
+    Clock,
+    AlertCircle,
+    LayoutDashboard,
+    Shield,
+    FileDigit,
+    Share2,
+    FileSpreadsheet,
+    Printer,
+    Edit3,
+    Trash2,
+    Copy,
+    Archive,
+    History,
+    MessageSquare,
+    Link as LinkIcon,
+    RefreshCw,
+    Maximize2,
+    CloudUpload
+} from 'lucide-react';
 
 export default function AdminDashboard() {
     const { user } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { tournaments, clubs, unions, matches, news, disciplineIncidents, disciplineSanctions, regulations, loading, errors, refresh } = useAdminConsole();
+
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
     const [activeTab, setActiveTab] = useState(searchParams?.get('tab') || 'dashboard');
-    const [myTournaments, setMyTournaments] = useState<any[]>([]);
-    const [myUnions, setMyUnions] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [createClubMode, setCreateClubMode] = useState<'none' | 'selection' | 'quick' | 'import'>('none');
     const [reportTab, setReportTab] = useState<'noticias' | 'resumen' | 'boletin_oficial' | 'eventos'>('noticias');
@@ -29,6 +63,7 @@ export default function AdminDashboard() {
     const [disciplineSearch, setDisciplineSearch] = useState('');
     const [tourSubTabs, setTourSubTabs] = useState<Record<string, string>>({}); // { tourId: activeTab }
     const [isUploading, setIsUploading] = useState(false);
+    const [regulatedEntries, setRegulatedEntries] = useState<any[]>([]);
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, tourId: string) => {
         const file = event.target.files?.[0];
@@ -43,20 +78,21 @@ export default function AdminDashboard() {
                     const result = await mammoth.convertToHtml({ arrayBuffer });
                     const html = result.value;
 
-                    const existingIdx = db.regulations.findIndex(r => r.scopeId === tourId);
+                    const existingIdx = regulatedEntries.findIndex(r => r.scopeId === tourId);
                     if (existingIdx >= 0) {
-                        db.regulations[existingIdx].content = html;
-                        db.regulations[existingIdx].updatedAt = new Date().toISOString();
+                        const next = [...regulatedEntries];
+                        next[existingIdx].content = html;
+                        next[existingIdx].updatedAt = new Date().toISOString();
+                        setRegulatedEntries(next);
                     } else {
-                        db.regulations.push({
+                        setRegulatedEntries(prev => [...prev, {
                             id: Math.random().toString(36).substr(2, 9),
                             scopeType: 'tournament',
                             scopeId: tourId,
                             content: html,
                             updatedAt: new Date().toISOString()
-                        });
+                        }]);
                     }
-                    setTourSubTabs(prev => ({ ...prev })); // Force re-render
                 } catch (err) {
                     console.error("Conversion error:", err);
                     alert("Error interpretando el archivo Word.");
@@ -74,11 +110,6 @@ export default function AdminDashboard() {
     // Quick Create State
     const [quickClubName, setQuickClubName] = useState('');
 
-    const reportNews = [
-        { id: 'n1', status: 'published', title: 'Sanciones Disciplinarias - Fecha 4 - Bloque Regional', time: 'Hace 2 horas', ref: 'UC-992' },
-        { id: 'n2', status: 'draft', title: 'Cambio de localía: Jockey Club vs Tala RC', time: 'Programado: 14 Feb', ref: 'UC-995' },
-        { id: 'n3', status: 'published', title: 'Circular #12: Nuevos protocolos de seguridad', time: 'Hace 2 días', ref: 'UC-980' },
-    ];
 
     const reportNotes = [
         { id: 'nt1', date: '2026-02-10', category: 'Disciplinario', title: 'Resolución Exp. DIS-9021', content: 'Sanción de 4 semanas al jugador R. Dupont por tackle alto.' },
@@ -150,7 +181,7 @@ export default function AdminDashboard() {
         { id: 'e2', day: '15', month: 'FEB', title: 'Clínica de Scrum para Referees M19', place: 'Club La Tablada • 10:00' },
     ];
 
-    const activeReport = reportNews.find((item) => item.id === activeReportId) || reportNews[0];
+    const activeReport = news.find((item) => item.id === activeReportId) || news[0] || { title: 'Sin noticias' };
 
     useEffect(() => {
         if (!user || !adminPanel?.href) return;
@@ -159,19 +190,11 @@ export default function AdminDashboard() {
         }
     }, [adminPanel, user, router]);
 
-    useEffect(() => {
-        if (!user) return;
-        const memberships = db.memberships.filter(m => m.userId === user.id);
-        const unions = memberships.filter(m => m.scopeType === 'union').map(m => db.unions.find(u => u.id === m.scopeId)).filter(Boolean);
-        const tournaments = db.tournaments; // For Monolith view, showing all
-
-        setMyUnions(unions);
-        setMyTournaments(tournaments);
-    }, [user]);
-
-    const filteredTournaments = myTournaments.filter(t =>
-        t.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredTournaments = useMemo(() => {
+        return tournaments.filter(t =>
+            t.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [tournaments, searchTerm]);
 
     if (adminPanel?.href && adminPanel.href !== '/admin') {
         return null;
@@ -205,6 +228,45 @@ export default function AdminDashboard() {
 
                 <main className="main-content">
                     <div className="container-limited">
+                        {/* Global Loading / Error Indicators */}
+                        {loading.all && (
+                            <div style={{
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                padding: '12px 20px',
+                                borderRadius: '8px',
+                                marginBottom: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px'
+                            }}>
+                                <RefreshCw className="animate-spin" size={16} />
+                                <span style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Actualizando datos del sistema...</span>
+                            </div>
+                        )}
+
+                        {Object.values(errors).some(e => e !== null) && (
+                            <div style={{
+                                background: 'rgba(255, 68, 68, 0.1)',
+                                border: '1px solid rgba(255, 68, 68, 0.2)',
+                                padding: '16px 20px',
+                                borderRadius: '8px',
+                                marginBottom: '24px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <AlertCircle color="var(--accent-danger)" size={20} />
+                                    <div>
+                                        <div style={{ fontWeight: 600, color: 'var(--accent-danger)' }}>Error de carga parcial</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                                            Algunos módulos no se pudieron sincronizar. El sistema está usando datos en cache si están disponibles.
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onClick={() => refresh()} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.8rem' }}>Reintentar</button>
+                            </div>
+                        )}
 
                         {/* === DASHBOARD PRINCIPAL (Dashboard A Content) === */}
                         {activeTab === 'dashboard' && (
@@ -223,22 +285,22 @@ export default function AdminDashboard() {
                                 <div className="grid-12" style={{ marginBottom: '32px' }}>
                                     <div className="glass kpi-card span-3">
                                         <div className="kpi-label">Partidos Activos</div>
-                                        <div className="kpi-value">{db.matches.filter(m => m.status !== 'final').length}</div>
+                                        <div className="kpi-value">{matches.filter((m: any) => m.status !== 'final').length}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--accent-bio)' }}>En curso o programados</div>
                                     </div>
                                     <div className="glass kpi-card span-3">
                                         <div className="kpi-label"><span className="pulse-live"></span>En Vivo</div>
-                                        <div className="kpi-value" style={{ color: 'var(--accent-bio)' }}>{db.matches.filter(m => m.status === 'live').length}</div>
+                                        <div className="kpi-value" style={{ color: 'var(--accent-bio)' }}>{matches.filter((m: any) => m.status === 'live').length}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Consola abierta</div>
                                     </div>
                                     <div className="glass kpi-card span-3">
                                         <div className="kpi-label">Borradores</div>
-                                        <div className="kpi-value">{myTournaments.filter(t => t.status !== 'published').length}</div>
+                                        <div className="kpi-value">{tournaments.filter((t: any) => t.status !== 'published').length}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--accent-danger)' }}>Torneos sin publicar</div>
                                     </div>
                                     <div className="glass kpi-card span-3">
                                         <div className="kpi-label">Clubes</div>
-                                        <div className="kpi-value">{myUnions.length === 1 ? db.clubs.filter(c => c.unionId === myUnions[0].id).length : db.clubs.length}</div>
+                                        <div className="kpi-value">{clubs.length}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Afiliados</div>
                                     </div>
                                 </div>
@@ -249,11 +311,11 @@ export default function AdminDashboard() {
                                         <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Mis Torneos Recientes</h3>
                                     </div>
                                     <div>
-                                        {myTournaments.slice(0, 3).map(t => (
+                                        {tournaments.slice(0, 3).map(t => (
                                             <div key={t.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <div>
                                                     <div style={{ fontWeight: 600 }}>{t.name}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{t.category} • {t.seasonId}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{t.category} • {t.season_id}</div>
                                                 </div>
                                                 <span className={`badge ${t.status === 'published' ? 'badge-bio' : 'badge-warning'}`}>{t.status === 'published' ? 'Activo' : 'Borrador'}</span>
                                             </div>
@@ -273,7 +335,7 @@ export default function AdminDashboard() {
                                         <p>Gestión de fixtures, reglamentos y estados.</p>
                                     </div>
                                     <div className="module-actions">
-                                        <Link href={`/admin/union/${myUnions[0]?.id || 'u1'}/torneos/crear`} style={{ textDecoration: 'none', background: 'var(--accent-bio)', color: '#000', padding: '10px 20px', borderRadius: '8px', fontWeight: 700 }}>+ Crear Torneo</Link>
+                                        <Link href={`/admin/union/${unions[0]?.id || 'u1'}/torneos/crear`} style={{ textDecoration: 'none', background: 'var(--accent-bio)', color: '#000', padding: '10px 20px', borderRadius: '8px', fontWeight: 700 }}>+ Crear Torneo</Link>
                                     </div>
                                 </div>
 
@@ -290,7 +352,7 @@ export default function AdminDashboard() {
                                                     {t.status === 'published' ? 'Activo' : 'Borrador'}
                                                 </span>
                                                 <h3 style={{ fontSize: '1.2rem', marginBottom: '5px' }}>{t.name}</h3>
-                                                <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>{t.seasonId} • {t.sport}</p>
+                                                <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>{t.season_id} • {t.sport}</p>
                                             </div>
                                         </Link>
                                     ))}
@@ -340,7 +402,7 @@ export default function AdminDashboard() {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {db.clubs.map(c => (
+                                                    {clubs.map(c => (
                                                         <tr key={c.id}>
                                                             <td><strong>{c.name}</strong></td>
                                                             <td>{c.city || 'N/A'}</td>
@@ -372,7 +434,7 @@ export default function AdminDashboard() {
 
                                                 <div className="grid-12">
                                                     <div className="glass span-3" style={{ padding: '32px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '16px', transition: 'all 0.2s', border: '1px solid var(--accent-bio)' }}
-                                                        onClick={() => window.location.href = `/admin/union/${myUnions[0]?.id || 'u1'}/clubes/crear`}>
+                                                        onClick={() => window.location.href = `/admin/entities/new?type=club`}>
                                                         <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--accent-bio-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-bio)' }}>
                                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                                         </div>
@@ -473,7 +535,7 @@ export default function AdminDashboard() {
                                                     onChange={(e) => setDisciplineTourFilter(e.target.value)}
                                                 >
                                                     <option>Todos los torneos</option>
-                                                    {myTournaments.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                                    {tournaments.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                                 </select>
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -490,16 +552,16 @@ export default function AdminDashboard() {
                                     </div>
                                 </header>
 
-                                {myTournaments
+                                {tournaments
                                     .filter(t => disciplineTourFilter === 'Todos los torneos' || t.id === disciplineTourFilter)
-                                    .filter(t => db.disciplineIncidents.some(inc => inc.tournamentId === t.id))
+                                    .filter(t => disciplineIncidents.some(inc => inc.tournament_id === t.id))
                                     .map(tournament => {
-                                        const tourIncidents = db.disciplineIncidents.filter(inc =>
-                                            inc.tournamentId === tournament.id &&
-                                            (inc.playerName.toLowerCase().includes(disciplineSearch.toLowerCase()) ||
-                                                inc.clubName.toLowerCase().includes(disciplineSearch.toLowerCase()))
+                                        const tourIncidents = disciplineIncidents.filter(inc =>
+                                            inc.tournament_id === tournament.id &&
+                                            (inc.player_name.toLowerCase().includes(disciplineSearch.toLowerCase()) ||
+                                                (inc as any).club?.name?.toLowerCase().includes(disciplineSearch.toLowerCase()))
                                         );
-                                        const tourSanctions = db.disciplineSanctions.filter(s => tourIncidents.some(i => i.playerId === s.playerId));
+                                        const tourSanctions = disciplineSanctions.filter(s => tourIncidents.some(i => i.id === s.incident_id));
                                         const activeSubTab = tourSubTabs[tournament.id] || 'Bandeja de Casos';
 
                                         return (
@@ -507,7 +569,7 @@ export default function AdminDashboard() {
                                                 <div style={{ padding: '24px', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <div>
                                                         <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{tournament.name}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'monospace' }}>TEMPORADA {tournament.seasonId} • {tournament.category}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'monospace' }}>TEMPORADA {tournament.season_id} • {tournament.category}</div>
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '8px' }}>
                                                         <span className="badge badge-neutral" style={{ padding: '4px 10px' }}>NIVEL 1</span>
@@ -568,20 +630,20 @@ export default function AdminDashboard() {
                                                             <tbody>
                                                                 {tourIncidents.map(inc => (
                                                                     <tr key={inc.id}>
-                                                                        <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{inc.id}<br /><small style={{ opacity: 0.5 }}>{inc.date}</small></td>
+                                                                        <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{inc.id.substring(0, 8)}...<br /><small style={{ opacity: 0.5 }}>{new Date(inc.created_at).toLocaleDateString()}</small></td>
                                                                         <td>
                                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                                                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--border-glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inc.playerName.split(' ').map(n => n[0]).join('')}</div>
+                                                                                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--border-glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inc.player_name.split(' ').map(n => n[0]).join('')}</div>
                                                                                 <div>
-                                                                                    <div style={{ fontWeight: 600 }}>{inc.playerName}</div>
-                                                                                    <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{inc.clubName}</div>
+                                                                                    <div style={{ fontWeight: 600 }}>{inc.player_name}</div>
+                                                                                    <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{(inc as any).club?.name || 'Club Indefinido'}</div>
                                                                                 </div>
                                                                             </div>
                                                                         </td>
                                                                         <td>
                                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                                                 {inc.severity === 'high' && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-danger)', boxShadow: '0 0 10px var(--accent-danger)' }}></span>}
-                                                                                {inc.incidentType}
+                                                                                {inc.incident_type}
                                                                             </div>
                                                                             <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{inc.description}</div>
                                                                         </td>
@@ -614,10 +676,10 @@ export default function AdminDashboard() {
                                                             <tbody>
                                                                 {tourSanctions.map(s => (
                                                                     <tr key={s.id}>
-                                                                        <td style={{ fontFamily: 'monospace' }}>{s.id}</td>
-                                                                        <td>{s.playerName} ({s.clubName})</td>
+                                                                        <td style={{ fontFamily: 'monospace' }}>{s.id.substring(0, 8)}</td>
+                                                                        <td>{disciplineIncidents.find(i => i.id === s.incident_id)?.player_name || 'Desconocido'}</td>
                                                                         <td>{s.summary}</td>
-                                                                        <td>{s.startDate} - {s.endDate}</td>
+                                                                        <td>{s.start_date || '?'} - {s.end_date || '?'}</td>
                                                                         <td><span className="badge badge-bio">{s.status === 'active' ? 'Activa' : s.status}</span></td>
                                                                     </tr>
                                                                 ))}
@@ -652,11 +714,11 @@ export default function AdminDashboard() {
                                                                 </div>
                                                             </div>
                                                             <div style={{ padding: '32px', minHeight: '200px' }}>
-                                                                {db.regulations.find(r => r.scopeId === tournament.id) ? (
+                                                                {regulations.find(r => r.scope_id === tournament.id) ? (
                                                                     <div
                                                                         className='reglamento-content'
                                                                         style={{ color: 'var(--text-main)', fontSize: '14px', lineHeight: '1.6' }}
-                                                                        dangerouslySetInnerHTML={{ __html: db.regulations.find(r => r.scopeId === tournament.id)?.content || '' }}
+                                                                        dangerouslySetInnerHTML={{ __html: regulations.find(r => r.scope_id === tournament.id)?.content || '' }}
                                                                     />
                                                                 ) : (
                                                                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
@@ -672,7 +734,7 @@ export default function AdminDashboard() {
                                         );
                                     })}
 
-                                {myTournaments.filter(t => disciplineTourFilter === 'Todos los torneos' || t.id === disciplineTourFilter).filter(t => db.disciplineIncidents.some(inc => inc.tournamentId === t.id)).length === 0 && (
+                                {tournaments.filter(t => disciplineTourFilter === 'Todos los torneos' || t.id === disciplineTourFilter).filter(t => disciplineIncidents.some(inc => inc.tournament_id === t.id)).length === 0 && (
                                     <div className="glass" style={{ padding: '60px', textAlign: 'center', color: 'var(--text-dim)' }}>
                                         <div style={{ fontSize: '3rem', marginBottom: '16px', opacity: 0.2 }}>⚖️</div>
                                         <p>No se encontraron expedientes activos con los filtros aplicados.</p>
@@ -748,7 +810,7 @@ export default function AdminDashboard() {
                                     {reportTab === 'noticias' && (
                                         <div className="reportes-grid">
                                             <div className="reportes-list">
-                                                {reportNews.map((item) => (
+                                                {news.map((item) => (
                                                     <div
                                                         key={item.id}
                                                         className={`reportes-card ${item.id === activeReportId ? 'active' : ''}`}
@@ -758,11 +820,11 @@ export default function AdminDashboard() {
                                                             <span className={`reportes-badge ${item.status === 'published' ? 'published' : ''}`}>
                                                                 {item.status === 'published' ? 'Publicado' : 'Borrador'}
                                                             </span>
-                                                            <span>{item.ref}</span>
+                                                            <span>NOTICIA</span>
                                                         </div>
                                                         <h3>{item.title}</h3>
                                                         <div className="reportes-meta">
-                                                            <span>{item.time}</span>
+                                                            <span>{item.published_at ? new Date(item.published_at).toLocaleDateString() : 'Pendiente'}</span>
                                                             <span>UC</span>
                                                         </div>
                                                     </div>

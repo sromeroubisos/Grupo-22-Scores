@@ -4,11 +4,12 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import LogoUploader from '@/components/LogoUploader';
 import { getActiveSports } from '@/lib/data/sports';
-import { ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { ChevronLeft, CheckCircle, AlertCircle, Save, Share2, Globe, MapPin, Trophy } from 'lucide-react';
+import '../../creation-forms.css';
 
 const activeSports = getActiveSports();
 
-type StepId = 1 | 2 | 3 | 4 | 5;
+type StepId = 1 | 2 | 3;
 
 const steps = [
     { id: 1, name: 'Básico' },
@@ -26,21 +27,23 @@ function slugify(value: string) {
         .slice(0, 60);
 }
 
-// ─── Toast mínimo ─────────────────────────────────────────────────────────────
-
+// ─── Toast mínimo (Usando clases compartidas o inline simple) ──────────────────
 function Toast({ message, type }: { message: string; type: 'success' | 'error' }) {
     return (
         <div style={{
-            position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999,
-            background: type === 'success' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
-            border: `1px solid ${type === 'success' ? '#10b981' : '#ef4444'}`,
-            borderRadius: '10px', padding: '12px 20px',
-            display: 'flex', alignItems: 'center', gap: '10px',
-            color: 'white', fontSize: '14px', maxWidth: '360px',
+            position: 'fixed', bottom: '100px', right: '24px', zIndex: 9999,
+            background: type === 'success' ? 'rgba(0,163,101,0.2)' : 'rgba(239,68,68,0.2)',
+            backdropFilter: 'blur(20px)',
+            border: `1px solid ${type === 'success' ? '#00a365' : '#ef4444'}`,
+            borderRadius: '12px', padding: '16px 24px',
+            display: 'flex', alignItems: 'center', gap: '12px',
+            color: 'white', fontSize: '14px', maxWidth: '400px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            fontWeight: 700
         }}>
             {type === 'success'
-                ? <CheckCircle size={18} color="#10b981" />
-                : <AlertCircle size={18} color="#ef4444" />}
+                ? <CheckCircle size={20} color="#00a365" />
+                : <AlertCircle size={20} color="#ef4444" />}
             {message}
         </div>
     );
@@ -62,7 +65,7 @@ export default function CreateClubSuper() {
         union_id: 'uar',
         city: '',
         website: '',
-        primaryColor: '#10b981',
+        primaryColor: '#00a365',
         logo_url: '',
     });
 
@@ -120,7 +123,7 @@ export default function CreateClubSuper() {
 
             const clubId = json.data.id;
             setCreatedClubId(clubId);
-            showToast('Club creado. Completá los datos de identidad.', 'success');
+            showToast('Club registrado. Completá la identidad visual.', 'success');
             setCurrentStep(2);
         } catch {
             showToast('Error de red al crear el club', 'error');
@@ -132,6 +135,7 @@ export default function CreateClubSuper() {
     // ── PASO 2 → Guarda identidad vía PATCH ────────────────────────────────
     const handleSaveIdentity = async () => {
         if (!createdClubId) return;
+        setCreating(true);
         try {
             const res = await fetch(`/api/clubs/${createdClubId}`, {
                 method: 'PATCH',
@@ -151,60 +155,45 @@ export default function CreateClubSuper() {
                 return;
             }
 
-            showToast('Identidad guardada', 'success');
+            showToast('Identidad visual actualizada', 'success');
             setCurrentStep(3);
         } catch {
             showToast('Error de red', 'error');
+        } finally {
+            setCreating(false);
         }
     };
 
-    // ── PASO 3 → Ir a manage ───────────────────────────────────────────────
     const handleGoToManage = () => {
         if (createdClubId) {
             router.push(`/admin/entities/${createdClubId}/manage?type=club`);
         }
     };
 
-    const css = `
-        :root { --accent:#10b981; --border:rgba(255,255,255,0.08); --glass:rgba(15,15,15,0.7); }
-        .glass-card { background:var(--glass); backdrop-filter:blur(16px); border:1px solid var(--border); border-radius:12px; }
-        .form-input { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; padding:12px 16px; border-radius:8px; width:100%; font-size:14px; box-sizing:border-box; }
-        .form-input:focus { outline:none; border-color:var(--accent); }
-        .btn-primary { background:var(--accent); color:black; padding:12px 28px; border-radius:8px; font-weight:700; border:none; cursor:pointer; font-size:14px; }
-        .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
-        .btn-glass { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:14px; }
-        .step-pill { padding:6px 16px; border-radius:999px; font-size:12px; font-weight:600; border:1px solid var(--border); background:transparent; color:#6b7280; cursor:pointer; }
-        .step-pill.active { border-color:var(--accent); color:var(--accent); background:rgba(16,185,129,0.08); }
-        .step-pill.done { border-color:#10b981; color:#10b981; }
-        @media(max-width:768px) { .form-grid-2 { grid-template-columns:1fr !important; } }
-    `;
-
     return (
-        <div style={{ minHeight: '100vh', background: '#050505', color: 'white' }}>
-            <style>{css}</style>
-
-            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 24px' }}>
+        <div className="creation-body">
+            <div className="creation-container">
 
                 {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '40px' }}>
+                <header className="creation-header">
                     <button
                         onClick={() => router.push('/admin/super/clubes')}
-                        style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        className="btn btn-outline"
+                        style={{ padding: '8px 16px', marginBottom: '24px', height: 'auto', width: 'auto' }}
                     >
-                        <ArrowLeft size={18} /> Clubes
+                        <ChevronLeft size={16} /> Volver a Clubes
                     </button>
-                    <span style={{ color: '#333' }}>/</span>
-                    <span style={{ color: 'white', fontWeight: 600 }}>Nuevo Club</span>
-                </div>
+                    <h1>{currentStep === 3 ? '¡Todo listo!' : 'Nuevo Club Profesional'}</h1>
+                    <p>Configura la identidad y parámetros globales de la institución.</p>
+                </header>
 
                 {/* Stepper */}
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '40px', flexWrap: 'wrap' }}>
+                <nav className="stepper-nav">
                     {steps.map(step => (
                         <button
                             key={step.id}
                             className={`step-pill ${currentStep === step.id ? 'active' : ''} ${createdClubId && step.id < currentStep ? 'done' : ''}`}
                             onClick={() => {
-                                // Solo retroceder, no saltar adelante sin crear
                                 if (step.id < currentStep || (step.id === 2 && createdClubId)) {
                                     setCurrentStep(step.id);
                                 }
@@ -214,209 +203,205 @@ export default function CreateClubSuper() {
                             {step.name}
                         </button>
                     ))}
-                </div>
+                </nav>
 
                 {/* ── STEP 1: Básico ──────────────────────────────────────── */}
                 {currentStep === 1 && (
-                    <div className="glass-card" style={{ padding: '32px' }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Datos del Club</h2>
-                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '32px' }}>
-                            Al confirmar, el club se crea en la base de datos. Podés agregar divisiones inmediatamente.
-                        </p>
-
-                        <div style={{ display: 'grid', gap: '24px' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                                    NOMBRE DEL CLUB *
-                                </label>
-                                <input
-                                    className="form-input"
-                                    value={form.name}
-                                    onChange={e => handleNameChange(e.target.value)}
-                                    placeholder="Ej: San Isidro Club"
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                                    SLUG (ID en sistema) *
-                                </label>
-                                <input
-                                    className="form-input"
-                                    value={form.slug}
-                                    onChange={e => update('slug', e.target.value)}
-                                    style={{ color: '#10b981', fontFamily: 'monospace' }}
-                                />
-                                <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '6px' }}>
-                                    Solo minúsculas, números y guiones. Ej: san-isidro-club
-                                </p>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '12px', textTransform: 'uppercase' }}>
-                                    DEPORTE
-                                </label>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
-                                    {activeSports.map(sport => (
-                                        <button
-                                            key={sport.id}
-                                            type="button"
-                                            onClick={() => update('sport', sport.id)}
-                                            style={{
-                                                padding: '10px 12px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer',
-                                                border: form.sport === sport.id ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                                                background: form.sport === sport.id ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.03)',
-                                                color: form.sport === sport.id ? '#10b981' : '#9ca3af',
-                                                display: 'flex', alignItems: 'center', gap: '6px',
-                                            }}
-                                        >
-                                            <span>{sport.icon}</span><span>{sport.nameEs}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                                        UNIÓN ID
-                                    </label>
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Datos Generales</h2>
+                            <p>Información básica para identificar al club en el sistema.</p>
+                        </div>
+                        <div className="partition-body">
+                            <div className="form-grid">
+                                <div className="field-group">
+                                    <label>NOMBRE DEL CLUB *</label>
                                     <input
                                         className="form-input"
-                                        value={form.union_id}
-                                        onChange={e => update('union_id', e.target.value)}
-                                        placeholder="uar"
+                                        value={form.name}
+                                        onChange={e => handleNameChange(e.target.value)}
+                                        placeholder="Ej: San Isidro Club"
                                     />
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                                        CIUDAD
-                                    </label>
+
+                                <div className="field-group">
+                                    <label>SLUG (IDENTIFICADOR) *</label>
                                     <input
                                         className="form-input"
-                                        value={form.city}
-                                        onChange={e => update('city', e.target.value)}
-                                        placeholder="Buenos Aires"
+                                        value={form.slug}
+                                        onChange={e => update('slug', e.target.value)}
+                                        style={{ color: 'var(--accent)', fontFamily: 'JetBrains Mono' }}
                                     />
+                                    <p style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                                        URL amigable. Solo minúsculas, números y guiones.
+                                    </p>
+                                </div>
+
+                                <div className="field-group" style={{ gap: 16 }}>
+                                    <label>DEPORTE PRINCIPAL</label>
+                                    <div className="choice-grid">
+                                        {activeSports.map(sport => (
+                                            <button
+                                                key={sport.id}
+                                                type="button"
+                                                onClick={() => update('sport', sport.id)}
+                                                className={`choice-btn ${form.sport === sport.id ? 'selected' : ''}`}
+                                            >
+                                                <span className="choice-icon">{sport.icon}</span>
+                                                <span className="choice-label">{sport.nameEs}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid-2">
+                                    <div className="field-group">
+                                        <label>UNIÓN / ORGANISMO</label>
+                                        <input
+                                            className="form-input"
+                                            value={form.union_id}
+                                            onChange={e => update('union_id', e.target.value)}
+                                            placeholder="Ej: UAR, URBA..."
+                                        />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>CIUDAD / REGIÓN</label>
+                                        <input
+                                            className="form-input"
+                                            value={form.city}
+                                            onChange={e => update('city', e.target.value)}
+                                            placeholder="Buenos Aires"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px' }}>
-                            <button
-                                className="btn-primary"
-                                onClick={handleCreateClub}
-                                disabled={creating || !form.name.trim() || !form.slug}
-                            >
-                                {creating ? 'Creando club...' : 'Crear Club y Continuar →'}
-                            </button>
-                        </div>
-                    </div>
+                    </article>
                 )}
 
                 {/* ── STEP 2: Identidad ────────────────────────────────────── */}
                 {currentStep === 2 && createdClubId && (
-                    <div className="glass-card" style={{ padding: '32px' }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Identidad Visual</h2>
-                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '32px' }}>
-                            Podés completar esto ahora o más tarde desde el panel de gestión.
-                        </p>
-
-                        <div style={{ display: 'grid', gap: '24px' }}>
-                            <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '12px', textTransform: 'uppercase' }}>
-                                        ESCUDO
-                                    </label>
-                                    <LogoUploader onUpload={handleLogoUpload} accentColor="#10b981" />
-                                </div>
-                                <div style={{ flex: 1, minWidth: '200px', display: 'grid', gap: '16px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                                            SIGLA / NOMBRE CORTO
-                                        </label>
-                                        <input
-                                            className="form-input"
-                                            value={form.shortName}
-                                            onChange={e => update('shortName', e.target.value)}
-                                            placeholder="SIC"
-                                        />
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Identidad Visual</h2>
+                            <p>Establece los colores y el escudo oficial del club.</p>
+                        </div>
+                        <div className="partition-body">
+                            <div className="form-grid">
+                                <section style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                    <div className="field-group">
+                                        <label>ESCUDO OFICIAL</label>
+                                        <LogoUploader onUpload={handleLogoUpload} accentColor="var(--accent)" />
                                     </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                                            COLOR PRIMARIO
-                                        </label>
-                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <div style={{ flex: 1, minWidth: '280px', display: 'grid', gap: '20px' }}>
+                                        <div className="field-group">
+                                            <label>SIGLA / NOMBRE CORTO</label>
                                             <input
-                                                type="color"
-                                                value={form.primaryColor}
-                                                onChange={e => update('primaryColor', e.target.value)}
-                                                style={{ width: '40px', height: '40px', border: 'none', background: 'none', cursor: 'pointer' }}
+                                                className="form-input"
+                                                value={form.shortName}
+                                                onChange={e => update('shortName', e.target.value)}
+                                                placeholder="Ej: SIC, CASI, CUBA..."
                                             />
-                                            <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>{form.primaryColor}</span>
+                                        </div>
+                                        <div className="field-group">
+                                            <label>COLOR IDENTITARIO</label>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                                                <input
+                                                    type="color"
+                                                    value={form.primaryColor}
+                                                    onChange={e => update('primaryColor', e.target.value)}
+                                                    style={{ width: '44px', height: '44px', border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
+                                                />
+                                                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 800 }}>{form.primaryColor.toUpperCase()}</span>
+                                            </div>
+                                        </div>
+                                        <div className="field-group">
+                                            <label>SITIO WEB OFICIAL</label>
+                                            <input
+                                                className="form-input"
+                                                value={form.website}
+                                                onChange={e => update('website', e.target.value)}
+                                                placeholder="https://www.misitio.com"
+                                            />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                                            WEBSITE
-                                        </label>
-                                        <input
-                                            className="form-input"
-                                            value={form.website}
-                                            onChange={e => update('website', e.target.value)}
-                                            placeholder="https://..."
-                                        />
-                                    </div>
-                                </div>
+                                </section>
                             </div>
                         </div>
+                    </article>
+                )}
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', gap: '16px' }}>
-                            <button className="btn-glass" onClick={() => setCurrentStep(1)}>← Atrás</button>
+                {/* ── STEP 3: Revisión / Éxito ─────────────────────────────── */}
+                {currentStep === 3 && createdClubId && (
+                    <article className="partition" style={{ textAlign: 'center' }}>
+                        <div className="partition-body" style={{ padding: '60px 40px' }}>
+                            <div style={{ fontSize: '4rem', marginBottom: '24px' }}>🏆</div>
+                            <h2 style={{ fontSize: '2rem', fontWeight: 950, textTransform: 'uppercase', marginBottom: '12px' }}>
+                                Club Creado con Éxito
+                            </h2>
+                            <div style={{
+                                display: 'inline-block',
+                                background: 'var(--accent-glow)',
+                                border: '1px solid var(--accent)',
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                marginBottom: '24px'
+                            }}>
+                                <span style={{ color: 'var(--accent)', fontFamily: 'JetBrains Mono', fontWeight: 800 }}>{form.slug}</span>
+                            </div>
+                            <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 40px' }}>
+                                La institución ya forma parte del ecosistema. Ahora puedes configurar planteles, sedes y competencias.
+                            </p>
+
+                            <div className="grid-2" style={{ maxWidth: 500, margin: '0 auto' }}>
+                                <button className="btn btn-outline" onClick={() => router.push('/admin/super/clubes')}>
+                                    LISTADO GENERAL
+                                </button>
+                                <button className="btn btn-primary" onClick={handleGoToManage}>
+                                    IR A GESTIÓN <ChevronLeft size={16} style={{ transform: 'rotate(180deg)' }} />
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                )}
+
+                {/* Footer Actions */}
+                <footer className="actions-footer">
+                    {currentStep === 1 && (
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleCreateClub}
+                            disabled={creating || !form.name.trim() || !form.slug}
+                        >
+                            {creating ? 'PROCESANDO...' : 'REGISTRAR CLUB Y CONTINUAR'}
+                        </button>
+                    )}
+                    {currentStep === 2 && (
+                        <>
+                            <button className="btn btn-outline" onClick={() => setCurrentStep(1)}>
+                                VOLVER
+                            </button>
                             <div style={{ display: 'flex', gap: '12px' }}>
                                 <button
-                                    className="btn-glass"
+                                    className="btn btn-outline"
                                     onClick={() => {
-                                        showToast('Podés completar la identidad desde el panel de gestión', 'success');
+                                        showToast('Identidad pendiente - Puedes editarla luego', 'success');
                                         router.push(`/admin/entities/${createdClubId}/manage?type=club`);
                                     }}
                                 >
-                                    Saltar por ahora
+                                    OMITIR
                                 </button>
-                                <button className="btn-primary" onClick={handleSaveIdentity}>
-                                    Guardar Identidad →
+                                <button className="btn btn-primary" onClick={handleSaveIdentity} disabled={creating}>
+                                    {creating ? 'GUARDANDO...' : 'GUARDAR IDENTIDAD'}
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* ── STEP 3: Confirmación / Ir a Manage ───────────────────── */}
-                {currentStep === 3 && createdClubId && (
-                    <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏆</div>
-                        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>
-                            ¡Club creado exitosamente!
-                        </h2>
-                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '8px' }}>
-                            <span style={{ color: '#10b981', fontFamily: 'monospace' }}>{createdClubId}</span>
-                        </p>
-                        <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '32px' }}>
-                            Ahora podés agregar divisiones, sedes y configurar permisos directamente desde el panel de gestión.
-                        </p>
-                        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <button className="btn-glass" onClick={() => router.push('/admin/super/clubes')}>
-                                Volver a la lista
-                            </button>
-                            <button className="btn-primary" onClick={handleGoToManage}>
-                                Ir al Panel de Gestión →
-                            </button>
-                        </div>
-                    </div>
-                )}
+                        </>
+                    )}
+                </footer>
             </div>
 
             {toast && <Toast message={toast.message} type={toast.type} />}
         </div>
     );
 }
+

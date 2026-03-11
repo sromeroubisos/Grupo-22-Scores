@@ -7,6 +7,7 @@ interface MatchesStoreResult {
   matches: any[];
   loading: boolean;
   liveCount: number;
+  error: { flashscore: boolean; supabase: boolean } | null;
 }
 
 const STALE_TTL = 60 * 1000;      // 60 seconds · Cache standard (matches request)
@@ -21,6 +22,33 @@ function cacheKey(date: string, sportId: string) {
   return `${date}__${sportId}`;
 }
 
+// ─── Live reconciliation ─────────────────────────────────────────────────────
+// Merges a live snapshot into the current match list:
+//   - matches present in snapshot  → status='live' + live fields merged
+//   - matches that WERE live but absent from snapshot → status='final', live_time cleared
+//   - all others → unchanged
+function reconcileLiveOverlay<T extends { id: string; status?: string | null; live_time?: number | null }>(
+  current: T[],
+  liveSnapshot: T[]
+): T[] {
+  const nextLiveMap = new Map(liveSnapshot.map(m => [m.id, m]));
+  const nextLiveIds = new Set(liveSnapshot.map(m => m.id));
+
+  return current.map(m => {
+    const wasLive = m.status === 'live';
+    const nowLive = nextLiveIds.has(m.id);
+
+    if (nowLive) {
+      const live = nextLiveMap.get(m.id)!;
+      return { ...m, ...live, status: 'live' as const };
+    }
+    if (wasLive && !nowLive) {
+      return { ...m, status: 'final' as const, live_time: null };
+    }
+    return m;
+  });
+}
+
 export function useMatchesStore(
   selectedDate: string,
   sportId: string
@@ -28,6 +56,7 @@ export function useMatchesStore(
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [tick, setTick] = useState(0); // force re-render on cache update
+  const [sourceError, setSourceError] = useState<{ flashscore: boolean; supabase: boolean } | null>(null);
 
   const timeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -39,22 +68,37 @@ export function useMatchesStore(
   const prefetchedRef = useRef(false);
   const prevSportRef = useRef(sportId);
 
-  // Fetch a single date, update cache, return data
+  // Convert API sources metadata to error state
+  function buildSourceError(sources: any): { flashscore: boolean; supabase: boolean } | null {
+    if (!sources) return null;
+    const fsErr = !sources.flashscore?.ok;
+    const dbErr = !sources.supabase?.ok;
+    return (fsErr || dbErr) ? { flashscore: fsErr, supabase: dbErr } : null;
+  }
+
+  // Fetch a single date, update cache, return data + sources metadata
   const fetchDate = useCallback(
-    async (date: string, signal?: AbortSignal): Promise<any[]> => {
+    async (date: string, signal?: AbortSignal): Promise<{ matches: any[]; sources?: any }> => {
       try {
         const url = `/api/matches?date=${date}&sport=${sportId}&external=true&tz=${encodeURIComponent(timeZone)}`;
         const res = await fetch(url, { signal });
-        if (!res.ok) return [];
+        if (!res.ok) return { matches: [] };
         const data = await res.json();
         const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
+        const sources = data.sources || null;
+
+        // Use short TTL (~10s) when a source failed so errors self-correct quickly;
+        // normal 60s TTL when everything is healthy.
+        const hasError = sources && (!sources.flashscore?.ok || !sources.supabase?.ok);
+        const SHORT_MISS = STALE_TTL - 10_000; // shift timestamp back so cache is stale in ~10s
         matchesCache.set(cacheKey(date, sportId), arr);
-        lastFetchedAt.set(cacheKey(date, sportId), Date.now());
-        return arr;
+        lastFetchedAt.set(cacheKey(date, sportId), hasError ? Date.now() - SHORT_MISS : Date.now());
+
+        return { matches: arr, sources };
       } catch (e: any) {
-        if (e?.name === 'AbortError') return [];
+        if (e?.name === 'AbortError') return { matches: [] };
         console.error('fetchDate error:', e);
-        return [];
+        return { matches: [] };
       }
     },
     [sportId, timeZone]
@@ -97,9 +141,12 @@ export function useMatchesStore(
 
       if (isStale) {
         // Background refresh
-        fetchDate(selectedDate, controller.signal).then(data => {
+        fetchDate(selectedDate, controller.signal).then(({ matches: data, sources }) => {
           if (!controller.signal.aborted && data.length > 0) {
             setMatches(data);
+          }
+          if (!controller.signal.aborted && sources) {
+            setSourceError(buildSourceError(sources));
           }
         });
       }
@@ -110,10 +157,11 @@ export function useMatchesStore(
       // If we are switching sports, clear previous matches immediately
       setMatches([]);
 
-      fetchDate(selectedDate, controller.signal).then(data => {
+      fetchDate(selectedDate, controller.signal).then(({ matches: data, sources }) => {
         if (!controller.signal.aborted) {
           setMatches(data);
           setLoading(false);
+          setSourceError(buildSourceError(sources));
         }
       });
     }
@@ -151,7 +199,7 @@ export function useMatchesStore(
         }
         const batch = toFetch.slice(i, i + PREFETCH_BATCH_SIZE);
         await Promise.all(
-          batch.map(d => fetchDate(d, controller.signal))
+          batch.map(d => fetchDate(d, controller.signal).then(r => r.matches))
         );
       }
     }, 3000);
@@ -163,13 +211,13 @@ export function useMatchesStore(
   }, [selectedDate, sportId, timeZone, fetchDate]);
 
   // LIVE polling: only when selectedDate is today
+  // Smart control: stops when no live matches remain; restarts via full-refresh path.
   useEffect(() => {
     if (!selectedDate) return;
 
     const todayKey = getTodayKey(timeZone);
     const isToday = selectedDate === todayKey;
 
-    // Clear existing polling
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
       pollingRef.current = null;
@@ -179,46 +227,64 @@ export function useMatchesStore(
 
     const controller = new AbortController();
 
-    pollingRef.current = setInterval(async () => {
+    // ── Interval helpers (scoped — no stale closure risk) ─────────────────
+    function startLivePolling(tick: () => Promise<void>): void {
+      if (pollingRef.current != null) return;
+      pollingRef.current = setInterval(() => { void tick(); }, LIVE_POLL_INTERVAL);
+    }
+
+    function stopLivePolling(): void {
+      if (pollingRef.current == null) return;
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+
+    // ── Core polling tick ─────────────────────────────────────────────────
+    async function pollLiveMatches(): Promise<void> {
       if (controller.signal.aborted) return;
-
-      const liveData = await fetchLive(controller.signal);
-
-      if (controller.signal.aborted) return;
-
-      if (liveData.length > 0) {
-        // Merge live data into current matches
+      try {
         const key = cacheKey(selectedDate, sportId);
-        const current = matchesCache.get(key) || [];
-        const liveMap = new Map(liveData.map(m => [m.id, m]));
 
-        const merged = current.map(match => {
-          const liveMatch = liveMap.get(match.id);
-          if (liveMatch) {
-            return {
-              ...match,
-              status: 'live',
-              score: liveMatch.score,
-              clock: liveMatch.clock
-            };
-          }
-          return match;
-        });
+        // 1. Fetch live snapshot
+        const liveSnapshot = await fetchLive(controller.signal);
+        if (controller.signal.aborted) return;
+
+        // 2. Reconcile: promote live, demote finished
+        const current = matchesCache.get(key) ?? [];
+        const merged = reconcileLiveOverlay(current, liveSnapshot);
 
         matchesCache.set(key, merged);
-        lastFetchedAt.set(key, Date.now());
+        // Only reset staleness clock when we actually got live data
+        if (liveSnapshot.length > 0) lastFetchedAt.set(key, Date.now());
         setMatches(merged);
-      }
 
-      // Refresh full data if STALE_TTL exceeded
-      const lastFull = lastFetchedAt.get(cacheKey(selectedDate, sportId)) || 0;
-      if (Date.now() - lastFull > STALE_TTL) {
-        const freshData = await fetchDate(selectedDate, controller.signal);
-        if (!controller.signal.aborted && freshData.length > 0) {
-          setMatches(freshData);
+        // 3. Smart stop — no more live matches visible
+        const newLiveCount = merged.filter(m => m.status === 'live').length;
+        if (newLiveCount === 0) {
+          stopLivePolling();
         }
+
+        // 4. Full refresh when cache is stale (runs regardless of live count).
+        //    Can restart polling if fresh data surfaces new live matches.
+        const lastFull = lastFetchedAt.get(key) ?? 0;
+        if (Date.now() - lastFull > STALE_TTL) {
+          const { matches: freshData } = await fetchDate(selectedDate, controller.signal);
+          if (!controller.signal.aborted && freshData.length > 0) {
+            matchesCache.set(key, freshData);
+            lastFetchedAt.set(key, Date.now());
+            setMatches(freshData);
+            const freshLive = freshData.filter(
+              (m: { status?: string | null }) => m.status === 'live'
+            ).length;
+            if (freshLive > 0) startLivePolling(pollLiveMatches);
+          }
+        }
+      } catch {
+        // fail-safe: never throw from inside interval
       }
-    }, LIVE_POLL_INTERVAL);
+    }
+
+    startLivePolling(pollLiveMatches);
 
     return () => {
       controller.abort();
@@ -234,5 +300,5 @@ export function useMatchesStore(
     [matches]
   );
 
-  return { matches, loading, liveCount };
+  return { matches, loading, liveCount, error: sourceError };
 }

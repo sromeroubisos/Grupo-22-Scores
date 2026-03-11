@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, CheckCircle, AlertCircle, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, Plus, Trash2, Eye, EyeOff, Shield, MapPin, Trophy, Settings, Globe, ChevronLeft } from 'lucide-react';
+import '../../../creation-forms.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,9 +29,9 @@ interface Venue {
 interface SetupStatus {
     isPublished: boolean; status: string; canPublish: boolean;
     steps: {
-        identity:  { done: boolean; missingFields: string[] };
+        identity: { done: boolean; missingFields: string[] };
         divisions: { done: boolean; count: number };
-        venues:    { done: boolean; count: number };
+        venues: { done: boolean; count: number };
     };
 }
 
@@ -42,61 +43,34 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
         return () => clearTimeout(t);
     }, [onClose]);
     return (
-        <div style={{
-            position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999,
-            background: type === 'success' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
-            border: `1px solid ${type === 'success' ? '#10b981' : '#ef4444'}`,
-            borderRadius: '10px', padding: '12px 20px',
-            display: 'flex', alignItems: 'center', gap: '10px',
-            color: 'white', fontSize: '14px', maxWidth: '360px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-        }}>
-            {type === 'success' ? <CheckCircle size={18} color="#10b981" /> : <AlertCircle size={18} color="#ef4444" />}
+        <div className={`toast-notification ${type}`}>
+            {type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
             {message}
         </div>
     );
 }
 
-// ─── Shared CSS ───────────────────────────────────────────────────────────────
-
-const css = `
-:root { --accent:#10b981; --border:rgba(255,255,255,0.08); --glass:rgba(15,15,15,0.7); }
-.glass { background:var(--glass); backdrop-filter:blur(16px); border:1px solid var(--border); border-radius:12px; }
-.fi { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; padding:10px 14px; border-radius:8px; width:100%; font-size:14px; box-sizing:border-box; }
-.fi:focus { outline:none; border-color:var(--accent); }
-.bp { background:var(--accent); color:black; padding:10px 24px; border-radius:8px; font-weight:700; border:none; cursor:pointer; font-size:14px; }
-.bp:disabled { opacity:0.5; cursor:not-allowed; }
-.bg { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:14px; }
-.tab-btn { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:14px; font-weight:500; color:#6b7280; border-bottom:2px solid transparent; transition:all 0.2s; }
-.tab-btn.active { color:white; border-bottom-color:var(--accent); }
-label.fl { display:block; font-size:12px; color:#9ca3af; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em; }
-.row { display:flex; gap:16px; flex-wrap:wrap; }
-.row > * { flex:1; min-width:180px; }
-.badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; }
-.badge-draft { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#9ca3af; }
-.badge-pub { background:rgba(16,185,129,0.12); border:1px solid #10b981; color:#10b981; }
-`;
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ClubManagePage() {
-    const params       = useParams();
+    const params = useParams();
     const searchParams = useSearchParams();
-    const router       = useRouter();
-    const clubId       = params?.id as string;
+    const router = useRouter();
+    const clubId = params?.id as string;
 
     const initialTab = (searchParams?.get('tab') as Tab) || 'identidad';
-    const [activeTab,   setActiveTab]   = useState<Tab>(initialTab);
-    const [club,        setClub]        = useState<Club | null>(null);
-    const [divisions,   setDivisions]   = useState<Division[]>([]);
-    const [venues,      setVenues]      = useState<Venue[]>([]);
+    const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+    const [club, setClub] = useState<Club | null>(null);
+    const [divisions, setDivisions] = useState<Division[]>([]);
+    const [venues, setVenues] = useState<Venue[]>([]);
     const [setupStatus, setSetupStatus] = useState<SetupStatus | null>(null);
-    const [loading,     setLoading]     = useState(true);
-    const [saving,      setSaving]      = useState(false);
-    const [toast,       setToast]       = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Edit form para Identidad
     const [identityForm, setIdentityForm] = useState({
-        name: '', short_name: '', city: '', primary_color: '#10b981',
+        name: '', short_name: '', city: '', primary_color: '#00a365',
         logo_url: '', website: '', union_id: '',
     });
 
@@ -137,16 +111,16 @@ export default function ClubManagePage() {
             const c = clubJson.data;
             setClub(c);
             setIdentityForm({
-                name:          c.name          || '',
-                short_name:    c.short_name    || '',
-                city:          c.city          || '',
-                primary_color: c.primary_color || '#10b981',
-                logo_url:      c.logo_url      || '',
-                website:       c.website       || '',
-                union_id:      c.union_id      || '',
+                name: c.name || '',
+                short_name: c.short_name || '',
+                city: c.city || '',
+                primary_color: c.primary_color || '#00a365',
+                logo_url: c.logo_url || '',
+                website: c.website || '',
+                union_id: c.union_id || '',
             });
             setDivisions(divJson.data || []);
-            setVenues(venJson.data    || []);
+            setVenues(venJson.data || []);
             setSetupStatus(statusJson.data || null);
         } catch {
             showToast('Error cargando datos del club', 'error');
@@ -272,9 +246,9 @@ export default function ClubManagePage() {
 
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: '#050505', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ textAlign: 'center', color: '#6b7280' }}>
-                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>⟳</div>
+            <div className="creation-body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '12px', animation: 'spin 1s linear infinite' }}>⟳</div>
                     Cargando club...
                 </div>
             </div>
@@ -283,404 +257,482 @@ export default function ClubManagePage() {
 
     if (!club) return null;
 
-    const tabs: { id: Tab; label: string }[] = [
-        { id: 'identidad',  label: 'Identidad'  },
-        { id: 'sedes',      label: 'Sedes'       },
-        { id: 'divisiones', label: `Divisiones (${divisions.length})` },
-        { id: 'config',     label: 'Config'      },
-        { id: 'publicar',   label: 'Publicar'    },
+    const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+        { id: 'identidad', label: 'Identidad', icon: <Shield size={14} /> },
+        { id: 'sedes', label: 'Sedes', icon: <MapPin size={14} /> },
+        { id: 'divisiones', label: `Divisiones (${divisions.length})`, icon: <Trophy size={14} /> },
+        { id: 'config', label: 'Config', icon: <Settings size={14} /> },
+        { id: 'publicar', label: 'Publicar', icon: <Globe size={14} /> },
     ];
 
     return (
-        <div style={{ minHeight: '100vh', background: '#050505', color: 'white' }}>
-            <style>{css}</style>
-
-            {/* ── Header ──────────────────────────────────────────────────── */}
-            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '20px 32px' }}>
-                <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <button
-                            onClick={() => router.push('/admin/super/clubes')}
-                            style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
-                        >
-                            <ArrowLeft size={16} /> Clubes
-                        </button>
-                        <span style={{ color: '#333' }}>/</span>
-                        <span style={{ color: '#9ca3af', fontSize: '13px' }}>{club.name}</span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            {/* Logo */}
-                            <div style={{
-                                width: '52px', height: '52px', borderRadius: '10px', border: '2px solid rgba(255,255,255,0.12)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                                background: club.primary_color ? `${club.primary_color}18` : 'rgba(16,185,129,0.1)',
-                            }}>
-                                {club.logo_url
-                                    ? <img src={club.logo_url.startsWith('<svg') ? `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(club.logo_url)))}` : club.logo_url}
-                                           alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                    : <span style={{ fontSize: '22px', fontWeight: 700, color: club.primary_color || '#10b981' }}>
-                                        {club.name.charAt(0)}
-                                      </span>
-                                }
-                            </div>
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <h1 style={{ fontSize: '22px', fontWeight: 700, margin: 0 }}>{club.name}</h1>
-                                    <span className={`badge ${setupStatus?.isPublished ? 'badge-pub' : 'badge-draft'}`}>
-                                        {setupStatus?.isPublished ? 'Publicado' : 'Borrador'}
-                                    </span>
-                                </div>
-                                <p style={{ color: '#6b7280', fontSize: '13px', margin: '4px 0 0', fontFamily: 'monospace' }}>
-                                    {club.sport} · {club.city || 'Sin ciudad'} · {club.union_id}
-                                </p>
-                            </div>
+        <div className="creation-body">
+            <div className="creation-container">
+                {/* Header */}
+                <header className="creation-header">
+                    <button
+                        onClick={() => router.push('/admin/super/clubes')}
+                        className="btn btn-outline"
+                        style={{ padding: '8px 16px', marginBottom: '24px', height: 'auto', width: 'auto' }}
+                    >
+                        <ChevronLeft size={16} /> Volver a Clubes
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+                        <div style={{
+                            width: '48px', height: '48px', borderRadius: '12px', border: '2px solid var(--border)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                            background: club.primary_color ? `${club.primary_color}18` : 'rgba(16,185,129,0.1)',
+                        }}>
+                            {club.logo_url
+                                ? <img src={club.logo_url.startsWith('<svg') ? `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(club.logo_url)))}` : club.logo_url}
+                                    alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                : <span style={{ fontSize: '20px', fontWeight: 800, color: club.primary_color || 'var(--accent)' }}>
+                                    {club.name.charAt(0)}
+                                </span>
+                            }
                         </div>
+                        <div>
+                            <h1>{club.name}</h1>
+                            <p className="meta-text" style={{ margin: 0 }}>
+                                {club.sport} · {club.city || 'Sin ciudad'} · {club.union_id}
+                            </p>
+                        </div>
+                    </div>
+                </header>
 
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            {setupStatus?.isPublished ? (
-                                <button className="bg" onClick={handleUnpublish} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                                    <EyeOff size={14} /> Despublicar
+                {/* Stepper / Tabs */}
+                <nav className="stepper-nav">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            className={`step-pill ${activeTab === tab.id ? 'active' : ''}`}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                {tab.icon}
+                                {tab.label}
+                            </span>
+                        </button>
+                    ))}
+                </nav>
+
+                {/* Content */}
+                <main className="creation-content" style={{ marginTop: '32px' }}>
+                    {/* TAB: IDENTIDAD */}
+                    {activeTab === 'identidad' && (
+                        <article className="partition">
+                            <div className="partition-header">
+                                <h2>Identidad del Club</h2>
+                                <p>Configura la información oficial y visual del club.</p>
+                            </div>
+                            <div className="partition-body">
+                                <div className="form-grid">
+                                    <div className="field-group">
+                                        <label>NOMBRE OFICIAL</label>
+                                        <input
+                                            className="form-input"
+                                            value={identityForm.name}
+                                            onChange={e => setIdentityForm(p => ({ ...p, name: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div className="grid-2">
+                                        <div className="field-group">
+                                            <label>SIGLA</label>
+                                            <input
+                                                className="form-input"
+                                                value={identityForm.short_name}
+                                                onChange={e => setIdentityForm(p => ({ ...p, short_name: e.target.value }))}
+                                                placeholder="Ej: SIC"
+                                            />
+                                        </div>
+                                        <div className="field-group">
+                                            <label>CIUDAD / LOCALIDAD</label>
+                                            <input
+                                                className="form-input"
+                                                value={identityForm.city}
+                                                onChange={e => setIdentityForm(p => ({ ...p, city: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid-2">
+                                        <div className="field-group">
+                                            <label>COLOR CORPORATIVO</label>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--surface-light)', padding: '10px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                                <input
+                                                    type="color"
+                                                    value={identityForm.primary_color}
+                                                    onChange={e => setIdentityForm(p => ({ ...p, primary_color: e.target.value }))}
+                                                    style={{ width: '32px', height: '32px', border: 'none', background: 'none', cursor: 'pointer' }}
+                                                />
+                                                <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 600 }}>{identityForm.primary_color.toUpperCase()}</span>
+                                            </div>
+                                        </div>
+                                        <div className="field-group">
+                                            <label>VÍNCULO UNIÓN (ID)</label>
+                                            <input
+                                                className="form-input"
+                                                value={identityForm.union_id}
+                                                onChange={e => setIdentityForm(p => ({ ...p, union_id: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>SITIO WEB</label>
+                                        <input
+                                            className="form-input"
+                                            value={identityForm.website}
+                                            onChange={e => setIdentityForm(p => ({ ...p, website: e.target.value }))}
+                                            placeholder="https://www.club.com"
+                                        />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>LOGO / ESCUDO (URL o SVG)</label>
+                                        <textarea
+                                            className="form-input"
+                                            value={identityForm.logo_url}
+                                            onChange={e => setIdentityForm(p => ({ ...p, logo_url: e.target.value }))}
+                                            rows={3}
+                                            placeholder="URL de imagen o código SVG..."
+                                            style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '11px' }}
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+                                    <button className="btn btn-primary" onClick={handleSaveIdentity} disabled={saving}>
+                                        {saving ? 'Guardando...' : 'Guardar Identidad'}
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    )}
+
+                    {/* TAB: SEDES */}
+                    {activeTab === 'sedes' && (
+                        <div style={{ display: 'grid', gap: '24px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Gestión de Canchas</h2>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '13px', marginTop: '4px' }}>Define los lugares donde el club hace de local.</p>
+                                </div>
+                                <button className="btn btn-primary" onClick={() => setShowVenueForm(true)}>
+                                    <Plus size={16} /> Agregar Sede
                                 </button>
-                            ) : (
-                                <button
-                                    className="bp"
-                                    onClick={() => setActiveTab('publicar')}
-                                    style={{ fontSize: '13px', padding: '8px 20px' }}
-                                >
-                                    <Eye size={14} style={{ display: 'inline', marginRight: '6px' }} /> Publicar Club
-                                </button>
+                            </div>
+
+                            {venues.length === 0 && !showVenueForm && (
+                                <div className="partition" style={{ padding: '48px', textAlign: 'center' }}>
+                                    <MapPin size={40} style={{ color: 'var(--text-dim)', opacity: 0.3, marginBottom: '16px' }} />
+                                    <p style={{ color: 'var(--text-dim)' }}>No hay sedes registradas todavía.</p>
+                                    <button className="btn btn-outline" style={{ marginTop: '16px' }} onClick={() => setShowVenueForm(true)}>+ Crear primera sede</button>
+                                </div>
+                            )}
+
+                            {venues.map(venue => (
+                                <div key={venue.id} className="partition" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                        <div style={{ width: '40px', height: '40px', background: 'var(--surface-light)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
+                                            <MapPin size={20} />
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {venue.name}
+                                                {venue.is_primary && <span className="status-chip active green" style={{ fontSize: '9px', padding: '2px 8px' }}>Principal</span>}
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
+                                                {[venue.address, venue.city].filter(Boolean).join(' · ')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            if (!confirm('¿Eliminar sede?')) return;
+                                            const res = await fetch(`/api/clubs/${clubId}/venues?venue_id=${venue.id}`, { method: 'DELETE' });
+                                            if (res.ok) { setVenues(prev => prev.filter(v => v.id !== venue.id)); showToast('Sede eliminada', 'success'); }
+                                            else showToast('Error al eliminar', 'error');
+                                        }}
+                                        className="btn-icon"
+                                        style={{ color: 'var(--accent-red)', opacity: 0.6 }}
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            ))}
+
+                            {showVenueForm && (
+                                <article className="partition">
+                                    <div className="partition-header">
+                                        <h2>Nueva Sede / Cancha</h2>
+                                    </div>
+                                    <div className="partition-body">
+                                        <div className="form-grid">
+                                            <div className="field-group">
+                                                <label>NOMBRE DEL LUGAR *</label>
+                                                <input className="form-input" value={venueForm.name} onChange={e => setVenueForm(p => ({ ...p, name: e.target.value }))} placeholder="Ej: Cancha Principal" />
+                                            </div>
+                                            <div className="grid-2">
+                                                <div className="field-group">
+                                                    <label>DIRECCIÓN</label>
+                                                    <input className="form-input" value={venueForm.address} onChange={e => setVenueForm(p => ({ ...p, address: e.target.value }))} />
+                                                </div>
+                                                <div className="field-group">
+                                                    <label>CIUDAD</label>
+                                                    <input className="form-input" value={venueForm.city} onChange={e => setVenueForm(p => ({ ...p, city: e.target.value }))} />
+                                                </div>
+                                            </div>
+                                            <div className="field-group">
+                                                <label>LINK GOOGLE MAPS</label>
+                                                <input className="form-input" value={venueForm.maps_link} onChange={e => setVenueForm(p => ({ ...p, maps_link: e.target.value }))} placeholder="https://goo.gl/maps/..." />
+                                            </div>
+                                            <label className="checkbox-field" style={{ background: 'var(--surface-light)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                                                <input type="checkbox" checked={venueForm.is_primary} onChange={e => setVenueForm(p => ({ ...p, is_primary: e.target.checked }))} style={{ width: '18px', height: '18px', accentColor: 'var(--accent)' }} />
+                                                <span style={{ fontSize: '13px', fontWeight: 600 }}>Cancha principal / Sede central</span>
+                                            </label>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                                            <button className="btn btn-outline" onClick={() => setShowVenueForm(false)}>Cancelar</button>
+                                            <button className="btn btn-primary" onClick={handleCreateVenue} disabled={saving}>{saving ? 'Guardando...' : 'Agregar Sede'}</button>
+                                        </div>
+                                    </div>
+                                </article>
                             )}
                         </div>
-                    </div>
+                    )}
 
-                    {/* Tabs */}
-                    <div style={{ display: 'flex', gap: '4px', marginTop: '24px', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'auto' }}>
-                        {tabs.map(tab => (
-                            <button
-                                key={tab.id}
-                                className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                                onClick={() => setActiveTab(tab.id)}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* ── Content ─────────────────────────────────────────────────── */}
-            <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px' }}>
-
-                {/* ─── TAB: IDENTIDAD ─────────────────────────────────────── */}
-                {activeTab === 'identidad' && (
-                    <div className="glass" style={{ padding: '32px', maxWidth: '680px' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '28px' }}>Identidad del Club</h2>
-                        <div style={{ display: 'grid', gap: '20px' }}>
-                            <div>
-                                <label className="fl">NOMBRE</label>
-                                <input className="fi" value={identityForm.name} onChange={e => setIdentityForm(p => ({ ...p, name: e.target.value }))} />
-                            </div>
-                            <div className="row">
+                    {/* TAB: DIVISIONES */}
+                    {activeTab === 'divisiones' && (
+                        <div style={{ display: 'grid', gap: '24px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
-                                    <label className="fl">SIGLA</label>
-                                    <input className="fi" value={identityForm.short_name} onChange={e => setIdentityForm(p => ({ ...p, short_name: e.target.value }))} placeholder="SIC" />
+                                    <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Divisiones</h2>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '13px', marginTop: '4px' }}>Estructura competitiva del club.</p>
                                 </div>
-                                <div>
-                                    <label className="fl">CIUDAD</label>
-                                    <input className="fi" value={identityForm.city} onChange={e => setIdentityForm(p => ({ ...p, city: e.target.value }))} />
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div>
-                                    <label className="fl">COLOR PRIMARIO</label>
-                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                        <input type="color" value={identityForm.primary_color} onChange={e => setIdentityForm(p => ({ ...p, primary_color: e.target.value }))} style={{ width: '36px', height: '36px', border: 'none', background: 'none', cursor: 'pointer' }} />
-                                        <span style={{ fontFamily: 'monospace', fontSize: '13px' }}>{identityForm.primary_color}</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="fl">UNIÓN ID</label>
-                                    <input className="fi" value={identityForm.union_id} onChange={e => setIdentityForm(p => ({ ...p, union_id: e.target.value }))} />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="fl">WEBSITE</label>
-                                <input className="fi" value={identityForm.website} onChange={e => setIdentityForm(p => ({ ...p, website: e.target.value }))} placeholder="https://..." />
-                            </div>
-                            <div>
-                                <label className="fl">LOGO URL / SVG</label>
-                                <textarea className="fi" value={identityForm.logo_url} onChange={e => setIdentityForm(p => ({ ...p, logo_url: e.target.value }))} rows={3} placeholder="URL o SVG del escudo" style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '12px' }} />
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '28px' }}>
-                            <button className="bp" onClick={handleSaveIdentity} disabled={saving}>
-                                {saving ? 'Guardando...' : 'Guardar Identidad'}
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* ─── TAB: SEDES ─────────────────────────────────────────── */}
-                {activeTab === 'sedes' && (
-                    <div style={{ display: 'grid', gap: '16px', maxWidth: '680px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Sedes</h2>
-                            <button className="bp" onClick={() => setShowVenueForm(true)} style={{ padding: '8px 16px', fontSize: '13px' }}>
-                                <Plus size={14} style={{ display: 'inline', marginRight: '4px' }} /> Agregar Sede
-                            </button>
-                        </div>
-
-                        {venues.length === 0 && !showVenueForm && (
-                            <div className="glass" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
-                                <p style={{ marginBottom: '12px' }}>No hay sedes registradas.</p>
-                                <button className="bg" onClick={() => setShowVenueForm(true)}>+ Agregar primera sede</button>
-                            </div>
-                        )}
-
-                        {venues.map(venue => (
-                            <div key={venue.id} className="glass" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div>
-                                    <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        {venue.name}
-                                        {venue.is_primary && <span className="badge badge-pub" style={{ fontSize: '10px' }}>Principal</span>}
-                                    </div>
-                                    <div style={{ fontSize: '13px', color: '#9ca3af', marginTop: '4px' }}>
-                                        {[venue.address, venue.city].filter(Boolean).join(' · ')}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={async () => {
-                                        if (!confirm('¿Eliminar sede?')) return;
-                                        const res = await fetch(`/api/clubs/${clubId}/venues?venue_id=${venue.id}`, { method: 'DELETE' });
-                                        if (res.ok) { setVenues(prev => prev.filter(v => v.id !== venue.id)); showToast('Sede eliminada', 'success'); }
-                                        else showToast('Error al eliminar', 'error');
-                                    }}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px' }}
-                                >
-                                    <Trash2 size={16} />
+                                <button className="btn btn-primary" onClick={() => setShowDivisionForm(true)}>
+                                    <Plus size={16} /> Nueva División
                                 </button>
                             </div>
-                        ))}
 
-                        {showVenueForm && (
-                            <div className="glass" style={{ padding: '24px' }}>
-                                <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '20px' }}>Nueva Sede</h3>
-                                <div style={{ display: 'grid', gap: '16px' }}>
-                                    <div>
-                                        <label className="fl">NOMBRE *</label>
-                                        <input className="fi" value={venueForm.name} onChange={e => setVenueForm(p => ({ ...p, name: e.target.value }))} placeholder="Ej: Cancha Principal" />
-                                    </div>
-                                    <div className="row">
-                                        <div>
-                                            <label className="fl">DIRECCIÓN</label>
-                                            <input className="fi" value={venueForm.address} onChange={e => setVenueForm(p => ({ ...p, address: e.target.value }))} />
-                                        </div>
-                                        <div>
-                                            <label className="fl">CIUDAD</label>
-                                            <input className="fi" value={venueForm.city} onChange={e => setVenueForm(p => ({ ...p, city: e.target.value }))} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="fl">LINK MAPS</label>
-                                        <input className="fi" value={venueForm.maps_link} onChange={e => setVenueForm(p => ({ ...p, maps_link: e.target.value }))} placeholder="https://goo.gl/maps/..." />
-                                    </div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#9ca3af' }}>
-                                        <input type="checkbox" checked={venueForm.is_primary} onChange={e => setVenueForm(p => ({ ...p, is_primary: e.target.checked }))} style={{ accentColor: '#10b981' }} />
-                                        Marcar como sede principal
-                                    </label>
-                                </div>
-                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                                    <button className="bg" onClick={() => setShowVenueForm(false)}>Cancelar</button>
-                                    <button className="bp" onClick={handleCreateVenue} disabled={saving}>{saving ? 'Guardando...' : 'Agregar Sede'}</button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* ─── TAB: DIVISIONES ────────────────────────────────────── */}
-                {activeTab === 'divisiones' && (
-                    <div style={{ display: 'grid', gap: '16px', maxWidth: '900px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Divisiones</h2>
-                                <p style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>
-                                    Categorías y ramas del club. Persisten en base de datos inmediatamente.
-                                </p>
-                            </div>
-                            <button className="bp" onClick={() => setShowDivisionForm(true)} style={{ padding: '8px 16px', fontSize: '13px' }}>
-                                <Plus size={14} style={{ display: 'inline', marginRight: '4px' }} /> Nueva División
-                            </button>
-                        </div>
-
-                        {divisions.length === 0 && !showDivisionForm && (
-                            <div className="glass" style={{ padding: '48px', textAlign: 'center', color: '#6b7280' }}>
-                                <div style={{ fontSize: '40px', marginBottom: '12px' }}>🏆</div>
-                                <p style={{ marginBottom: '16px' }}>Sin divisiones aún.</p>
-                                <p style={{ fontSize: '13px', marginBottom: '20px', color: '#555' }}>
-                                    Creá la primera categoría para empezar a operar.
-                                </p>
-                                <button className="bp" onClick={() => setShowDivisionForm(true)}>+ Nueva División</button>
-                            </div>
-                        )}
-
-                        {divisions.length > 0 && (
-                            <div className="glass" style={{ overflow: 'hidden' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <article className="partition" style={{ padding: 0, overflow: 'hidden' }}>
+                                <table className="form-table">
                                     <thead>
-                                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '11px', color: '#6b7280', textTransform: 'uppercase' }}>
-                                            {['Nombre', 'Deporte', 'Rama', 'Categoría', 'Estado', 'Temporada', ''].map(h => (
-                                                <th key={h} style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'left' }}>{h}</th>
-                                            ))}
+                                        <tr>
+                                            <th>NOMBRE</th>
+                                            <th>DEPORTE</th>
+                                            <th>RAMA</th>
+                                            <th>CAT.</th>
+                                            <th>ESTADO</th>
+                                            <th style={{ textAlign: 'right' }}>ACCIONES</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {divisions.map(div => (
-                                            <tr key={div.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <td style={{ padding: '14px 16px', fontWeight: 600 }}>
-                                                    {div.featured && <span style={{ color: '#10b981', marginRight: '6px' }}>★</span>}
+                                            <tr key={div.id}>
+                                                <td style={{ fontWeight: 700 }}>
+                                                    {div.featured && <span style={{ color: 'var(--accent)', marginRight: '6px' }}>★</span>}
                                                     {div.name}
                                                 </td>
-                                                <td style={{ padding: '14px 16px', color: '#9ca3af', fontSize: '13px' }}>{div.sport || club?.sport || '—'}</td>
-                                                <td style={{ padding: '14px 16px', color: '#9ca3af', fontSize: '13px' }}>{div.gender || '—'}</td>
-                                                <td style={{ padding: '14px 16px', color: '#9ca3af', fontSize: '13px' }}>{div.category || '—'}</td>
-                                                <td style={{ padding: '14px 16px' }}>
-                                                    <span className={`badge ${div.status === 'active' ? 'badge-pub' : 'badge-draft'}`} style={{ fontSize: '11px' }}>
-                                                        {div.status === 'active' ? 'Activa' : div.status || 'Draft'}
+                                                <td>{div.sport || club?.sport || '—'}</td>
+                                                <td>{div.gender || '—'}</td>
+                                                <td>{div.category || '—'}</td>
+                                                <td>
+                                                    <span className={`status-chip active ${div.status === 'active' ? 'green' : ''}`} style={{ fontSize: '10px' }}>
+                                                        {div.status === 'active' ? 'Activa' : (div.status || 'Draft')}
                                                     </span>
                                                 </td>
-                                                <td style={{ padding: '14px 16px', color: '#9ca3af', fontSize: '13px' }}>{div.season || '—'}</td>
-                                                <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                                                    <button
-                                                        onClick={() => handleDeleteDivision(div.id)}
-                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px' }}
-                                                    >
-                                                        <Trash2 size={15} />
+                                                <td style={{ textAlign: 'right' }}>
+                                                    <button onClick={() => handleDeleteDivision(div.id)} className="btn-icon" style={{ color: 'var(--accent-red)', opacity: 0.6 }}>
+                                                        <Trash2 size={16} />
                                                     </button>
                                                 </td>
                                             </tr>
                                         ))}
+                                        {divisions.length === 0 && !showDivisionForm && (
+                                            <tr>
+                                                <td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
+                                                    Sin divisiones registradas.
+                                                </td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
-                            </div>
-                        )}
+                            </article>
 
-                        {showDivisionForm && (
-                            <div className="glass" style={{ padding: '24px' }}>
-                                <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '20px' }}>Nueva División</h3>
-                                <div style={{ display: 'grid', gap: '16px' }}>
-                                    <div>
-                                        <label className="fl">NOMBRE *</label>
-                                        <input className="fi" value={divForm.name} onChange={e => setDivForm(p => ({ ...p, name: e.target.value }))} placeholder="Ej: Primera, Reserva, M19" />
+                            {showDivisionForm && (
+                                <article className="partition">
+                                    <div className="partition-header">
+                                        <h2>Crear Nueva División</h2>
                                     </div>
-                                    <div className="row">
-                                        <div>
-                                            <label className="fl">RAMA</label>
-                                            <select className="fi" value={divForm.gender} onChange={e => setDivForm(p => ({ ...p, gender: e.target.value }))}>
-                                                <option>Masculino</option>
-                                                <option>Femenino</option>
-                                                <option>Mixto</option>
-                                            </select>
+                                    <div className="partition-body">
+                                        <div className="form-grid">
+                                            <div className="field-group">
+                                                <label>NOMBRE DE LA DIVISIÓN *</label>
+                                                <input className="form-input" value={divForm.name} onChange={e => setDivForm(p => ({ ...p, name: e.target.value }))} placeholder="Ej: Primera, M19, Reserva" />
+                                            </div>
+                                            <div className="grid-2">
+                                                <div className="field-group">
+                                                    <label>RAMA / GÉNERO</label>
+                                                    <select className="form-select" value={divForm.gender} onChange={e => setDivForm(p => ({ ...p, gender: e.target.value }))}>
+                                                        <option>Masculino</option>
+                                                        <option>Femenino</option>
+                                                        <option>Mixto</option>
+                                                    </select>
+                                                </div>
+                                                <div className="field-group">
+                                                    <label>TEMPORADA</label>
+                                                    <input className="form-input" value={divForm.season} onChange={e => setDivForm(p => ({ ...p, season: e.target.value }))} />
+                                                </div>
+                                            </div>
+                                            <div className="field-group">
+                                                <label>CATEGORÍA ESPECÍFICA</label>
+                                                <input className="form-input" value={divForm.category} onChange={e => setDivForm(p => ({ ...p, category: e.target.value }))} placeholder="Ej: Elite, Juvenil, Infantil..." />
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="fl">CATEGORÍA</label>
-                                            <input className="fi" value={divForm.category} onChange={e => setDivForm(p => ({ ...p, category: e.target.value }))} placeholder="Senior, Juvenil, Infantil..." />
+                                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                                            <button className="btn btn-outline" onClick={() => setShowDivisionForm(false)}>Cancelar</button>
+                                            <button className="btn btn-primary" onClick={handleCreateDivision} disabled={saving || !divForm.name.trim()}>
+                                                {saving ? 'Creando...' : 'Crear División'}
+                                            </button>
                                         </div>
-                                        <div>
-                                            <label className="fl">TEMPORADA</label>
-                                            <input className="fi" value={divForm.season} onChange={e => setDivForm(p => ({ ...p, season: e.target.value }))} />
+                                    </div>
+                                </article>
+                            )}
+                        </div>
+                    )}
+
+                    {/* TAB: CONFIG */}
+                    {activeTab === 'config' && (
+                        <article className="partition" style={{ maxWidth: '600px' }}>
+                            <div className="partition-header">
+                                <h2>Configuración Técnica</h2>
+                            </div>
+                            <div className="partition-body">
+                                <div className="form-grid">
+                                    <div className="field-group">
+                                        <label>ID DEL CLUB (SLUG)</label>
+                                        <input className="form-input" value={club.id} readOnly style={{ color: 'var(--accent)', fontFamily: 'monospace', opacity: 0.8 }} />
+                                        <p style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '6px' }}>Identificador permanente utilizado para rutas y API.</p>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>ESTADO DEL REGISTRO</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span className={`status-chip active ${club.status === 'published' ? 'green' : ''}`}>
+                                                {(club.status || 'draft').toUpperCase()}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                                    <button className="bg" onClick={() => setShowDivisionForm(false)}>Cancelar</button>
-                                    <button className="bp" onClick={handleCreateDivision} disabled={saving || !divForm.name.trim()}>
-                                        {saving ? 'Guardando...' : 'Crear División'}
+                            </div>
+                        </article>
+                    )}
+
+                    {/* TAB: PUBLICAR */}
+                    {activeTab === 'publicar' && (
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <article className="partition" style={{ maxWidth: '580px', width: '100%', textAlign: 'center', padding: '40px' }}>
+                                <div style={{
+                                    width: '64px', height: '64px', borderRadius: '50%', background: 'var(--surface-light)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px',
+                                    color: setupStatus?.isPublished ? 'var(--accent)' : 'var(--text-dim)'
+                                }}>
+                                    {setupStatus?.isPublished ? <CheckCircle size={32} /> : <Globe size={32} />}
+                                </div>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '8px' }}>
+                                    {setupStatus?.isPublished ? '¡Club en Vivo!' : 'Lanzamiento del Club'}
+                                </h2>
+                                <p style={{ color: 'var(--text-dim)', fontSize: '14px', marginBottom: '32px' }}>
+                                    {setupStatus?.isPublished
+                                        ? 'Toda la información del club es visible para los usuarios en la aplicación.'
+                                        : 'Asegúrate de cumplir con los requisitos mínimos para que el club pueda ser descubierto.'}
+                                </p>
+
+                                <div style={{ textAlign: 'left', display: 'grid', gap: '12px', marginBottom: '40px' }}>
+                                    {[
+                                        { label: 'Identidad completada', done: setupStatus?.steps.identity.done ?? false },
+                                        { label: 'Estructura de divisiones (N)', done: (setupStatus?.steps.divisions.count ?? 0) > 0 },
+                                        { label: 'Sedes y ubicación', done: (setupStatus?.steps.venues.count ?? 0) > 0 },
+                                    ].map(item => (
+                                        <div key={item.label} style={{
+                                            display: 'flex', alignItems: 'center', gap: '12px', padding: '16px',
+                                            background: 'var(--surface-light)', borderRadius: '12px', border: `1px solid ${item.done ? 'var(--accent-o20)' : 'var(--border)'}`
+                                        }}>
+                                            {item.done ? <CheckCircle size={18} color="var(--accent)" /> : <AlertCircle size={18} color="var(--text-dim)" />}
+                                            <span style={{ fontSize: '14px', fontWeight: 600, color: item.done ? 'var(--text)' : 'var(--text-dim)' }}>{item.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {setupStatus?.isPublished ? (
+                                    <button className="btn btn-outline" onClick={handleUnpublish} style={{ color: 'var(--accent-red)' }}>
+                                        <EyeOff size={16} /> Despublicar Club
                                     </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                                ) : (
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={handlePublish}
+                                        disabled={saving || !setupStatus?.canPublish}
+                                        style={{ width: '100%', padding: '16px', fontSize: '16px' }}
+                                    >
+                                        {saving ? 'Publicando...' : 'Publicar Club Ahora'}
+                                    </button>
+                                )}
 
-                {/* ─── TAB: CONFIG ─────────────────────────────────────────── */}
-                {activeTab === 'config' && (
-                    <div className="glass" style={{ padding: '32px', maxWidth: '600px' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '24px' }}>Configuración General</h2>
-                        <div style={{ display: 'grid', gap: '20px' }}>
-                            <div>
-                                <label className="fl">SLUG / ID</label>
-                                <input className="fi" value={club.id} readOnly style={{ color: '#10b981', fontFamily: 'monospace', opacity: 0.7 }} />
-                                <p style={{ fontSize: '11px', color: '#555', marginTop: '4px' }}>El ID no se puede cambiar una vez creado.</p>
-                            </div>
-                            <div>
-                                <label className="fl">ESTADO</label>
-                                <input className="fi" value={club.status || 'draft'} readOnly style={{ opacity: 0.7 }} />
-                            </div>
+                                {!setupStatus?.canPublish && !setupStatus?.isPublished && (
+                                    <p style={{ color: 'var(--accent-red)', fontSize: '12px', marginTop: '16px', fontWeight: 600 }}>
+                                        No se puede publicar hasta completar los requisitos.
+                                    </p>
+                                )}
+                            </article>
                         </div>
-                    </div>
-                )}
+                    )}
+                </main>
 
-                {/* ─── TAB: PUBLICAR ───────────────────────────────────────── */}
-                {activeTab === 'publicar' && (
-                    <div className="glass" style={{ padding: '40px', maxWidth: '600px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>
-                            {setupStatus?.isPublished ? '✅' : '📋'}
-                        </div>
-                        <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>
-                            {setupStatus?.isPublished ? 'Club Publicado' : 'Publicar Club'}
-                        </h2>
-                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '32px' }}>
-                            {setupStatus?.isPublished
-                                ? 'Este club es visible públicamente.'
-                                : 'Revisá los requisitos antes de publicar.'}
-                        </p>
-
-                        {/* Checklist */}
-                        <div style={{ textAlign: 'left', display: 'grid', gap: '12px', marginBottom: '32px' }}>
-                            {[
-                                { label: 'Nombre completado',       done: setupStatus?.steps.identity.done ?? false },
-                                { label: 'Al menos 1 división',     done: (setupStatus?.steps.divisions.count ?? 0) > 0 },
-                                { label: 'Sede registrada',         done: (setupStatus?.steps.venues.count ?? 0) > 0 },
-                            ].map(item => (
-                                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: `1px solid ${item.done ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
-                                    {item.done
-                                        ? <CheckCircle size={18} color="#10b981" />
-                                        : <AlertCircle size={18} color="#6b7280" />}
-                                    <span style={{ fontSize: '14px', color: item.done ? 'white' : '#6b7280' }}>
-                                        {item.label}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {setupStatus?.isPublished ? (
-                            <button className="bg" onClick={handleUnpublish}>
-                                <EyeOff size={14} style={{ display: 'inline', marginRight: '6px' }} /> Despublicar
-                            </button>
-                        ) : (
-                            <button
-                                className="bp"
-                                onClick={handlePublish}
-                                disabled={saving || !setupStatus?.canPublish}
-                                style={{ padding: '14px 40px', fontSize: '15px' }}
-                            >
-                                {saving ? 'Publicando...' : 'Publicar Club'}
-                            </button>
-                        )}
-
-                        {!setupStatus?.canPublish && !setupStatus?.isPublished && (
-                            <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '12px' }}>
-                                Completá los requisitos marcados para poder publicar.
-                            </p>
-                        )}
-                    </div>
+                {/* Footer Actions Overlay for Identity */}
+                {activeTab === 'identidad' && (
+                    <footer className="actions-footer">
+                        <p style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Los cambios en identidad afectan el SEO y rutas.</p>
+                        <button className="btn btn-primary" onClick={handleSaveIdentity} disabled={saving}>
+                            {saving ? 'Guardando...' : 'Actualizar Club'}
+                        </button>
+                    </footer>
                 )}
             </div>
 
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+            <style jsx>{`
+                .form-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .form-table th {
+                    padding: 12px 20px;
+                    background: var(--surface-light);
+                    text-align: left;
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: var(--text-dim);
+                    border-bottom: 1px solid var(--border);
+                }
+                .form-table td {
+                    padding: 16px 20px;
+                    border-bottom: 1px solid var(--border);
+                    font-size: 13px;
+                }
+                .btn-icon {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 8px;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                }
+                .btn-icon:hover {
+                    background: var(--surface-light);
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }

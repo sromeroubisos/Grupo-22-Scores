@@ -2,15 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import {
+    ChevronLeft, Trophy, Calendar, Globe, Shield, Settings, CheckCircle,
+    LayoutGrid, ListOrdered, GitMerge, Info, Search, Loader2
+} from 'lucide-react';
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
 import { createClient } from '@/lib/supabase/client';
 import { SPORTS, getActiveSports } from '@/lib/data/sports';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
+import '../../creation-forms.css';
 
 const activeSports = getActiveSports();
 
-// Match rules per sport for the form defaults
 const sportDefaults: Record<string, { duration: number; win: number; draw: number; loss: number }> = {
     'football': { duration: 90, win: 3, draw: 1, loss: 0 },
     'rugby': { duration: 80, win: 4, draw: 2, loss: 0 },
@@ -43,16 +46,26 @@ const sportDefaults: Record<string, { duration: number; win: number; draw: numbe
     'kabaddi': { duration: 40, win: 2, draw: 0, loss: 0 },
 };
 
+const steps = [
+    { id: 1, name: 'Configuración', icon: <Settings size={14} /> },
+    { id: 2, name: 'Fases', icon: <Trophy size={14} /> },
+    { id: 3, name: 'Participantes', icon: <Shield size={14} /> },
+    { id: 4, name: 'Reglas', icon: <CheckCircle size={14} /> },
+    { id: 5, name: 'Publicar', icon: <Globe size={14} /> },
+] as const;
+
 export default function SuperCreateTournament() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tournamentId = searchParams?.get('tournamentId');
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const supabase = createClient();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [isEdit, setIsEdit] = useState(false);
     const [unions, setUnions] = useState<any[]>([]);
+    const [clubs, setClubs] = useState<any[]>([]);
+    const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [saving, setSaving] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -64,57 +77,75 @@ export default function SuperCreateTournament() {
         startDate: '',
         endDate: '',
         format: 'league',
-        pointsWin: 4,
-        pointsDraw: 2,
-        pointsLoss: 0,
         matchDuration: 80,
         gender: 'Masculino',
         category: 'Profesional',
         country: '',
         unionId: '',
+        rules: {
+            pointsWin: 4,
+            pointsDraw: 2,
+            pointsLoss: 0,
+            pointsBonusTry: 1,
+            pointsBonusLoss: 1,
+        }
     });
 
     useEffect(() => {
         supabase.from('unions').select('*').order('name').then(({ data }) => {
             setUnions(data || []);
         });
+
+        supabase.from('clubs').select('*').order('name').then(({ data }) => {
+            setClubs(data || []);
+        });
     }, [supabase]);
 
     useEffect(() => {
         if (!tournamentId) return;
-        supabase.from('tournaments').select('*').eq('id', tournamentId).single().then(({ data }) => {
-            if (!data) return;
-            setIsEdit(true);
-            const sportVal = data.sport ? mapExternalSportToInternalSport(data.sport) : 'rugby';
-            const defaults = sportDefaults[sportVal] || {};
-            setFormData(prev => ({
-                ...prev,
-                name: data.name || '',
-                sport: sportVal,
-                season: data.season_id || '2026',
-                category: data.category || prev.category,
-                format: data.format || prev.format,
-                country: data.country || '',
-                unionId: data.union_id || '',
-                pointsWin: defaults.win ?? prev.pointsWin,
-                pointsDraw: defaults.draw ?? prev.pointsDraw,
-                pointsLoss: defaults.loss ?? prev.pointsLoss,
-                matchDuration: defaults.duration ?? prev.matchDuration,
-            }));
-        });
-    }, [tournamentId]);
+        supabase.from('tournaments')
+            .select('*')
+            .eq('id', tournamentId)
+            .single()
+            .then(({ data }: { data: any }) => {
+                if (!data) return;
+                setIsEdit(true);
+                const sportVal = data.sport ? mapExternalSportToInternalSport(data.sport) : 'rugby';
+                const defaults = (sportDefaults[sportVal as string] || {}) as any;
+
+                setFormData(prev => ({
+                    ...prev,
+                    name: data.name || '',
+                    sport: sportVal,
+                    visibility: data.is_visible ? 'public' : 'private',
+                    season: data.season_id || '2026',
+                    category: data.category || prev.category,
+                    format: data.format || prev.format,
+                    country: data.country || '',
+                    unionId: data.union_id || '',
+                    rules: {
+                        ...prev.rules,
+                        pointsWin: data.points_win ?? defaults.win ?? prev.rules.pointsWin,
+                        pointsDraw: data.points_draw ?? defaults.draw ?? prev.rules.pointsDraw,
+                        pointsLoss: data.points_loss ?? defaults.loss ?? prev.rules.pointsLoss,
+                    }
+                }));
+            });
+    }, [tournamentId, supabase]);
 
     const handleSportChange = (sportId: string) => {
         const d = sportDefaults[sportId];
         setFormData(prev => ({
             ...prev,
             sport: sportId,
-            ...(d ? {
-                matchDuration: d.duration,
-                pointsWin: d.win,
-                pointsDraw: d.draw,
-                pointsLoss: d.loss,
-            } : {}),
+            rules: {
+                ...prev.rules,
+                ...(d ? {
+                    pointsWin: d.win,
+                    pointsDraw: d.draw,
+                    pointsLoss: d.loss,
+                } : {})
+            }
         }));
     };
 
@@ -125,7 +156,6 @@ export default function SuperCreateTournament() {
             return;
         }
 
-        // Final step: save to Supabase
         setSaving(true);
         try {
             const payload = {
@@ -138,14 +168,19 @@ export default function SuperCreateTournament() {
                 union_id: formData.unionId || null,
                 status: 'published' as const,
                 is_visible: formData.visibility === 'public',
+                points_win: formData.rules.pointsWin,
+                points_draw: formData.rules.pointsDraw,
+                points_loss: formData.rules.pointsLoss,
                 slug: formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now(),
             };
 
             let error: any;
             if (isEdit && tournamentId) {
-                ({ error } = await supabase.from('tournaments').update(payload).eq('id', tournamentId));
+                const { error: err } = await (supabase.from('tournaments') as any).update(payload).eq('id', tournamentId);
+                error = err;
             } else {
-                ({ error } = await supabase.from('tournaments').insert([payload]));
+                const { error: err } = await (supabase.from('tournaments') as any).insert([payload]);
+                error = err;
             }
 
             if (error) throw error;
@@ -157,239 +192,428 @@ export default function SuperCreateTournament() {
         }
     };
 
-    if (currentStep === 2) {
-        return (
-            <PhaseCreator
-                phaseIndex={1}
-                totalPhases={3}
-                onPrev={() => setCurrentStep(1)}
-                onNext={() => setCurrentStep(3)}
-            />
-        );
-    }
-
     return (
-        <div className="create-tournament-page">
-            <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
-                :root {
-                    --bg-deep: #07090c;
-                    --bg-surface: #0b1016;
-                    --glass: rgba(255, 255, 255, 0.03);
-                    --glass-border: rgba(255, 255, 255, 0.08);
-                    --accent-green: #22c55e;
-                    --text-primary: rgba(255, 255, 255, 0.92);
-                    --text-secondary: rgba(255, 255, 255, 0.62);
-                    --text-muted: rgba(255, 255, 255, 0.35);
-                    --radius-lg: 12px;
-                    --radius-md: 8px;
-                    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-
-                .create-tournament-page {
-                    background-color: var(--bg-deep);
-                    min-height: 100vh;
-                    font-family: 'Inter', sans-serif;
-                    padding: 32px;
-                }
-
-                .app-container {
-                    max-width: 800px;
-                    margin: 0 auto;
-                }
-
-                .form-group {
-                    margin-bottom: 24px;
-                }
-
-                label {
-                    display: block;
-                    font-size: 13px;
-                    color: var(--text-secondary);
-                    margin-bottom: 8px;
-                }
-
-                input, select {
-                    width: 100%;
-                    background: var(--bg-surface);
-                    border: 1px solid var(--glass-border);
-                    color: white;
-                    padding: 12px;
-                    border-radius: var(--radius-md);
-                }
-
-                .btn {
-                    padding: 12px 24px;
-                    border-radius: var(--radius-md);
-                    cursor: pointer;
-                    border: none;
-                    font-weight: 600;
-                }
-
-                .btn-primary {
-                    background: var(--accent-green);
-                    color: black;
-                }
-
-                .btn-secondary {
-                    background: transparent;
-                    border: 1px solid var(--glass-border);
-                    color: white;
-                }
-
-                .wizard-footer {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 40px;
-                }
-
-                .sport-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-                    gap: 10px;
-                    margin-top: 8px;
-                }
-
-                .sport-btn {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 10px 12px;
-                    border-radius: var(--radius-md);
-                    border: 1px solid var(--glass-border);
-                    background: var(--bg-surface);
-                    color: var(--text-secondary);
-                    cursor: pointer;
-                    font-size: 13px;
-                    transition: var(--transition);
-                }
-
-                .sport-btn.selected {
-                    border-color: var(--accent-green);
-                    color: var(--accent-green);
-                    background: rgba(34, 197, 94, 0.08);
-                }
-            `}</style>
-
-            <div className="app-container">
-                <div style={{ marginBottom: 32 }}>
+        <div className="creation-body">
+            <div className="creation-container">
+                {/* Header */}
+                <header className="creation-header">
                     <button
-                        onClick={() => router.back()}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+                        onClick={() => router.push('/admin/super/torneos')}
+                        className="btn btn-outline"
+                        style={{ padding: '8px 16px', marginBottom: '24px', height: 'auto', width: 'auto' }}
                     >
-                        <ArrowLeft size={16} /> Volver
+                        <ChevronLeft size={16} /> Volver a Torneos
                     </button>
-                    <h1 style={{ color: 'white', marginTop: 16 }}>
-                        {isEdit ? 'Editar Torneo' : 'Nuevo Torneo'}
-                    </h1>
-                    <p style={{ color: 'var(--text-secondary)' }}>
-                        Configuración global del torneo
-                    </p>
-                </div>
+                    <h1>{isEdit ? 'Editar Torneo' : 'Inaugurar Torneo'}</h1>
+                    <p>Define los parámetros globales y la estructura de tu competencia.</p>
+                </header>
 
-                <div className="form-group">
-                    <label>Nombre del Torneo</label>
-                    <input
-                        type="text"
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Ej: Superliga 2026"
-                    />
-                </div>
+                {/* Stepper */}
+                <nav className="stepper-nav">
+                    {steps.map(step => (
+                        <button
+                            key={step.id}
+                            className={`step-pill ${currentStep === step.id ? 'active' : ''} ${step.id < currentStep ? 'done' : ''}`}
+                            onClick={() => {
+                                if (step.id < currentStep) setCurrentStep(step.id);
+                            }}
+                        >
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                {step.id < currentStep ? '✓' : step.icon}
+                                {step.name}
+                            </span>
+                        </button>
+                    ))}
+                </nav>
 
-                <div className="form-group">
-                    <label>Deporte</label>
-                    <div className="sport-grid">
-                        {activeSports.map(sport => (
-                            <button
-                                key={sport.id}
-                                type="button"
-                                className={`sport-btn${formData.sport === sport.id ? ' selected' : ''}`}
-                                onClick={() => handleSportChange(sport.id)}
-                            >
-                                <span>{sport.icon}</span>
-                                <span>{sport.nameEs}</span>
-                            </button>
-                        ))}
-                    </div>
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
-                        Deporte seleccionado: <strong style={{ color: 'var(--text-secondary)' }}>{SPORTS[formData.sport as keyof typeof SPORTS]?.nameEs || formData.sport}</strong>
-                    </p>
-                </div>
+                {/* STEP 1: DATOS BÁSICOS */}
+                {currentStep === 1 && (
+                    <>
+                        <article className="partition">
+                            <div className="partition-header">
+                                <h2>Configuración General</h2>
+                                <p>Información de identidad y categorización.</p>
+                            </div>
+                            <div className="partition-body">
+                                <div className="form-grid">
+                                    <div className="field-group">
+                                        <label>NOMBRE DEL TORNEO *</label>
+                                        <input
+                                            className="form-input"
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                            placeholder="Ej: Torneo del Interior A 2026"
+                                        />
+                                    </div>
 
-                <div className="form-group">
-                    <label>Temporada</label>
-                    <select
-                        value={formData.season}
-                        onChange={e => setFormData({ ...formData, season: e.target.value })}
+                                    <div className="field-group">
+                                        <label>DEPORTE</label>
+                                        <div className="choice-grid">
+                                            {activeSports.map(sport => (
+                                                <button
+                                                    key={sport.id}
+                                                    type="button"
+                                                    className={`choice-btn ${formData.sport === sport.id ? 'selected' : ''}`}
+                                                    onClick={() => handleSportChange(sport.id)}
+                                                >
+                                                    <span className="choice-icon">{sport.icon}</span>
+                                                    <span className="choice-label">{sport.nameEs}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid-2">
+                                        <div className="field-group">
+                                            <label>TEMPORADA</label>
+                                            <select
+                                                className="form-select"
+                                                value={formData.season}
+                                                onChange={e => setFormData({ ...formData, season: e.target.value })}
+                                            >
+                                                <option value="2026">2026</option>
+                                                <option value="2025">2025</option>
+                                                <option value="2024">2024</option>
+                                            </select>
+                                        </div>
+                                        <div className="field-group">
+                                            <label>CATEGORÍA</label>
+                                            <input
+                                                className="form-input"
+                                                type="text"
+                                                value={formData.category}
+                                                onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                                placeholder="Ej: Primera, Juveniles, etc."
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article className="partition">
+                            <div className="partition-header">
+                                <h2>Jurisdicción y Alcance</h2>
+                                <p>Define dónde se desarrolla y quién lo rige.</p>
+                            </div>
+                            <div className="partition-body">
+                                <div className="grid-2">
+                                    <div className="field-group">
+                                        <label>PAÍS / REGIÓN</label>
+                                        <select
+                                            className="form-select"
+                                            value={formData.country}
+                                            onChange={e => setFormData({ ...formData, country: e.target.value })}
+                                        >
+                                            <option value="">Global / Internacional</option>
+                                            <option value="Argentina">Argentina</option>
+                                            <option value="Uruguay">Uruguay</option>
+                                            <option value="Chile">Chile</option>
+                                        </select>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>UNIÓN VINCULADA</label>
+                                        <select
+                                            className="form-select"
+                                            value={formData.unionId}
+                                            onChange={e => setFormData({ ...formData, unionId: e.target.value })}
+                                        >
+                                            <option value="">Independiente (Sin vínculo)</option>
+                                            {unions.map(u => (
+                                                <option key={u.id} value={u.id}>{u.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </>
+                )}
+
+                {/* STEP 2: FASES */}
+                {currentStep === 2 && (
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Estructura de Fases</h2>
+                            <p>Configura cómo se organiza la competencia.</p>
+                        </div>
+                        <div className="partition-body">
+                            <div className="field-group">
+                                <label>TIPO DE FORMATO</label>
+                                <div className="choice-grid">
+                                    <button
+                                        type="button"
+                                        className={`choice-btn ${formData.format === 'groups' ? 'selected' : ''}`}
+                                        onClick={() => setFormData({ ...formData, format: 'groups' })}
+                                    >
+                                        <LayoutGrid className="choice-icon" />
+                                        <span className="choice-label">Fase de Grupos + Playoffs</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`choice-btn ${formData.format === 'league' ? 'selected' : ''}`}
+                                        onClick={() => setFormData({ ...formData, format: 'league' })}
+                                    >
+                                        <ListOrdered className="choice-icon" />
+                                        <span className="choice-label">Liga (Todos contra todos)</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`choice-btn ${formData.format === 'knockout' ? 'selected' : ''}`}
+                                        onClick={() => setFormData({ ...formData, format: 'knockout' })}
+                                    >
+                                        <GitMerge className="choice-icon" />
+                                        <span className="choice-label">Eliminación Directa</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="sub-partition" style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', marginTop: '30px' }}>
+                                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <Trophy size={18} color="var(--accent)" />
+                                    <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Configurador de Fases</h3>
+                                </div>
+                                <PhaseCreator
+                                    phaseIndex={1}
+                                    totalPhases={1}
+                                    onPrev={() => setCurrentStep(1)}
+                                    onNext={() => setCurrentStep(3)}
+                                />
+                            </div>
+                        </div>
+                    </article>
+                )}
+
+                {/* STEP 3: PARTICIPANTES */}
+                {currentStep === 3 && (
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Clubes Participantes</h2>
+                            <p>Selecciona los clubes que formarán parte de este torneo.</p>
+                        </div>
+                        <div className="partition-body">
+                            <div className="form-grid">
+                                <div className="field-group">
+                                    <label>BUSCAR Y AGREGAR CLUBES</label>
+                                    <div className="search-box">
+                                        <Search className="icon" size={18} />
+                                        <input
+                                            type="text"
+                                            placeholder="Escribe el nombre del club..."
+                                            className="form-input"
+                                            value={searchTerm}
+                                            onChange={e => setSearchTerm(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th style={{ width: '40px' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={clubs.length > 0 && selectedClubs.length === clubs.length}
+                                                        onChange={() => {
+                                                            if (selectedClubs.length === clubs.length) setSelectedClubs([]);
+                                                            else setSelectedClubs(clubs.map(c => c.id));
+                                                        }}
+                                                    />
+                                                </th>
+                                                <th>CLUB</th>
+                                                <th>UBICACIÓN</th>
+                                                <th style={{ width: '100px' }}>ACCIÓN</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {clubs.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
+                                                        Cargando clubes...
+                                                    </td>
+                                                </tr>
+                                            ) : clubs.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())).map(club => (
+                                                <tr key={club.id} className={selectedClubs.includes(club.id) ? 'active' : ''}>
+                                                    <td>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedClubs.includes(club.id)}
+                                                            onChange={() => {
+                                                                if (selectedClubs.includes(club.id)) setSelectedClubs(p => p.filter(id => id !== club.id));
+                                                                else setSelectedClubs(p => [...p, club.id]);
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            {club.logo_url && <img src={club.logo_url} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />}
+                                                            <span>{club.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>{club.city || club.short_name || 'Sede Central'}</td>
+                                                    <td>
+                                                        <button
+                                                            type="button"
+                                                            className={`btn ${selectedClubs.includes(club.id) ? 'btn-primary' : 'btn-outline'}`}
+                                                            style={{ padding: '4px 12px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
+                                                            onClick={() => {
+                                                                if (selectedClubs.includes(club.id)) setSelectedClubs(p => p.filter(id => id !== club.id));
+                                                                else setSelectedClubs(p => [...p, club.id]);
+                                                            }}
+                                                        >
+                                                            {selectedClubs.includes(club.id) ? '✓ Añadido' : '+ Añadir'}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                )}
+
+                {/* STEP 4: REGLAS */}
+                {currentStep === 4 && (
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Sistema de Puntuación</h2>
+                            <p>Define los puntos que se otorgarán por cada resultado.</p>
+                        </div>
+                        <div className="partition-body">
+                            <div className="grid-2">
+                                <div className="field-group">
+                                    <label>PUNTOS POR GANAR</label>
+                                    <input
+                                        className="form-input"
+                                        type="number"
+                                        value={formData.rules.pointsWin}
+                                        onChange={e => setFormData({
+                                            ...formData,
+                                            rules: { ...formData.rules, pointsWin: parseInt(e.target.value) }
+                                        })}
+                                    />
+                                </div>
+                                <div className="field-group">
+                                    <label>PUNTOS POR EMPATAR</label>
+                                    <input
+                                        className="form-input"
+                                        type="number"
+                                        value={formData.rules.pointsDraw}
+                                        onChange={e => setFormData({
+                                            ...formData,
+                                            rules: { ...formData.rules, pointsDraw: parseInt(e.target.value) }
+                                        })}
+                                    />
+                                </div>
+                            </div>
+
+                            {formData.sport === 'rugby' && (
+                                <div className="sub-partition" style={{ marginTop: '20px', padding: '15px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                                    <h4 style={{ marginBottom: '15px', color: 'var(--accent)', fontSize: '13px', textTransform: 'uppercase' }}>Puntos Bonus (Rugby)</h4>
+                                    <div className="grid-2">
+                                        <div className="field-group">
+                                            <label>POR 4 O MÁS TRIES</label>
+                                            <input
+                                                className="form-input"
+                                                type="number"
+                                                value={formData.rules.pointsBonusTry}
+                                                onChange={e => setFormData({
+                                                    ...formData,
+                                                    rules: { ...formData.rules, pointsBonusTry: parseInt(e.target.value) }
+                                                })}
+                                            />
+                                        </div>
+                                        <div className="field-group">
+                                            <label>POR PERDER POR {'<'} 7</label>
+                                            <input
+                                                className="form-input"
+                                                type="number"
+                                                value={formData.rules.pointsBonusLoss}
+                                                onChange={e => setFormData({
+                                                    ...formData,
+                                                    rules: { ...formData.rules, pointsBonusLoss: parseInt(e.target.value) }
+                                                })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </article>
+                )}
+
+                {/* STEP 5: REVISIÓN */}
+                {currentStep === 5 && (
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Resumen y Confirmación</h2>
+                            <p>Revisa que toda la información sea correcta antes de finalizar.</p>
+                        </div>
+                        <div className="partition-body">
+                            <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                                <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Nombre</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.name}</span>
+                                </div>
+                                <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Deporte</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.sport.toUpperCase()}</span>
+                                </div>
+                                <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Temporada</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.season}</span>
+                                </div>
+                                <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Categoría</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.category || 'N/A'}</span>
+                                </div>
+                            </div>
+
+                            <article className="partition" style={{ marginTop: '30px', border: '1px dashed var(--border)' }}>
+                                <div className="partition-header">
+                                    <h3>Visibilidad Final</h3>
+                                </div>
+                                <div className="partition-body">
+                                    <select
+                                        className="form-select"
+                                        value={formData.visibility}
+                                        onChange={e => setFormData({ ...formData, visibility: e.target.value })}
+                                    >
+                                        <option value="public">🌍 Público (Vivo en la app)</option>
+                                        <option value="private">🔒 Privado (Borrador interno)</option>
+                                    </select>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                )}
+
+                {/* Footer Actions */}
+                <footer className="actions-footer">
+                    <button
+                        className="btn btn-outline"
+                        disabled={currentStep === 1 || saving}
+                        onClick={() => setCurrentStep(p => p - 1)}
                     >
-                        <option value="2026">2026</option>
-                        <option value="2025">2025</option>
-                        <option value="2024">2024</option>
-                    </select>
-                </div>
-
-                <div className="form-group">
-                    <label>Categoría</label>
-                    <input
-                        type="text"
-                        value={formData.category}
-                        onChange={e => setFormData({ ...formData, category: e.target.value })}
-                        placeholder="Ej: Primera División, U19, Femenino..."
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>País</label>
-                    <select
-                        value={formData.country}
-                        onChange={e => setFormData({ ...formData, country: e.target.value })}
-                    >
-                        <option value="">Global (sin país)</option>
-                        <option value="Argentina">Argentina</option>
-                        <option value="Uruguay">Uruguay</option>
-                        <option value="Chile">Chile</option>
-                        <option value="Brasil">Brasil</option>
-                        <option value="Colombia">Colombia</option>
-                    </select>
-                </div>
-
-                <div className="form-group">
-                    <label>Unión (Opcional)</label>
-                    <select
-                        value={formData.unionId}
-                        onChange={e => setFormData({ ...formData, unionId: e.target.value })}
-                    >
-                        <option value="">Sin vínculo (Unlinked)</option>
-                        {unions.map(u => (
-                            <option key={u.id} value={u.id}>{u.name}</option>
-                        ))}
-                    </select>
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                        Puedes vincular el torneo a una unión más tarde desde el catálogo.
-                    </p>
-                </div>
-
-                <div className="form-group">
-                    <label>Visibilidad</label>
-                    <select
-                        value={formData.visibility}
-                        onChange={e => setFormData({ ...formData, visibility: e.target.value })}
-                    >
-                        <option value="public">Público</option>
-                        <option value="private">Privado (borrador)</option>
-                    </select>
-                </div>
-
-                <div className="wizard-footer">
-                    <button className="btn btn-secondary" disabled={currentStep === 1} onClick={() => setCurrentStep(p => p - 1)}>
-                        Anterior
+                        Paso Anterior
                     </button>
-                    <button className="btn btn-primary" onClick={handleNext} disabled={saving || !formData.name}>
-                        {saving ? 'Guardando...' : currentStep === 5 ? (isEdit ? 'Guardar Cambios' : 'Publicar Torneo') : 'Siguiente'}
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleNext}
+                        disabled={saving || (currentStep === 1 && !formData.name)}
+                    >
+                        {saving ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Loader2 className="spinning" size={18} />
+                                {isEdit ? 'Guardando...' : 'Creando...'}
+                            </span>
+                        ) : currentStep === 5 ? (isEdit ? 'Guardar Cambios' : 'Finalizar Torneo') : 'Siguiente Paso'}
                     </button>
-                </div>
+                </footer>
+
             </div>
         </div>
     );

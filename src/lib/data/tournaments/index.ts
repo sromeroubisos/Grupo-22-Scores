@@ -73,7 +73,24 @@ export const getAllTournaments = (): Tournament[] => {
 };
 
 export const getTournamentById = (id: string): Tournament | undefined => {
-    return getAllTournaments().find(t => t.id === id);
+    const allTournaments = getAllTournaments();
+
+    // Try exact ID match first
+    let tournament = allTournaments.find(t => t.id === id);
+
+    // If not found and ID has fs- prefix, try to match by flashScoreIds (case-insensitive)
+    if (!tournament && id.toLowerCase().startsWith('fs-')) {
+        const rawId = id.slice(3).toLowerCase();
+        tournament = allTournaments.find(t =>
+            t.flashScoreIds && (
+                t.flashScoreIds.tournamentId?.toLowerCase() === rawId ||
+                t.flashScoreIds.tournamentStageId?.toLowerCase() === rawId ||
+                t.flashScoreIds.tournamentTemplateId?.toLowerCase() === rawId
+            )
+        );
+    }
+
+    return tournament;
 };
 
 export const getCountriesWithTournaments = (sportId: SportId): string[] => {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { db } from '@/lib/mock-db';
 
 export default function UnionClubs() {
@@ -39,7 +40,7 @@ export default function UnionClubs() {
                     <h1 style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '8px' }}>Clubes</h1>
                     <p style={{ color: 'var(--color-text-secondary)' }}>Listado de entidades vinculadas a esta unión.</p>
                 </div>
-                <button className="btn btn-primary">+ Nuevo Club</button>
+                <Link href={`/admin/entities/new?type=club`} className="btn btn-primary">+ Nuevo Club</Link>
             </div>
 
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -76,7 +77,13 @@ export default function UnionClubs() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                                    <button style={{ color: 'var(--color-accent)', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: 600 }}>Editar</button>
+                                    <Link
+                                        href={`/admin/entities/${c.id}/manage?type=club`}
+                                        className="btn btn-ghost"
+                                        style={{ color: 'var(--color-accent)', fontWeight: 600 }}
+                                    >
+                                        Editar
+                                    </Link>
                                 </td>
                             </tr>
                         )) : (

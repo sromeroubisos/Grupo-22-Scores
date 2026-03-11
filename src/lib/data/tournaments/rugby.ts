@@ -5,16 +5,78 @@ import type { Tournament } from '@/lib/types';
 export const RUGBY_TOURNAMENTS_INTERNATIONAL: Tournament[] = [
     // Major International Tournaments
     { id: 'rugby-world-cup', name: 'World Cup', url: '/rugby-union/world/world-cup/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 100, categories: ['men'], format: 'group-knockout' },
-    { id: 'rugby-six-nations', name: 'Six Nations', url: '/rugby-union/europe/six-nations/', type: 'international', sportId: 'rugby', countryId: 'europe', priority: 99, categories: ['men'], format: 'league' },
+    {
+        id: 'rugby-six-nations',
+        name: 'Six Nations',
+        url: '/rugby-union/europe/six-nations/',
+        type: 'international',
+        sportId: 'rugby',
+        countryId: 'europe',
+        priority: 99,
+        categories: ['men'],
+        format: 'league',
+        flashScoreIds: {
+            tournamentId: 'OI2GTjwP',
+            tournamentStageId: 'xd15pGfS',
+            tournamentTemplateId: 'faEPan8O',
+            seasonId: '185'
+        }
+    },
     { id: 'rugby-nations-championship', name: 'Nations Championship', url: '/rugby-union/world/nations-championship/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 95, categories: ['men'] },
-    { id: 'rugby-championship', name: 'Rugby Championship', url: '/rugby-union/world/rugby-championship/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 94, categories: ['men'] },
+    {
+        id: 'rugby-championship',
+        name: 'Rugby Championship',
+        url: '/rugby-union/world/rugby-championship/',
+        type: 'international',
+        sportId: 'rugby',
+        countryId: 'international',
+        priority: 94,
+        categories: ['men'],
+        flashScoreIds: {
+            tournamentId: 'M54dkNqe',
+            tournamentStageId: '6cEG6eKs',
+            tournamentTemplateId: 'xxwSbYzH',
+            seasonId: '182'
+        }
+    },
     { id: 'rugby-tri-nations', name: 'Tri Nations', url: '/rugby-union/world/tri-nations/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 93, categories: ['men'] },
     { id: 'rugby-lions-tour', name: 'Lions Tour', url: '/rugby-union/world/british-irish-lions-tour/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 92, categories: ['men'] },
 
     // Club Competitions
-    // Club Competitions
-    { id: 'rugby-united-rugby-championship', name: 'United Rugby Championship', url: '/rugby-union/world/united-rugby-championship/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 90, categories: ['men'], format: 'league' },
-    { id: 'rugby-super-rugby', name: 'Super Rugby', url: '/rugby-union/world/super-rugby/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 89, categories: ['men'], format: 'league' },
+    {
+        id: 'rugby-united-rugby-championship',
+        name: 'United Rugby Championship',
+        url: '/rugby-union/world/united-rugby-championship/',
+        type: 'international',
+        sportId: 'rugby',
+        countryId: 'international',
+        priority: 90,
+        categories: ['men'],
+        format: 'league',
+        flashScoreIds: {
+            tournamentId: 'EyHYm58U',
+            tournamentStageId: 'Qux1DBdB',
+            tournamentTemplateId: 'jBHqXTNh',
+            seasonId: '187'
+        }
+    },
+    {
+        id: 'rugby-super-rugby',
+        name: 'Super Rugby',
+        url: '/rugby-union/world/super-rugby/',
+        type: 'international',
+        sportId: 'rugby',
+        countryId: 'international',
+        priority: 89,
+        categories: ['men'],
+        format: 'league',
+        flashScoreIds: {
+            tournamentId: '0rhtApjB',
+            tournamentStageId: '63T0FgLF',
+            tournamentTemplateId: 'Stv0V7h5',
+            seasonId: '185'
+        }
+    },
 
     // Other International
     { id: 'rugby-nations-cup', name: 'Nations Cup', url: '/rugby-union/world/nations-cup/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 80, categories: ['men'] },
@@ -24,6 +86,24 @@ export const RUGBY_TOURNAMENTS_INTERNATIONAL: Tournament[] = [
     { id: 'rugby-irb-tbilisi-cup', name: 'IRB Tbilisi Cup', url: '/rugby-union/world/irb-tbilisi-cup/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 70, categories: ['men'] },
 
     // Americas
+    {
+        id: 'rugby-super-rugby-americas',
+        name: 'Super Rugby Americas',
+        url: '/rugby-union/south-america/super-rugby-americas/',
+        type: 'international',
+        sportId: 'rugby',
+        countryId: 'south-america',
+        priority: 85,
+        categories: ['men'],
+        format: 'league',
+        // FlashScore IDs for Super Rugby Americas
+        flashScoreIds: {
+            tournamentId: 'pMj4LOS9',
+            tournamentStageId: 'foLzZ955',
+            tournamentTemplateId: 'Sx5te8Or',
+            seasonId: '185'
+        }
+    },
     { id: 'rugby-americas-championship', name: 'Americas Championship', url: '/rugby-union/south-america/americas-championship/', type: 'international', sportId: 'rugby', countryId: 'south-america', priority: 75, categories: ['men'] },
     { id: 'rugby-americas-pacific-challenge', name: 'Americas Pacific Challenge', url: '/rugby-union/world/americas-pacific-challenge/', type: 'international', sportId: 'rugby', countryId: 'international', priority: 74, categories: ['men'] },
 
@@ -96,6 +176,12 @@ export const RUGBY_TOURNAMENTS_BY_COUNTRY: Record<string, Tournament[]> = {
             priority: 100,
             categories: ['men'],
             format: 'league',
+            flashScoreIds: {
+                tournamentId: 'ILOhakKD',
+                tournamentStageId: 'Ofv2oc3E',
+                tournamentTemplateId: 'WOKkldz0',
+                seasonId: '185'
+            },
             seasons: [
                 { seasonId: '2026', year: 2026, teamsCount: 12, isActive: true },
                 { seasonId: '2025', year: 2025, teamsCount: 12, isActive: false }
@@ -114,7 +200,23 @@ export const RUGBY_TOURNAMENTS_BY_COUNTRY: Record<string, Tournament[]> = {
     ],
 
     'england': [
-        { id: 'rugby-england-premiership', name: 'Premiership Rugby', url: '/rugby-union/england/premiership-rugby/', type: 'local', sportId: 'rugby', countryId: 'england', priority: 100, categories: ['men'], format: 'league' },
+        {
+            id: 'rugby-england-premiership',
+            name: 'Premiership Rugby',
+            url: '/rugby-union/england/premiership-rugby/',
+            type: 'local',
+            sportId: 'rugby',
+            countryId: 'england',
+            priority: 100,
+            categories: ['men'],
+            format: 'league',
+            flashScoreIds: {
+                tournamentId: 'pA7BoY5e',
+                tournamentStageId: '4j70XxXN',
+                tournamentTemplateId: 'za7D2lO5',
+                seasonId: '187'
+            }
+        },
         { id: 'rugby-england-championship', name: 'Championship Rugby', url: '/rugby-union/england/championship-rugby/', type: 'local', sportId: 'rugby', countryId: 'england', priority: 90, categories: ['men'], format: 'league' },
         { id: 'rugby-england-premiership-cup', name: 'Premiership Rugby Cup', url: '/rugby-union/england/premiership-rugby-cup/', type: 'cup', sportId: 'rugby', countryId: 'england', priority: 85, categories: ['men'], format: 'knockout' },
         { id: 'rugby-england-championship-cup', name: 'Championship Cup', url: '/rugby-union/england/championship-cup/', type: 'cup', sportId: 'rugby', countryId: 'england', priority: 80, categories: ['men'], format: 'knockout' },
@@ -126,7 +228,23 @@ export const RUGBY_TOURNAMENTS_BY_COUNTRY: Record<string, Tournament[]> = {
     ],
 
     'france': [
-        { id: 'rugby-france-top-14', name: 'Top 14', url: '/rugby-union/france/top-14/', type: 'local', sportId: 'rugby', countryId: 'france', priority: 100, categories: ['men'], format: 'league' },
+        {
+            id: 'rugby-france-top-14',
+            name: 'Top 14',
+            url: '/rugby-union/france/top-14/',
+            type: 'local',
+            sportId: 'rugby',
+            countryId: 'france',
+            priority: 100,
+            categories: ['men'],
+            format: 'league',
+            flashScoreIds: {
+                tournamentId: '6LLKpkiU',
+                tournamentStageId: 'vT1Y09gC',
+                tournamentTemplateId: 'SzD3Lkgt',
+                seasonId: '187'
+            }
+        },
         { id: 'rugby-france-pro-d2', name: 'Pro D2', url: '/rugby-union/france/pro-d2/', type: 'local', sportId: 'rugby', countryId: 'france', priority: 90, categories: ['men'], format: 'league' },
         { id: 'rugby-france-nationale', name: 'Nationale', url: '/rugby-union/france/nationale/', type: 'local', sportId: 'rugby', countryId: 'france', priority: 80, categories: ['men'], format: 'league' },
         { id: 'rugby-france-supersevens', name: 'Supersevens', url: '/rugby-union/france/supersevens/', type: 'local', sportId: 'rugby', countryId: 'france', priority: 75, categories: ['sevens'] },
@@ -159,7 +277,23 @@ export const RUGBY_TOURNAMENTS_BY_COUNTRY: Record<string, Tournament[]> = {
     ],
 
     'new-zealand': [
-        { id: 'rugby-nz-bunnings-npc', name: 'Bunnings NPC', url: '/rugby-union/new-zealand/bunnings-npc/', type: 'local', sportId: 'rugby', countryId: 'new-zealand', priority: 100, categories: ['men'], format: 'league' },
+        {
+            id: 'rugby-nz-bunnings-npc',
+            name: 'Bunnings NPC',
+            url: '/rugby-union/new-zealand/bunnings-npc/',
+            type: 'local',
+            sportId: 'rugby',
+            countryId: 'new-zealand',
+            priority: 100,
+            categories: ['men'],
+            format: 'league',
+            flashScoreIds: {
+                tournamentId: 'jZAJkgK7',
+                tournamentStageId: 'bLQN0qCR',
+                tournamentTemplateId: 'dARNQf5R',
+                seasonId: '182'
+            }
+        },
         { id: 'rugby-nz-heartland-championships', name: 'Heartland Championships', url: '/rugby-union/new-zealand/heartland-championships/', type: 'local', sportId: 'rugby', countryId: 'new-zealand', priority: 80, categories: ['men'], format: 'league' },
         { id: 'rugby-nz-super-rugby-aupiki-women', name: 'Super Rugby Aupiki Women', url: '/rugby-union/new-zealand/super-rugby-aupiki-women/', type: 'local', sportId: 'rugby', countryId: 'new-zealand', priority: 95, categories: ['women'], isWomen: true, format: 'league' },
     ],
@@ -186,7 +320,23 @@ export const RUGBY_TOURNAMENTS_BY_COUNTRY: Record<string, Tournament[]> = {
     ],
 
     'south-africa': [
-        { id: 'rugby-sa-currie-cup', name: 'Currie Cup', url: '/rugby-union/south-africa/currie-cup/', type: 'local', sportId: 'rugby', countryId: 'south-africa', priority: 100, categories: ['men'], format: 'league' },
+        {
+            id: 'rugby-sa-currie-cup',
+            name: 'Currie Cup',
+            url: '/rugby-union/south-africa/currie-cup/',
+            type: 'local',
+            sportId: 'rugby',
+            countryId: 'south-africa',
+            priority: 100,
+            categories: ['men'],
+            format: 'league',
+            flashScoreIds: {
+                tournamentId: '2L86dHCR',
+                tournamentStageId: 'OxwThlTd',
+                tournamentTemplateId: 'pjUEaE29',
+                seasonId: '182'
+            }
+        },
     ],
 
     'spain': [

@@ -79,24 +79,44 @@ export interface TournamentSeason {
     isActive: boolean;
 }
 
+export interface TournamentRuleset {
+    bonusRules?: {
+        offensiveBonus?: { enabled: boolean; type: string; threshold: number };
+        defensiveBonus?: { enabled: boolean; type: string; threshold: number };
+    };
+}
+
 export interface Tournament {
     id: string;
     name: string;
+    displayName?: string | null;
+    originalName?: string | null;
     nameEs?: string;
-    url: string;
-    type: TournamentType;
+    url?: string | null;
+    type?: TournamentType;
     format?: TournamentFormat;
-    sportId: SportId;
-    countryId: string;
-    priority: number;
+    sportId?: SportId | string | null;
+    countryId?: string | null;
+    priority?: number | null;
     logoUrl?: string | null;
-    categories: TournamentCategory[];
+    customLogoUrl?: string | null;
+    originalLogoUrl?: string | null;
+    isApiManaged?: boolean | null;
+    dataSource?: string | null;
+    categories?: TournamentCategory[] | string[];
     seasons?: TournamentSeason[];
     isWomen?: boolean;
     isYouth?: boolean;
     ageGroup?: string;
     isVisible?: boolean;
     folderId?: string;
+    flashScoreIds?: {
+        tournamentId?: string;
+        tournamentStageId?: string;
+        tournamentTemplateId?: string;
+        seasonId?: string;
+    };
+    ruleset?: TournamentRuleset;
 }
 
 // ===== TEAM TYPES =====

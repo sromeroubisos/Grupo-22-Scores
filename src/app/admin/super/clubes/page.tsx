@@ -1,384 +1,255 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/mock-db';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
-import { Eye, EyeOff, Folder, FolderIcon, MoreVertical, Plus, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { invalidateCache, type ClubWithUnion } from '@/lib/cache/superAdminCache';
+import { useState } from 'react';
 
-const countryFlags: Record<string, string> = {
-    Argentina: '🇦🇷',
-    Uruguay: '🇺🇾',
-    Chile: '🇨🇱'
-};
-
-import { SPORTS } from '@/lib/data/sports';
-
-const sportLabels: Record<string, string> = Object.fromEntries(
-    Object.entries(SPORTS).map(([id, s]) => [id, s.nameEs])
-);
+function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; color?: string | null }) {
+    if (logo && (logo.startsWith('http') || logo.startsWith('/'))) {
+        return (
+            <img
+                src={logo} alt={name}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+        );
+    }
+    const initials = name.substring(0, 2).toUpperCase();
+    return (
+        <div style={{
+            width: '100%', height: '100%', background: color || '#3f3f46',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 14, fontWeight: 700, color: '#fff', borderRadius: 4,
+        }}>
+            {initials}
+        </div>
+    );
+}
 
 export default function SuperadminClubesPage() {
-    const { filters } = useSuperConsole();
-    const [folderFilter, setFolderFilter] = useState('all');
-    const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
-    const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-    const [newFolderName, setNewFolderName] = useState('');
+    // ─── Read from shared context (already prefetched by layout) ─────────────────
+    const { filters, clubs, loading, errors, refresh, setFilters: _setFilters } = useSuperConsole();
+    const isLoading = loading.clubs;
+    const errorMsg = errors.clubs;
 
-    // State for Supabase data
-    const [clubs, setClubs] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    // Local state for optimistic mutations (avoid full context refresh unless needed)
+    const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<ClubWithUnion>>>({});
+    const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+
     const supabase = createClient();
 
-    const toggleActionMenu = (id: string) => {
-        if (actionMenuOpenId === id) setActionMenuOpenId(null);
-        else setActionMenuOpenId(id);
-    };
-
-    const fetchData = async () => {
-        setLoading(true);
-        setErrorMsg(null);
-
-        // Safety timeout
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Request timed out after 5s')), 5000)
-        );
-
-        try {
-            console.log('Fetching clubs...');
-
-            // Race the query against the timeout
-            const { data, error } = await Promise.race([
-                supabase
-                    .from('clubs')
-                    .select('*')
-                    .order('name'),
-                timeoutPromise
-            ]) as any;
-
-            if (error) {
-                console.error('Error fetching clubs from Supabase:', error);
-                throw error;
-            } else {
-                console.log('Clubs data loaded from DB:', data?.length);
-                setClubs(data || []);
-            }
-        } catch (err: any) {
-            console.error('Failed to fetch clubs from DB:', err);
-            setErrorMsg(`Error cargando datos: ${err.message}`);
-            setClubs([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const handleCreateFolder = () => {
-        // Mock folder creation for now
-        if (!newFolderName.trim()) return;
-        const newFolder = {
-            id: newFolderName.toLowerCase().replace(/\s+/g, '-'),
-            name: newFolderName.trim(),
-            color: '#3b82f6' // Default blue
-        };
-        db.folders.push(newFolder);
-        setNewFolderName('');
-        setIsCreateFolderOpen(false);
-    };
-
-    const handleMoveToFolder = async (clubId: string, folderId: string) => {
-        // Feature depends on folder_id column, which might not exist yet.
-        console.log('Move to folder not implemented in DB yet', clubId, folderId);
+    const handleToggleVisibility = async (club: ClubWithUnion) => {
+        setTogglingId(club.id);
         setActionMenuOpenId(null);
-    };
-
-    const handleToggleVisibility = async (clubId: string, current: boolean | undefined) => {
+        const currentVal = localOverrides[club.id]?.visibility ?? club.visibility;
+        const newVal = currentVal === 'hidden' ? 'visible' : 'hidden';
+        // Optimistic update
+        setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], visibility: newVal } }));
         try {
-            // Check if is_visible column exists update otherwise mock
-            console.log('Toggling visibility', clubId, !current);
-            // Optimistic update if we were to implement
-            // await supabase.from('clubs').update({ is_visible: !current }).eq('id', clubId);
-            // fetchData();
-        } catch (err) {
-            console.error('Error toggling visibility', err);
+            const { error } = await supabase.from('clubs').update({ visibility: newVal } as any).eq('id', club.id);
+            if (error) throw error;
+            invalidateCache('clubs_list');
+        } catch (err: any) {
+            // Revert
+            setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], visibility: currentVal } }));
+            alert(`Error: ${err.message}`);
+        } finally {
+            setTogglingId(null);
         }
     };
 
-    const handleDelete = async (clubId: string) => {
-        if (confirm('¿Estás seguro de eliminar este club?')) {
-            try {
-                const { error } = await supabase
-                    .from('clubs')
-                    .delete()
-                    .eq('id', clubId);
-
-                if (error) {
-                    alert('Error al eliminar club');
-                    console.error(error);
-                } else {
-                    fetchData();
-                }
-            } catch (err) {
-                console.error(err);
-            }
+    const handleDelete = async (clubId: string, clubName: string) => {
+        setActionMenuOpenId(null);
+        if (!confirm(`¿Eliminar el club "${clubName}"? Esta acción no se puede deshacer.`)) return;
+        setDeletingId(clubId);
+        try {
+            const { error } = await supabase.from('clubs').delete().eq('id', clubId);
+            if (error) throw error;
+            // Optimistic remove
+            setDeletedIds(prev => new Set([...prev, clubId]));
+            invalidateCache('clubs_list');
+        } catch (err: any) {
+            alert(`Error al eliminar: ${err.message}`);
+        } finally {
+            setDeletingId(null);
         }
     };
 
-    const formattedClubs = useMemo(() => {
-        return clubs.map((c, index) => {
-            // Default mappings since columns might be missing
-            const sports = [c.sport || 'rugby'];
-            const country = c.country_id === 'URY' ? 'Uruguay' : 'Argentina'; // Simple mapping
-            const verified = true; // Assume DB clubs are verified/created by admin
-            const apiLinked = false;
-            const statusKey = 'activo';
-            const source = 'Manual';
+    // Apply optimistic overrides + deleted filter
+    const displayClubs = useMemo(() => clubs
+        .filter(c => !deletedIds.has(c.id))
+        .map(c => ({ ...c, ...(localOverrides[c.id] ?? {}) }))
+        , [clubs, deletedIds, localOverrides]);
 
-            // Folders are mock for now
-            const folderId = c.folder_id; // If exists
-            const folder = db.folders.find(f => f.id === folderId);
-
-            return {
-                id: c.id,
-                unionId: c.union_id,
-                name: c.name,
-                shortName: c.short_name || c.name,
-                city: c.city || 'Ubicación desconocida',
-                logo: c.logo_url || '🛡️',
-                sports,
-                sportLabels: sportLabels[c.sport || 'rugby'] || c.sport || 'Rugby',
-                country,
-                verified,
-                apiLinked,
-                statusKey,
-                source,
-                followers: 100 + index * 10, // Mock
-                views: 500 + index * 50, // Mock
-                matchesThisMonth: 0, // Need relation to calculate
-                folderId,
-                folderName: folder?.name,
-                folderColor: folder?.color,
-                isVisible: true
-            };
-        });
-    }, [clubs]);
-
-    const filtered = formattedClubs.filter((club) => {
-        if (filters.sport !== 'all' && !club.sports.includes(filters.sport)) return false;
-        if (filters.country !== 'all' && club.country !== filters.country) return false;
-        if (filters.status !== 'all' && club.statusKey !== filters.status) return false;
-        if (filters.source !== 'all' && club.source !== filters.source) return false;
+    const filtered = useMemo(() => displayClubs.filter(club => {
         if (filters.search && !club.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
-
-        if (folderFilter !== 'all') {
-            if (folderFilter === 'none') return !club.folderId;
-            return club.folderId === folderFilter;
-        }
-
+        if (filters.country !== 'all' && club.country !== filters.country) return false;
         return true;
-    });
+    }), [displayClubs, filters.search, filters.country]);
 
-    const grouped = filtered.reduce<Record<string, Record<string, typeof filtered>>>((acc, club) => {
-        club.sports.forEach((sport) => {
-            if (filters.sport !== 'all' && sport !== filters.sport) return;
-            if (!acc[sport]) acc[sport] = {};
-            if (!acc[sport][club.country]) acc[sport][club.country] = [];
-            acc[sport][club.country].push(club);
-        });
-        return acc;
-    }, {});
-
-    const createUnionId = 'any'; // Simplification
+    const visibleCount = filtered.filter(c => c.visibility !== 'hidden').length;
+    const hiddenCount = filtered.filter(c => c.visibility === 'hidden').length;
 
     return (
-        <div style={{ paddingBottom: '40px' }} onClick={() => setActionMenuOpenId(null)}>
+        <div style={{ paddingBottom: 40 }} onClick={() => setActionMenuOpenId(null)}>
+
             <div className={styles.consoleHeader}>
                 <div>
                     <div className={styles.consoleTitle}>Clubes</div>
-                    <div className={styles.consoleSubtitle}>Gestión de entidades deportivas</div>
+                    <div className={styles.consoleSubtitle}>
+                        {isLoading
+                            ? 'Cargando…'
+                            : `${filtered.length} clubes — ${visibleCount} visibles, ${hiddenCount} ocultos`}
+                    </div>
                 </div>
                 <div className={styles.consoleActions}>
-                    <div className={styles.filterGroup}>
-                        <Folder className={styles.filterIcon} size={14} />
-                        <select
-                            className={styles.filterSelect}
-                            value={folderFilter}
-                            onChange={(e) => setFolderFilter(e.target.value)}
-                        >
-                            <option value="all">Todas las carpetas</option>
-                            <option value="none">Sin carpeta</option>
-                            {db.folders.map(f => (
-                                <option key={f.id} value={f.id}>{f.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <Link href="/admin/super/clubes/crear" className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
-                        + Crear Club
+                    <button
+                        className={styles.cardAction}
+                        onClick={() => refresh('clubs')}
+                        disabled={isLoading}
+                        title="Forzar recarga"
+                    >
+                        <RefreshCw size={13} style={{ marginRight: 4, animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
+                        Refrescar
+                    </button>
+                    <Link href="/admin/entities/new?type=club" className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
+                        <Plus size={13} style={{ marginRight: 4 }} /> Crear Club
                     </Link>
                 </div>
             </div>
 
-            {isCreateFolderOpen && (
-                <div className={styles.slab} style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        placeholder="Nombre de la nueva carpeta..."
-                        className={styles.filterControl}
-                        style={{ maxWidth: 300 }}
-                        value={newFolderName}
-                        onChange={(e) => setNewFolderName(e.target.value)}
-                        autoFocus
-                    />
-                    <button className={styles.actionBtn} onClick={handleCreateFolder}>Guardar</button>
-                    <button className={styles.actionBtn} onClick={() => setIsCreateFolderOpen(false)} style={{ opacity: 0.7 }}>Cancelar</button>
-                </div>
-            )}
-
-            {loading && <div className={styles.slab} style={{ padding: 40, textAlign: 'center' }}>Cargando clubes...</div>}
-
             {errorMsg && (
-                <div className={styles.slab} style={{ padding: '12px', textAlign: 'center', color: '#f59e0b', border: '1px solid #f59e0b', marginBottom: '16px', fontSize: '14px' }}>
-                    Warning: {errorMsg}
+                <div style={{ padding: '12px 16px', marginBottom: 16, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, color: '#ef4444', fontSize: 13 }}>
+                    ⚠️ {errorMsg}
                 </div>
             )}
 
-            {!loading && Object.keys(grouped).length === 0 && (
-                <div className={styles.cardItem} style={{ padding: 24, textAlign: 'center', color: '#666' }}>
-                    No se encontraron clubes con los filtros actuales.
+            {isLoading && (
+                <div className={styles.slab} style={{ padding: 48, textAlign: 'center', color: 'var(--basalt-400)' }}>
+                    <RefreshCw size={20} style={{ marginBottom: 12, animation: 'spin 1s linear infinite' }} />
+                    <div>Cargando clubes…</div>
                 </div>
             )}
 
-            {!loading && Object.entries(grouped).map(([sport, countries]) => (
-                <section key={sport} className={styles.groupSection}>
-                    <div className={styles.groupHeader}>
-                        <span className={styles.groupTitle}>{sportLabels[sport] || sport}</span>
+            {!isLoading && filtered.length === 0 && (
+                <div className={styles.slab} style={{ padding: 48, textAlign: 'center' }}>
+                    <Shield size={36} style={{ marginBottom: 16, opacity: 0.3 }} />
+                    <div style={{ color: 'var(--basalt-400)' }}>
+                        {clubs.length === 0
+                            ? 'No hay clubes en la base de datos.'
+                            : 'Ningún club coincide con los filtros actuales.'}
                     </div>
-                    {Object.entries(countries).map(([country, items]) => (
-                        <div key={country} className={styles.subGroup}>
-                            <div className={styles.subGroupHeader}>
-                                <span className={styles.groupFlag}>{countryFlags[country] || '🌐'}</span>
-                                <span className={styles.groupTitle}>{country}</span>
-                                <span className={styles.groupMeta}>{items.length} clubes</span>
-                            </div>
-                            <div className={styles.cardGrid}>
-                                {items.map((club) => (
-                                    <div key={`${sport}-${club.id}`} className={styles.cardItem}>
-                                        <div className={styles.cardHeader}>
-                                            <div className={styles.cardLogo}>
-                                                {club.logo && (club.logo.startsWith('http') || club.logo.startsWith('/')) ?
-                                                    <img src={club.logo} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> :
-                                                    club.logo
-                                                }
-                                            </div>
-                                            <div>
-                                                <div className={styles.cardTitle}>{club.name}</div>
-                                                <div className={styles.cardContext}>
-                                                    <span className={styles.contextLinePrimary}>
-                                                        {club.city}
-                                                    </span>
-                                                    <span className={styles.contextLineSecondary}>
-                                                        {club.sportLabels}
-                                                    </span>
-                                                </div>
-                                            </div>
+                </div>
+            )}
 
-                                            {/* Overflow Menu Trigger */}
-                                            <button
-                                                className={styles.moreMenuBtn}
-                                                onClick={(e) => { e.stopPropagation(); toggleActionMenu(club.id); }}
-                                            >
-                                                <MoreVertical size={16} />
-                                            </button>
-
-                                            {/* Menu Overlay */}
-                                            {actionMenuOpenId === club.id && (
-                                                <div className={styles.menuDropdown}>
-                                                    <button
-                                                        className={styles.menuItem}
-                                                        onClick={() => handleToggleVisibility(club.id, club.isVisible)}
-                                                    >
-                                                        {club.isVisible ? <EyeOff size={14} style={{ marginRight: 8 }} /> : <Eye size={14} style={{ marginRight: 8 }} />}
-                                                        {club.isVisible ? 'Ocultar' : 'Mostrar'}
-                                                    </button>
-
-                                                    <div className={styles.menuDivider} />
-                                                    <div className={styles.menuLabel}>Mover a carpeta</div>
-
-                                                    {db.folders.map(f => (
-                                                        <button
-                                                            key={f.id}
-                                                            className={styles.menuItem}
-                                                            onClick={() => handleMoveToFolder(club.id, f.id)}
-                                                        >
-                                                            <FolderIcon size={14} style={{ marginRight: 8, color: f.color || '#888' }} />
-                                                            {f.name}
-                                                        </button>
-                                                    ))}
-                                                    <button
-                                                        className={styles.menuItem}
-                                                        onClick={() => handleMoveToFolder(club.id, 'none')}
-                                                    >
-                                                        <FolderIcon size={14} style={{ marginRight: 8, opacity: 0.5 }} />
-                                                        Sin carpeta
-                                                    </button>
-
-                                                    <div className={styles.menuDivider} />
-
-                                                    <button
-                                                        className={`${styles.menuItem} ${styles.danger}`}
-                                                        onClick={() => handleDelete(club.id)}
-                                                    >
-                                                        <Trash2 size={14} style={{ marginRight: 8 }} />
-                                                        Eliminar
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className={styles.badgeRow}>
-                                            <span className={`${styles.badgePill} ${club.verified ? styles.badgeActive : styles.badgeArchived}`}>
-                                                {club.verified ? 'Verificado' : 'En Revision'}
-                                            </span>
-                                            <span className={`${styles.badgePill} ${club.apiLinked ? styles.badgeApiAlt : styles.badgeManualAlt}`}>
-                                                {club.source}
-                                            </span>
-                                            {club.folderId && (
-                                                <span className={styles.badgePill} style={{ borderColor: club.folderColor, color: club.folderColor }}>
-                                                    📁 {club.folderName}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className={styles.metricPrimary}>
-                                            <span className={styles.metricValueBig}>{club.followers}</span>
-                                            <span className={styles.metricLabelSmall} style={{ textAlign: 'right' }}>SEGUIDORES</span>
-                                        </div>
-
-                                        <div className={styles.cardActions}>
-                                            <Link href={`/admin/entities/${club.id}/manage?type=club`} className={styles.actionBtn}>
-                                                Ver
-                                            </Link>
-                                            <Link href={`/admin/entities/${club.id}/manage?type=club`} className={styles.actionBtn}>
-                                                Editar
-                                            </Link>
-                                            <button className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
-                                                Sync
-                                            </button>
-                                        </div>
-                                    </div>
+            {!isLoading && filtered.length > 0 && (
+                <div className={styles.slab} style={{ padding: 0, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--surface-edge)' }}>
+                                {['Club', 'Ciudad / País', 'Unión', 'Color', 'Visibilidad', 'Acciones'].map(h => (
+                                    <th key={h} style={{
+                                        padding: '12px 16px', textAlign: 'left',
+                                        fontFamily: 'var(--font-mono)', fontSize: 10,
+                                        color: 'var(--basalt-400)', textTransform: 'uppercase', letterSpacing: '0.07em',
+                                    }}>{h}</th>
                                 ))}
-                            </div>
-                        </div>
-                    ))}
-                </section>
-            ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.map(club => {
+                                const isVisible = club.visibility !== 'hidden';
+                                return (
+                                    <tr
+                                        key={club.id}
+                                        style={{ borderBottom: '1px solid var(--surface-edge)', opacity: deletingId === club.id ? 0.4 : 1, transition: 'opacity 0.2s' }}
+                                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                    >
+                                        <td style={{ padding: '12px 16px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <div style={{ width: 36, height: 36, borderRadius: 6, border: '1px solid var(--surface-edge)', background: 'var(--basalt-800)', overflow: 'hidden', flexShrink: 0 }}>
+                                                    <ClubLogo logo={club.logo_url} name={club.name} color={club.primary_color} />
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 600, color: '#ececec' }}>{club.name}</div>
+                                                    {club.short_name && <div style={{ fontSize: 11, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)' }}>{club.short_name}</div>}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '12px 16px', color: 'var(--basalt-400)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                                                <MapPin size={11} />
+                                                {[club.city, club.region, club.country].filter(Boolean).join(', ') || '—'}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '12px 16px' }}>
+                                            {club.union
+                                                ? <span style={{ padding: '3px 8px', borderRadius: 4, background: 'var(--basalt-800)', border: '1px solid var(--surface-edge)', fontSize: 11, fontFamily: 'var(--font-mono)', color: '#a1a1aa' }}>{club.union.name}</span>
+                                                : <span style={{ color: 'var(--basalt-600)', fontSize: 12 }}>Sin unión</span>}
+                                        </td>
+                                        <td style={{ padding: '12px 16px' }}>
+                                            {club.primary_color ? (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <div style={{ width: 16, height: 16, borderRadius: 3, background: club.primary_color, border: '1px solid rgba(255,255,255,0.1)' }} />
+                                                    <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--basalt-400)' }}>{club.primary_color}</span>
+                                                </div>
+                                            ) : <span style={{ color: 'var(--basalt-600)', fontSize: 12 }}>—</span>}
+                                        </td>
+                                        <td style={{ padding: '12px 16px' }}>
+                                            <span style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4,
+                                                background: isVisible ? 'rgba(16,185,129,0.1)' : 'rgba(107,114,128,0.1)',
+                                                border: `1px solid ${isVisible ? 'rgba(16,185,129,0.3)' : 'rgba(107,114,128,0.3)'}`,
+                                                color: isVisible ? '#10b981' : '#9ca3af', fontSize: 11,
+                                            }}>
+                                                {isVisible ? <Eye size={10} /> : <EyeOff size={10} />}
+                                                {isVisible ? 'Visible' : 'Oculto'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '12px 16px', position: 'relative' }} onClick={e => e.stopPropagation()}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <Link href={`/admin/entities/${club.id}/manage?type=club`} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                    <Pencil size={11} /> Gestionar
+                                                </Link>
+                                                <div style={{ position: 'relative' }}>
+                                                    <button className={styles.moreMenuBtn} onClick={() => setActionMenuOpenId(prev => prev === club.id ? null : club.id)}>
+                                                        <MoreVertical size={14} />
+                                                    </button>
+                                                    {actionMenuOpenId === club.id && (
+                                                        <div className={styles.menuDropdown} style={{ right: 0, top: '100%', minWidth: 160 }}>
+                                                            <button className={styles.menuItem} onClick={() => handleToggleVisibility(club)} disabled={togglingId === club.id}>
+                                                                {isVisible
+                                                                    ? <><EyeOff size={13} style={{ marginRight: 8 }} />Ocultar</>
+                                                                    : <><Eye size={13} style={{ marginRight: 8 }} />Mostrar</>}
+                                                            </button>
+                                                            <div className={styles.menuDivider} />
+                                                            <button className={`${styles.menuItem} ${styles.danger}`} onClick={() => handleDelete(club.id, club.name)}>
+                                                                <Trash2 size={13} style={{ marginRight: 8 }} /> Eliminar
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 }

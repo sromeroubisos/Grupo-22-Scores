@@ -27,10 +27,7 @@ export interface MatchResult {
     version: number;              // para auditor----a/rollback
 }
 
-export interface MatchReferee {
-    id?: string;
-    name?: string;
-}
+
 
 export interface Match {
     id: string;
@@ -52,8 +49,7 @@ export interface Match {
     scheduledAt: Date | null;
     venueId?: string;
     venueName?: string;           // denormalized for display
-    field?: string;
-    referee?: MatchReferee;
+
 
     status: MatchStatus;
     score: MatchScore;
@@ -88,8 +84,7 @@ export interface MatchUpdate {
     scheduledAt?: Date | null;
     venueId?: string;
     venueName?: string;
-    field?: string;
-    referee?: MatchReferee;
+
     status?: MatchStatus;
     homeTeamId?: string;
     homeTeamName?: string;
