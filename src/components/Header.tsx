@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
 import { resolveAdminPanel } from '@/lib/auth/roles';
 
 export default function Header() {
-    const { user, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, logout } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -38,8 +40,8 @@ export default function Header() {
         return name ? name.substring(0, 2).toUpperCase() : 'US';
     };
 
-    // Helper for breadcrumbs - Dynamic based on path
-    const renderBreadcrumbs = () => {
+    // Helper for breadcrumbs - Memoized based on path
+    const breadcrumbsComponent = useMemo(() => {
         if (!pathname) return null;
 
         const segments = pathname.split('/').filter(Boolean);
@@ -105,7 +107,7 @@ export default function Header() {
                 ))}
             </div>
         );
-    };
+    }, [pathname]);
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
 
@@ -118,11 +120,19 @@ export default function Header() {
                 </Link>
 
                 {/* BREADCRUMB: Center Zone (Contextual) */}
-                {renderBreadcrumbs()}
+                <div className="g22-header-center-zone">
+                    {breadcrumbsComponent}
+                    <GlobalSearch />
+                </div>
 
                 {/* USER + THEME: Right Zone */}
                 <div className="g22-header-actions">
-                    <button className="g22-mobile-search-btn" aria-label="Buscar" style={{ background: 'transparent', border: 'none', padding: '8px', cursor: 'pointer', color: 'inherit', display: 'flex' }}>
+                    <button 
+                        className="g22-mobile-search-btn" 
+                        aria-label="Buscar" 
+                        style={{ background: 'transparent', border: 'none', padding: '8px', cursor: 'pointer', color: 'inherit', display: 'flex' }}
+                        onClick={() => router.push('/search')}
+                    >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>

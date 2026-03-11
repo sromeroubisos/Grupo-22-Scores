@@ -3,116 +3,26 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import styles from './search.module.css';
-import { db } from '@/lib/mock-db';
 import { Search, X, Clock } from 'lucide-react';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-type EntityType = 'CLUB' | 'LIGA';
 
 interface HistoryItem {
     id: string;
-    type: EntityType;
+    type: 'tournament' | 'club';
     title: string;
     subtitle: string;
-    href: string;
+    url: string;
+    logo_url?: string;
     lastViewedAt: number;
 }
 
 interface ResultRow {
     id: string;
-    type: EntityType;
+    type: 'tournament' | 'club';
     title: string;
     subtitle: string;
-    href: string;
-    color?: string;
+    url: string;
+    logo_url?: string;
 }
-
-// ─── Debounce hook ────────────────────────────────────────────────────────────
-
-function useDebounce(value: string, delay: number) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-    useEffect(() => {
-        const handler = setTimeout(() => setDebouncedValue(value), delay);
-        return () => clearTimeout(handler);
-    }, [value, delay]);
-    return debouncedValue;
-}
-
-// ─── History hook (localStorage) ─────────────────────────────────────────────
-
-const HISTORY_KEY = 'search_history_v1';
-const HISTORY_LIMIT = 20;
-
-function useSearchHistory() {
-    const [history, setHistory] = useState<HistoryItem[]>([]);
-
-    useEffect(() => {
-        try {
-            const raw = localStorage.getItem(HISTORY_KEY);
-            if (raw) setHistory(JSON.parse(raw));
-        } catch {
-            // ignore
-        }
-    }, []);
-
-    const persist = (items: HistoryItem[]) => {
-        setHistory(items);
-        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(items)); } catch { /* ignore */ }
-    };
-
-    const saveItem = useCallback((item: Omit<HistoryItem, 'lastViewedAt'>) => {
-        setHistory(prev => {
-            const filtered = prev.filter(h => h.id !== item.id);
-            const next = [{ ...item, lastViewedAt: Date.now() }, ...filtered].slice(0, HISTORY_LIMIT);
-            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
-            return next;
-        });
-    }, []);
-
-    const removeItem = useCallback((id: string) => {
-        setHistory(prev => {
-            const next = prev.filter(h => h.id !== id);
-            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
-            return next;
-        });
-    }, []);
-
-    const clearAll = useCallback(() => persist([]), []);
-
-    return { history, saveItem, removeItem, clearAll };
-}
-
-// ─── Search logic (mock DB) ───────────────────────────────────────────────────
-
-function buildResults(query: string): ResultRow[] {
-    const lq = query.toLowerCase();
-
-    const clubs: ResultRow[] = db.clubs
-        .filter(c => c.name.toLowerCase().includes(lq) || c.city.toLowerCase().includes(lq))
-        .map(c => ({
-            id: `club-${c.id}`,
-            type: 'CLUB' as EntityType,
-            title: c.name,
-            subtitle: `${(c as any).country ?? 'Argentina'} · ${c.city}`,
-            href: `/clubs/${c.id}`,
-            color: c.primaryColor,
-        }));
-
-    const leagues: ResultRow[] = db.tournaments
-        .filter(l => l.name.toLowerCase().includes(lq) || l.category.toLowerCase().includes(lq))
-        .map(l => ({
-            id: `tour-${l.id}`,
-            type: 'LIGA' as EntityType,
-            title: l.name,
-            subtitle: `${l.sport} · ${l.category}`,
-            href: `/tournaments/${l.id}`,
-        }));
-
-    return [...leagues, ...clubs];
-}
-
-const TRENDING = ['Copa del Mundo', 'Los Pumas', 'Playoffs URBA', 'Leonas', 'Inter Miami', 'Top 14'];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -134,16 +44,21 @@ function SkeletonRows() {
 
 function ResultRowItem({ row, onSave }: { row: ResultRow; onSave: (r: ResultRow) => void }) {
     return (
-        <Link href={row.href} className={styles.row} onClick={() => onSave(row)}>
-            <div
-                className={styles.rowIcon}
-                style={{ backgroundColor: row.color ?? 'var(--color-bg-tertiary)' }}
-            />
+        <Link href={row.url} className={styles.row} onClick={() => onSave(row)}>
+            <div className={styles.rowIcon}>
+                {row.logo_url ? (
+                    <img src={row.logo_url} alt={row.title} />
+                ) : (
+                    row.type === 'tournament' ? '🏆' : '🛡️'
+                )}
+            </div>
             <div className={styles.rowInfo}>
                 <span className={styles.rowTitle}>{row.title}</span>
                 <span className={styles.rowSubtitle}>{row.subtitle}</span>
             </div>
-            <span className={styles.rowBadge}>{row.type}</span>
+            <span className={`${styles.badge} ${row.type === 'tournament' ? styles.tournamentBadge : styles.clubBadge}`}>
+                {row.type === 'tournament' ? 'Torneo' : 'Club'}
+            </span>
             <svg className={styles.rowChevron} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path d="M9 18l6-6-6-6" />
             </svg>
@@ -151,28 +66,108 @@ function ResultRowItem({ row, onSave }: { row: ResultRow; onSave: (r: ResultRow)
     );
 }
 
+// ─── Hooks ────────────────────────────────────────────────────────────────────
+
+function useDebounce(value: string, delay: number) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+    return debouncedValue;
+}
+
+const HISTORY_KEY = 'search_history_v1';
+const HISTORY_LIMIT = 20;
+
+function useSearchHistory() {
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(HISTORY_KEY);
+            if (raw) setHistory(JSON.parse(raw));
+        } catch { /* ignore */ }
+    }, []);
+
+    const saveItem = useCallback((item: Omit<HistoryItem, 'lastViewedAt'>) => {
+        setHistory(prev => {
+            const filtered = prev.filter(h => h.id !== item.id);
+            const next = [{ ...item, lastViewedAt: Date.now() }, ...filtered].slice(0, HISTORY_LIMIT);
+            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+        });
+    }, []);
+
+    const removeItem = useCallback((id: string) => {
+        setHistory(prev => {
+            const next = prev.filter(h => h.id !== id);
+            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+        });
+    }, []);
+
+    const clearAll = useCallback(() => {
+        setHistory([]);
+        try { localStorage.removeItem(HISTORY_KEY); } catch { /* ignore */ }
+    }, []);
+
+    return { history, saveItem, removeItem, clearAll };
+}
+
+const TRENDING = ['Copa del Mundo', 'Los Pumas', 'Playoffs URBA', 'Leonas', 'Inter Miami', 'Top 14'];
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
-    const debouncedQuery = useDebounce(query, 300);
+    const debouncedQuery = useDebounce(query, 250);
     const inputRef = useRef<HTMLInputElement>(null);
+    const [results, setResults] = useState<ResultRow[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const { history, saveItem, removeItem, clearAll } = useSearchHistory();
 
-    const isDebouncing = query !== debouncedQuery;
+    useEffect(() => {
+        const fetchResults = async () => {
+            if (debouncedQuery.length < 2) {
+                setResults([]);
+                return;
+            }
+
+            setIsLoading(true);
+            try {
+                const res = await fetch(`/api/search/universal?q=${encodeURIComponent(debouncedQuery)}`);
+                if (!res.ok) throw new Error('Search failed');
+                const data = await res.json();
+                setResults(data.data || []);
+            } catch (err) {
+                console.error('Search error:', err);
+                setResults([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchResults();
+    }, [debouncedQuery]);
+
+    const handleSave = useCallback((row: ResultRow | HistoryItem) => {
+        saveItem({
+            id: row.id,
+            type: row.type,
+            title: row.title,
+            subtitle: row.subtitle,
+            url: (row as any).url || (row as any).href,
+            logo_url: row.logo_url
+        });
+    }, [saveItem]);
+
     const hasQuery = debouncedQuery.length >= 2;
-    const results = hasQuery ? buildResults(debouncedQuery) : [];
+    const showEmpty = !isLoading && !hasQuery && query.length < 2;
 
-    const handleSave = useCallback((row: ResultRow) => {
-        saveItem({ id: row.id, type: row.type, title: row.title, subtitle: row.subtitle, href: row.href });
-    }, [saveItem]);
-
-    const handleHistoryClick = useCallback((item: HistoryItem) => {
-        saveItem(item);
-    }, [saveItem]);
-
-    // State A: no query (or < 2 chars)
-    const showEmpty = !isDebouncing && !hasQuery;
+    // Grouping logic
+    const tournaments = results.filter(r => r.type === 'tournament');
+    const clubs = results.filter(r => r.type === 'club');
 
     return (
         <div className={styles.page}>
@@ -183,7 +178,7 @@ export default function SearchPage() {
                     <input
                         ref={inputRef}
                         className={styles.input}
-                        placeholder="Clubes, ligas, jugadores, partidos..."
+                        placeholder="Buscar torneos o clubes..."
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         autoComplete="off"
@@ -193,7 +188,7 @@ export default function SearchPage() {
                     {query.length > 0 && (
                         <button
                             className={styles.clearBtn}
-                            onClick={() => { setQuery(''); inputRef.current?.focus(); }}
+                            onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus(); }}
                             aria-label="Limpiar búsqueda"
                         >
                             <X size={16} />
@@ -219,16 +214,21 @@ export default function SearchPage() {
                                 {history.map(item => (
                                     <Link
                                         key={item.id}
-                                        href={item.href}
+                                        href={item.url}
                                         className={styles.recentRow}
-                                        onClick={() => handleHistoryClick(item)}
+                                        onClick={() => handleSave(item)}
                                     >
-                                        <Clock size={15} className={styles.recentIcon} />
+                                        <div className={styles.recentIconWrapper}>
+                                            {item.logo_url ? (
+                                                <img src={item.logo_url} className={styles.recentLogo} alt="" />
+                                            ) : (
+                                                <Clock size={15} className={styles.recentIcon} />
+                                            )}
+                                        </div>
                                         <div className={styles.rowInfo}>
                                             <span className={styles.rowTitle}>{item.title}</span>
                                             <span className={styles.rowSubtitle}>{item.subtitle}</span>
                                         </div>
-                                        <span className={styles.rowBadge}>{item.type}</span>
                                         <button
                                             className={styles.removeBtn}
                                             onClick={e => { e.preventDefault(); e.stopPropagation(); removeItem(item.id); }}
@@ -260,25 +260,33 @@ export default function SearchPage() {
                     </>
                 )}
 
-                {/* State B: debouncing → skeleton */}
-                {!showEmpty && (isDebouncing || (query.length >= 2 && debouncedQuery.length < 2)) && (
-                    <SkeletonRows />
-                )}
+                {/* Loading state */}
+                {isLoading && <SkeletonRows />}
 
-                {/* State B: results ready */}
-                {!showEmpty && !isDebouncing && hasQuery && (
+                {/* Results list */}
+                {!showEmpty && !isLoading && hasQuery && (
                     results.length > 0 ? (
                         <div className={styles.resultList}>
-                            {results.map(row => (
-                                <ResultRowItem key={row.id} row={row} onSave={handleSave} />
-                            ))}
+                            {tournaments.length > 0 && (
+                                <>
+                                    <div className={styles.groupHeader}>Torneos</div>
+                                    {tournaments.map(row => (
+                                        <ResultRowItem key={row.id} row={row} onSave={handleSave} />
+                                    ))}
+                                </>
+                            )}
+                            {clubs.length > 0 && (
+                                <>
+                                    <div className={styles.groupHeader}>Clubes</div>
+                                    {clubs.map(row => (
+                                        <ResultRowItem key={row.id} row={row} onSave={handleSave} />
+                                    ))}
+                                </>
+                            )}
                         </div>
                     ) : (
                         <div className={styles.noResults}>
-                            <p>No hay datos disponibles todavía</p>
-                            <button className={styles.clearBtn} onClick={() => window.location.reload()} style={{ marginTop: '20px', padding: '8px 16px', background: 'var(--color-surface-hover)', borderRadius: '8px', color: 'var(--color-text)' }}>
-                                Reintentar
-                            </button>
+                            <p>No se encontraron resultados para "{debouncedQuery}"</p>
                         </div>
                     )
                 )}
