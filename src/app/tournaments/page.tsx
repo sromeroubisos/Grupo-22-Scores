@@ -147,6 +147,7 @@ export default function TorneosPage() {
         const groups: Record<string, Tournament[]> = {};
         filteredTournaments.forEach(t => {
             if (t.countryId === 'argentina') return; // Already in recommended
+            if (!t.countryId) return;
             if (!groups[t.countryId]) groups[t.countryId] = [];
             groups[t.countryId].push(t);
         });
@@ -154,7 +155,7 @@ export default function TorneosPage() {
         return Object.entries(groups)
             .map(([countryId, tournaments]) => ({
                 country: getCountryById(countryId) || { id: countryId, name: countryId, nameEs: countryId, flagEmoji: FLAG_FALLBACK },
-                tournaments: tournaments.sort((a, b) => b.priority - a.priority)
+                tournaments: tournaments.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
             }))
             .sort((a, b) => (a.country.nameEs || a.country.name).localeCompare(b.country.nameEs || b.country.name));
     }, [filteredTournaments]);

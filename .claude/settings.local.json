@@ -34,7 +34,11 @@
       "Bash(node scripts/test-all-rugby-tournaments.js)",
       "Bash(node scripts/test-super-rugby.js)",
       "Bash(node scripts/test-rugby-standings.js)",
-      "Bash(timeout 120 npm run build)"
+      "Bash(timeout 120 npm run build)",
+      "Bash(ls /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/lib/data/tournaments/*.ts)",
+      "Bash(for table in admin_audit_log club_aliases club_profile club_secondary_unions club_venues players provider_entities squad_members)",
+      "Bash(do echo \"=== $table ===\")",
+      "Bash(done)"
     ]
   }
 }

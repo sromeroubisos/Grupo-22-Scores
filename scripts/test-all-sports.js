@@ -3,7 +3,7 @@
  * This validates that the FlashScore API works correctly for each sport
  */
 
-const API_KEY = '32e9f1aee1msha3c5470d1ea7367p10fac7jsnf9a1bfc88131';
+const API_KEY = 'YOUR_RAPIDAPI_KEY_HERE';
 const API_HOST = 'flashscore4.p.rapidapi.com';
 
 // Complete sport mapping from flashscore.ts

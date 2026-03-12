@@ -3,7 +3,7 @@ import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
 
-const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '32e9f1aee1msha3c5470d1ea7367p10fac7jsnf9a1bfc88131';
+const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
 const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
 
 // Cache configuration

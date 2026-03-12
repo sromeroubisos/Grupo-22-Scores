@@ -1,13 +1,13 @@
-// Migrated to proxy.ts (Next.js 16 format)
+// Proxy handler (Next.js 16 format)
 // This proxy handles Auth initialization via Supabase SSR (updateSession).
 // Because auth requires cookie interception on requests, this is kept here.
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
+import { updateSession } from '@/lib/supabase/proxy'
 
-export async function middleware(request: NextRequest) {
-    console.log('[Middleware] Request to:', request.nextUrl.pathname);
+export async function proxy(request: NextRequest) {
+    console.log('[Proxy] Request to:', request.nextUrl.pathname);
     const { pathname, searchParams } = request.nextUrl;
     const host = request.headers.get('host') || ''
     const isProd = process.env.NODE_ENV === 'production'

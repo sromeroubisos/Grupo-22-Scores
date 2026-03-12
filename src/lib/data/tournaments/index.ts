@@ -95,7 +95,7 @@ export const getTournamentById = (id: string): Tournament | undefined => {
 
 export const getCountriesWithTournaments = (sportId: SportId): string[] => {
     const tournaments = getTournamentsBySport(sportId);
-    const countries = new Set(tournaments.map(t => t.countryId));
+    const countries = new Set(tournaments.map(t => t.countryId).filter((c): c is string => !!c));
     return Array.from(countries).sort();
 };
 

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "RapidAPI Hub - FlashScore": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.rapidapi.com",
+        "--header",
+        "x-api-host: flashscore4.p.rapidapi.com",
+        "--header",
+        "x-api-key: YOUR_RAPIDAPI_KEY_HERE"
+      ]
+    }
+  }
+}

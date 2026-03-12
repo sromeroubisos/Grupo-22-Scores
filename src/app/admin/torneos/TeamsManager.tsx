@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+import React, { useState } from 'react';
 import styles from './page.module.css';
 
 interface Team {
@@ -30,23 +31,13 @@ export default function TeamsManager({ categories, zones, teams, onUpdateTeams, 
     const [selectedCategory, setSelectedCategory] = useState(categories[0] || '');
     const [selectedZone, setSelectedZone] = useState(zones[0] || '');
 
-    // Filtered clubs suggestion logic could go here
-    const [filteredClubs, setFilteredClubs] = useState<string[]>([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-
-    useEffect(() => {
-        if (newTeamName) {
-            const matches = MOCK_CLUBS.filter(c =>
-                c.toLowerCase().includes(newTeamName.toLowerCase()) &&
-                !c.toLowerCase().match(newTeamName.toLowerCase()) // simplistic exact match check
-            );
-            // Actually just show all matching
-            setFilteredClubs(MOCK_CLUBS.filter(c => c.toLowerCase().includes(newTeamName.toLowerCase())));
-            setShowSuggestions(true);
-        } else {
-            setShowSuggestions(false);
-        }
+    // Filtered clubs suggestion logic
+    const filteredClubs = React.useMemo(() => {
+        if (!newTeamName) return [];
+        return MOCK_CLUBS.filter(c => c.toLowerCase().includes(newTeamName.toLowerCase()));
     }, [newTeamName]);
+
+    const showSuggestions = newTeamName.length > 0 && filteredClubs.length > 0;
 
     const handleAddTeam = () => {
         if (!newTeamName || !selectedCategory || !selectedZone) {
@@ -63,7 +54,6 @@ export default function TeamsManager({ categories, zones, teams, onUpdateTeams, 
 
         onUpdateTeams([...teams, newTeam]);
         setNewTeamName('');
-        setShowSuggestions(false);
     };
 
     const handleRemoveTeam = (id: string) => {
@@ -74,7 +64,6 @@ export default function TeamsManager({ categories, zones, teams, onUpdateTeams, 
 
     const selectWhyClub = (club: string) => {
         setNewTeamName(club);
-        setShowSuggestions(false);
     };
 
     // Filter displayed teams
@@ -201,7 +190,7 @@ export default function TeamsManager({ categories, zones, teams, onUpdateTeams, 
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {displayTeams.map((team, idx) => (
+                                        {displayTeams.map((team) => (
                                             <tr key={team.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                                                 <td style={{ padding: '1rem', fontWeight: 600 }}>{team.name}</td>
                                                 <td style={{ padding: '1rem' }}><span className={styles.badge} style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}>{team.category}</span></td>

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Sidebar from '../components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -10,25 +9,20 @@ export default function GlobalAdminLayout({ children }: { children: React.ReactN
     const { user, isAuthenticated } = useAuth();
     const router = useRouter();
 
-    const [isAuthorized, setIsAuthorized] = React.useState(false);
+    const isAuthorized = isAuthenticated && user?.role === 'admin_general';
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (isAuthenticated && !isAuthorized) {
+            router.push('/admin'); // Redirect to dashboard if not general admin
+        } else if (!isAuthenticated) {
             router.push('/login');
-            return;
         }
-
-        if (user?.role === 'admin_general') {
-            setIsAuthorized(true);
-        } else {
-            router.push('/admin'); // Redirect to dashboard instead of home
-        }
-    }, [isAuthenticated, user, router]);
+    }, [isAuthenticated, isAuthorized, router]);
 
     if (!isAuthenticated || !isAuthorized) {
         return (
             <div style={{ padding: '50px', display: 'flex', justifyContent: 'center' }}>
-                <div className="spinner"></div> // Ensure spinner CSS exists or use text
+                <div className="spinner"></div> {/* Ensure spinner CSS exists or use text */}
             </div>
         );
     }

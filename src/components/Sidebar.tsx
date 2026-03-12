@@ -13,6 +13,7 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
     const groups: Record<string, { countryName: string; flagEmoji: string; tournaments: Tournament[] }> = {};
 
     tournaments.forEach(tournament => {
+        if (!tournament.countryId) return;
         const country = getCountryById(tournament.countryId);
         const countryName = country?.name || tournament.countryId;
         const flagEmoji = country?.flagEmoji || '🌍';
@@ -25,7 +26,7 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
 
     // Sort tournaments within each group by priority
     Object.values(groups).forEach(group => {
-        group.tournaments.sort((a, b) => b.priority - a.priority);
+        group.tournaments.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
     });
 
     return groups;

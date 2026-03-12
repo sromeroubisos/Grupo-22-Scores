@@ -7,7 +7,7 @@ export function useAnimatedDisclosure(isOpen: boolean, duration = 180) {
   const [isVisible, setIsVisible] = useState(isOpen);
 
   useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let timeoutId: number | undefined;
     let frameId: number | undefined;
 
     if (isOpen) {

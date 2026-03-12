@@ -8,8 +8,8 @@ export async function syncTournamentsAction() {
         const results = await syncStaticTournaments();
         revalidatePath('/admin/torneos');
         return { success: true, results };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in syncTournamentsAction:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
 }

@@ -78,13 +78,10 @@ export async function POST(request: Request) {
                 existingTournament = existingData;
             } else {
                 // Look up by original name, sport, country just in case
-                const { data: matchedData } = await supabase
-                    .from('tournaments')
-                    .select('*')
-                    .eq('original_name', t.name)
-                    .eq('sport_id', t.sportId)
-                    .eq('country_id', t.countryId)
-                    .single();
+                let matchQuery = supabase.from('tournaments').select('*').eq('original_name', t.name);
+                if (t.sportId) matchQuery = matchQuery.eq('sport_id', t.sportId as string);
+                if (t.countryId) matchQuery = matchQuery.eq('country_id', t.countryId);
+                const { data: matchedData } = await matchQuery.single();
 
                 if (matchedData) {
                     existingTournament = matchedData;
@@ -104,7 +101,7 @@ export async function POST(request: Request) {
                 data_source: 'external_static_import',
                 priority: t.priority,
                 country_id: t.countryId,
-                sport_id: typeof t.sportId === 'string' ? t.sportId : t.sportId?.id,
+                sport_id: (t.sportId as string | null | undefined) ?? null,
                 slug: existingTournament?.slug || t.id, // Fallback to id
                 status: existingTournament?.status || 'published',
                 logo_url: existingTournament?.logo_url || t.logoUrl,
