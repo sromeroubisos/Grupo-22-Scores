@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, memo } from 'react';
 import { ArrowLeft, Calendar, Trophy, Users, MapPin, ChevronRight, ChevronLeft, Share2, Star, Download } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
@@ -11,6 +11,7 @@ import { getActiveSports } from '@/lib/data/sports';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import TournamentLeader from '@/components/TournamentLeader';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
@@ -101,6 +102,110 @@ function generateDates(timeZone: string) {
 
 
 
+// --- Memoized Sub-components for Performance ---
+
+const LiveMinute = ({ dateTime, sport }: { dateTime: string, sport: any }) => {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return <>{calculateVirtualMatchTime(dateTime, sport, 'live') || 'En Vivo'}</>;
+};
+
+const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport }: { 
+  match: Match & { _dateTime: string }, 
+  selectedSport: any, 
+  styles: any,
+  isIndividualSport: boolean
+}) => {
+  return (
+    <Link
+      href={`/matches/${match.id}`}
+      className={`${styles.matchRow} ${match.status === 'live' ? styles.matchRowLive : ''}`}
+    >
+      <div className={styles.matchTime}>
+        {match.status === 'live' ? (
+          <span className={styles.matchLive}>
+            <span className={styles.matchLiveDot}></span>
+            {match.minute || <LiveMinute dateTime={match._dateTime} sport={selectedSport} />}
+          </span>
+        ) : match.status === 'finished' ? (
+          <span className={styles.matchFinished}>FT</span>
+        ) : (
+          <span className={styles.matchTimeText}>{match.time}</span>
+        )}
+      </div>
+
+      <div className={styles.matchTeams}>
+        <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : ''}`}>
+          <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
+            {match.homeLogo ? (
+              <img
+                src={match.homeLogo}
+                alt={match.home}
+                className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.style.display = 'none';
+                  (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
+                }}
+              />
+            ) : null}
+            <span className={styles.logoFallback} style={match.homeLogo ? { display: 'none' } : {}}>
+              {isIndividualSport ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              )}
+            </span>
+          </span>
+          <span className={styles.teamName}>{match.home}</span>
+          <span className={styles.teamScore}>{match.homeScore ?? '-'}</span>
+        </div>
+        <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : ''}`}>
+          <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
+            {match.awayLogo ? (
+              <img
+                src={match.awayLogo}
+                alt={match.away}
+                className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.style.display = 'none';
+                  (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
+                }}
+              />
+            ) : null}
+            <span className={styles.logoFallback} style={match.awayLogo ? { display: 'none' } : {}}>
+              {isIndividualSport ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              )}
+            </span>
+          </span>
+          <span className={styles.teamName}>{match.away}</span>
+          <span className={styles.teamScore}>{match.awayScore ?? '-'}</span>
+        </div>
+      </div>
+    </Link>
+  );
+});
+
+// Update the display name for dev tools
+MatchRow.displayName = 'MatchRow';
+
 export default function HomePage() {
 
   const [selectedDate, setSelectedDate] = useState('');
@@ -108,7 +213,21 @@ export default function HomePage() {
   const [news, setNews] = useState<any[]>([]);
   const [manualTournamentsList, setManualTournamentsList] = useState<Tournament[]>([]);
 
-  const { selectedSport, setSelectedSport } = useSport();
+  const { selectedSport, setSelectedSport, activeSports } = useSport();
+  const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
+
+  // Sort active sports: favorites first, then rest in original order
+  const sortedActiveSports = useMemo(() => {
+    if (favoriteSportIds.length === 0) return activeSports;
+    return [...activeSports].sort((a, b) => {
+      const aFav = favoriteSportIds.includes(a.id);
+      const bFav = favoriteSportIds.includes(b.id);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      return 0;
+    });
+  }, [activeSports, favoriteSportIds]);
+
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set(['international']));
   const [expandedLeagueIds, setExpandedLeagueIds] = useState<Set<string>>(new Set()); // Level 2 Accordion
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<string>>(new Set()); // Main Content Collapse
@@ -123,8 +242,7 @@ export default function HomePage() {
   // Favorites hook
   const { toggleLeagueFavorite, isLeagueFavorite } = useFavorites();
 
-  // Get active sports for switcher
-  const activeSports = useMemo(() => getActiveSports(), []);
+  // Sports list handled by context (to respect global configuration)
 
   // Get tournaments for selected sport
   const allTournaments = useMemo(() => getTournamentsBySport(selectedSport.id), [selectedSport.id]);
@@ -196,17 +314,13 @@ export default function HomePage() {
     }
 
     matches.forEach(match => {
-      // API returns enriched data (match.homeTeam, match.tournament, etc.)
       const tournament = match.tournament;
-
-      // Basic validation (API filters, but good to be safe)
       if (!tournament) return;
 
       const countryName = (tournament as any).country || 'Internacional';
       const cleanedName = cleanLeagueName(tournament.name, countryName);
       const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
 
-      // Consolidate into an existing group when the same tournament arrives under a different ID
       const existingId = dedupByKey.get(dedupKey);
       const groupKey = existingId ?? tournament.id;
 
@@ -222,36 +336,11 @@ export default function HomePage() {
         dedupByKey.set(dedupKey, groupKey);
       }
 
-      // Convert UTC->local using the centralized timezone utility
       const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
 
-      // Map status
       let status: 'live' | 'scheduled' | 'finished' = 'scheduled';
       if (match.status === 'live') status = 'live';
       if (match.status === 'final') status = 'finished';
-
-      // Format minute logic - for live matches, compute from kickoff time
-      let minuteDisplay = '';
-      if (status === 'live') {
-        const period = match.clock?.period || '';
-        if (period === 'HT' || period === 'ET' || period === 'Final') {
-          minuteDisplay = period;
-        } else if (match.clock?.running && match.clock?.seconds > 0) {
-          minuteDisplay = `${Math.floor(match.clock.seconds / 60)}'`;
-        } else {
-          // Compute minute from kickoff timestamp using the new Virtual Clock logic
-          // This handles halves, quarters, overtimes, and breaks per sport
-          minuteDisplay = calculateVirtualMatchTime(match.dateTime, selectedSport, 'live');
-          if (!minuteDisplay) {
-            // Fallback if virtual clock returns empty for some reason
-            const kickoff = new Date(match.dateTime).getTime();
-            const elapsed = Math.max(0, Math.floor((now - kickoff) / 60000));
-            minuteDisplay = elapsed > 0 ? `${elapsed}'` : 'En Vivo';
-          }
-        }
-      } else if (match.clock?.period && status === 'finished') {
-        minuteDisplay = match.clock.period;
-      }
 
       groups[groupKey].matches.push({
         id: match.id,
@@ -263,8 +352,10 @@ export default function HomePage() {
         awayLogo: match.awayTeam?.logo,
         awayScore: match.score?.away,
         status: status,
-        minute: minuteDisplay
-      });
+        // minutes will be calculated by the MatchRow component using the original dateTime
+        minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,
+        _dateTime: match.dateTime // Preserve for real-time calculation
+      } as any);
     });
 
     const leaguesArray = Object.values(groups);
@@ -279,7 +370,7 @@ export default function HomePage() {
       return a.league.localeCompare(b.league);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matches, isLeagueFavorite, userTimeZone, liveTick]);
+  }, [matches, isLeagueFavorite, userTimeZone]); // removed liveTick
 
   const toggleCountry = (countryId: string) => {
     setExpandedCountries(prev => {
@@ -451,7 +542,7 @@ export default function HomePage() {
               </button>
 
               <div className={`${styles.sportMenu} ${isSportMenuOpen ? styles.sportMenuOpen : ''}`}>
-                {activeSports.map(sport => (
+                {sortedActiveSports.map(sport => (
                   <div
                     key={sport.id}
                     className={`${styles.sportMenuItem} ${selectedSport.id === sport.id ? styles.sportMenuItemActive : ''}`}
@@ -514,12 +605,23 @@ export default function HomePage() {
                   </button>
 
                   <div className={`${styles.accordionContent} ${expandedCountries.has('international') ? styles.open : ''}`}>
-                    {filteredInternational.map((tournament) => (
+                    {filteredInternational
+                      .slice()
+                      .sort((a, b) => {
+                        const aFav = favoriteLeagueIds.includes(a.id);
+                        const bFav = favoriteLeagueIds.includes(b.id);
+                        if (aFav && !bFav) return -1;
+                        if (!aFav && bFav) return 1;
+                        return 0;
+                      })
+                      .map((tournament) => (
                       <Link
                         key={tournament.id}
                         href={`/tournaments/${tournament.id}`}
                         className={styles.accordionItemLink}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
+                        {favoriteLeagueIds.includes(tournament.id) && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                         <span>{tournament.name}</span>
                       </Link>
                     ))}
@@ -559,10 +661,20 @@ export default function HomePage() {
                     </button>
 
                     <div className={`${styles.accordionContent} ${isExpanded ? styles.open : ''}`}>
-                      {group.tournaments.map((tournament) => {
+                      {group.tournaments
+                        .slice()
+                        .sort((a, b) => {
+                          const aFav = favoriteLeagueIds.includes(a.id);
+                          const bFav = favoriteLeagueIds.includes(b.id);
+                          if (aFav && !bFav) return -1;
+                          if (!aFav && bFav) return 1;
+                          return 0;
+                        })
+                        .map((tournament) => {
                         // Check if tournament has sub-items (Seasons)
                         const hasSubItems = tournament.seasons && tournament.seasons.length > 0;
                         const isLeagueExpanded = expandedLeagueIds.has(tournament.id);
+                        const isFavLeague = favoriteLeagueIds.includes(tournament.id);
 
                         if (hasSubItems) {
                           return (
@@ -573,8 +685,9 @@ export default function HomePage() {
                               >
                                 <Link
                                   href={`/tournaments/${tournament.id}`}
-                                  style={{ flex: 1, padding: '10px 16px', color: 'inherit', textDecoration: 'none', textAlign: 'left' }}
+                                  style={{ flex: 1, padding: '10px 16px', color: 'inherit', textDecoration: 'none', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '6px' }}
                                 >
+                                  {isFavLeague && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                                   {tournament.name}
                                 </Link>
                                 <button
@@ -627,7 +740,9 @@ export default function HomePage() {
                               key={tournament.id}
                               href={`/tournaments/${tournament.id}`}
                               className={styles.accordionItemLink}
+                              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
+                              {isFavLeague && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                               <span>{tournament.name}</span>
                             </Link>
                           );
@@ -645,7 +760,7 @@ export default function HomePage() {
         <main className={styles.mainContent}>
           {/* Sport Selector (Mobile) */}
           <div className={styles.mobileSportSelector}>
-            {activeSports.map(sport => (
+            {sortedActiveSports.map(sport => (
               <button
                 key={sport.id}
                 className={`${styles.sportChip} ${selectedSport.id === sport.id ? styles.active : ''}`}
@@ -711,22 +826,48 @@ export default function HomePage() {
 
             <div className={styles.matchesContainer}>
               {/* Source error indicator — shown when FlashScore or Supabase is down */}
-              {sourceError && (
+              {sourceError?.scenario === 'fs_cache' && (
+                <div style={{
+                  display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
+                  borderRadius: '6px', background: 'rgba(100,180,255,0.07)',
+                  border: '1px solid rgba(100,180,255,0.15)',
+                  fontSize: '0.75rem', color: '#80b8ff',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ opacity: 0.8 }}>Datos de FlashScore desde caché — puede haber un leve retraso.</span>
+                </div>
+              )}
+              {sourceError?.scenario === 'fs_down_db_ok' && (
                 <div style={{
                   display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
                   borderRadius: '6px', background: 'rgba(255,160,0,0.08)',
                   border: '1px solid rgba(255,160,0,0.2)',
                   fontSize: '0.75rem', color: 'var(--color-text-dim)',
-                  flexWrap: 'wrap', alignItems: 'center'
+                  alignItems: 'center'
                 }}>
-                  <span style={{ opacity: 0.7 }}>Fuente con problemas:</span>
-                  {sourceError.flashscore && (
-                    <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,100,100,0.15)', color: '#ff8080' }}>FlashScore</span>
-                  )}
-                  {sourceError.supabase && (
-                    <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,100,100,0.15)', color: '#ff8080' }}>Base de datos</span>
-                  )}
-                  <span style={{ opacity: 0.5 }}>— los datos pueden estar incompletos</span>
+                  <span style={{ opacity: 0.8 }}>FlashScore no disponible — mostrando solo partidos locales.</span>
+                </div>
+              )}
+              {sourceError?.scenario === 'db_down_fs_ok' && (
+                <div style={{
+                  display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
+                  borderRadius: '6px', background: 'rgba(255,160,0,0.08)',
+                  border: '1px solid rgba(255,160,0,0.2)',
+                  fontSize: '0.75rem', color: 'var(--color-text-dim)',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ opacity: 0.8 }}>Partidos de la base de datos no disponibles — solo datos de FlashScore.</span>
+                </div>
+              )}
+              {sourceError?.scenario === 'both_down' && (
+                <div style={{
+                  display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
+                  borderRadius: '6px', background: 'rgba(255,60,60,0.08)',
+                  border: '1px solid rgba(255,80,80,0.2)',
+                  fontSize: '0.75rem', color: '#ff8080',
+                  alignItems: 'center'
+                }}>
+                  <span>Sin conexión a las fuentes de datos — los datos pueden estar incompletos o ausentes.</span>
                 </div>
               )}
 
@@ -819,85 +960,13 @@ export default function HomePage() {
                     <div className={`${styles.matchesListWrapper} ${isCollapsed ? styles.collapsed : ''}`}>
                       <div className={styles.matchesList}>
                         {league.matches.map((match) => (
-                          <Link
-                            key={match.id}
-                            href={`/matches/${match.id}`}
-                            className={`${styles.matchRow} ${match.status === 'live' ? styles.matchRowLive : ''}`}
-                          >
-                            <div className={styles.matchTime}>
-                              {match.status === 'live' ? (
-                                <span className={styles.matchLive}>
-                                  <span className={styles.matchLiveDot}></span>
-                                  {match.minute}
-                                </span>
-                              ) : match.status === 'finished' ? (
-                                <span className={styles.matchFinished}>FT</span>
-                              ) : (
-                                <span className={styles.matchTimeText}>{match.time}</span>
-                              )}
-                            </div>
-
-                            <div className={styles.matchTeams}>
-                              <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : ''}`}>
-                                <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-                                  {match.homeLogo ? (
-                                    <img
-                                      src={match.homeLogo}
-                                      alt={match.home}
-                                      className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
-                                      onError={(e) => {
-                                        e.currentTarget.onerror = null;
-                                        e.currentTarget.style.display = 'none';
-                                        (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
-                                      }}
-                                    />
-                                  ) : null}
-                                  <span className={styles.logoFallback} style={match.homeLogo ? { display: 'none' } : {}}>
-                                    {isIndividualSport ? (
-                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                                      </svg>
-                                    ) : (
-                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                      </svg>
-                                    )}
-                                  </span>
-                                </span>
-                                <span className={styles.teamName}>{match.home}</span>
-                                <span className={styles.teamScore}>{match.homeScore ?? '-'}</span>
-                              </div>
-                              <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : ''}`}>
-                                <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-                                  {match.awayLogo ? (
-                                    <img
-                                      src={match.awayLogo}
-                                      alt={match.away}
-                                      className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
-                                      onError={(e) => {
-                                        e.currentTarget.onerror = null;
-                                        e.currentTarget.style.display = 'none';
-                                        (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
-                                      }}
-                                    />
-                                  ) : null}
-                                  <span className={styles.logoFallback} style={match.awayLogo ? { display: 'none' } : {}}>
-                                    {isIndividualSport ? (
-                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                                      </svg>
-                                    ) : (
-                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                      </svg>
-                                    )}
-                                  </span>
-                                </span>
-                                <span className={styles.teamName}>{match.away}</span>
-                                <span className={styles.teamScore}>{match.awayScore ?? '-'}</span>
-                              </div>
-                            </div>
-                          </Link>
+                          <MatchRow 
+                            key={match.id} 
+                            match={match as any} 
+                            selectedSport={selectedSport} 
+                            styles={styles} 
+                            isIndividualSport={isIndividualSport} 
+                          />
                         ))}
                       </div>
                     </div>

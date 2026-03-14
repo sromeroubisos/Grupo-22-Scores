@@ -4,6 +4,11 @@ import { getFlashScoreMatches, getFlashScoreLiveMatches } from '@/lib/services/f
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
 import { formatDateKey, canonicalizeTimezone, toLocalMatch } from '@/lib/timezone';
 import { createClient } from '@/lib/supabase/server';
+import {
+    getMatchesForDate,
+    getLiveMatches,
+    mapCachedToEnrichedMatch
+} from '@/lib/services/externalMatchCache';
 
 // Maps internal sport IDs to all DB variants that should match
 function getSportVariants(sport: string): string[] {
@@ -167,8 +172,18 @@ export async function GET(request: Request) {
 
                 return NextResponse.json({ data: finalLiveMatches });
             } catch (e) {
-                console.error('Live-only fetch failed:', e);
-                return NextResponse.json({ data: [] });
+                console.error('Live-only fetch failed, trying external_match_cache:', e);
+                try {
+                    const supabase = await createClient();
+                    const cachedLive = await getLiveMatches(sport, supabase);
+                    const enriched = cachedLive.map(m => mapCachedToEnrichedMatch(m, sport));
+                    return NextResponse.json({
+                        data: enriched,
+                        sources: { flashscore: { ok: false, count: 0, fromCache: cachedLive.length > 0 } }
+                    });
+                } catch {
+                    return NextResponse.json({ data: [] });
+                }
             }
         }
 
@@ -183,7 +198,7 @@ export async function GET(request: Request) {
         let enrichedMatches: any[] = [];
 
         // Per-source tracking (returned in response for client error visibility)
-        let fsOk = false, fsCount = 0;
+        let fsOk = false, fsCount = 0, fsFromCache = false;
         let dbOk = false, dbCount = 0, dbFallback = false;
 
         if (!useExternal) {
@@ -242,13 +257,17 @@ export async function GET(request: Request) {
                 const todayKey = formatDateKey(new Date(), timeZone);
                 const isToday = date === todayKey;
 
+                // Track whether FlashScore API actually failed (vs returned 0 results)
+                let fsFetchFailed = false;
+
                 // Parallel fetch if today, otherwise just list
                 let [externalMatches, liveMatches] = await Promise.all([
                     getFlashScoreMatches(localDate, sport || 'rugby', {
                         timeZone,
                         targetDateKey: date || undefined
                     }).catch(e => {
-                        console.warn('[matches] FlashScore fetch failed - source disabled', e?.message);
+                        console.warn('[matches] FlashScore fetch failed - trying cache', e?.message);
+                        fsFetchFailed = true;
                         return [];
                     }),
                     isToday ? getFlashScoreLiveMatches(sport || 'rugby').catch(e => {
@@ -257,6 +276,26 @@ export async function GET(request: Request) {
                     }) : Promise.resolve([])
                 ]);
 
+                // ── Cache fallback when FlashScore is unavailable ─────────────
+                if (fsFetchFailed) {
+                    try {
+                        const supabaseForCache = await createClient();
+                        const cached = await getMatchesForDate(date, sport || 'rugby', supabaseForCache);
+                        if (cached.length > 0) {
+                            const fromCache = cached.map(m => mapCachedToEnrichedMatch(m, sport || 'rugby'));
+                            enrichedMatches = [...enrichedMatches, ...fromCache];
+                            fsOk = false;
+                            fsFromCache = true;
+                            fsCount = fromCache.length;
+                            console.log(`[matches] FlashScore cache fallback: ${fsCount} matches for date=${date}`);
+                        }
+                    } catch (cacheErr) {
+                        console.warn('[matches] Cache fallback also failed:', cacheErr);
+                    }
+                    // Skip the rest of the FlashScore enrichment path
+                }
+
+                if (!fsFetchFailed) {
                 // Merge live data into list
                 if (liveMatches && liveMatches.length > 0) {
                     const liveMap = new Map(liveMatches.map(m => [m.id, m]));
@@ -333,6 +372,7 @@ export async function GET(request: Request) {
                 if (externalMatches && externalMatches.length > 0) {
                     persistFromExternalMatches(externalMatches, sport || 'rugby');
                 }
+                } // end if (!fsFetchFailed)
             } catch (e) {
                 console.error('External section processing failed:', e);
             }
@@ -344,28 +384,61 @@ export async function GET(request: Request) {
         try {
             const supabase = await createClient();
 
+            // Build the base query for the selected date
+            const { localStart, localEnd } = (() => {
+                // date is YYYY-MM-DD. We want the full range of that day in UTC for the DB query.
+                // However, since we use TIMESTAMPTZ, comparing with string dates works well if they include the offset.
+                // For simplicity, we use the date as-is which PostgreSQL interprets relative to UTC if no offset.
+                return {
+                    localStart: `${date}T00:00:00Z`,
+                    localEnd: `${date}T23:59:59Z`
+                };
+            })();
+
+            // Filter by sport through tournament relationship
+            const sportVariants = sport ? getSportVariants(sport) : null;
+
             // Attempt 1: named FK joins (works when FK constraint names are stable)
-            let { data: dbMatches, error: dbError } = await supabase
+            let query = supabase
                 .from('matches')
                 .select(`
                     id, date_time, round_label, venue, status, score, live_enabled,
                     tournament_id, home_club_id, away_club_id, notes, stream_url, replay_url,
-                    tournament:tournaments(id, name, sport, season_id, status, union:unions(id, name, country)),
+                    tournament:tournaments!inner(id, name, sport, season_id, status, union:unions(id, name, country)),
                     home_team:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, primary_color),
                     away_team:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, primary_color)
                 `)
+                .gte('date_time', localStart)
+                .lte('date_time', localEnd)
                 .order('date_time', { ascending: true });
 
-            // Attempt 2: if FK names changed (e.g. after schema migration), fall back to manual join
+            // Apply sport filter via !inner join
+            if (sportVariants) {
+                query = query.in('tournament.sport', sportVariants);
+            }
+
+            let { data: dbMatches, error: dbError } = await query;
+
+            // Attempt 2: if FK names changed, fall back to manual join but KEEP FILTERS
             if (dbError && /fkey|relationship|foreign/i.test(dbError.message)) {
                 dbFallback = true;
                 console.warn('[matches] FK join failed, falling back to manual club join:', dbError.message);
-                const [mRes, cRes] = await Promise.all([
-                    supabase.from('matches').select(`
+                
+                let mQuery = supabase.from('matches').select(`
                         id, date_time, round_label, venue, status, score, live_enabled,
                         tournament_id, home_club_id, away_club_id, notes, stream_url, replay_url,
-                        tournament:tournaments(id, name, sport, season_id, status)
-                    `).order('date_time', { ascending: true }),
+                        tournament:tournaments!inner(id, name, sport, season_id, status)
+                    `)
+                    .gte('date_time', localStart)
+                    .lte('date_time', localEnd)
+                    .order('date_time', { ascending: true });
+
+                if (sportVariants) {
+                    mQuery = mQuery.in('tournament.sport', sportVariants);
+                }
+
+                const [mRes, cRes] = await Promise.all([
+                    mQuery,
                     supabase.from('clubs').select('id, name, short_name, logo_url, primary_color')
                 ]);
                 const clubMap = new Map((cRes.data || []).map((c: any) => [c.id, c]));
@@ -377,28 +450,12 @@ export async function GET(request: Request) {
                 dbError = mRes.error;
             }
 
-            if (!dbError && dbMatches && dbMatches.length > 0) {
-                // Track existing IDs to avoid duplicates
+            if (!dbError && dbMatches) {
+                dbOk = true;
                 const existingIds = new Set(enrichedMatches.map((m: any) => m.id));
 
-                // Filter by sport through tournament relationship
-                const sportVariants = sport ? getSportVariants(sport) : null;
-
                 const enrichedDbMatches = dbMatches
-                    .filter((m: any) => {
-                        // Skip if already present from FlashScore
-                        if (existingIds.has(m.id)) return false;
-                        // Allow all manually created matches to appear by default, regardless of tournament status.
-                        // (Alternatively, we could filter by ['published', 'active', 'draft'])
-                        // We will just not restrict by tournament status for now, as manual matches are explicitly created by the admin.
-                        // Filter by sport if provided
-                        if (sportVariants && m.tournament?.sport) {
-                            return sportVariants.includes(m.tournament.sport.toLowerCase());
-                        }
-                        // If match has no tournament or no sport assigned, always include it
-                        // (these are likely friendlies or matches created without tournament link)
-                        return true;
-                    })
+                    .filter((m: any) => !existingIds.has(m.id))
                     .map((m: any) => {
                         const { localTime } = toLocalMatch(m.date_time, timeZone);
                         return {
@@ -458,7 +515,6 @@ export async function GET(request: Request) {
                     });
 
                 enrichedMatches = [...enrichedMatches, ...enrichedDbMatches];
-                dbOk = true;
                 dbCount = enrichedDbMatches.length;
                 console.log(`[matches] Supabase: ${dbCount} matches (fallback=${dbFallback})`);
             }
@@ -486,7 +542,7 @@ export async function GET(request: Request) {
         return NextResponse.json({
             data: enrichedMatches,
             sources: {
-                flashscore: { ok: fsOk, count: fsCount },
+                flashscore: { ok: fsOk, count: fsCount, fromCache: fsFromCache },
                 supabase: { ok: dbOk, count: dbCount, fallback: dbFallback }
             }
         });
