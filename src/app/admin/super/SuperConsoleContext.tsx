@@ -8,6 +8,7 @@ import {
     invalidateCache, getCachedStale, isCacheEntryStale,
     type ClubWithUnion, type MatchRow, type TournamentRow, type UnionRow, type NewsRow
 } from '@/lib/cache/superAdminCache';
+import { normalizeError } from '@/lib/utils/errorUtils';
 
 // ─── Cache keys ───────────────────────────────────────────────────────────────
 
@@ -150,13 +151,15 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             const data = await fetchClubs(force);
             setClubs(data);
             setErrors(prev => ({ ...prev, clubs: null }));
-        } catch (err: any) {
-            console.error(`[SuperConsoleContext] Failed to load clubs:`, err);
-            let message = err.message || 'Error al cargar clubes';
-            if (err.message?.includes('Timeout after')) {
-                message = 'Timeout: El servidor está tardando demasiado en responder (clubes)';
-            }
-            setErrors(prev => ({ ...prev, clubs: message }));
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            console.error(`[SuperConsoleContext] Failed to load clubs:`, {
+                message: normalized.message,
+                details: normalized.details,
+                code: normalized.code,
+                raw: normalized.raw
+            });
+            setErrors(prev => ({ ...prev, clubs: normalized.message }));
         } finally {
             setLoading(prev => ({ ...prev, clubs: false }));
         }
@@ -178,13 +181,15 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             const data = await fetchMatches(force);
             setMatches(data);
             setErrors(prev => ({ ...prev, matches: null }));
-        } catch (err: any) {
-            console.error(`[SuperConsoleContext] Failed to load matches:`, err);
-            let message = err.message || 'Error al cargar partidos';
-            if (err.message?.includes('Timeout after')) {
-                message = 'Timeout: El servidor está tardando demasiado en responder (partidos)';
-            }
-            setErrors(prev => ({ ...prev, matches: message }));
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            console.error(`[SuperConsoleContext] Failed to load matches:`, {
+                message: normalized.message,
+                details: normalized.details,
+                code: normalized.code,
+                raw: normalized.raw
+            });
+            setErrors(prev => ({ ...prev, matches: normalized.message }));
         } finally {
             setLoading(prev => ({ ...prev, matches: false }));
         }
@@ -206,13 +211,15 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             const data = await fetchTournaments(force);
             setTournaments(data);
             setErrors(prev => ({ ...prev, tournaments: null }));
-        } catch (err: any) {
-            console.error(`[SuperConsoleContext] Failed to load tournaments:`, err);
-            let message = err.message || 'Error al cargar torneos';
-            if (err.message?.includes('Timeout after')) {
-                message = 'Timeout: El servidor está tardando demasiado en responder (torneos)';
-            }
-            setErrors(prev => ({ ...prev, tournaments: message }));
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            console.error(`[SuperConsoleContext] Failed to load tournaments:`, {
+                message: normalized.message,
+                details: normalized.details,
+                code: normalized.code,
+                raw: normalized.raw
+            });
+            setErrors(prev => ({ ...prev, tournaments: normalized.message }));
         } finally {
             setLoading(prev => ({ ...prev, tournaments: false }));
         }
@@ -234,13 +241,15 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             const data = await fetchUnions(force);
             setUnions(data);
             setErrors(prev => ({ ...prev, unions: null }));
-        } catch (err: any) {
-            console.error(`[SuperConsoleContext] Failed to load unions:`, err);
-            let message = err.message || 'Error al cargar uniones';
-            if (err.message?.includes('Timeout after')) {
-                message = 'Timeout: El servidor está tardando demasiado en responder (uniones)';
-            }
-            setErrors(prev => ({ ...prev, unions: message }));
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            console.error(`[SuperConsoleContext] Failed to load unions:`, {
+                message: normalized.message,
+                details: normalized.details,
+                code: normalized.code,
+                raw: normalized.raw
+            });
+            setErrors(prev => ({ ...prev, unions: normalized.message }));
         } finally {
             setLoading(prev => ({ ...prev, unions: false }));
         }
@@ -262,13 +271,15 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             const data = await fetchNews(force);
             setNews(data);
             setErrors(prev => ({ ...prev, news: null }));
-        } catch (err: any) {
-            console.error(`[SuperConsoleContext] Failed to load news:`, err);
-            let message = err.message || 'Error al cargar noticias';
-            if (err.message?.includes('Timeout after')) {
-                message = 'Timeout: El servidor está tardando demasiado en responder (noticias)';
-            }
-            setErrors(prev => ({ ...prev, news: message }));
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            console.error(`[SuperConsoleContext] Failed to load news:`, {
+                message: normalized.message,
+                details: normalized.details,
+                code: normalized.code,
+                raw: normalized.raw
+            });
+            setErrors(prev => ({ ...prev, news: normalized.message }));
         } finally {
             setLoading(prev => ({ ...prev, news: false }));
         }

@@ -19,7 +19,6 @@ import {
     MapPin,
     MoreVertical,
     Plus,
-    FileUp,
     RefreshCw,
     Search,
     Settings,
@@ -36,9 +35,9 @@ import type { MatchStatus, MatchWithClubs, PhaseWithRounds, RoundWithMatches } f
 import { FixtureProvider, useFixture } from './FixtureContext';
 import { FixtureMatchEditor } from './FixtureMatchEditor';
 import MatchCenterClient, { MatchRow } from '@/app/admin/super/partidos/[id]/MatchCenterClient';
-import * as XLSX from 'xlsx';
 import './fixture-management.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
+import { FixtureImportWizard as SmartFixtureImportWizard } from './FixtureImportWizard';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 
@@ -1644,7 +1643,7 @@ const DiagnosticsPanel = ({
 };
 
 const FixtureWizard = ({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) => {
-    const { generateFixture, generateMatches, importMatches, selectedPhaseId, fixture } = useFixture();
+    const { generateFixture, generateMatches, selectedPhaseId, fixture } = useFixture();
     const [step, setStep] = useState(0); // 0 for strategy selection
     const [strategy, setStrategy] = useState<'rounds' | 'berger' | 'import'>('rounds');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -1665,42 +1664,10 @@ const FixtureWizard = ({ onClose, onComplete }: { onClose: () => void; onComplet
         homeAndAway: false,
     });
 
-    // Import config
-    const [importConfig, setImportConfig] = useState({
-        file: null as File | null,
-        matchesData: [] as Array<Record<string, unknown>>,
-    });
-
     const phase = useMemo(
         () => fixture?.phases.find((item) => item.id === selectedPhaseId),
         [fixture, selectedPhaseId]
     );
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            try {
-                const bstr = evt.target?.result;
-                const wb = XLSX.read(bstr, { type: 'binary' });
-                const wsname = wb.SheetNames[0];
-                const ws = wb.Sheets[wsname];
-                const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws);
-
-                setImportConfig({
-                    file,
-                    matchesData: data,
-                });
-                setStep(2);
-            } catch (error) {
-                console.error("Error parsing file:", error);
-                alert("Error al procesar el archivo. Revisa que sea un formato valido.");
-            }
-        };
-        reader.readAsBinaryString(file);
-    };
 
     const handleGenerate = async () => {
         if (!selectedPhaseId) return;
@@ -1721,9 +1688,6 @@ const FixtureWizard = ({ onClose, onComplete }: { onClose: () => void; onComplet
                     homeAndAway: bergerConfig.homeAndAway
                 });
                 success = !!result;
-            } else if (strategy === 'import') {
-                const result = await importMatches(selectedPhaseId || '', importConfig.matchesData);
-                success = result.success;
             }
         } catch (error) {
             console.error("Generation error:", error);
@@ -1740,6 +1704,16 @@ const FixtureWizard = ({ onClose, onComplete }: { onClose: () => void; onComplet
 
     return (
         <section className="fixture-panel-shell fixture-glass">
+            {strategy === 'import' && step === 1 ? (
+                <SmartFixtureImportWizard
+                    phaseId={selectedPhaseId || ''}
+                    onBack={() => setStep(0)}
+                    onComplete={onComplete}
+                />
+            ) : null}
+
+            {!(strategy === 'import' && step === 1) ? (
+            <>
             <div className="fixture-wizard-progress">
                 <div className="fixture-wizard-progress-fill" style={{ width: `${(step / 2) * 100}%` }} />
             </div>
@@ -1969,69 +1943,25 @@ const FixtureWizard = ({ onClose, onComplete }: { onClose: () => void; onComplet
                     <div className="fixture-panel-header">
                         <div>
                             <span className="fixture-kicker">Upload</span>
-                            <h3>Importar archivo externo</h3>
-                            <p className="fixture-panel-copy">Sube un Excel o CSV con la lista de encuentros.</p>
-                        </div>
-                    </div>
-
-                    <div className="fixture-upload-zone">
-                        <input
-                            type="file"
-                            id="fixture-file-upload"
-                            hidden
-                            accept=".csv,.xlsx,.xls"
-                            onChange={handleFileChange}
-                        />
-                        <label htmlFor="fixture-file-upload" className="upload-drop-area">
-                            <FileUp size={32} />
-                            <span>Arrastra un archivo o haz clic para buscar</span>
-                            <em>Soporta .csv, .xlsx</em>
-                        </label>
-                    </div>
-
-                    <div className="fixture-panel-footer">
-                        <button className="btn-secondary" onClick={() => setStep(0)}>
-                            Volver
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {step === 2 && strategy === 'import' && (
-                <div className="fixture-wizard-step">
-                    <div className="fixture-panel-header">
-                        <div>
-                            <span className="fixture-kicker">Preview</span>
-                            <h3>Confirmar datos importados</h3>
-                            <p className="fixture-panel-copy">Hemos detectado los siguientes partidos en tu archivo.</p>
-                        </div>
-                    </div>
-
-                    <div className="fixture-confirm-grid">
-                        <div className="preview-stat">
-                            <span>Archivo</span>
-                            <strong>{importConfig.file?.name}</strong>
-                        </div>
-                        <div className="preview-stat">
-                            <span>Partidos detectados</span>
-                            <strong>{importConfig.matchesData.length}</strong>
+                            <h3>Importar fixture inteligente</h3>
+                            <p className="fixture-panel-copy">El archivo pasa por detección, normalización, validación y confirmación antes de crear partidos.</p>
                         </div>
                     </div>
 
                     <div className="fixture-warning-callout">
                         <AlertTriangle size={18} />
                         <p>
-                            Asegurate de que los nombres de los equipos coincidan exactamente con los registrados en el torneo.
+                            Este modo ya no inserta partidos directo al subir una planilla. Continuá al asistente para revisar cada fila.
                         </p>
                     </div>
 
                     <div className="fixture-panel-footer">
-                        <button className="btn-secondary" onClick={() => setStep(1)}>
-                            Cambiar archivo
+                        <button className="btn-secondary" onClick={() => setStep(0)}>
+                            Volver
                         </button>
-                        <button className="btn-primary" onClick={handleGenerate} disabled={isGenerating}>
-                            {isGenerating ? <RefreshCw className="spin" size={16} /> : <FileCheck size={16} />}
-                            <span>{isGenerating ? 'Importando...' : 'Finalizar importacion'}</span>
+                        <button className="btn-primary" onClick={() => setStep(1)}>
+                            <span>Abrir asistente</span>
+                            <ChevronRight size={16} />
                         </button>
                     </div>
                 </div>
@@ -2127,6 +2057,8 @@ const FixtureWizard = ({ onClose, onComplete }: { onClose: () => void; onComplet
                     </div>
                 </div>
             )}
+            </>
+            ) : null}
         </section>
     );
 };

@@ -5,13 +5,11 @@
  *  - First load → fetch from Supabase, store in cache with TTL.
  *  - Subsequent navigations within the same session → instant, return cached data.
  *  - User can manually refresh → invalidate cache and re-fetch.
- *  - TTL default: 60 seconds (enough to prevent redundant fetches on navigation).
- *
- * This eliminates the N×supabase-round-trips caused by each page doing its own fetch
- * every time the user navigates between Torneos, Clubes, Partidos, Jugadores.
+ *  - TTL default: 5 minutes.
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { normalizeError } from '@/lib/utils/errorUtils';
 
 const DEFAULT_TTL_MS = 5 * 60_000; // 5 minutes
 
@@ -45,7 +43,6 @@ export function invalidateAll() {
 /**
  * Returns cached data for a key regardless of staleness.
  * Returns null if the key has never been cached.
- * Used for stale-while-revalidate: show old data immediately, revalidate in background.
  */
 export function getCachedStale<T>(key: string): T | null {
     const entry = cache.get(key) as CacheEntry<T> | undefined;
@@ -61,13 +58,7 @@ export function isCacheEntryStale(key: string): boolean {
     return isStale(entry);
 }
 
-/**
- * Thin wrapper around a supabase fetch with in-memory caching.
- * @param key   - cache key (unique per query)
- * @param fetcher - async function that does the actual supabase call
- * @param ttl   - time-to-live in ms (default 60s)
- */
-const FETCH_TIMEOUT_MS = 15_000; // 15 seconds for cold start safety instead of 45s
+const FETCH_TIMEOUT_MS = 15_000; // 15 seconds
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
     let timeoutId: NodeJS.Timeout;
@@ -94,37 +85,30 @@ export async function cachedFetch<T>(
         return existing.data;
     }
 
-    // Deduplication: if a fetch is already in progress for this key, return that promise
     if (activeFetches.has(key)) {
-        console.log(`[Cache] Reusing active fetch for '${key}'`);
         return activeFetches.get(key) as Promise<T>;
     }
 
     const fetchPromise = (async () => {
-        const start = Date.now();
         try {
-            console.log(`[Cache] Starting fetch for '${key}'...`);
-
+            const data = await withTimeout(fetcher(), FETCH_TIMEOUT_MS, key);
+            cache.set(key, { data, fetchedAt: Date.now(), ttl });
+            return data;
+        } catch (err: any) {
+            const msg = err.message || 'Unknown error';
+            console.warn(`[Cache] Primary fetch failed for '${key}'. Rethrying WITHOUT timeout. Error: ${msg}`);
             try {
-                // Attempt fetch with timeout - increased for safety
-                const data = await withTimeout(fetcher(), FETCH_TIMEOUT_MS, key);
-                const duration = Date.now() - start;
-                console.log(`[Cache] Fetch for '${key}' succeeded in ${duration}ms`);
-
-                cache.set(key, { data, fetchedAt: Date.now(), ttl });
-                return data;
-            } catch (err: any) {
-                console.warn(`[Cache] Primary fetch failed for '${key}', attempting fallback:`, err.message);
-                // Fallback direct fetch (bypassing timeout wrapper just in case it's a wrapper bug or a transient network stall)
                 const fallbackData = await fetcher();
                 cache.set(key, { data: fallbackData, fetchedAt: Date.now(), ttl });
                 return fallbackData;
+            } catch (retryErr: any) {
+                console.error(`[Cache] RE-FETCH FAILED for '${key}' RAW:`, retryErr);
+                console.error(`[Cache] RE-FETCH FAILED JSON:`,
+                    JSON.stringify(retryErr, Object.getOwnPropertyNames(retryErr)));
+                const normalized = normalizeError(retryErr);
+                console.error(`[Cache] RE-FETCH FAILED NORMALIZED for '${key}':`, normalized);
+                throw normalized;
             }
-        } catch (err: any) {
-            const duration = Date.now() - start;
-            console.error(`[Cache] Fetch failed for '${key}' after ${duration}ms:`, err.message);
-            // DO NOT auto-retry without timeout here, it causes infinite loading
-            throw err;
         } finally {
             activeFetches.delete(key);
         }
@@ -135,11 +119,9 @@ export async function cachedFetch<T>(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Specific fetchers — using explicit column selection (never `select('*')`)
-// to minimize payload size and allow Supabase to use covering indexes.
+// Fetchers
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Getter for supabase client to ensure it's initialized correctly in all environments
 function getSupabase() {
     return createClient();
 }
@@ -199,51 +181,127 @@ export async function fetchMatches(force = false): Promise<MatchRow[]> {
     if (force) invalidateCache(KEY);
 
     return cachedFetch(KEY, async () => {
-        console.log('[Cache] Fetching matches from Supabase...');
-        try {
-            const result = await getSupabase()
-                .from('matches')
-                .select(`
-                    id, round_id, date_time, venue, status, score, live_enabled, tournament_id, home_club_id, away_club_id,
-                    tournament:tournaments(id, name, sport, season_id),
-                    home_team:clubs!matches_home_club_id_fkey(id, name, logo_url, primary_color),
-                    away_team:clubs!matches_away_club_id_fkey(id, name, logo_url, primary_color)
-                `)
-                .order('date_time', { ascending: false });
+        const { data, error } = await getSupabase()
+            .from('matches')
+            .select(`
+                id, round_id, date_time, venue, status, score, live_enabled, tournament_id, home_club_id, away_club_id,
+                tournament:tournaments(id, name, sport, season_id),
+                home_team:clubs!matches_home_club_id_fkey(id, name, logo_url, primary_color),
+                away_team:clubs!matches_away_club_id_fkey(id, name, logo_url, primary_color)
+            `)
+            .order('date_time', { ascending: false });
 
-            console.log('[Cache] Matches returned:', result.data?.length, 'Error:', result.error);
-
-            if (result.error) throw result.error;
-            return (result.data as unknown as MatchRow[]) ?? [];
-        } catch (err) {
-            console.error('[Cache] fetchMatches failed:', err);
-            throw err;
-        }
+        if (error) throw error;
+        return (data as unknown as MatchRow[]) ?? [];
     });
 }
 
 export interface TournamentRow {
     id: string;
     name: string;
-    season_id: string;
+    slug: string | null;
+    sport_id: string | null;
+    sport_name: string | null;
+    country_id: string | null;
+    country_name: string | null;
+    organization_id: string | null;
+    organization_name: string | null;
+    logo_url: string | null;
+    is_popular: boolean;
+    is_active: boolean;
+    display_order: number | null;
+    followers_count: number;
+    is_followed_by_user: boolean;
+    created_at: string;
+    updated_at: string;
+    // Admin fields
+    season_id: string | null;
     status: string | null;
-    sport: string | null;
     category: string | null;
     age_grade: string | null;
-    region: string | null;
-    country: string | null;
     format: string | null;
     is_visible: boolean | null;
-    created_at: string | null;
-    updated_at: string | null;
-    union_id: string | null;
-    external_id: string | null;
-    logo_url: string | null;
-    slug: string | null;
-    is_api_managed: boolean | null;
+    is_api_managed: boolean;
     data_source: string | null;
     display_name: string | null;
     original_name: string | null;
+    union_id: string | null;
+    external_id: string | null;
+    // Compatibility
+    sport?: string | null;
+    country?: string | null;
+}
+
+export async function fetchTournaments(force = false): Promise<TournamentRow[]> {
+    const KEY = 'tournaments_list';
+    if (force) invalidateCache(KEY);
+
+    return cachedFetch(KEY, async () => {
+        try {
+            const { data, error } = await getSupabase()
+                .rpc('get_all_tournaments', {
+                    p_include_hidden: true,
+                    p_viewer_user_id: null
+                });
+
+            if (error) {
+                // PGRST202 is "function not found"
+                if (error.code === 'PGRST202' || error.message?.includes('not find the function')) {
+                    console.warn('[Cache] get_all_tournaments RPC not found, falling back to direct query');
+                    return fetchTournamentsFallback();
+                }
+                console.error('[fetchTournaments][RAW] Supabase RPC error:', error);
+                console.error('[fetchTournaments][RAW] JSON (all props):',
+                    JSON.stringify(error, Object.getOwnPropertyNames(error)));
+                const normalized = normalizeError(error);
+                console.error('[fetchTournaments][NORMALIZED]:', normalized);
+                throw normalized;
+            }
+
+            return (data || []).map(t => ({
+                ...t,
+                sport: t.sport_id, // For backward compatibility with existing filters
+                country: t.country_name || t.country_id // For grouping by country
+            })) as unknown as TournamentRow[];
+        } catch (err: any) {
+             if (err.code === 'PGRST202' || err.message?.includes('not find the function')) {
+                return fetchTournamentsFallback();
+             }
+             throw err;
+        }
+    });
+}
+
+/**
+ * Direct table query fallback for super admin cache
+ */
+async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
+    const { data, error } = await getSupabase()
+        .from('tournaments')
+        .select(`
+            *,
+            sport:sports(name),
+            country:countries(name),
+            union:unions(name)
+        `);
+
+    if (error) {
+        console.error('[Cache] Fallback query failed:', error);
+        throw error;
+    }
+
+    return (data || []).map(t => ({
+        ...t,
+        sport_name: (t.sport as any)?.name || 'Unknown',
+        country_name: (t.country as any)?.name || 'Generic',
+        organization_name: (t.union as any)?.name || null,
+        sport: t.sport_id,
+        country: (t.country as any)?.name || t.country_id,
+        followers_count: 0,
+        is_followed_by_user: false,
+        display_name: t.display_name || t.name,
+        original_name: t.original_name || t.name
+    })) as unknown as TournamentRow[];
 }
 
 export interface UnionRow {
@@ -254,6 +312,33 @@ export interface UnionRow {
     sport?: string | null;
     union_level?: string | null;
     parent_union_id?: string | null;
+    branding?: Record<string, any> | null;
+}
+
+export async function fetchUnions(force = false): Promise<UnionRow[]> {
+    const KEY = 'unions_list';
+    if (force) invalidateCache(KEY);
+
+    return cachedFetch(KEY, async () => {
+        const { data, error } = await getSupabase()
+            .from('unions')
+            .select('id, name, country, branding')
+            .order('name');
+
+        if (error) throw error;
+        return ((data as any[]) ?? []).map((union) => ({
+            id: union.id,
+            name: union.name,
+            country: union.country,
+            branding: union.branding || null,
+            region: union.branding?.organization?.jurisdiction?.region || null,
+            sport: union.branding?.organization?.identity?.sport || null,
+            union_level: union.branding?.organization?.jurisdiction?.jurisdiction_type
+                || union.branding?.organization?.identity?.union_level
+                || null,
+            parent_union_id: union.branding?.organization?.relationships?.parent_organization_id || null,
+        }));
+    }, 5 * 60_000);
 }
 
 export interface NewsRow {
@@ -266,57 +351,18 @@ export interface NewsRow {
     published_at: string | null;
 }
 
-export async function fetchTournaments(force = false): Promise<TournamentRow[]> {
-    const KEY = 'tournaments_list';
-    if (force) invalidateCache(KEY);
-
-    return cachedFetch(KEY, async () => {
-        const { data, error } = await getSupabase()
-            .from('tournaments')
-            .select('id, name, season_id, status, sport, category, age_grade, region, country, format, is_visible, created_at, updated_at, union_id, external_id, logo_url, slug, is_api_managed, data_source, display_name, original_name')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return (data as TournamentRow[]) ?? [];
-    });
-}
-
-export async function fetchUnions(force = false): Promise<UnionRow[]> {
-    const KEY = 'unions_list';
-    if (force) invalidateCache(KEY);
-
-    // Unions change rarely — cache for 5 minutes
-    return cachedFetch(KEY, async () => {
-        const { data, error } = await getSupabase()
-            .from('unions')
-            .select('id, name, country')
-            .order('name');
-
-        if (error) throw error;
-        return (data as UnionRow[]) ?? [];
-    }, 5 * 60_000);
-}
-
 export async function fetchNews(force = false): Promise<NewsRow[]> {
     const KEY = 'news_list';
     if (force) invalidateCache(KEY);
 
     return cachedFetch(KEY, async () => {
-        try {
-            const { data, error } = await getSupabase()
-                .from('news')
-                .select('id, title, summary, content, image_url, status, published_at')
-                .order('published_at', { ascending: false });
+        const { data, error } = await getSupabase()
+            .from('news')
+            .select('id, title, summary, content, image_url, status, published_at')
+            .order('published_at', { ascending: false });
 
-            if (error) {
-                console.error('[Cache] fetchNews error:', error);
-                throw error;
-            }
-            return (data as NewsRow[]) ?? [];
-        } catch (err) {
-            console.error('[Cache] fetchNews failed:', err);
-            throw err;
-        }
+        if (error) throw error;
+        return (data as NewsRow[]) ?? [];
     });
 }
 
@@ -396,4 +442,3 @@ export async function fetchRegulations(force = false): Promise<RegulationRow[]> 
         return (data as RegulationRow[]) ?? [];
     });
 }
-

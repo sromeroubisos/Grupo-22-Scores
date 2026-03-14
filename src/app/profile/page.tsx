@@ -6,8 +6,11 @@ import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import {
     FileText, User, LogOut, Camera,
-    ChevronRight, Globe, Lock, Bell, Trophy, ShieldCheck, Star,
+    ChevronRight, Globe, Lock, Bell, Trophy, ShieldCheck, Star, Heart,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { getActiveSports } from '@/lib/data/sports';
 import styles from './profile.module.css';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
@@ -286,6 +289,10 @@ function EmptySection({ icon, title, message, action }: {
 
 function SettingsPanel({ logout }: { logout: () => void }) {
     const [showStaffForm, setShowStaffForm] = useState(false);
+    const router = useRouter();
+    const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
+    const allSports = getActiveSports();
+    const favoriteSports = allSports.filter(s => favoriteSportIds.includes(s.id));
 
     if (showStaffForm) {
         return (
@@ -301,6 +308,77 @@ function SettingsPanel({ logout }: { logout: () => void }) {
     return (
         <div className={styles.settingsList}>
             <h3 className={styles.sidebarSectionTitle}>Configuración</h3>
+
+            {/* Preferencias deportivas */}
+            <div style={{
+                background: 'var(--color-surface-2, rgba(255,255,255,0.04))',
+                border: '1px solid var(--color-border)',
+                borderRadius: '12px',
+                padding: '14px 16px',
+                marginBottom: '12px',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: favoriteSports.length > 0 ? '10px' : '0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Heart size={15} style={{ color: 'var(--color-accent)' }} />
+                        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Preferencias deportivas</span>
+                    </div>
+                    <button
+                        onClick={() => router.push('/onboarding/preferences?edit=true')}
+                        style={{
+                            background: 'transparent',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '8px',
+                            padding: '5px 12px',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            color: 'var(--color-accent)',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        Editar
+                    </button>
+                </div>
+                {favoriteSports.length > 0 ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {favoriteSports.map(s => (
+                            <span key={s.id} style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '3px 10px',
+                                background: 'rgba(0,163,101,0.10)',
+                                border: '1px solid rgba(0,163,101,0.25)',
+                                borderRadius: '99px',
+                                fontSize: '0.78rem',
+                                fontWeight: 500,
+                                color: 'var(--color-text-secondary)',
+                            }}>
+                                {s.icon} {s.nameEs}
+                            </span>
+                        ))}
+                        {favoriteLeagueIds.length > 0 && (
+                            <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '3px 10px',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '99px',
+                                fontSize: '0.78rem',
+                                color: 'var(--color-text-tertiary)',
+                            }}>
+                                🏆 {favoriteLeagueIds.length} liga{favoriteLeagueIds.length !== 1 ? 's' : ''}
+                            </span>
+                        )}
+                    </div>
+                ) : (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', margin: 0 }}>
+                        Todavía no elegiste deportes favoritos.
+                    </p>
+                )}
+            </div>
 
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>

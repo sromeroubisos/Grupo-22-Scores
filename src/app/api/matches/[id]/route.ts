@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
-import type { MatchFormData } from '@/lib/types/fixture';
 
 export async function GET(
   request: NextRequest,
@@ -18,10 +18,11 @@ export async function GET(
     }
 
     return NextResponse.json(match);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in GET /api/matches/[id]:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: message },
       { status: 500 }
     );
   }
@@ -31,6 +32,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdminApiUser();
     const matchId = (await params).id;
     const body = await request.json();
 
@@ -48,10 +50,11 @@ export async function PATCH(
     }
 
     return NextResponse.json(match);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in PATCH /api/matches/[id]:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: message },
       { status: 500 }
     );
   }
@@ -62,6 +65,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdminApiUser();
     const matchId = (await params).id;
     const success = await FixtureService.deleteMatch(matchId);
 
@@ -73,10 +77,11 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in DELETE /api/matches/[id]:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: message },
       { status: 500 }
     );
   }

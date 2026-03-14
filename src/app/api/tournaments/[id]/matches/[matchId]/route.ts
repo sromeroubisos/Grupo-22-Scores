@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 
 export async function PATCH(
@@ -6,6 +7,7 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string, matchId: string }> }
 ) {
     try {
+        await requireAdminApiUser();
         const { matchId } = await params;
         const body = await request.json();
 
@@ -19,10 +21,11 @@ export async function PATCH(
         }
 
         return NextResponse.json(match);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal server error';
         console.error('Error in PATCH /api/tournaments/[id]/matches/[matchId]:', error);
         return NextResponse.json(
-            { error: error.message || 'Internal server error' },
+            { error: message },
             { status: 500 }
         );
     }
@@ -33,6 +36,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string, matchId: string }> }
 ) {
     try {
+        await requireAdminApiUser();
         const { matchId } = await params;
         const success = await FixtureService.deleteMatch(matchId);
 
@@ -44,10 +48,11 @@ export async function DELETE(
         }
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal server error';
         console.error('Error in DELETE /api/tournaments/[id]/matches/[matchId]:', error);
         return NextResponse.json(
-            { error: error.message || 'Internal server error' },
+            { error: message },
             { status: 500 }
         );
     }

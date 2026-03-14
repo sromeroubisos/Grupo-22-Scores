@@ -955,12 +955,16 @@ export type Database = {
           external_id: string | null
           format: string | null
           id: string
+          is_active: boolean
           is_api_managed: boolean
+          is_popular: boolean
           is_visible: boolean
           logo_url: string | null
           name: string
+          organization_id: string | null
           original_logo_url: string | null
           original_name: string | null
+          display_order: number | null
           primary_color: string | null
           priority: number | null
           region: string | null
@@ -993,10 +997,14 @@ export type Database = {
           id?: string
           is_api_managed?: boolean
           is_visible?: boolean
+          is_active?: boolean
+          is_popular?: boolean
           logo_url?: string | null
           name: string
+          organization_id?: string | null
           original_logo_url?: string | null
           original_name?: string | null
+          display_order?: number | null
           primary_color?: string | null
           priority?: number | null
           region?: string | null
@@ -1027,12 +1035,16 @@ export type Database = {
           external_id?: string | null
           format?: string | null
           id?: string
+          is_active?: boolean
           is_api_managed?: boolean
+          is_popular?: boolean
           is_visible?: boolean
           logo_url?: string | null
           name?: string
+          organization_id?: string | null
           original_logo_url?: string | null
           original_name?: string | null
+          display_order?: number | null
           primary_color?: string | null
           priority?: number | null
           region?: string | null
@@ -1389,6 +1401,48 @@ export type Database = {
       get_user_favorites: {
         Args: { p_entity_type?: string }
         Returns: Json
+      }
+      get_all_tournaments: {
+        Args: {
+          p_viewer_user_id?: string | null
+          p_include_hidden?: boolean
+        }
+        Returns: {
+          id: string
+          name: string
+          slug: string | null
+          sport_id: string | null
+          sport_name: string | null
+          country_id: string | null
+          country_name: string | null
+          organization_id: string | null
+          organization_name: string | null
+          logo_url: string | null
+          is_popular: boolean
+          is_active: boolean
+          display_order: number | null
+          followers_count: number
+          is_followed_by_user: boolean
+          created_at: string
+          updated_at: string
+          original_name: string | null
+          display_name: string | null
+          is_api_managed: boolean
+          data_source: string | null
+          category: string | null
+          age_grade: string | null
+          format: string | null
+          status: string | null
+          season_id: string | null
+          union_id: string | null
+          external_id: string | null
+        }[]
+      }
+      toggle_tournament_follow: {
+        Args: {
+          p_tournament_id: string
+        }
+        Returns: boolean
       }
       toggle_favorite: {
         Args: { p_entity_type: string; p_entity_id: string }

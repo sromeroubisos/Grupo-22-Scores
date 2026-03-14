@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/live-sync",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/fixture-sync",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

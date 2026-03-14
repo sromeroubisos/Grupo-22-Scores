@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 
 export async function POST(
@@ -7,6 +8,7 @@ export async function POST(
 ) {
     try {
         const tournamentId = (await params).id;
+        await requireAdminApiUser();
         const body = await request.json();
 
         // Ensure tournamentId is in the data
@@ -25,10 +27,11 @@ export async function POST(
         }
 
         return NextResponse.json(match, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal server error';
         console.error('Error in POST /api/tournaments/[id]/matches:', error);
         return NextResponse.json(
-            { error: error.message || 'Internal server error' },
+            { error: message },
             { status: 500 }
         );
     }

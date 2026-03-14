@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link'; // Added Link import
-import { isSuperAdmin } from '@/lib/types/user';
 import SuperSidebar from './SuperSidebar';
 import styles from './layout.module.css';
 import { SuperConsoleProvider, useSuperConsole } from './SuperConsoleContext';
@@ -147,8 +146,10 @@ function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 export default function GlobalAdminLayout({ children }: { children: React.ReactNode }) {
     const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-    const [isAuthorized, setIsAuthorized] = React.useState(false);
+    const isUnionManageRoute = /^\/admin\/super\/uniones\/[^/]+$/.test(pathname || '');
+    const isAuthorized = user?.role === 'super_admin' || user?.role === 'admin_general';
 
     useEffect(() => {
         if (isLoading) return; // Wait until auth state is resolved
@@ -158,15 +159,10 @@ export default function GlobalAdminLayout({ children }: { children: React.ReactN
             return;
         }
 
-        // Check if user is super admin using the shared helper
-        // We cast user to any because useAuth returns AppUserRole but isSuperAdmin expects UserRole
-        // However, we just added super_admin to AppUserRole in roles.ts so it should be compatible soon
-        if (isSuperAdmin(user as any)) {
-            setIsAuthorized(true);
-        } else {
+        if (!isAuthorized) {
             router.push('/');
         }
-    }, [isAuthenticated, user, router, isLoading]);
+    }, [isAuthenticated, isAuthorized, router, isLoading]);
 
     // Lock body scroll when mobile sidebar is open
     useEffect(() => {
@@ -191,12 +187,28 @@ export default function GlobalAdminLayout({ children }: { children: React.ReactN
         <SuperConsoleProvider>
             <div className={styles.layout}>
                 <SuperSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-                <main className={styles.main}>
-                    <SuperTopbar onToggleSidebar={() => setIsSidebarOpen(true)} />
-                    <div className={styles.contentWrapper}>
-                        {children}
-                    </div>
-                </main>
+                {isUnionManageRoute ? (
+                    <main className={`${styles.main} ${styles.entityMain}`}>
+                        <div className={styles.entityMobileBar}>
+                            <button className={styles.mobileMenuBtn} onClick={() => setIsSidebarOpen(true)} aria-label="Abrir menÃº">
+                                <svg className={styles.mobileMenuIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <div className={styles.entityMobileLabel}>Union / Federacion</div>
+                        </div>
+                        <div className={styles.entityContent}>
+                            {children}
+                        </div>
+                    </main>
+                ) : (
+                    <main className={styles.main}>
+                        <SuperTopbar onToggleSidebar={() => setIsSidebarOpen(true)} />
+                        <div className={styles.contentWrapper}>
+                            {children}
+                        </div>
+                    </main>
+                )}
             </div>
         </SuperConsoleProvider>
     );

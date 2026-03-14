@@ -6,7 +6,7 @@ import { EditorialHeader } from '../components/EditorialHeader';
 import { newsService, type NewsItem } from '@/lib/services/newsService';
 import { Image as ImageIcon, Trash2, Globe, Trophy, Users, Upload, X } from 'lucide-react';
 import styles from '../styles/editorial.module.css';
-import { getActiveSports } from '@/lib/data/sports';
+import { useSport } from '@/context/SportContext';
 import { CMSSelect } from '../components/CMSSelect';
 
 interface EditorialPageProps {
@@ -35,7 +35,7 @@ export default function EditorialPage({ initialData }: EditorialPageProps) {
     const [isUploading, setIsUploading] = useState(false);
 
     const [tagInput, setTagInput] = useState('');
-    const activeSports = getActiveSports();
+    const { activeSports } = useSport();
 
     const handleImageClick = () => {
         if (uploadMode === 'upload') {

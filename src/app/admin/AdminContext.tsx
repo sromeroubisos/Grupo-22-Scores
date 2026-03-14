@@ -20,6 +20,7 @@ import {
     SanctionRow,
     RegulationRow
 } from '@/lib/cache/superAdminCache';
+import { normalizeError } from '@/lib/utils/errorUtils';
 
 interface AdminContextType {
     tournaments: TournamentRow[];
@@ -108,24 +109,15 @@ export function AdminConsoleProvider({ children }: { children: ReactNode }) {
             setLoading(prev => ({ ...prev, [lKey]: false }));
             setErrors(prev => ({ ...prev, [key]: null }));
         } catch (err: any) {
-            console.error(`[AdminContext] Failed to load ${key}:`, err);
+            const normalized = normalizeError(err);
+            console.error(`[AdminContext] Failed to load ${key}:`, {
+                message: normalized.message,
+                details: normalized.details,
+                code: normalized.code,
+                raw: normalized.raw
+            });
 
-            let message = 'Error desconocido';
-            if (err.message?.includes('Timeout after')) {
-                message = `Timeout: El servidor está tardando demasiado en responder (${key})`;
-            } else if (err.code === '42P01') {
-                message = `Error de base de datos: La tabla de ${key} no existe`;
-            } else if (err.code?.startsWith('PGRST30')) {
-                message = 'Error de autenticación: Tu sesión puede haber expirado';
-            } else if (err.message?.includes('network') || !window.navigator.onLine) {
-                message = 'Error de red: Comprueba tu conexión a internet';
-            } else if (err.message) {
-                message = err.message;
-            } else {
-                message = `Error al cargar ${key}`;
-            }
-
-            setErrors(prev => ({ ...prev, [key]: message }));
+            setErrors(prev => ({ ...prev, [key]: normalized.message }));
             setLoading(prev => ({ ...prev, [lKey]: false }));
         }
     }, []);

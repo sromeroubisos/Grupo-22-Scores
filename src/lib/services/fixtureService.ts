@@ -3,6 +3,7 @@
  * Backend service for managing tournament fixtures
  */
 
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import type {
   TournamentFixture,
@@ -15,13 +16,111 @@ import type {
   MatchFormData,
   RoundFormData,
   PhaseFormData,
-  ResetRoundParams,
   FixtureGenerationParams,
   MassRescheduleParams,
 } from '@/lib/types/fixture';
 
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
+  private static _warnedWriteFallback = false;
+
+  private static async getWriteClient() {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return createAdminClient();
+    }
+
+    if (!this._warnedWriteFallback) {
+      console.warn('[FixtureService] SUPABASE_SERVICE_ROLE_KEY missing. Falling back to session client for fixture writes.');
+      this._warnedWriteFallback = true;
+    }
+
+    return createClient();
+  }
+
+  private static async assertPhaseBelongsToTournament(
+    supabase: any,
+    tournamentId: string,
+    phaseId: string
+  ): Promise<void> {
+    const { data: phase, error } = await supabase
+      .from('tournament_phases')
+      .select('id, tournament_id')
+      .eq('id', phaseId)
+      .single();
+
+    if (error || !phase) {
+      throw new Error('La fase seleccionada no existe.');
+    }
+
+    if (phase.tournament_id !== tournamentId) {
+      throw new Error('La fase seleccionada no pertenece al torneo activo.');
+    }
+  }
+
+  private static async assertRoundBelongsToPhase(
+    supabase: any,
+    phaseId: string,
+    roundId: string | null | undefined
+  ): Promise<void> {
+    if (!roundId) return;
+
+    const { data: round, error } = await supabase
+      .from('tournament_rounds')
+      .select('id, phase_id')
+      .eq('id', roundId)
+      .single();
+
+    if (error || !round) {
+      throw new Error('La jornada seleccionada no existe.');
+    }
+
+    if (round.phase_id !== phaseId) {
+      throw new Error('La jornada seleccionada no pertenece a la fase activa.');
+    }
+  }
+
+  private static async assertClubReferences(
+    supabase: any,
+    clubIds: Array<string | null | undefined>
+  ): Promise<void> {
+    const uniqueClubIds = Array.from(new Set(clubIds.filter((clubId): clubId is string => Boolean(clubId))));
+
+    if (uniqueClubIds.length === 0) {
+      throw new Error('Debes seleccionar al menos un equipo válido.');
+    }
+
+    const { data: clubs, error } = await supabase
+      .from('clubs')
+      .select('id')
+      .in('id', uniqueClubIds);
+
+    if (error) {
+      throw new Error(`No se pudieron validar los equipos seleccionados: ${error.message}`);
+    }
+
+    if ((clubs || []).length !== uniqueClubIds.length) {
+      throw new Error('Uno o más equipos seleccionados no existen en la base de datos.');
+    }
+  }
+
+  private static async assertMatchContext(
+    supabase: any,
+    context: {
+      tournamentId: string;
+      phaseId: string;
+      roundId?: string | null;
+      homeClubId: string | null;
+      awayClubId: string | null;
+    }
+  ): Promise<void> {
+    if (!context.homeClubId || !context.awayClubId) {
+      throw new Error('Debes seleccionar ambos equipos del partido.');
+    }
+
+    await this.assertPhaseBelongsToTournament(supabase, context.tournamentId, context.phaseId);
+    await this.assertRoundBelongsToPhase(supabase, context.phaseId, context.roundId);
+    await this.assertClubReferences(supabase, [context.homeClubId, context.awayClubId]);
+  }
 
   /**
    * Check if the round_label column exists in the matches table.
@@ -275,10 +374,10 @@ export class FixtureService {
   static async findOrCreateRound(phaseId: string, roundLabel: string): Promise<string | null> {
     if (!roundLabel) return null;
 
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     // 1. Try to find existing round with this name in this phase
-    const { data: existing, error: findError } = await supabase
+    const { data: existing } = await supabase
       .from('tournament_rounds')
       .select('id')
       .eq('phase_id', phaseId)
@@ -322,7 +421,11 @@ export class FixtureService {
    * Create a new match
    */
   static async createMatch(data: MatchFormData & { tournamentId: string }): Promise<Match | null> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
+
+    if (!data.dateTime) {
+      throw new Error('Debes seleccionar una fecha para el partido.');
+    }
 
     // Validation: teams must be different
     if (data.homeClubId === data.awayClubId) {
@@ -341,12 +444,13 @@ export class FixtureService {
       finalRoundId = await this.findOrCreateRound(data.phaseId, data.roundLabel);
     }
 
-    // Fallback: If no roundId and no roundLabel was provided, but we have a phase,
-    // explicitly assign it to "Fecha 1" or the first available round to ensure it's not orphaned entirely by the UI grouping
-    if (!finalRoundId && data.phaseId && !data.roundLabel) {
-      console.log(`[FixtureService] No round provided. Auto-assigning to default round 'Fecha 1'.`);
-      finalRoundId = await this.findOrCreateRound(data.phaseId, 'Fecha 1');
-    }
+    await this.assertMatchContext(supabase, {
+      tournamentId: data.tournamentId,
+      phaseId: data.phaseId,
+      roundId: finalRoundId,
+      homeClubId: data.homeClubId,
+      awayClubId: data.awayClubId,
+    });
 
     // Explicit whitelist for base columns strictly matching public.matches
     const insertData: any = {
@@ -379,8 +483,13 @@ export class FixtureService {
       .single();
 
     if (error) {
-      console.error('Error creating match:', error);
+      console.error('[FixtureService] Error creating match:', { error, insertData });
       throw new Error(error.message);
+    }
+
+    if (!match?.id || match.tournament_id !== data.tournamentId || match.phase_id !== data.phaseId) {
+      console.error('[FixtureService] Match insert returned inconsistent data:', match);
+      throw new Error('El partido se creó con datos incompletos. Revisá la configuración de la base.');
     }
 
     return this.mapMatch(match);
@@ -390,17 +499,27 @@ export class FixtureService {
    * Update a match
    */
   static async updateMatch(matchId: string, data: Partial<MatchFormData>): Promise<Match | null> {
-    const supabase = await createClient();
-
-    // Validation: teams must be different
-    if (data.homeClubId && data.awayClubId && data.homeClubId === data.awayClubId) {
-      throw new Error('El equipo local y el visitante no pueden ser el mismo.');
-    }
+    const supabase = await this.getWriteClient();
 
     const [supportsRoundLabel] = await Promise.all([
       this.checkRoundLabelSupport()
     ]);
     console.log(`[FixtureService] updateMatch - round_label: ${supportsRoundLabel}`);
+
+    const { data: existingMatch, error: existingMatchError } = await supabase
+      .from('matches')
+      .select('id, tournament_id, phase_id, round_id, home_club_id, away_club_id')
+      .eq('id', matchId)
+      .single();
+
+    if (existingMatchError || !existingMatch) {
+      throw new Error('El partido que intentás actualizar no existe.');
+    }
+
+    const nextPhaseId = data.phaseId ?? existingMatch.phase_id;
+    if (!nextPhaseId) {
+      throw new Error('El partido debe pertenecer a una fase.');
+    }
 
     const updateData: any = {};
 
@@ -409,15 +528,33 @@ export class FixtureService {
       updateData.round_id = await this.findOrCreateRound(data.phaseId, data.roundLabel);
     } else if (data.roundId) {
       updateData.round_id = data.roundId;
+    } else if (data.roundId === null) {
+      updateData.round_id = null;
     }
 
-    if (data.homeClubId) updateData.home_club_id = data.homeClubId;
-    if (data.awayClubId) updateData.away_club_id = data.awayClubId;
-    if (data.dateTime) updateData.date_time = data.dateTime;
-    if (data.venue) updateData.venue = data.venue;
+    const nextHomeClubId = data.homeClubId ?? existingMatch.home_club_id;
+    const nextAwayClubId = data.awayClubId ?? existingMatch.away_club_id;
+
+    if (nextHomeClubId === nextAwayClubId) {
+      throw new Error('El equipo local y el visitante no pueden ser el mismo.');
+    }
+
+    await this.assertMatchContext(supabase, {
+      tournamentId: existingMatch.tournament_id,
+      phaseId: nextPhaseId,
+      roundId: updateData.round_id !== undefined ? updateData.round_id : existingMatch.round_id,
+      homeClubId: nextHomeClubId,
+      awayClubId: nextAwayClubId,
+    });
+
+    if (data.homeClubId !== undefined) updateData.home_club_id = data.homeClubId;
+    if (data.awayClubId !== undefined) updateData.away_club_id = data.awayClubId;
+    if (data.dateTime !== undefined) updateData.date_time = data.dateTime;
+    if (data.venue !== undefined) updateData.venue = data.venue;
     if (data.status) {
       updateData.status = data.status;
       if (data.status === 'live') updateData.live_enabled = true;
+      if (data.status !== 'live') updateData.live_enabled = false;
     }
 
     if (supportsRoundLabel && data.roundLabel !== undefined) {
@@ -443,7 +580,7 @@ export class FixtureService {
       .single();
 
     if (error) {
-      console.error('Error updating match:', error);
+      console.error('[FixtureService] Error updating match:', { error, matchId, updateData });
       throw new Error(error.message);
     }
 
@@ -454,7 +591,7 @@ export class FixtureService {
    * Delete a match
    */
   static async deleteMatch(matchId: string): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     const { error } = await supabase.from('matches').delete().eq('id', matchId);
 
@@ -470,7 +607,7 @@ export class FixtureService {
    * Create a new round
    */
   static async createRound(data: RoundFormData): Promise<TournamentRound | null> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     const { data: round, error } = await supabase
       .from('tournament_rounds')
@@ -497,7 +634,7 @@ export class FixtureService {
    * Update a round
    */
   static async updateRound(roundId: string, data: Partial<RoundFormData>): Promise<TournamentRound | null> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     const updateData: any = {};
     if (data.name) updateData.name = data.name;
@@ -525,7 +662,7 @@ export class FixtureService {
    * Delete a round (and all its matches if cascade)
    */
   static async deleteRound(roundId: string): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     const { error } = await supabase.from('tournament_rounds').delete().eq('id', roundId);
 
@@ -541,7 +678,7 @@ export class FixtureService {
    * Create a new phase
    */
   static async createPhase(data: PhaseFormData): Promise<TournamentPhase | null> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     const { data: phase, error } = await supabase
       .from('tournament_phases')
@@ -574,7 +711,7 @@ export class FixtureService {
     numRounds: number,
     namePattern: string = 'Fecha {n}'
   ): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     const { error } = await supabase.rpc('generate_rounds_for_phase', {
       p_phase_id: phaseId,
@@ -594,20 +731,40 @@ export class FixtureService {
    * Generate Round-Robin (Berger) matches for a phase
    */
   static async generateMatchesForPhase(params: FixtureGenerationParams): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
-    // 1. Get participants to ensure fresh data and get club_ids
+    const requestedClubIds = Array.from(new Set(params.clubIds.filter(Boolean)));
+
+    // 1. Resolve the tournament from the selected phase
+    const { data: phaseData } = await supabase
+      .from('tournament_phases')
+      .select('tournament_id')
+      .eq('id', params.phaseId)
+      .single();
+
+    const tournamentId = phaseData?.tournament_id;
+
+    if (!tournamentId) {
+      throw new Error('La fase seleccionada no pertenece a ningún torneo.');
+    }
+
+    // 2. Get active participants for the selected clubs inside this tournament
     const { data: participants, error: pError } = await supabase
       .from('tournament_participants')
       .select('id, club_id')
-      .in('id', params.clubIds)
+      .eq('tournament_id', tournamentId)
+      .in('club_id', requestedClubIds)
       .eq('status', 'active');
 
     if (pError || !participants || participants.length < 2) {
       throw new Error('Se necesitan al menos 2 participantes activos.');
     }
 
-    // 2. Prepare teams for Berger
+    if (participants.length !== requestedClubIds.length) {
+      throw new Error('Uno o más equipos seleccionados no son participantes activos del torneo.');
+    }
+
+    // 3. Prepare teams for Berger
     // We use the participant IDs for the algorithm
     const teamIds = participants.map(p => p.id);
     const hasBye = teamIds.length % 2 !== 0;
@@ -619,7 +776,7 @@ export class FixtureService {
     const roundsPerCycle = n - 1;
     const totalRoundsNeeded = params.roundsCount || (params.homeAndAway ? roundsPerCycle * 2 : roundsPerCycle);
 
-    // 3. Create rounds first
+    // 4. Create rounds first
     const rounds: any[] = [];
     for (let i = 0; i < totalRoundsNeeded; i++) {
       const { data: round, error } = await supabase
@@ -636,20 +793,11 @@ export class FixtureService {
       rounds.push(round);
     }
 
-    // 4. Generate pairs using Berger algorithm
+    // 5. Generate pairs using Berger algorithm
     const matches: any[] = [];
     const baseDate = new Date(params.startDate);
     const [hours, minutes] = (params.matchTime || '00:00').split(':').map(Number);
     baseDate.setHours(hours || 0, minutes || 0, 0, 0);
-
-    // Get tournament_id for matches
-    const { data: phaseData } = await supabase
-      .from('tournament_phases')
-      .select('tournament_id')
-      .eq('id', params.phaseId)
-      .single();
-
-    const tournamentId = phaseData?.tournament_id;
 
     for (let r = 0; r < totalRoundsNeeded; r++) {
       const roundIdxInCycle = r % roundsPerCycle;
@@ -658,7 +806,7 @@ export class FixtureService {
       roundDate.setDate(baseDate.getDate() + (r * 7)); // Default: 1 round per week
 
       for (let i = 0; i < n / 2; i++) {
-        let homeIdx = (roundIdxInCycle + i) % (n - 1);
+        const homeIdx = (roundIdxInCycle + i) % (n - 1);
         let awayIdx = (n - 1 - i + roundIdxInCycle) % (n - 1);
 
         if (i === 0) {
@@ -679,9 +827,15 @@ export class FixtureService {
         const homeClubId = participants.find(p => p.id === finalHomeId)?.club_id;
         const awayClubId = participants.find(p => p.id === finalAwayId)?.club_id;
 
+        if (!homeClubId || !awayClubId) {
+          throw new Error('No se pudieron resolver los clubes de uno o más participantes activos.');
+        }
+
         matches.push({
           tournament_id: tournamentId,
+          phase_id: params.phaseId,
           round_id: roundId,
+          group_id: params.groupId || null,
           home_club_id: homeClubId,
           away_club_id: awayClubId,
           date_time: roundDate.toISOString(),
@@ -692,10 +846,17 @@ export class FixtureService {
       }
     }
 
-    // 5. Bulk insert matches
+    // 6. Bulk insert matches
     if (matches.length > 0) {
-      const { error } = await supabase.from('matches').insert(matches);
+      const { data: insertedMatches, error } = await supabase
+        .from('matches')
+        .insert(matches)
+        .select('id');
+
       if (error) throw error;
+      if ((insertedMatches || []).length !== matches.length) {
+        throw new Error('No se pudieron persistir todos los partidos generados.');
+      }
     }
 
     return true;
@@ -705,13 +866,49 @@ export class FixtureService {
    * Import matches from external data
    */
   static async importMatches(tournamentId: string, phaseId: string, matchesData: any[]): Promise<{ success: boolean, imported: number, errors: string[] }> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
     const errors: string[] = [];
     let importedCount = 0;
 
+    try {
+      await this.assertPhaseBelongsToTournament(supabase, tournamentId, phaseId);
+      const roundIds = Array.from(new Set(matchesData.map((match) => match.roundId).filter(Boolean)));
+
+      for (const roundId of roundIds) {
+        await this.assertRoundBelongsToPhase(supabase, phaseId, roundId);
+      }
+
+      const clubIds = matchesData.flatMap((match) => [match.homeClubId, match.awayClubId]);
+      await this.assertClubReferences(supabase, clubIds);
+
+      for (const match of matchesData) {
+        if (!match.dateTime) {
+          throw new Error('Todos los partidos importados deben incluir fecha.');
+        }
+
+        if (!match.homeClubId || !match.awayClubId) {
+          throw new Error('Todos los partidos importados deben tener local y visitante resueltos.');
+        }
+
+        if (match.homeClubId === match.awayClubId) {
+          throw new Error('No se puede importar un partido con el mismo club en local y visitante.');
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo validar el contexto de importación.';
+      console.error('[FixtureService] Import validation failed:', { tournamentId, phaseId, message });
+      return {
+        success: false,
+        imported: 0,
+        errors: [message],
+      };
+    }
+
     const matchesToInsert = matchesData.map(m => ({
       tournament_id: tournamentId,
+      phase_id: phaseId,
       round_id: m.roundId,
+      group_id: m.groupId || null,
       home_club_id: m.homeClubId,
       away_club_id: m.awayClubId,
       date_time: m.dateTime,
@@ -724,11 +921,19 @@ export class FixtureService {
     const chunkSize = 50;
     for (let i = 0; i < matchesToInsert.length; i += chunkSize) {
       const chunk = matchesToInsert.slice(i, i + chunkSize);
-      const { error } = await supabase.from('matches').insert(chunk);
+      const { data: insertedMatches, error } = await supabase
+        .from('matches')
+        .insert(chunk)
+        .select('id');
+
       if (error) {
+        console.error('[FixtureService] Error importing match chunk:', { error, chunk });
         errors.push(`Error al insertar lote ${Math.floor(i / chunkSize) + 1}: ${error.message}`);
       } else {
-        importedCount += chunk.length;
+        importedCount += insertedMatches?.length || 0;
+        if ((insertedMatches?.length || 0) !== chunk.length) {
+          errors.push(`El lote ${Math.floor(i / chunkSize) + 1} se insertó de forma incompleta.`);
+        }
       }
     }
 
@@ -743,7 +948,7 @@ export class FixtureService {
    * Mass reschedule all matches in a round
    */
   static async massRescheduleRound(params: MassRescheduleParams): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     if (params.newDate) {
       const { data: matches } = await supabase
@@ -806,7 +1011,7 @@ export class FixtureService {
    * Reset a round (delete all matches)
    */
   static async resetRound(roundId: string): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = await this.getWriteClient();
 
     const { error } = await supabase.from('matches').delete().eq('round_id', roundId);
 

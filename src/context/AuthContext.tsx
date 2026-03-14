@@ -16,6 +16,7 @@ interface User {
     tournamentId?: string;
     clubId?: string;
     memberships?: MembershipLike[];
+    onboardingCompleted: boolean | null; // null = not yet checked
 }
 
 interface AuthContextType {
@@ -24,6 +25,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (role?: AppUserRole, returnTo?: string) => void;
     logout: () => void;
+    refreshOnboardingStatus: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,22 +61,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (profile) {
                 console.log('[AuthContext] Profile found in DB');
-                const { data: membershipsData, error: membershipError } = await supabase
-                    .from('memberships')
-                    .select('scope_type, scope_id, role')
-                    .eq('user_id', sbUser.id);
+                const supabaseAny = supabase as any;
+                const [membershipsResult, onboardingResult] = await Promise.all([
+                    supabase
+                        .from('memberships')
+                        .select('scope_type, scope_id, role')
+                        .eq('user_id', sbUser.id),
+                    supabaseAny
+                        .from('user_onboarding_status')
+                        .select('preferences_onboarding_completed, skipped')
+                        .eq('user_id', sbUser.id)
+                        .single(),
+                ]);
 
-                if (membershipError) {
-                    console.warn('[AuthContext] Memberships fetch error:', membershipError.message);
+                if (membershipsResult.error) {
+                    console.warn('[AuthContext] Memberships fetch error:', membershipsResult.error.message);
                 }
 
                 if (!isMounted.current) return;
 
-                const memberships: MembershipLike[] = (membershipsData || []).map((m: any) => ({
+                const memberships: MembershipLike[] = (membershipsResult.data || []).map((m: any) => ({
                     scopeType: m.scope_type,
                     scopeId: m.scope_id,
                     role: m.role,
                 }));
+
+                const onboarding = onboardingResult.data as { preferences_onboarding_completed: boolean; skipped: boolean } | null;
+                let onboardingCompleted = false;
+
+                if (onboarding) {
+                    onboardingCompleted = onboarding.preferences_onboarding_completed || onboarding.skipped;
+                } else {
+                    // Si no tiene registro, es su primer inicio de sesión.
+                    // Lo marcamos como "skip" en background para que NO se le vuelva a pedir en futuros logins.
+                    // En esta sesión se le pedirá porque localmente onboardingCompleted es false.
+                    onboardingCompleted = false;
+                    import('@/lib/services/preferencesService').then(({ completeOnboarding }) => {
+                        completeOnboarding(supabase, sbUser.id, { skipped: true }).catch(() => { });
+                    });
+                }
 
                 const finalUser = {
                     id: profile.id,
@@ -83,8 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     role: normalizeRole(profile.role),
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
                     memberships,
+                    onboardingCompleted,
                 };
-                console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role);
+                console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role, 'onboardingCompleted:', onboardingCompleted);
                 setUser(finalUser);
             } else {
                 const { isSuperAdminEmail } = await import('@/lib/types/user');
@@ -98,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     email: sbUser.email || '',
                     role: fallbackRole,
                     avatarUrl: sbUser.user_metadata?.avatar_url,
+                    onboardingCompleted: false,
                 });
             }
         } catch (err: any) {
@@ -110,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 email: sbUser.email || '',
                 role: 'fan',
                 avatarUrl: sbUser.user_metadata?.avatar_url,
+                onboardingCompleted: true, // Don't block on error
             });
         } finally {
             if (isMounted.current) {
@@ -212,13 +240,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const refreshOnboardingStatus = async () => {
+        if (!user) return;
+        try {
+            const { data } = await (supabase as any)
+                .from('user_onboarding_status')
+                .select('preferences_onboarding_completed, skipped')
+                .eq('user_id', user.id)
+                .single();
+
+            const row = data as { preferences_onboarding_completed: boolean; skipped: boolean } | null;
+            const onboardingCompleted = row
+                ? (row.preferences_onboarding_completed || row.skipped)
+                : false;
+
+            if (isMounted.current) {
+                setUser(prev => prev ? { ...prev, onboardingCompleted } : null);
+            }
+        } catch (err) {
+            console.error('[AuthContext] refreshOnboardingStatus error:', err);
+        }
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
             isAuthenticated: !!user,
             isLoading,
             login,
-            logout
+            logout,
+            refreshOnboardingStatus,
         }}>
             {children}
         </AuthContext.Provider>

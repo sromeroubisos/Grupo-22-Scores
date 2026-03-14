@@ -16,10 +16,10 @@ import {
 } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import { FixtureProvider, useFixture } from './FixtureContext';
-import { TournamentFixtureTab } from './TournamentFixtureTab';
 import TournamentStandingsTab from './standings/TournamentStandingsTab';
 import { TournamentStatsTab } from './TournamentStatsTab';
 import { FlashScoreSyncPanel } from './FlashScoreSyncPanel';
+import { TournamentOperationFixtureWorkspace } from './TournamentOperationFixtureWorkspace';
 import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 
@@ -314,7 +314,10 @@ function OperationContent({
 
             <div className="min-h-[500px]">
                 {currentSubTab === 'fixture' && (
-                    <TournamentFixtureTab id={id} data={data} phaseId={selectedPhaseId || undefined} isSubTab />
+                    <TournamentOperationFixtureWorkspace
+                        tournament={data}
+                        selectedPhaseId={selectedPhaseId}
+                    />
                 )}
                 {currentSubTab === 'tabla' && (
                     <TournamentStandingsTab tournamentId={id} />

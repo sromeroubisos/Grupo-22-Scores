@@ -42,9 +42,13 @@ export interface Sport {
     nameEs: string;
     icon: string;
     isActive: boolean;
+    isVisible?: boolean;
     priority: number;
+    displayOrder?: number;
     groupLabel?: string; // e.g., 'Countries', 'Categories'
     groupLabelEs?: string; // e.g., 'Países', 'Categorías'
+    groupKey?: string;  // Parent sport key — e.g. 'rugby' groups rugby-union & rugby-league
+    groupName?: string; // Display name for the parent group
     matchRules?: {
         periods: number;
         periodDurationMinutes: number;

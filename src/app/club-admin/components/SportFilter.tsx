@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { getActiveSports } from '@/lib/data/sports';
+import { useSport } from '@/context/SportContext';
 import { useDisciplinas } from './DisciplinasContext';
 import styles from '../page.module.css';
 
@@ -12,17 +12,17 @@ interface SportFilterProps {
 
 export default function SportFilter({ selectedSport, onSportChange }: SportFilterProps) {
     const { clubSports } = useDisciplinas();
-    const allSports = useMemo(() => getActiveSports(), []);
+    const { activeSports } = useSport();
 
     // Filter available sports based on club's registered disciplines
     const availableSports = useMemo(() => {
-        const filtered = allSports.filter(s => clubSports.includes(s.id));
+        const filtered = activeSports.filter(s => clubSports.includes(s.id));
         return [{ id: 'all', label: 'Todos los deportes', icon: '🌐' }, ...filtered.map(s => ({
             id: s.id,
             label: s.nameEs || s.name,
             icon: s.icon
         }))];
-    }, [allSports, clubSports]);
+    }, [activeSports, clubSports]);
 
     return (
         <div className={styles.sportFilter}>

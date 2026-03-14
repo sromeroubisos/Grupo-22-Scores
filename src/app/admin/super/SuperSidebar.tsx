@@ -57,6 +57,13 @@ const navGroups: NavGroup[] = [
                     'M9.75 2.75a2.5 2.5 0 015 0v1.5a2.5 2.5 0 01-5 0v-1.5zM4 9a4 4 0 014-4h8a4 4 0 014 4v8a4 4 0 01-4 4H8a4 4 0 01-4-4V9z'
             },
             {
+                id: 'deportes',
+                label: 'Gestión de Deportes',
+                href: '/admin/super/deportes',
+                iconPath:
+                    'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5c1.743 3.511 2.846 7.42 3.12 11.5'
+            },
+            {
                 id: 'folders',
                 label: 'Carpetas',
                 href: '/admin/super/carpetas',
@@ -109,6 +116,13 @@ const navGroups: NavGroup[] = [
                 href: '/admin/super/sync',
                 iconPath:
                     'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+            },
+            {
+                id: 'ingesta',
+                label: 'Ingesta de Torneos',
+                href: '/admin/super/torneos/ingesta',
+                iconPath:
+                    'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10'
             }
         ]
     }

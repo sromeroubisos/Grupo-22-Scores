@@ -203,6 +203,8 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '🏉',
         isActive: false,
         priority: 20,
+        groupKey: 'rugby',
+        groupName: 'Rugby',
     },
     'rugby-league': {
         id: 'rugby-league',
@@ -211,6 +213,8 @@ export const SPORTS: Record<SportId, Sport> = {
         icon: '🏉',
         isActive: false,
         priority: 21,
+        groupKey: 'rugby',
+        groupName: 'Rugby',
     },
     'boxing': {
         id: 'boxing',

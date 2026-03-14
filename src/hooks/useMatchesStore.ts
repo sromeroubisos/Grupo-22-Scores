@@ -3,11 +3,20 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { generateLocalDateKeys, getTodayKey } from '@/lib/timezone';
 
+export type SourceErrorScenario = 'fs_down_db_ok' | 'db_down_fs_ok' | 'both_down' | 'fs_cache' | null;
+
+export interface SourceError {
+  flashscore: boolean;
+  supabase: boolean;
+  flashscoreFromCache?: boolean;
+  scenario: SourceErrorScenario;
+}
+
 interface MatchesStoreResult {
   matches: any[];
   loading: boolean;
   liveCount: number;
-  error: { flashscore: boolean; supabase: boolean } | null;
+  error: SourceError | null;
 }
 
 const STALE_TTL = 60 * 1000;      // 60 seconds · Cache standard (matches request)
@@ -56,7 +65,7 @@ export function useMatchesStore(
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [tick, setTick] = useState(0); // force re-render on cache update
-  const [sourceError, setSourceError] = useState<{ flashscore: boolean; supabase: boolean } | null>(null);
+  const [sourceError, setSourceError] = useState<SourceError | null>(null);
 
   const timeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -68,12 +77,19 @@ export function useMatchesStore(
   const prefetchedRef = useRef(false);
   const prevSportRef = useRef(sportId);
 
-  // Convert API sources metadata to error state
-  function buildSourceError(sources: any): { flashscore: boolean; supabase: boolean } | null {
+  // Convert API sources metadata to a rich error state with scenario discrimination
+  function buildSourceError(sources: any): SourceError | null {
     if (!sources) return null;
-    const fsErr = !sources.flashscore?.ok;
-    const dbErr = !sources.supabase?.ok;
-    return (fsErr || dbErr) ? { flashscore: fsErr, supabase: dbErr } : null;
+    const fsErr   = !sources.flashscore?.ok;
+    const dbErr   = !sources.supabase?.ok;
+    const fsCache = sources.flashscore?.fromCache === true;
+    if (!fsErr && !dbErr && !fsCache) return null;
+    let scenario: SourceErrorScenario = null;
+    if (fsCache)              scenario = 'fs_cache';
+    else if (fsErr && !dbErr) scenario = 'fs_down_db_ok';
+    else if (!fsErr && dbErr) scenario = 'db_down_fs_ok';
+    else if (fsErr && dbErr)  scenario = 'both_down';
+    return { flashscore: fsErr, supabase: dbErr, flashscoreFromCache: fsCache, scenario };
   }
 
   // Fetch a single date, update cache, return data + sources metadata

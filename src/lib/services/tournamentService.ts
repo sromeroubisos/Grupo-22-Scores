@@ -1,0 +1,288 @@
+import { supabase } from '../supabase';
+import { Database } from '../database.types';
+import { normalizeError } from '../utils/errorUtils';
+
+export interface TournamentGlobal {
+  id: string;
+  name: string;
+  slug: string;
+  sport_id: string;
+  sport_name: string;
+  country_id: string | null;
+  country_name: string | null;
+  organization_id: string | null;
+  organization_name: string | null;
+  is_active: boolean;
+  is_popular: boolean;
+  display_order: number | null;
+  followers_count: number;
+  is_followed_by_user: boolean;
+  created_at: string;
+  updated_at: string;
+  display_name?: string;
+  original_name?: string;
+  is_api_managed?: boolean;
+}
+
+export type TournamentUpdate = Database['public']['Tables']['tournaments']['Update'];
+
+export const tournamentService = {
+  /**
+   * Fetches all tournaments from all sports in a single request.
+   * Includes popularity, logos, and follower data.
+   */
+  async getAllTournaments(options: { 
+    includeHidden?: boolean,
+    userId?: string 
+  } = {}): Promise<TournamentGlobal[]> {
+    try {
+      const { data, error } = await supabase.rpc('get_all_tournaments', {
+        p_include_hidden: options.includeHidden || false,
+        p_viewer_user_id: options.userId || null
+      });
+
+      if (error) {
+        // If it's a "function not found" error, trigger fallback
+        if (error.code === 'PGRST202' || error.message?.includes('not find the function')) {
+          console.warn('[tournamentService] RPC not found, falling back to direct table query');
+          return this.getTournamentsFallback(options);
+        }
+        throw error;
+      }
+
+      return data as TournamentGlobal[];
+    } catch (err: any) {
+      if (err.code === 'PGRST202' || err.message?.includes('not find the function')) {
+        return this.getTournamentsFallback(options);
+      }
+      const normalized = normalizeError(err);
+      console.error('[tournamentService] getAllTournaments failed:', normalized);
+      throw normalized;
+    }
+  },
+
+  /**
+   * Fallback method when RPC is missing or failing
+   */
+  async getTournamentsFallback(options: { includeHidden?: boolean }): Promise<TournamentGlobal[]> {
+    let query = supabase
+      .from('tournaments')
+      .select(`
+        *,
+        sport:sports(name),
+        country:countries(name),
+        union:unions(name)
+      `);
+    
+    if (!options.includeHidden) {
+      query = query.eq('is_active', true).or('is_visible.eq.true,is_visible.is.null');
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[tournamentService] Fallback also failed:', error);
+      throw error;
+    }
+
+    // Map to TournamentGlobal shape
+    return (data || []).map(t => ({
+      id: t.id,
+      name: t.name,
+      slug: t.slug || '',
+      sport_id: t.sport_id || '',
+      sport_name: (t.sport as any)?.name || 'Unknown',
+      country_id: t.country_id || null,
+      country_name: (t.country as any)?.name || null,
+      organization_id: t.organization_id || t.union_id || null,
+      organization_name: (t.union as any)?.name || null,
+      logo_url: t.logo_url || null,
+      is_active: t.is_active !== false,
+      is_popular: t.is_popular === true,
+      display_order: t.display_order || 0,
+      followers_count: 0,
+      is_followed_by_user: false,
+      created_at: t.created_at,
+      updated_at: t.updated_at,
+      display_name: t.display_name,
+      original_name: t.original_name,
+      is_api_managed: t.is_api_managed || false
+    })) as any[];
+  },
+
+  /**
+   * Updates tournament metadata like popularity, logo, etc.
+   * Only allows specific whitelisted columns to prevent errors with non-existent fields.
+   */
+  async updateTournamentMeta(id: string, updates: Partial<TournamentUpdate>) {
+    // 1. Strict whitelist of REAL columns in 'tournaments' table
+    const ALLOWED_COLUMNS = [
+      'name', 'slug', 'sport_id', 'country_id', 'organization_id', 'union_id',
+      'logo_url', 'banner_url', 'is_active', 'is_popular', 'is_visible', 'display_order',
+      'display_name', 'custom_logo_url', 'data_source', 'status', 'season_id',
+      'category', 'age_grade', 'format', 'ruleset', 'streaming_url', 'url',
+      'primary_color', 'secondary_color', 'priority', 'region'
+    ];
+
+    // 2. Filter payload strictly
+    const filteredUpdates: any = {};
+    const ignoredFields: string[] = [];
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (ALLOWED_COLUMNS.includes(key)) {
+        filteredUpdates[key] = value;
+      } else {
+        ignoredFields.push(key);
+      }
+    });
+
+    // Detailed debug logs
+    console.log(`[tournamentService] Updating tournament ${id}:`, {
+      keys: Object.keys(filteredUpdates),
+      is_popular_update: filteredUpdates.is_popular !== undefined ? filteredUpdates.is_popular : 'not_updating'
+    });
+
+    if (ignoredFields.length > 0) {
+      console.warn('[tournamentService] IGNORED KEYS (Not in whitelist):', ignoredFields);
+    }
+
+    // Early exit if no valid columns to update
+    if (Object.keys(filteredUpdates).length === 0) {
+      console.warn('[tournamentService] No valid columns to update for tournament:', id);
+      return null;
+    }
+
+    // 3. DEEP DIAGNOSIS
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
+
+    // Check UUID validity
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      console.error(`[tournamentService] INVALID UUID passed: ${id}`);
+      throw new Error(`ID de torneo inválido: ${id}. No es un formato UUID válido.`);
+    }
+
+    // Step 3a: Existence check
+    const { data: existing, error: checkError } = await supabase
+      .from('tournaments')
+      .select('id, name')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('[tournamentService] Database check error:', checkError);
+      throw new Error(`Error al verificar existencia del torneo: ${checkError.message}`);
+    }
+
+    if (!existing) {
+      // If we are here, we might want to check if it's visible with a service role bypass (not possible client-side)
+      // but we can check if there are ANY tournaments to see if it's a general connection issue.
+      const { count } = await supabase.from('tournaments').select('*', { count: 'exact', head: true });
+      
+      console.error(`[tournamentService] Tournament ${id} not found. Total records in table visible to user: ${count}`);
+      throw new Error(`Torneo NO ENCONTRADO (ID: ${id}). Es posible que haya sido eliminado o que el ID suministrado sea incorrecto.`);
+    }
+
+    // 4. PERFORM UPDATE
+    const { data, error, status } = await supabase
+      .from('tournaments')
+      .update(filteredUpdates)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      const normalized = normalizeError(error);
+      console.error('[tournamentService] updateTournamentMeta failed:', {
+        error: normalized,
+        tournament_id: id,
+        user_id: userId
+      });
+
+      // Special handling for RLS/Permissions
+      if (normalized.code === '42501' || normalized.message.toLowerCase().includes('permission') || normalized.message.toLowerCase().includes('policy')) {
+        let role = 'unknown';
+        if (userId) {
+          // Try table first
+          const { data: userData } = await supabase.from('users').select('role').eq('id', userId).maybeSingle();
+          
+          if (userData?.role) {
+            role = userData.role;
+          } else {
+            // Fallback to RPC which has SECURITY DEFINER
+            const { data: rpcRole } = await (supabase as any).rpc('get_my_role');
+            if (rpcRole) role = String(rpcRole);
+          }
+        }
+        throw new Error(`PERMISO DENEGADO: Tu rol '${role}' no tiene permisos para actualizar torneos (Código RLS 42501).`);
+      }
+
+      throw normalized;
+    }
+
+    // 5. FINAL DIAGNOSIS
+    if (!data) {
+      console.error('[tournamentService] Update affected 0 rows despite record existing. RLS block detected.', { id, userId });
+      
+      let role = 'unknown';
+      if (userId) {
+        const { data: userData } = await supabase.from('users').select('role').eq('id', userId).maybeSingle();
+        if (userData?.role) {
+          role = userData.role;
+        } else {
+          const { data: rpcRole } = await (supabase as any).rpc('get_my_role');
+          if (rpcRole) role = String(rpcRole);
+        }
+      }
+      
+      throw new Error(`BLOQUEO DE SEGURIDAD (RLS): El torneo existe, pero tu sesión (Rol: ${role}) no tiene permisos para modificar la tabla 'tournaments'.`);
+    }
+
+    return data;
+  },
+
+  /**
+   * Toggles the follow status for a tournament.
+   */
+  async toggleFollow(tournamentId: string) {
+    const { data, error } = await supabase.rpc('toggle_tournament_follow', {
+      p_tournament_id: tournamentId
+    });
+
+    if (error) {
+      console.error('Error toggling tournament follow:', error);
+      throw error;
+    }
+
+    return data as boolean; // Returns true if followed, false if unfollowed
+  },
+
+  /**
+   * Uploads a logo for a tournament.
+   * Note: Assumes a 'tournament-logos' bucket exists in Supabase.
+   */
+  async uploadLogo(id: string, file: File): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${id}-${Math.random()}.${fileExt}`;
+    const filePath = `logos/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('tournaments')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Error uploading logo:', uploadError);
+      throw uploadError;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('tournaments')
+      .getPublicUrl(filePath);
+
+    // Also update the tournament record
+    await this.updateTournamentMeta(id, { logo_url: publicUrl });
+
+    return publicUrl;
+  }
+};

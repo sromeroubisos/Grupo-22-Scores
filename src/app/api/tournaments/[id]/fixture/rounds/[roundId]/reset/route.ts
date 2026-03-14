@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 
 export async function POST(
@@ -6,6 +7,7 @@ export async function POST(
     { params }: { params: Promise<{ id: string, roundId: string }> }
 ) {
     try {
+        await requireAdminApiUser();
         const { roundId } = await params;
 
         // The FixtureService doesn't have a direct 'resetRound' yet, 
@@ -18,10 +20,11 @@ export async function POST(
         const result = await FixtureService.resetRound(roundId);
 
         return NextResponse.json({ success: result });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal server error';
         console.error('Error in POST /api/tournaments/[id]/fixture/rounds/[roundId]/reset:', error);
         return NextResponse.json(
-            { error: error.message || 'Internal server error' },
+            { error: message },
             { status: 500 }
         );
     }

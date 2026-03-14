@@ -96,7 +96,7 @@ export default function TournamentsClient() {
                 id: t.id,
                 name: t.name,
                 season: 'N/A', // Data not in table?
-                sport: t.sport_id,
+                sport: t.sport_id || 'Rugby Union',
                 organizer: t.country_id || 'N/A',
                 status: (t.status as Tournament['status']) || 'published',
                 categories: [],
@@ -106,7 +106,7 @@ export default function TournamentsClient() {
                 teams: [],
                 hasFixture: false,
                 visibility: 'public',
-                country: t.country_id,
+                country: t.country_id || undefined,
                 is_api_managed: t.is_api_managed
             }));
 

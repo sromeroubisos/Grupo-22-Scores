@@ -1,0 +1,384 @@
+/* Tectonic Ingestion Page Styles */
+.tectonicPage {
+    --basalt-950: #0a0a0b;
+    --basalt-900: #121214;
+    --basalt-800: #1c1c1f;
+    --basalt-700: #2a2a2e;
+    --basalt-600: #3f3f46;
+    --basalt-400: #a1a1aa;
+    --magma-primary: #ff4d00;
+    --magma-glow: rgba(255, 77, 0, 0.15);
+    --cyanite: #00f2ff;
+    --surface-edge: rgba(255, 255, 255, 0.05);
+    --font-sans: 'Geist', sans-serif;
+    --font-mono: 'Geist Mono', monospace;
+    --slab-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+
+    min-height: 100%;
+    color: #ececec;
+    font-family: var(--font-sans);
+}
+
+.tectonicHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.headerInfo h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+}
+
+.headerInfo p {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--basalt-400);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.tectonicGrid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.slab {
+    background: var(--basalt-900);
+    border: 1px solid var(--surface-edge);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--slab-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.slab::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--surface-edge), transparent);
+}
+
+.col3 { grid-column: span 3; }
+.col4 { grid-column: span 4; }
+.col5 { grid-column: span 5; }
+.col6 { grid-column: span 6; }
+.col7 { grid-column: span 7; }
+.col8 { grid-column: span 8; }
+.col9 { grid-column: span 9; }
+.col12 { grid-column: span 12; }
+
+.slabLabel {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--basalt-600);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.slabTitle {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.searchBox {
+    margin-bottom: 16px;
+}
+
+.input {
+    width: 100%;
+    background: var(--basalt-800);
+    border: 1px solid var(--surface-edge);
+    color: #fff;
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input:focus {
+    border-color: var(--magma-primary);
+}
+
+.scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 8px;
+    padding-right: 4px;
+}
+
+/* Custom Scrollbar */
+.scrollArea::-webkit-scrollbar {
+    width: 4px;
+}
+.scrollArea::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scrollArea::-webkit-scrollbar-thumb {
+    background: var(--basalt-700);
+    border-radius: 10px;
+}
+
+.listItem {
+    padding: 10px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+}
+
+.listItem:hover {
+    background: var(--basalt-800);
+}
+
+.listItemSelected {
+    background: rgba(255, 77, 0, 0.1);
+    border-color: rgba(255, 77, 0, 0.3);
+}
+
+.listItemActive {
+    background: rgba(0, 242, 255, 0.05);
+    border-color: rgba(0, 242, 255, 0.2);
+}
+
+.itemIcon {
+    font-size: 18px;
+}
+
+.itemInfo {
+    flex: 1;
+}
+
+.itemName {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.itemMeta {
+    font-size: 11px;
+    color: var(--basalt-600);
+}
+
+.badge {
+    padding: 2px 6px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    border-radius: 2px;
+}
+
+.badgeLinked { color: var(--cyanite); border: 1px solid rgba(0, 242, 255, 0.3); }
+.badgeImport { color: var(--magma-primary); border: 1px solid rgba(255, 77, 0, 0.3); }
+
+.tournamentCard {
+    background: var(--basalt-800);
+    border: 1px solid var(--surface-edge);
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.tournamentCard:hover {
+    border-color: var(--magma-primary);
+    transform: translateX(4px);
+}
+
+.tournamentCardSelected {
+    border-color: var(--magma-primary);
+    background: rgba(255, 77, 0, 0.05);
+}
+
+.tournamentLogo {
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 4px;
+    object-fit: contain;
+}
+
+.fixtureItem {
+    padding: 12px;
+    border-bottom: 1px solid var(--surface-edge);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fixtureTime {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--basalt-600);
+    width: 60px;
+}
+
+.fixtureTeams {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.fixtureTeam {
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.fixtureScore {
+    font-weight: 700;
+    color: var(--cyanite);
+}
+
+.btn {
+    background: var(--basalt-700);
+    border: 1px solid var(--surface-edge);
+    color: #fff;
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    background: var(--basalt-600);
+}
+
+.btnPrimary {
+    background: var(--magma-primary);
+    border: none;
+    font-weight: 700;
+}
+
+.btnPrimary:hover {
+    background: #ff6a2a;
+}
+
+.tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--basalt-800);
+    padding: 2px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.tab {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    color: var(--basalt-400);
+    transition: all 0.2s;
+}
+
+.tabActive {
+    background: var(--basalt-700);
+    color: #fff;
+    font-weight: 600;
+}
+
+.loadingOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 11, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--basalt-700);
+    border-top-color: var(--magma-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.dialogOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.dialogContent {
+    background: var(--basalt-900);
+    border: 1px solid var(--surface-edge);
+    width: 100%;
+    max-width: 450px;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dialogTitle {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.dialogDescription {
+    color: var(--basalt-400);
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.dialogActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--basalt-600);
+    gap: 12px;
+}

@@ -9,18 +9,13 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function checkSchema() {
-    console.log('Checking tournaments table columns...');
-    const { data, error } = await supabase
-        .from('tournaments')
-        .select('name, display_name, custom_logo_url, original_logo_url')
-        .limit(1);
-
+async function checkColumns() {
+    const { data, error } = await supabase.rpc('get_table_columns', { table_name: 'sports' });
     if (error) {
-        console.log('Error or columns missing:', error.message);
+        console.error('Error fetching columns:', error);
     } else {
-        console.log('Columns exist! Data:', data);
+        console.log('Columns in sports table:', data);
     }
 }
 
-checkSchema().catch(console.error);
+checkColumns();

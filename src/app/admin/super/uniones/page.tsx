@@ -4,9 +4,9 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
-import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, Shield, MapPin } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, Plus, RefreshCw, Shield, MapPin } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { invalidateCache } from '@/lib/cache/superAdminCache';
+import { invalidateCache, type UnionRow } from '@/lib/cache/superAdminCache';
 
 export default function UnionesPage() {
     const { filters, unions, loading, errors, refresh } = useSuperConsole();
@@ -14,10 +14,8 @@ export default function UnionesPage() {
     const errorMsg = errors.unions;
 
     const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
-    const [togglingId, setTogglingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const [localOverrides, setLocalOverrides] = useState<Record<string, any>>({});
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
 
     const supabase = createClient();
@@ -38,12 +36,12 @@ export default function UnionesPage() {
         }
     };
 
-    const displayUnions = useMemo(() => unions
-        .filter((u: any) => !deletedIds.has(u.id))
-        .map((u: any) => ({ ...u, ...(localOverrides[u.id] ?? {}) }))
-        , [unions, deletedIds, localOverrides]);
+    const displayUnions = useMemo(
+        () => unions.filter((union) => !deletedIds.has(union.id)),
+        [unions, deletedIds],
+    );
 
-    const filtered = useMemo(() => displayUnions.filter((union: any) => {
+    const filtered = useMemo(() => displayUnions.filter((union: UnionRow) => {
         if (filters.search && !union.name.toLowerCase().includes(filters.search.toLowerCase()) && !(union.id && union.id.toLowerCase().includes(filters.search.toLowerCase()))) return false;
         if (filters.country && filters.country !== 'all' && union.country !== filters.country) return false;
         return true;
@@ -116,9 +114,8 @@ export default function UnionesPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.map((union: any) => {
-                                const isVisible = union.visibility !== 'hidden';
-                                const parentUnion = unions.find((u: any) => u.id === union.parent_union_id);
+                            {filtered.map((union: UnionRow) => {
+                                const parentUnion = unions.find((u: UnionRow) => u.id === union.parent_union_id);
                                 return (
                                     <tr
                                         key={union.id}
@@ -153,7 +150,7 @@ export default function UnionesPage() {
                                         </td>
                                         <td style={{ padding: '12px 16px', position: 'relative' }} onClick={e => e.stopPropagation()}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <Link href={`/admin/super/uniones/editar/${union.id}`} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                <Link href={`/admin/super/uniones/${union.id}`} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                                                     <Pencil size={11} /> Gestionar
                                                 </Link>
                                                 <div style={{ position: 'relative' }}>

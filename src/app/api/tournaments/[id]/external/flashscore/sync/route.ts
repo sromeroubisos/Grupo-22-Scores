@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { FixtureService } from '@/lib/services/fixtureService';
 import type { SyncRequest } from '@/lib/types/flashscore-integration';
@@ -9,6 +10,7 @@ export async function POST(
 ) {
     try {
         const tournamentId = (await params).id;
+        await requireAdminApiUser();
         const body: SyncRequest = await request.json();
         const { phase_id, round_id, matches } = body;
 
@@ -68,23 +70,28 @@ export async function POST(
             .single();
 
         if (existing) {
-            const currentRuleset = (existing as any).ruleset ?? {};
+            const currentRuleset = typeof existing.ruleset === 'object' && existing.ruleset
+                ? existing.ruleset as Record<string, unknown>
+                : {};
             const updatedRuleset = {
                 ...currentRuleset,
                 flashscore: {
-                    ...(currentRuleset.flashscore ?? {}),
+                    ...((typeof currentRuleset.flashscore === 'object' && currentRuleset.flashscore)
+                        ? currentRuleset.flashscore as Record<string, unknown>
+                        : {}),
                     last_sync: new Date().toISOString(),
                 },
             };
             await supabase
                 .from('tournaments')
-                .update({ ruleset: updatedRuleset } as any)
+                .update({ ruleset: updatedRuleset })
                 .eq('id', tournamentId);
         }
 
         return NextResponse.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Internal server error';
         console.error('Error in POST /external/flashscore/sync:', err);
-        return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

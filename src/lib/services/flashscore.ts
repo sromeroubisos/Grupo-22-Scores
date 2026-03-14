@@ -938,3 +938,82 @@ export async function getPlayerCareer(playerUrl: string) {
     if (data) memoryCache.set(cacheKey, data, CACHE_TTL_PLAYERS);
     return data;
 }
+
+// --- Tournament Ingestion Discovery Endpoints ---
+
+/**
+ * Get list of available sports from the API
+ */
+export async function getSports() {
+    const cacheKey = 'flashscore-sports-list';
+    const cached = memoryCache.get<any>(cacheKey);
+    if (cached) return cached;
+
+    const url = `https://${API_HOST}/api/flashscore/v2/sports/list`;
+    const { data } = await apiFetch<any>(url, {
+        headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
+        debugTag: 'SportsList',
+        silent: true,
+        cacheTtl: CACHE_TTL_TOURNAMENTS
+    });
+
+    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    return data;
+}
+
+/**
+ * Get countries associated with a sport
+ */
+export async function getCountriesBySport(sportId: string | number) {
+    const flashScoreSportId = typeof sportId === 'string' ? (SPORT_MAPPING[sportId] || parseInt(sportId)) : sportId;
+    const cacheKey = `countries-by-sport-${flashScoreSportId}`;
+    const cached = memoryCache.get<any>(cacheKey);
+    if (cached) return cached;
+
+    const url = `https://${API_HOST}/api/flashscore/v2/countries/list?sport_id=${flashScoreSportId}`;
+    const { data } = await apiFetch<any>(url, {
+        headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
+        debugTag: 'CountriesBySport',
+        silent: true,
+        cacheTtl: CACHE_TTL_TOURNAMENTS
+    });
+
+    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    return data;
+}
+
+/**
+ * Get tournaments by sport and entity (country or continental ID)
+ */
+export async function getTournamentsBySportAndEntity(sportId: string | number, entityId: string | number) {
+    const flashScoreSportId = typeof sportId === 'string' ? (SPORT_MAPPING[sportId] || parseInt(sportId)) : sportId;
+    const cacheKey = `tournaments-by-entity-${flashScoreSportId}-${entityId}`;
+    const cached = memoryCache.get<any>(cacheKey);
+    if (cached) return cached;
+
+    const url = `https://${API_HOST}/api/flashscore/v2/tournaments/list?sport_id=${flashScoreSportId}&country_id=${entityId}`;
+    const { data } = await apiFetch<any>(url, {
+        headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
+        debugTag: 'TournamentsByEntity',
+        silent: true,
+        cacheTtl: CACHE_TTL_TOURNAMENTS
+    });
+
+    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    return data;
+}
+
+/**
+ * Get seasons/archives for a tournament
+ */
+export async function getSeasonsByTournament(tournamentStageId: string) {
+    // Reuse existing archives function as it provides the list of seasons
+    return getTournamentArchives(tournamentStageId);
+}
+
+/**
+ * Get fixtures for a specific tournament or season
+ */
+export async function getFixturesByTournamentOrSeason(tournamentTemplateId: string, seasonId: string, page: number = 1) {
+    return getTournamentFixtures(tournamentTemplateId, seasonId, page);
+}

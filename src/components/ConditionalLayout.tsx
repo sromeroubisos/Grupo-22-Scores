@@ -20,12 +20,32 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const { user, isAuthenticated, isLoading } = useAuth();
     const isCoachPanel = pathname?.startsWith('/entrenador');
     const isManagementPage = pathname?.startsWith('/admin') || pathname?.startsWith('/club-admin') || isCoachPanel;
+    const isOnboardingPage = pathname?.startsWith('/onboarding');
 
     useEffect(() => {
-        if (!isLoading && isManagementPage && !isAuthenticated) {
+        if (isLoading) return;
+
+        if (isManagementPage && !isAuthenticated) {
             router.push('/login');
+            return;
         }
-    }, [isLoading, isManagementPage, isAuthenticated, router]);
+
+        // Redirect to onboarding if authenticated but onboarding not completed
+        if (
+            isAuthenticated &&
+            user &&
+            user.onboardingCompleted === false &&
+            !isOnboardingPage &&
+            !isManagementPage
+        ) {
+            router.push('/onboarding/preferences');
+        }
+    }, [isLoading, isManagementPage, isAuthenticated, user, isOnboardingPage, router]);
+
+    // Onboarding pages get a blank layout (no header/footer/nav)
+    if (isOnboardingPage) {
+        return <>{children}</>;
+    }
 
     if (isManagementPage) {
         return (

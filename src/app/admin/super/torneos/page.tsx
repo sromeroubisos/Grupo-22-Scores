@@ -2,11 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Trash2, Eye, EyeOff, MoreVertical, Plus, RefreshCw } from 'lucide-react';
+import { Trash2, Eye, EyeOff, MoreVertical, Plus, RefreshCw, Star, StarOff, Users, Hash, Upload } from 'lucide-react';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
+import { tournamentService } from '@/lib/services/tournamentService';
+import type { TournamentUpdate } from '@/lib/services/tournamentService';
+import { normalizeError } from '@/lib/utils/errorUtils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -21,14 +24,9 @@ const STATUS_STYLES: Record<string, string> = {
     active: styles.badgeActive, archived: styles.badgeArchived,
 };
 
-const SPORT_LABELS: Record<string, string> = {
-    rugby: 'Rugby', football: 'Fútbol', hockey: 'Hockey',
-    basketball: 'Básquet', volleyball: 'Vóley',
-};
-
 const countryFlags: Record<string, string> = {
     Argentina: '🇦🇷', Uruguay: '🇺🇾', Chile: '🇨🇱', Paraguay: '🇵🇾', Brazil: '🇧🇷',
-    'South Africa': '🇿🇦', England: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', France: '🇫🇷', Italy: '🇮🇹', Scotland: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', Wales: '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+    'South Africa': '🇿🇦', England: '🏴󠁧󠁢󠁿', France: '🇫🇷', Italy: '🇮🇹', Scotland: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', Wales: '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
     Ireland: '🇮🇪', Australia: '🇦🇺', 'New Zealand': '🇳🇿', USA: '🇺🇸', Canada: '🇨🇦',
     Spain: '🇪🇸', Portugal: '🇵🇹', Japan: '🇯🇵', Fiji: '🇫🇯', Samoa: '🇼🇸', Tonga: '🇹🇴',
     Georgia: '🇬🇪', Romania: '🇷🇴', Namibia: '🇳🇦',
@@ -37,42 +35,52 @@ const countryFlags: Record<string, string> = {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SuperadminTorneosPage() {
-    // ─── Read from shared context (already prefetched by layout) ─────────────────
     const { filters, setFilters, tournaments: rawTournaments, unions, loading, errors, refresh } = useSuperConsole();
     const isLoading = loading.tournaments;
     const error = errors.tournaments;
-    const supabase = createClient(); // only for mutations
+    const supabase = createClient();
 
     const [seasonFilter, setSeasonFilter] = useState('all');
     const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
     const [linkingTournamentId, setLinkingTournamentId] = useState<string | null>(null);
     const [selectedUnionId, setSelectedUnionId] = useState('');
 
-    // Optimistic local state — immediate UI feedback before server confirms
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
-    const [visibilityOverrides, setVisibilityOverrides] = useState<Map<string, boolean>>(new Map());
+    
+    // Performance: local state for instant toggles
+    const [localMetadata, setLocalMetadata] = useState<Record<string, { is_active?: boolean, is_popular?: boolean, display_order?: number | null }>>({});
 
     // ── Enriched Data ─────────────────────────────────────────────────────────
 
     const tournaments = useMemo(() => {
-        const unionMap = new Map(unions.map(u => [u.id, u]));
         return rawTournaments
             .filter(t => !deletedIds.has(t.id))
             .map(t => {
-                const union = t.union_id ? unionMap.get(t.union_id) : null;
-                const source = t.external_id ? 'API' : 'Manual';
-                // Prioritize the country field from the tournament itself
-                const countryName = t.country || union?.country || 'Global';
-                const is_visible = visibilityOverrides.has(t.id) ? visibilityOverrides.get(t.id)! : t.is_visible;
-                return { ...t, is_visible, union, source, groupKey: countryName };
-            })
-            .sort((a, b) => (a.display_name || a.name).localeCompare(b.display_name || b.name));
-    }, [rawTournaments, unions, deletedIds, visibilityOverrides]);
+                const local = localMetadata[t.id] || {};
+                
+                // 1. Better source detection
+                const source = t.is_api_managed ? 'API' : 'Manual';
+                
+                // 2. Clear country normalization for consistent grouping
+                const rawCountry = t.country_name?.trim() || 'Global';
+                const countryName = rawCountry === 'Global' ? 'Global' : 
+                    rawCountry.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                
+                return { 
+                    ...t, 
+                    is_active: local.is_active ?? t.is_active,
+                    is_popular: local.is_popular ?? t.is_popular,
+                    display_order: local.display_order ?? t.display_order,
+                    source, 
+                    groupKey: countryName 
+                };
+            });
+    }, [rawTournaments, deletedIds, localMetadata]);
 
     // ── Filters ───────────────────────────────────────────────────────────────
 
     const filtered = useMemo(() => tournaments.filter(t => {
-        if (filters.sport !== 'all' && t.sport !== filters.sport) return false;
+        if (filters.sport !== 'all' && t.sport_id !== filters.sport) return false;
         if (filters.status !== 'all' && t.status !== filters.status) return false;
         if (filters.country !== 'all' && t.groupKey !== filters.country) return false;
         
@@ -85,6 +93,7 @@ export default function SuperadminTorneosPage() {
             if (!matchesName && !matchesDisplayName && !matchesOriginalName && !matchesCountry) return false;
         }
         
+        if (filters.source !== 'all' && t.source !== filters.source) return false;
         if (seasonFilter !== 'all' && t.season_id !== seasonFilter) return false;
         return true;
     }), [tournaments, filters, seasonFilter]);
@@ -97,7 +106,6 @@ export default function SuperadminTorneosPage() {
             return acc;
         }, {});
 
-        // Sort groups: Global last, others alphabetical
         return Object.keys(groups)
             .sort((a, b) => {
                 if (a === 'Global') return 1;
@@ -121,13 +129,40 @@ export default function SuperadminTorneosPage() {
 
     // ── Actions ───────────────────────────────────────────────────────────────
 
+    const handleUpdateMeta = async (id: string, updates: Partial<TournamentUpdate>) => {
+        // Find the full tournament object for logging
+        const tournament = tournaments.find(t => t.id === id);
+        console.log('[SuperadminTorneosPage] USER CLICK - Update triggered:', {
+            id,
+            request_keys: Object.keys(updates),
+            full_tournament: tournament
+        });
+        
+        setLocalMetadata(prev => ({
+            ...prev,
+            [id]: { ...(prev[id] || {}), ...updates }
+        }));
+
+        try {
+            const result = await tournamentService.updateTournamentMeta(id, updates);
+            if (!result && Object.keys(updates).length > 0) {
+                console.warn('[SuperadminTorneosPage] Update discarded (all fields were invalid/filtered)', Object.keys(updates));
+            }
+        } catch (err: unknown) {
+            console.error('[SuperadminTorneosPage] Update failed:', err);
+            const normalized = normalizeError(err);
+            const msg = normalized.message || 'Error inesperado';
+            const code = normalized.code ? ` (Código: ${normalized.code})` : '';
+            alert('Error al actualizar: ' + msg + code);
+            refresh('tournaments');
+        }
+    };
+
     const handleDelete = async (id: string) => {
         if (!confirm('¿Seguro que deseas eliminar este torneo?')) return;
-        // Optimistic: hide immediately
         setDeletedIds(prev => new Set([...prev, id]));
         const { error } = await supabase.from('tournaments').delete().eq('id', id);
         if (error) {
-            // Revert on failure
             setDeletedIds(prev => { const s = new Set(prev); s.delete(id); return s; });
             alert('Error al eliminar: ' + error.message);
             return;
@@ -136,34 +171,29 @@ export default function SuperadminTorneosPage() {
         refresh('tournaments');
     };
 
-    const handleToggleVisibility = async (id: string, current: boolean | null) => {
-        const next = !current;
-        // Optimistic: flip immediately
-        setVisibilityOverrides(prev => new Map([...prev, [id, next]]));
-        const { error } = await supabase
-            .from('tournaments')
-            .update({ is_visible: next } as any)
-            .eq('id', id);
-        if (error) {
-            // Revert on failure
-            setVisibilityOverrides(prev => { const m = new Map(prev); m.delete(id); return m; });
-            alert('Error: ' + error.message);
-            return;
+    const handleLogoUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            await tournamentService.uploadLogo(id, file);
+            alert('Logo actualizado con éxito');
+            refresh('tournaments');
+        } catch (err: any) {
+            alert('Error al subir logo: ' + err.message);
         }
-        invalidateCache('tournaments_list');
-        refresh('tournaments');
     };
 
     const confirmLink = async () => {
         if (!linkingTournamentId || !selectedUnionId) return;
-        const { error } = await supabase
-            .from('tournaments')
-            .update({ union_id: selectedUnionId })
-            .eq('id', linkingTournamentId);
-        if (error) { alert('Error: ' + error.message); return; }
-        invalidateCache('tournaments_list');
-        refresh('tournaments');
-        setLinkingTournamentId(null);
+        try {
+            await tournamentService.updateTournamentMeta(linkingTournamentId, { organization_id: selectedUnionId });
+            invalidateCache('tournaments_list');
+            refresh('tournaments');
+            setLinkingTournamentId(null);
+        } catch (err: any) {
+            alert('Error: ' + err.message);
+        }
     };
 
     const toggleActionMenu = (id: string) =>
@@ -178,7 +208,7 @@ export default function SuperadminTorneosPage() {
                 <div>
                     <div className={styles.consoleTitle}>Torneos</div>
                     <div className={styles.consoleSubtitle}>
-                        Gestión global de competiciones · {rawTournaments.length} torneos
+                        Gestión global de competiciones · {rawTournaments.length} torneos registrados
                     </div>
                 </div>
                 <div className={styles.consoleActions}>
@@ -213,9 +243,10 @@ export default function SuperadminTorneosPage() {
                         onChange={e => setFilters(prev => ({ ...prev, sport: e.target.value }))}
                     >
                         <option value="all">Todos</option>
-                        {Object.entries(SPORT_LABELS).map(([val, label]) => (
-                            <option key={val} value={val}>{label}</option>
-                        ))}
+                        {/* We could fetch unique sports from tournament list or constant */}
+                        <option value="rugby">Rugby</option>
+                        <option value="football">Fútbol</option>
+                        <option value="hockey">Hockey</option>
                     </select>
 
                     <span className={styles.filterLabel}>País</span>
@@ -240,6 +271,17 @@ export default function SuperadminTorneosPage() {
                     >
                         <option value="all">Todas</option>
                         {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+
+                    <span className={styles.filterLabel}>Origen</span>
+                    <select
+                        className={styles.filterControl}
+                        value={filters.source}
+                        onChange={e => setFilters(prev => ({ ...prev, source: e.target.value as any }))}
+                    >
+                        <option value="all">Todos</option>
+                        <option value="API">API (Gestor Externo)</option>
+                        <option value="Manual">Manual (Locales)</option>
                     </select>
                 </div>
             </div>
@@ -268,12 +310,16 @@ export default function SuperadminTorneosPage() {
                     </div>
                     <div className={styles.cardGrid}>
                         {items.map(t => (
-                            <div key={t.id} className={styles.cardItem}>
+                            <div key={t.id} className={styles.cardItem} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                                 <div className={styles.cardHeader}>
-                                    <div className={styles.cardLogo}>
+                                    <div className={styles.cardLogo} style={{ position: 'relative' }}>
                                         {t.logo_url ? (
-                                            <img src={t.logo_url} alt={t.name} style={{ width: 32, height: 32, objectFit: 'contain' }} />
+                                            <img src={t.logo_url} alt={t.name} style={{ width: 40, height: 40, objectFit: 'contain' }} />
                                         ) : '🏆'}
+                                        <label className={styles.logoEditOverlay}>
+                                            <input type="file" hidden accept="image/*" onChange={(e) => handleLogoUpload(t.id, e)} />
+                                            <Upload size={12} />
+                                        </label>
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div className={styles.cardTitle}>
@@ -286,57 +332,82 @@ export default function SuperadminTorneosPage() {
                                         </div>
                                         <div className={styles.cardContext}>
                                             <span className={styles.contextLinePrimary}>
-                                                {t.season_id} · {SPORT_LABELS[t.sport || ''] || t.sport || 'N/A'}
+                                                {t.season_id} · {t.sport_name || t.sport_id || 'N/A'}
                                                 {t.category ? ` · ${t.category}` : ''}
-                                                {t.age_grade ? ` · ${t.age_grade}` : ''}
                                             </span>
                                             <span className={styles.contextLineSecondary}>
-                                                Unión: {t.union?.name || 'Sin vínculo'}
-                                                {t.format ? ` · ${t.format}` : ''}
+                                                Org: {t.organization_name || 'Sin vínculo'}
                                             </span>
                                         </div>
                                     </div>
 
-                                    {/* Action menu */}
-                                    <div style={{ position: 'relative' }}>
-                                        <button
-                                            className={styles.moreMenuBtn}
-                                            onClick={e => { e.stopPropagation(); toggleActionMenu(t.id); }}
-                                        >
-                                            <MoreVertical size={16} />
-                                        </button>
+                                    <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
 
-                                        {actionMenuOpenId === t.id && (
-                                            <div className={styles.menuDropdown}>
-                                                <button
-                                                    className={styles.menuItem}
-                                                    onClick={() => { handleToggleVisibility(t.id, t.is_visible); setActionMenuOpenId(null); }}
-                                                >
-                                                    {t.is_visible
-                                                        ? <><EyeOff size={14} style={{ marginRight: 8 }} /> Ocultar</>
-                                                        : <><Eye size={14} style={{ marginRight: 8 }} /> Mostrar</>}
-                                                </button>
+                                        <div style={{ position: 'relative' }}>
+                                            <button
+                                                className={`${styles.moreMenuBtn} ${t.is_popular ? styles.starActive : ''}`}
+                                                style={{ marginRight: 4, color: t.is_popular ? '#facc15' : 'rgba(255,255,255,0.2)' }}
+                                                onClick={() => handleUpdateMeta(t.id, { is_popular: !t.is_popular })}
+                                                title={t.is_popular ? "Quitar de populares" : "Marcar como popular"}
+                                            >
+                                                {t.is_popular ? <Star size={16} fill="currentColor" /> : <StarOff size={16} />}
+                                            </button>
 
-                                                {!t.union_id && (
+                                            <button
+                                                className={styles.moreMenuBtn}
+                                                onClick={e => { e.stopPropagation(); toggleActionMenu(t.id); }}
+                                            >
+                                                <MoreVertical size={16} />
+                                            </button>
+
+                                            {actionMenuOpenId === t.id && (
+                                                <div className={styles.menuDropdown}>
                                                     <button
-                                                        className={`${styles.menuItem} ${styles.warning}`}
+                                                        className={styles.menuItem}
+                                                        onClick={() => { handleUpdateMeta(t.id, { is_active: !t.is_active }); setActionMenuOpenId(null); }}
+                                                    >
+                                                        {t.is_active
+                                                            ? <><EyeOff size={14} style={{ marginRight: 8 }} /> Desactivar</>
+                                                            : <><Eye size={14} style={{ marginRight: 8 }} /> Activar</>}
+                                                    </button>
+
+                                                    <button
+                                                        className={styles.menuItem}
                                                         onClick={() => { setLinkingTournamentId(t.id); setActionMenuOpenId(null); }}
                                                     >
-                                                        🔗 Vincular Unión
+                                                        🔗 Vincular Org/Unión
                                                     </button>
-                                                )}
 
-                                                <div className={styles.menuDivider} />
+                                                    <div className={styles.menuDivider} />
 
-                                                <button
-                                                    className={`${styles.menuItem} ${styles.danger}`}
-                                                    onClick={() => { handleDelete(t.id); setActionMenuOpenId(null); }}
-                                                >
-                                                    <Trash2 size={14} style={{ marginRight: 8 }} />
-                                                    Eliminar
-                                                </button>
-                                            </div>
-                                        )}
+                                                    <button
+                                                        className={`${styles.menuItem} ${styles.danger}`}
+                                                        onClick={() => { handleDelete(t.id); setActionMenuOpenId(null); }}
+                                                    >
+                                                        <Trash2 size={14} style={{ marginRight: 8 }} />
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Stats & Metadata Row */}
+                                <div className={styles.statsRow} style={{ display: 'flex', gap: 12, marginTop: 12, padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#aaa' }}>
+                                        <Users size={14} />
+                                        <span>{t.followers_count || 0} seguidores</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#aaa' }}>
+                                        <Hash size={14} />
+                                        <span>Orden: </span>
+                                        <input 
+                                            type="number" 
+                                            value={t.display_order || 0} 
+                                            onChange={(e) => handleUpdateMeta(t.id, { display_order: parseInt(e.target.value) || 0 })}
+                                            style={{ width: 40, background: 'transparent', border: '1px solid #333', color: 'white', borderRadius: 4, padding: '0 4px', fontSize: 11 }}
+                                        />
                                     </div>
                                 </div>
 
@@ -348,18 +419,20 @@ export default function SuperadminTorneosPage() {
                                     <span className={`${styles.badgePill} ${t.source === 'API' ? styles.badgeApiAlt : styles.badgeManualAlt}`}>
                                         {t.source}
                                     </span>
-                                    {t.is_visible === false && (
-                                        <span className={`${styles.badgePill} ${styles.badgeArchived}`}>Oculto</span>
+                                    {t.is_popular && (
+                                        <span className={`${styles.badgePill} ${styles.badgePopular}`}>
+                                            Popular
+                                        </span>
                                     )}
-                                    {t.region && (
-                                        <span className={styles.badgePill}>{t.region}</span>
+                                    {!t.is_active && (
+                                        <span className={`${styles.badgePill} ${styles.badgeArchived}`}>Inactivo</span>
                                     )}
                                 </div>
 
                                 {/* Actions */}
                                 <div className={styles.cardActions}>
                                     <Link href={`/admin/entities/${t.id}/manage?type=tournament`} className={styles.actionBtn}>
-                                        Ver / Editar
+                                        Configurar Detalles
                                     </Link>
                                 </div>
                             </div>
@@ -379,16 +452,16 @@ export default function SuperadminTorneosPage() {
                         background: '#0b1016', border: '1px solid rgba(255,255,255,0.1)',
                         padding: 24, borderRadius: 12, minWidth: 320, maxWidth: 400
                     }}>
-                        <h3 style={{ margin: '0 0 8px', color: 'white' }}>Vincular Unión</h3>
+                        <h3 style={{ margin: '0 0 8px', color: 'white' }}>Vincular Organización</h3>
                         <p style={{ color: '#aaa', fontSize: 13, marginBottom: 16 }}>
-                            Selecciona una unión existente para vincular este torneo.
+                            Selecciona una unión o entidad para vincular este torneo.
                         </p>
                         <select
                             value={selectedUnionId}
                             onChange={e => setSelectedUnionId(e.target.value)}
                             style={{ width: '100%', padding: 12, borderRadius: 6, background: '#1a1d24', border: '1px solid #333', color: 'white', marginBottom: 20 }}
                         >
-                            <option value="">Seleccionar Unión...</option>
+                            <option value="">Seleccionar Organización...</option>
                             {unions.map(u => (
                                 <option key={u.id} value={u.id}>{u.name}{u.country ? ` (${u.country})` : ''}</option>
                             ))}
