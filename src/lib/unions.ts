@@ -298,12 +298,12 @@ export function mapLegacyLevelToJurisdiction(level?: string | null): string {
     }
 }
 
-export function safeObject(value: unknown): Record<string, unknown> {
+export function safeObject(value: unknown): Record<string, any> {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-    return value as Record<string, unknown>;
+    return value as Record<string, any>;
 }
 
-export function extractUnionBranding(record: UnionRecordLike | null | undefined): Record<string, unknown> {
+export function extractUnionBranding(record: UnionRecordLike | null | undefined): Record<string, any> {
     return safeObject(record?.branding);
 }
 

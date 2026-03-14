@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/context/AuthContext'
@@ -62,7 +62,7 @@ function ArrowRightIcon() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function OnboardingPreferencesPage() {
+function OnboardingPreferencesContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const isEditMode = searchParams.get('edit') === 'true'
@@ -587,5 +587,13 @@ export default function OnboardingPreferencesPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function OnboardingPreferencesPage() {
+    return (
+        <Suspense>
+            <OnboardingPreferencesContent />
+        </Suspense>
     )
 }
