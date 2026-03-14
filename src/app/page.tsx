@@ -430,13 +430,7 @@ export default function HomePage() {
         .eq('is_visible', true);
 
       if (error) {
-        console.error('Error fetching manual tournaments:', error);
-        console.error('Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-        });
+        console.error('Error fetching manual tournaments:', error.message);
         return;
       }
 
