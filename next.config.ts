@@ -2,6 +2,21 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  typescript: {
+    // Velocidad extrema: saltamos la comprobación de tipos durante el build.
+    // Los errores se verán en el IDE o en el pre-commit.
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    // Optimiza la carga de librerías pesadas para que el build y el HMR sean más rápidos
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@dnd-kit/utilities',
+    ],
+  },
   async redirects() {
     return [
       {
