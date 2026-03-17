@@ -216,16 +216,26 @@ ALTER TABLE public.clubs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
 
 -- Política 1: Lectura Pública (Cualquiera puede ver torneos y partidos publicados)
+DROP POLICY IF EXISTS "Public Read Tournaments" ON public.tournaments;
 CREATE POLICY "Public Read Tournaments" ON public.tournaments FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Clubs" ON public.clubs;
 CREATE POLICY "Public Read Clubs" ON public.clubs FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Matches" ON public.matches;
 CREATE POLICY "Public Read Matches" ON public.matches FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read News" ON public.news;
 CREATE POLICY "Public Read News" ON public.news FOR SELECT USING (status = 'published');
 
 -- Política 2: Super Admin Total (Acceso a todo)
 -- Nota: Esto requiere que tengas un usuario con role='super_admin' en public.users
+DROP POLICY IF EXISTS "Super Admin Full Access Users" ON public.users;
 CREATE POLICY "Super Admin Full Access Users" ON public.users USING (
     (SELECT role FROM public.users WHERE id = auth.uid()) = 'super_admin'
 );
+
+DROP POLICY IF EXISTS "Super Admin Full Access Tournaments" ON public.tournaments;
 CREATE POLICY "Super Admin Full Access Tournaments" ON public.tournaments USING (
     (SELECT role FROM public.users WHERE id = auth.uid()) = 'super_admin'
 );
@@ -233,6 +243,7 @@ CREATE POLICY "Super Admin Full Access Tournaments" ON public.tournaments USING 
 
 -- Política 3: Usuarios Autenticados (Lectura básica, escritura restringida)
 -- Por ahora, para MVP, permitimos que usuarios autenticados creen cosas si no hay restricción fuerte
+DROP POLICY IF EXISTS "Auth Users Can Create" ON public.tournaments;
 CREATE POLICY "Auth Users Can Create" ON public.tournaments FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 -- ============================================
@@ -247,8 +258,14 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_tournaments_updated_at ON public.tournaments;
 CREATE TRIGGER update_tournaments_updated_at BEFORE UPDATE ON public.tournaments FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_matches_updated_at ON public.matches;
 CREATE TRIGGER update_matches_updated_at BEFORE UPDATE ON public.matches FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_regulations_updated_at ON public.regulations;
+CREATE TRIGGER update_regulations_updated_at BEFORE UPDATE ON public.regulations FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 -- ============================================
 -- 8. MANEJO DE NUEVOS USUARIOS (Auth Hook)

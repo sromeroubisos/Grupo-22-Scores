@@ -123,15 +123,20 @@ ALTER TABLE public.tournaments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
 
 -- Lectura pública para todos
+DROP POLICY IF EXISTS "Public Read" ON public.tournaments;
 CREATE POLICY "Public Read" ON public.tournaments FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Matches" ON public.matches;
 CREATE POLICY "Public Read Matches" ON public.matches FOR SELECT USING (true);
 
 -- Super Admin: Acceso Total
+DROP POLICY IF EXISTS "Super Admin Access" ON public.tournaments;
 CREATE POLICY "Super Admin Access" ON public.tournaments USING (
     (SELECT role FROM public.users WHERE id = auth.uid()) = 'super_admin'
 );
 
 -- Editores: Acceso basado en Memberships
+DROP POLICY IF EXISTS "Editor Access" ON public.tournaments;
 CREATE POLICY "Editor Access" ON public.tournaments USING (
     EXISTS (
         SELECT 1 FROM public.memberships 
