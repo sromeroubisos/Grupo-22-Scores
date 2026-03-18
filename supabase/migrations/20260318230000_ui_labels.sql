@@ -40,18 +40,22 @@ ALTER TABLE public.ui_labels ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.team_labels ENABLE ROW LEVEL SECURITY;
 
 -- Read: público (para mostrar etiquetas en vistas públicas)
+DROP POLICY IF EXISTS "ui_labels_read" ON public.ui_labels;
 CREATE POLICY "ui_labels_read" ON public.ui_labels
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "team_labels_read" ON public.team_labels;
 CREATE POLICY "team_labels_read" ON public.team_labels
   FOR SELECT USING (true);
 
 -- Write: solo usuarios autenticados (admins)
+DROP POLICY IF EXISTS "ui_labels_write" ON public.ui_labels;
 CREATE POLICY "ui_labels_write" ON public.ui_labels
   FOR ALL
   USING (auth.role() = 'authenticated')
   WITH CHECK (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "team_labels_write" ON public.team_labels;
 CREATE POLICY "team_labels_write" ON public.team_labels
   FOR ALL
   USING (auth.role() = 'authenticated')
