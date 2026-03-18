@@ -89,6 +89,23 @@ export interface StandingsDataPayload {
   last_calculated_at?: string | null;
 }
 
+export interface UiLabel {
+  id: string;
+  name: string;
+  color: string;
+  scope: string;
+}
+
+export interface TeamLabelAssignment {
+  id: string;
+  label_id: string;
+  club_id: string;
+  tournament_id: string | null;
+  phase_id: string | null;
+  group_id: string | null;
+  label: UiLabel;
+}
+
 export interface AuditEntry {
   id?: string;
   created_at: string;

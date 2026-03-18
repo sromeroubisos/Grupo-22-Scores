@@ -618,16 +618,17 @@
     padding: 20px;
     border-radius: 22px;
     overflow: hidden;
-    transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
+    cursor: pointer;
+    transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
 }
 
 .fixture-match-card:hover {
-    border-color: rgba(0, 163, 101, 0.35);
-    box-shadow: var(--fixture-shadow-glow);
+    border-color: rgba(0, 163, 101, 0.45);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 20px rgba(0, 163, 101, 0.15);
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
-        rgba(15, 20, 28, 0.78);
-    transform: translateY(-2px);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        rgba(15, 20, 28, 0.85);
+    transform: translateY(-4px) scale(1.01);
 }
 
 .fixture-match-card.fixture-status-live {

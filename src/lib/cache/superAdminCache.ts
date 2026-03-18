@@ -102,9 +102,17 @@ export async function cachedFetch<T>(
                 cache.set(key, { data: fallbackData, fetchedAt: Date.now(), ttl });
                 return fallbackData;
             } catch (retryErr: any) {
-                console.error(`[Cache] RE-FETCH FAILED for '${key}' RAW:`, retryErr);
-                console.error(`[Cache] RE-FETCH FAILED JSON:`,
-                    JSON.stringify(retryErr, Object.getOwnPropertyNames(retryErr)));
+                // If it's a Supabase error, it might not stringify well
+                const errorData = {
+                    message: retryErr?.message,
+                    code: retryErr?.code,
+                    details: retryErr?.details,
+                    hint: retryErr?.hint,
+                    status: retryErr?.status,
+                    name: retryErr?.name
+                };
+                console.error(`[Cache] RE-FETCH FAILED for '${key}':`, errorData);
+                
                 const normalized = normalizeError(retryErr);
                 console.error(`[Cache] RE-FETCH FAILED NORMALIZED for '${key}':`, normalized);
                 throw normalized;

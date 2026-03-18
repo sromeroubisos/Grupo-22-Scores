@@ -24,13 +24,8 @@ ALTER TABLE public.admin_audit_log ENABLE ROW LEVEL SECURITY;
 -- Grants
 GRANT SELECT, INSERT ON public.admin_audit_log TO authenticated;
 
--- Policies
--- SELECT: only super_admin (or users with the role 'super_admin' or similar, we will check what authorize_admin does, but typical is checking user role)
--- The prompt says "solo super_admin (o rol admin equivalente actual)"
--- Let's check how authorize_admin or the club editor works. The user mentions "solo super_admin (ideal)", we can check "public.users.role = 'super_admin'".
--- ACTUALLY, the prompt says "Policy SELECT: solo super_admin (o rol admin equivalente actual)" 
--- Let's do a SELECT policy that checks authorize_admin() if it exists, or just we can let authenticated users select if they are admins. Let's do authorize_admin().
--- The prompt says "Policy INSERT: permitir inserts solo al usuario logueado (authenticated) PERO restringido a super_admin (ideal)." Let's use authorize_admin() for INSERT as well, plus they must supply their own actor_user_id.
+DROP POLICY IF EXISTS "Allow select for super_admins" ON public.admin_audit_log;
+DROP POLICY IF EXISTS "Allow insert for actor" ON public.admin_audit_log;
 
 CREATE POLICY "Allow select for super_admins" ON public.admin_audit_log
     FOR SELECT

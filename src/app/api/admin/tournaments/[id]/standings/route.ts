@@ -31,11 +31,15 @@ export async function GET(
             return NextResponse.json({ error: 'Phase not found' }, { status: 404 });
         }
 
-        const { data: tournament } = await supabase
+        const { data: tournament, error: tournamentError } = await supabase
             .from('tournaments')
-            .select('ruleset')
+            .select('id, name, ruleset, status')
             .eq('id', tournamentId)
             .single();
+
+        if (tournamentError) {
+            return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+        }
 
         const resolvedRules = StandingsEngine.resolveRules(phase.settings, tournament?.ruleset);
 
@@ -53,7 +57,7 @@ export async function GET(
         // 3. Fetch final matches for this phase
         let mQuery = supabase
             .from('matches')
-            .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, events')
+            .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id')
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phaseId)
             .eq('status', 'final');

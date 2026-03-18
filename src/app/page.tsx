@@ -15,7 +15,6 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import TournamentLeader from '@/components/TournamentLeader';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
-import { createClient } from '@/lib/supabase/client';
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -422,19 +421,16 @@ export default function HomePage() {
 
     // Fetch manual tournaments
     async function fetchManualTournaments() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('tournaments')
-        .select('*')
-        .eq('status', 'published')
-        .eq('is_visible', true);
+      try {
+        const response = await fetch('/api/home/manual-tournaments', { cache: 'no-store' });
+        const payload = await response.json().catch(() => ({}));
 
-      if (error) {
-        console.error('Error fetching manual tournaments:', error.message);
-        return;
-      }
+        if (!response.ok) {
+          console.error('Error fetching manual tournaments:', payload.error || `HTTP ${response.status}`);
+          return;
+        }
 
-      if (data) {
+        const data = Array.isArray(payload.data) ? payload.data : [];
         const mapped: Tournament[] = data.map((t: any) => ({
           id: t.id,
           name: t.display_name || t.name,
@@ -454,6 +450,8 @@ export default function HomePage() {
           format: t.format,
         }));
         setManualTournamentsList(mapped);
+      } catch (error) {
+        console.error('Error fetching manual tournaments:', error instanceof Error ? error.message : 'Unknown error');
       }
     }
     fetchManualTournaments();
@@ -825,6 +823,34 @@ export default function HomePage() {
             )}
 
             <div className={styles.matchesContainer}>
+              {sourceError?.message && (
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  marginBottom: '8px',
+                  borderRadius: '6px',
+                  background: sourceError.flashscore && sourceError.supabase
+                    ? 'rgba(255,60,60,0.08)'
+                    : sourceError.flashscoreFromCache
+                      ? 'rgba(100,180,255,0.07)'
+                      : 'rgba(255,160,0,0.08)',
+                  border: sourceError.flashscore && sourceError.supabase
+                    ? '1px solid rgba(255,80,80,0.2)'
+                    : sourceError.flashscoreFromCache
+                      ? '1px solid rgba(100,180,255,0.15)'
+                      : '1px solid rgba(255,160,0,0.2)',
+                  fontSize: '0.75rem',
+                  color: sourceError.flashscore && sourceError.supabase
+                    ? '#ff8080'
+                    : sourceError.flashscoreFromCache
+                      ? '#80b8ff'
+                      : 'var(--color-text-dim)',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ opacity: 0.8 }}>{sourceError.message}</span>
+                </div>
+              )}
               {/* Source error indicator — shown when FlashScore or Supabase is down */}
               {sourceError?.scenario === 'fs_cache' && (
                 <div style={{
@@ -905,6 +931,7 @@ export default function HomePage() {
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
                   <h3>No se pudieron cargar los partidos</h3>
+                  {sourceError.message ? <p>{sourceError.message}</p> : null}
                   <p>Hay un problema de conexión con una o más fuentes de datos.</p>
                 </div>
               )}

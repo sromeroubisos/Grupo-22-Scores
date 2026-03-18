@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Activity, CheckCircle2, Clock3, Layers3, XCircle } from 'lucide-react';
 import { StandingsFiltersBar } from './StandingsFiltersBar';
 import { StandingsSidebar } from './StandingsSidebar';
 import { StandingsTable } from './StandingsTable';
+import { ManageLabelsPanel } from './ManageLabelsPanel';
 import styles from './TournamentStandingsTab.module.css';
-import type { StandingsDataPayload, StandingsPhase, StandingsRow, TournamentContextData } from './types';
+import type { StandingsDataPayload, StandingsPhase, StandingsRow, TeamLabelAssignment, TournamentContextData, UiLabel } from './types';
 
 function formatRelativeTime(iso: string | null): string {
   if (!iso) return 'Nunca calculada';
@@ -54,32 +55,34 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [recalcFeedback, setRecalcFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [logicPanelError, setLogicPanelError] = useState<string | null>(null);
+  const [allLabels, setAllLabels] = useState<UiLabel[]>([]);
+  const [assignments, setAssignments] = useState<TeamLabelAssignment[]>([]);
+  const [showLabelsPanel, setShowLabelsPanel] = useState(false);
 
-  const loadContext = useCallback(
-    async (preservePhase = false) => {
-      try {
-        setLogicPanelError(null);
-        const res = await fetch(`/api/admin/tournaments/${tournamentId}/standings/context`);
-        const data = await res.json();
+  const loadContextAndLite = useCallback(async () => {
+    setLoadingContext(true);
+    setLogicPanelError(null);
 
-        if (data.ok) {
-          setContext(data);
-          if (data.phases?.length > 0 && (!preservePhase || !selectedPhase)) {
-            const firstActive = data.phases.find((phase: StandingsPhase) => phase.is_active) || data.phases[0];
-            setSelectedPhase(firstActive.id);
-          }
-        } else {
-          setLogicPanelError('No se pudo cargar la logica.');
+    try {
+      const contextRes = await fetch(`/api/admin/tournaments/${tournamentId}/standings/context`);
+      const contextData = await contextRes.json();
+
+      if (contextData.ok) {
+        setContext(contextData);
+        if (contextData.phases?.length > 0) {
+          const firstActive = contextData.phases.find((p: StandingsPhase) => p.is_active) || contextData.phases[0];
+          setSelectedPhase(firstActive.id);
         }
-      } catch (error) {
-        console.error('Error loading standings context:', error);
-        setLogicPanelError('No se pudo cargar la logica.');
-      } finally {
-        setLoadingContext(false);
+      } else {
+        setLogicPanelError('No se pudo cargar el contexto.');
       }
-    },
-    [tournamentId, selectedPhase],
-  );
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+      setLogicPanelError('Error de red al cargar datos.');
+    } finally {
+      setLoadingContext(false);
+    }
+  }, [tournamentId]);
 
   const loadStandings = useCallback(async () => {
     if (!selectedPhase) return;
@@ -94,19 +97,39 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
       if (data.ok) {
         setStandingsData(data);
       } else {
-        setLogicPanelError('No se pudo cargar la logica.');
+        setLogicPanelError('No se pudo cargar la tabla real-time.');
       }
     } catch (error) {
       console.error('Error loading standings data:', error);
-      setLogicPanelError('No se pudo cargar la logica.');
+      setLogicPanelError('Error de red al cargar la tabla.');
     } finally {
       setLoadingStandings(false);
     }
   }, [selectedGroup, selectedPhase, selectedTableType, tournamentId]);
 
+  const loadAssignments = useCallback(async (phaseId: string | null, groupId: string | null) => {
+    if (!phaseId) return;
+    try {
+      const url = `/api/admin/team-labels?tournament_id=${tournamentId}&phase_id=${phaseId}${groupId ? `&group_id=${groupId}` : ''}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.ok) setAssignments(json.data ?? []);
+    } catch {
+      // non-blocking
+    }
+  }, [tournamentId]);
+
   useEffect(() => {
-    loadContext();
-  }, [loadContext]);
+    loadContextAndLite();
+  }, [loadContextAndLite]);
+
+  // Load global labels once on mount
+  useEffect(() => {
+    fetch('/api/admin/labels?scope=standings')
+      .then((r) => r.json())
+      .then((json) => { if (json.ok) setAllLabels(json.data ?? []); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 900px)');
@@ -117,8 +140,16 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   }, []);
 
   useEffect(() => {
-    if (selectedPhase) loadStandings();
-  }, [loadStandings, selectedPhase]);
+    if (selectedPhase && !loadingContext) {
+      loadStandings();
+    }
+  }, [loadStandings, selectedPhase, loadingContext]);
+
+  // Load assignments only when phase/group changes
+  useEffect(() => {
+    loadAssignments(selectedPhase, selectedGroup);
+  }, [loadAssignments, selectedPhase, selectedGroup]);
+
 
   const handleRecalculate = async () => {
     if (!selectedPhase) return;
@@ -157,6 +188,53 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     }
   };
 
+  // Build a map: club_id → UiLabel[] for fast lookup in StandingsTable
+  const labelsMap = useMemo<Record<string, UiLabel[]>>(() => {
+    const map: Record<string, UiLabel[]> = {};
+    for (const a of assignments) {
+      if (!map[a.club_id]) map[a.club_id] = [];
+      map[a.club_id].push(a.label);
+    }
+    return map;
+  }, [assignments]);
+
+  // assignment id lookup: labelId+clubId → assignment id (for unassign)
+  const assignmentIdMap = useMemo<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    for (const a of assignments) {
+      map[`${a.label_id}__${a.club_id}`] = a.id;
+    }
+    return map;
+  }, [assignments]);
+
+  const handleAssignLabel = async (clubId: string, labelId: string) => {
+    const res = await fetch('/api/admin/team-labels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        label_id: labelId,
+        club_id: clubId,
+        tournament_id: tournamentId,
+        phase_id: selectedPhase,
+        group_id: selectedGroup,
+      }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setAssignments((prev) => [...prev, json.data]);
+    }
+  };
+
+  const handleUnassignLabel = async (clubId: string, labelId: string) => {
+    const assignmentId = assignmentIdMap[`${labelId}__${clubId}`];
+    if (!assignmentId) return;
+    const res = await fetch(`/api/admin/team-labels/${assignmentId}`, { method: 'DELETE' });
+    const json = await res.json();
+    if (json.ok) {
+      setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+    }
+  };
+
   if (loadingContext) {
     return <div className={styles.loadingState}>Loading standings context...</div>;
   }
@@ -181,7 +259,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   const hasOwnPhaseSettings = !!activePhase?.settings;
 
   const handleLogicUpdated = async () => {
-    await loadContext(true);
+    await loadContextAndLite();
     await loadStandings();
   };
 
@@ -206,21 +284,21 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
               </p>
             </div>
 
-            <div className={styles.headerMeta}>
-              <div className={styles.metaCard}>
-                <span className={styles.metaLabel}>Torneo</span>
-                <div className={styles.metaValue}>
-                  <Layers3 size={14} />
-                  <span>{context.tournament?.name || 'Sin torneo'}</span>
+              <div className={styles.headerMeta}>
+                <div className={styles.metaCard}>
+                  <span className={styles.metaLabel}>Torneo</span>
+                  <div className={styles.metaValue}>
+                    <Layers3 size={14} />
+                    {loadingContext ? <div className={`${styles.skeleton} ${styles.metaSkeleton}`} /> : <span>{context?.tournament?.name || 'Sin torneo'}</span>}
+                  </div>
                 </div>
-              </div>
-              <div className={styles.metaCard}>
-                <span className={styles.metaLabel}>Fase actual</span>
-                <div className={styles.metaValue}>
-                  <Activity size={14} />
-                  <span>{activePhase?.name || 'Sin fase'}</span>
+                <div className={styles.metaCard}>
+                  <span className={styles.metaLabel}>Fase actual</span>
+                  <div className={styles.metaValue}>
+                    <Activity size={14} />
+                    {loadingContext ? <div className={`${styles.skeleton} ${styles.metaSkeleton}`} /> : <span>{activePhase?.name || 'Sin fase'}</span>}
+                  </div>
                 </div>
-              </div>
               <div className={styles.metaCard}>
                 <span className={styles.metaLabel}>Estado</span>
                 <div className={styles.metaValue}>
@@ -245,6 +323,21 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
                   {tab.label}
                 </button>
               ))}
+              <button
+                type="button"
+                className={`${styles.localTab} ${showLabelsPanel ? styles.localTabActive : ''}`}
+                onClick={() => setShowLabelsPanel((v) => !v)}
+                title="Gestionar etiquetas"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4, display: 'inline' }}>
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+                  <line x1="7" y1="7" x2="7.01" y2="7"/>
+                </svg>
+                Etiquetas
+                {allLabels.length > 0 && (
+                  <span className={styles.labelCountBadge}>{allLabels.length}</span>
+                )}
+              </button>
             </div>
 
             <div className={styles.localContext}>
@@ -263,6 +356,19 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
             </div>
           </div>
         </header>
+
+        {showLabelsPanel && (
+          <ManageLabelsPanel
+            labels={allLabels}
+            onClose={() => setShowLabelsPanel(false)}
+            onCreated={(label) => setAllLabels((prev) => [...prev, label])}
+            onUpdated={(label) => setAllLabels((prev) => prev.map((l) => (l.id === label.id ? label : l)))}
+            onDeleted={(id) => {
+              setAllLabels((prev) => prev.filter((l) => l.id !== id));
+              setAssignments((prev) => prev.filter((a) => a.label_id !== id));
+            }}
+          />
+        )}
 
         {recalcFeedback && (
           <div
@@ -303,17 +409,17 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
             <div className={styles.metricsBar}>
               <MetricCard
                 label="Partidos contados"
-                value={metrics?.counted_matches ?? '--'}
+                value={loadingStandings ? '--' : (metrics?.counted_matches ?? '--')}
                 foot="Resultados finales procesados"
               />
               <MetricCard
                 label="Pendientes"
-                value={metrics?.pending_results ?? '--'}
+                value={loadingStandings ? '--' : (metrics?.pending_results ?? '--')}
                 foot="Partidos aún fuera del cálculo"
               />
               <MetricCard
                 label="Ajustes manuales"
-                value={metrics?.manual_overrides ?? '--'}
+                value={loadingStandings ? '--' : (metrics?.manual_overrides ?? '--')}
                 foot="Overrides aplicados a esta fase"
               />
             </div>
@@ -346,6 +452,11 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
               tableColumns={phaseTableColumns}
               rules={resolvedRules}
               compactMobile={isCompactMobile}
+              labelsMap={labelsMap}
+              allLabels={allLabels}
+              onAssignLabel={handleAssignLabel}
+              onUnassignLabel={handleUnassignLabel}
+              assignmentIdMap={assignmentIdMap}
             />
           </section>
 

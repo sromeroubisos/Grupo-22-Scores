@@ -237,7 +237,7 @@ export default function TournamentFixture() {
                                                 </div>
 
                                                 <div className="matchScore">
-                                                    {match.score.home !== null ? (
+                                                    {match.status !== 'scheduled' && match.score.home !== null ? (
                                                         <>
                                                             <span className="scoreNum">{match.score.home}</span>
                                                             <span className="scoreSep">-</span>

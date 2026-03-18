@@ -39,27 +39,4 @@ CREATE POLICY "audit_log_deny_insert_authenticated"
     TO authenticated
     WITH CHECK (false);
 
--- =============================================================================
--- VERIFICATION QUERIES  (run manually after migration — expected results below)
--- =============================================================================
 
--- A) Check RLS is enabled and forced
--- Expected: relrowsecurity=true, relforcerowsecurity=true
-SELECT relname, relrowsecurity, relforcerowsecurity
-FROM   pg_class
-WHERE  relname = 'admin_audit_log';
-
--- B) List all active policies on the table
--- Expected rows: audit_log_select_own (SELECT, authenticated, PERMISSIVE)
---                audit_log_deny_insert_authenticated (INSERT, authenticated, RESTRICTIVE)
-SELECT polname, cmd, roles, qual, with_check, polpermissive
-FROM   pg_policies
-WHERE  tablename = 'admin_audit_log';
-
--- C) Check role-level privileges (should show NO INSERT for anon/authenticated)
--- Expected: service_role has INSERT; anon + authenticated do NOT.
-SELECT grantee, privilege_type, is_grantable
-FROM   information_schema.role_table_grants
-WHERE  table_schema = 'public'
-  AND  table_name   = 'admin_audit_log'
-ORDER  BY grantee, privilege_type;

@@ -1,0 +1,54 @@
+{
+  "project": "Grupo-22-Scores",
+  "audit_date": "2026-03-18",
+  "status": "In Progress",
+  "priorities": {
+    "P1": "Critical Structural Fixes",
+    "P2": "Performance Optimization",
+    "P3": "Governance & Security (RLS)",
+    "P4": "New Feature Support (UI Labels)"
+  },
+  "modules": [
+    {
+      "id": "RLS_SIMPLIFICATION",
+      "priority": "P1",
+      "status": "Drafted",
+      "file": "supabase/migrations/20260318100001_rls_simplification.sql",
+      "objective": "Consolidate RLS policies into a single robust admin check and unify public read visibility."
+    },
+    {
+      "id": "SCHEMA_HARDENING",
+      "priority": "P1",
+      "status": "Drafted",
+      "file": "supabase/migrations/20260318200000_schema_hardening_v1.sql",
+      "objective": "Add composite UNIQUE constraints to prevent duplicate favorites/standings and index critical FKs."
+    },
+    {
+      "id": "RELATIONAL_EVENTS",
+      "priority": "P2",
+      "status": "Drafted",
+      "file": "supabase/migrations/20260318200001_relational_events.sql",
+      "objective": "Move match events from JSONB to a relational match_events table for advanced stats."
+    },
+    {
+      "id": "PERFORMANCE_INDICES",
+      "priority": "P2",
+      "status": "Drafted",
+      "file": "supabase/migrations/20260318220000_perf_composite_indexes.sql",
+      "objective": "Optimize standings and match list queries with composite indices covering common filters."
+    },
+    {
+      "id": "UI_LABELS_SYSTEM",
+      "priority": "P4",
+      "status": "Drafted",
+      "file": "supabase/migrations/20260318230000_ui_labels.sql",
+      "objective": "Support the new UI Labeling feature for standings (Promotions, Relegations, etc)."
+    }
+  ],
+  "verification_steps": [
+    "Run npx supabase db push or execute concatenated SQL in Dashboard.",
+    "Verify no 'Could not find table' errors in the UI.",
+    "Verify admin functions can still manage all entities.",
+    "Verify anonymous users can still see public matches/standings."
+  ]
+}

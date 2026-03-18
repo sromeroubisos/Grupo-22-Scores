@@ -76,14 +76,17 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
                                         const homeName = m.home_participant?.participant_name || m.home_team?.name || m.HOME_NAME || m.home_name || m.home?.name || 'TBD';
                                         const awayName = m.away_participant?.participant_name || m.away_team?.name || m.AWAY_NAME || m.away_name || m.away?.name || 'TBD';
 
-                                        const homeScore = m.score_home ?? m.scores?.home ?? m.HOME_SCORE ?? m.home_score ?? m.home_team?.score ?? '-';
-                                        const awayScore = m.score_away ?? m.scores?.away ?? m.AWAY_SCORE ?? m.away_score ?? m.away_team?.score ?? '-';
+                                        const matchDate = m.match_start_iso || m.start_time || m.date;
+                                        const status = m.result || m.status || m.match_status?.status || (m.winner_id ? 'Final' : '');
+
+                                        const isScheduled = status === 'scheduled' || status === 'NS' || status === 'Not Started';
+                                        const rawHomeScore = m.score_home ?? m.scores?.home ?? m.HOME_SCORE ?? m.home_score ?? m.home_team?.score ?? null;
+                                        const rawAwayScore = m.score_away ?? m.scores?.away ?? m.AWAY_SCORE ?? m.away_score ?? m.away_team?.score ?? null;
+                                        const homeScore = isScheduled || rawHomeScore == null ? '-' : rawHomeScore;
+                                        const awayScore = isScheduled || rawAwayScore == null ? '-' : rawAwayScore;
 
                                         const homeLogo = m.home_participant?.image_path || m.home_team?.image_path || m.home_team?.small_image_path || m.home_team?.logo || '';
                                         const awayLogo = m.away_participant?.image_path || m.away_team?.image_path || m.away_team?.small_image_path || m.away_team?.logo || '';
-
-                                        const matchDate = m.match_start_iso || m.start_time || m.date;
-                                        const status = m.result || m.status || m.match_status?.status || (m.winner_id ? 'Final' : '');
 
                                         // Winner logic
                                         const isFinished = status === 'finished' || status === 'Final' || !!m.winner_id;

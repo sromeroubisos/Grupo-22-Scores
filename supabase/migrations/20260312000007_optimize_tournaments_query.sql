@@ -5,6 +5,21 @@
 -- Improve the RPC with better performance (pre-aggregated followers)
 -- and more robust type handling (using TEXT for IDs to avoid cast issues).
 
+-- 5. THE ULTIMATE DROP FOR get_all_tournaments (Handles all signatures)
+DO $$
+DECLARE
+    r record;
+BEGIN
+    FOR r IN (
+        SELECT n.nspname, p.proname, pg_get_function_identity_arguments(p.oid) as args
+        FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+        WHERE n.nspname = 'public' AND p.proname = 'get_all_tournaments'
+    ) LOOP
+        EXECUTE 'DROP FUNCTION ' || quote_ident(r.nspname) || '.' || quote_ident(r.proname) || '(' || r.args || ')';
+    END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.get_all_tournaments(
     p_viewer_user_id UUID DEFAULT NULL,
     p_include_hidden BOOLEAN DEFAULT false

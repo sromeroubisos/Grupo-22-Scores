@@ -96,7 +96,9 @@ function OnboardingPreferencesContent() {
                     .is('group_key', null)
                     .order('display_order', { ascending: true })
 
-                if (dbErr) throw dbErr
+                if (dbErr) {
+                    console.warn('[Onboarding] loadSports DB error (using fallback):', dbErr.message || dbErr)
+                }
 
                 let mapped: SportOption[] = (data || []).map((s: any) => ({
                     id: s.id,
@@ -128,7 +130,7 @@ function OnboardingPreferencesContent() {
                     setSelectedSportIds(existing)
                 }
             } catch (err: any) {
-                console.error('[Onboarding] loadSports error:', err)
+                console.error('[Onboarding] loadSports try/catch error:', err.message || err)
                 setError('No se pudieron cargar los deportes. Intentá de nuevo.')
             } finally {
                 setLoadingSports(false)

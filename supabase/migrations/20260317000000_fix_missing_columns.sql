@@ -58,12 +58,20 @@ ALTER TABLE public.clubs
 -- 4. REFRESH SCHEMA CACHE
 NOTIFY pgrst, 'reload schema';
 
--- 5. RE-RECREATE RPC TO ENSURE IT WORKS WITH THE NEW COLUMNS
--- (Dropped and recreated to be 100% sure the types match)
-DROP FUNCTION IF EXISTS public.get_all_tournaments(BOOLEAN, TEXT);
-DROP FUNCTION IF EXISTS public.get_all_tournaments(TEXT, BOOLEAN);
-DROP FUNCTION IF EXISTS public.get_all_tournaments(BOOLEAN, UUID);
-DROP FUNCTION IF EXISTS public.get_all_tournaments(UUID, BOOLEAN);
+-- 5. THE ULTIMATE DROP FOR get_all_tournaments (Handles all signatures)
+DO $$
+DECLARE
+    r record;
+BEGIN
+    FOR r IN (
+        SELECT n.nspname, p.proname, pg_get_function_identity_arguments(p.oid) as args
+        FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+        WHERE n.nspname = 'public' AND p.proname = 'get_all_tournaments'
+    ) LOOP
+        EXECUTE 'DROP FUNCTION ' || quote_ident(r.nspname) || '.' || quote_ident(r.proname) || '(' || r.args || ')';
+    END LOOP;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.get_all_tournaments(
     p_include_hidden BOOLEAN DEFAULT false,

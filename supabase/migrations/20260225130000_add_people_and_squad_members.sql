@@ -65,6 +65,14 @@ CREATE TABLE IF NOT EXISTS public.club_person_roles (
 ALTER TABLE public.people ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.club_person_roles ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "people_public_read" ON public.people;
+    DROP POLICY IF EXISTS "roles_public_read" ON public.club_person_roles;
+    DROP POLICY IF EXISTS "people_admin_all" ON public.people;
+    DROP POLICY IF EXISTS "roles_admin_all" ON public.club_person_roles;
+END $$;
+
 -- Lectura pública
 CREATE POLICY "people_public_read" ON public.people FOR SELECT USING (true);
 CREATE POLICY "roles_public_read" ON public.club_person_roles FOR SELECT USING (true);

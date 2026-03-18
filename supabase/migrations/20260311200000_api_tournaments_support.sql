@@ -63,6 +63,18 @@ ALTER TABLE public.countries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.seasons ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "Public Read Sports" ON public.sports;
+    DROP POLICY IF EXISTS "Public Read Countries" ON public.countries;
+    DROP POLICY IF EXISTS "Public Read Categories" ON public.categories;
+    DROP POLICY IF EXISTS "Public Read Seasons" ON public.seasons;
+    DROP POLICY IF EXISTS "Admin Administer Sports" ON public.sports;
+    DROP POLICY IF EXISTS "Admin Administer Countries" ON public.countries;
+    DROP POLICY IF EXISTS "Admin Administer Categories" ON public.categories;
+    DROP POLICY IF EXISTS "Admin Administer Seasons" ON public.seasons;
+END $$;
+
 -- Read policies
 CREATE POLICY "Public Read Sports" ON public.sports FOR SELECT USING (true);
 CREATE POLICY "Public Read Countries" ON public.countries FOR SELECT USING (true);

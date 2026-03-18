@@ -27,8 +27,9 @@ $$;
 GRANT EXECUTE ON FUNCTION public.is_super_admin() TO authenticated, anon;
 
 -- 2. Borrar todas las policies actuales de users para partir limpio
-DROP POLICY IF EXISTS "Super Admin Full Access Users"  ON public.users;
-DROP POLICY IF EXISTS "super_admin_full_access"        ON public.users;
+DROP POLICY IF EXISTS "users_select_own"           ON public.users;
+DROP POLICY IF EXISTS "users_update_own"           ON public.users;
+DROP POLICY IF EXISTS "users_superadmin_all"       ON public.users;
 DROP POLICY IF EXISTS "Users can read own profile"     ON public.users;
 DROP POLICY IF EXISTS "Users can update own profile"   ON public.users;
 DROP POLICY IF EXISTS "Auth Users Can Create"          ON public.users;

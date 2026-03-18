@@ -24,6 +24,7 @@ import {
   WandSparkles,
   Zap,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import type { Database } from '@/lib/database.types';
 import type { MatchStatus, MatchWithClubs, RoundWithMatches } from '@/lib/types/fixture';
 import type { FixtureImportPreviewResult } from '@/lib/types/fixture-import';
@@ -1066,7 +1067,19 @@ export function TournamentOperationFixtureWorkspace({
                     const collapsed = collapsedContainerIds.has(container.id);
                     return (
                       <section key={container.id} className={`fixture-round-section ${collapsed ? 'is-collapsed' : 'is-expanded'}`}>
-                        <button type="button" className="fixture-round-summary" onClick={() => toggleContainer(container.id)} aria-expanded={!collapsed}>
+                        <div
+                          className="fixture-round-summary"
+                          onClick={() => toggleContainer(container.id)}
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={!collapsed}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              toggleContainer(container.id);
+                            }
+                          }}
+                        >
                           <header className="fixture-round-header">
                             <div className="fixture-round-title">
                               <span className="fixture-round-index">{String(container.matches.length).padStart(2, '0')}</span>
@@ -1104,7 +1117,7 @@ export function TournamentOperationFixtureWorkspace({
                               </div>
                             </div>
                           </header>
-                        </button>
+                        </div>
 
                         <div className={`fixture-round-details ${!collapsed ? 'is-expanded' : ''}`}>
                           <div className="fixture-matches-grid">
@@ -1325,10 +1338,15 @@ function MatchCard({
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
+  const router = useRouter();
   const { match, round } = entry;
 
   return (
-    <article className={`fixture-match-card fixture-glass ${getMatchTone(match.status)}`}>
+    <article 
+      className={`fixture-match-card fixture-glass ${getMatchTone(match.status)}`}
+      style={{ cursor: 'pointer' }}
+      onClick={() => router.push(`/admin/matches/${match.id}/manage`)}
+    >
       <div className="fixture-match-top">
         <div>
           <span className="fixture-match-headline">{formatDateLabel(match.dateTime)} · {formatTimeLabel(match.dateTime)}</span>
@@ -1355,7 +1373,7 @@ function MatchCard({
           <span><Calendar size={14} />{match.venue || 'Sede por definir'}</span>
         </div>
 
-        <div className="fixture-match-actions">
+        <div className="fixture-match-actions" onClick={(e) => e.stopPropagation()}>
           <button className="fixture-mini-btn" onClick={onEdit}>
             <Pencil size={14} />
             <span>Editar</span>

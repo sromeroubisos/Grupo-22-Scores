@@ -50,6 +50,13 @@ ALTER TABLE public.user_onboarding_status ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_favorite_sports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_favorite_leagues ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "Users manage own onboarding status" ON public.user_onboarding_status;
+    DROP POLICY IF EXISTS "Users manage own favorite sports" ON public.user_favorite_sports;
+    DROP POLICY IF EXISTS "Users manage own favorite leagues" ON public.user_favorite_leagues;
+END $$;
+
 -- Each user can only read/write their own onboarding status
 CREATE POLICY "Users manage own onboarding status"
     ON public.user_onboarding_status

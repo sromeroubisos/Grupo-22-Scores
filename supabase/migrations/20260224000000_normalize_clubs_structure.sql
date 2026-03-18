@@ -48,14 +48,23 @@ ALTER TABLE public.clubs
     ADD COLUMN IF NOT EXISTS visibility TEXT DEFAULT 'visible'
         CHECK (visibility IN ('visible', 'hidden'));
 
--- Renombrar 'status' a 'lifecycle' (si existe)
+-- Renombrar 'status' a 'lifecycle' (si existe status y no lifecycle)
 DO $$
 BEGIN
     IF EXISTS (
         SELECT 1 FROM information_schema.columns
         WHERE table_name = 'clubs' AND column_name = 'status'
     ) THEN
-        ALTER TABLE public.clubs RENAME COLUMN status TO lifecycle;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'clubs' AND column_name = 'lifecycle'
+        ) THEN
+            ALTER TABLE public.clubs RENAME COLUMN status TO lifecycle;
+        ELSE
+            -- Si ambos existen, migramos datos si lifecycle es null y borramos status
+            UPDATE public.clubs SET lifecycle = status WHERE lifecycle IS NULL;
+            ALTER TABLE public.clubs DROP COLUMN status;
+        END IF;
     END IF;
 END $$;
 

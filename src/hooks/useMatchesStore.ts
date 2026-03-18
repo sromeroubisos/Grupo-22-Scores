@@ -9,6 +9,9 @@ export interface SourceError {
   flashscore: boolean;
   supabase: boolean;
   flashscoreFromCache?: boolean;
+  flashscoreReason?: string | null;
+  supabaseReason?: string | null;
+  message?: string | null;
   scenario: SourceErrorScenario;
 }
 
@@ -80,16 +83,36 @@ export function useMatchesStore(
   // Convert API sources metadata to a rich error state with scenario discrimination
   function buildSourceError(sources: any): SourceError | null {
     if (!sources) return null;
-    const fsErr   = !sources.flashscore?.ok;
-    const dbErr   = !sources.supabase?.ok;
-    const fsCache = sources.flashscore?.fromCache === true;
+    const flashscore = sources.flashscore ?? {};
+    const supabase = sources.supabase ?? {};
+    const fsErr = flashscore.ok === false;
+    const dbErr = supabase.ok === false;
+    const fsCache = flashscore.fromCache === true;
     if (!fsErr && !dbErr && !fsCache) return null;
     let scenario: SourceErrorScenario = null;
+    let message: string | null = null;
     if (fsCache)              scenario = 'fs_cache';
     else if (fsErr && !dbErr) scenario = 'fs_down_db_ok';
     else if (!fsErr && dbErr) scenario = 'db_down_fs_ok';
     else if (fsErr && dbErr)  scenario = 'both_down';
-    return { flashscore: fsErr, supabase: dbErr, flashscoreFromCache: fsCache, scenario };
+    if (scenario === 'fs_cache') {
+      message = flashscore.message || 'Datos de FlashScore desde caché; puede haber un leve retraso.';
+    } else if (scenario === 'fs_down_db_ok') {
+      message = flashscore.message || 'FlashScore no disponible; mostrando solo partidos locales.';
+    } else if (scenario === 'db_down_fs_ok') {
+      message = supabase.message || 'No se pudieron cargar los partidos desde la base de datos. Mostrando datos de FlashScore.';
+    } else if (scenario === 'both_down') {
+      message = 'No se pudieron cargar los partidos desde ninguna fuente de datos.';
+    }
+    return {
+      flashscore: fsErr,
+      supabase: dbErr,
+      flashscoreFromCache: fsCache,
+      flashscoreReason: flashscore.reason ?? null,
+      supabaseReason: supabase.reason ?? null,
+      message,
+      scenario: null
+    };
   }
 
   // Fetch a single date, update cache, return data + sources metadata

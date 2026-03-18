@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     AlertCircle,
@@ -16,12 +17,35 @@ import {
 } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import { FixtureProvider, useFixture } from './FixtureContext';
-import TournamentStandingsTab from './standings/TournamentStandingsTab';
-import { TournamentStatsTab } from './TournamentStatsTab';
-import { FlashScoreSyncPanel } from './FlashScoreSyncPanel';
-import { TournamentOperationFixtureWorkspace } from './TournamentOperationFixtureWorkspace';
 import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
+
+// Dynamic imports for sub-tabs to optimize bundle size and prevent background data fetching
+const TournamentStandingsTab = dynamic(() => import('./standings/TournamentStandingsTab'), {
+    loading: () => <TabLoading placeholder="Cargando posiciones..." />,
+});
+
+const TournamentStatsTab = dynamic(() => import('./TournamentStatsTab').then(mod => mod.TournamentStatsTab), {
+    loading: () => <TabLoading placeholder="Cargando estadísticas..." />,
+});
+
+const FlashScoreSyncPanel = dynamic(() => import('./FlashScoreSyncPanel').then(mod => mod.FlashScoreSyncPanel), {
+    loading: () => <TabLoading placeholder="Cargando sincronización..." />,
+});
+
+const TournamentOperationFixtureWorkspace = dynamic(() => import('./TournamentOperationFixtureWorkspace').then(mod => mod.TournamentOperationFixtureWorkspace), {
+    loading: () => <TabLoading placeholder="Cargando fixture..." />,
+});
+
+// Reusable loading component for tabs
+function TabLoading({ placeholder }: { placeholder: string }) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+            <RefreshCw className="animate-spin text-blue-500 opacity-20" size={32} />
+            <p className="text-dim text-xs font-mono opacity-50">{placeholder}</p>
+        </div>
+    );
+}
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 
@@ -77,7 +101,7 @@ export function TournamentOperationTab({ id, data }: TournamentOperationTabProps
                 const active = fetchedPhases.find((phase) => phase.is_active);
                 setSelectedPhaseId(active?.id || fetchedPhases[0].id);
             }
-        } catch (err: unknown) {
+        } catch (err) {
             setError(err instanceof Error ? err.message : 'Error loading phases');
         } finally {
             setLoading(false);

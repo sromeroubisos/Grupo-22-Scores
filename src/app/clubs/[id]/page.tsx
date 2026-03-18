@@ -203,8 +203,12 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         const timestamp = match.timestamp || match.start_time || match.time;
         const date = timestamp ? new Date(timestamp * 1000) : new Date();
 
-        const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score ?? '-';
-        const scoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score ?? '-';
+        const matchStatus = match.match_status || match.event_status || match.status || '';
+        const isScheduled = matchStatus === 'scheduled' || matchStatus === 'NS' || matchStatus === 'Not Started';
+        const rawScoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score ?? null;
+        const rawScoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score ?? null;
+        const scoreHome = isScheduled || rawScoreHome == null ? '-' : rawScoreHome;
+        const scoreAway = isScheduled || rawScoreAway == null ? '-' : rawScoreAway;
 
         const homeName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Home';
         const awayName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Away';
@@ -505,6 +509,45 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                 <div className={styles.infoRow}>
                                     <span className={styles.label}>Fundado</span>
                                     <span className={styles.value}>{details.founded}</span>
+                                </div>
+                            )}
+                            {(details?.type || details?.club_type) && (
+                                <div className={styles.infoRow}>
+                                    <span className={styles.label}>Tipo</span>
+                                    <span className={styles.value}>{details.type || details.club_type}</span>
+                                </div>
+                            )}
+                            {(details?.short_code || details?.code) && (
+                                <div className={styles.infoRow}>
+                                    <span className={styles.label}>Codigo</span>
+                                    <span className={styles.value}>{details.short_code || details.code}</span>
+                                </div>
+                            )}
+                            {(details?.website || details?.website_url) && (
+                                <div className={styles.infoRow}>
+                                    <span className={styles.label}>Web</span>
+                                    <a href={details.website || details.website_url} target="_blank" rel="noopener noreferrer" className={styles.value} style={{ wordBreak: 'break-all' }}>
+                                        {(details.website || details.website_url).replace(/^https?:\/\//, '')}
+                                    </a>
+                                </div>
+                            )}
+                            {details?.description || details?.about ? (
+                                <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-secondary, #888)', lineHeight: 1.5 }}>
+                                    {details.description || details.about}
+                                </div>
+                            ) : null}
+                            {details?.social_links && typeof details.social_links === 'object' && Object.keys(details.social_links).length > 0 && (
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary, #888)', marginBottom: 6 }}>Redes</div>
+                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                        {Object.entries(details.social_links as Record<string, string>).map(([network, url]) =>
+                                            url ? (
+                                                <a key={network} href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, textTransform: 'capitalize' }}>
+                                                    {network}
+                                                </a>
+                                            ) : null
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>

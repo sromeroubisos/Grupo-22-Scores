@@ -3,17 +3,9 @@
 -- Broadens RLS policies for tournaments to include all admin roles.
 -- ============================================================
 
--- First, check if the policy exists and drop it to recreate with updated roles
-DO $$ 
-BEGIN
-    IF EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'tournaments' 
-        AND policyname = 'Super Admin Access'
-    ) THEN
-        DROP POLICY "Super Admin Access" ON public.tournaments;
-    END IF;
-END $$;
+-- First, ensure previous policies are dropped to avoid conflicts
+DROP POLICY IF EXISTS "Super Admin Access" ON public.tournaments;
+DROP POLICY IF EXISTS "Admin Tournament Management" ON public.tournaments;
 
 -- Create a more inclusive policy for tournaments administration
 -- This covers super_admin, admin_general, and admin roles

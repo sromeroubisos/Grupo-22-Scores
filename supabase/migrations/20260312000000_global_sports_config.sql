@@ -22,6 +22,7 @@ ALTER TABLE public.sports ADD COLUMN IF NOT EXISTS updated_by UUID REFERENCES au
 ALTER TABLE public.sports ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE public.sports ADD COLUMN IF NOT EXISTS icon TEXT;
 ALTER TABLE public.sports ADD COLUMN IF NOT EXISTS name_es TEXT; -- Added for translations
+ALTER TABLE public.sports ADD COLUMN IF NOT EXISTS slug TEXT; -- Missing migration column
 
 -- 3. Enable RLS
 ALTER TABLE public.sports ENABLE ROW LEVEL SECURITY;

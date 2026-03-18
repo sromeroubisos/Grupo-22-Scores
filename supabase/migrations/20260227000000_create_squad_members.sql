@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS squad_members (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Relaciones
-    division_id UUID NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
+    division_id UUID NOT NULL REFERENCES club_divisions(id) ON DELETE CASCADE,
     person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
 
     -- Información del jugador en el plantel
@@ -43,6 +43,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS squad_members_updated_at ON squad_members;
 CREATE TRIGGER squad_members_updated_at
     BEFORE UPDATE ON squad_members
     FOR EACH ROW
@@ -50,6 +51,14 @@ CREATE TRIGGER squad_members_updated_at
 
 -- RLS (Row Level Security) - Políticas de seguridad
 ALTER TABLE squad_members ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "Allow public read access on squad_members" ON squad_members;
+    DROP POLICY IF EXISTS "Allow authenticated insert on squad_members" ON squad_members;
+    DROP POLICY IF EXISTS "Allow authenticated update on squad_members" ON squad_members;
+    DROP POLICY IF EXISTS "Allow authenticated delete on squad_members" ON squad_members;
+END $$;
 
 -- Permitir lectura pública (opcional, ajustar según necesidades)
 CREATE POLICY "Allow public read access on squad_members"
@@ -81,7 +90,7 @@ CREATE POLICY "Allow authenticated delete on squad_members"
     USING (true);
 
 -- Comentarios para documentación
-COMMENT ON TABLE squad_members IS 'Relaciona jugadores (people) con planteles (divisions). Gestiona la composición de cada plantel con roles, dorsales y estados.';
+COMMENT ON TABLE squad_members IS 'Relaciona jugadores (people) con planteles (club_divisions). Gestiona la composición de cada plantel con roles, dorsales y estados.';
 COMMENT ON COLUMN squad_members.position IS 'Posición específica del jugador en el plantel';
 COMMENT ON COLUMN squad_members.role IS 'Rol del jugador: titular, suplente, o desarrollo';
 COMMENT ON COLUMN squad_members.jersey_number IS 'Número de camiseta/dorsal del jugador';

@@ -58,11 +58,10 @@ AS $$
 
     FROM public.favorites f
 
-    -- Club por UUID (usa PK directamente)
+    -- Club por UUID (usa PK directamente) - Nota: en este schema clubs.id es TEXT
     LEFT JOIN public.clubs c_uuid
         ON  f.entity_type = 'club'
-        AND f.entity_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-        AND c_uuid.id = f.entity_id::uuid
+        AND c_uuid.id = f.entity_id
 
     -- Club por external_id (usa índice UNIQUE de external_id)
     LEFT JOIN public.clubs c_ext
@@ -73,8 +72,7 @@ AS $$
     -- Torneo por UUID
     LEFT JOIN public.tournaments trn_uuid
         ON  f.entity_type IN ('league', 'tournament')
-        AND f.entity_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-        AND trn_uuid.id = f.entity_id::uuid
+        AND trn_uuid.id::text = f.entity_id
 
     -- Torneo por external_id
     LEFT JOIN public.tournaments trn_ext

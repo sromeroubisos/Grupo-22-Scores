@@ -45,6 +45,12 @@ CREATE INDEX IF NOT EXISTS idx_matches_datetime ON public.matches(date_time);
 -- ─── RLS POLICIES ────────────────────────────────────────────────────────
 ALTER TABLE public.tournament_rounds ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "public_read_rounds" ON public.tournament_rounds;
+    DROP POLICY IF EXISTS "admin_manage_rounds" ON public.tournament_rounds;
+END $$;
+
 -- Public read for all
 CREATE POLICY "public_read_rounds" ON public.tournament_rounds FOR SELECT USING (true);
 
@@ -189,6 +195,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_auto_complete_round ON public.matches;
 CREATE TRIGGER trg_auto_complete_round
 AFTER UPDATE ON public.matches
 FOR EACH ROW

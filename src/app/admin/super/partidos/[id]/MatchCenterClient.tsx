@@ -76,6 +76,13 @@ export interface MatchRow {
     homeClub?: ClubInfo | null;
     awayClub?: ClubInfo | null;
     tournament?: TournamentInfo | null;
+    // Points per match
+    home_base_points:       number | null;
+    away_base_points:       number | null;
+    home_bonus_points:      number | null;
+    away_bonus_points:      number | null;
+    points_autocalculated:  boolean | null;
+    points_override_reason: string | null;
 }
 
 interface MatchCenterClientProps {
@@ -141,6 +148,76 @@ function countTries(events: MatchEvent[], team: 'home' | 'away'): number {
     return events.filter(e => e.type === 'try' && e.team === team).length;
 }
 
+/* ─── POINTS HELPERS ─── */
+interface PointsRules {
+    win: number;
+    draw: number;
+    loss: number;
+    offensiveThreshold: number | null;
+    defensiveMargin: number | null;
+}
+
+async function fetchPhaseRules(matchId: string, roundId: string | null): Promise<PointsRules> {
+    const defaults: PointsRules = { win: 4, draw: 2, loss: 0, offensiveThreshold: 4, defensiveMargin: 7 };
+    if (!roundId) return defaults;
+    try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data: round } = await supabase
+            .from('tournament_rounds')
+            .select('phase_id')
+            .eq('id', roundId)
+            .single();
+        if (!round?.phase_id) return defaults;
+        const { data: phase } = await supabase
+            .from('tournament_phases')
+            .select('settings')
+            .eq('id', round.phase_id)
+            .single();
+        const settings = phase?.settings as any;
+        return {
+            win:  settings?.points?.win  ?? defaults.win,
+            draw: settings?.points?.draw ?? defaults.draw,
+            loss: settings?.points?.loss ?? defaults.loss,
+            offensiveThreshold: settings?.bonus?.offensive?.tries ?? settings?.bonus?.offensive?.threshold ?? defaults.offensiveThreshold,
+            defensiveMargin:    settings?.bonus?.defensive?.margin ?? defaults.defensiveMargin,
+        };
+    } catch {
+        return defaults;
+    }
+}
+
+function calcPointsFromResult(
+    score: { home: number; away: number },
+    events: MatchEvent[],
+    rules: PointsRules,
+): { homeBase: number; awayBase: number; homeBonus: number; awayBonus: number } {
+    let homeBase = 0, awayBase = 0, homeBonus = 0, awayBonus = 0;
+    if (score.home > score.away) {
+        homeBase = rules.win;
+        awayBase = rules.loss;
+    } else if (score.home < score.away) {
+        homeBase = rules.loss;
+        awayBase = rules.win;
+    } else {
+        homeBase = rules.draw;
+        awayBase = rules.draw;
+    }
+    // Offensive bonus
+    if (rules.offensiveThreshold !== null) {
+        const homeTries = countTries(events, 'home');
+        const awayTries = countTries(events, 'away');
+        if (homeTries >= rules.offensiveThreshold) homeBonus += 1;
+        if (awayTries >= rules.offensiveThreshold) awayBonus += 1;
+    }
+    // Defensive bonus (only for the losing team)
+    if (rules.defensiveMargin !== null) {
+        if (score.home < score.away && (score.away - score.home) <= rules.defensiveMargin) homeBonus += 1;
+        if (score.away < score.home && (score.home - score.away) <= rules.defensiveMargin) awayBonus += 1;
+    }
+    return { homeBase, awayBase, homeBonus, awayBonus };
+}
+
 /* ─────────────────── CLIENT COMPONENT ─────────────────── */
 export default function MatchCenterClient({ initialMatch, matchId, onClose }: MatchCenterClientProps) {
     const router = useRouter();
@@ -154,6 +231,17 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     // Editable state for events & lineups (local mirrors of DB JSONB)
     const [localEvents, setLocalEvents] = useState<MatchEvent[]>(Array.isArray(initialMatch.events) ? initialMatch.events : []);
     const [localLineups, setLocalLineups] = useState<MatchLineups>(initialMatch.lineups || { home: [], away: [] });
+
+    // Editable state for per-match points
+    const [localPoints, setLocalPoints] = useState({
+        home_base_points:       initialMatch.home_base_points      ?? null as number | null,
+        away_base_points:       initialMatch.away_base_points      ?? null as number | null,
+        home_bonus_points:      initialMatch.home_bonus_points      ?? 0,
+        away_bonus_points:      initialMatch.away_bonus_points      ?? 0,
+        points_autocalculated:  initialMatch.points_autocalculated  ?? true,
+        points_override_reason: initialMatch.points_override_reason ?? '',
+    });
+    const [savingPoints, setSavingPoints] = useState(false);
 
     /* ─── REFRESH (for after saves / config changes) ─── */
     const fetchMatch = useCallback(async () => {
@@ -178,6 +266,54 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             console.error('Error refreshing match:', err);
         }
     }, [matchId, supabase]);
+
+    /* ─── POINTS: RECALCULATE & SAVE ─── */
+    const handleRecalculate = useCallback(async () => {
+        const currentScore = match.score || { home: 0, away: 0 };
+        const rules = await fetchPhaseRules(matchId, match.round_id);
+        const pts = calcPointsFromResult(currentScore, localEvents, rules);
+        setLocalPoints(prev => ({
+            ...prev,
+            home_base_points:      pts.homeBase,
+            away_base_points:      pts.awayBase,
+            home_bonus_points:     pts.homeBonus,
+            away_bonus_points:     pts.awayBonus,
+            points_autocalculated: true,
+        }));
+    }, [match, matchId, localEvents]);
+
+    const handleSavePoints = useCallback(async () => {
+        setSavingPoints(true);
+        try {
+            await supabase.from('matches').update({
+                home_base_points:       localPoints.home_base_points,
+                away_base_points:       localPoints.away_base_points,
+                home_bonus_points:      localPoints.home_bonus_points,
+                away_bonus_points:      localPoints.away_bonus_points,
+                points_autocalculated:  localPoints.points_autocalculated,
+                points_override_reason: localPoints.points_override_reason || null,
+            }).eq('id', matchId);
+            await fetchMatch();
+        } finally {
+            setSavingPoints(false);
+        }
+    }, [supabase, matchId, localPoints, fetchMatch]);
+
+    // On mount: if no saved points and match is already final, auto-fill
+    useEffect(() => {
+        if (initialMatch.home_base_points === null && initialMatch.status === 'final') {
+            handleRecalculate();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Reactive: recalculate whenever score/status/events change, only while in auto mode
+    useEffect(() => {
+        // Read auto flag at effect-run time (intentionally not in deps to avoid loops)
+        if (!localPoints.points_autocalculated) return;
+        handleRecalculate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [match.score, match.status, localEvents]);
 
     /* ─── REALTIME (live matches) ─── */
     useEffect(() => {
@@ -927,6 +1063,132 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     />
                                     <label htmlFor="live-check" style={{ margin: 0, color: '#fff' }}>Habilitar actualizaciones en vivo</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* ── PUNTOS DEL PARTIDO ── */}
+                        <div style={{ marginTop: 32, borderTop: '1px solid #222', paddingTop: 24 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                                <h4 style={{ margin: 0 }}>Puntos del Partido</h4>
+                                <span style={{
+                                    fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12,
+                                    background: localPoints.points_autocalculated ? 'rgba(0,163,101,0.2)' : 'rgba(245,158,11,0.2)',
+                                    color: localPoints.points_autocalculated ? 'var(--accent)' : '#f59e0b',
+                                    border: `1px solid ${localPoints.points_autocalculated ? 'var(--accent)' : '#f59e0b'}`,
+                                }}>
+                                    {localPoints.points_autocalculated ? 'Autocalculado' : 'Editado manualmente'}
+                                </span>
+                            </div>
+                            <p style={{ fontSize: 13, color: '#888', marginBottom: 20, marginTop: 0 }}>
+                                Los puntos base se completan automáticamente según las reglas del partido. Podés agregar bonus o penalizaciones manuales.
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                                <div className="form-group" style={{ margin: 0 }}>
+                                    <label>Puntos base local</label>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={localPoints.home_base_points ?? 0}
+                                        style={{ borderRadius: 4 }}
+                                        onChange={(e) => {
+                                            const v = Math.max(0, parseInt(e.target.value) || 0);
+                                            setLocalPoints(prev => ({ ...prev, home_base_points: v, points_autocalculated: false }));
+                                        }}
+                                    />
+                                </div>
+                                <div className="form-group" style={{ margin: 0 }}>
+                                    <label>Puntos base visitante</label>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={localPoints.away_base_points ?? 0}
+                                        style={{ borderRadius: 4 }}
+                                        onChange={(e) => {
+                                            const v = Math.max(0, parseInt(e.target.value) || 0);
+                                            setLocalPoints(prev => ({ ...prev, away_base_points: v, points_autocalculated: false }));
+                                        }}
+                                    />
+                                </div>
+                                <div className="form-group" style={{ margin: 0 }}>
+                                    <label>Bonus / modificador local</label>
+                                    <input
+                                        type="number"
+                                        value={localPoints.home_bonus_points}
+                                        style={{ borderRadius: 4 }}
+                                        onChange={(e) => {
+                                            const v = parseInt(e.target.value) || 0;
+                                            setLocalPoints(prev => ({ ...prev, home_bonus_points: v, points_autocalculated: false }));
+                                        }}
+                                    />
+                                    <small style={{ color: '#666', fontSize: 11 }}>Permite sumar o restar puntos manualmente.</small>
+                                </div>
+                                <div className="form-group" style={{ margin: 0 }}>
+                                    <label>Bonus / modificador visitante</label>
+                                    <input
+                                        type="number"
+                                        value={localPoints.away_bonus_points}
+                                        style={{ borderRadius: 4 }}
+                                        onChange={(e) => {
+                                            const v = parseInt(e.target.value) || 0;
+                                            setLocalPoints(prev => ({ ...prev, away_bonus_points: v, points_autocalculated: false }));
+                                        }}
+                                    />
+                                    <small style={{ color: '#666', fontSize: 11 }}>Permite sumar o restar puntos manualmente.</small>
+                                </div>
+                            </div>
+
+                            {/* Totals (read-only) */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                                {[
+                                    { label: 'Total local', value: (localPoints.home_base_points ?? 0) + localPoints.home_bonus_points },
+                                    { label: 'Total visitante', value: (localPoints.away_base_points ?? 0) + localPoints.away_bonus_points },
+                                ].map(({ label, value }) => (
+                                    <div key={label} style={{ background: '#111', borderRadius: 4, padding: '10px 14px' }}>
+                                        <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>{label}</div>
+                                        <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)' }}>{value}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Override reason */}
+                            {!localPoints.points_autocalculated && (
+                                <div className="form-group">
+                                    <label>Motivo de ajuste (opcional)</label>
+                                    <textarea
+                                        rows={2}
+                                        value={localPoints.points_override_reason}
+                                        placeholder="Ej: Sanción disciplinaria, corrección de resultado..."
+                                        style={{ borderRadius: 4, resize: 'vertical' }}
+                                        onChange={(e) => setLocalPoints(prev => ({ ...prev, points_override_reason: e.target.value }))}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Actions */}
+                            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                                <button
+                                    type="button"
+                                    onClick={handleRecalculate}
+                                    style={{
+                                        background: 'transparent', border: '1px solid #333', color: '#aaa',
+                                        borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
+                                    }}
+                                >
+                                    Recalcular automáticamente
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSavePoints}
+                                    disabled={savingPoints}
+                                    style={{
+                                        background: 'var(--accent)', border: 'none', color: '#000',
+                                        borderRadius: 4, padding: '8px 20px', cursor: savingPoints ? 'not-allowed' : 'pointer',
+                                        fontWeight: 700, fontSize: 13, opacity: savingPoints ? 0.6 : 1,
+                                    }}
+                                >
+                                    {savingPoints ? 'Guardando...' : 'Guardar puntos'}
+                                </button>
                             </div>
                         </div>
                     </article>

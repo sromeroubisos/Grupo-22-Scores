@@ -6,7 +6,7 @@
 -- Add notes column to tournament_participants (if not exists)
 ALTER TABLE public.tournament_participants
     ADD COLUMN IF NOT EXISTS notes TEXT,
-    ADD COLUMN IF NOT EXISTS region_id UUID REFERENCES public.regions(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS region_id UUID, -- References public.regions(id) ON DELETE SET NULL (Table missing)
     ADD COLUMN IF NOT EXISTS country_name TEXT;
 
 -- Update status enum to include all states

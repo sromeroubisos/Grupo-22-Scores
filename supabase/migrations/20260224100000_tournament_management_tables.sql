@@ -105,6 +105,18 @@ ALTER TABLE public.tournament_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournament_participants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournament_standings ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "public_read_phases" ON public.tournament_phases;
+    DROP POLICY IF EXISTS "public_read_groups" ON public.tournament_groups;
+    DROP POLICY IF EXISTS "public_read_participants" ON public.tournament_participants;
+    DROP POLICY IF EXISTS "public_read_standings" ON public.tournament_standings;
+    DROP POLICY IF EXISTS "admin_manage_phases" ON public.tournament_phases;
+    DROP POLICY IF EXISTS "admin_manage_groups" ON public.tournament_groups;
+    DROP POLICY IF EXISTS "admin_manage_participants" ON public.tournament_participants;
+    DROP POLICY IF EXISTS "admin_manage_standings" ON public.tournament_standings;
+END $$;
+
 -- Public read for all
 CREATE POLICY "public_read_phases" ON public.tournament_phases FOR SELECT USING (true);
 CREATE POLICY "public_read_groups" ON public.tournament_groups FOR SELECT USING (true);

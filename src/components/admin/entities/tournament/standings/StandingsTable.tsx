@@ -1,9 +1,11 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { normalizeStandingsRules } from './rules';
+import { LabelChip } from './LabelChip';
+import { AssignLabelDropdown } from './AssignLabelDropdown';
 import styles from './TournamentStandingsTab.module.css';
-import type { StandingsRow, StandingsRules } from './types';
+import type { StandingsRow, StandingsRules, UiLabel } from './types';
 
 type ColumnId =
   | 'played'
@@ -327,6 +329,11 @@ export function StandingsTable({
   tableColumns,
   rules,
   compactMobile = false,
+  labelsMap,
+  allLabels,
+  onAssignLabel,
+  onUnassignLabel,
+  assignmentIdMap,
 }: {
   data: StandingsRow[];
   isLoading: boolean;
@@ -336,10 +343,47 @@ export function StandingsTable({
   tableColumns?: Record<string, boolean> | null;
   rules?: StandingsRules | null;
   compactMobile?: boolean;
+  labelsMap?: Record<string, UiLabel[]>;
+  allLabels?: UiLabel[];
+  onAssignLabel?: (clubId: string, labelId: string) => Promise<void>;
+  onUnassignLabel?: (clubId: string, labelId: string) => Promise<void>;
+  assignmentIdMap?: Record<string, string>;
 }) {
+  const [openDropdownRow, setOpenDropdownRow] = useState<string | null>(null);
   if (isLoading) {
-    return <div className={styles.loadingState}>Calculating standings...</div>;
+    return (
+      <section className={`${styles.glassPanel} ${styles.tableShell}`}>
+        <div className={styles.tableHeader}>
+          <div className={styles.skeleton} style={{ height: '24px', width: '200px', marginBottom: '8px' }} />
+          <div className={styles.skeleton} style={{ height: '16px', width: '300px' }} />
+        </div>
+        <div className={styles.tableViewport}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th style={{ width: '50px' }}>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th colSpan={8}>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(8)].map((_, i) => (
+                <tr key={i} className={styles.row}>
+                  <td><div className={styles.skeleton} style={{ height: '20px', width: '20px', margin: '0 auto' }} /></td>
+                  <td><div className={styles.skeleton} style={{ height: '20px', width: '150px' }} /></td>
+                  {[...Array(6)].map((_, j) => (
+                    <td key={j}><div className={styles.skeleton} style={{ height: '20px', width: '30px', margin: '0 auto' }} /></td>
+                  ))}
+                  <td><div className={styles.skeleton} style={{ height: '20px', width: '40px', margin: '0 auto' }} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    );
   }
+
 
   if (!data || data.length === 0) {
     return <div className={styles.emptyState}>No hay participantes o partidos para la combinacion seleccionada.</div>;
@@ -409,7 +453,21 @@ export function StandingsTable({
                         ) : (
                           <div className={styles.teamLogoFallback}>LOG</div>
                         )}
-                        <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
+                        <div className={styles.teamNameBlock}>
+                          <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
+                          {labelsMap && rowKey && labelsMap[rowKey] && labelsMap[rowKey].length > 0 && (
+                            <div className={styles.teamLabels}>
+                              {labelsMap[rowKey].map((label) => (
+                                <LabelChip
+                                  key={label.id}
+                                  name={label.name}
+                                  color={label.color}
+                                  onRemove={onUnassignLabel ? () => onUnassignLabel(rowKey, label.id) : undefined}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
 
@@ -419,14 +477,40 @@ export function StandingsTable({
                       </td>
                     ))}
 
-                    <td className={styles.actionCell}>
-                      <button type="button" className={styles.iconButton} title="Ver detalles">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="1" />
-                          <circle cx="19" cy="12" r="1" />
-                          <circle cx="5" cy="12" r="1" />
-                        </svg>
-                      </button>
+                    <td className={styles.actionCell} style={{ position: 'relative' }}>
+                      {allLabels && allLabels.length > 0 && onAssignLabel && onUnassignLabel ? (
+                        <>
+                          <button
+                            type="button"
+                            className={styles.iconButton}
+                            title="Asignar etiqueta"
+                            onClick={() => setOpenDropdownRow(openDropdownRow === rowKey ? null : rowKey)}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="1" />
+                              <circle cx="19" cy="12" r="1" />
+                              <circle cx="5" cy="12" r="1" />
+                            </svg>
+                          </button>
+                          {openDropdownRow === rowKey && (
+                            <AssignLabelDropdown
+                              allLabels={allLabels}
+                              assignedLabelIds={new Set((labelsMap?.[rowKey] ?? []).map((l) => l.id))}
+                              onAssign={(labelId) => onAssignLabel(rowKey, labelId)}
+                              onUnassign={(labelId) => onUnassignLabel(rowKey, labelId)}
+                              onClose={() => setOpenDropdownRow(null)}
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <button type="button" className={styles.iconButton} title="Ver detalles">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="1" />
+                            <circle cx="19" cy="12" r="1" />
+                            <circle cx="5" cy="12" r="1" />
+                          </svg>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

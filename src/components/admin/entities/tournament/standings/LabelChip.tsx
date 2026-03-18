@@ -1,0 +1,43 @@
+'use client';
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export function LabelChip({
+  name,
+  color,
+  onRemove,
+}: {
+  name: string;
+  color: string;
+  onRemove?: () => void;
+}) {
+  return (
+    <span
+      style={{
+        backgroundColor: hexToRgba(color, 0.18),
+        border: '1px solid #00a365',
+        color: color,
+      }}
+      className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium leading-none whitespace-nowrap"
+      title={name}
+    >
+      {name}
+      {onRemove && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          className="ml-0.5 rounded-full opacity-70 hover:opacity-100 transition-opacity leading-none"
+          aria-label={`Quitar etiqueta ${name}`}
+        >
+          ×
+        </button>
+      )}
+    </span>
+  );
+}

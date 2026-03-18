@@ -85,6 +85,24 @@
   animation: pulse 1.3s ease-in-out infinite;
 }
 
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+
 .header {
   display: flex;
   flex-direction: column;
@@ -1530,4 +1548,392 @@
     grid-column: 1 / -1;
     text-align: right;
   }
+}
+
+/* ============================================
+   LABELS SYSTEM
+   ============================================ */
+
+/* Label count badge on the "Etiquetas" tab button */
+.labelCountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #03120d;
+  font-size: 9px;
+  font-weight: 800;
+  margin-left: 6px;
+}
+
+/* Team name + labels stacked vertically */
+.teamNameBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.teamLabels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinnerIcon {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ---- Manage Labels Panel (modal) ---- */
+
+.labelsOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 7, 8, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.labelsPanel {
+  width: min(480px, 100%);
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+  background: #0a1519;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.labelsPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.labelsPanelTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.labelsPanelClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.labelsPanelClose:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text);
+}
+
+/* Labels list */
+.labelsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 20px;
+  min-height: 60px;
+}
+
+.labelsEmpty {
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.labelRowActions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.labelActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.labelActionBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.labelActionBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.labelActionBtnDanger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Create/Edit form */
+.labelsForm {
+  padding: 16px 20px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.labelsFormTitle {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.labelsFormRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.labelsInput {
+  flex: 1;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.labelsInput:focus {
+  border-color: rgba(0, 163, 101, 0.45);
+}
+
+.labelsInput:disabled {
+  opacity: 0.5;
+}
+
+.colorPickerWrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.colorInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.colorPreviewSwatch {
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+.colorPresetsRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.colorPresetSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.12s, border-color 0.12s;
+  padding: 0;
+}
+
+.colorPresetSwatch:hover:not(:disabled) {
+  transform: scale(1.15);
+}
+
+.colorPresetSwatch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.colorPresetSwatchActive {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.labelPreviewRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.labelPreviewHint {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.labelsError {
+  color: #ef4444;
+  font-size: 12px;
+  margin: 0;
+}
+
+.labelsFormActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.labelsBtnSecondary,
+.labelsBtnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.labelsBtnSecondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.labelsBtnPrimary {
+  background: var(--accent);
+  border: 1px solid rgba(0, 163, 101, 0.4);
+  color: #03120d;
+  box-shadow: 0 8px 20px rgba(0, 163, 101, 0.2);
+}
+
+.labelsBtnPrimary:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+/* ---- Assign Label Dropdown ---- */
+
+.assignDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 200;
+  min-width: 180px;
+  max-width: 260px;
+  padding: 6px;
+  background: #0d1c21;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assignDropdownEmpty {
+  padding: 10px 8px;
+  color: var(--text-faint);
+  font-size: 11px;
+  text-align: center;
+  margin: 0;
+}
+
+.assignDropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 9px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.assignDropdownItem:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.assignDropdownItemActive {
+  background: rgba(0, 163, 101, 0.07);
+  border-color: rgba(0, 163, 101, 0.15);
+}
+
+.assignDropdownCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--accent);
 }

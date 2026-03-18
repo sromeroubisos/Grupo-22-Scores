@@ -1,0 +1,1466 @@
+{
+  "tournamentId": "55f28144-3d92-484b-a57d-646e06740808",
+  "phases": [
+    {
+      "id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "tournament_id": "55f28144-3d92-484b-a57d-646e06740808",
+      "name": "Fase Regular",
+      "phase_type": "league",
+      "order_index": 1,
+      "is_active": true,
+      "settings": {
+        "legs": 2,
+        "groupTags": [
+          "Semifinales",
+          "Cuartos de Final",
+          "Playout"
+        ],
+        "teamsCount": 10,
+        "groupLabels": [
+          {
+            "name": "Semifinales",
+            "color": "#60a5fa"
+          },
+          {
+            "name": "Cuartos de Final",
+            "color": "#60a5fa"
+          },
+          {
+            "name": "Playout",
+            "color": "#60a5fa"
+          }
+        ],
+        "matchFormat": {
+          "type": "series",
+          "label": "Ida y Vuelta",
+          "behavior": {
+            "series": {
+              "seriesLength": 2,
+              "tieResolution": "extra_time_then_penalty_shootout",
+              "aggregateMethod": "points_sum"
+            },
+            "single_match": {
+              "seriesLength": 1,
+              "winnerDetermination": "most_points_in_match"
+            }
+          }
+        },
+        "playerStats": {
+          "behavior": {
+            "attribution": {
+              "howToApply": "for_each_eligible_player_add_same_team_stat_delta_as_in_team_totals",
+              "teamStatsToPlayers": [
+                "points_for",
+                "points_against",
+                "wins",
+                "draws",
+                "losses",
+                "bonus_points"
+              ]
+            },
+            "eligibility": {
+              "mode": "played_or_starter",
+              "rules": [
+                {
+                  "if": {
+                    "assignOnlyToStarters": true
+                  },
+                  "then": {
+                    "eligiblePlayers": "starters_only"
+                  }
+                },
+                {
+                  "if": {
+                    "assignOnlyToStarters": false
+                  },
+                  "then": {
+                    "eligiblePlayers": "played_true"
+                  }
+                }
+              ],
+              "playedFlagField": "lineup.played",
+              "starterFlagField": "lineup.is_starter"
+            },
+            "whenToAttribute": "on_match_finalized"
+          },
+          "assignOnlyToStarters": false,
+          "assignTeamStatsToPlayersWhoPlayed": true
+        },
+        "tiebreakers": [
+          {
+            "order": "desc",
+            "metric": "points",
+            "enabled": true,
+            "priority": 1
+          },
+          {
+            "order": "desc",
+            "metric": "headToHead",
+            "enabled": true,
+            "priority": 2
+          },
+          {
+            "order": "desc",
+            "metric": "pointsDiff",
+            "enabled": true,
+            "priority": 3
+          },
+          {
+            "order": "desc",
+            "metric": "pointsFor",
+            "enabled": true,
+            "priority": 4
+          },
+          {
+            "order": "desc",
+            "metric": "won",
+            "enabled": false,
+            "priority": 5
+          },
+          {
+            "order": "desc",
+            "metric": "drawn",
+            "enabled": false,
+            "priority": 6
+          },
+          {
+            "order": "desc",
+            "metric": "percentage",
+            "enabled": false,
+            "priority": 7
+          },
+          {
+            "order": "desc",
+            "metric": "tries",
+            "enabled": false,
+            "priority": 8
+          },
+          {
+            "order": "desc",
+            "metric": "conversions",
+            "enabled": false,
+            "priority": 9
+          }
+        ],
+        "advanceCount": 6,
+        "pointsSystem": {
+          "win": 4,
+          "draw": 2,
+          "loss": 0,
+          "behavior": {
+            "input": {
+              "requires": [
+                "score"
+              ],
+              "statusRequired": "finalized"
+            },
+            "output": {
+              "writesTo": [
+                "standings"
+              ]
+            },
+            "idempotency": {
+              "key": "match_id",
+              "rule": "ignore_if_already_processed"
+            },
+            "basePointsLogic": [
+              {
+                "if": {
+                  "win": true
+                },
+                "then": {
+                  "add": 4
+                }
+              },
+              {
+                "if": {
+                  "draw": true
+                },
+                "then": {
+                  "add": 2
+                }
+              },
+              {
+                "if": {
+                  "loss": true
+                },
+                "then": {
+                  "add": 0
+                }
+              }
+            ],
+            "whenToCalculate": "on_match_finalized"
+          },
+          "allowBonusPoints": true,
+          "extraTimeAlternativeSystem": false
+        },
+        "tableColumns": {
+          "won": true,
+          "lost": true,
+          "runs": false,
+          "drawn": true,
+          "tries": true,
+          "played": true,
+          "points": true,
+          "tackles": false,
+          "extraWon": false,
+          "dropGoals": false,
+          "extraLost": false,
+          "penalties": false,
+          "pointsFor": true,
+          "extraDrawn": false,
+          "percentage": false,
+          "pointsDiff": true,
+          "conversions": false,
+          "extraPlayed": false,
+          "posVariation": true,
+          "pointsAgainst": true,
+          "classification": false
+        },
+        "statsAssignment": "played",
+        "tiebreakerBehavior": {
+          "scope": {
+            "tableScope": "phase_group_or_pool",
+            "headToHeadScope": "only_between_tied_teams_in_that_tableScope"
+          },
+          "algorithm": {
+            "stepByStep": [
+              "points",
+              "headToHead",
+              "pointsDiff",
+              "pointsFor"
+            ],
+            "finalFallback": {
+              "mode": "stable",
+              "rule": "keep_previous_order_or_use_team_id_ascending",
+              "reason": "ensure deterministic sorting"
+            }
+          },
+          "appliesTo": "standings_sorting_only",
+          "evaluationTime": "after_all_matches_in_scope_processed"
+        }
+      },
+      "created_at": "2026-03-05T20:30:02.032775+00:00",
+      "updated_at": "2026-03-05T20:30:02.032775+00:00"
+    }
+  ],
+  "groups": [
+    {
+      "id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Grupo Único",
+      "order_index": 1,
+      "created_at": "2026-03-18T04:26:37.574754+00:00"
+    }
+  ],
+  "rounds": [
+    {
+      "id": "c8af3b07-26f1-4ac2-948d-73d93380bed9",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 1",
+      "order_index": 1,
+      "start_date": "2026-03-14T00:00:00+00:00",
+      "end_date": "2026-03-14T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:38.558986+00:00",
+      "updated_at": "2026-03-18T04:26:38.558986+00:00"
+    },
+    {
+      "id": "0cdf83e7-f9de-4c46-971b-97ba78554955",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 2",
+      "order_index": 2,
+      "start_date": "2026-03-21T00:00:00+00:00",
+      "end_date": "2026-03-21T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:39.139744+00:00",
+      "updated_at": "2026-03-18T04:26:39.139744+00:00"
+    },
+    {
+      "id": "5ac7fc3c-7626-46b0-aad7-dc756a0ab5a1",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 3",
+      "order_index": 3,
+      "start_date": "2026-04-11T00:00:00+00:00",
+      "end_date": "2026-04-11T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:39.72208+00:00",
+      "updated_at": "2026-03-18T04:26:39.72208+00:00"
+    },
+    {
+      "id": "65f5f2aa-6d6d-4af3-ade7-efa1c2706bb5",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 4",
+      "order_index": 4,
+      "start_date": "2026-04-18T00:00:00+00:00",
+      "end_date": "2026-04-18T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:40.299581+00:00",
+      "updated_at": "2026-03-18T04:26:40.299581+00:00"
+    },
+    {
+      "id": "bc150c77-b8c3-48a8-8ef2-f44f991a7114",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 5",
+      "order_index": 5,
+      "start_date": "2026-05-09T00:00:00+00:00",
+      "end_date": "2026-05-09T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:40.866509+00:00",
+      "updated_at": "2026-03-18T04:26:40.866509+00:00"
+    },
+    {
+      "id": "6ec9a734-4e5a-4f1b-b600-de30e20f6803",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 6",
+      "order_index": 6,
+      "start_date": "2026-05-16T00:00:00+00:00",
+      "end_date": "2026-05-16T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:41.436059+00:00",
+      "updated_at": "2026-03-18T04:26:41.436059+00:00"
+    },
+    {
+      "id": "005ca088-6730-40f7-a948-15d38c47bc3e",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 7",
+      "order_index": 7,
+      "start_date": "2026-06-06T00:00:00+00:00",
+      "end_date": "2026-06-06T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:42.014732+00:00",
+      "updated_at": "2026-03-18T04:26:42.014732+00:00"
+    },
+    {
+      "id": "9f5d6648-3f3d-4420-b282-d5a0d9028b2d",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 8",
+      "order_index": 8,
+      "start_date": "2026-06-13T00:00:00+00:00",
+      "end_date": "2026-06-13T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:42.604363+00:00",
+      "updated_at": "2026-03-18T04:26:42.604363+00:00"
+    },
+    {
+      "id": "f0c7dda6-9d7c-497d-9bf0-b5f4e459aea0",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 9",
+      "order_index": 9,
+      "start_date": "2026-06-20T00:00:00+00:00",
+      "end_date": "2026-06-20T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:43.159544+00:00",
+      "updated_at": "2026-03-18T04:26:43.159544+00:00"
+    },
+    {
+      "id": "97f20ffb-980e-4e07-815d-9aab0c425bfd",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 10",
+      "order_index": 10,
+      "start_date": "2026-07-11T00:00:00+00:00",
+      "end_date": "2026-07-11T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:43.71187+00:00",
+      "updated_at": "2026-03-18T04:26:43.71187+00:00"
+    },
+    {
+      "id": "88ba09dd-fe85-4e06-b135-645f8dd531ed",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 11",
+      "order_index": 11,
+      "start_date": "2026-07-18T00:00:00+00:00",
+      "end_date": "2026-07-18T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:44.290708+00:00",
+      "updated_at": "2026-03-18T04:26:44.290708+00:00"
+    },
+    {
+      "id": "33a65930-4ad9-492d-b02a-3159248f075c",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 12",
+      "order_index": 12,
+      "start_date": "2026-08-08T00:00:00+00:00",
+      "end_date": "2026-08-08T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:44.876555+00:00",
+      "updated_at": "2026-03-18T04:26:44.876555+00:00"
+    },
+    {
+      "id": "d1ff16d8-2663-498a-ad34-82009323e923",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 13",
+      "order_index": 13,
+      "start_date": "2026-08-22T00:00:00+00:00",
+      "end_date": "2026-08-22T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:45.454587+00:00",
+      "updated_at": "2026-03-18T04:26:45.454587+00:00"
+    },
+    {
+      "id": "a8ae5766-46ea-4150-8e7e-b6dc21b3924d",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 14",
+      "order_index": 14,
+      "start_date": "2026-08-29T00:00:00+00:00",
+      "end_date": "2026-08-29T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:46.028566+00:00",
+      "updated_at": "2026-03-18T04:26:46.028566+00:00"
+    },
+    {
+      "id": "a5c009ae-1ee6-451b-9ae5-c484e2556023",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 15",
+      "order_index": 15,
+      "start_date": "2026-09-19T00:00:00+00:00",
+      "end_date": "2026-09-19T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:46.605775+00:00",
+      "updated_at": "2026-03-18T04:26:46.605775+00:00"
+    },
+    {
+      "id": "a275054e-fa89-4374-bdc3-57771025950d",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 16",
+      "order_index": 16,
+      "start_date": "2026-10-10T00:00:00+00:00",
+      "end_date": "2026-10-10T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:47.193665+00:00",
+      "updated_at": "2026-03-18T04:26:47.193665+00:00"
+    },
+    {
+      "id": "bf3d4ae3-323b-4cc1-8431-2d12461bf499",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 17",
+      "order_index": 17,
+      "start_date": "2026-10-17T00:00:00+00:00",
+      "end_date": "2026-10-17T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:47.790051+00:00",
+      "updated_at": "2026-03-18T04:26:47.790051+00:00"
+    },
+    {
+      "id": "f0108423-9b97-4bf5-8e5d-c13bd1f18d24",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "name": "Fecha 18",
+      "order_index": 18,
+      "start_date": "2026-10-24T00:00:00+00:00",
+      "end_date": "2026-10-24T00:00:00+00:00",
+      "is_completed": false,
+      "notes": null,
+      "created_at": "2026-03-18T04:26:48.381949+00:00",
+      "updated_at": "2026-03-18T04:26:48.381949+00:00"
+    }
+  ],
+  "matches": [
+    {
+      "id": "8c25aea6-3e2b-4275-b533-168a899bbf11",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "c8af3b07-26f1-4ac2-948d-73d93380bed9",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "adfc34b5-1578-4b81-a8a6-77cc5b441517",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "c8af3b07-26f1-4ac2-948d-73d93380bed9",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "fe5e2542-6a53-43a2-9049-7949534f7ba3",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "5ac7fc3c-7626-46b0-aad7-dc756a0ab5a1",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "07ab4e57-2065-4f9d-88a4-79a423983e69",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "d1ff16d8-2663-498a-ad34-82009323e923",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "74f64f4b-53b3-407b-83a9-43a3d4817a6b",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "c8af3b07-26f1-4ac2-948d-73d93380bed9",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7ad6e414-6a9a-498c-a50b-589ab2aa9423",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "c8af3b07-26f1-4ac2-948d-73d93380bed9",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7b665f5b-5e6a-411c-88d1-697bf2764453",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "c8af3b07-26f1-4ac2-948d-73d93380bed9",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "edf37f25-2cc4-40ae-a98c-583daaae7989",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "0cdf83e7-f9de-4c46-971b-97ba78554955",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "20097f83-0bbd-4157-8b46-d07b815414cc",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "0cdf83e7-f9de-4c46-971b-97ba78554955",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "4953222a-6aa5-4bf2-a305-9857fc8be67d",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "0cdf83e7-f9de-4c46-971b-97ba78554955",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "066476c6-e469-4193-b83e-7926677ed8df",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "0cdf83e7-f9de-4c46-971b-97ba78554955",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7d4aadbc-c02a-4ce7-960d-0caa67e699fb",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "0cdf83e7-f9de-4c46-971b-97ba78554955",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "e3e336e6-5a7a-4afa-8f6a-07fc8ac95fc7",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "5ac7fc3c-7626-46b0-aad7-dc756a0ab5a1",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "14996b15-f8d3-434c-9cc0-a7ac435e15e0",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "5ac7fc3c-7626-46b0-aad7-dc756a0ab5a1",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7841b0b2-ca42-4a7a-ab2e-68b39f5a66c0",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "5ac7fc3c-7626-46b0-aad7-dc756a0ab5a1",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "ab5ec0c4-16ac-46a6-b1ef-3317c83f5155",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "5ac7fc3c-7626-46b0-aad7-dc756a0ab5a1",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7f51b9ea-6bed-469c-b166-1b0ff6f1f5a9",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "65f5f2aa-6d6d-4af3-ade7-efa1c2706bb5",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "8311c57c-9736-4f6f-8cc6-5f7b84520252",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "65f5f2aa-6d6d-4af3-ade7-efa1c2706bb5",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "aebf81c2-3866-488a-96d7-f55c7e63cc4d",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "65f5f2aa-6d6d-4af3-ade7-efa1c2706bb5",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "c8322337-77ad-4a95-b460-51c7ea430e76",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "65f5f2aa-6d6d-4af3-ade7-efa1c2706bb5",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "0d1db355-f4c3-422d-914d-e0e50868915a",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "88ba09dd-fe85-4e06-b135-645f8dd531ed",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "ecb3519d-85db-46ff-89c7-df8253f6a9cb",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "65f5f2aa-6d6d-4af3-ade7-efa1c2706bb5",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "48ae89cc-aad1-42ad-ab0e-f8046b6f3b85",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bc150c77-b8c3-48a8-8ef2-f44f991a7114",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "892a4555-b67e-483f-b553-ba77a0080384",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "6ec9a734-4e5a-4f1b-b600-de30e20f6803",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "036b75fd-2f9b-4676-828b-44ddfb58bc02",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "33a65930-4ad9-492d-b02a-3159248f075c",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "35c22e7e-757e-4279-ad52-586607b10038",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bc150c77-b8c3-48a8-8ef2-f44f991a7114",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "e7d9a477-b8f4-4320-a719-89cb14b00e49",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "6ec9a734-4e5a-4f1b-b600-de30e20f6803",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d08eea6e-cd79-4975-b96b-1826fe3c0b65",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "33a65930-4ad9-492d-b02a-3159248f075c",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "6f6c4ac9-904e-4f8b-a840-7a75d620af66",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bc150c77-b8c3-48a8-8ef2-f44f991a7114",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7cb7011e-de77-4a19-97e9-06c3b4d5f325",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "6ec9a734-4e5a-4f1b-b600-de30e20f6803",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "5c9d2f2d-1a89-47ad-8fde-229d162bd434",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bc150c77-b8c3-48a8-8ef2-f44f991a7114",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7758ac38-e0b7-4bed-aa8f-30abd5340056",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "6ec9a734-4e5a-4f1b-b600-de30e20f6803",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "8becfffa-2ff4-4070-8627-c49b129c8e1a",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "005ca088-6730-40f7-a948-15d38c47bc3e",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "ce494a15-cf04-4027-8bd2-7a8dd417d51a",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bc150c77-b8c3-48a8-8ef2-f44f991a7114",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "55bda912-ae96-4952-b6b8-11e891ca2c34",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "6ec9a734-4e5a-4f1b-b600-de30e20f6803",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d6d3182b-62ae-4e2c-9b52-2c2767120aee",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "005ca088-6730-40f7-a948-15d38c47bc3e",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "e5585fbe-28d6-4a83-bf97-dca5dfe05737",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "005ca088-6730-40f7-a948-15d38c47bc3e",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "95f94d5c-107b-4e82-bec4-efe3595ef757",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "005ca088-6730-40f7-a948-15d38c47bc3e",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "30d36490-4f9b-490b-a31a-c232cd58aff4",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "9f5d6648-3f3d-4420-b282-d5a0d9028b2d",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "4d26a146-7b4e-4726-960a-559e74c7feb9",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "9f5d6648-3f3d-4420-b282-d5a0d9028b2d",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "561bc02c-7fdd-4ca9-b50e-33782938cc94",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "9f5d6648-3f3d-4420-b282-d5a0d9028b2d",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "908e05de-a687-46d0-803b-78b273b09527",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "9f5d6648-3f3d-4420-b282-d5a0d9028b2d",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d9e3b2ec-edf3-4f62-8ec9-4bacad499d8e",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0c7dda6-9d7c-497d-9bf0-b5f4e459aea0",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "dcb8cd91-beec-4da2-8e3a-9e2112a6dc3c",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0c7dda6-9d7c-497d-9bf0-b5f4e459aea0",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "a8ed64d5-f9ae-4940-b395-b26d06c5b561",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0c7dda6-9d7c-497d-9bf0-b5f4e459aea0",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "bc6c2fd2-1a81-4092-8aee-d1464ca69e58",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0c7dda6-9d7c-497d-9bf0-b5f4e459aea0",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d35e019b-6139-4f3f-98d0-42789a8b038d",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0c7dda6-9d7c-497d-9bf0-b5f4e459aea0",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d453d127-3573-4035-b219-f9a708cf263a",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "97f20ffb-980e-4e07-815d-9aab0c425bfd",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "f9e6886b-8eb8-4fad-bd98-a1c392be4959",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "97f20ffb-980e-4e07-815d-9aab0c425bfd",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7026c7d1-2786-4d50-b0fe-24a02bd727e9",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "97f20ffb-980e-4e07-815d-9aab0c425bfd",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "bb9c8ef0-c4d6-4803-8b00-df740e26628b",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "97f20ffb-980e-4e07-815d-9aab0c425bfd",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "c640a343-0885-435c-9d42-f5e6223745d9",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "97f20ffb-980e-4e07-815d-9aab0c425bfd",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "f7340930-ffb5-4a73-85ba-f637e2a24748",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "88ba09dd-fe85-4e06-b135-645f8dd531ed",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "f52b82a7-7ee3-4fa5-872d-3cc7953682f7",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "88ba09dd-fe85-4e06-b135-645f8dd531ed",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "40cb25a9-a833-41dc-9460-e0c7e58a1d28",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "88ba09dd-fe85-4e06-b135-645f8dd531ed",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "713cff2f-a2ed-4354-ad30-5319a52eb5f5",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "88ba09dd-fe85-4e06-b135-645f8dd531ed",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "e838c140-0494-4704-8271-7a2ae07b796a",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "33a65930-4ad9-492d-b02a-3159248f075c",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "ef81de07-9f23-4e8e-8a37-688d6950b29c",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "33a65930-4ad9-492d-b02a-3159248f075c",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "baae930c-30dd-4c54-8975-51c855414692",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "33a65930-4ad9-492d-b02a-3159248f075c",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "0e195bc5-3c9d-451e-83eb-66cd30fed970",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "d1ff16d8-2663-498a-ad34-82009323e923",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7c0298a2-9b5b-47db-aafd-90c01f865cfb",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "d1ff16d8-2663-498a-ad34-82009323e923",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "b032c9a0-f9e0-4038-b53b-87e9a35ee023",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "d1ff16d8-2663-498a-ad34-82009323e923",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "b5f29e7b-8a52-4343-bc3b-0b864aa601c3",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "d1ff16d8-2663-498a-ad34-82009323e923",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "f4941b1e-064e-4e22-94b7-4d2d1eeda652",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bf3d4ae3-323b-4cc1-8431-2d12461bf499",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "3ff8db1e-4052-4c55-b3fe-ea731f6d4cff",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bf3d4ae3-323b-4cc1-8431-2d12461bf499",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "79b663d1-65a0-437e-9e4f-2b80fc8ce61b",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bf3d4ae3-323b-4cc1-8431-2d12461bf499",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "bd90349b-b50c-4b98-84c9-66b81be825a0",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bf3d4ae3-323b-4cc1-8431-2d12461bf499",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d0e7b4ae-aaee-4da6-b15a-f53547b0a9dd",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "bf3d4ae3-323b-4cc1-8431-2d12461bf499",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "a023e633-4f52-478d-9300-b8a3c562b9b7",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0108423-9b97-4bf5-8e5d-c13bd1f18d24",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d7153a73-6c92-412a-8a0b-383f5a63df49",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a8ae5766-46ea-4150-8e7e-b6dc21b3924d",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "eb5d98c2-3e96-4c6e-b60a-e80e27214839",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a8ae5766-46ea-4150-8e7e-b6dc21b3924d",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "4c00070e-3a5d-4b95-a317-f4a9663f5ae8",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a8ae5766-46ea-4150-8e7e-b6dc21b3924d",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "7294c4c9-b705-4987-8314-38a892490845",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a8ae5766-46ea-4150-8e7e-b6dc21b3924d",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "94c90d12-7785-4f4e-b1a4-28cdfe97cd8a",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a8ae5766-46ea-4150-8e7e-b6dc21b3924d",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "db17b565-aa1a-4fa4-bc89-c10324517f3f",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0108423-9b97-4bf5-8e5d-c13bd1f18d24",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "eea69bd9-4947-4269-9c23-6ea108defc94",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0108423-9b97-4bf5-8e5d-c13bd1f18d24",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "17c238c7-40ab-4b27-9bc6-d074be839573",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0108423-9b97-4bf5-8e5d-c13bd1f18d24",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "9924114e-fc12-4605-b7f1-0f40d05434ef",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "f0108423-9b97-4bf5-8e5d-c13bd1f18d24",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "e4a979ca-07b5-4583-aa91-c014e09d7d47",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a5c009ae-1ee6-451b-9ae5-c484e2556023",
+      "home_club_id": "jockey-club-de-villa-maria",
+      "away_club_id": "club-universitario-de-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "63a07e27-ab60-4263-92d2-b02d1807830f",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a5c009ae-1ee6-451b-9ae5-c484e2556023",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "carlos-paz-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "9ae6e777-1bd7-4dd4-ae77-f3a5768c230c",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a5c009ae-1ee6-451b-9ae5-c484e2556023",
+      "home_club_id": "uru-cure-rugby-club",
+      "away_club_id": "club-la-tablada",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "9cc51174-1099-47b4-ad84-729f88a6ab28",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a5c009ae-1ee6-451b-9ae5-c484e2556023",
+      "home_club_id": "tala-rugby-club",
+      "away_club_id": "club-palermo-bajo",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "acdf66fc-5072-44f2-90e9-44e143ea47b7",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a5c009ae-1ee6-451b-9ae5-c484e2556023",
+      "home_club_id": "jockey-club-cordoba",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "9c50d0e0-0b8c-40ab-b7f9-8aa730d46dd2",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "005ca088-6730-40f7-a948-15d38c47bc3e",
+      "home_club_id": "san-martin-de-villa-maria",
+      "away_club_id": "cordoba-athletic-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "23d6dcb4-7969-4889-aaa9-ee5dd355a9af",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "9f5d6648-3f3d-4420-b282-d5a0d9028b2d",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "e2554170-037f-4113-9036-7ab8f61c779a",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a275054e-fa89-4374-bdc3-57771025950d",
+      "home_club_id": "cordoba-athletic-club",
+      "away_club_id": "san-martin-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "2466f441-a662-4c23-ae76-742355c35d54",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a275054e-fa89-4374-bdc3-57771025950d",
+      "home_club_id": "club-la-tablada",
+      "away_club_id": "jockey-club-cordoba",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "9534ff00-8b39-4ee5-9349-998ff1fa4aa2",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a275054e-fa89-4374-bdc3-57771025950d",
+      "home_club_id": "carlos-paz-rugby-club",
+      "away_club_id": "tala-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "adad23e8-6f19-43a6-9135-05c5a6479891",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a275054e-fa89-4374-bdc3-57771025950d",
+      "home_club_id": "club-universitario-de-cordoba",
+      "away_club_id": "uru-cure-rugby-club",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    },
+    {
+      "id": "d31a29e4-ad62-40b1-b523-2c2fd1ea663b",
+      "phase_id": "b4a7d7e2-7436-43ad-a11b-59d514171b3d",
+      "group_id": "9c852c74-2c5a-4e47-9541-99653b8bd3b0",
+      "round_uuid": "a275054e-fa89-4374-bdc3-57771025950d",
+      "home_club_id": "club-palermo-bajo",
+      "away_club_id": "jockey-club-de-villa-maria",
+      "has_valid_phase": true,
+      "has_valid_group": true,
+      "has_valid_round": true
+    }
+  ]
+}

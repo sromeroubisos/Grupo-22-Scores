@@ -32,6 +32,12 @@ CREATE INDEX IF NOT EXISTS idx_tournament_followers_user_id ON public.tournament
 ALTER TABLE public.tournament_followers ENABLE ROW LEVEL SECURITY;
 
 -- Everyone can see counts (public access)
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "Public can view follower stats" ON public.tournament_followers;
+    DROP POLICY IF EXISTS "Users manage own follows" ON public.tournament_followers;
+END $$;
+
 CREATE POLICY "Public can view follower stats" 
 ON public.tournament_followers FOR SELECT USING (true);
 

@@ -203,10 +203,15 @@ export class FixtureService {
 
     // 4. Get ALL matches for this tournament directly by tournament_id
     // This captures even "orphaned" matches and is much more efficient.
+    // Explicit columns exclude heavy JSONB fields (events, lineups, weather, clock)
+    // that are not needed for the fixture list view.
     const { data: allMatches, error: matchesError } = await supabase
       .from('matches')
       .select(`
-        *,
+        id, tournament_id, round_uuid, phase_id, group_id,
+        date_time, venue, pitch, status, score, live_enabled,
+        round_label, referee, attendance, notes, stream_url, replay_url,
+        home_club_id, away_club_id,
         home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
         away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
       `)
@@ -293,34 +298,58 @@ export class FixtureService {
   }
 
   /**
-   * Get rounds for a specific phase with their matches
+   * Get rounds for a specific phase with their matches.
+   * Fetches rounds and matches in parallel (2 queries total, not N+1).
    */
   static async getRoundsForPhase(phaseId: string): Promise<RoundWithMatches[] | null> {
     const supabase = await createClient();
 
-    const { data: rounds, error: roundsError } = await supabase
-      .from('tournament_rounds')
-      .select('*')
-      .eq('phase_id', phaseId)
-      .order('order_index', { ascending: true });
+    const [{ data: rounds, error: roundsError }, { data: allMatches, error: matchesError }] =
+      await Promise.all([
+        supabase
+          .from('tournament_rounds')
+          .select('*')
+          .eq('phase_id', phaseId)
+          .order('order_index', { ascending: true }),
+        supabase
+          .from('matches')
+          .select(`
+            id, tournament_id, round_uuid, phase_id, group_id,
+            date_time, venue, pitch, status, score, live_enabled,
+            round_label, referee, attendance, notes, stream_url, replay_url,
+            home_club_id, away_club_id,
+            home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
+            away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
+          `)
+          .eq('phase_id', phaseId)
+          .order('date_time', { ascending: true }),
+      ]);
 
     if (roundsError) {
       console.error('Error fetching rounds:', roundsError);
       return null;
     }
 
-    const roundsWithMatches: RoundWithMatches[] = await Promise.all(
-      (rounds || []).map(async (round) => {
-        const matches = await this.getMatchesForRound(round.id);
-        return {
-          ...this.mapRound(round),
-          matches: matches || [],
-          matchCount: matches?.length || 0,
-        };
-      })
-    );
+    if (matchesError) {
+      console.error('Error fetching matches for phase:', matchesError);
+    }
 
-    return roundsWithMatches;
+    // Group matches by round_uuid in memory — avoids N+1
+    const matchesByRound = new Map<string, any[]>();
+    for (const m of allMatches || []) {
+      const key = m.round_uuid ?? '__orphan__';
+      if (!matchesByRound.has(key)) matchesByRound.set(key, []);
+      matchesByRound.get(key)!.push(m);
+    }
+
+    return (rounds || []).map((round) => {
+      const matches = (matchesByRound.get(round.id) || []).map((m) => this.mapMatchWithClubs(m));
+      return {
+        ...this.mapRound(round),
+        matches,
+        matchCount: matches.length,
+      };
+    });
   }
 
   /**
@@ -1133,7 +1162,7 @@ export class FixtureService {
       id: match.id,
       tournamentId: match.tournament_id,
       phaseId: match.phase_id,
-      roundId: match.round_id,
+      roundId: match.round_uuid ?? match.round_id ?? null,
       groupId: match.group_id || null,
       homeClubId: match.home_club_id,
       awayClubId: match.away_club_id,

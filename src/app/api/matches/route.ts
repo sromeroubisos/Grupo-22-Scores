@@ -200,6 +200,10 @@ export async function GET(request: Request) {
         // Per-source tracking (returned in response for client error visibility)
         let fsOk = false, fsCount = 0, fsFromCache = false;
         let dbOk = false, dbCount = 0, dbFallback = false;
+        let fsReason: string | null = null;
+        let fsMessage: string | null = null;
+        let dbReason: string | null = null;
+        let dbMessage: string | null = null;
 
         if (!useExternal) {
             let matches = db.matches;
@@ -268,6 +272,8 @@ export async function GET(request: Request) {
                     }).catch(e => {
                         console.warn('[matches] FlashScore fetch failed - trying cache', e?.message);
                         fsFetchFailed = true;
+                        fsReason = 'flashscore_fetch_failed';
+                        fsMessage = 'No se pudieron cargar los partidos desde FlashScore.';
                         return [];
                     }),
                     isToday ? getFlashScoreLiveMatches(sport || 'rugby').catch(e => {
@@ -287,6 +293,8 @@ export async function GET(request: Request) {
                             fsOk = false;
                             fsFromCache = true;
                             fsCount = fromCache.length;
+                            fsReason = 'flashscore_cache_fallback';
+                            fsMessage = 'Datos de FlashScore desde caché; puede haber un leve retraso.';
                             console.log(`[matches] FlashScore cache fallback: ${fsCount} matches for date=${date}`);
                         }
                     } catch (cacheErr) {
@@ -367,6 +375,8 @@ export async function GET(request: Request) {
                 enrichedMatches = [...enrichedMatches, ...enrichedExternalMatches];
                 fsOk = true;
                 fsCount = enrichedExternalMatches.length;
+                fsReason = fsCount === 0 ? 'empty_result' : null;
+                fsMessage = fsCount === 0 ? 'No hay partidos de FlashScore para este filtro.' : null;
                 console.log(`[matches] FlashScore: ${fsCount} matches for date=${date}`);
 
                 if (externalMatches && externalMatches.length > 0) {
@@ -375,6 +385,8 @@ export async function GET(request: Request) {
                 } // end if (!fsFetchFailed)
             } catch (e) {
                 console.error('External section processing failed:', e);
+                fsReason = 'flashscore_processing_failed';
+                fsMessage = 'No se pudo procesar la respuesta de FlashScore.';
             }
         }
 
@@ -516,10 +528,18 @@ export async function GET(request: Request) {
 
                 enrichedMatches = [...enrichedMatches, ...enrichedDbMatches];
                 dbCount = enrichedDbMatches.length;
+                dbReason = dbCount === 0 ? 'empty_result' : null;
+                dbMessage = dbCount === 0 ? 'No hay partidos en base de datos para este filtro.' : null;
                 console.log(`[matches] Supabase: ${dbCount} matches (fallback=${dbFallback})`);
+            } else if (dbError) {
+                dbReason = 'database_query_failed';
+                dbMessage = 'No se pudieron cargar los partidos desde la base de datos.';
+                console.warn('[matches] Supabase query failed:', dbError.message);
             }
         } catch (dbFetchError) {
             console.error('Supabase DB matches fetch failed (non-fatal):', dbFetchError);
+            dbReason = 'database_fetch_failed';
+            dbMessage = 'No se pudieron cargar los partidos desde la base de datos.';
             // Non-fatal: FlashScore data still available
         }
 
@@ -542,8 +562,8 @@ export async function GET(request: Request) {
         return NextResponse.json({
             data: enrichedMatches,
             sources: {
-                flashscore: { ok: fsOk, count: fsCount, fromCache: fsFromCache },
-                supabase: { ok: dbOk, count: dbCount, fallback: dbFallback }
+                flashscore: { ok: fsOk, count: fsCount, fromCache: fsFromCache, reason: fsReason, message: fsMessage },
+                supabase: { ok: dbOk, count: dbCount, fallback: dbFallback, reason: dbReason, message: dbMessage }
             }
         });
     } catch (error) {
