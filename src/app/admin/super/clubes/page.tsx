@@ -10,10 +10,13 @@ import { invalidateCache, type ClubWithUnion } from '@/lib/cache/superAdminCache
 import { useState } from 'react';
 
 function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; color?: string | null }) {
-    if (logo && (logo.startsWith('http') || logo.startsWith('/'))) {
+    if (logo) {
+        const src = logo.trimStart().startsWith('<svg')
+            ? `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(logo)))}`
+            : logo;
         return (
             <img
-                src={logo} alt={name}
+                src={src} alt={name}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
@@ -33,13 +36,18 @@ function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; c
 
 export default function SuperadminClubesPage() {
     // ─── Read from shared context (already prefetched by layout) ─────────────────
-    const { filters, clubs, loading, errors, refresh, setFilters: _setFilters } = useSuperConsole();
+    const { filters, clubs, loading, errors, refresh, setFilters } = useSuperConsole();
     const isLoading = loading.clubs;
     const errorMsg = errors.clubs;
 
     const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
     const [togglingId, setTogglingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    // Local filter state (club-specific dimensions)
+    const [unionFilter, setUnionFilter] = useState('all');
+    const [visibilityFilter, setVisibilityFilter] = useState('all');
+    const [logoFilter, setLogoFilter] = useState('all');
 
     // Local state for optimistic mutations (avoid full context refresh unless needed)
     const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<ClubWithUnion>>>({});
@@ -90,11 +98,33 @@ export default function SuperadminClubesPage() {
         .map(c => ({ ...c, ...(localOverrides[c.id] ?? {}) }))
         , [clubs, deletedIds, localOverrides]);
 
+    const availableCountries = useMemo(() =>
+        [...new Set(displayClubs.map(c => c.country).filter(Boolean) as string[])].sort()
+    , [displayClubs]);
+
+    const availableUnions = useMemo(() =>
+        [...new Set(displayClubs.map(c => c.union?.name).filter(Boolean) as string[])].sort()
+    , [displayClubs]);
+
     const filtered = useMemo(() => displayClubs.filter(club => {
         if (filters.search && !club.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
         if (filters.country !== 'all' && club.country !== filters.country) return false;
+        if (unionFilter !== 'all' && (!club.union || club.union.name !== unionFilter)) return false;
+        if (visibilityFilter === 'visible' && club.is_visible === false) return false;
+        if (visibilityFilter === 'oculto' && club.is_visible !== false) return false;
+        if (logoFilter === 'con' && !club.logo_url) return false;
+        if (logoFilter === 'sin' && club.logo_url) return false;
         return true;
-    }), [displayClubs, filters.search, filters.country]);
+    }), [displayClubs, filters.search, filters.country, unionFilter, visibilityFilter, logoFilter]);
+
+    const hasActiveFilters = filters.search || filters.country !== 'all' || unionFilter !== 'all' || visibilityFilter !== 'all' || logoFilter !== 'all';
+
+    const clearFilters = () => {
+        setFilters(prev => ({ ...prev, search: '', country: 'all' }));
+        setUnionFilter('all');
+        setVisibilityFilter('all');
+        setLogoFilter('all');
+    };
 
     const visibleCount = filtered.filter(c => c.is_visible !== false).length;
     const hiddenCount = filtered.filter(c => c.is_visible === false).length;
@@ -124,6 +154,69 @@ export default function SuperadminClubesPage() {
                     <Link href="/admin/entities/new?type=club" className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
                         <Plus size={13} style={{ marginRight: 4 }} /> Crear Club
                     </Link>
+                </div>
+            </div>
+
+            {/* Filter bar */}
+            <div className={styles.filterBar} style={{ gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                    <input
+                        type="text"
+                        className={styles.filterControl}
+                        placeholder="Buscar por nombre..."
+                        value={filters.search}
+                        onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                        style={{ width: '100%' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span className={styles.filterLabel}>País</span>
+                    <select
+                        className={styles.filterControl}
+                        value={filters.country}
+                        onChange={e => setFilters(prev => ({ ...prev, country: e.target.value }))}
+                    >
+                        <option value="all">Todos</option>
+                        {availableCountries.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+
+                    <span className={styles.filterLabel}>Unión</span>
+                    <select
+                        className={styles.filterControl}
+                        value={unionFilter}
+                        onChange={e => setUnionFilter(e.target.value)}
+                    >
+                        <option value="all">Todas</option>
+                        {availableUnions.map(u => <option key={u} value={u}>{u}</option>)}
+                    </select>
+
+                    <span className={styles.filterLabel}>Visibilidad</span>
+                    <select
+                        className={styles.filterControl}
+                        value={visibilityFilter}
+                        onChange={e => setVisibilityFilter(e.target.value)}
+                    >
+                        <option value="all">Todos</option>
+                        <option value="visible">Visible</option>
+                        <option value="oculto">Oculto</option>
+                    </select>
+
+                    <span className={styles.filterLabel}>Logo</span>
+                    <select
+                        className={styles.filterControl}
+                        value={logoFilter}
+                        onChange={e => setLogoFilter(e.target.value)}
+                    >
+                        <option value="all">Todos</option>
+                        <option value="con">Con logo</option>
+                        <option value="sin">Sin logo</option>
+                    </select>
+
+                    {hasActiveFilters && (
+                        <button className={styles.cardAction} onClick={clearFilters} style={{ whiteSpace: 'nowrap' }}>
+                            Limpiar
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -177,12 +270,17 @@ export default function SuperadminClubesPage() {
                                     >
                                         <td style={{ padding: '12px 16px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                <div style={{ width: 36, height: 36, borderRadius: 6, border: '1px solid var(--surface-edge)', background: 'var(--basalt-800)', overflow: 'hidden', flexShrink: 0 }}>
+                                                <div style={{ width: 44, height: 44, borderRadius: 6, border: '1px solid var(--surface-edge)', background: 'var(--basalt-800)', overflow: 'hidden', flexShrink: 0 }}>
                                                     <ClubLogo logo={club.logo_url} name={club.name} color={club.primary_color} />
                                                 </div>
                                                 <div>
                                                     <div style={{ fontWeight: 600, color: '#ececec' }}>{club.name}</div>
                                                     {club.short_name && <div style={{ fontSize: 11, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)' }}>{club.short_name}</div>}
+                                                    {!club.logo_url && (
+                                                        <div style={{ fontSize: 10, color: '#f59e0b', fontFamily: 'var(--font-mono)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 3 }}>
+                                                            ⚠ sin logo
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
