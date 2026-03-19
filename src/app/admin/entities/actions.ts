@@ -15,10 +15,10 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         slug: z.string().regex(/^[a-z0-9-]+$/, 'Solo letras minúsculas, números y guiones').optional().nullable(),
         season_id: z.string().optional().nullable(),
         union_id: z.string().optional().nullable(), // unions use TEXT IDs
-        sport: z.enum(['rugby', 'football', 'hockey', 'basketball', 'volleyball']).optional().nullable(),
+        sport_id: z.string().optional().nullable(),
         category: z.string().optional().nullable(),
         age_grade: z.string().optional().nullable(),
-        country: z.string().optional().nullable(),
+        country_id: z.string().optional().nullable(),
         region: z.string().optional().nullable(),
         status: z.enum(['draft', 'published', 'active', 'archived']).optional().nullable(),
         is_visible: z.boolean().optional().nullable(),

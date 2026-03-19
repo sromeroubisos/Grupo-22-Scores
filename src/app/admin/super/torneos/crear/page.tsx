@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-    ChevronLeft, Trophy, Calendar, Globe, Shield, Settings, CheckCircle,
-    LayoutGrid, ListOrdered, GitMerge, Info, Search, Loader2
+    ChevronLeft, Trophy, Globe, Shield, Settings, CheckCircle,
+    LayoutGrid, ListOrdered, GitMerge, Search, Loader2
 } from 'lucide-react';
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
 import { createClient } from '@/lib/supabase/client';
+import { createEntity, updateEntity } from '@/app/admin/entities/actions';
 import { SPORTS, getActiveSports } from '@/lib/data/sports';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 import '../../creation-forms.css';
@@ -73,12 +74,7 @@ export default function SuperCreateTournament() {
         sport: 'rugby',
         visibility: 'public',
         season: '2026',
-        location: '',
-        startDate: '',
-        endDate: '',
         format: 'league',
-        matchDuration: 80,
-        gender: 'Masculino',
         category: 'Profesional',
         country: '',
         unionId: '',
@@ -91,18 +87,20 @@ export default function SuperCreateTournament() {
         }
     });
 
+    // Load reference data
     useEffect(() => {
         supabase.from('unions').select('*').order('name').then(({ data }) => {
             setUnions(data || []);
         });
-
         supabase.from('clubs').select('*').order('name').then(({ data }) => {
             setClubs(data || []);
         });
     }, [supabase]);
 
+    // Load tournament data when editing
     useEffect(() => {
         if (!tournamentId) return;
+
         supabase.from('tournaments')
             .select('*')
             .eq('id', tournamentId)
@@ -110,8 +108,9 @@ export default function SuperCreateTournament() {
             .then(({ data }: { data: any }) => {
                 if (!data) return;
                 setIsEdit(true);
-                const sportVal = data.sport ? mapExternalSportToInternalSport(data.sport) : 'rugby';
-                const defaults = (sportDefaults[sportVal as string] || {}) as any;
+
+                const sportVal = data.sport_id ? mapExternalSportToInternalSport(data.sport_id) : 'rugby';
+                const defaults = sportDefaults[sportVal as string] || {};
 
                 setFormData(prev => ({
                     ...prev,
@@ -121,15 +120,25 @@ export default function SuperCreateTournament() {
                     season: data.season_id || '2026',
                     category: data.category || prev.category,
                     format: data.format || prev.format,
-                    country: data.country || '',
+                    country: data.country_id || '',
                     unionId: data.union_id || '',
                     rules: {
                         ...prev.rules,
-                        pointsWin: data.points_win ?? defaults.win ?? prev.rules.pointsWin,
-                        pointsDraw: data.points_draw ?? defaults.draw ?? prev.rules.pointsDraw,
-                        pointsLoss: data.points_loss ?? defaults.loss ?? prev.rules.pointsLoss,
+                        pointsWin: data.ruleset?.pointsWin ?? defaults.win ?? prev.rules.pointsWin,
+                        pointsDraw: data.ruleset?.pointsDraw ?? defaults.draw ?? prev.rules.pointsDraw,
+                        pointsLoss: data.ruleset?.pointsLoss ?? defaults.loss ?? prev.rules.pointsLoss,
+                        pointsBonusTry: data.ruleset?.pointsBonusTry ?? prev.rules.pointsBonusTry,
+                        pointsBonusLoss: data.ruleset?.pointsBonusLoss ?? prev.rules.pointsBonusLoss,
                     }
                 }));
+            });
+
+        // Load existing participants
+        supabase.from('tournament_participants')
+            .select('club_id')
+            .eq('tournament_id', tournamentId)
+            .then(({ data }) => {
+                setSelectedClubs(data?.map((p: any) => p.club_id) || []);
             });
     }, [tournamentId, supabase]);
 
@@ -140,11 +149,7 @@ export default function SuperCreateTournament() {
             sport: sportId,
             rules: {
                 ...prev.rules,
-                ...(d ? {
-                    pointsWin: d.win,
-                    pointsDraw: d.draw,
-                    pointsLoss: d.loss,
-                } : {})
+                ...(d ? { pointsWin: d.win, pointsDraw: d.draw, pointsLoss: d.loss } : {})
             }
         }));
     };
@@ -158,32 +163,55 @@ export default function SuperCreateTournament() {
 
         setSaving(true);
         try {
-            const payload = {
+            const ruleset = {
+                pointsWin: formData.rules.pointsWin,
+                pointsDraw: formData.rules.pointsDraw,
+                pointsLoss: formData.rules.pointsLoss,
+                ...(formData.sport === 'rugby' ? {
+                    pointsBonusTry: formData.rules.pointsBonusTry,
+                    pointsBonusLoss: formData.rules.pointsBonusLoss,
+                } : {})
+            };
+
+            const payload: Record<string, any> = {
                 name: formData.name,
-                sport: formData.sport,
+                sport_id: formData.sport,
                 season_id: formData.season || '2026',
                 category: formData.category || null,
                 format: formData.format || null,
-                country: formData.country || null,
+                country_id: formData.country || null,
                 union_id: formData.unionId || null,
                 status: 'published' as const,
                 is_visible: formData.visibility === 'public',
-                points_win: formData.rules.pointsWin,
-                points_draw: formData.rules.pointsDraw,
-                points_loss: formData.rules.pointsLoss,
-                slug: formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now(),
+                ruleset,
             };
 
-            let error: any;
+            let savedId: string;
+
             if (isEdit && tournamentId) {
-                const { error: err } = await (supabase.from('tournaments') as any).update(payload).eq('id', tournamentId);
-                error = err;
+                // On edit: don't touch the slug
+                await updateEntity('tournament', tournamentId, payload);
+                savedId = tournamentId;
             } else {
-                const { error: err } = await (supabase.from('tournaments') as any).insert([payload]);
-                error = err;
+                // On create: generate a unique slug
+                payload.slug = formData.name
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+                const result = await createEntity('tournament', payload);
+                savedId = result.id;
             }
 
-            if (error) throw error;
+            // Persist participants
+            if (selectedClubs.length > 0) {
+                if (isEdit) {
+                    await supabase.from('tournament_participants').delete().eq('tournament_id', savedId);
+                }
+                await supabase.from('tournament_participants').insert(
+                    selectedClubs.map(clubId => ({ tournament_id: savedId, club_id: clubId }))
+                );
+            }
+
             router.push('/admin/super/torneos');
         } catch (err: any) {
             alert('Error al guardar el torneo: ' + err.message);
@@ -226,7 +254,7 @@ export default function SuperCreateTournament() {
                     ))}
                 </nav>
 
-                {/* STEP 1: DATOS BÁSICOS */}
+                {/* STEP 1: CONFIGURACIÓN */}
                 {currentStep === 1 && (
                     <>
                         <article className="partition">
@@ -570,6 +598,14 @@ export default function SuperCreateTournament() {
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Categoría</strong>
                                     <span style={{ fontSize: '16px', color: 'white' }}>{formData.category || 'N/A'}</span>
                                 </div>
+                                <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Participantes</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{selectedClubs.length} club{selectedClubs.length !== 1 ? 's' : ''}</span>
+                                </div>
+                                <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Puntos (G/E/P)</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.rules.pointsWin} / {formData.rules.pointsDraw} / {formData.rules.pointsLoss}</span>
+                                </div>
                             </div>
 
                             <article className="partition" style={{ marginTop: '30px', border: '1px dashed var(--border)' }}>
@@ -613,7 +649,6 @@ export default function SuperCreateTournament() {
                         ) : currentStep === 5 ? (isEdit ? 'Guardar Cambios' : 'Finalizar Torneo') : 'Siguiente Paso'}
                     </button>
                 </footer>
-
             </div>
         </div>
     );

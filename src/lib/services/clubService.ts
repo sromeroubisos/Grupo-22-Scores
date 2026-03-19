@@ -60,23 +60,14 @@ export async function createClub(
     name: normalizeText(input.name)!,
     short_name: normalizeText(input.short_name),
     slug: normalizeSlug(input.slug),
-    entity_type: input.entity_type,
     sport: normalizeText(input.sport) ?? 'rugby',
     country: normalizeText(input.country) ?? 'ARG',
     region: normalizeText(input.region),
     city: normalizeText(input.city),
-    address: normalizeText(input.address),
-    lat: normalizeNumber(input.lat),
-    lng: normalizeNumber(input.lng),
     union_id: normalizeText(input.union_id),
     logo_url: normalizeUrl(input.logo_url),
     primary_color: normalizeText(input.primary_color),
-    source: input.source ?? 'manual',
-    external_id: normalizeText(input.external_id),
-    visibility: input.visibility ?? 'visible',
-    lifecycle: input.lifecycle ?? 'draft',
-    is_visible: input.visibility !== 'hidden', // Legacy compatibility
-    notes_internal: normalizeText(input.notes_internal),
+    is_visible: input.visibility !== 'hidden',
   };
 
   // 3. Insertar en Supabase
@@ -291,9 +282,6 @@ export async function updateClub(
       if (input.core.slug !== undefined) {
         normalizedCore.slug = normalizeSlug(input.core.slug);
       }
-      if (input.core.entity_type !== undefined) {
-        normalizedCore.entity_type = input.core.entity_type;
-      }
       if (input.core.sport !== undefined) {
         normalizedCore.sport = normalizeText(input.core.sport);
       }
@@ -306,15 +294,6 @@ export async function updateClub(
       if (input.core.city !== undefined) {
         normalizedCore.city = normalizeText(input.core.city);
       }
-      if (input.core.address !== undefined) {
-        normalizedCore.address = normalizeText(input.core.address);
-      }
-      if (input.core.lat !== undefined) {
-        normalizedCore.lat = normalizeNumber(input.core.lat);
-      }
-      if (input.core.lng !== undefined) {
-        normalizedCore.lng = normalizeNumber(input.core.lng);
-      }
       if (input.core.union_id !== undefined) {
         normalizedCore.union_id = normalizeText(input.core.union_id);
       }
@@ -324,27 +303,8 @@ export async function updateClub(
       if (input.core.primary_color !== undefined) {
         normalizedCore.primary_color = normalizeText(input.core.primary_color);
       }
-      if (input.core.source !== undefined) {
-        normalizedCore.source = input.core.source;
-      }
-      if (input.core.external_id !== undefined) {
-        normalizedCore.external_id = normalizeText(input.core.external_id);
-      }
-      if (input.core.last_sync_at !== undefined) {
-        normalizedCore.last_sync_at = input.core.last_sync_at;
-      }
-      if (input.core.sync_status !== undefined) {
-        normalizedCore.sync_status = normalizeText(input.core.sync_status);
-      }
       if (input.core.visibility !== undefined) {
-        normalizedCore.visibility = input.core.visibility;
-        normalizedCore.is_visible = input.core.visibility === 'visible'; // Legacy sync
-      }
-      if (input.core.lifecycle !== undefined) {
-        normalizedCore.lifecycle = input.core.lifecycle;
-      }
-      if (input.core.notes_internal !== undefined) {
-        normalizedCore.notes_internal = normalizeText(input.core.notes_internal);
+        normalizedCore.is_visible = input.core.visibility === 'visible';
       }
 
       if (normalizedCore.union_id) {

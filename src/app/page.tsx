@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, memo } from 'react';
-import { ArrowLeft, Calendar, Trophy, Users, MapPin, ChevronRight, ChevronLeft, Share2, Star, Download } from 'lucide-react';
+import { Trophy, MapPin, ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
@@ -283,23 +283,11 @@ export default function HomePage() {
   // Matches via unified hook (cache + prefetch 7 days + live polling)
   const { matches, loading, liveCount: hookLiveCount, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id);
 
-  // Live timer: tick every second so live match minutes update in real-time
-  const [liveTick, setLiveTick] = useState(0);
-  useEffect(() => {
-    const hasLive = matches.some(m => m.status === 'live');
-    if (!hasLive) return;
-    const id = setInterval(() => setLiveTick(t => t + 1), 1000);
-    return () => clearInterval(id);
-  }, [matches]);
-
   // --- Dynamic Matches Data Implementation ---
-  // liveTick is included so live minute displays update every second
   const matchesByLeague = useMemo<LeagueMatches[]>(() => {
     const groups: Record<string, LeagueMatches> = {};
     // Secondary index to deduplicate tournaments by country+name across different IDs
     const dedupByKey = new Map<string, string>();
-    const now = Date.now();
-
     // Strip a redundant country prefix that FlashScore sometimes embeds in tournament names.
     // e.g. countryName="South America", name="SOUTH AMERICA: Super Rugby Americas"
     // → cleaned = "Super Rugby Americas"
@@ -316,7 +304,7 @@ export default function HomePage() {
       const tournament = match.tournament;
       if (!tournament) return;
 
-      const countryName = (tournament as any).country || 'Internacional';
+      const countryName = ((tournament as any).country || 'Internacional').replace(/\b\w/g, (c: string) => c.toUpperCase());
       const cleanedName = cleanLeagueName(tournament.name, countryName);
       const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
 
@@ -368,8 +356,7 @@ export default function HomePage() {
       if (!aIsFavorite && bIsFavorite) return 1;
       return a.league.localeCompare(b.league);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matches, isLeagueFavorite, userTimeZone]); // removed liveTick
+  }, [matches, isLeagueFavorite, userTimeZone]);
 
   const toggleCountry = (countryId: string) => {
     setExpandedCountries(prev => {
@@ -438,9 +425,9 @@ export default function HomePage() {
           url: `/tournaments/${t.id}`,
           type: 'local',
           sportId: t.sport_id as any,
-          countryId: (t.country || 'Argentina').toLowerCase(),
+          countryId: (t.country_id || 'Argentina').toLowerCase(),
           priority: 50,
-          logoUrl: t.custom_logo_url || t.logo_url,
+          logoUrl: t.logo_url,
           categories: t.category ? [t.category.toLowerCase()] : [],
           seasons: t.season_id ? [{ seasonId: String(t.season_id), teamsCount: 0, isActive: true }] : [],
           isVisible: t.is_visible,
@@ -938,8 +925,6 @@ export default function HomePage() {
 
               {!loading && matchesByLeague.map((league) => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
-                const matchesCount = league.matches.length;
-                const liveCount = league.matches.filter(m => m.status === 'live').length;
                 const isFavorite = isLeagueFavorite(league.leagueId);
 
                 return (

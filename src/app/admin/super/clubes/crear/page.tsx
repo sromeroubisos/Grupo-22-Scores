@@ -1,20 +1,18 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import LogoUploader from '@/components/LogoUploader';
 import { getActiveSports } from '@/lib/data/sports';
-import { ChevronLeft, CheckCircle, AlertCircle, Save, Share2, Globe, MapPin, Trophy } from 'lucide-react';
+import { ChevronLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import '../../creation-forms.css';
 
 const activeSports = getActiveSports();
 
-type StepId = 1 | 2 | 3;
+type StepId = 1 | 2;
 
 const steps = [
     { id: 1, name: 'Básico' },
-    { id: 2, name: 'Identidad' },
-    { id: 3, name: 'Revisión' },
+    { id: 2, name: 'Listo' },
 ] as const;
 
 function slugify(value: string) {
@@ -27,7 +25,6 @@ function slugify(value: string) {
         .slice(0, 60);
 }
 
-// ─── Toast mínimo (Usando clases compartidas o inline simple) ──────────────────
 function Toast({ message, type }: { message: string; type: 'success' | 'error' }) {
     return (
         <div style={{
@@ -59,14 +56,10 @@ export default function CreateClubSuper() {
 
     const [form, setForm] = useState({
         name: '',
-        shortName: '',
         sport: 'rugby',
         slug: '',
         union_id: 'uar',
         city: '',
-        website: '',
-        primaryColor: '#00a365',
-        logo_url: '',
     });
 
     const showToast = (message: string, type: 'success' | 'error') => {
@@ -81,11 +74,6 @@ export default function CreateClubSuper() {
         setForm(prev => ({ ...prev, name, slug: slugify(name) }));
     };
 
-    const handleLogoUpload = useCallback((logoData: string) => {
-        update('logo_url', logoData);
-    }, []);
-
-    // ── PASO 1 → Crea el club en DB inmediatamente ──────────────────────────
     const handleCreateClub = async () => {
         if (!form.name.trim()) {
             showToast('El nombre del club es requerido', 'error');
@@ -121,44 +109,11 @@ export default function CreateClubSuper() {
                 return;
             }
 
-            const clubId = json.data.id;
-            setCreatedClubId(clubId);
-            showToast('Club registrado. Completá la identidad visual.', 'success');
+            setCreatedClubId(json.data.id);
+            showToast('Club registrado con éxito.', 'success');
             setCurrentStep(2);
         } catch {
             showToast('Error de red al crear el club', 'error');
-        } finally {
-            setCreating(false);
-        }
-    };
-
-    // ── PASO 2 → Guarda identidad vía PATCH ────────────────────────────────
-    const handleSaveIdentity = async () => {
-        if (!createdClubId) return;
-        setCreating(true);
-        try {
-            const res = await fetch(`/api/clubs/${createdClubId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    short_name: form.shortName,
-                    city: form.city,
-                    primary_color: form.primaryColor,
-                    logo_url: form.logo_url,
-                    website: form.website,
-                }),
-            });
-
-            if (!res.ok) {
-                const j = await res.json();
-                showToast(j.error || 'Error al guardar identidad', 'error');
-                return;
-            }
-
-            showToast('Identidad visual actualizada', 'success');
-            setCurrentStep(3);
-        } catch {
-            showToast('Error de red', 'error');
         } finally {
             setCreating(false);
         }
@@ -183,8 +138,8 @@ export default function CreateClubSuper() {
                     >
                         <ChevronLeft size={16} /> Volver a Clubes
                     </button>
-                    <h1>{currentStep === 3 ? '¡Todo listo!' : 'Nuevo Club Profesional'}</h1>
-                    <p>Configura la identidad y parámetros globales de la institución.</p>
+                    <h1>{currentStep === 2 ? '¡Todo listo!' : 'Nuevo Club'}</h1>
+                    <p>Registrá los datos básicos. La identidad visual se configura en el panel de gestión.</p>
                 </header>
 
                 {/* Stepper */}
@@ -194,9 +149,7 @@ export default function CreateClubSuper() {
                             key={step.id}
                             className={`step-pill ${currentStep === step.id ? 'active' : ''} ${createdClubId && step.id < currentStep ? 'done' : ''}`}
                             onClick={() => {
-                                if (step.id < currentStep || (step.id === 2 && createdClubId)) {
-                                    setCurrentStep(step.id);
-                                }
+                                if (step.id < currentStep) setCurrentStep(step.id);
                             }}
                         >
                             {createdClubId && step.id < currentStep ? '✓ ' : `${step.id}. `}
@@ -210,7 +163,7 @@ export default function CreateClubSuper() {
                     <article className="partition">
                         <div className="partition-header">
                             <h2>Datos Generales</h2>
-                            <p>Información básica para identificar al club en el sistema.</p>
+                            <p>Información básica para registrar al club en el sistema.</p>
                         </div>
                         <div className="partition-body">
                             <div className="form-grid">
@@ -279,60 +232,8 @@ export default function CreateClubSuper() {
                     </article>
                 )}
 
-                {/* ── STEP 2: Identidad ────────────────────────────────────── */}
+                {/* ── STEP 2: Listo ─────────────────────────────────────── */}
                 {currentStep === 2 && createdClubId && (
-                    <article className="partition">
-                        <div className="partition-header">
-                            <h2>Identidad Visual</h2>
-                            <p>Establece los colores y el escudo oficial del club.</p>
-                        </div>
-                        <div className="partition-body">
-                            <div className="form-grid">
-                                <section style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                                    <div className="field-group">
-                                        <label>ESCUDO OFICIAL</label>
-                                        <LogoUploader onUpload={handleLogoUpload} accentColor="var(--accent)" />
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: '280px', display: 'grid', gap: '20px' }}>
-                                        <div className="field-group">
-                                            <label>SIGLA / NOMBRE CORTO</label>
-                                            <input
-                                                className="form-input"
-                                                value={form.shortName}
-                                                onChange={e => update('shortName', e.target.value)}
-                                                placeholder="Ej: SIC, CASI, CUBA..."
-                                            />
-                                        </div>
-                                        <div className="field-group">
-                                            <label>COLOR IDENTITARIO</label>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)' }}>
-                                                <input
-                                                    type="color"
-                                                    value={form.primaryColor}
-                                                    onChange={e => update('primaryColor', e.target.value)}
-                                                    style={{ width: '44px', height: '44px', border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
-                                                />
-                                                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 800 }}>{form.primaryColor.toUpperCase()}</span>
-                                            </div>
-                                        </div>
-                                        <div className="field-group">
-                                            <label>SITIO WEB OFICIAL</label>
-                                            <input
-                                                className="form-input"
-                                                value={form.website}
-                                                onChange={e => update('website', e.target.value)}
-                                                placeholder="https://www.misitio.com"
-                                            />
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
-                        </div>
-                    </article>
-                )}
-
-                {/* ── STEP 3: Revisión / Éxito ─────────────────────────────── */}
-                {currentStep === 3 && createdClubId && (
                     <article className="partition" style={{ textAlign: 'center' }}>
                         <div className="partition-body" style={{ padding: '60px 40px' }}>
                             <div style={{ fontSize: '4rem', marginBottom: '24px' }}>🏆</div>
@@ -350,7 +251,7 @@ export default function CreateClubSuper() {
                                 <span style={{ color: 'var(--accent)', fontFamily: 'JetBrains Mono', fontWeight: 800 }}>{form.slug}</span>
                             </div>
                             <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 40px' }}>
-                                La institución ya forma parte del ecosistema. Ahora puedes configurar planteles, sedes y competencias.
+                                La institución ya forma parte del ecosistema. Configurá escudo, colores, planteles y sedes desde el panel de gestión.
                             </p>
 
                             <div className="grid-2" style={{ maxWidth: 500, margin: '0 auto' }}>
@@ -373,29 +274,8 @@ export default function CreateClubSuper() {
                             onClick={handleCreateClub}
                             disabled={creating || !form.name.trim() || !form.slug}
                         >
-                            {creating ? 'PROCESANDO...' : 'REGISTRAR CLUB Y CONTINUAR'}
+                            {creating ? 'PROCESANDO...' : 'REGISTRAR CLUB'}
                         </button>
-                    )}
-                    {currentStep === 2 && (
-                        <>
-                            <button className="btn btn-outline" onClick={() => setCurrentStep(1)}>
-                                VOLVER
-                            </button>
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <button
-                                    className="btn btn-outline"
-                                    onClick={() => {
-                                        showToast('Identidad pendiente - Puedes editarla luego', 'success');
-                                        router.push(`/admin/entities/${createdClubId}/manage?type=club`);
-                                    }}
-                                >
-                                    OMITIR
-                                </button>
-                                <button className="btn btn-primary" onClick={handleSaveIdentity} disabled={creating}>
-                                    {creating ? 'GUARDANDO...' : 'GUARDAR IDENTIDAD'}
-                                </button>
-                            </div>
-                        </>
                     )}
                 </footer>
             </div>
@@ -404,4 +284,3 @@ export default function CreateClubSuper() {
         </div>
     );
 }
-

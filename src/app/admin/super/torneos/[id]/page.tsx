@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { db } from '@/lib/mock-db';
 
 export default function SuperadminTournamentRedirect() {
     const router = useRouter();
@@ -11,14 +10,12 @@ export default function SuperadminTournamentRedirect() {
 
     useEffect(() => {
         if (!tournamentId) return;
-        const tournament = db.tournaments.find(t => t.id === tournamentId);
-        if (!tournament) return;
-        router.push(`/admin/union/${tournament.unionId}/torneos/crear?tournamentId=${tournamentId}&from=super`);
+        router.push(`/admin/super/torneos/crear?tournamentId=${tournamentId}`);
     }, [tournamentId, router]);
 
     return (
         <div style={{ padding: '40px', color: 'var(--color-text-secondary)' }}>
-            Redirigiendo a la edicion del torneo...
+            Redirigiendo a la edición del torneo...
         </div>
     );
 }

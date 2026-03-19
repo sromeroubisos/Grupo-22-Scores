@@ -156,6 +156,8 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                 const overrideStageId = sp.get('tournament_stage_id') || sp.get('tournamentStageId') || sp.get('stageId');
                 const urlParam = sp.get('url');
 
+                const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
                 localTournament = getTournamentById(id);
 
                 if (!localTournament) {
@@ -170,38 +172,26 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                             categories: [],
                             priority: 0,
                         } as any;
+                    } else if (UUID_RE.test(id)) {
+                        // UUID → DB-only tournament. Skip metadata round-trip;
+                        // metadata will be included in the /data response below.
+                        localTournament = {
+                            id,
+                            name: 'Cargando...',
+                            url: '',
+                            type: 'league' as any,
+                            sportId: (overrideSport || 'rugby') as any,
+                            countryId: 'international',
+                            categories: [],
+                            priority: 0,
+                            __isDbOnly: true,
+                        } as any;
                     } else {
-                        // Try DB lookup for manually created tournaments (UUID IDs)
-                        try {
-                            const dbRes = await fetch(`/api/db/tournaments/${id}`, { signal: controller.signal });
-                            if (dbRes.ok) {
-                                const dbPayload = await dbRes.json();
-                                if (dbPayload.ok && dbPayload.tournament) {
-                                    const t = dbPayload.tournament;
-                                    localTournament = {
-                                        id: t.id,
-                                        name: t.display_name || t.name,
-                                        url: '',
-                                        type: 'league' as any,
-                                        sportId: (t.sport_id || t.sport || overrideSport || 'rugby') as any,
-                                        countryId: t.country_id || t.country || 'international',
-                                        categories: [],
-                                        priority: 0,
-                                        logoUrl: t.logo_url || undefined,
-                                        __isDbOnly: true,
-                                    } as any;
-                                }
-                            }
-                        } catch {
-                            // Ignore fetch errors here; handled below
+                        if (!controller.signal.aborted) {
+                            setError('Torneo no encontrado en nuestra base de datos.');
+                            setLoading(false);
                         }
-                        if (!localTournament) {
-                            if (!controller.signal.aborted) {
-                                setError('Torneo no encontrado en nuestra base de datos.');
-                                setLoading(false);
-                            }
-                            return;
-                        }
+                        return;
                     }
                 }
 
@@ -215,6 +205,19 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                         console.log('[FRONTEND] payload recibido desde API (DB-only):', dbData);
                         
                         if (dbData.ok) {
+                            // Update tournament metadata from the /data response
+                            if (dbData.tournament) {
+                                const t = dbData.tournament;
+                                const enriched = {
+                                    ...localTournament,
+                                    name: t.display_name || t.name || localTournament.name,
+                                    sportId: t.sport_id || localTournament.sportId,
+                                    countryId: t.country_id || localTournament.countryId,
+                                    logoUrl: t.logo_url || localTournament.logoUrl,
+                                };
+                                if (!controller.signal.aborted) setTournamentData(enriched);
+                            }
+
                             setDbParticipants(dbData.participants ?? []);
                             setDbPhases(dbData.phases ?? []);
                             setDbGroups(dbData.groups ?? []);

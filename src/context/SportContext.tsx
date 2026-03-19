@@ -1,9 +1,11 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import type { Sport, SportId } from '@/lib/types';
 import { SPORTS, getSportById } from '@/lib/data/sports';
 import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { getFavoriteSports } from '@/lib/services/preferencesService';
 
 interface SportContextType {
     selectedSport: Sport;
@@ -17,11 +19,13 @@ const SportContext = createContext<SportContextType | undefined>(undefined);
 
 export function SportProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [allSports, setAllSports] = useState<Sport[]>([]);
     const [selectedSport, setSelectedSport] = useState<Sport>(
         Object.values(SPORTS)[0] as Sport
     );
+    const hasAutoSelectedRef = useRef<string | null>(null);
 
     // Filter visible sports and sort by display order.
     // Sports with a groupKey (e.g. rugby-union, rugby-league) are managed
@@ -64,6 +68,20 @@ export function SportProvider({ children }: { children: ReactNode }) {
 
         fetchConfig();
     }, []);
+
+    useEffect(() => {
+        if (!user || allSports.length === 0) return;
+        if (hasAutoSelectedRef.current === user.id) return;
+        hasAutoSelectedRef.current = user.id;
+
+        getFavoriteSports(supabase, user.id).then(favoriteIds => {
+            if (favoriteIds.length === 0) return;
+            const favSport = favoriteIds
+                .map(id => allSports.find(s => s.id === id))
+                .find(s => s && s.isVisible !== false && !s.groupKey);
+            if (favSport) setSelectedSport(favSport);
+        }).catch(() => {});
+    }, [user?.id, allSports.length]);
 
     const selectSportById = (id: SportId) => {
         const sport = getSportById(id);

@@ -353,9 +353,36 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         if (res.ok) {
                             const matchData = await res.json();
 
-                            const sportId = matchData.sportId || 2; // Default to 2 (rugby)
-
+                            const sportId = matchData.sportId || 2;
                             const score = matchData.score || { home: 0, away: 0 };
+                            const homeClubId = matchData.homeClub?.id || matchData.homeClubId || '';
+                            const awayClubId = matchData.awayClub?.id || matchData.awayClubId || '';
+                            const tournamentId = matchData.tournamentId || '';
+
+                            // Parallel-fetch standings + H2H
+                            const [standingsRes, h2hRes] = await Promise.allSettled([
+                                tournamentId
+                                    ? fetch(`/api/db/standings?tournament=${tournamentId}`, { signal: controller.signal }).then(r => r.ok ? r.json() : null)
+                                    : Promise.resolve(null),
+                                homeClubId && awayClubId
+                                    ? fetch(`/api/db/h2h?home=${homeClubId}&away=${awayClubId}`, { signal: controller.signal }).then(r => r.ok ? r.json() : null)
+                                    : Promise.resolve(null),
+                            ]);
+
+                            // Map DB standings rows → format expected by the match detail standings renderer
+                            const rawStandings = standingsRes.status === 'fulfilled' && standingsRes.value?.standings
+                                ? standingsRes.value.standings
+                                : [];
+                            const standings = rawStandings.map((row: any) => ({
+                                rank: row.position,
+                                name: row.team?.name ?? '',
+                                played: row.matches_total ?? 0,
+                                goal_difference: row.goal_difference ?? 0,
+                                points: row.points_total ?? 0,
+                            }));
+                            const h2h = h2hRes.status === 'fulfilled' && h2hRes.value?.matches
+                                ? h2hRes.value.matches
+                                : [];
 
                             const processedMatch = {
                                 id: matchData.id,
@@ -366,27 +393,27 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
                                     : '--:--',
                                 tournament: matchData.tournament?.name || 'Partido Local',
-                                tournamentId: matchData.tournamentId || '',
+                                tournamentId,
                                 category: 'General',
                                 round: matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
                                 referee: matchData.referee || null,
                                 home: {
-                                    id: matchData.homeClub?.id || matchData.homeClubId || 'home',
+                                    id: homeClubId || 'home',
                                     name: matchData.homeClub?.name || 'Local',
                                     logo: matchData.homeClub?.logo || null,
                                     score: score.home ?? 0
                                 },
                                 away: {
-                                    id: matchData.awayClub?.id || matchData.awayClubId || 'away',
+                                    id: awayClubId || 'away',
                                     name: matchData.awayClub?.name || 'Visitante',
                                     logo: matchData.awayClub?.logo || null,
                                     score: score.away ?? 0
                                 },
                                 events: matchData.events || [],
                                 lineups: matchData.lineups || null,
-                                standings: [],
-                                h2h: [],
+                                standings,
+                                h2h,
                                 draw: []
                             };
 

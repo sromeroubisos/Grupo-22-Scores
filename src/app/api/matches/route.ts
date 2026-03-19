@@ -135,7 +135,7 @@ export async function GET(request: Request) {
                                 dateTime: m.date_time,
                                 time: localTime,
                                 status: m.status || 'scheduled',
-                                score: m.score || { home: 0, away: 0 },
+                                score: m.status === 'scheduled' ? null : (m.score ?? null),
                                 clock: { running: true, seconds: 0, period: 'En Vivo' },
                                 roundId: m.round_label || 'General',
                                 venue: m.venue || 'Sede',
@@ -330,7 +330,7 @@ export async function GET(request: Request) {
                             const d = new Date(m.scheduledAt);
                             if (!isNaN(d.getTime())) dateStr = d.toISOString();
                         }
-                    } catch (e) {
+                    } catch {
                         console.warn('Date conversion failed for match', m.id);
                     }
 
@@ -339,7 +339,7 @@ export async function GET(request: Request) {
                         tournamentId: m.tournamentId,
                         dateTime: dateStr,
                         status: (m.status === 'final' ? 'final' : m.status === 'live' ? 'live' : 'scheduled') as any,
-                        score: m.score as any,
+                        score: m.status === 'scheduled' ? null : (m.score ?? null),
                         clock: {
                             running: m.status === 'live',
                             seconds: 0,
@@ -411,7 +411,7 @@ export async function GET(request: Request) {
             const sportVariants = sport ? getSportVariants(sport) : null;
 
             // Attempt 1: named FK joins (works when FK constraint names are stable)
-            let query = supabase
+            const query = supabase
                 .from('matches')
                 .select(`
                     id, date_time, round_label, venue, status, score,
@@ -474,7 +474,7 @@ export async function GET(request: Request) {
                             dateTime: m.date_time,
                             time: localTime,
                             status: m.status || 'scheduled',
-                            score: m.score || { home: 0, away: 0 },
+                            score: m.status === 'scheduled' ? null : (m.score ?? null),
                             clock: {
                                 running: m.status === 'live',
                                 seconds: 0,
@@ -599,17 +599,9 @@ export async function POST(request: Request) {
             roundId,
             homeClubId,
             awayClubId,
-            homeSquadId,
-            awaySquadId,
             dateTime,
             venue,
-            city,
-            isNeutralVenue,
-            address,
-            referee,
             status,
-            isPublic,
-            isFeatured,
             notes,
         } = body;
 
@@ -649,16 +641,6 @@ export async function POST(request: Request) {
                 finalTournamentId = (round.tournament_phases as any).tournament_id;
             }
         }
-
-        // Helper to check if string is valid UUID
-        const isValidUUID = (id: string | null) => {
-            if (!id) return false;
-            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-            return uuidRegex.test(id);
-        };
-
-        const isRoundUUID = isValidUUID(roundId);
-        const isPhaseUUID = isValidUUID(phaseId);
 
         // Insert match
         // Only include columns that are confirmed in the database schema

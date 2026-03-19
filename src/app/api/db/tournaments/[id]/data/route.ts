@@ -27,7 +27,14 @@ export async function GET(
         }
     }
 
-    const [participantsRes, matchesRes, standingsRes, phasesRes, groupsRes] = await Promise.all([
+    const [tournamentRes, participantsRes, matchesRes, standingsRes, phasesRes, groupsRes] = await Promise.all([
+        supabase
+            .from('tournaments')
+            .select('id, name, display_name, sport_id, country_id, logo_url, status, is_visible, slug')
+            .eq('id', tournament_id)
+            .maybeSingle(),
+
+
         supabase
             .from('tournament_participants')
             .select(`
@@ -90,6 +97,7 @@ export async function GET(
 
     return NextResponse.json({
         ok: true,
+        tournament: tournamentRes.data || null,
         participants: participantsRes.data || [],
         matches: matchesRes.data || [],
         standings: standingsRes.data || [],
