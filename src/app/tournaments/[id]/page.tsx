@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useState, useEffect } from 'react';
+import React, { use, useState, useEffect, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
@@ -114,6 +114,72 @@ function getQuickStats(
     return { played, upcoming, teams, leaderName, nextDate };
 }
 
+function hexToRgba(color: string, alpha: number) {
+    const normalized = color.trim();
+    const hex = normalized.startsWith('#') ? normalized.slice(1) : normalized;
+
+    if (/^[0-9a-f]{3}$/i.test(hex)) {
+        const [r, g, b] = hex.split('').map((char) => parseInt(char + char, 16));
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    if (/^[0-9a-f]{6}$/i.test(hex)) {
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    const rgbMatch = normalized.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i);
+    if (rgbMatch) {
+        return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${alpha})`;
+    }
+
+    return normalized;
+}
+
+function buildRowAccentStyle(color?: string | null): CSSProperties | undefined {
+    if (!color) return undefined;
+    return {
+        '--standings-row-accent': color,
+        '--standings-row-bg': hexToRgba(color, 0.14),
+        '--standings-row-bg-strong': hexToRgba(color, 0.2),
+    } as CSSProperties;
+}
+
+function getAutoZoneColor(
+    position: number,
+    totalTeams: number,
+    qualRules: any,
+    groupLabels: any[],
+): string | null {
+    if (!qualRules || !Array.isArray(groupLabels) || groupLabels.length === 0) return null;
+    const status = StandingsEngine.resolveStatus(position, totalTeams, qualRules);
+    if (!status) return null;
+    const label = groupLabels.find((l: any) => l.name === status);
+    return label?.color ?? null;
+}
+
+function resolveStandingsRowLabel(row: any, assignments: any[]) {
+    const teamId = row.team?.id || row.team?.team_id || row.participant?.id || row.team_id || null;
+    if (!teamId) return null;
+
+    const phaseId = row.phase_id ?? null;
+    const groupId = row.group_id ?? null;
+
+    const priority = (assignment: any) => {
+        if (assignment.phase_id === phaseId && assignment.group_id === groupId) return 4;
+        if (assignment.phase_id === phaseId && !assignment.group_id) return 3;
+        if (!assignment.phase_id && !assignment.group_id) return 2;
+        if (assignment.phase_id === phaseId) return 1;
+        return 0;
+    };
+
+    return assignments
+        .filter((assignment) => assignment.club_id === teamId && assignment.label?.color)
+        .sort((left, right) => priority(right) - priority(left))[0]?.label || null;
+}
+
 // ── Main Component ──────────────────────────────────────────────────────────
 
 export default function TournamentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -140,6 +206,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
     const [dbParticipants, setDbParticipants] = useState<any[]>([]);
     const [dbPhases, setDbPhases] = useState<any[]>([]);
     const [dbGroups, setDbGroups] = useState<any[]>([]);
+    const [dbTeamLabels, setDbTeamLabels] = useState<any[]>([]);
 
     // ── Data fetch ────────────────────────────────────────────────────────
 
@@ -221,6 +288,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                             setDbParticipants(dbData.participants ?? []);
                             setDbPhases(dbData.phases ?? []);
                             setDbGroups(dbData.groups ?? []);
+                            setDbTeamLabels(dbData.teamLabels ?? []);
 
                             // Map DB matches → frontend match format
                             const mapMatch = (m: any) => ({
@@ -471,6 +539,17 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                     standings;
     const activeRows = normalizeStandingsRows(standingsSource);
 
+    const resolvedQualRules = (() => {
+        try {
+            return dbPhases.length > 0
+                ? StandingsEngine.resolveRules(dbPhases[0].settings ?? {}, {}).qualification_rules
+                : null;
+        } catch { return null; }
+    })();
+    const phaseGroupLabels: any[] = (() => {
+        try { return dbPhases[0]?.settings?.groupLabels ?? []; } catch { return []; }
+    })();
+
     // Team map (for Teams tab)
     const teamMap = new Map<string, { name: string; logo: string }>();
     const addFromMatches = (list: any[]) => {
@@ -619,14 +698,21 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
     const renderStandingsRow = (row: any, idx: number) => {
         const pos = row.position || (idx + 1);
-        const borderColor = pos <= 4 ? styles.borderGreen : pos <= 6 ? styles.borderYellow : '';
         const logo = row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
             row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo;
         const teamName = row.team?.name || row.participant?.name || row.name;
         const teamId = row.team?.id || row.team?.team_id || row.participant?.id || row.team_id;
+        const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
+        const accentColor = rowLabel?.color
+            ?? getAutoZoneColor(pos, activeRows.length, resolvedQualRules, phaseGroupLabels);
+        const rowAccentStyle = buildRowAccentStyle(accentColor);
 
         return (
-            <div key={idx} className={`${styles.tableRow} ${borderColor}`}>
+            <div
+                key={idx}
+                className={`${styles.tableRow} ${rowAccentStyle ? styles.tableRowTinted : ''}`}
+                style={rowAccentStyle}
+            >
                 <div className={styles.colPos}>{pos}</div>
                 <div className={styles.colTeam}>
                     {logo
@@ -643,7 +729,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                 <div className={`${styles.colVal} ${styles.colValDG}`}>
                     {(row.goals_for && row.goals_against) ? (row.goals_for - row.goals_against) : (row.goal_difference || '0')}
                 </div>
-                <div className={styles.colPts}>{row.points_total || row.points}</div>
+                <div className={styles.colPts}>{row.points_total ?? row.points ?? 0}</div>
             </div>
         );
     };
