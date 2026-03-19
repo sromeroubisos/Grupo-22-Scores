@@ -437,7 +437,7 @@ export default function HomePage() {
           nameEs: t.display_name || t.name,
           url: `/tournaments/${t.id}`,
           type: 'local',
-          sportId: t.sport as any,
+          sportId: t.sport_id as any,
           countryId: (t.country || 'Argentina').toLowerCase(),
           priority: 50,
           logoUrl: t.custom_logo_url || t.logo_url,

@@ -10,7 +10,7 @@ export async function GET() {
                 id,
                 name,
                 display_name,
-                sport,
+                sport_id,
                 country,
                 custom_logo_url,
                 logo_url,
