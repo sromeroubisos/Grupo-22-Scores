@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
+import { SPORTS } from '@/lib/data/sports';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { useTournamentDirty } from './TournamentContext';
 import { Shield, Globe, Image as ImageIcon } from 'lucide-react';
@@ -21,6 +22,8 @@ type TournamentDetailsRow = TournamentRow & {
 const COUNTRIES = ['Argentina', 'Brasil', 'Chile', 'Colombia', 'Uruguay', 'Paraguay', 'Bolivia', 'Perú', 'Ecuador', 'Venezuela', 'United Kingdom', 'France', 'Spain', 'Italy', 'New Zealand', 'South Africa', 'Australia'];
 const REGIONS = ['Sudamérica', 'Norteamérica', 'Europa Occidental', 'Europa del Este', 'Oceanía', 'África', 'Asia'];
 const AGE_GRADES = ['Mayores', 'M23 (Sub-23)', 'M19 (Sub-19)', 'M17 (Sub-17)', 'M16 (Sub-16)', 'Femenino', 'Veteranos'];
+
+const SPORT_OPTIONS = Object.values(SPORTS).sort((a, b) => a.priority - b.priority);
 
 function slugify(s: string) {
     return s
@@ -55,6 +58,7 @@ export function TournamentDetailsTab({ data, id, unions }: TournamentDetailsTabP
         display_name: tournament.display_name || '',
         slug: tournament.slug ?? '',
         season_id: tournament.season_id ?? '2026',
+        sport_id: tournament.sport_id ?? '',
         union_id: tournament.union_id ?? '',
         country: tournament.country ?? '',
         region: tournament.region ?? '',
@@ -102,6 +106,7 @@ export function TournamentDetailsTab({ data, id, unions }: TournamentDetailsTabP
                     name: form.name.trim(),
                     slug: form.slug || null,
                     season_id: form.season_id || null,
+                    sport_id: form.sport_id || null,
                     union_id: form.union_id || null,
                     country: form.country || null,
                     region: form.region || null,
@@ -124,7 +129,7 @@ export function TournamentDetailsTab({ data, id, unions }: TournamentDetailsTabP
     handleSaveRef.current = handleSave;
 
     return (
-        <div className="flash-ui-container dark bg-transparent" style={{ '--accent': '#3b82f6', minHeight: 'auto' } as React.CSSProperties}>
+        <div className="flash-ui-container dark bg-transparent" style={{ '--accent': '#00a365', minHeight: 'auto' } as React.CSSProperties}>
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-28 md:pb-20">
                 {message && (
                     <div className={`p-4 mb-6 text-sm border ${message.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
@@ -269,6 +274,22 @@ export function TournamentDetailsTab({ data, id, unions }: TournamentDetailsTabP
                                 onChange={e => update('season_id', e.target.value)}
                                 disabled={isApiManaged}
                             />
+                        </div>
+                        <div className="manager-input-group">
+                            <label className="manager-field-label">Deporte</label>
+                            <select
+                                className={`manager-url-select ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                value={form.sport_id}
+                                onChange={e => update('sport_id', e.target.value)}
+                                disabled={isApiManaged}
+                            >
+                                <option value="">Seleccionar deporte</option>
+                                {SPORT_OPTIONS.map((sport) => (
+                                    <option key={sport.id} value={sport.id}>
+                                        {sport.nameEs || sport.name || sport.id}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div className="manager-input-group">
                             <label className="manager-field-label">Ruta URL (Slug)</label>

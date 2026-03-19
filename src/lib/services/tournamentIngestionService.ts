@@ -171,15 +171,10 @@ export class TournamentIngestionService {
             .insert({
                 name: internalParams.name || externalTournament.name,
                 display_name: internalParams.display_name || externalTournament.name,
-                original_name: externalTournament.name,
                 slug: normalizeSlug(internalParams.name || externalTournament.name),
                 sport_id: externalTournament.sport_id,
                 country_id: externalTournament.country_id,
                 logo_url: externalTournament.logo_url,
-                external_id: externalTournament.id,
-                data_source: 'flashscore',
-                is_api_managed: true,
-                is_active: true,
                 is_visible: true
             })
             .select()
@@ -198,9 +193,7 @@ export class TournamentIngestionService {
         const { error } = await supabase
             .from('tournaments')
             .update({
-                external_id: externalId,
-                data_source: 'flashscore',
-                is_api_managed: true
+                updated_at: new Date().toISOString()
             })
             .eq('id', internalId);
 

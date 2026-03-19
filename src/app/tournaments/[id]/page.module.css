@@ -937,6 +937,15 @@
 .tableRow:last-child { border-bottom: none; }
 .tableRow:hover { background: var(--fl-hover-bg); }
 
+.tableRowTinted {
+    border-left-color: var(--standings-row-accent);
+    background: linear-gradient(90deg, var(--standings-row-bg) 0%, transparent 78%);
+}
+
+.tableRowTinted:hover {
+    background: linear-gradient(90deg, var(--standings-row-bg-strong) 0%, var(--fl-hover-bg) 82%);
+}
+
 .borderGreen {
     border-left-color: var(--fl-success);
     background: rgba(34, 197, 94, 0.035);

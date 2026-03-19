@@ -153,7 +153,6 @@ export async function GET(request: NextRequest) {
         query = query.eq('is_visible', true);
     }
     if (unionId) query = query.eq('union_id', unionId);
-    if (sport)   query = query.eq('sport', sport);
 
     const { data, error } = await query;
     if (error) return err('Error al obtener clubes', 500, error.message);

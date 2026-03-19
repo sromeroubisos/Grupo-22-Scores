@@ -49,7 +49,6 @@ type ClubRow = {
     city: string | null;
     region: string | null;
     country: string | null;
-    sport: string | null;
     is_visible: boolean | null;
     created_at: string;
     updated_at: string | null;
@@ -59,9 +58,6 @@ type TournamentRow = {
     id: string;
     name: string;
     display_name: string | null;
-    season_id: string | null;
-    category: string | null;
-    format: string | null;
     status: string | null;
     is_visible: boolean | null;
     created_at: string | null;
@@ -154,7 +150,7 @@ export default function UnionManagePage() {
 
     const filteredTournaments = useMemo(
         () =>
-            tournaments.filter((tournament) => `${tournament.display_name || tournament.name} ${tournament.season_id || ''} ${tournament.status || ''}`.toLowerCase().includes(deferredTournamentQuery.toLowerCase())),
+            tournaments.filter((tournament) => `${tournament.display_name || tournament.name} ${tournament.status || ''}`.toLowerCase().includes(deferredTournamentQuery.toLowerCase())),
         [tournaments, deferredTournamentQuery],
     );
 
@@ -191,7 +187,7 @@ export default function UnionManagePage() {
                 id: `tournament-${tournament.id}`,
                 title: `Movimiento en torneo: ${tournament.display_name || tournament.name}`,
                 time: tournament.updated_at || tournament.created_at || new Date().toISOString(),
-                meta: [tournament.season_id, tournament.status].filter(Boolean).join(' - ') || 'Competicion oficial',
+                meta: [tournament.status].filter(Boolean).join(' - ') || 'Competicion oficial',
             })),
             ...memberships.slice(0, 4).map((membership) => ({
                 id: `staff-${membership.id}`,
@@ -263,8 +259,8 @@ export default function UnionManagePage() {
             auditRes,
         ] = await Promise.all([
             supabase.from('unions').select('*').eq('id', unionId).maybeSingle(),
-            supabase.from('clubs').select('id, name, short_name, city, region, country, sport, is_visible, created_at, updated_at').eq('union_id', unionId).order('name'),
-            supabase.from('tournaments').select('id, name, display_name, season_id, category, format, status, is_visible, created_at, updated_at').eq('union_id', unionId).order('created_at', { ascending: false }),
+            supabase.from('clubs').select('id, name, short_name, city, region, country, is_visible, created_at, updated_at').eq('union_id', unionId).order('name'),
+            supabase.from('tournaments').select('id, name, display_name, status, is_visible, created_at, updated_at').eq('union_id', unionId).order('created_at', { ascending: false }),
             supabase.from('memberships').select('id, user_id, role, created_at').eq('scope_type', 'union').eq('scope_id', unionId).order('created_at', { ascending: false }),
             supabase.from('news').select('id, title, status, published_at, created_at').eq('scope', 'union').eq('scope_id', unionId).order('created_at', { ascending: false }).limit(8),
             supabase.from('regulations').select('id, content, updated_at').eq('scope_type', 'union').eq('scope_id', unionId).order('updated_at', { ascending: false }).limit(8),
@@ -840,7 +836,6 @@ function renderActiveTab({
                                 <thead>
                                     <tr>
                                         <th>Club</th>
-                                        <th>Deporte</th>
                                         <th>Ubicacion</th>
                                         <th>Visibilidad</th>
                                         <th>Actualizado</th>
@@ -849,13 +844,12 @@ function renderActiveTab({
                                 <tbody>
                                     {clubs.length === 0 && (
                                         <tr>
-                                            <td colSpan={5} className={styles.mutedCell}>No hay clubes afiliados con este filtro.</td>
+                                            <td colSpan={4} className={styles.mutedCell}>No hay clubes afiliados con este filtro.</td>
                                         </tr>
                                     )}
                                     {clubs.map((club) => (
                                         <tr key={club.id}>
                                             <td>{club.name}</td>
-                                            <td>{club.sport || '-'}</td>
                                             <td>{[club.region, club.country].filter(Boolean).join(' - ') || '-'}</td>
                                             <td>{club.is_visible ? 'Visible' : 'Oculto'}</td>
                                             <td>{new Date(club.updated_at || club.created_at).toLocaleDateString()}</td>
@@ -876,24 +870,18 @@ function renderActiveTab({
                             <thead>
                                 <tr>
                                     <th>Torneo</th>
-                                    <th>Temporada</th>
-                                    <th>Categoria</th>
-                                    <th>Formato</th>
                                     <th>Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {tournaments.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className={styles.mutedCell}>No hay torneos vinculados.</td>
+                                        <td colSpan={2} className={styles.mutedCell}>No hay torneos vinculados.</td>
                                     </tr>
                                 )}
                                 {tournaments.map((tournament) => (
                                     <tr key={tournament.id}>
                                         <td>{tournament.display_name || tournament.name}</td>
-                                        <td>{tournament.season_id || '-'}</td>
-                                        <td>{tournament.category || '-'}</td>
-                                        <td>{tournament.format || '-'}</td>
                                         <td>{tournament.status || '-'}</td>
                                     </tr>
                                 ))}

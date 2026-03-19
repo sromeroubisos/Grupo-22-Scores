@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     console.log(`[BACKEND] Fetching manual tournament data for ID/Slug: ${id}`);
     
@@ -27,7 +27,7 @@ export async function GET(
         }
     }
 
-    const [tournamentRes, participantsRes, matchesRes, standingsRes, phasesRes, groupsRes] = await Promise.all([
+    const [tournamentRes, participantsRes, matchesRes, standingsRes, phasesRes, groupsRes, teamLabelsRes] = await Promise.all([
         supabase
             .from('tournaments')
             .select('id, name, display_name, sport_id, country_id, logo_url, status, is_visible, slug')
@@ -80,6 +80,11 @@ export async function GET(
             .select('*')
             .eq('tournament_id', tournament_id)
             .order('name', { ascending: true }),
+
+        supabase
+            .from('team_labels')
+            .select('id, label_id, club_id, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)')
+            .eq('tournament_id', tournament_id),
     ]);
 
     const standingsCount = standingsRes.data?.length || 0;
@@ -88,7 +93,8 @@ export async function GET(
         Matches: ${matchesRes.data?.length || 0}
         Standings rows raw count: ${standingsCount}
         Phases: ${phasesRes.data?.length || 0}
-        Groups: ${groupsRes.data?.length || 0}`);
+        Groups: ${groupsRes.data?.length || 0}
+        Team labels: ${teamLabelsRes.data?.length || 0}`);
     
     // Log sample payload if exists
     if (standingsCount > 0) {
@@ -103,6 +109,7 @@ export async function GET(
         standings: standingsRes.data || [],
         phases: phasesRes.data || [],
         groups: groupsRes.data || [],
+        teamLabels: teamLabelsRes.data || [],
         debug: {
             id,
             standingsCount,

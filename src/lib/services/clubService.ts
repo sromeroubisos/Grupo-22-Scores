@@ -103,12 +103,12 @@ export async function createClub(
       .select('*')
       .single();
 
-    // Si falla porque falta la columna 'sport' o 'is_visible' (o la caché está vieja), reintentamos sin ellas
+    // Si falla porque falta la columna 'is_visible' o 'sport' (o la caché está vieja), reintentamos sin ellas
     if (error && (
-      error.message.includes('column "sport"') ||
       error.message.includes('column "is_visible"') ||
-      error.message.includes("'sport' column") ||
+      error.message.includes('column "sport"') ||
       error.message.includes("'is_visible' column") ||
+      error.message.includes("'sport' column") ||
       error.message.includes("schema cache")
     )) {
       console.warn('⚠️ Detectada discrepancia de esquema en "clubs", reintentando operación reducida...');
@@ -118,6 +118,8 @@ export async function createClub(
       if (isSchemaCacheError || error.message.includes('column "sport"') || error.message.includes("'sport' column")) {
         delete (fallbackData as any).sport;
       }
+      
+      // Si la columna 'is_visible' realmente no existe aún (esquema muy viejo) o falla la caché
       if (isSchemaCacheError || error.message.includes('column "is_visible"') || error.message.includes("'is_visible' column")) {
         delete (fallbackData as any).is_visible;
       }
@@ -336,24 +338,15 @@ export async function updateClub(
         .update(normalizedCore)
         .eq('id', clubId);
 
-      // Si falla porque falta la columna 'sport' o 'is_visible' (o la caché está vieja), reintentamos sin ellas
+      // Si falla porque falta la columna 'is_visible' (o la caché está vieja), reintentamos sin ella
       if (coreError && (
-        coreError.message.includes('column "sport"') ||
         coreError.message.includes('column "is_visible"') ||
-        coreError.message.includes("'sport' column") ||
         coreError.message.includes("'is_visible' column") ||
         coreError.message.includes("schema cache")
       )) {
         console.warn('⚠️ Detectada discrepancia de esquema en "clubs" durante UPDATE, reintentando...');
         const fallbackCore = { ...normalizedCore };
-        const isSchemaCacheError = coreError.message.includes("schema cache");
-
-        if (isSchemaCacheError || coreError.message.includes('column "sport"') || coreError.message.includes("'sport' column")) {
-          delete fallbackCore.sport;
-        }
-        if (isSchemaCacheError || coreError.message.includes('column "is_visible"') || coreError.message.includes("'is_visible' column")) {
-          delete fallbackCore.is_visible;
-        }
+        delete (fallbackCore as any).is_visible;
 
         const retry = await supabase
           .from('clubs')

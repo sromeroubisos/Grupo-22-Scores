@@ -88,6 +88,7 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                 {TOURNAMENT_TABS.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = currentTab === tab.id;
+                    const index = TOURNAMENT_TABS.indexOf(tab);
                     return (
                         <button
                             key={tab.id}
@@ -96,8 +97,14 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                             type="button"
                             aria-current={isActive ? 'page' : undefined}
                         >
-                            <Icon size={14} className="basalt-tab-icon" />
-                            <span>{tab.label}</span>
+                            <span className="basalt-tab-step">{String(index + 1).padStart(2, '0')}</span>
+                            <span className="basalt-tab-glyph">
+                                <Icon size={14} className="basalt-tab-icon" />
+                            </span>
+                            <span className="basalt-tab-copy">
+                                <span className="basalt-tab-label">{tab.label}</span>
+                                <small className="basalt-tab-description">{tab.description}</small>
+                            </span>
                         </button>
                     );
                 })}

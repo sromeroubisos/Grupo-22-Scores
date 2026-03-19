@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
-import { FIXTURE_IMPORT_SCHEMA_MESSAGE, isFixtureImportSchemaError } from '@/lib/utils/fixtureImportErrors';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { FixtureImportService } from '@/lib/services/fixtureImportService';
 
@@ -68,12 +67,6 @@ export async function POST(
         return NextResponse.json(result);
     } catch (error: unknown) {
         console.error('Error in POST /api/tournaments/[id]/fixture/import:', error);
-        if (isFixtureImportSchemaError(error)) {
-            return NextResponse.json(
-                { error: FIXTURE_IMPORT_SCHEMA_MESSAGE, code: 'schema_not_initialized' },
-                { status: 503 }
-            );
-        }
         const message = error instanceof Error ? error.message : 'Internal server error';
         return NextResponse.json(
             { error: message },

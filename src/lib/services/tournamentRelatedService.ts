@@ -120,7 +120,7 @@ async function fetchTournamentLinkedRelationsWithClient(
 
     const { data: tournamentsData, error: tournamentsError } = await supabase
         .from('tournaments')
-        .select('id, name, display_name, season_id, sport_id, status')
+        .select('id, name, display_name, sport_id, status')
         .in('id', linkedIds);
 
     if (tournamentsError) {
@@ -137,7 +137,7 @@ async function fetchTournamentLinkedRelationsWithClient(
             {
                 id: row.id as string,
                 name: (row.display_name || row.name) as string,
-                season: row.season_id ? String(row.season_id) : null,
+                season: null,
                 sport: row.sport_id ? String(row.sport_id) : null,
                 status: row.status ? String(row.status) : null,
             },

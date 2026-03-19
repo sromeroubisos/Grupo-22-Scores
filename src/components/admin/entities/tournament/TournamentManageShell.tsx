@@ -146,20 +146,58 @@ export function TournamentManageShell({ id, data, currentTab, children }: ShellP
                     onMenuClose={() => setMenuOpen(false)}
                 />
 
-                <TournamentTabs id={id} currentTab={currentTab} data={data} />
+                <div className="basalt-shell-stage">
+                    <TournamentTabs id={id} currentTab={currentTab} data={data} />
 
-                <div className={`basalt-shell-layout ${currentTab === 'posiciones' ? 'basalt-shell-layout-wide' : ''}`}>
-                    <main className={`basalt-shell-main ${currentTab === 'posiciones' ? 'basalt-shell-main-wide' : ''}`}>
-                        {children}
-                    </main>
+                    <div className={`basalt-shell-layout ${currentTab === 'posiciones' ? 'basalt-shell-layout-wide' : ''}`}>
+                        <main className={`basalt-shell-main ${currentTab === 'posiciones' ? 'basalt-shell-main-wide' : ''}`}>
+                            {children}
+                        </main>
 
-                    {currentTab === 'resumen' && (
-                        <TournamentRightSidebar
-                            id={id}
-                            data={data}
-                            onDelete={handleDelete}
-                        />
-                    )}
+                        {currentTab === 'resumen' && (
+                            <TournamentRightSidebar
+                                id={id}
+                                data={data}
+                                onDelete={handleDelete}
+                            />
+                        )}
+                    </div>
+
+                    <footer className="basalt-action-footer">
+                        <div className="basalt-action-footer-copy">
+                            <span className="basalt-action-footer-kicker">Workspace</span>
+                            <strong className="basalt-action-footer-title">Gestion del torneo</strong>
+                            <p className="basalt-action-footer-text">
+                                Navega por modulos, valida estructura y cierra cambios desde una consola unificada.
+                            </p>
+                        </div>
+
+                        <div className="basalt-action-footer-meta">
+                            <span className={`basalt-action-footer-badge ${isDirty ? 'is-live' : 'is-ready'}`}>
+                                {isDirty ? 'Cambios pendientes' : 'Estado sincronizado'}
+                            </span>
+                            <span className="basalt-action-footer-shortcut">Ctrl/Cmd + S</span>
+                        </div>
+
+                        <div className="basalt-action-footer-actions">
+                            <button
+                                className="basalt-btn"
+                                onClick={handleRecalculate}
+                                disabled={isTransitioning}
+                                type="button"
+                            >
+                                Recalcular
+                            </button>
+                            <button
+                                className="basalt-btn basalt-btn-primary"
+                                onClick={handleSave}
+                                disabled={isTransitioning || !isDirty}
+                                type="button"
+                            >
+                                {isTransitioning ? 'Procesando...' : 'Guardar cambios'}
+                            </button>
+                        </div>
+                    </footer>
                 </div>
 
             </div>

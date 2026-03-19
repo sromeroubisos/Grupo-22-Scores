@@ -90,6 +90,8 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
   const [initialForm] = useState(form);
   const [saving, setSaving] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdClubId, setCreatedClubId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -262,6 +264,7 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
       admin_contact_email: form.admin_contact_email || null,
       admin_contact_phone: form.admin_contact_phone || null,
       logo_url: form.logo_url,
+      primary_color: form.primary_color || null,
       source: form.source as any,
       external_id: form.external_id || null,
       aliases: form.aliases_text.split(',').map(s => s.trim()).filter(Boolean),
@@ -289,8 +292,8 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
 
       // Success
       invalidateCache('clubs_list');
-      alert('✅ Club creado exitosamente!');
-      router.push(`/admin/entities/${result.club?.id}/manage?type=club`);
+      setCreatedClubId(result.club?.id ?? null);
+      setShowSuccessModal(true);
     } catch (err) {
       alert('Error inesperado: ' + (err instanceof Error ? err.message : 'Desconocido'));
     } finally {
@@ -327,6 +330,24 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
           </button>
         </div>
       </header>
+
+      {/* Modal Éxito */}
+      {showSuccessModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h2 className={styles.modalHeader}>¡Club creado exitosamente!</h2>
+            <p className={styles.modalText}>¿Qué querés hacer ahora?</p>
+            <div className={styles.modalActions}>
+              <button className={styles.btnCancelModal} onClick={() => router.push('/admin/super/clubes/crear')}>
+                Crear otro club
+              </button>
+              <button className={styles.btnConfirmModal} onClick={() => router.push(`/admin/entities/${createdClubId}/manage?type=club`)}>
+                Ir al panel del club
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Interceptor */}
       {showExitModal && (

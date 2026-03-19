@@ -209,7 +209,7 @@ export function TournamentEditor({
         slug: data.slug ?? '',
         season_id: data.season_id ?? new Date().getFullYear().toString(),
         union_id: data.union_id ?? '',
-        sport: data.sport ?? 'rugby',
+        sport_id: data.sport_id ?? 'rugby',
         category: data.category ?? '',
         age_grade: data.age_grade ?? 'Mayores (Adults)',
         status: data.status ?? 'draft',
@@ -246,7 +246,7 @@ export function TournamentEditor({
         setForm(prev => {
             const next = { ...prev, [key]: value };
             if (key === 'name' && isCreate && !slugEdited) next.slug = slugify(value);
-            if (key === 'sport' && isCreate) {
+            if (key === 'sport_id' && isCreate) {
                 const preset = SPORT_PRESETS[value] ?? SPORT_PRESETS.rugby;
                 setRuleset((r: any) => ({
                     ...r,
@@ -704,16 +704,16 @@ export function TournamentEditor({
                                 <button
                                     key={s.id}
                                     type="button"
-                                    onClick={() => handleChange('sport', s.id)}
+                                    onClick={() => handleChange('sport_id', s.id)}
                                     style={{
-                                        border: `1px solid ${form.sport === s.id ? T.neon : T.border}`,
+                                        border: `1px solid ${form.sport_id === s.id ? T.neon : T.border}`,
                                         padding: '1rem',
                                         textAlign: 'center',
                                         cursor: 'pointer',
                                         transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)',
                                         borderRadius: T.radius,
-                                        backgroundColor: form.sport === s.id ? T.neonDim : 'transparent',
-                                        color: form.sport === s.id ? T.neon : T.textDim,
+                                        backgroundColor: form.sport_id === s.id ? T.neonDim : 'transparent',
+                                        color: form.sport_id === s.id ? T.neon : T.textDim,
                                         fontFamily: T.sans,
                                     }}
                                 >

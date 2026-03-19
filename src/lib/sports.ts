@@ -1,8 +1,8 @@
 import type { Database } from './database.types';
 
 export type ExternalSportId = string;
-// Since tournaments.sport is string | null in DB, we extract the non-nullable string type.
-export type InternalSport = NonNullable<Database['public']['Tables']['tournaments']['Row']['sport']>;
+// Since tournaments.sport_id is string | null in DB, we extract the non-nullable string type.
+export type InternalSport = NonNullable<Database['public']['Tables']['tournaments']['Row']['sport_id']>;
 
 // Deduplicated and canonical list of external sports and their IDs
 export const SPORTS_CANONICAL = [

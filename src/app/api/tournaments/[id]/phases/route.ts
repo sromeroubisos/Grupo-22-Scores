@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { buildPhaseSettingsWithSyncedLabels } from '@/lib/server/phaseLabels';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,9 +25,9 @@ export async function GET(
     }
 
     return NextResponse.json({ data: phases || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in GET /api/tournaments/[id]/phases:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -39,16 +40,29 @@ export async function POST(
     const supabase = await createClient();
     const tournamentId = (await params).id;
     const body = await request.json();
+    const phaseName = typeof body.name === 'string' ? body.name.trim() : '';
+    const phaseType = body.phase_type || 'league';
+    const groupNames: string[] = phaseType === 'group_stage'
+      ? (body.settings?.group_names || []).filter((n: unknown) => typeof n === 'string' && n.trim()).map((name: string) => name.trim())
+      : [];
+    const syncedSettings = await buildPhaseSettingsWithSyncedLabels(supabase, body.settings);
+
+    if (!phaseName) {
+      return NextResponse.json({ error: 'El nombre de la fase es obligatorio.' }, { status: 400 });
+    }
 
     const { data: phase, error } = await supabase
       .from('tournament_phases')
       .insert({
         tournament_id: tournamentId,
-        name: body.name,
-        phase_type: body.phase_type || 'league',
+        name: phaseName,
+        phase_type: phaseType,
         order_index: body.order_index ?? 0,
         is_active: body.is_active ?? true,
-        settings: body.settings || {},
+        settings: {
+          ...syncedSettings,
+          group_names: groupNames,
+        },
       })
       .select()
       .single();
@@ -62,11 +76,29 @@ export async function POST(
       }, { status: 500 });
     }
 
+    // Auto-create tournament_groups for group_stage phases
+    if (phase && phaseType === 'group_stage') {
+      if (groupNames.length > 0) {
+        const groupInserts = groupNames.map((name, index) => ({
+          phase_id: phase.id,
+          name: name.trim(),
+          order_index: index,
+        }));
+        const { error: groupError } = await supabase
+          .from('tournament_groups')
+          .insert(groupInserts);
+        if (groupError) {
+          console.error('Error creating groups for phase:', groupError);
+          // Phase was created successfully — log but don't fail the request
+        }
+      }
+    }
+
     return NextResponse.json({ data: phase }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in POST /api/tournaments/[id]/phases:', error);
     return NextResponse.json({
-      error: error?.message || String(error),
+      error: error instanceof Error ? error.message : String(error),
       location: 'catch_block'
     }, { status: 500 });
   }

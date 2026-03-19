@@ -6,6 +6,7 @@ import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
+type TournamentDisplayRow = TournamentRow & { sport?: string | null };
 
 export interface TournamentHeaderProps {
     data: TournamentRow;
@@ -23,8 +24,9 @@ export interface TournamentHeaderProps {
 }
 
 export function computeHealth(data: TournamentRow): 'OK' | 'WARNING' | 'ERROR' {
-    if (!data.name) return 'ERROR';
-    if (!data.slug || !data.sport || !data.union_id) return 'WARNING';
+    const tournament = data as TournamentDisplayRow;
+    if (!tournament.name) return 'ERROR';
+    if (!tournament.slug || !tournament.sport || !tournament.union_id) return 'WARNING';
     return 'OK';
 }
 
@@ -33,6 +35,7 @@ export function TournamentHeader({
     onSave, onStatusTransition, onRecalculate, onDuplicate, onExport, onDelete,
     onMenuToggle, onMenuClose,
 }: TournamentHeaderProps) {
+    const tournament = data as TournamentDisplayRow;
     const status = (data.status ?? 'draft').toUpperCase();
     const health = computeHealth(data);
     const isVisible = data.is_visible;
@@ -79,6 +82,11 @@ export function TournamentHeader({
     return (
         <header className="basalt-header">
             <div className="basalt-header-main">
+                <div className="basalt-header-eyebrow">
+                    <span className="basalt-header-kicker">Tournament Console</span>
+                    <span className="basalt-header-slug">{data.slug || 'draft-routing'}</span>
+                </div>
+
                 {isDirty && (
                     <div className="basalt-unsaved">
                         <div className="basalt-dot-pulse" />
@@ -89,6 +97,12 @@ export function TournamentHeader({
                 <div className="basalt-header-title-row">
                     <h1 className="basalt-h1">{data.name || 'TORNEO SIN NOMBRE'}</h1>
                     <span className="basalt-header-season">{data.season_id || '--'}</span>
+                </div>
+
+                <div className="basalt-header-meta">
+                    <span>{tournament.sport || 'Disciplina pendiente'}</span>
+                    <span>{tournament.category || 'Categoria no definida'}</span>
+                    <span>{tournament.format || 'Formato en configuracion'}</span>
                 </div>
 
                 <div className="basalt-header-badges">

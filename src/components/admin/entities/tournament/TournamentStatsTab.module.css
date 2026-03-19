@@ -411,3 +411,67 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Basalt tournament console overrides */
+.page {
+  --stats-bg: #07101a;
+  --stats-surface: rgba(9, 15, 24, 0.86);
+  --stats-surface-2: rgba(12, 21, 32, 0.92);
+  --stats-border: rgba(255, 255, 255, 0.08);
+  --stats-text: #eef4f7;
+  --stats-muted: rgba(228, 236, 241, 0.58);
+  --stats-accent: #00a365;
+  --stats-accent-soft: rgba(0, 163, 101, 0.14);
+  --stats-accent-soft-2: rgba(0, 163, 101, 0.08);
+  gap: 22px;
+}
+
+.header,
+.filters,
+.tableSection,
+.vizCard,
+.card {
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(0, 163, 101, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 36%),
+    rgba(9, 15, 24, 0.86);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+}
+
+.eyebrow,
+.meta span,
+.field span,
+.cardLabel,
+.sectionMeta span,
+.sortButton {
+  letter-spacing: 0.16em;
+}
+
+.actionButton,
+.tab,
+.select,
+.entityLogo,
+.insights li,
+.chartTrack {
+  border-radius: 14px;
+}
+
+.actionPrimary {
+  background: linear-gradient(135deg, #00b26f 0%, #008f59 100%);
+  color: #f4fff9;
+}
+
+.tabActive,
+.metaAccent {
+  color: #d9ffeb;
+  border-color: rgba(0, 214, 136, 0.24);
+}
+
+.tabActive {
+  background: rgba(0, 163, 101, 0.12);
+}
+
+.chartFill {
+  background: linear-gradient(90deg, #00a365, #00d688);
+}

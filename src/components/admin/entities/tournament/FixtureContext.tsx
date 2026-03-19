@@ -14,7 +14,6 @@ import type {
   FixtureImportConfirmResult,
   FixtureImportPreviewResult,
 } from '@/lib/types/fixture-import';
-import { FIXTURE_IMPORT_SCHEMA_MESSAGE, isFixtureImportSchemaError } from '@/lib/utils/fixtureImportErrors';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -208,7 +207,6 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
       return result as FixtureImportPreviewResult;
     } catch (error) {
       console.error('Error previewing fixture import:', error);
-      const isSchemaError = isFixtureImportSchemaError(error);
       const fallback: FixtureImportPreviewResult = {
         ok: false,
         summary: {
@@ -240,8 +238,8 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
         issues: [
           {
             severity: 'error',
-            code: isSchemaError ? 'schema_not_initialized' : 'preview_failed',
-            message: isSchemaError ? FIXTURE_IMPORT_SCHEMA_MESSAGE : error instanceof Error ? error.message : 'Failed to preview fixture import',
+            code: 'preview_failed',
+            message: error instanceof Error ? error.message : 'Failed to preview fixture import',
             field: 'document',
           },
         ],
@@ -279,7 +277,6 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
       return result as FixtureImportConfirmResult;
     } catch (error) {
       console.error('Error confirming fixture import:', error);
-      const isSchemaError = isFixtureImportSchemaError(error);
       const fallback: FixtureImportConfirmResult = {
         ok: false,
         jobId: params.jobId,
@@ -290,8 +287,8 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
         issues: [
           {
             severity: 'error',
-            code: isSchemaError ? 'schema_not_initialized' : 'confirm_failed',
-            message: isSchemaError ? FIXTURE_IMPORT_SCHEMA_MESSAGE : error instanceof Error ? error.message : 'Failed to confirm fixture import',
+            code: 'confirm_failed',
+            message: error instanceof Error ? error.message : 'Failed to confirm fixture import',
             field: 'document',
           },
         ],

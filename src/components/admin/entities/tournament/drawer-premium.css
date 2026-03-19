@@ -6,7 +6,7 @@
 .pp-drawer-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 2100;
     background: rgba(0, 0, 0, 0.45);
     animation: pp-fade-in 0.2s ease-out;
 }
@@ -21,10 +21,14 @@
     background: var(--pp-bg);
     border-left: 1px solid var(--pp-border);
     box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
-    z-index: 1100;
+    z-index: 2101;
     animation: pp-slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
+}
+
+.pp-drawer-panel-wide {
+    max-width: 720px;
 }
 
 @keyframes pp-slide-in-right {
@@ -374,6 +378,19 @@
     gap: 8px;
 }
 
+.pp-upsert-segmented {
+    display: grid;
+    gap: 8px;
+}
+
+.pp-upsert-segmented-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pp-upsert-segmented-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .pp-segment-option {
     padding: 10px 16px;
     font-size: 12px;
@@ -418,6 +435,67 @@
     width: 16px;
     height: 16px;
     flex-shrink: 0;
+}
+
+.pp-upsert-club-list {
+    max-height: 260px;
+    margin-top: 12px;
+}
+
+.pp-select-wrap {
+    position: relative;
+}
+
+.pp-form-select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 42px;
+}
+
+.pp-select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-top: -6px;
+    border-right: 2px solid var(--pp-text-muted);
+    border-bottom: 2px solid var(--pp-text-muted);
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+.pp-form-textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+.pp-inline-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pp-inline-label svg {
+    width: 12px;
+    height: 12px;
+}
+
+.pp-text-uppercase {
+    text-transform: uppercase;
+}
+
+.pp-info-card-success {
+    margin-top: 14px;
+    background: rgba(0, 163, 101, 0.08);
+    border: 1px solid rgba(0, 163, 101, 0.2);
+}
+
+.pp-info-card-success p,
+.pp-info-card-success strong {
+    color: var(--pp-text-main);
 }
 
 .pp-drawer-footer {
@@ -518,6 +596,11 @@
     }
 
     .pp-form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .pp-upsert-segmented-2,
+    .pp-upsert-segmented-3 {
         grid-template-columns: 1fr;
     }
 

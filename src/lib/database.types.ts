@@ -133,7 +133,6 @@ export type Database = {
           region: string | null
           short_name: string | null
           slug: string | null
-          sport: string | null
           union_id: string | null
           updated_at: string | null
         }
@@ -964,38 +963,23 @@ export type Database = {
           country: string | null
           country_id: string | null
           created_at: string
-          custom_logo_url: string | null
-          data_source: string | null
           display_name: string | null
-          external_id: string | null
           format: string | null
           id: string
-          is_active: boolean
-          is_api_managed: boolean
           is_popular: boolean
           is_visible: boolean
           logo_url: string | null
           name: string
-          organization_id: string | null
-          original_logo_url: string | null
-          original_name: string | null
-          display_order: number | null
           primary_color: string | null
-          priority: number | null
           region: string | null
           ruleset: { [key: string]: any } | null
           season_id: string | null
           secondary_color: string | null
           slug: string | null
-          social_links: Json | null
-          sponsors: Json | null
-          sport: string | null
           sport_id: string | null
           status: string
-          streaming_url: string | null
           union_id: string | null
           updated_at: string
-          url: string | null
         }
         Insert: {
           age_grade?: string | null
@@ -1004,38 +988,23 @@ export type Database = {
           country?: string | null
           country_id?: string | null
           created_at?: string
-          custom_logo_url?: string | null
-          data_source?: string | null
           display_name?: string | null
-          external_id?: string | null
           format?: string | null
           id?: string
-          is_api_managed?: boolean
-          is_visible?: boolean
-          is_active?: boolean
           is_popular?: boolean
+          is_visible?: boolean
           logo_url?: string | null
           name: string
-          organization_id?: string | null
-          original_logo_url?: string | null
-          original_name?: string | null
-          display_order?: number | null
           primary_color?: string | null
-          priority?: number | null
           region?: string | null
           ruleset?: { [key: string]: any } | null
           season_id?: string | null
           secondary_color?: string | null
           slug?: string | null
-          social_links?: Json | null
-          sponsors?: Json | null
-          sport?: string | null
           sport_id?: string | null
           status?: string
-          streaming_url?: string | null
           union_id?: string | null
           updated_at?: string
-          url?: string | null
         }
         Update: {
           age_grade?: string | null
@@ -1044,38 +1013,23 @@ export type Database = {
           country?: string | null
           country_id?: string | null
           created_at?: string
-          custom_logo_url?: string | null
-          data_source?: string | null
           display_name?: string | null
-          external_id?: string | null
           format?: string | null
           id?: string
-          is_active?: boolean
-          is_api_managed?: boolean
           is_popular?: boolean
           is_visible?: boolean
           logo_url?: string | null
           name?: string
-          organization_id?: string | null
-          original_logo_url?: string | null
-          original_name?: string | null
-          display_order?: number | null
           primary_color?: string | null
-          priority?: number | null
           region?: string | null
           ruleset?: { [key: string]: any } | null
           season_id?: string | null
           secondary_color?: string | null
           slug?: string | null
-          social_links?: Json | null
-          sponsors?: Json | null
-          sport?: string | null
           sport_id?: string | null
           status?: string
-          streaming_url?: string | null
           union_id?: string | null
           updated_at?: string
-          url?: string | null
         }
         Relationships: [
           { foreignKeyName: "tournaments_union_id_fkey"; columns: ["union_id"]; referencedRelation: "unions"; referencedColumns: ["id"] },

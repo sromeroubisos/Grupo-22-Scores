@@ -752,3 +752,78 @@
         min-height: 42px;
     }
 }
+
+/* Basalt tournament console overrides */
+.shell {
+    gap: 18px;
+    padding-bottom: 88px;
+}
+
+.hero,
+.viewport,
+.alertCard,
+.feedback,
+.mercuryCard,
+.formPanel,
+.linkedCard,
+.emptyPanel {
+    border-radius: 24px;
+    border-color: rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(135deg, rgba(0, 163, 101, 0.08), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 38%),
+        rgba(9, 15, 24, 0.86);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+}
+
+.heroAccent {
+    background: linear-gradient(180deg, rgba(0, 214, 136, 0.95), rgba(0, 214, 136, 0));
+    box-shadow: 0 0 18px rgba(0, 214, 136, 0.35);
+}
+
+.eyebrow,
+.sectionEyebrow,
+.cardEyebrow,
+.metricLabel,
+.field span {
+    color: rgba(177, 255, 218, 0.78);
+}
+
+.switcher,
+.itemRow,
+.inputWrap,
+.select,
+.textarea,
+.ghostButton,
+.actionButton,
+.metricCard {
+    border-radius: 16px;
+}
+
+.switcherButtonActive,
+.primaryButton,
+.fab {
+    background: linear-gradient(135deg, #00b26f 0%, #008f59 100%);
+    color: #f4fff9;
+    border-color: rgba(0, 214, 136, 0.28);
+    box-shadow: 0 14px 32px rgba(0, 163, 101, 0.2);
+}
+
+.ghostButton,
+.actionButton,
+.switcherButton,
+.itemRow,
+.metricCard {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.itemRow:hover,
+.mercuryCard:hover,
+.linkedCard:hover {
+    border-color: rgba(0, 214, 136, 0.2);
+    background: rgba(0, 163, 101, 0.06);
+}
+
+.badge {
+    border-radius: 999px;
+}

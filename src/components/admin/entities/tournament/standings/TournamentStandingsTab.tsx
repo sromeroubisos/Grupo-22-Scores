@@ -5,7 +5,7 @@ import { Activity, CheckCircle2, Clock3, Layers3, XCircle } from 'lucide-react';
 import { StandingsFiltersBar } from './StandingsFiltersBar';
 import { StandingsSidebar } from './StandingsSidebar';
 import { StandingsTable } from './StandingsTable';
-import { ManageLabelsPanel } from './ManageLabelsPanel';
+import { PhaseLabelsPanel } from './PhaseLabelsPanel';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsDataPayload, StandingsPhase, StandingsRow, TeamLabelAssignment, TournamentContextData, UiLabel } from './types';
 
@@ -55,7 +55,6 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [recalcFeedback, setRecalcFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [logicPanelError, setLogicPanelError] = useState<string | null>(null);
-  const [allLabels, setAllLabels] = useState<UiLabel[]>([]);
   const [assignments, setAssignments] = useState<TeamLabelAssignment[]>([]);
   const [showLabelsPanel, setShowLabelsPanel] = useState(false);
 
@@ -123,14 +122,6 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     loadContextAndLite();
   }, [loadContextAndLite]);
 
-  // Load global labels once on mount
-  useEffect(() => {
-    fetch('/api/admin/labels?scope=standings')
-      .then((r) => r.json())
-      .then((json) => { if (json.ok) setAllLabels(json.data ?? []); })
-      .catch(() => {});
-  }, []);
-
   useEffect(() => {
     const media = window.matchMedia('(max-width: 900px)');
     const sync = () => setIsCompactMobile(media.matches);
@@ -149,6 +140,40 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   useEffect(() => {
     loadAssignments(selectedPhase, selectedGroup);
   }, [loadAssignments, selectedPhase, selectedGroup]);
+
+  const activePhase = useMemo(
+    () => context?.phases.find((phase: StandingsPhase) => phase.id === selectedPhase) || null,
+    [context?.phases, selectedPhase],
+  );
+
+  useEffect(() => {
+    if (!activePhase) return;
+
+    const phaseGroups = activePhase.groups || [];
+    if (phaseGroups.length === 0) {
+      setSelectedGroup(null);
+      return;
+    }
+
+    setSelectedGroup((current) => {
+      if (current && phaseGroups.some((group) => group.id === current)) {
+        return current;
+      }
+      return phaseGroups[0].id;
+    });
+  }, [selectedPhase, activePhase]);
+
+  const allLabels = useMemo<UiLabel[]>(() => {
+    const phaseLabels = activePhase?.settings?.groupLabels || [];
+    return phaseLabels
+      .filter((label) => !!label.id && !!label.name)
+      .map((label) => ({
+        id: label.id as string,
+        name: label.name,
+        color: label.color,
+        scope: 'standings',
+      }));
+  }, [activePhase?.settings?.groupLabels]);
 
 
   const handleRecalculate = async () => {
@@ -191,12 +216,14 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   // Build a map: club_id → UiLabel[] for fast lookup in StandingsTable
   const labelsMap = useMemo<Record<string, UiLabel[]>>(() => {
     const map: Record<string, UiLabel[]> = {};
+    const allowedLabelIds = new Set(allLabels.map((label) => label.id));
     for (const a of assignments) {
+      if (!allowedLabelIds.has(a.label.id)) continue;
       if (!map[a.club_id]) map[a.club_id] = [];
       map[a.club_id].push(a.label);
     }
     return map;
-  }, [assignments]);
+  }, [allLabels, assignments]);
 
   // assignment id lookup: labelId+clubId → assignment id (for unassign)
   const assignmentIdMap = useMemo<Record<string, string>>(() => {
@@ -243,7 +270,6 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     return <div className={styles.emptyState}>No se encontraron fases para este torneo.</div>;
   }
 
-  const activePhase = context.phases.find((phase: StandingsPhase) => phase.id === selectedPhase);
   const activeGroups = activePhase?.groups || [];
   const metrics = standingsData?.metrics;
   const resolvedRules = standingsData?.rules ?? activePhase?.resolvedRules ?? null;
@@ -358,15 +384,10 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
         </header>
 
         {showLabelsPanel && (
-          <ManageLabelsPanel
+          <PhaseLabelsPanel
             labels={allLabels}
+            phaseName={activePhase?.name || 'Fase activa'}
             onClose={() => setShowLabelsPanel(false)}
-            onCreated={(label) => setAllLabels((prev) => [...prev, label])}
-            onUpdated={(label) => setAllLabels((prev) => prev.map((l) => (l.id === label.id ? label : l)))}
-            onDeleted={(id) => {
-              setAllLabels((prev) => prev.filter((l) => l.id !== id));
-              setAssignments((prev) => prev.filter((a) => a.label_id !== id));
-            }}
           />
         )}
 
@@ -452,12 +473,11 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
               tableColumns={phaseTableColumns}
               rules={resolvedRules}
               compactMobile={isCompactMobile}
-              labelsMap={labelsMap}
-              allLabels={allLabels}
-              onAssignLabel={handleAssignLabel}
-              onUnassignLabel={handleUnassignLabel}
-              assignmentIdMap={assignmentIdMap}
-            />
+                  labelsMap={labelsMap}
+                  allLabels={allLabels}
+                  onAssignLabel={handleAssignLabel}
+                  onUnassignLabel={handleUnassignLabel}
+                />
           </section>
 
           <aside className={styles.rightRail}>

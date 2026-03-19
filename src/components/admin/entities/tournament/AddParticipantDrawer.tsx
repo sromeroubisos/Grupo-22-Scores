@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, UserPlus, IdCard, Search, AlertCircle } from 'lucide-react';
 import './participants-premium.css';
 import './drawer-premium.css';
@@ -35,12 +36,22 @@ interface Participant {
     name: string;
 }
 
+interface NewParticipantInput {
+    club_id: string;
+    name: string;
+    type: 'club';
+    short_code: string | null;
+    seed: null;
+    status: 'active' | 'pending';
+}
+
 interface AddParticipantDrawerProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (participants: any[]) => Promise<void>;
+    onAdd: (participants: NewParticipantInput[]) => Promise<void>;
     clubs: Club[];
     existingParticipants?: Participant[];
+    loadingClubs?: boolean;
 }
 
 export function AddParticipantDrawer({
@@ -48,7 +59,8 @@ export function AddParticipantDrawer({
     onClose,
     onAdd,
     clubs,
-    existingParticipants = []
+    existingParticipants = [],
+    loadingClubs = false,
 }: AddParticipantDrawerProps) {
     // Form state
     const [selectedClubIds, setSelectedClubIds] = useState<string[]>([]);
@@ -132,16 +144,16 @@ export function AddParticipantDrawer({
             setSearchQuery('');
             setStatus('active');
             onClose();
-        } catch (err: any) {
-            setError(err.message || 'Error al crear participantes');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Error al crear participantes');
         } finally {
             setLoading(false);
         }
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || typeof document === 'undefined') return null;
 
-    return (
+    return createPortal((
         <>
             {/* Overlay */}
             <div className="pp-drawer-overlay" onClick={onClose} />
@@ -199,7 +211,15 @@ export function AddParticipantDrawer({
 
                             {/* Club List */}
                             <div className="pp-club-list">
-                                {filteredClubs.length === 0 ? (
+                                {loadingClubs ? (
+                                    <div className="pp-club-empty">
+                                        <div className="pp-drawer-spinner" />
+                                        <div className="pp-club-empty-title">Cargando clubes</div>
+                                        <p className="pp-club-empty-text">
+                                            Estamos trayendo la lista de clubes desde la base de datos.
+                                        </p>
+                                    </div>
+                                ) : filteredClubs.length === 0 ? (
                                     <div className="pp-club-empty">
                                         <IdCard />
                                         <div className="pp-club-empty-title">
@@ -333,7 +353,7 @@ export function AddParticipantDrawer({
                             <button
                                 type="submit"
                                 className="pp-drawer-btn primary"
-                                disabled={loading || selectedClubIds.length === 0 || clubs.length === 0}
+                                disabled={loading || loadingClubs || selectedClubIds.length === 0 || clubs.length === 0}
                             >
                                 {loading ? (
                                     <>
@@ -349,5 +369,5 @@ export function AddParticipantDrawer({
                 </form>
             </div>
         </>
-    );
+    ), document.body);
 }

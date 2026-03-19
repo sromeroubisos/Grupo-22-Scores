@@ -3,6 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { X, FileUp, CheckCircle2, AlertTriangle, ChevronRight } from 'lucide-react';
 
+import { ParticipantType, ParticipantStatus } from './TournamentParticipantsTab';
+
 interface Participant {
     id: string;
     name: string;
@@ -12,7 +14,7 @@ interface Participant {
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onImport: (participants: { name: string; type: string; status: string }[]) => Promise<void>;
+    onImport: (participants: { name: string; type: ParticipantType; status: ParticipantStatus }[]) => Promise<void>;
     existingParticipants: Participant[];
 }
 
@@ -43,8 +45,8 @@ export function ImportParticipantsDrawerV2({ isOpen, onClose, onImport, existing
                 .filter(p => !p.isDuplicate)
                 .map(p => ({
                     name: p.name,
-                    type: 'club',
-                    status: 'active'
+                    type: 'club' as ParticipantType,
+                    status: 'active' as ParticipantStatus
                 }));
 
             await onImport(toImport);

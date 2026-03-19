@@ -196,11 +196,10 @@ export async function getLeaguesBySports(
     // - Use neq(is_visible, false) to include both true AND null values
     const { data: tourData, error: tourError } = await supabase
         .from('tournaments')
-        .select('id, name, display_name, sport, country, logo_url, status')
-        .in('sport', sportIds)
-        .neq('status', 'archived')
+        .select('id, name, display_name, country_id, sport_id, logo_url, is_visible, slug')
+        .in('sport_id', sportIds)
         .neq('is_visible', false)
-        .order('name', { ascending: true })
+        .order('name', { ascending: true });
 
     if (tourError) {
         console.error('[preferencesService] getLeaguesBySports tournaments error:', tourError.message)
@@ -226,8 +225,8 @@ export async function getLeaguesBySports(
             id: String(t.id),
             name: t.display_name || t.name,
             displayName: t.display_name ?? null,
-            sport: t.sport,
-            country: t.country ?? null,
+            sport: t.sport_id,
+            country: t.country_id ?? null,
             logoUrl: t.logo_url || null,
         })
     }

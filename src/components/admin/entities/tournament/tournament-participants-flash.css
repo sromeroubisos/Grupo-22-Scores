@@ -836,3 +836,104 @@ tr:hover .participant-name {
 .animate-slide-in {
     animation: slideInFromBottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Basalt tournament console overrides */
+.participants-flash-container {
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text-primary);
+    background:
+        radial-gradient(circle at top right, rgba(0, 163, 101, 0.14), transparent 26%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 34%),
+        transparent;
+    min-height: auto;
+    padding: 0;
+}
+
+.participants-header,
+.participants-filter-bar,
+.participants-table-container {
+    border-radius: 22px;
+    border-color: rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 38%),
+        rgba(9, 15, 24, 0.86);
+    box-shadow: 0 18px 54px rgba(0, 0, 0, 0.22);
+}
+
+.participants-header {
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.participants-filter-bar {
+    padding: 18px;
+    margin-bottom: 18px;
+}
+
+.participants-table-container {
+    overflow: hidden;
+}
+
+.participants-section-label,
+.counter-pill-label,
+.participants-table th,
+.footer-info,
+.filter-input,
+.filter-select,
+.participant-code {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.counter-pill,
+.bulk-action-badge,
+.type-badge,
+.status-badge,
+.participant-logo,
+.filter-input,
+.filter-select {
+    border-radius: 14px;
+}
+
+.counter-pill,
+.type-badge,
+.participants-table tbody tr.selected,
+.participants-table-footer,
+.bulk-action-badge {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-flash {
+    border-radius: 14px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent),
+        rgba(255, 255, 255, 0.03);
+}
+
+.btn-flash.primary {
+    background: linear-gradient(135deg, #00b26f 0%, #008f59 100%);
+}
+
+.participants-table thead {
+    background: rgba(5, 10, 17, 0.96);
+}
+
+.participants-table tbody tr:hover {
+    background: rgba(0, 163, 101, 0.05);
+}
+
+.participants-title {
+    font-size: clamp(28px, 3vw, 40px);
+    letter-spacing: -0.04em;
+}
+
+.participants-counters {
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 1024px) {
+    .participants-flash-container {
+        padding: 0;
+    }
+}

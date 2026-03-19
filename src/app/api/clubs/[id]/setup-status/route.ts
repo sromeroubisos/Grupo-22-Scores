@@ -30,7 +30,6 @@ export async function GET(
 
     const missingIdentity: string[] = [];
     if (!club.name)          missingIdentity.push('name');
-    if (!club.sport)         missingIdentity.push('sport');
     if (!club.logo_url)      missingIdentity.push('logo_url');
     if (!club.primary_color) missingIdentity.push('primary_color');
 

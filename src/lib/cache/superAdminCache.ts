@@ -296,18 +296,23 @@ async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
         throw error;
     }
 
-    return (data || []).map(t => ({
-        ...t,
-        sport_name: (t.sport as any)?.name || 'Unknown',
-        country_name: (t.country as any)?.name || 'Generic',
-        organization_name: (t.union as any)?.name || null,
-        sport: t.sport_id,
-        country: (t.country as any)?.name || t.country_id,
-        followers_count: 0,
-        is_followed_by_user: false,
-        display_name: t.display_name || t.name,
-        original_name: t.original_name || t.name
-    })) as unknown as TournamentRow[];
+    return (data || []).map(t => {
+        const row = t as any;
+        return {
+            ...t,
+            sport_name: (row.sport as any)?.name || 'Unknown',
+            country_name: (row.country as any)?.name || 'Generic',
+            organization_name: (row.union as any)?.name || null,
+            sport: row.sport_id,
+            country: (row.country as any)?.name || row.country_id,
+            followers_count: 0,
+            is_followed_by_user: false,
+            display_name: row.display_name || row.name,
+            original_name: row.original_name || row.name,
+            is_api_managed: row.is_api_managed || false,
+            is_active: row.status === 'active' || row.status === 'published'
+        };
+    }) as unknown as TournamentRow[];
 }
 
 export interface UnionRow {

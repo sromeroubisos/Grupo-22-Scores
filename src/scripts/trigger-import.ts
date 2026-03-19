@@ -81,25 +81,17 @@ async function importTournaments() {
             // Fetch existing to preserve overrides
             const { data: existingTournament } = await supabase
                 .from('tournaments')
-                .select('display_name, custom_logo_url')
+                .select('display_name')
                 .eq('id', tournamentId)
                 .single();
 
             const payload: any = {
                 id: tournamentId,
-                external_id: t.id,
                 name: t.name,
-                original_name: t.originalName || t.name,
                 slug: (t as any).slug || t.id.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
                 logo_url: t.logoUrl,
-                original_logo_url: t.logoUrl,
-                url: t.url,
-                sport: dbSport,
                 sport_id: dbSport,
-                country: (t as any).country || '',
                 country_id: t.countryId && t.countryId !== 'International' ? t.countryId : null,
-                is_api_managed: true,
-                data_source: 'static_import',
                 status: 'active',
                 is_visible: true
             };
@@ -107,10 +99,8 @@ async function importTournaments() {
             // Preserve visual overrides or use defaults for new records
             if (existingTournament) {
                 payload.display_name = existingTournament.display_name;
-                payload.custom_logo_url = existingTournament.custom_logo_url;
             } else {
                 payload.display_name = t.displayName || t.name;
-                payload.custom_logo_url = null;
             }
 
             const { error: tournamentError } = await supabase

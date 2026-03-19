@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import { type CSSProperties, type ReactNode, useState } from 'react';
 import { normalizeStandingsRules } from './rules';
 import { LabelChip } from './LabelChip';
 import { AssignLabelDropdown } from './AssignLabelDropdown';
@@ -80,6 +80,40 @@ function NumericValue({ value }: { value: number }) {
   if (value > 0) return <span className={styles.numericPositive}>+{value}</span>;
   if (value < 0) return <span className={styles.numericNegative}>{value}</span>;
   return <span className={styles.numericNeutral}>0</span>;
+}
+
+function hexToRgba(color: string, alpha: number) {
+  const normalized = color.trim();
+  const hex = normalized.startsWith('#') ? normalized.slice(1) : normalized;
+
+  if (/^[0-9a-f]{3}$/i.test(hex)) {
+    const [r, g, b] = hex.split('').map((char) => parseInt(char + char, 16));
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  if (/^[0-9a-f]{6}$/i.test(hex)) {
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  const rgbMatch = normalized.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i);
+  if (rgbMatch) {
+    return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${alpha})`;
+  }
+
+  return normalized;
+}
+
+function createAccentVars(color: string | null | undefined): CSSProperties | undefined {
+  if (!color) return undefined;
+
+  return {
+    '--standings-row-accent': color,
+    '--standings-row-bg': hexToRgba(color, 0.12),
+    '--standings-row-bg-strong': hexToRgba(color, 0.18),
+  } as CSSProperties;
 }
 
 function getActiveColumns({
@@ -219,10 +253,12 @@ function MobileStandingsCards({
   data,
   activeColumns,
   compactMobile,
+  labelsMap,
 }: {
   data: StandingsRow[];
   activeColumns: ActiveColumn[];
   compactMobile?: boolean;
+  labelsMap?: Record<string, UiLabel[]>;
 }) {
   const hasForm = activeColumns.some((column) => column.id === 'form');
 
@@ -230,8 +266,13 @@ function MobileStandingsCards({
     <div className={styles.mobileCards}>
       {data.map((row, index) => {
         const key = row.teamId || row.team?.id || row.teamName || String(index);
+        const accentStyle = createAccentVars(labelsMap?.[key]?.[0]?.color);
         return (
-          <details key={key} className={`${styles.glassPanel} ${styles.mobileCard}`}>
+          <details
+            key={key}
+            className={`${styles.glassPanel} ${styles.mobileCard} ${accentStyle ? styles.mobileCardTinted : ''}`}
+            style={accentStyle}
+          >
             <summary className={styles.mobileCardSummary}>
               <div className={styles.mobileCardTop}>
                 <div className={styles.mobileRank}>{row.position ?? index + 1}</div>
@@ -333,7 +374,6 @@ export function StandingsTable({
   allLabels,
   onAssignLabel,
   onUnassignLabel,
-  assignmentIdMap,
 }: {
   data: StandingsRow[];
   isLoading: boolean;
@@ -347,7 +387,6 @@ export function StandingsTable({
   allLabels?: UiLabel[];
   onAssignLabel?: (clubId: string, labelId: string) => Promise<void>;
   onUnassignLabel?: (clubId: string, labelId: string) => Promise<void>;
-  assignmentIdMap?: Record<string, string>;
 }) {
   const [openDropdownRow, setOpenDropdownRow] = useState<string | null>(null);
   if (isLoading) {
@@ -439,13 +478,18 @@ export function StandingsTable({
             <tbody>
               {data.map((row, index) => {
                 const rowKey = row.teamId || row.team?.id || row.teamName || String(index);
+                const accentStyle = createAccentVars(labelsMap?.[rowKey]?.[0]?.color);
                 return (
-                  <tr key={rowKey} className={styles.row}>
-                    <td className={`${styles.stickyPos} ${styles.cellMono}`} style={{ zIndex: 20 }}>
+                  <tr
+                    key={rowKey}
+                    className={`${styles.row} ${accentStyle ? styles.rowTinted : ''}`}
+                    style={accentStyle}
+                  >
+                    <td className={`${styles.stickyPos} ${styles.cellMono} ${accentStyle ? styles.stickyCellTinted : ''}`} style={{ zIndex: 20 }}>
                       {row.position ?? index + 1}
                     </td>
 
-                    <td className={styles.stickyTeam} style={{ zIndex: 20 }}>
+                    <td className={`${styles.stickyTeam} ${accentStyle ? styles.stickyCellTinted : ''}`} style={{ zIndex: 20 }}>
                       <div className={styles.teamIdentity}>
                         {row.team?.logo ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
@@ -520,7 +564,7 @@ export function StandingsTable({
         </div>
       </div>
 
-      <MobileStandingsCards data={data} activeColumns={activeColumns} compactMobile={compactMobile} />
+      <MobileStandingsCards data={data} activeColumns={activeColumns} compactMobile={compactMobile} labelsMap={labelsMap} />
     </section>
   );
 }

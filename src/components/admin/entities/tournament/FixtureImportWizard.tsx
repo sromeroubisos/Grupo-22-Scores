@@ -62,7 +62,6 @@ export function FixtureImportWizard({
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [schemaUnavailable, setSchemaUnavailable] = useState(false);
 
   const metrics = useMemo(() => {
     return {
@@ -82,13 +81,11 @@ export function FixtureImportWizard({
       mapping: nextMapping || mapping,
     });
 
-    const isSchemaError = result.issues.some((issue) => issue.code === 'schema_not_initialized');
-
     startTransition(() => {
-      setPreview(isSchemaError ? null : result);
+      setPreview(result.ok ? result : null);
       setMapping(result.mapping.selected || {});
       setRows(
-        isSchemaError
+        !result.ok
           ? []
           : result.rows.map((row) => ({
               ...row,
@@ -99,8 +96,7 @@ export function FixtureImportWizard({
       );
     });
 
-    setSchemaUnavailable(isSchemaError);
-    onPreviewChange?.(isSchemaError ? null : result);
+    onPreviewChange?.(result.ok ? result : null);
 
     if (!result.ok) {
       setFeedback(result.issues[0]?.message || 'No se pudo analizar la fuente.');
@@ -137,12 +133,10 @@ export function FixtureImportWizard({
 
     if (!result.ok && result.issues.length > 0) {
       setFeedback(result.issues[0].message);
-      setSchemaUnavailable(result.issues.some((issue) => issue.code === 'schema_not_initialized'));
       setIsConfirming(false);
       return;
     }
 
-    setSchemaUnavailable(false);
     setFeedback(`Importacion lista. Creados: ${result.created}, actualizados: ${result.updated}, omitidos: ${result.skipped}.`);
     setIsConfirming(false);
     onPreviewChange?.(null);
@@ -155,7 +149,7 @@ export function FixtureImportWizard({
         <div>
           <span className="fixture-kicker">Importar Fixture</span>
           <h3>Deteccion, validacion y confirmacion</h3>
-          <p className="fixture-panel-copy">Ningun archivo crea partidos automaticamente. Todo pasa por preview y aprobacion.</p>
+          <p className="fixture-panel-copy">Ningun archivo crea partidos automaticamente. Todo pasa por preview y aprobacion. Formato sugerido: Jornada 1 - 19/03/2026 - Equipo A vs Equipo B - 16:30 - Cancha 1.</p>
         </div>
         <div className="fixture-panel-actions">
           <button className="fixture-icon-btn" onClick={onBack} title="Cerrar" type="button">
@@ -200,7 +194,7 @@ export function FixtureImportWizard({
             rows={6}
             value={pastedText}
             onChange={(event) => setPastedText(event.target.value)}
-            placeholder="Jockey Club vs Tala RC - 16:30 - Cancha 1"
+            placeholder={'Jornada 1 - 19/03/2026 - Jockey Club vs Tala RC - 16:30 - Cancha 1\nJornada 1 - 19/03/2026 - CRAI vs Estudiantes - 18:00 - Cancha 2'}
             style={{ minHeight: 140 }}
           />
         </div>
@@ -213,11 +207,11 @@ export function FixtureImportWizard({
         <button
           className="btn-primary"
           onClick={() => runPreview()}
-          disabled={schemaUnavailable || isPreviewing || (mode === 'file' ? !file : !pastedText.trim())}
+          disabled={isPreviewing || (mode === 'file' ? !file : !pastedText.trim())}
           type="button"
         >
           {isPreviewing ? <RefreshCw className="spin" size={16} /> : <Upload size={16} />}
-          <span>{schemaUnavailable ? 'Importacion no disponible' : isPreviewing ? 'Analizando...' : 'Analizar fuente'}</span>
+          <span>{isPreviewing ? 'Analizando...' : 'Analizar fuente'}</span>
         </button>
       </div>
 
@@ -445,7 +439,7 @@ export function FixtureImportWizard({
             <button className="btn-secondary" onClick={() => setRows((current) => current.map((row) => ({ ...row, action: 'approve' })))} type="button">
               Aprobar todo lo visible
             </button>
-            <button className="btn-primary" onClick={handleConfirm} disabled={schemaUnavailable || isConfirming || !rows.length} type="button">
+            <button className="btn-primary" onClick={handleConfirm} disabled={isConfirming || !rows.length} type="button">
               {isConfirming ? <RefreshCw className="spin" size={16} /> : <CheckCircle2 size={16} />}
               <span>{isConfirming ? 'Importando...' : 'Confirmar importacion'}</span>
             </button>

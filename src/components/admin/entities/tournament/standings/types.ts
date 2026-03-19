@@ -1,3 +1,5 @@
+import type { GroupLabel } from '@/types/phase-settings';
+
 export type ResolvedTiebreaker = string | { key?: string; id?: string; label?: string };
 
 export interface StandingsRules {
@@ -35,6 +37,7 @@ export interface StandingsPhase {
   groups?: StandingsGroup[];
   settings?: {
     tableColumns?: Record<string, boolean>;
+    groupLabels?: GroupLabel[];
   };
   resolvedRules?: StandingsRules | null;
 }

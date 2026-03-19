@@ -83,6 +83,26 @@ type MatchableEntry = {
   aliases: string[];
 };
 
+type CachedPreviewRecord = {
+  id: string;
+  preview_payload: {
+    raw: Record<string, unknown>;
+    normalized: FixtureImportNormalizedRow;
+    matched: FixtureImportPreviewRow['matched'];
+    issues: FixtureImportIssue[];
+    sourceLabel: string;
+    duplicateAction: FixtureDuplicateAction;
+    action: FixtureImportAction;
+  };
+  duplicate_action: FixtureDuplicateAction;
+  duplicate_match_id: string | null;
+  approval_status?: string;
+  inserted_match_id?: string | null;
+};
+
+const IMPORT_PREVIEW_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const importPreviewCache = new Map<string, { createdAt: number; previews: CachedPreviewRecord[] }>();
+
 const HEADER_ALIASES: Record<keyof FixtureColumnMapping, string[]> = {
   home_team: ['Local', 'Equipo Local', 'Home', 'Club A', 'Equipo A'],
   away_team: ['Visitante', 'Equipo Visitante', 'Away', 'Club B', 'Equipo B'],
@@ -127,6 +147,8 @@ export class FixtureImportService {
     if (rows.length > 0) {
       await this.storePreviewRows(supabase, job.id, rows, confidence);
     }
+
+    this.cachePreviewRows(job.id, rows);
 
     await this.safeInsertImportLog(supabase, {
       job_id: job.id,
@@ -331,6 +353,9 @@ export class FixtureImportService {
       .single();
 
     if (fallbackInsert.error || !fallbackInsert.data) {
+      if (this.isCompatRetryableError(fallbackInsert.error)) {
+        return { id: this.createEphemeralJobId() };
+      }
       throw new Error(fallbackInsert.error?.message || 'No se pudo crear el trabajo de importación.');
     }
 
@@ -338,6 +363,10 @@ export class FixtureImportService {
   }
 
   private static async storeImportFile(supabase: any, jobId: string, parsed: ParsedSource) {
+    if (this.isEphemeralJobId(jobId)) {
+      return;
+    }
+
     const primaryInsert = await supabase.from('import_files').insert({
       job_id: jobId,
       original_name: parsed.fileName || 'pasted-text.txt',
@@ -366,11 +395,18 @@ export class FixtureImportService {
     });
 
     if (fallbackInsert.error) {
+      if (this.isCompatRetryableError(fallbackInsert.error)) {
+        return;
+      }
       throw new Error(fallbackInsert.error.message || 'No se pudo guardar el archivo importado.');
     }
   }
 
   private static async storePreviewRows(supabase: any, jobId: string, rows: FixtureImportPreviewRow[], confidence: FixtureImportConfidence) {
+    if (this.isEphemeralJobId(jobId)) {
+      return;
+    }
+
     const primaryRowsInsert = await supabase
       .from('import_rows')
       .insert(
@@ -452,6 +488,9 @@ export class FixtureImportService {
       .select('id, row_index');
 
     if (legacyRowsInsert.error || !legacyRowsInsert.data) {
+      if (this.isCompatRetryableError(legacyRowsInsert.error)) {
+        return;
+      }
       throw new Error(legacyRowsInsert.error?.message || 'No se pudieron guardar las filas importadas.');
     }
 
@@ -471,6 +510,9 @@ export class FixtureImportService {
       .select('id');
 
     if (legacyPreviewInsert.error || !legacyPreviewInsert.data) {
+      if (this.isCompatRetryableError(legacyPreviewInsert.error)) {
+        return;
+      }
       throw new Error(legacyPreviewInsert.error?.message || 'No se pudo crear la previsualización.');
     }
 
@@ -480,6 +522,11 @@ export class FixtureImportService {
   }
 
   private static async loadStoredPreviews(supabase: any, jobId: string) {
+    const cachedPreviews = this.getCachedPreviews(jobId);
+    if (cachedPreviews) {
+      return cachedPreviews;
+    }
+
     const primaryQuery = await supabase
       .from('import_match_previews')
       .select('id, preview_payload, duplicate_action, duplicate_match_id')
@@ -523,6 +570,10 @@ export class FixtureImportService {
   }
 
   private static async finalizeImportJob(supabase: any, jobId: string, stats: { created: number; updated: number; skipped: number; rejected: number }) {
+    if (this.isEphemeralJobId(jobId)) {
+      return;
+    }
+
     const primaryUpdate = await supabase
       .from('import_jobs')
       .update({
@@ -548,11 +599,18 @@ export class FixtureImportService {
       .eq('id', jobId);
 
     if (fallbackUpdate.error) {
+      if (this.isCompatRetryableError(fallbackUpdate.error)) {
+        return;
+      }
       throw fallbackUpdate.error;
     }
   }
 
   private static async safeInsertImportLog(supabase: any, payload: Record<string, unknown>) {
+    if (this.isEphemeralJobId(String(payload.job_id || ''))) {
+      return;
+    }
+
     const primaryInsert = await supabase.from('import_logs').insert(payload);
     if (!primaryInsert.error) {
       return;
@@ -944,34 +1002,90 @@ export class FixtureImportService {
   }
 
   private static parseTextLine(line: string) {
-    const dateMatch = line.match(/\b(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\b/);
-    const timeMatch = line.match(/\b(\d{1,2}:\d{2})\b/);
-    const scoreMatch = line.match(/\b(\d+)\s*[-:]\s*(\d+)\b/);
-    let working = line;
-    if (dateMatch) working = working.replace(dateMatch[0], '').trim();
-    if (timeMatch) working = working.replace(timeMatch[0], '').trim();
-    const vsMatch = working.match(/(.+?)\s+(?:vs|v)\s+(.+)/i);
+    const pipeSegments = line.split(/\s+\|\s+/).map((item) => item.trim()).filter(Boolean);
+    const dashSegments = line.split(/\s+-\s+/).map((item) => item.trim()).filter(Boolean);
+    const segments = dashSegments.length >= 3 ? dashSegments : pipeSegments;
+    const teamSegmentIndex = segments.findIndex((segment) => /\b(?:vs|v)\b/i.test(segment));
+    const metadataSegments = teamSegmentIndex >= 0 ? segments.slice(0, teamSegmentIndex) : [];
+    const trailingSegments = teamSegmentIndex >= 0 ? segments.slice(teamSegmentIndex + 1) : [];
+
+    let round: string | null = null;
+    let matchDate: string | null = null;
+    let matchTime: string | null = null;
+    let venue: string | null = null;
+
+    metadataSegments.forEach((segment) => {
+      const dateMatch = segment.match(/\b(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\b/);
+      if (dateMatch) {
+        matchDate = dateMatch[1];
+        const roundCandidate = segment.replace(dateMatch[0], '').replace(/^[\s-]+|[\s-]+$/g, '').trim();
+        if (roundCandidate) {
+          round = roundCandidate;
+        }
+        return;
+      }
+
+      if (segment) {
+        round = round ? `${round} ${segment}`.trim() : segment;
+      }
+    });
+
+    if (!matchDate) {
+      const inlineDateMatch = line.match(/\b(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\b/);
+      matchDate = inlineDateMatch?.[1] || null;
+      if (matchDate && !round && segments[0]) {
+        const roundCandidate = segments[0].replace(matchDate, '').replace(/^[\s-]+|[\s-]+$/g, '').trim();
+        round = roundCandidate || null;
+      }
+    }
+
+    trailingSegments.forEach((segment) => {
+      if (!matchTime) {
+        const timeMatch = segment.match(/\b(\d{1,2}:\d{2})\b/);
+        if (timeMatch) {
+          matchTime = timeMatch[1];
+          const venueCandidate = segment.replace(timeMatch[0], '').replace(/^[\s-]+|[\s-]+$/g, '').trim();
+          if (venueCandidate) {
+            venue = venue ? `${venue} | ${venueCandidate}` : venueCandidate;
+          }
+          return;
+        }
+      }
+
+      if (segment) {
+        venue = venue ? `${venue} | ${segment}` : segment;
+      }
+    });
+
+    const teamSegment = teamSegmentIndex >= 0 ? segments[teamSegmentIndex] : line;
+    const cleanedTeamSegment = teamSegment
+      .replace(matchDate || '', '')
+      .replace(matchTime || '', '')
+      .replace(/^[\s-]+|[\s-]+$/g, '')
+      .trim();
+    const vsMatch = cleanedTeamSegment.match(/(.+?)\s+(?:vs|v)\s+(.+)/i);
+
     if (vsMatch) {
-      const segments = vsMatch[2].split(/\s+\|\s+|\s+-\s+/).map((item) => item.trim()).filter(Boolean);
       return {
         homeTeam: vsMatch[1].trim(),
-        awayTeam: segments[0] || null,
-        matchDate: dateMatch?.[1] || null,
-        matchTime: timeMatch?.[1] || null,
-        venue: segments.slice(1).join(' | ') || null,
-        round: null,
-        status: scoreMatch ? 'final' : 'scheduled',
+        awayTeam: vsMatch[2].trim(),
+        matchDate,
+        matchTime,
+        venue,
+        round,
+        status: 'scheduled',
       };
     }
-    const segments = working.split(/\s+\|\s+|\s+-\s+/).map((item) => item.trim()).filter(Boolean);
+
+    const fallbackSegments = cleanedTeamSegment.split(/\s+-\s+/).map((item) => item.trim()).filter(Boolean);
     return {
-      homeTeam: segments[0] || null,
-      awayTeam: segments[1] || null,
-      matchDate: dateMatch?.[1] || null,
-      matchTime: timeMatch?.[1] || null,
-      venue: segments.slice(2).join(' | ') || null,
-      round: null,
-      status: scoreMatch ? 'final' : 'scheduled',
+      homeTeam: fallbackSegments[0] || null,
+      awayTeam: fallbackSegments[1] || null,
+      matchDate,
+      matchTime,
+      venue: venue || fallbackSegments.slice(2).join(' | ') || null,
+      round,
+      status: 'scheduled',
     };
   }
 
@@ -1136,6 +1250,10 @@ export class FixtureImportService {
   }
 
   private static async markPreview(supabase: any, previewId: string, approvalStatus: string, matchId: string | null) {
+    if (this.updateCachedPreview(previewId, approvalStatus, matchId)) {
+      return;
+    }
+
     const primaryUpdate = await supabase.from('import_match_previews').update({ approval_status: approvalStatus, inserted_match_id: matchId }).eq('id', previewId);
     if (!primaryUpdate.error) {
       return;
@@ -1151,6 +1269,9 @@ export class FixtureImportService {
       .eq('id', previewId);
 
     if (fallbackUpdate.error) {
+      if (this.isCompatRetryableError(fallbackUpdate.error)) {
+        return;
+      }
       throw fallbackUpdate.error;
     }
   }
@@ -1234,5 +1355,67 @@ export class FixtureImportService {
     if (['manual_review', 'skipped_duplicate', 'omitted'].includes(approvalStatus)) return 'warning';
     if (['rejected'].includes(approvalStatus)) return 'invalid';
     return 'pending';
+  }
+
+  private static createEphemeralJobId() {
+    return `mem-fixture-${randomUUID()}`;
+  }
+
+  private static isEphemeralJobId(jobId: string | null | undefined) {
+    return typeof jobId === 'string' && jobId.startsWith('mem-fixture-');
+  }
+
+  private static cachePreviewRows(jobId: string, rows: FixtureImportPreviewRow[]) {
+    this.cleanupPreviewCache();
+    importPreviewCache.set(jobId, {
+      createdAt: Date.now(),
+      previews: rows.map((row) => ({
+        id: row.previewId,
+        preview_payload: {
+          raw: row.raw,
+          normalized: row.normalized,
+          matched: row.matched,
+          issues: row.issues,
+          sourceLabel: row.sourceLabel,
+          duplicateAction: row.duplicateAction,
+          action: row.action,
+        },
+        duplicate_action: row.duplicateAction,
+        duplicate_match_id: row.matched.duplicateMatchId,
+        approval_status: row.action === 'approve' ? 'pending' : 'omitted',
+        inserted_match_id: null,
+      })),
+    });
+  }
+
+  private static getCachedPreviews(jobId: string) {
+    this.cleanupPreviewCache();
+    return importPreviewCache.get(jobId)?.previews || null;
+  }
+
+  private static updateCachedPreview(previewId: string, approvalStatus: string, matchId: string | null) {
+    this.cleanupPreviewCache();
+
+    for (const cached of importPreviewCache.values()) {
+      const preview = cached.previews.find((item) => item.id === previewId);
+      if (!preview) {
+        continue;
+      }
+
+      preview.approval_status = approvalStatus;
+      preview.inserted_match_id = matchId;
+      return true;
+    }
+
+    return false;
+  }
+
+  private static cleanupPreviewCache() {
+    const now = Date.now();
+    for (const [jobId, cached] of importPreviewCache.entries()) {
+      if (now - cached.createdAt > IMPORT_PREVIEW_CACHE_TTL_MS) {
+        importPreviewCache.delete(jobId);
+      }
+    }
   }
 }

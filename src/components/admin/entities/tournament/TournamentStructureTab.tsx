@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { AlertCircle, CheckCircle, ChevronRight, Layers, Plus, Trash2 } from 'lucide-react';
 import './basalt.css';
-import '../club/vitreous-club.css';
 import './phase-wizard.css';
+import './tournament-structure.css';
 
 import { TiebreakerList, TiebreakerItem } from './TiebreakerList';
 import { TableColumnSelector, ColumnCategory } from './TableColumnSelector';
-import { PhaseSettings, tiebreakersToLegacy, GroupLabel } from '@/types/phase-settings';
+import { LabelChip } from './standings/LabelChip';
+import { PhaseSettings, GroupLabel } from '@/types/phase-settings';
+
 interface Phase {
     id: string;
     tournament_id: string;
@@ -19,11 +22,29 @@ interface Phase {
     settings?: PhaseSettings;
 }
 
+const PHASE_TYPE_LABELS: Record<string, string> = {
+    league: 'Liga · Round-robin',
+    group_stage: 'Fase de Grupos',
+    knockout: 'Eliminación Directa',
+    playoff: 'Playoffs',
+};
+
+const PHASE_TYPE_BADGE: Record<string, string> = {
+    league: 'badge-ok',
+    group_stage: 'badge-published',
+    knockout: 'badge-warning',
+    playoff: 'badge-draft',
+};
+
+const PRESET_COLORS = [
+    '#00a365', '#22c55e', '#eab308', '#ef4444', '#3b82f6', '#a855f7', '#f97316', '#14b8a6',
+];
+
 export function TournamentStructureTab({ data, id }: { data?: any; id?: string }) {
     const [phases, setPhases] = useState<Phase[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Form state for creating phase
+    // Form state
     const [showPhaseForm, setShowPhaseForm] = useState(false);
     const [phaseName, setPhaseName] = useState('');
     const [phaseType, setPhaseType] = useState<'league' | 'knockout' | 'group_stage' | 'playoff'>('league');
@@ -33,44 +54,27 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
     const isRugby = data?.sport?.toLowerCase() === 'rugby';
 
-    // Points system defaults
+    // Points system
     const [pointsWin, setPointsWin] = useState(isRugby ? 4 : 3);
     const [pointsDraw, setPointsDraw] = useState(isRugby ? 2 : 1);
     const [pointsLoss, setPointsLoss] = useState(0);
     const [allowBonusPoints, setAllowBonusPoints] = useState(isRugby);
-
-    // Extra time
     const [useExtraTimePoints, setUseExtraTimePoints] = useState(false);
     const [pointsWinExtra, setPointsWinExtra] = useState(2);
     const [pointsDrawExtra, setPointsDrawExtra] = useState(1);
     const [pointsLossExtra, setPointsLossExtra] = useState(0);
 
-    // Columns & features
+    // Table columns
     const [tableCols, setTableCols] = useState<Record<string, boolean>>({
-        posVariation: true,
-        points: true,
-        won: true,
-        drawn: true,
-        lost: true,
-        played: true,
-        percentage: false,
-        classification: false,
-        pointsFor: true,
-        pointsAgainst: true,
-        pointsDiff: true,
-        extraPlayed: false,
-        extraWon: false,
-        extraDrawn: false,
-        extraLost: false,
-        tries: isRugby,
-        conversions: isRugby,
-        penalties: isRugby,
-        dropGoals: isRugby,
-        tackles: isRugby,
-        runs: isRugby
+        posVariation: true, points: true, won: true, drawn: true, lost: true,
+        played: true, percentage: false, classification: false,
+        pointsFor: true, pointsAgainst: true, pointsDiff: true,
+        extraPlayed: false, extraWon: false, extraDrawn: false, extraLost: false,
+        tries: isRugby, conversions: isRugby, penalties: isRugby,
+        dropGoals: isRugby, tackles: isRugby, runs: isRugby,
     });
 
-    // Tiebreakers - NEW STRUCTURE
+    // Tiebreakers
     const defaultTiebreakers: TiebreakerItem[] = [
         { metric: 'points', label: 'Puntos', enabled: true, order: 'desc' as const, priority: 1 },
         { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc' as const, priority: 2, requiresRoundRobin: true },
@@ -82,135 +86,213 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         ...(isRugby ? [
             { metric: 'tries', label: 'Tries', enabled: false, order: 'desc' as const, priority: 8 },
             { metric: 'conversions', label: 'Conversiones', enabled: false, order: 'desc' as const, priority: 9 },
-        ] : [])
+        ] : []),
     ];
 
     const [tiebreakers, setTiebreakers] = useState<TiebreakerItem[]>(defaultTiebreakers);
-
-    // Player Stats assignment
     const [statsAssignment, setStatsAssignment] = useState<'played' | 'starters'>('played');
     const [currentStep, setCurrentStep] = useState(1);
     const [editingPhaseId, setEditingPhaseId] = useState<string | null>(null);
+    const [creating, setCreating] = useState(false);
 
-    // Group labels
-    const PRESET_COLORS = [
-        "#00a365", "#22c55e", "#eab308", "#ef4444", "#3b82f6", "#a855f7", "#f97316", "#14b8a6"
-    ];
+    // Group names (actual DB groups for group_stage)
+    const [groupNames, setGroupNames] = useState<string[]>([]);
+
+    // Classification zone labels
     const [groupLabels, setGroupLabels] = useState<GroupLabel[]>([]);
     const [newLabel, setNewLabel] = useState('');
+    const [labelColor, setLabelColor] = useState(PRESET_COLORS[0]);
+    const [labelColorMode, setLabelColorMode] = useState<'auto' | 'manual'>('auto');
+    const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
+    const [labelError, setLabelError] = useState<string | null>(null);
 
-    const addLabel = () => {
-        if (newLabel.trim() && !groupLabels.find(l => l.name === newLabel.trim())) {
-            const autoColorIndex = groupLabels.length;
-            const autoColor = PRESET_COLORS[autoColorIndex % PRESET_COLORS.length];
-            setGroupLabels([...groupLabels, {
-                id: `tag_${Date.now()}`,
-                name: newLabel.trim(),
-                colorMode: 'auto',
-                color: autoColor,
-                autoColorIndex
-            }]);
-            setNewLabel('');
-        }
+    const getAutoLabelColor = (index: number) => PRESET_COLORS[index % PRESET_COLORS.length];
+    const getLabelKey = (label: GroupLabel) => label.id ?? label.name;
+    const normalizeGroupLabels = (labels: GroupLabel[] = []) => labels.map((label, index) => {
+        const autoColorIndex = label.autoColorIndex ?? index;
+        const colorMode = label.colorMode ?? 'auto';
+        return {
+            ...label,
+            id: label.id ?? `tag_${index}_${label.name}`,
+            colorMode,
+            autoColorIndex,
+            color: label.color || getAutoLabelColor(autoColorIndex),
+        };
+    });
+
+    // --- Group name helpers ---
+    const addGroupName = () => {
+        const next = String.fromCharCode(65 + groupNames.length);
+        setGroupNames(prev => [...prev, `Grupo ${next}`]);
     };
 
-    const removeLabel = (labelName: string) => {
-        setGroupLabels(groupLabels.filter(l => l.name !== labelName));
+    const updateGroupName = (index: number, value: string) => {
+        setGroupNames(prev => prev.map((n, i) => (i === index ? value : n)));
+    };
+
+    const removeGroupName = (index: number) => {
+        setGroupNames(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // --- Label helpers ---
+    const resetLabelForm = () => {
+        setNewLabel('');
+        setLabelColor(PRESET_COLORS[0]);
+        setLabelColorMode('auto');
+        setEditingLabelId(null);
+        setLabelError(null);
+    };
+
+    const addLabel = () => {
+        const trimmed = newLabel.trim();
+        if (!trimmed) {
+            setLabelError('El nombre de la etiqueta es obligatorio.');
+            return;
+        }
+
+        const normalized = trimmed.toLowerCase();
+        const hasDuplicate = groupLabels.some(label =>
+            label.name.trim().toLowerCase() === normalized && getLabelKey(label) !== editingLabelId
+        );
+
+        if (hasDuplicate) {
+            setLabelError('Ya existe una etiqueta con ese nombre.');
+            return;
+        }
+
+        if (editingLabelId) {
+            setGroupLabels(prev => prev.map((label, index) => {
+                if (getLabelKey(label) !== editingLabelId) return label;
+                const autoColorIndex = label.autoColorIndex ?? index;
+                return {
+                    ...label,
+                    name: trimmed,
+                    colorMode: labelColorMode,
+                    color: labelColorMode === 'auto' ? getAutoLabelColor(autoColorIndex) : labelColor,
+                    autoColorIndex,
+                };
+            }));
+        } else {
+            const autoColorIndex = groupLabels.length;
+            setGroupLabels(prev => [...prev, {
+                id: `tag_${Date.now()}`,
+                name: trimmed,
+                colorMode: labelColorMode,
+                color: labelColorMode === 'auto' ? getAutoLabelColor(autoColorIndex) : labelColor,
+                autoColorIndex,
+            }]);
+        }
+
+        resetLabelForm();
+    };
+
+    const startLabelEdit = (label: GroupLabel) => {
+        setEditingLabelId(getLabelKey(label));
+        setNewLabel(label.name);
+        setLabelColor(label.color);
+        setLabelColorMode(label.colorMode);
+        setLabelError(null);
+    };
+
+    const removeLabel = (labelId: string) => {
+        if (editingLabelId === labelId) {
+            resetLabelForm();
+        }
+        setGroupLabels(prev => prev.filter(label => getLabelKey(label) !== labelId));
     };
 
     const updateLabelMode = (name: string, mode: 'auto' | 'manual') => {
-        setGroupLabels(groupLabels.map(l => {
-            if (l.name === name) {
-                const newColor = mode === 'auto' ? PRESET_COLORS[(l.autoColorIndex || 0) % PRESET_COLORS.length] : l.color;
-                return { ...l, colorMode: mode, color: newColor };
-            }
-            return l;
+        setGroupLabels(prev => prev.map(l => {
+            if (l.name !== name) return l;
+            return { ...l, colorMode: mode, color: mode === 'auto' ? getAutoLabelColor(l.autoColorIndex || 0) : l.color };
         }));
     };
 
     const updateLabelColor = (name: string, color: string) => {
-        setGroupLabels(groupLabels.map(l => l.name === name ? { ...l, color } : l));
+        setGroupLabels(prev => prev.map(l => l.name === name ? { ...l, color } : l));
     };
 
-    const [creating, setCreating] = useState(false);
-
-    // Column categories for better organization
+    // Column categories
     const columnCategories: ColumnCategory[] = useMemo(() => [
         {
-            id: 'basic',
-            label: 'Básicas',
+            id: 'basic', label: 'Básicas',
             columns: [
                 { id: 'posVariation', label: 'Variación' },
                 { id: 'points', label: 'Puntos' },
                 { id: 'played', label: 'Jugados' },
                 { id: 'classification', label: 'Clasificación' },
-            ]
+            ],
         },
         {
-            id: 'results',
-            label: 'Resultados',
+            id: 'results', label: 'Resultados',
             columns: [
                 { id: 'won', label: 'Victorias' },
                 { id: 'drawn', label: 'Empates' },
                 { id: 'lost', label: 'Derrotas' },
                 { id: 'percentage', label: 'Porcentaje' },
-            ]
+            ],
         },
         {
-            id: 'extraTime',
-            label: 'Prórroga',
+            id: 'extraTime', label: 'Prórroga',
             columns: [
                 { id: 'extraPlayed', label: 'Jugados (Prórroga)' },
                 { id: 'extraWon', label: 'Victorias (Prórroga)' },
                 { id: 'extraDrawn', label: 'Empates (Prórroga)' },
                 { id: 'extraLost', label: 'Derrotas (Prórroga)' },
-            ]
+            ],
         },
         {
-            id: 'scoring',
-            label: 'Anotación',
+            id: 'scoring', label: 'Anotación',
             columns: [
                 { id: 'pointsFor', label: 'A Favor' },
                 { id: 'pointsAgainst', label: 'En Contra' },
                 { id: 'pointsDiff', label: 'Diferencia' },
-            ]
+            ],
         },
         ...(isRugby ? [{
-            id: 'rugby',
-            label: 'Rugby',
+            id: 'rugby', label: 'Rugby',
             columns: [
                 { id: 'tries', label: 'Try' },
                 { id: 'conversions', label: 'Conversión' },
                 { id: 'penalties', label: 'Penal' },
                 { id: 'dropGoals', label: 'Drop Goal' },
                 { id: 'tackles', label: 'Tackle' },
-                { id: 'runs', label: 'Carrera' }
-            ]
-        }] : [])
+                { id: 'runs', label: 'Carrera' },
+            ],
+        }] : []),
     ], [isRugby]);
 
-    // Validations
+    // Validation
     const validationErrors = useMemo(() => {
         const errors: string[] = [];
-
-        const enabledTiebreakers = tiebreakers.filter(tb => tb.enabled);
-
-        if (enabledTiebreakers.length === 0) {
-            errors.push('Debe haber al menos un criterio de desempate activo');
-        }
-
-        if (useExtraTimePoints && !tableCols.extraWon && !tableCols.extraDrawn) {
+        const enabled = tiebreakers.filter(tb => tb.enabled);
+        if (enabled.length === 0) errors.push('Debe haber al menos un criterio de desempate activo');
+        if (useExtraTimePoints && !tableCols.extraWon && !tableCols.extraDrawn)
             errors.push('Prórroga activada pero sin columnas de prórroga visibles');
-        }
+        if (enabled.some(tb => tb.metric === 'points') && enabled.some(tb => tb.metric === 'won'))
+            errors.push('Advertencia: "Puntos" y "Victorias" pueden ser redundantes');
+        return errors;
+    }, [tiebreakers, useExtraTimePoints, tableCols]);
 
-        const hasPointsAndWins = enabledTiebreakers.some(tb => tb.metric === 'points') &&
-            enabledTiebreakers.some(tb => tb.metric === 'won');
-        if (hasPointsAndWins) {
-            errors.push('Advertencia: "Puntos" y "Victorias" pueden ser redundantes según el sistema de puntos');
+    const phaseFormErrors = useMemo(() => {
+        const errors: string[] = [];
+        const normalizedName = phaseName.trim();
+        const normalizedTeams = teamsCount === '' ? null : Number(teamsCount);
+        const normalizedAdvance = advanceCount === '' ? null : Number(advanceCount);
+        const activeGroupNames = groupNames.filter(name => name.trim());
+
+        if (!normalizedName) errors.push('Debes ingresar un nombre de fase.');
+        if (normalizedTeams !== null && normalizedTeams < 2) errors.push('La fase debe tener al menos 2 equipos.');
+        if (normalizedAdvance !== null && normalizedAdvance < 1) errors.push('Debe avanzar al menos 1 equipo.');
+        if (normalizedTeams !== null && normalizedAdvance !== null && normalizedAdvance > normalizedTeams) {
+            errors.push('Los equipos que avanzan no pueden superar la cantidad total.');
+        }
+        if (phaseType === 'group_stage' && activeGroupNames.length === 0) {
+            errors.push('La fase de grupos necesita al menos un grupo.');
         }
 
         return errors;
-    }, [tiebreakers, useExtraTimePoints, tableCols]);
+    }, [advanceCount, groupNames, phaseName, phaseType, teamsCount]);
 
     const resetForm = () => {
         setCurrentStep(1);
@@ -230,30 +312,16 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setStatsAssignment('played');
         setTiebreakers(defaultTiebreakers);
         setTableCols({
-            posVariation: true,
-            points: true,
-            won: true,
-            drawn: true,
-            lost: true,
-            played: true,
-            percentage: false,
-            classification: false,
-            pointsFor: true,
-            pointsAgainst: true,
-            pointsDiff: true,
-            extraPlayed: false,
-            extraWon: false,
-            extraDrawn: false,
-            extraLost: false,
-            tries: isRugby,
-            conversions: isRugby,
-            penalties: isRugby,
-            dropGoals: isRugby,
-            tackles: isRugby,
-            runs: isRugby
+            posVariation: true, points: true, won: true, drawn: true, lost: true,
+            played: true, percentage: false, classification: false,
+            pointsFor: true, pointsAgainst: true, pointsDiff: true,
+            extraPlayed: false, extraWon: false, extraDrawn: false, extraLost: false,
+            tries: isRugby, conversions: isRugby, penalties: isRugby,
+            dropGoals: isRugby, tackles: isRugby, runs: isRugby,
         });
         setGroupLabels([]);
-        setNewLabel('');
+        setGroupNames([]);
+        resetLabelForm();
         setShowPhaseForm(false);
         setEditingPhaseId(null);
     };
@@ -269,35 +337,26 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             setAdvanceCount(s.advanceCount || '');
             setLegs(s.legs || 1);
 
-            // Points
             if (s.pointsSystem) {
                 setPointsWin(s.pointsSystem.win);
                 setPointsDraw(s.pointsSystem.draw);
                 setPointsLoss(s.pointsSystem.loss);
                 setAllowBonusPoints(!!s.pointsSystem.allowBonusPoints);
                 setUseExtraTimePoints(!!s.pointsSystem.extraTimeAlternativeSystem);
-
                 if (s.pointsSystem.behavior?.extraTimeLogic) {
                     setPointsWinExtra(s.pointsSystem.behavior.extraTimeLogic.win || 2);
                     setPointsDrawExtra(s.pointsSystem.behavior.extraTimeLogic.draw || 1);
                     setPointsLossExtra(s.pointsSystem.behavior.extraTimeLogic.loss || 0);
                 }
             } else {
-                // Legacy points if pointsSystem is missing
                 setPointsWin(isRugby ? 4 : 3);
                 setPointsDraw(isRugby ? 2 : 1);
                 setPointsLoss(0);
                 setAllowBonusPoints(isRugby);
             }
 
-            // Columns
-            if (s.tableColumns) {
-                setTableCols({ ...tableCols, ...s.tableColumns });
-            }
-
-            // Tiebreakers
+            if (s.tableColumns) setTableCols(prev => ({ ...prev, ...s.tableColumns }));
             if (s.tiebreakers) {
-                // Map saved tiebreakers and merge with defaults to ensure all fields are present
                 const saved = s.tiebreakers.map(t => {
                     const d = defaultTiebreakers.find(dt => dt.metric === t.metric);
                     return { ...d, ...t };
@@ -305,25 +364,19 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 setTiebreakers(saved as TiebreakerItem[]);
             }
 
-            // Group Labels
-            setGroupLabels(s.groupLabels || []);
-
-            // Stats
+            setGroupLabels(normalizeGroupLabels(s.groupLabels || []));
+            setGroupNames((s as any).group_names || []);
             setStatsAssignment(s.statsAssignment || (s.playerStats?.assignOnlyToStarters ? 'starters' : 'played'));
         }
 
+        resetLabelForm();
         setShowPhaseForm(true);
         setCurrentStep(1);
     };
 
-    const handleEditClick = (phase: Phase) => {
-        loadPhaseIntoForm(phase);
-    };
-
     useEffect(() => {
-        if (id) {
-            loadPhases();
-        }
+        if (id) loadPhases();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const loadPhases = async () => {
@@ -331,8 +384,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         try {
             const res = await fetch(`/api/tournaments/${id}/phases`);
             if (res.ok) {
-                const data = await res.json();
-                setPhases(data.data || []);
+                const json = await res.json();
+                setPhases(json.data || []);
             }
         } catch (error) {
             console.error('Error loading phases:', error);
@@ -344,20 +397,23 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const handleCreatePhase = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id) return;
-
-        // Validate before submitting
+        if (phaseFormErrors.length > 0) {
+            alert(phaseFormErrors[0]);
+            return;
+        }
         if (validationErrors.some(err => err.includes('Debe haber'))) {
             alert('Por favor corrija los errores de validación antes de guardar');
             return;
         }
 
         setCreating(true);
-
         const url = editingPhaseId
             ? `/api/tournaments/${id}/phases/${editingPhaseId}`
             : `/api/tournaments/${id}/phases`;
-
         const method = editingPhaseId ? 'PATCH' : 'POST';
+        const sanitizedGroupNames = phaseType === 'group_stage'
+            ? groupNames.map(name => name.trim()).filter(Boolean)
+            : [];
 
         try {
             const response = await fetch(url, {
@@ -369,15 +425,13 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     order_index: editingPhaseId ? undefined : phases.length + 1,
                     is_active: true,
                     settings: {
-                        // Legacy/Core Fields
                         teamsCount: teamsCount === '' ? 0 : Number(teamsCount),
                         advanceCount: advanceCount === '' ? 0 : Number(advanceCount),
                         legs,
                         tableColumns: tableCols,
-                        groupLabels: groupLabels,
+                        groupLabels,
                         statsAssignment,
-
-                        // New Structured Fields
+                        group_names: sanitizedGroupNames,
                         groupTags: groupLabels.map(l => l.name),
                         playerStats: {
                             assignTeamStatsToPlayersWhoPlayed: statsAssignment === 'played',
@@ -389,36 +443,23 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     playedFlagField: 'lineup.played',
                                     starterFlagField: 'lineup.is_starter',
                                     rules: [
-                                        {
-                                            if: { assignOnlyToStarters: true },
-                                            then: { eligiblePlayers: 'starters_only' }
-                                        },
-                                        {
-                                            if: { assignOnlyToStarters: false },
-                                            then: { eligiblePlayers: 'played_true' }
-                                        }
-                                    ]
+                                        { if: { assignOnlyToStarters: true }, then: { eligiblePlayers: 'starters_only' } },
+                                        { if: { assignOnlyToStarters: false }, then: { eligiblePlayers: 'played_true' } },
+                                    ],
                                 },
                                 attribution: {
                                     teamStatsToPlayers: ['points_for', 'points_against', 'wins', 'draws', 'losses', 'bonus_points'],
-                                    howToApply: 'for_each_eligible_player_add_same_team_stat_delta_as_in_team_totals'
-                                }
-                            }
+                                    howToApply: 'for_each_eligible_player_add_same_team_stat_delta_as_in_team_totals',
+                                },
+                            },
                         },
                         matchFormat: {
                             type: legs === 2 ? 'series' : 'single_match',
                             label: legs === 2 ? 'Ida y Vuelta' : 'Partido Único',
                             behavior: {
-                                single_match: {
-                                    seriesLength: 1,
-                                    winnerDetermination: 'most_points_in_match'
-                                },
-                                series: {
-                                    seriesLength: 2,
-                                    aggregateMethod: 'points_sum',
-                                    tieResolution: 'extra_time_then_penalty_shootout'
-                                }
-                            }
+                                single_match: { seriesLength: 1, winnerDetermination: 'most_points_in_match' },
+                                series: { seriesLength: 2, aggregateMethod: 'points_sum', tieResolution: 'extra_time_then_penalty_shootout' },
+                            },
                         },
                         pointsSystem: {
                             win: pointsWin,
@@ -428,17 +469,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             allowBonusPoints,
                             behavior: {
                                 whenToCalculate: 'on_match_finalized',
-                                input: {
-                                    requires: ['score'],
-                                    statusRequired: 'finalized'
-                                },
-                                output: {
-                                    writesTo: ['standings']
-                                },
+                                input: { requires: ['score'], statusRequired: 'finalized' },
+                                output: { writesTo: ['standings'] },
                                 basePointsLogic: [
                                     { if: { win: true }, then: { add: pointsWin } },
                                     { if: { draw: true }, then: { add: pointsDraw } },
-                                    { if: { loss: true }, then: { add: pointsLoss } }
+                                    { if: { loss: true }, then: { add: pointsLoss } },
                                 ],
                                 extraTimeLogic: useExtraTimePoints ? {
                                     enabledWhen: { extraTimeAlternativeSystem: true },
@@ -446,34 +482,25 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     howToApply: 'override_base_points_with_extra_time_logic',
                                     win: pointsWinExtra,
                                     draw: pointsDrawExtra,
-                                    loss: pointsLossExtra
+                                    loss: pointsLossExtra,
                                 } : undefined,
-                                idempotency: {
-                                    key: 'match_id',
-                                    rule: 'ignore_if_already_processed'
-                                }
-                            }
+                                idempotency: { key: 'match_id', rule: 'ignore_if_already_processed' },
+                            },
                         },
-                        tiebreakers: tiebreakers.map(({ metric, enabled, order, priority }) => ({
-                            metric, enabled, order, priority
-                        })),
+                        tiebreakers: tiebreakers.map(({ metric, enabled, order, priority }) => ({ metric, enabled, order, priority })),
                         tiebreakerBehavior: {
                             appliesTo: 'standings_sorting_only',
                             evaluationTime: 'after_all_matches_in_scope_processed',
                             scope: {
                                 tableScope: 'phase_group_or_pool',
-                                headToHeadScope: 'only_between_tied_teams_in_that_tableScope'
+                                headToHeadScope: 'only_between_tied_teams_in_that_tableScope',
                             },
                             algorithm: {
                                 stepByStep: tiebreakers.filter(t => t.enabled).map(t => t.metric),
-                                finalFallback: {
-                                    mode: 'stable',
-                                    rule: 'keep_previous_order_or_use_team_id_ascending',
-                                    reason: 'ensure deterministic sorting'
-                                }
-                            }
-                        }
-                    }
+                                finalFallback: { mode: 'stable', rule: 'keep_previous_order_or_use_team_id_ascending' },
+                            },
+                        },
+                    },
                 }),
             });
 
@@ -481,36 +508,17 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 resetForm();
                 await loadPhases();
             } else {
-                // Robust Error Parsing
                 const contentType = response.headers.get('content-type');
                 let errorMessage = `Error ${response.status}`;
-                let errorDetail = '';
-
                 try {
-                    if (contentType && contentType.includes('application/json')) {
+                    if (contentType?.includes('application/json')) {
                         const errorData = await response.json();
-                        errorDetail = JSON.stringify(errorData, null, 2);
                         errorMessage = errorData.message || errorData.error || errorMessage;
                     } else {
-                        errorDetail = await response.text();
-                        errorMessage = errorDetail || errorMessage;
+                        errorMessage = (await response.text()) || errorMessage;
                     }
-                } catch (parseError) {
-                    console.error('Failed to parse error response:', parseError);
-                }
-
-                console.group('❌ Phase Creation Failed');
-                console.error(`Status: ${response.status} (${response.statusText})`);
-                console.error(`URL: ${response.url}`);
-                console.error(`Response Body:`, errorDetail);
-                console.groupEnd();
-
-                // Normalize for user alert (limit length if it's an HTML blob)
-                const displayMessage = errorMessage.length > 200
-                    ? errorMessage.substring(0, 197) + '...'
-                    : errorMessage;
-
-                alert(`Error al crear fase: ${displayMessage}\n\nRevisa la consola para más detalles técnicos.`);
+                } catch { /* ignore parse error */ }
+                alert(`Error al guardar fase: ${errorMessage.length > 200 ? errorMessage.slice(0, 197) + '...' : errorMessage}`);
             }
         } catch (error: any) {
             console.error('Error creating phase:', error);
@@ -522,12 +530,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
     const handleDeletePhase = async (phaseId: string) => {
         if (!confirm('¿Seguro quieres eliminar esta fase y todas sus dependencias?')) return;
-
         try {
-            const response = await fetch(`/api/tournaments/${id}/phases/${phaseId}`, {
-                method: 'DELETE',
-            });
-
+            const response = await fetch(`/api/tournaments/${id}/phases/${phaseId}`, { method: 'DELETE' });
             if (response.ok) {
                 await loadPhases();
             } else {
@@ -539,413 +543,911 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         }
     };
 
-    const getPhaseTypeLabel = (type: string) => {
-        switch (type) {
-            case 'league': return 'Liga (Round-robin)';
-            case 'group_stage': return 'Fase de Grupos';
-            case 'knockout': return 'Eliminación Directa';
-            case 'playoff': return 'Playoffs';
-            default: return type.toUpperCase();
+    // Step navigation accounting for skipped steps
+    const goNext = () => {
+        if (currentStep === 1 && (phaseType === 'knockout' || phaseType === 'playoff')) {
+            setCurrentStep(4);
+        } else {
+            setCurrentStep(c => c + 1);
         }
     };
 
+    const goPrev = () => {
+        if (currentStep === 4 && (phaseType === 'knockout' || phaseType === 'playoff')) {
+            setCurrentStep(1);
+        } else {
+            setCurrentStep(c => c - 1);
+        }
+    };
+
+    const STEPS = [
+        { step: 1, title: 'Básico', desc: 'Formato general', show: true },
+        { step: 2, title: 'Puntos', desc: 'Sistema de puntuación', show: phaseType === 'league' || phaseType === 'group_stage' },
+        { step: 3, title: 'Desempate', desc: 'Criterios y tabla', show: phaseType === 'league' || phaseType === 'group_stage' },
+        { step: 4, title: 'Etiquetas', desc: 'Zonas de clasificación', show: true },
+        { step: 5, title: 'Estadísticas', desc: 'Atribución a jugadores', show: true },
+    ];
+
+    // ─── RENDER ───────────────────────────────────────────────────────────────
+
+    const visibleSteps = STEPS.filter(step => step.show);
+    const currentStepIndex = Math.max(visibleSteps.findIndex(step => step.step === currentStep), 0);
+    const lastVisibleStep = visibleSteps[visibleSteps.length - 1]?.step ?? 5;
+    const currentPhaseOrdinal = editingPhaseId ? phases.findIndex(phase => phase.id === editingPhaseId) + 1 : phases.length + 1;
+    const canSubmitPhase = phaseFormErrors.length === 0 && !validationErrors.some(error => error.includes('Debe haber'));
+    const progressPercent = visibleSteps.length > 0
+        ? ((currentStepIndex + 1) / visibleSteps.length) * 100
+        : 0;
+
+    const structureMetrics = useMemo(() => {
+        const activePhase = phases.find(phase => phase.is_active) || phases[0] || null;
+        const groupPhaseCount = phases.filter(phase => phase.phase_type === 'group_stage').length;
+        const knockoutPhaseCount = phases.filter(phase => phase.phase_type === 'knockout' || phase.phase_type === 'playoff').length;
+        const configuredGroups = phases.reduce((count, phase) => {
+            const groupCount = Array.isArray((phase.settings as any)?.group_names)
+                ? (phase.settings as any).group_names.length
+                : 0;
+            return count + groupCount;
+        }, 0);
+
+        return {
+            activePhase,
+            groupPhaseCount,
+            knockoutPhaseCount,
+            configuredGroups,
+        };
+    }, [phases]);
+
+    useEffect(() => {
+        if (visibleSteps.length === 0) return;
+        if (!visibleSteps.some(step => step.step === currentStep)) {
+            setCurrentStep(visibleSteps[0].step);
+        }
+    }, [currentStep, visibleSteps]);
+
+    if (loading) {
+        return (
+            <div className="basalt-card flex items-center justify-center min-h-[300px]">
+                <p className="text-dim text-sm">Cargando estructura del torneo...</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="flash-ui-container dark bg-transparent" style={{ '--accent': '#00a365', minHeight: 'auto' } as React.CSSProperties}>
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-32">
-                {loading ? (
-                    <div className="manager-card">
-                        <div className="p-12 text-center text-[#888]">Cargando la estructura del torneo...</div>
+        <div className="tournament-structure-shell flex flex-col gap-8 animate-in fade-in duration-500 pb-24">
+            {!showPhaseForm && (
+                <section className="basalt-card basalt-hero structure-hero-panel">
+                    <div className="structure-hero-copy">
+                        <p className="basalt-section-kicker">Competitive workspace</p>
+                        <h2 className="structure-hero-title">Estructura y creacion de fases</h2>
+                        <p className="structure-hero-text">
+                            Ordena el recorrido competitivo del torneo y prepara la base visual para fixture,
+                            clasificacion y configuracion avanzada.
+                        </p>
+                        <div className="structure-hero-meta">
+                            <span>{phases.length > 0 ? 'Sistema estructural activo' : 'Pendiente de configuracion'}</span>
+                            <span>{structureMetrics.activePhase?.name || 'Sin fase principal definida'}</span>
+                        </div>
                     </div>
-                ) : (
-                    <>
-                        {/* List of existing phases */}
-                        {phases.length > 0 && !showPhaseForm && (
-                            <div className="manager-card">
-                                <header className="manager-header">
-                                    <div className="manager-header-titles">
-                                        <h1>Fases del Torneo</h1>
-                                        <p>Estructura y configuración de cada fase competitiva</p>
+
+                    <div className="structure-summary-grid">
+                        <article className="structure-summary-card">
+                            <span className="structure-summary-label">Fases</span>
+                            <strong className="structure-summary-value">{phases.length}</strong>
+                            <small className="structure-summary-foot">Bloques competitivos configurados</small>
+                        </article>
+                        <article className="structure-summary-card">
+                            <span className="structure-summary-label">Fase activa</span>
+                            <strong className="structure-summary-value structure-summary-value--text">
+                                {structureMetrics.activePhase?.name || 'Sin definir'}
+                            </strong>
+                            <small className="structure-summary-foot">
+                                {structureMetrics.activePhase
+                                    ? PHASE_TYPE_LABELS[structureMetrics.activePhase.phase_type] || structureMetrics.activePhase.phase_type
+                                    : 'Todavia no hay etapa principal'}
+                            </small>
+                        </article>
+                        <article className="structure-summary-card">
+                            <span className="structure-summary-label">Grupos</span>
+                            <strong className="structure-summary-value">{structureMetrics.configuredGroups}</strong>
+                            <small className="structure-summary-foot">
+                                {structureMetrics.groupPhaseCount} fase{structureMetrics.groupPhaseCount === 1 ? '' : 's'} con grupos
+                            </small>
+                        </article>
+                        <article className="structure-summary-card">
+                            <span className="structure-summary-label">Eliminacion</span>
+                            <strong className="structure-summary-value">{structureMetrics.knockoutPhaseCount}</strong>
+                            <small className="structure-summary-foot">Llaves y playoffs configurados</small>
+                        </article>
+                    </div>
+                </section>
+            )}
+
+            {/* ── Phase list ── */}
+            {phases.length > 0 && !showPhaseForm && (
+                <div className="basalt-card structure-module p-6">
+                    <div className="structure-module-header flex items-center justify-between gap-4 mb-6">
+                        <div>
+                            <p className="basalt-section-kicker mb-1">Competitive map</p>
+                            <h2 className="basalt-h1 structure-module-title">Fases del torneo</h2>
+                            <p className="structure-module-copy">
+                                Cada modulo concentra una etapa del torneo con su formato y reglas base.
+                            </p>
+                        </div>
+                        <span className="basalt-badge badge-ok">
+                            {phases.length} FASE{phases.length !== 1 ? 'S' : ''}
+                        </span>
+                    </div>
+
+                    <div className="structure-phase-list flex flex-col gap-4">
+                        {phases.map((phase, index) => (
+                            <div
+                                key={phase.id}
+                                onClick={() => loadPhaseIntoForm(phase)}
+                                className="structure-phase-card group relative flex items-start sm:items-center justify-between gap-4 p-5 rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] hover:border-[var(--accent-primary)] hover:bg-[var(--surface-elevated)] transition-all duration-200 cursor-pointer"
+                            >
+                                <div className="structure-phase-main flex items-start sm:items-center gap-4 min-w-0">
+                                    <div className="structure-phase-icon flex-shrink-0 w-10 h-10 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border-basalt)] flex items-center justify-center">
+                                        <Layers size={18} className="text-dim" />
                                     </div>
-                                    <div className="manager-metadata-box">
-                                        {phases.length} FASE{phases.length !== 1 ? 'S' : ''}
+                                    <div className="structure-phase-copy min-w-0">
+                                        <div className="structure-phase-badges flex items-center gap-2 flex-wrap mb-1">
+                                            <span className="structure-phase-step text-[10px] font-bold text-dim uppercase tracking-widest">
+                                                Fase {index + 1}
+                                            </span>
+                                            <span className={`basalt-badge ${PHASE_TYPE_BADGE[phase.phase_type] || 'badge-draft'}`}>
+                                                {PHASE_TYPE_LABELS[phase.phase_type] || phase.phase_type}
+                                            </span>
+                                            {phase.is_active && (
+                                                <span className="basalt-badge badge-ok">Activa</span>
+                                            )}
+                                        </div>
+                                        <h3 className="structure-phase-title text-lg font-extrabold tracking-tight text-white">{phase.name}</h3>
+                                        <div className="structure-phase-meta flex flex-wrap gap-3 mt-2 text-xs text-dim">
+                                            {phase.settings?.teamsCount && phase.settings.teamsCount > 0 && (
+                                                <span>{phase.settings.teamsCount} equipos</span>
+                                            )}
+                                            {phase.settings?.legs && (
+                                                <span>{phase.settings.legs === 2 ? 'Ida y vuelta' : 'Partido único'}</span>
+                                            )}
+                                            {phase.settings?.advanceCount && phase.settings.advanceCount > 0 && (
+                                                <span className="structure-phase-meta-accent text-[var(--status-active)] font-semibold">
+                                                    {phase.settings.advanceCount} avanzan
+                                                </span>
+                                            )}
+                                            {(phase.settings as any)?.group_names?.length > 0 && (
+                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
+                                                    {(phase.settings as any).group_names.length} grupos
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </header>
-                                <div className="flex flex-col md:flex-row flex-wrap gap-8">
-                                    {phases.map((phase, index) => (
-                                        <div
-                                            key={phase.id}
-                                            onClick={() => handleEditClick(phase)}
-                                            className="relative group border border-[rgba(255,255,255,0.08)] bg-[rgba(10,10,11,0.72)] backdrop-blur-[10px] hover:border-[rgba(255,255,255,0.15)] transition-all duration-300 rounded-[10px] w-full min-w-[320px] md:min-w-[520px] max-w-[720px] overflow-hidden cursor-pointer hover:bg-[rgba(20,20,22,0.85)]"
-                                            style={{ padding: '18px 20px' }}
+                                </div>
+
+                                <div className="structure-phase-actions flex items-center gap-2 flex-shrink-0">
+                                    <ChevronRight size={16} className="structure-phase-chevron text-dim group-hover:text-white transition-colors" />
+                                    <button
+                                        onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
+                                        className="structure-phase-delete opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-all duration-200"
+                                        title="Eliminar fase"
+                                    >
+                                        <Trash2 size={15} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="structure-module-footer mt-6 pt-6 border-t border-[var(--border-basalt)] flex justify-center">
+                        <button
+                            className="basalt-btn basalt-btn-primary"
+                            onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                        >
+                            <Plus size={16} />
+                            Agregar nueva fase
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Empty state ── */}
+            {phases.length === 0 && !showPhaseForm && (
+                <div className="basalt-card basalt-hero structure-empty-panel flex flex-col items-center justify-center text-center py-20 px-8 gap-6">
+                    <div className="structure-empty-icon w-16 h-16 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border-basalt)] flex items-center justify-center">
+                        <Layers size={28} className="text-dim" />
+                    </div>
+                    <div className="structure-empty-copy">
+                        <p className="basalt-section-kicker mb-3">Phase builder</p>
+                        <h3 className="basalt-h1 structure-empty-title mb-3">Sin fases configuradas</h3>
+                        <p className="structure-empty-text text-dim text-sm max-w-md mx-auto">
+                            Diseña la estructura competitiva del torneo. Define cómo se competirá y qué criterios decidirán al campeón.
+                        </p>
+                    </div>
+                    <button
+                        className="basalt-btn basalt-btn-primary"
+                        onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                    >
+                        <Plus size={16} />
+                        Configurar primera fase
+                    </button>
+                </div>
+            )}
+
+            {/* ── Phase wizard ── */}
+            {showPhaseForm && (
+                <div className="basalt-card phase-wizard-card structure-wizard-card p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <form onSubmit={handleCreatePhase}>
+                        <div className="phase-wizard-layout structure-wizard-layout flex flex-col lg:flex-row min-h-[600px]">
+
+                            {/* Sidebar */}
+                            <aside className="phase-wizard-sidebar structure-wizard-sidebar w-full lg:w-64 xl:w-72 flex-shrink-0 bg-[var(--surface-basalt)] border-b lg:border-b-0 lg:border-r border-[var(--border-basalt)] p-6 flex flex-col gap-4">
+                                <div className="phase-wizard-sidebar-head structure-wizard-sidebar-head mb-2">
+                                    <p className="phase-wizard-kicker text-[10px] font-bold text-dim uppercase tracking-widest mb-1">
+                                        {editingPhaseId ? 'Editando' : 'Nueva'}
+                                    </p>
+                                    <h2 className="phase-wizard-sidebar-title text-xl font-extrabold tracking-tight">
+                                        {phaseName || `Fase ${currentPhaseOrdinal}`}
+                                    </h2>
+                                    <p className="structure-wizard-sidebar-copy">
+                                        Consola modular para definir formato, reglas y criterios de esta etapa.
+                                    </p>
+                                </div>
+
+                                <div className="structure-wizard-progress-card">
+                                    <div className="structure-wizard-progress-head">
+                                        <span>Progreso</span>
+                                        <strong>{currentStepIndex + 1}/{visibleSteps.length}</strong>
+                                    </div>
+                                    <div className="structure-wizard-progress-bar">
+                                        <span style={{ width: `${progressPercent}%` }} />
+                                    </div>
+                                </div>
+
+                                {(phaseFormErrors.length > 0 || validationErrors.filter(e => e.includes('Debe haber')).length > 0) && (
+                                    <div className="structure-inline-alert structure-inline-alert-error flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+                                        <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+                                        <span>{phaseFormErrors[0] || validationErrors.find(e => e.includes('Debe haber'))}</span>
+                                    </div>
+                                )}
+
+                                <nav className="phase-wizard-stepper structure-wizard-stepper flex flex-col gap-1">
+                                    {visibleSteps.map(s => (
+                                        <button
+                                            key={s.step}
+                                            type="button"
+                                            onClick={() => setCurrentStep(s.step)}
+                                            className={`phase-wizard-step structure-wizard-step flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 ${currentStep === s.step
+                                                ? 'bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/30'
+                                                : 'hover:bg-[var(--surface-elevated)]'
+                                                }`}
                                         >
-                                            {/* Texture Overlay */}
-                                            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '16px 16px' }}></div>
+                                            <span className={`phase-wizard-step-index structure-wizard-step-index w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5 ${currentStep > s.step
+                                                ? 'bg-[var(--status-active)] text-white'
+                                                : currentStep === s.step
+                                                    ? 'bg-[var(--accent-primary)] text-white'
+                                                    : 'bg-[var(--surface-elevated)] border border-[var(--border-basalt)] text-dim'
+                                                }`}>
+                                                {currentStep > s.step ? <CheckCircle size={12} /> : s.step}
+                                            </span>
+                                            <span className="phase-wizard-step-copy flex flex-col min-w-0">
+                                                <span className={`phase-wizard-step-title text-sm font-semibold ${currentStep === s.step ? 'text-white' : 'text-dim'}`}>
+                                                    {s.title}
+                                                </span>
+                                                <span className="phase-wizard-step-desc text-[11px] text-dim">{s.desc}</span>
+                                            </span>
+                                        </button>
+                                    ))}
+                                </nav>
 
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeletePhase(phase.id);
-                                                }}
-                                                className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 p-2 rounded-md hover:bg-red-500/10 text-[#888] hover:text-red-400 transition-all duration-200 z-10"
-                                                title="Eliminar fase"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                                            </button>
+                                <div className="structure-sidebar-facts">
+                                    <div className="structure-sidebar-fact">
+                                        <span>Tipo</span>
+                                        <strong>{PHASE_TYPE_LABELS[phaseType] || phaseType}</strong>
+                                    </div>
+                                    <div className="structure-sidebar-fact">
+                                        <span>Equipos</span>
+                                        <strong>{teamsCount === '' ? '--' : teamsCount}</strong>
+                                    </div>
+                                    <div className="structure-sidebar-fact">
+                                        <span>Avanzan</span>
+                                        <strong>{advanceCount === '' ? '--' : advanceCount}</strong>
+                                    </div>
+                                </div>
+                            </aside>
 
-                                            <div className="uppercase tracking-[0.22em] text-[12px] text-[rgba(255,255,255,0.45)] mb-2.5 font-medium relative z-10">Fase {index + 1}</div>
-                                            <h3 className="font-[800] text-white pr-8 leading-tight relative z-10" style={{ fontSize: 'clamp(28px, 3vw, 40px)', marginBottom: '10px' }}>
-                                                {phase.name}
-                                            </h3>
+                            {/* Content */}
+                            <div className="phase-wizard-content structure-wizard-content flex-1 flex flex-col p-6 lg:p-8 gap-0 min-w-0">
 
-                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 text-[14px] text-[rgba(255,255,255,0.65)] relative z-10">
-                                                <div className="flex items-center gap-2.5">
-                                                    <div className="w-2 h-2 rounded-full bg-[#00a365]"></div>
-                                                    <span className="text-white/90 font-medium">{getPhaseTypeLabel(phase.phase_type)}</span>
+                                {/* STEP 1: Básico */}
+                                {currentStep === 1 && (
+                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-basic flex flex-col gap-6">
+                                        <div className="phase-wizard-step-head structure-step-head">
+                                            <p className="phase-wizard-kicker text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 1</p>
+                                            <h3 className="phase-wizard-step-heading text-2xl font-extrabold tracking-tight mb-1">Configuración Básica</h3>
+                                            <p className="phase-wizard-step-subtitle text-dim text-sm">Define la estructura general de la fase</p>
+                                        </div>
+
+                                        <div className="phase-wizard-fields flex flex-col gap-5">
+                                            {/* Name */}
+                                            <div className="structure-field-panel structure-field-panel-wide">
+                                                <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-2">
+                                                    Nombre de la fase
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="basalt-input"
+                                                    value={phaseName}
+                                                    onChange={e => setPhaseName(e.target.value)}
+                                                    placeholder="Ej: Fase Regular, Octavos de Final"
+                                                    required
+                                                    autoFocus
+                                                />
+                                            </div>
+
+                                            {/* Phase type */}
+                                            <div className="structure-field-panel structure-field-panel-wide">
+                                                <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
+                                                    Tipo de fase
+                                                </label>
+                                                <div className="structure-option-grid grid grid-cols-2 gap-3">
+                                                    {(['league', 'group_stage', 'knockout', 'playoff'] as const).map(type => (
+                                                        <button
+                                                            key={type}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setPhaseType(type);
+                                                                if (type === 'group_stage' && groupNames.length === 0) {
+                                                                    setGroupNames(['Grupo A', 'Grupo B']);
+                                                                }
+                                                            }}
+                                                            className={`structure-option-card flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${phaseType === type
+                                                                ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                                                : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
+                                                                }`}
+                                                        >
+                                                            <span className="text-sm font-bold">
+                                                                {type === 'league' && 'Liga'}
+                                                                {type === 'group_stage' && 'Grupos'}
+                                                                {type === 'knockout' && 'Llaves'}
+                                                                {type === 'playoff' && 'Playoff'}
+                                                            </span>
+                                                            <span className="text-[11px] mt-0.5 opacity-70">
+                                                                {PHASE_TYPE_LABELS[type]}
+                                                            </span>
+                                                        </button>
+                                                    ))}
                                                 </div>
+                                            </div>
 
-                                                {phase.settings?.teamsCount && phase.settings.teamsCount > 0 ? (
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-2 h-2 rounded-full bg-[rgba(255,255,255,0.15)]"></div>
-                                                        <span>{phase.settings.teamsCount} Equipos</span>
+                                            {/* Groups definition — only for group_stage */}
+                                            {phaseType === 'group_stage' && (
+                                                <div className="structure-field-panel structure-field-panel-wide structure-field-panel-accent rounded-xl border border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5 p-5">
+                                                    <div className="flex items-center justify-between gap-3 mb-4">
+                                                        <div>
+                                                            <p className="text-xs font-bold text-dim uppercase tracking-widest mb-0.5">
+                                                                Grupos de la fase
+                                                            </p>
+                                                            <p className="text-sm text-white font-semibold">
+                                                                Define los grupos que componen esta fase
+                                                            </p>
+                                                        </div>
+                                                        <span className="basalt-badge badge-published">
+                                                            {groupNames.length} grupo{groupNames.length !== 1 ? 's' : ''}
+                                                        </span>
                                                     </div>
-                                                ) : null}
 
-                                                {phase.settings?.legs ? (
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-2 h-2 rounded-full bg-[rgba(255,255,255,0.15)]"></div>
-                                                        <span>{phase.settings.legs === 2 ? 'Ida y Vuelta' : 'Partido Único'}</span>
+                                                    <div className="flex flex-col gap-2 mb-4">
+                                                        {groupNames.map((name, i) => (
+                                                            <div key={i} className="structure-group-row flex gap-2">
+                                                                <input
+                                                                    type="text"
+                                                                    className="basalt-input flex-1"
+                                                                    value={name}
+                                                                    onChange={e => updateGroupName(i, e.target.value)}
+                                                                    placeholder={`Grupo ${String.fromCharCode(65 + i)}`}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="basalt-btn flex-shrink-0 px-3"
+                                                                    onClick={() => removeGroupName(i)}
+                                                                    title="Eliminar grupo"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                ) : null}
 
-                                                {phase.settings?.advanceCount && phase.settings.advanceCount > 0 ? (
-                                                    <div className="flex items-center gap-2.5 text-[#00a365] font-medium">
-                                                        <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,163,101,0.4)] bg-[#00a365]"></div>
-                                                        <span>{phase.settings.advanceCount} Avanzan</span>
+                                                    <button
+                                                        type="button"
+                                                        className="basalt-btn w-full"
+                                                        onClick={addGroupName}
+                                                    >
+                                                        <Plus size={14} />
+                                                        Agregar grupo
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {/* Teams & advance counts */}
+                                            <div className="structure-split-grid grid grid-cols-2 gap-4">
+                                                <div className="structure-field-panel">
+                                                    <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-2">
+                                                        Cantidad de equipos
+                                                    </label>
+                                                    <div className="structure-counter-shell flex items-center border border-[var(--border-basalt)] rounded-lg bg-[var(--bg-basalt)] overflow-hidden">
+                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 2 : Math.max(2, Number(p) - 1))}>−</button>
+                                                        <input type="number" className="flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={teamsCount} onChange={e => setTeamsCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
+                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 3 : Number(p) + 1)}>+</button>
                                                     </div>
-                                                ) : null}
+                                                </div>
+                                                <div className="structure-field-panel">
+                                                    <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-2">
+                                                        Equipos que avanzan
+                                                    </label>
+                                                    <div className="structure-counter-shell flex items-center border border-[var(--border-basalt)] rounded-lg bg-[var(--bg-basalt)] overflow-hidden">
+                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setAdvanceCount(p => p === '' ? 1 : Math.max(1, Number(p) - 1))}>−</button>
+                                                        <input type="number" className="flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={advanceCount} onChange={e => setAdvanceCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
+                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setAdvanceCount(p => p === '' ? 2 : Number(p) + 1)}>+</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Match format */}
+                                            <div className="structure-field-panel">
+                                                <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
+                                                    Formato de partido
+                                                </label>
+                                                <div className="structure-option-grid structure-option-grid-double flex gap-3">
+                                                    {([{ value: 1, label: 'Partido único' }, { value: 2, label: 'Ida y vuelta' }] as const).map(opt => (
+                                                        <button
+                                                            key={opt.value}
+                                                            type="button"
+                                                            onClick={() => setLegs(opt.value)}
+                                                            className={`structure-option-card flex-1 py-3 rounded-xl border text-sm font-semibold transition-all duration-150 ${legs === opt.value
+                                                                ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                                                : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
+                                                                }`}
+                                                        >
+                                                            {opt.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                                <div className="flex justify-center mt-12">
-                                    <button className="manager-btn-inline" onClick={() => { resetForm(); setShowPhaseForm(true); }}>+ Agregar Nueva Fase</button>
-                                </div>
-                            </div>
-                        )}
+                                    </div>
+                                )}
 
-                        {phases.length === 0 && !showPhaseForm && (
-                            <div className="manager-card border-dashed border-2 border-[var(--border)] bg-transparent hover:border-[var(--accent)]/10 transition-all duration-700 empty-state-container">
-                                <div className="flex flex-col items-center justify-center py-40 px-6 relative overflow-hidden">
-                                    <div className="text-9xl mb-12 opacity-30 filter grayscale hover:grayscale-0 transition-all duration-700 icon-float icon-pulse cursor-default">📋</div>
-                                    <h3 className="text-4xl font-black text-white mb-6">Sin Fases Configuradas</h3>
-                                    <p className="text-[15px] text-[#888] mb-16 max-w-xl text-center">Diseña el alma de tu torneo. Define cómo se competirá y qué criterios decidirán al campeón.</p>
-                                    <button className="manager-btn-inline" onClick={() => { resetForm(); setShowPhaseForm(true); }}>Configurar Primera Fase</button>
-                                </div>
-                            </div>
-                        )}
+                                {/* STEP 2: Puntos */}
+                                {currentStep === 2 && (
+                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-points flex flex-col gap-6">
+                                        <div className="structure-step-head">
+                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 2</p>
+                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Sistema de Puntos</h3>
+                                            <p className="text-dim text-sm">Configura los puntos otorgados por cada resultado</p>
+                                        </div>
 
-                        {/* PHASE WIZARD UI */}
-                        {showPhaseForm && (
-                            <div className="phase-wizard-wrapper mt-8">
-                                <form onSubmit={handleCreatePhase} className="monolith-container">
-                                    {/* Sidebar */}
-                                    <aside className="sidebar">
-                                        <div className="sidebar-header">
-                                            <h2>Fase {editingPhaseId ? phases.findIndex(p => p.id === editingPhaseId) + 1 : phases.length + 1}</h2>
-                                            <p>{editingPhaseId ? 'Editando Fase' : 'Nueva Fase'}</p>
+                                        <div className="structure-score-grid grid grid-cols-3 gap-4">
+                                            {[
+                                                { label: 'Victoria', value: pointsWin, set: setPointsWin, color: 'text-[var(--status-active)]' },
+                                                { label: 'Empate', value: pointsDraw, set: setPointsDraw, color: 'text-dim' },
+                                                { label: 'Derrota', value: pointsLoss, set: setPointsLoss, color: 'text-[var(--status-error)]' },
+                                            ].map(({ label, value, set, color }) => (
+                                                <div key={label} className="structure-field-panel structure-score-panel">
+                                                    <label className={`structure-field-label block text-xs font-bold uppercase tracking-widest mb-2 ${color}`}>{label}</label>
+                                                    <input
+                                                        type="number"
+                                                        className="basalt-input text-center text-2xl font-black py-4"
+                                                        value={value}
+                                                        onChange={e => set(Number(e.target.value))}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="structure-field-panel rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] p-5">
+                                            <label className="flex items-center gap-3 cursor-pointer mb-0">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 accent-[var(--accent-primary)]"
+                                                    checked={useExtraTimePoints}
+                                                    onChange={e => setUseExtraTimePoints(e.target.checked)}
+                                                />
+                                                <div>
+                                                    <span className="text-sm font-semibold text-white">Puntos diferentes por prórroga / penales</span>
+                                                    <p className="text-xs text-dim mt-0.5">Si se va a tiempo extra se usan estos puntos alternativos</p>
+                                                </div>
+                                            </label>
+                                            {useExtraTimePoints && (
+                                                <div className="structure-score-grid grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-[var(--border-basalt)]">
+                                                    {[
+                                                        { label: 'Victoria (extra)', value: pointsWinExtra, set: setPointsWinExtra },
+                                                        { label: 'Empate (extra)', value: pointsDrawExtra, set: setPointsDrawExtra },
+                                                        { label: 'Derrota (extra)', value: pointsLossExtra, set: setPointsLossExtra },
+                                                    ].map(({ label, value, set }) => (
+                                                        <div key={label} className="structure-field-panel structure-score-panel">
+                                                            <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-2">{label}</label>
+                                                            <input type="number" className="basalt-input text-center" value={value} onChange={e => set(Number(e.target.value))} />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {isRugby && (
+                                            <div className="structure-field-panel rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] p-5">
+                                                <label className="flex items-center gap-3 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 accent-[var(--accent-primary)]"
+                                                        checked={allowBonusPoints}
+                                                        onChange={e => setAllowBonusPoints(e.target.checked)}
+                                                    />
+                                                    <div>
+                                                        <span className="text-sm font-semibold text-white">Puntos bonus (Rugby)</span>
+                                                        <p className="text-xs text-dim mt-0.5">Otorgar puntos de bonificación según las reglas del torneo</p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* STEP 3: Desempate */}
+                                {currentStep === 3 && (
+                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-rules flex flex-col gap-6">
+                                        <div className="structure-step-head">
+                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 3</p>
+                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Criterios de Desempate</h3>
+                                            <p className="text-dim text-sm">Define el orden de prioridad para resolver empates en la tabla</p>
                                         </div>
 
                                         {validationErrors.length > 0 && (
-                                            <div className="mb-6 p-4 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
-                                                {validationErrors.length} advertencia(s).
+                                            <div className="structure-inline-alert flex flex-col gap-1.5 p-4 rounded-lg bg-[var(--status-warning)]/10 border border-[var(--status-warning)]/30 text-[var(--status-warning)] text-xs">
+                                                {validationErrors.map((err, i) => (
+                                                    <span key={i} className="flex items-center gap-2">
+                                                        <AlertCircle size={12} /> {err}
+                                                    </span>
+                                                ))}
                                             </div>
                                         )}
 
-                                        <ul className="stepper-list">
-                                            {[
-                                                { step: 1, title: 'Básico', desc: 'Formato general', show: true },
-                                                { step: 2, title: 'Puntos', desc: 'Sistema de puntuación', show: phaseType === 'league' || phaseType === 'group_stage' },
-                                                { step: 3, title: 'Desempate', desc: 'Criterios', show: phaseType === 'league' || phaseType === 'group_stage' },
-                                                { step: 4, title: 'Etiquetas', desc: 'Zonas y clasificación', show: true },
-                                                { step: 5, title: 'Estadísticas', desc: 'Atribución a jugadores', show: true }
-                                            ].map(s => s.show && (
-                                                <li key={s.step}
-                                                    className={`step-item ${currentStep === s.step ? 'active' : ''} ${currentStep > s.step ? 'completed' : ''}`}
-                                                    onClick={() => setCurrentStep(s.step)}>
-                                                    <span className="step-item-title">{s.step}. {s.title}</span>
-                                                    <span className="step-item-desc">{s.desc}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </aside>
-
-                                    {/* Content Area */}
-                                    <div className="wizard-content">
-                                        <div className="carbon-overlay"></div>
-
-                                        {/* STEP 1: Basic Config */}
-                                        <div className={`step-pane ${currentStep === 1 ? 'active' : ''}`}>
-                                            <div className="section-header">
-                                                <h1>Configuración Básica</h1>
-                                                <p>Define la estructura general de la fase</p>
-                                            </div>
-
-                                            <div className="grid-layout mb-8">
-                                                <div className="field-group full-width">
-                                                    <label className="wizard-label">Nombre de la fase</label>
-                                                    <input type="text" className="wizard-input" value={phaseName} onChange={e => setPhaseName(e.target.value)} placeholder="Ej: Fase Regular" required autoFocus />
-                                                </div>
-
-                                                <div className="field-group full-width">
-                                                    <label className="wizard-label">Tipo de fase</label>
-                                                    <div className="radio-group">
-                                                        <div className="radio-option">
-                                                            <input type="radio" id="pt-league" name="phaseType" value="league" checked={phaseType === 'league'} onChange={() => setPhaseType('league')} />
-                                                            <label htmlFor="pt-league" className="radio-label">Liga</label>
-                                                        </div>
-                                                        <div className="radio-option">
-                                                            <input type="radio" id="pt-knockout" name="phaseType" value="knockout" checked={phaseType === 'knockout'} onChange={() => setPhaseType('knockout')} />
-                                                            <label htmlFor="pt-knockout" className="radio-label">Llaves</label>
-                                                        </div>
-                                                        <div className="radio-option">
-                                                            <input type="radio" id="pt-group" name="phaseType" value="group_stage" checked={phaseType === 'group_stage'} onChange={() => setPhaseType('group_stage')} />
-                                                            <label htmlFor="pt-group" className="radio-label">Grupos</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="field-group">
-                                                    <label className="wizard-label">Cantidad de Equipos</label>
-                                                    <div className="stepper-number">
-                                                        <button type="button" className="stepper-btn" onClick={() => setTeamsCount(prev => prev === '' ? 2 : Math.max(2, Number(prev) - 1))}>-</button>
-                                                        <input type="number" className="stepper-val bg-transparent border-none w-full text-center outline-none" value={teamsCount} onChange={e => setTeamsCount(e.target.value ? Number(e.target.value) : '')} placeholder="Ej: 12" />
-                                                        <button type="button" className="stepper-btn" onClick={() => setTeamsCount(prev => prev === '' ? 3 : Number(prev) + 1)}>+</button>
-                                                    </div>
-                                                </div>
-
-                                                <div className="field-group">
-                                                    <label className="wizard-label">Equipos que avanzan</label>
-                                                    <div className="stepper-number">
-                                                        <button type="button" className="stepper-btn" onClick={() => setAdvanceCount(prev => prev === '' ? 1 : Math.max(1, Number(prev) - 1))}>-</button>
-                                                        <input type="number" className="stepper-val bg-transparent border-none w-full text-center outline-none" value={advanceCount} onChange={e => setAdvanceCount(e.target.value ? Number(e.target.value) : '')} placeholder="Ej: 4" />
-                                                        <button type="button" className="stepper-btn" onClick={() => setAdvanceCount(prev => prev === '' ? 2 : Number(prev) + 1)}>+</button>
-                                                    </div>
-                                                </div>
-
-                                                <div className="field-group full-width mt-4">
-                                                    <label className="wizard-label">Formato de Partido</label>
-                                                    <div className="radio-group">
-                                                        <div className="radio-option">
-                                                            <input type="radio" id="mf-single" name="matchFormat" value={1} checked={legs === 1} onChange={() => setLegs(1)} />
-                                                            <label htmlFor="mf-single" className="radio-label">Partido Único</label>
-                                                        </div>
-                                                        <div className="radio-option">
-                                                            <input type="radio" id="mf-series" name="matchFormat" value={2} checked={legs === 2} onChange={() => setLegs(2)} />
-                                                            <label htmlFor="mf-series" className="radio-label">Ida y Vuelta</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        <div className="structure-field-panel">
+                                            <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
+                                                Reglas de desempate (arrastrar para priorizar)
+                                            </label>
+                                            <TiebreakerList items={tiebreakers} onChange={setTiebreakers} phaseType={phaseType} />
                                         </div>
 
-                                        {/* STEP 2: Sistema de Puntos */}
-                                        <div className={`step-pane ${currentStep === 2 ? 'active' : ''}`}>
-                                            <div className="section-header">
-                                                <h1>Sistema de Puntos</h1>
-                                                <p>Configura los puntos otorgados por cada resultado</p>
-                                            </div>
+                                        <div className="structure-field-panel pt-6 border-t border-[var(--border-basalt)]">
+                                            <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
+                                                Columnas de la tabla
+                                            </label>
+                                            <TableColumnSelector categories={columnCategories} selectedColumns={tableCols} onChange={setTableCols} />
+                                        </div>
+                                    </div>
+                                )}
 
-                                            <div className="grid-layout mb-8">
-                                                <div className="field-group">
-                                                    <label className="wizard-label text-green-500">Victoria</label>
-                                                    <input type="number" className="wizard-input text-center text-3xl font-black py-4" value={pointsWin} onChange={e => setPointsWin(Number(e.target.value))} />
-                                                </div>
-                                                <div className="field-group">
-                                                    <label className="wizard-label">Empate</label>
-                                                    <input type="number" className="wizard-input text-center text-3xl font-black py-4 text-[#aaa]" value={pointsDraw} onChange={e => setPointsDraw(Number(e.target.value))} />
-                                                </div>
-                                                <div className="field-group full-width md:full-width-none md:col-span-2 md:w-1/2 md:mx-auto mt-4">
-                                                    <label className="wizard-label text-[#d32f2f]">Pérdida</label>
-                                                    <input type="number" className="wizard-input text-center text-3xl font-black py-4" value={pointsLoss} onChange={e => setPointsLoss(Number(e.target.value))} />
-                                                </div>
-                                            </div>
+                                {/* STEP 4: Etiquetas */}
+                                {currentStep === 4 && (
+                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-labels flex flex-col gap-6">
+                                        <div className="structure-step-head">
+                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 4</p>
+                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Etiquetas de Clasificación</h3>
+                                            <p className="text-dim text-sm">Zonas coloreadas para resaltar posiciones en la tabla (ej: &quot;Clasifica&quot;, &quot;Descenso&quot;)</p>
+                                        </div>
 
-                                            <div className="border border-[var(--carbon-border)] bg-[var(--carbon-surface)] p-6 rounded mb-8">
-                                                <label className="checkbox-container !border-none !p-0 !bg-transparent mb-6">
-                                                    <input type="checkbox" checked={useExtraTimePoints} onChange={e => setUseExtraTimePoints(e.target.checked)} />
-                                                    <div className="checkmark"></div>
-                                                    <span className="text-white font-semibold">Habilitar Puntos Diferentes por Prórroga / Penales</span>
+                                        <div className="structure-labels-grid">
+                                            <div className="structure-field-panel structure-labels-list-panel">
+                                                <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
+                                                    Etiquetas creadas
                                                 </label>
 
-                                                {useExtraTimePoints && (
-                                                    <div className="grid-layout pt-4 border-t border-[var(--carbon-border)] mt-4">
-                                                        <div className="field-group">
-                                                            <label className="wizard-label text-green-500">Victoria (Extra)</label>
-                                                            <input type="number" className="wizard-input" value={pointsWinExtra} onChange={e => setPointsWinExtra(Number(e.target.value))} />
-                                                        </div>
-                                                        <div className="field-group">
-                                                            <label className="wizard-label">Empate (Extra)</label>
-                                                            <input type="number" className="wizard-input" value={pointsDrawExtra} onChange={e => setPointsDrawExtra(Number(e.target.value))} />
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {isRugby && (
-                                                <div className="border border-[var(--carbon-border)] bg-[var(--carbon-surface)] p-6 rounded">
-                                                    <h4 className="wizard-label mb-6">Bonificaciones (Rugby)</h4>
-                                                    <div className="flex flex-col gap-4">
-                                                        <label className="checkbox-container !border-none !p-0 !bg-transparent">
-                                                            <input type="checkbox" checked={allowBonusPoints} onChange={e => setAllowBonusPoints(e.target.checked)} />
-                                                            <div className="checkmark"></div>
-                                                            <span className="text-white font-semibold">Otorgar Puntos Bonus (según reglas del torneo)</span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* STEP 3: Tiebreakers & Columns */}
-                                        <div className={`step-pane ${currentStep === 3 ? 'active' : ''}`}>
-                                            <div className="section-header">
-                                                <h1>Criterios de Desempate</h1>
-                                                <p>Define cómo decidir empates y visualización de la tabla</p>
-                                            </div>
-
-                                            <div className="mb-12 wizard-sortable-container">
-                                                <h4 className="wizard-label mb-4">Reglas de Desempate (Arrastrar para priorizar)</h4>
-                                                <TiebreakerList items={tiebreakers} onChange={setTiebreakers} phaseType={phaseType} />
-                                            </div>
-
-                                            <div className="border-t border-[var(--carbon-border)] pt-8">
-                                                <h4 className="wizard-label mb-4">Glosario de Columnas de Tabla</h4>
-                                                <TableColumnSelector categories={columnCategories} selectedColumns={tableCols} onChange={setTableCols} />
-                                            </div>
-                                        </div>
-
-                                        {/* STEP 4: Etiquetas */}
-                                        <div className={`step-pane ${currentStep === 4 ? 'active' : ''}`}>
-                                            <div className="section-header">
-                                                <h1>Etiquetas de Grupo</h1>
-                                                <p>Define clasificaciones especiales para resaltar posiciones</p>
-                                            </div>
-
-                                            <div className="flex gap-4 mb-8">
-                                                <input type="text" className="wizard-input flex-1" value={newLabel} onChange={e => setNewLabel(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addLabel(); } }} placeholder="Ej: Clasifica a 8vos" />
-                                                <button type="button" className="wizard-btn wizard-btn-primary" style={{ padding: '0 2rem' }} onClick={addLabel}>Añadir</button>
-                                            </div>
-
-                                            <div className="flex flex-col gap-3">
                                                 {groupLabels.length === 0 ? (
-                                                    <div className="text-center p-8 border border-dashed border-[var(--carbon-border)] text-[var(--text-dim)]">No hay etiquetas creadas</div>
+                                                    <div className="structure-label-empty">
+                                                        Sin etiquetas configuradas. Agrega zonas para colorear la tabla de posiciones.
+                                                    </div>
                                                 ) : (
-                                                    groupLabels.map((label, i) => (
-                                                        <div key={i} className="flex flex-col gap-3 p-4 border border-[var(--carbon-border)] rounded bg-[var(--carbon-surface)] relative">
-                                                            <div className="flex justify-between items-center">
-                                                                <div className="font-bold text-white uppercase text-sm flex items-center gap-2">
-                                                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: label.color }}></div>
-                                                                    {label.name}
-                                                                </div>
-                                                                <button type="button" onClick={() => removeLabel(label.name)} className="text-[var(--text-dim)] hover:text-red-400 font-bold ml-auto p-1">✕</button>
-                                                            </div>
+                                                    <div className="structure-label-list">
+                                                        {groupLabels.map((label, index) => {
+                                                            const labelId = getLabelKey(label);
+                                                            const isEditing = editingLabelId === labelId;
 
-                                                            <div className="flex items-center gap-4 mt-2">
-                                                                <div className="flex bg-[var(--carbon-bg)] p-1 rounded-md">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => updateLabelMode(label.name, 'auto')}
-                                                                        className={`px-3 py-1 text-xs rounded transition-colors ${label.colorMode === 'auto' ? 'bg-[#333] text-white shadow' : 'text-[var(--text-dim)] hover:text-white'}`}
-                                                                    >
-                                                                        Color automático
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => updateLabelMode(label.name, 'manual')}
-                                                                        className={`px-3 py-1 text-xs rounded transition-colors ${label.colorMode === 'manual' ? 'bg-[#333] text-white shadow' : 'text-[var(--text-dim)] hover:text-white'}`}
-                                                                    >
-                                                                        Color manual
-                                                                    </button>
-                                                                </div>
-
-                                                                {label.colorMode === 'manual' && (
-                                                                    <div className="flex items-center gap-2">
-                                                                        <input type="color" value={label.color} onChange={e => updateLabelColor(label.name, e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent p-0" />
-                                                                        <input type="text" value={label.color} onChange={e => updateLabelColor(label.name, e.target.value)} className="w-20 bg-[var(--carbon-bg)] text-xs text-white border border-[var(--carbon-border)] rounded px-2 py-1 uppercase" maxLength={7} />
-                                                                        <div className="flex gap-1 xl:gap-2 ml-4">
-                                                                            {PRESET_COLORS.map(c => (
-                                                                                <button key={c} type="button" onClick={() => updateLabelColor(label.name, c)} className={`w-5 h-5 rounded-full cursor-pointer hover:scale-110 transition-transform ${label.color === c ? 'ring-2 ring-white ring-offset-2 ring-offset-[var(--carbon-surface)]' : ''}`} style={{ backgroundColor: c }} title={c}></button>
-                                                                            ))}
+                                                            return (
+                                                                <div key={labelId} className={`structure-label-row${isEditing ? ' structure-label-row-active' : ''}`}>
+                                                                    <div className="structure-label-row-head">
+                                                                        <div className="structure-label-row-main">
+                                                                            <LabelChip name={label.name} color={label.color} />
+                                                                            <span className="structure-label-row-meta">
+                                                                                {label.colorMode === 'auto'
+                                                                                    ? `Color automatico por orden ${index + 1}`
+                                                                                    : 'Color manual'}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="structure-label-row-actions">
+                                                                            <button type="button" className="structure-label-action-btn" onClick={() => startLabelEdit(label)}>
+                                                                                Editar
+                                                                            </button>
+                                                                            <button type="button" className="structure-label-action-btn structure-label-action-btn-danger" onClick={() => removeLabel(labelId)}>
+                                                                                <Trash2 size={13} />
+                                                                                Eliminar
+                                                                            </button>
                                                                         </div>
                                                                     </div>
-                                                                )}
 
-                                                                {label.colorMode === 'auto' && (
-                                                                    <div className="text-xs text-[var(--text-dim)] flex items-center gap-2">
-                                                                        Color generado automáticamente por orden
+                                                                    <div className="structure-label-row-config">
+                                                                        <div className="structure-label-mode-toggle">
+                                                                            {(['auto', 'manual'] as const).map(mode => (
+                                                                                <button
+                                                                                    key={mode}
+                                                                                    type="button"
+                                                                                    onClick={() => updateLabelMode(label.name, mode)}
+                                                                                    className={`structure-label-mode-btn${label.colorMode === mode ? ' is-active' : ''}`}
+                                                                                >
+                                                                                    {mode === 'auto' ? 'Automatico' : 'Manual'}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+
+                                                                        {label.colorMode === 'manual' ? (
+                                                                            <div className="structure-label-palette">
+                                                                                <input
+                                                                                    type="color"
+                                                                                    value={label.color}
+                                                                                    onChange={e => updateLabelColor(label.name, e.target.value)}
+                                                                                    className="structure-label-color-input"
+                                                                                    aria-label={`Color para ${label.name}`}
+                                                                                />
+                                                                                <div className="structure-label-presets">
+                                                                                    {PRESET_COLORS.map(color => (
+                                                                                        <button
+                                                                                            key={color}
+                                                                                            type="button"
+                                                                                            onClick={() => updateLabelColor(label.name, color)}
+                                                                                            className={`structure-label-swatch${label.color === color ? ' is-active' : ''}`}
+                                                                                            style={{ backgroundColor: color }}
+                                                                                            aria-label={`Usar color ${color}`}
+                                                                                        />
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <p className="structure-label-helper">
+                                                                                La tabla le asigna el color automaticamente segun su orden visual.
+                                                                            </p>
+                                                                        )}
                                                                     </div>
-                                                                )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="structure-field-panel structure-labels-form-panel">
+                                                <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
+                                                    {editingLabelId ? 'Editar etiqueta' : 'Nueva etiqueta'}
+                                                </label>
+
+                                                <div className="structure-label-form">
+                                                    <div className="structure-label-input-row">
+                                                        <input
+                                                            type="text"
+                                                            className="basalt-input structure-label-name-input"
+                                                            value={newLabel}
+                                                            onChange={e => {
+                                                                setNewLabel(e.target.value);
+                                                                if (labelError) setLabelError(null);
+                                                            }}
+                                                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addLabel(); } }}
+                                                            placeholder="Ej: Clasifica a 8vos, Descenso..."
+                                                        />
+                                                        <button type="button" className="basalt-btn basalt-btn-primary structure-label-submit" onClick={addLabel}>
+                                                            <Plus size={15} />
+                                                            {editingLabelId ? 'Actualizar' : 'Agregar'}
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="structure-label-mode-toggle structure-label-mode-toggle-form">
+                                                        {(['auto', 'manual'] as const).map(mode => (
+                                                            <button
+                                                                key={mode}
+                                                                type="button"
+                                                                onClick={() => setLabelColorMode(mode)}
+                                                                className={`structure-label-mode-btn${labelColorMode === mode ? ' is-active' : ''}`}
+                                                            >
+                                                                {mode === 'auto' ? 'Automatico' : 'Manual'}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+
+                                                    {labelColorMode === 'manual' ? (
+                                                        <div className="structure-label-palette structure-label-palette-form">
+                                                            <input
+                                                                type="color"
+                                                                value={labelColor}
+                                                                onChange={e => setLabelColor(e.target.value)}
+                                                                className="structure-label-color-input"
+                                                                aria-label="Seleccionar color de la etiqueta"
+                                                            />
+                                                            <div className="structure-label-presets">
+                                                                {PRESET_COLORS.map(color => (
+                                                                    <button
+                                                                        key={color}
+                                                                        type="button"
+                                                                        onClick={() => setLabelColor(color)}
+                                                                        className={`structure-label-swatch${labelColor === color ? ' is-active' : ''}`}
+                                                                        style={{ backgroundColor: color }}
+                                                                        aria-label={`Usar color ${color}`}
+                                                                    />
+                                                                ))}
                                                             </div>
                                                         </div>
-                                                    ))
-                                                )}
+                                                    ) : (
+                                                        <p className="structure-label-helper">
+                                                            El color se asigna automaticamente en el orden en que agregas las zonas.
+                                                        </p>
+                                                    )}
+
+                                                    {newLabel.trim() && (
+                                                        <div className="structure-label-preview">
+                                                            <span className="structure-label-preview-label">Vista previa</span>
+                                                            <LabelChip
+                                                                name={newLabel.trim()}
+                                                                color={labelColorMode === 'manual'
+                                                                    ? labelColor
+                                                                    : getAutoLabelColor(Math.max(
+                                                                        editingLabelId
+                                                                            ? groupLabels.findIndex(label => getLabelKey(label) === editingLabelId)
+                                                                            : groupLabels.length,
+                                                                        0,
+                                                                    ))}
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    {labelError && (
+                                                        <div className="structure-inline-alert structure-inline-alert-danger">
+                                                            <AlertCircle size={13} />
+                                                            <span>{labelError}</span>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="structure-label-form-actions">
+                                                        {editingLabelId && (
+                                                            <button type="button" className="basalt-btn basalt-btn-secondary" onClick={resetLabelForm}>
+                                                                Cancelar
+                                                            </button>
+                                                        )}
+                                                        <button type="button" className="basalt-btn basalt-btn-primary" onClick={addLabel}>
+                                                            {editingLabelId ? 'Guardar cambios' : 'Crear etiqueta'}
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        {/* STEP 5: Stats */}
-                                        <div className={`step-pane ${currentStep === 5 ? 'active' : ''}`}>
-                                            <div className="section-header">
-                                                <h1>Estadísticas</h1>
-                                                <p>Configuración de estadísticas de jugadores</p>
-                                            </div>
+                                        <div className="hidden">
+                                            <div className="structure-labels-grid">
+                                            <input
+                                                type="text"
+                                                className="basalt-input flex-1"
+                                                value={newLabel}
+                                                onChange={e => setNewLabel(e.target.value)}
+                                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addLabel(); } }}
+                                                placeholder="Ej: Clasifica a 8vos, Descenso..."
+                                            />
+                                            <button type="button" className="basalt-btn basalt-btn-primary flex-shrink-0" onClick={addLabel}>
+                                                <Plus size={15} />
+                                                Añadir
+                                            </button>
+                                        </div>
 
-                                            <label className="checkbox-container">
-                                                <input type="checkbox" checked={statsAssignment === 'starters'} onChange={e => setStatsAssignment(e.target.checked ? 'starters' : 'played')} />
-                                                <div className="checkmark"></div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-white font-semibold">Asignar estadísticas solo a titulares</span>
-                                                    <span className="text-xs text-[var(--text-dim)] mt-1">Si está inactivo, se asignará a "Cualquiera que haya jugado".</span>
+                                        {groupLabels.length === 0 ? (
+                                            <div className="structure-field-panel text-center py-10 px-6 rounded-xl border border-dashed border-[var(--border-basalt)] text-dim text-sm">
+                                                Sin etiquetas configuradas. Agrega zonas para colorear la tabla de posiciones.
+                                            </div>
+                                        ) : (
+                                            <div className="structure-label-stack flex flex-col gap-3">
+                                                {groupLabels.map((label, i) => (
+                                                    <div key={i} className="structure-field-panel p-4 rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)]">
+                                                        <div className="flex items-center justify-between mb-3">
+                                                            <div className="flex items-center gap-2.5">
+                                                                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: label.color }} />
+                                                                <span className="text-sm font-bold text-white">{label.name}</span>
+                                                            </div>
+                                                            <button type="button" onClick={() => removeLabel(label.name)} className="p-1.5 rounded-lg text-dim hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex bg-[var(--bg-basalt)] p-0.5 rounded-lg border border-[var(--border-basalt)]">
+                                                                {(['auto', 'manual'] as const).map(mode => (
+                                                                    <button key={mode} type="button" onClick={() => updateLabelMode(label.name, mode)} className={`px-3 py-1 text-xs rounded-md font-semibold transition-all ${label.colorMode === mode ? 'bg-[var(--surface-elevated)] text-white' : 'text-dim hover:text-white'}`}>
+                                                                        {mode === 'auto' ? 'Automático' : 'Manual'}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                            {label.colorMode === 'manual' && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <input type="color" value={label.color} onChange={e => updateLabelColor(label.name, e.target.value)} className="w-7 h-7 rounded cursor-pointer border-0 bg-transparent p-0" />
+                                                                    <div className="flex gap-1">
+                                                                        {PRESET_COLORS.map(c => (
+                                                                            <button key={c} type="button" onClick={() => updateLabelColor(label.name, c)} className={`w-4 h-4 rounded-full cursor-pointer hover:scale-110 transition-transform ${label.color === c ? 'ring-2 ring-white ring-offset-1 ring-offset-[var(--surface-basalt)]' : ''}`} style={{ backgroundColor: c }} />
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {label.colorMode === 'auto' && (
+                                                                <span className="text-xs text-dim">Color asignado automáticamente por orden</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* STEP 5: Stats */}
+                                {currentStep === 5 && (
+                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-stats flex flex-col gap-6">
+                                        <div className="structure-step-head">
+                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 5</p>
+                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Estadísticas</h3>
+                                            <p className="text-dim text-sm">Configura cómo se atribuyen las estadísticas a los jugadores</p>
+                                        </div>
+
+                                        <div className="structure-field-panel rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] p-5">
+                                            <label className="flex items-start gap-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 mt-0.5 accent-[var(--accent-primary)]"
+                                                    checked={statsAssignment === 'starters'}
+                                                    onChange={e => setStatsAssignment(e.target.checked ? 'starters' : 'played')}
+                                                />
+                                                <div>
+                                                    <span className="text-sm font-semibold text-white">Asignar estadísticas solo a titulares</span>
+                                                    <p className="text-xs text-dim mt-1">Si está inactivo, se asignará a todos los jugadores que hayan jugado.</p>
                                                 </div>
                                             </label>
                                         </div>
-
-                                        {/* Footer Actions */}
-                                        <div className="wizard-footer-actions">
-                                            <button type="button" className="wizard-btn wizard-btn-secondary" onClick={resetForm}>
-                                                Cancelar
-                                            </button>
-
-                                            {currentStep > 1 && (
-                                                <button type="button" className="wizard-btn wizard-btn-secondary ml-auto" onClick={() => setCurrentStep(c => c - 1)}>
-                                                    ← Atrás
-                                                </button>
-                                            )}
-
-                                            {currentStep < 5 && (
-                                                <button type="button" className={`wizard-btn wizard-btn-primary ${currentStep === 1 ? 'ml-auto' : ''}`} onClick={() => {
-                                                    // skip step 2 and 3 if knockout or playoff
-                                                    if (currentStep === 1 && (phaseType === 'knockout' || phaseType === 'playoff')) {
-                                                        setCurrentStep(4);
-                                                    } else {
-                                                        setCurrentStep(c => c + 1);
-                                                    }
-                                                }}>
-                                                    Siguiente →
-                                                </button>
-                                            )}
-
-                                            {currentStep === 5 && (
-                                                <button type="submit" className="wizard-btn wizard-btn-primary" disabled={creating || validationErrors.some(err => err.includes('Debe haber'))}>
-                                                    {creating ? 'Guardando...' : 'Guardar Fase'}
-                                                </button>
-                                            )}
-                                        </div>
                                     </div>
-                                </form>
+                                )}
+
+                                {/* Footer actions */}
+                            <div className="phase-wizard-footer structure-wizard-footer mt-auto pt-8 border-t border-[var(--border-basalt)] flex items-center gap-3 flex-wrap">
+                                    <button type="button" className="basalt-btn" onClick={resetForm}>
+                                        Cancelar
+                                    </button>
+                                    <div className="structure-wizard-footer-actions flex items-center gap-3 ml-auto">
+                                        {currentStep > 1 && (
+                                            <button type="button" className="basalt-btn" onClick={goPrev}>
+                                                ← Atrás
+                                            </button>
+                                        )}
+                                        {currentStep < lastVisibleStep && (
+                                            <button type="button" className="basalt-btn basalt-btn-primary" onClick={goNext}>
+                                                Siguiente →
+                                            </button>
+                                        )}
+                                        {currentStep === lastVisibleStep && (
+                                            <button
+                                                type="submit"
+                                                className="basalt-btn basalt-btn-primary"
+                                                disabled={creating || !canSubmitPhase}
+                                            >
+                                                {creating ? 'Guardando...' : editingPhaseId ? 'Guardar cambios' : 'Crear fase'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        )}
-                    </>
-                )}
-            </div>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

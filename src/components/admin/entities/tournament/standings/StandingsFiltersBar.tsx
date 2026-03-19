@@ -303,9 +303,9 @@ export function StandingsFiltersBar({
                 label="Grupo o zona"
                 value={selectedGroup || ''}
                 onChange={(value) => onGroupChange(value || null)}
-                disabled={!selectedPhase}
+                disabled={!selectedPhase || groups.length === 0}
               >
-                <option value="">Todos los grupos</option>
+                <option value="">{groups.length > 0 ? 'Todos los grupos' : 'Sin grupos configurados'}</option>
                 {groups.map((group) => (
                   <option key={group.id} value={group.id}>
                     {group.name}
