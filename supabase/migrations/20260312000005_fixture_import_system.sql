@@ -86,9 +86,6 @@ CREATE TABLE IF NOT EXISTS public.import_rows (
 );
 
 ALTER TABLE public.import_rows
-    ADD COLUMN IF NOT EXISTS job_id UUID REFERENCES public.import_jobs(id) ON DELETE CASCADE,
-    ADD COLUMN IF NOT EXISTS row_index INTEGER,
-    ADD COLUMN IF NOT EXISTS source_label TEXT,
     ADD COLUMN IF NOT EXISTS raw_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
     ADD COLUMN IF NOT EXISTS extracted_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
     ADD COLUMN IF NOT EXISTS normalized_payload JSONB NOT NULL DEFAULT '{}'::jsonb,

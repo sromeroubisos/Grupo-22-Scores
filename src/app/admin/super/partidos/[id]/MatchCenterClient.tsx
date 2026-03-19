@@ -84,6 +84,15 @@ export interface MatchRow {
     points_override_reason: string | null;
 }
 
+export interface MatchPoints {
+    home_base_points: number | null;
+    away_base_points: number | null;
+    home_bonus_points: number | null;
+    away_bonus_points: number | null;
+    points_autocalculated: boolean | null;
+    points_override_reason: string | null;
+}
+
 interface MatchCenterClientProps {
     initialMatch: MatchRow;
     matchId: string;
@@ -232,9 +241,9 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const [localLineups, setLocalLineups] = useState<MatchLineups>(initialMatch.lineups || { home: [], away: [] });
 
     // Editable state for per-match points
-    const [localPoints, setLocalPoints] = useState({
-        home_base_points:       initialMatch.home_base_points      ?? null as number | null,
-        away_base_points:       initialMatch.away_base_points      ?? null as number | null,
+    const [localPoints, setLocalPoints] = useState<MatchPoints>({
+        home_base_points:       initialMatch.home_base_points      ?? null,
+        away_base_points:       initialMatch.away_base_points      ?? null,
         home_bonus_points:      initialMatch.home_bonus_points      ?? 0,
         away_bonus_points:      initialMatch.away_bonus_points      ?? 0,
         points_autocalculated:  initialMatch.points_autocalculated  ?? true,
@@ -285,11 +294,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         setSavingPoints(true);
         try {
             await supabase.from('matches').update({
-                home_base_points:       localPoints.home_base_points,
-                away_base_points:       localPoints.away_base_points,
-                home_bonus_points:      localPoints.home_bonus_points,
-                away_bonus_points:      localPoints.away_bonus_points,
-                points_autocalculated:  localPoints.points_autocalculated,
+                home_base_points:       localPoints.home_base_points ?? 0,
+                away_base_points:       localPoints.away_base_points ?? 0,
+                home_bonus_points:      localPoints.home_bonus_points ?? 0,
+                away_bonus_points:      localPoints.away_bonus_points ?? 0,
+                points_autocalculated:  localPoints.points_autocalculated ?? true,
                 points_override_reason: localPoints.points_override_reason || null,
             }).eq('id', matchId);
             await fetchMatch();
@@ -1097,7 +1106,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <label>Bonus / modificador local</label>
                                     <input
                                         type="number"
-                                        value={localPoints.home_bonus_points}
+                                        value={localPoints.home_bonus_points ?? 0}
                                         style={{ borderRadius: 4 }}
                                         onChange={(e) => {
                                             const v = parseInt(e.target.value) || 0;
@@ -1110,7 +1119,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <label>Bonus / modificador visitante</label>
                                     <input
                                         type="number"
-                                        value={localPoints.away_bonus_points}
+                                        value={localPoints.away_bonus_points ?? 0}
                                         style={{ borderRadius: 4 }}
                                         onChange={(e) => {
                                             const v = parseInt(e.target.value) || 0;
@@ -1124,8 +1133,8 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             {/* Totals (read-only) */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                                 {[
-                                    { label: 'Total local', value: (localPoints.home_base_points ?? 0) + localPoints.home_bonus_points },
-                                    { label: 'Total visitante', value: (localPoints.away_base_points ?? 0) + localPoints.away_bonus_points },
+                                    { label: 'Total local', value: (localPoints.home_base_points ?? 0) + (localPoints.home_bonus_points ?? 0) },
+                                    { label: 'Total visitante', value: (localPoints.away_base_points ?? 0) + (localPoints.away_bonus_points ?? 0) },
                                 ].map(({ label, value }) => (
                                     <div key={label} style={{ background: '#111', borderRadius: 4, padding: '10px 14px' }}>
                                         <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>{label}</div>
@@ -1140,7 +1149,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <label>Motivo de ajuste (opcional)</label>
                                     <textarea
                                         rows={2}
-                                        value={localPoints.points_override_reason}
+                                        value={localPoints.points_override_reason ?? ''}
                                         placeholder="Ej: Sanción disciplinaria, corrección de resultado..."
                                         style={{ borderRadius: 4, resize: 'vertical' }}
                                         onChange={(e) => setLocalPoints(prev => ({ ...prev, points_override_reason: e.target.value }))}

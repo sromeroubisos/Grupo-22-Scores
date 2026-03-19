@@ -354,6 +354,12 @@ export type Database = {
           updated_at: string
           venue: string | null
           weather: Json | null
+          home_base_points: number
+          away_base_points: number
+          home_bonus_points: number
+          away_bonus_points: number
+          points_autocalculated: boolean
+          points_override_reason: string | null
         }
         Insert: {
           attendance?: number | null
@@ -377,6 +383,12 @@ export type Database = {
           updated_at?: string
           venue?: string | null
           weather?: Json | null
+          home_base_points?: number
+          away_base_points?: number
+          home_bonus_points?: number
+          away_bonus_points?: number
+          points_autocalculated?: boolean
+          points_override_reason?: string | null
         }
         Update: {
           attendance?: number | null
@@ -400,6 +412,12 @@ export type Database = {
           updated_at?: string
           venue?: string | null
           weather?: Json | null
+          home_base_points?: number
+          away_base_points?: number
+          home_bonus_points?: number
+          away_bonus_points?: number
+          points_autocalculated?: boolean
+          points_override_reason?: string | null
         }
         Relationships: [
           { foreignKeyName: "matches_tournament_id_fkey"; columns: ["tournament_id"]; referencedRelation: "tournaments"; referencedColumns: ["id"] }
