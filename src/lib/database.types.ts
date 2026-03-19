@@ -342,7 +342,6 @@ export type Database = {
           group_id: string | null
           home_club_id: string | null
           id: string
-          live_enabled: boolean
           notes: string | null
           phase_id: string | null
           pitch: string | null
@@ -366,7 +365,6 @@ export type Database = {
           group_id?: string | null
           home_club_id?: string | null
           id?: string
-          live_enabled?: boolean
           notes?: string | null
           phase_id?: string | null
           pitch?: string | null
@@ -390,7 +388,6 @@ export type Database = {
           group_id?: string | null
           home_club_id?: string | null
           id?: string
-          live_enabled?: boolean
           notes?: string | null
           phase_id?: string | null
           pitch?: string | null

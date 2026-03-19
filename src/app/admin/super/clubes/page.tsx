@@ -50,17 +50,17 @@ export default function SuperadminClubesPage() {
     const handleToggleVisibility = async (club: ClubWithUnion) => {
         setTogglingId(club.id);
         setActionMenuOpenId(null);
-        const currentVal = localOverrides[club.id]?.visibility ?? club.visibility;
-        const newVal = currentVal === 'hidden' ? 'visible' : 'hidden';
+        const currentVal = localOverrides[club.id]?.is_visible ?? club.is_visible;
+        const newVal = currentVal === false ? true : false;
         // Optimistic update
-        setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], visibility: newVal } }));
+        setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], is_visible: newVal } }));
         try {
-            const { error } = await supabase.from('clubs').update({ visibility: newVal } as any).eq('id', club.id);
+            const { error } = await supabase.from('clubs').update({ is_visible: newVal } as any).eq('id', club.id);
             if (error) throw error;
             invalidateCache('clubs_list');
         } catch (err: any) {
             // Revert
-            setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], visibility: currentVal } }));
+            setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], is_visible: currentVal } }));
             alert(`Error: ${err.message}`);
         } finally {
             setTogglingId(null);
@@ -96,8 +96,8 @@ export default function SuperadminClubesPage() {
         return true;
     }), [displayClubs, filters.search, filters.country]);
 
-    const visibleCount = filtered.filter(c => c.visibility !== 'hidden').length;
-    const hiddenCount = filtered.filter(c => c.visibility === 'hidden').length;
+    const visibleCount = filtered.filter(c => c.is_visible !== false).length;
+    const hiddenCount = filtered.filter(c => c.is_visible === false).length;
 
     return (
         <div style={{ paddingBottom: 40 }} onClick={() => setActionMenuOpenId(null)}>
@@ -167,7 +167,7 @@ export default function SuperadminClubesPage() {
                         </thead>
                         <tbody>
                             {filtered.map(club => {
-                                const isVisible = club.visibility !== 'hidden';
+                                const isVisible = club.is_visible !== false;
                                 return (
                                     <tr
                                         key={club.id}

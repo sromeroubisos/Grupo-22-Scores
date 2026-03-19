@@ -60,7 +60,7 @@ export async function GET(
       // We look for clubs that match either name OR the external_id
       const { data: dbClubs, error: dbError } = await supabase
         .from('clubs')
-        .select('id, name, short_name, logo_url, external_id')
+        .select('id, name, short_name, logo_url')
         .or(`name.in.(${teamNames.map(n => `"${n.replace(/"/g, '""')}"`).join(',')})`);
 
       if (dbError) {
@@ -73,7 +73,7 @@ export async function GET(
         name: club.name,
         short_name: club.short_name,
         logo: club.logo_url,
-        externalId: club.external_id
+        externalId: null
       }));
 
       // In participants route, we return the same structure as before

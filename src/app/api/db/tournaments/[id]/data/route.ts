@@ -8,7 +8,24 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClient();
 
-    console.log(`[BACKEND] Fetching manual tournament data for ID: ${id}`);
+    console.log(`[BACKEND] Fetching manual tournament data for ID/Slug: ${id}`);
+    
+    // Resolve ID if it's a slug
+    let tournament_id = id;
+    if (!id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        console.log(`[BACKEND] Resolving slug: ${id}`);
+        const { data: t } = await supabase
+            .from('tournaments')
+            .select('id')
+            .eq('slug', id)
+            .single();
+        if (t) {
+            tournament_id = t.id;
+            console.log(`[BACKEND] Slug resolved to UUID: ${tournament_id}`);
+        } else {
+            return NextResponse.json({ ok: false, error: 'Tournament not found' }, { status: 404 });
+        }
+    }
 
     const [participantsRes, matchesRes, standingsRes, phasesRes, groupsRes] = await Promise.all([
         supabase
@@ -19,7 +36,7 @@ export async function GET(
                     id, name, logo_url, short_name, slug
                 )
             `)
-            .eq('tournament_id', id)
+            .eq('tournament_id', tournament_id)
             .not('status', 'in', '("withdrawn","disqualified")')
             .order('seed', { ascending: true, nullsFirst: false }),
 
@@ -30,9 +47,9 @@ export async function GET(
                 home_club_id, away_club_id,
                 home:clubs!matches_home_club_id_fkey(id, name, logo_url),
                 away:clubs!matches_away_club_id_fkey(id, name, logo_url),
-                phase_id, group_id
+                phase_id, group_id, round_uuid
             `)
-            .eq('tournament_id', id)
+            .eq('tournament_id', tournament_id)
             .order('date_time', { ascending: true }),
 
         supabase
@@ -42,19 +59,19 @@ export async function GET(
                 bonus_points, form, stats, club_id, phase_id, group_id,
                 club:clubs!tournament_standings_club_id_fkey(id, name, logo_url, short_name)
             `)
-            .eq('tournament_id', id)
+            .eq('tournament_id', tournament_id)
             .order('position', { ascending: true }),
 
         supabase
             .from('tournament_phases')
             .select('*')
-            .eq('tournament_id', id)
+            .eq('tournament_id', tournament_id)
             .order('order_index', { ascending: true }),
 
         supabase
             .from('tournament_groups')
             .select('*')
-            .eq('tournament_id', id)
+            .eq('tournament_id', tournament_id)
             .order('name', { ascending: true }),
     ]);
 

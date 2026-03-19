@@ -104,7 +104,6 @@ export async function POST(request: NextRequest) {
         union_id,
         status: 'draft',
         is_visible: false,
-        external_id: `manual-${Date.now()}`,
     };
 
     const { data, error } = await supabase

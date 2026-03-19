@@ -9,10 +9,11 @@ export async function GET(
 
     const supabase = await createClient();
 
+    // Try to find a tournament by ID (UUID) or by slug
     const { data, error } = await supabase
         .from('tournaments')
-        .select('id, name, display_name, logo_url, sport, sport_id, country, country_id, slug, is_visible, status, data_source')
-        .eq('id', id)
+        .select('id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status, data_source')
+        .or(`id.eq.${id},slug.eq.${id}`)
         .single();
 
     if (error || !data) {

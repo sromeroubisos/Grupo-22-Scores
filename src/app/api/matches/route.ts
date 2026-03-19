@@ -111,9 +111,9 @@ export async function GET(request: Request) {
                     const { data: dbLiveMatches, error: dbError } = await supabase
                         .from('matches')
                         .select(`
-                            id, date_time, round_label, venue, status, score, live_enabled,
-                            tournament_id, home_club_id, away_club_id, notes, stream_url, replay_url,
-                            tournament:tournaments(id, name, sport, season_id, status, union:unions(id, name, country)),
+                            id, date_time, round_label, venue, status, score,
+                            tournament_id, home_club_id, away_club_id, notes,
+                            tournament:tournaments(id, name, sport_id, season_id, status, union:unions(id, name, country)),
                             home_team:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, primary_color),
                             away_team:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, primary_color)
                         `)
@@ -123,8 +123,8 @@ export async function GET(request: Request) {
                         const sportVariants = getSportVariants(sport);
                         const enrichedDbLive = dbLiveMatches.filter((m: any) => {
                             if (m.tournament && m.tournament.status && !['published', 'active'].includes(m.tournament.status)) return false;
-                            if (sportVariants && m.tournament?.sport) {
-                                return sportVariants.includes(m.tournament.sport.toLowerCase());
+                            if (sportVariants && m.tournament?.sport_id) {
+                                return sportVariants.includes(m.tournament.sport_id.toLowerCase());
                             }
                             return true;
                         }).map((m: any) => {
@@ -156,11 +156,11 @@ export async function GET(request: Request) {
                                 tournament: m.tournament ? {
                                     id: m.tournament.id,
                                     name: m.tournament.name,
-                                    sport: m.tournament.sport || sport,
+                                    sport: m.tournament.sport_id || sport,
                                     status: m.tournament.status || 'published',
                                     country: (m.tournament as any).union?.country || 'Internacional'
                                 } : { id: m.tournament_id || 'db-local', name: 'Partido Local', sport, status: 'published', country: 'Internacional' },
-                                liveEnabled: m.live_enabled || false,
+                                liveEnabled: m.status === 'live',
                                 source: 'db'
                            }
                         });
@@ -414,9 +414,9 @@ export async function GET(request: Request) {
             let query = supabase
                 .from('matches')
                 .select(`
-                    id, date_time, round_label, venue, status, score, live_enabled,
-                    tournament_id, home_club_id, away_club_id, notes, stream_url, replay_url,
-                    tournament:tournaments!inner(id, name, sport, season_id, status, union:unions(id, name, country)),
+                    id, date_time, round_label, venue, status, score,
+                    tournament_id, home_club_id, away_club_id, notes,
+                    tournament:tournaments!inner(id, name, sport_id, season_id, status, union:unions(id, name, country)),
                     home_team:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, primary_color),
                     away_team:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, primary_color)
                 `)
@@ -424,30 +424,21 @@ export async function GET(request: Request) {
                 .lte('date_time', localEnd)
                 .order('date_time', { ascending: true });
 
-            // Apply sport filter via !inner join
-            if (sportVariants) {
-                query = query.in('tournament.sport', sportVariants);
-            }
-
             let { data: dbMatches, error: dbError } = await query;
 
             // Attempt 2: if FK names changed, fall back to manual join but KEEP FILTERS
             if (dbError && /fkey|relationship|foreign/i.test(dbError.message)) {
                 dbFallback = true;
                 console.warn('[matches] FK join failed, falling back to manual club join:', dbError.message);
-                
-                let mQuery = supabase.from('matches').select(`
-                        id, date_time, round_label, venue, status, score, live_enabled,
-                        tournament_id, home_club_id, away_club_id, notes, stream_url, replay_url,
-                        tournament:tournaments!inner(id, name, sport, season_id, status)
+
+                const mQuery = supabase.from('matches').select(`
+                        id, date_time, round_label, venue, status, score,
+                        tournament_id, home_club_id, away_club_id, notes,
+                        tournament:tournaments!inner(id, name, sport_id, season_id, status)
                     `)
                     .gte('date_time', localStart)
                     .lte('date_time', localEnd)
                     .order('date_time', { ascending: true });
-
-                if (sportVariants) {
-                    mQuery = mQuery.in('tournament.sport', sportVariants);
-                }
 
                 const [mRes, cRes] = await Promise.all([
                     mQuery,
@@ -460,6 +451,13 @@ export async function GET(request: Request) {
                     away_team: clubMap.get(m.away_club_id) || null,
                 })) as any;
                 dbError = mRes.error;
+            }
+
+            // Post-process sport filter (more reliable than embedded-resource .in() in PostgREST)
+            if (!dbError && dbMatches && sportVariants) {
+                dbMatches = dbMatches.filter((m: any) =>
+                    sportVariants.includes(m.tournament?.sport_id) || sportVariants.includes(m.tournament?.sport)
+                );
             }
 
             if (!dbError && dbMatches) {
@@ -511,7 +509,7 @@ export async function GET(request: Request) {
                             tournament: m.tournament ? {
                                 id: m.tournament.id,
                                 name: m.tournament.name,
-                                sport: m.tournament.sport || (sport || 'rugby'),
+                                sport: m.tournament.sport_id || m.tournament.sport || (sport || 'rugby'),
                                 status: m.tournament.status || 'published',
                                 country: (m.tournament as any).union?.country || 'Internacional'
                             } : {
@@ -521,7 +519,7 @@ export async function GET(request: Request) {
                                 status: 'published',
                                 country: 'Internacional'
                             },
-                            liveEnabled: m.live_enabled || false,
+                            liveEnabled: false,
                             source: 'db' // Mark as database-sourced
                         };
                     });
@@ -534,7 +532,10 @@ export async function GET(request: Request) {
             } else if (dbError) {
                 dbReason = 'database_query_failed';
                 dbMessage = 'No se pudieron cargar los partidos desde la base de datos.';
-                console.warn('[matches] Supabase query failed:', dbError.message);
+                console.error('[matches] Supabase query failed:', JSON.stringify(dbError));
+                if (process.env.NODE_ENV === 'development') {
+                    dbMessage = `Supabase error: ${dbError.message} | code: ${dbError.code} | details: ${dbError.details}`;
+                }
             }
         } catch (dbFetchError) {
             console.error('Supabase DB matches fetch failed (non-fatal):', dbFetchError);
@@ -670,7 +671,6 @@ export async function POST(request: Request) {
             venue,
             status: status || 'scheduled',
             score: { home: 0, away: 0 },
-            live_enabled: false,
             notes: notes || null,
             stream_url: body.streamUrl || null,
             replay_url: body.replayUrl || null,

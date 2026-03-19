@@ -84,8 +84,7 @@ export class TournamentIngestionService {
         // Fetch internal tournaments for this sport to match
         const { data: internalTournaments } = await supabase
             .from('tournaments')
-            // @ts-ignore
-            .select('id, name, slug, external_id, data_source')
+            .select('id, name, slug')
             .eq('sport_id', sportId);
 
         const internalMap = new Map<string, any>();
@@ -94,7 +93,6 @@ export class TournamentIngestionService {
         const externalIdMap = new Map<string, any>();
 
         (internalTournaments || []).forEach(it => {
-            if (it.external_id) externalIdMap.set(it.external_id, it);
             if (it.slug) slugMap.set(it.slug, it);
             const normName = this.normalizeName(it.name);
             nameMap.set(normName, it);

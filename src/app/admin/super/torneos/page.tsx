@@ -48,7 +48,7 @@ export default function SuperadminTorneosPage() {
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
     
     // Performance: local state for instant toggles
-    const [localMetadata, setLocalMetadata] = useState<Record<string, { is_active?: boolean, is_popular?: boolean, display_order?: number | null }>>({});
+    const [localMetadata, setLocalMetadata] = useState<Record<string, { status?: string, is_visible?: boolean, is_popular?: boolean }>>({});
 
     // ── Enriched Data ─────────────────────────────────────────────────────────
 
@@ -68,9 +68,9 @@ export default function SuperadminTorneosPage() {
                 
                 return { 
                     ...t, 
-                    is_active: local.is_active ?? t.is_active,
+                    status: local.status ?? t.status,
+                    is_visible: local.is_visible ?? t.is_visible,
                     is_popular: local.is_popular ?? t.is_popular,
-                    display_order: local.display_order ?? t.display_order,
                     source, 
                     groupKey: countryName 
                 };
@@ -187,7 +187,7 @@ export default function SuperadminTorneosPage() {
     const confirmLink = async () => {
         if (!linkingTournamentId || !selectedUnionId) return;
         try {
-            await tournamentService.updateTournamentMeta(linkingTournamentId, { organization_id: selectedUnionId });
+            await tournamentService.updateTournamentMeta(linkingTournamentId, { union_id: selectedUnionId });
             invalidateCache('tournaments_list');
             refresh('tournaments');
             setLinkingTournamentId(null);
@@ -364,9 +364,13 @@ export default function SuperadminTorneosPage() {
                                                 <div className={styles.menuDropdown}>
                                                     <button
                                                         className={styles.menuItem}
-                                                        onClick={() => { handleUpdateMeta(t.id, { is_active: !t.is_active }); setActionMenuOpenId(null); }}
+                                                        onClick={() => { 
+                                                            const newStatus = t.status === 'published' ? 'draft' : 'published';
+                                                            handleUpdateMeta(t.id, { status: newStatus }); 
+                                                            setActionMenuOpenId(null); 
+                                                        }}
                                                     >
-                                                        {t.is_active
+                                                        {t.status === 'published'
                                                             ? <><EyeOff size={14} style={{ marginRight: 8 }} /> Desactivar</>
                                                             : <><Eye size={14} style={{ marginRight: 8 }} /> Activar</>}
                                                     </button>
@@ -401,12 +405,13 @@ export default function SuperadminTorneosPage() {
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#aaa' }}>
                                         <Hash size={14} />
-                                        <span>Orden: </span>
+                                        <span>Prioridad: </span>
                                         <input 
                                             type="number" 
-                                            value={t.display_order || 0} 
-                                            onChange={(e) => handleUpdateMeta(t.id, { display_order: parseInt(e.target.value) || 0 })}
-                                            style={{ width: 40, background: 'transparent', border: '1px solid #333', color: 'white', borderRadius: 4, padding: '0 4px', fontSize: 11 }}
+                                            value={0} 
+                                            disabled
+                                            title="La ordenación personalizada fue desactivada"
+                                            style={{ width: 40, background: 'transparent', border: '1px solid #333', color: 'rgba(255,255,255,0.3)', borderRadius: 4, padding: '0 4px', fontSize: 11, cursor: 'not-allowed' }}
                                         />
                                     </div>
                                 </div>

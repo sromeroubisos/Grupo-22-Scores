@@ -68,14 +68,17 @@ export const tournamentService = {
     let query = supabase
       .from('tournaments')
       .select(`
-        *,
+        id, name, slug, sport_id, country_id, union_id,
+        logo_url, is_popular, is_visible, display_name, status,
+        created_at, updated_at,
         sport:sports(name),
         country:countries(name),
         union:unions(name)
       `);
     
     if (!options.includeHidden) {
-      query = query.eq('is_active', true).or('is_visible.eq.true,is_visible.is.null');
+      // is_active was dropped, use status and is_visible
+      query = query.eq('status', 'published').or('is_visible.eq.true,is_visible.is.null');
     }
 
     const { data, error } = await query;
@@ -94,19 +97,20 @@ export const tournamentService = {
       sport_name: (t.sport as any)?.name || 'Unknown',
       country_id: t.country_id || null,
       country_name: (t.country as any)?.name || null,
-      organization_id: t.organization_id || t.union_id || null,
+      // organization_id column was dropped; fall back to union_id
+      organization_id: t.union_id || null,
       organization_name: (t.union as any)?.name || null,
       logo_url: t.logo_url || null,
-      is_active: t.is_active !== false,
+      is_active: t.status === 'published' && t.is_visible !== false,
       is_popular: t.is_popular === true,
-      display_order: t.display_order || 0,
+      display_order: 0,
       followers_count: 0,
       is_followed_by_user: false,
       created_at: t.created_at,
       updated_at: t.updated_at,
       display_name: t.display_name,
-      original_name: t.original_name,
-      is_api_managed: t.is_api_managed || false
+      original_name: null,
+      is_api_managed: false
     })) as any[];
   },
 
@@ -117,11 +121,11 @@ export const tournamentService = {
   async updateTournamentMeta(id: string, updates: Partial<TournamentUpdate>) {
     // 1. Strict whitelist of REAL columns in 'tournaments' table
     const ALLOWED_COLUMNS = [
-      'name', 'slug', 'sport_id', 'country_id', 'organization_id', 'union_id',
-      'logo_url', 'banner_url', 'is_active', 'is_popular', 'is_visible', 'display_order',
-      'display_name', 'custom_logo_url', 'data_source', 'status', 'season_id',
-      'category', 'age_grade', 'format', 'ruleset', 'streaming_url', 'url',
-      'primary_color', 'secondary_color', 'priority', 'region'
+      'name', 'slug', 'sport_id', 'country_id', 'union_id',
+      'logo_url', 'banner_url', 'is_visible', 
+      'display_name', 'status', 'season_id',
+      'category', 'age_grade', 'format', 'ruleset',
+      'primary_color', 'secondary_color'
     ];
 
     // 2. Filter payload strictly

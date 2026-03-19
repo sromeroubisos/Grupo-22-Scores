@@ -209,8 +209,8 @@ export class FixtureService {
       .from('matches')
       .select(`
         id, tournament_id, round_uuid, phase_id, group_id,
-        date_time, venue, pitch, status, score, live_enabled,
-        round_label, referee, attendance, notes, stream_url, replay_url,
+        date_time, venue, status, score,
+        round_label, notes,
         home_club_id, away_club_id,
         home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
         away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
@@ -315,8 +315,8 @@ export class FixtureService {
           .from('matches')
           .select(`
             id, tournament_id, round_uuid, phase_id, group_id,
-            date_time, venue, pitch, status, score, live_enabled,
-            round_label, referee, attendance, notes, stream_url, replay_url,
+            date_time, venue, status, score,
+            round_label, notes,
             home_club_id, away_club_id,
             home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
             away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
@@ -385,7 +385,7 @@ export class FixtureService {
         home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
         away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
       `)
-      .eq('round_id', roundId)
+      .eq('round_uuid', roundId)
       .order('date_time', { ascending: true });
 
     if (matchesError) {
@@ -485,20 +485,15 @@ export class FixtureService {
     const insertData: any = {
       phase_id: data.phaseId,
       group_id: data.groupId || null,
-      referee: data.referee || null,
-      pitch: data.pitch || null,
       tournament_id: data.tournamentId,
-      round_id: finalRoundId,
+      round_uuid: finalRoundId,
       home_club_id: data.homeClubId,
       away_club_id: data.awayClubId,
       date_time: data.dateTime,
       venue: data.venue,
       status: data.status,
       notes: data.notes || null,
-      stream_url: data.streamUrl || null,
-      replay_url: data.replayUrl || null,
       score: data.score || { home: 0, away: 0 },
-      live_enabled: data.status === 'live',
     };
 
     if (supportsRoundLabel) {
@@ -537,7 +532,7 @@ export class FixtureService {
 
     const { data: existingMatch, error: existingMatchError } = await supabase
       .from('matches')
-      .select('id, tournament_id, phase_id, round_id, home_club_id, away_club_id')
+      .select('id, tournament_id, phase_id, round_uuid, home_club_id, away_club_id')
       .eq('id', matchId)
       .single();
 
@@ -554,11 +549,11 @@ export class FixtureService {
 
     // Automated Round Management for updates
     if (!data.roundId && data.phaseId && data.roundLabel) {
-      updateData.round_id = await this.findOrCreateRound(data.phaseId, data.roundLabel);
+      updateData.round_uuid = await this.findOrCreateRound(data.phaseId, data.roundLabel);
     } else if (data.roundId) {
-      updateData.round_id = data.roundId;
+      updateData.round_uuid = data.roundId;
     } else if (data.roundId === null) {
-      updateData.round_id = null;
+      updateData.round_uuid = null;
     }
 
     const nextHomeClubId = data.homeClubId ?? existingMatch.home_club_id;
@@ -571,7 +566,7 @@ export class FixtureService {
     await this.assertMatchContext(supabase, {
       tournamentId: existingMatch.tournament_id,
       phaseId: nextPhaseId,
-      roundId: updateData.round_id !== undefined ? updateData.round_id : existingMatch.round_id,
+      roundId: updateData.round_uuid !== undefined ? updateData.round_uuid : existingMatch.round_uuid,
       homeClubId: nextHomeClubId,
       awayClubId: nextAwayClubId,
     });
@@ -582,8 +577,6 @@ export class FixtureService {
     if (data.venue !== undefined) updateData.venue = data.venue;
     if (data.status) {
       updateData.status = data.status;
-      if (data.status === 'live') updateData.live_enabled = true;
-      if (data.status !== 'live') updateData.live_enabled = false;
     }
 
     if (supportsRoundLabel && data.roundLabel !== undefined) {
@@ -592,14 +585,8 @@ export class FixtureService {
 
     if (data.phaseId) updateData.phase_id = data.phaseId;
     if (data.groupId !== undefined) updateData.group_id = data.groupId;
-    if (data.referee !== undefined) updateData.referee = data.referee;
-    if (data.pitch !== undefined) updateData.pitch = data.pitch;
-    if (data.streamUrl !== undefined) updateData.stream_url = data.streamUrl;
-    if (data.replayUrl !== undefined) updateData.replay_url = data.replayUrl;
     if (data.notes !== undefined) updateData.notes = data.notes;
     if (data.score) updateData.score = data.score;
-    if (data.lineups !== undefined) updateData.lineups = data.lineups;
-    if (data.events !== undefined) updateData.events = data.events;
 
     const { data: match, error } = await supabase
       .from('matches')
@@ -863,7 +850,7 @@ export class FixtureService {
         matches.push({
           tournament_id: tournamentId,
           phase_id: params.phaseId,
-          round_id: roundId,
+          round_uuid: roundId,
           group_id: params.groupId || null,
           home_club_id: homeClubId,
           away_club_id: awayClubId,
@@ -936,7 +923,7 @@ export class FixtureService {
     const matchesToInsert = matchesData.map(m => ({
       tournament_id: tournamentId,
       phase_id: phaseId,
-      round_id: m.roundId,
+      round_uuid: m.roundId,
       group_id: m.groupId || null,
       home_club_id: m.homeClubId,
       away_club_id: m.awayClubId,
@@ -983,7 +970,7 @@ export class FixtureService {
       const { data: matches } = await supabase
         .from('matches')
         .select('id, date_time')
-        .eq('round_id', params.roundId);
+        .eq('round_uuid', params.roundId);
 
       if (matches) {
         for (const match of matches) {
@@ -1005,7 +992,7 @@ export class FixtureService {
       const { data: matches } = await supabase
         .from('matches')
         .select('id, date_time')
-        .eq('round_id', params.roundId);
+        .eq('round_uuid', params.roundId);
 
       if (matches) {
         for (const match of matches) {
@@ -1025,7 +1012,7 @@ export class FixtureService {
       const { error } = await supabase
         .from('matches')
         .update({ venue: params.newVenue })
-        .eq('round_id', params.roundId);
+        .eq('round_uuid', params.roundId);
 
       if (error) {
         console.error('Error updating venue:', error);
@@ -1042,7 +1029,7 @@ export class FixtureService {
   static async resetRound(roundId: string): Promise<boolean> {
     const supabase = await this.getWriteClient();
 
-    const { error } = await supabase.from('matches').delete().eq('round_id', roundId);
+    const { error } = await supabase.from('matches').delete().eq('round_uuid', roundId);
 
     if (error) {
       console.error('Error resetting round:', error);
@@ -1169,14 +1156,9 @@ export class FixtureService {
       dateTime: match.date_time,
       venue: match.venue || null,
       status: match.status,
-      referee: match.referee || null,
-      pitch: match.pitch || null,
       score: match.score || { home: 0, away: 0 },
       notes: match.notes,
       roundLabel: match.round_label || null,
-      streamUrl: match.stream_url || null,
-      replayUrl: match.replay_url || null,
-      liveEnabled: match.live_enabled,
       createdAt: match.created_at,
       updatedAt: match.updated_at,
       lineups: match.lineups,

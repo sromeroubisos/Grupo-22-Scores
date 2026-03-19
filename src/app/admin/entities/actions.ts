@@ -50,7 +50,6 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         round_id: z.string().optional().nullable(),
         score: z.record(z.string(), z.any()).optional().nullable(),
         clock: z.record(z.string(), z.any()).optional().nullable(),
-        live_enabled: z.boolean().optional().nullable(),
     }),
     player: z.object({
         name: z.string().min(1, 'El nombre es requerido'),
@@ -209,7 +208,6 @@ export async function updateMatchLive(
     payload: {
         score?: { home: number; away: number };
         status?: string;
-        live_enabled?: boolean;
     }
 ): Promise<{ success: true }> {
     const supabase = await createClient();

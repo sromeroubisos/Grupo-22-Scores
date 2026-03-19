@@ -39,7 +39,6 @@ export interface Match {
   // Broadcasting & Media
   streamUrl?: string | null;
   replayUrl?: string | null;
-  liveEnabled: boolean;
 
   // Metadata
   createdAt: string;

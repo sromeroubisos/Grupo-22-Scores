@@ -20,8 +20,8 @@ interface DbTournament {
     id: string;
     name: string;
     display_name: string | null;
-    country: string | null;
-    sport: string | null;
+    country_id: string | null;
+    sport_id: string | null;
     logo_url: string | null;
     slug: string | null;
 }
@@ -151,8 +151,8 @@ export default function TorneosPage() {
 
             const { data, error } = await supabase
                 .from('tournaments')
-                .select('id, name, display_name, country, sport, logo_url, slug')
-                .in('sport', sportFilter)
+                .select('id, name, display_name, country_id, sport_id, logo_url, slug')
+                .in('sport_id', sportFilter)
                 .order('name', { ascending: true }) as any;
 
             if (!error && data) {
@@ -177,7 +177,7 @@ export default function TorneosPage() {
     // Argentina / popular section
     const recommended = useMemo(() => {
         return filteredTournaments.filter(t =>
-            t.country === 'argentina' || t.country === 'Argentina'
+            t.country_id === 'argentina' || t.country_id === 'Argentina'
         );
     }, [filteredTournaments]);
 
@@ -187,9 +187,9 @@ export default function TorneosPage() {
 
         filteredTournaments.forEach(t => {
             // Skip Argentina (shown in recommended)
-            if (t.country === 'argentina' || t.country === 'Argentina') return;
+            if (t.country_id === 'argentina' || t.country_id === 'Argentina') return;
 
-            const key = t.country || '__sin-pais__';
+            const key = t.country_id || '__sin-pais__';
             if (!groups[key]) groups[key] = [];
             groups[key].push(t);
         });

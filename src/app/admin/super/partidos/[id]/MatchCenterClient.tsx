@@ -65,7 +65,6 @@ export interface MatchRow {
     away_club_id: string | null;
     status: string;
     score: MatchScore;
-    live_enabled: boolean;
     clock: MatchClock;
     events: MatchEvent[] | null;
     lineups: MatchLineups | null;
@@ -317,7 +316,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
 
     /* ─── REALTIME (live matches) ─── */
     useEffect(() => {
-        if (!match?.live_enabled && match?.status !== 'live') return;
+        if (match?.status !== 'live') return;
         const channel = supabase
             .channel(`match-${matchId}`)
             .on('postgres_changes', {
@@ -334,7 +333,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             .subscribe();
 
         return () => { supabase.removeChannel(channel); };
-    }, [match?.live_enabled, match?.status, matchId, supabase]);
+    }, [match?.status, matchId, supabase]);
 
     /* ─── SAVE ─── */
     const handleSave = async () => {
@@ -1047,22 +1046,6 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                         }
                                     }}
                                 />
-                            </div>
-                            <div className="form-group">
-                                <label>Live Enabled</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 16, background: '#111', borderRadius: 4 }}>
-                                    <input
-                                        type="checkbox"
-                                        defaultChecked={match.live_enabled}
-                                        id="live-check"
-                                        style={{ width: 'auto' }}
-                                        onChange={async (e) => {
-                                            await supabase.from('matches').update({ live_enabled: e.target.checked }).eq('id', matchId);
-                                            fetchMatch();
-                                        }}
-                                    />
-                                    <label htmlFor="live-check" style={{ margin: 0, color: '#fff' }}>Habilitar actualizaciones en vivo</label>
-                                </div>
                             </div>
                         </div>
 

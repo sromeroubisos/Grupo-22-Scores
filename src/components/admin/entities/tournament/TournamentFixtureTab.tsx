@@ -478,7 +478,6 @@ function FixtureManagementCenter({
                 away_club_id: matchData.awayClubId,
                 status: matchData.status,
                 score: matchData.score,
-                live_enabled: matchData.liveEnabled,
                 clock: (matchData as unknown as { clock?: Record<string, unknown> }).clock || {},
                 events: matchData.events || null,
                 lineups: matchData.lineups || null,

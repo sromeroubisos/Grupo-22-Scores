@@ -144,9 +144,8 @@ export interface ClubRow {
     logo_url: string | null;
     primary_color: string | null;
     slug: string | null;
-    visibility: 'visible' | 'hidden' | null;
+    is_visible: boolean | null;
     union_id: string | null;
-    external_id: string | null;
 }
 
 export interface ClubWithUnion extends ClubRow {
@@ -160,7 +159,7 @@ export async function fetchClubs(force = false): Promise<ClubWithUnion[]> {
     return cachedFetch(KEY, async () => {
         const { data, error } = await getSupabase()
             .from('clubs')
-            .select('id, name, short_name, city, region, country, logo_url, primary_color, slug, visibility, union_id, external_id, union:unions(id, name)')
+            .select('id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, union:unions(id, name)')
             .order('name');
 
         if (error) throw error;
@@ -175,11 +174,10 @@ export interface MatchRow {
     venue: string | null;
     status: string | null;
     score: { home: number; away: number } | null;
-    live_enabled: boolean | null;
     tournament_id: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
-    tournament: { id: string; name: string; sport: string | null; season_id: string | null } | null;
+    tournament: { id: string; name: string; sport_id: string | null; season_id: string | null } | null;
     home_team: { id: string; name: string; logo_url: string | null; primary_color: string | null } | null;
     away_team: { id: string; name: string; logo_url: string | null; primary_color: string | null } | null;
 }
@@ -192,8 +190,8 @@ export async function fetchMatches(force = false): Promise<MatchRow[]> {
         const { data, error } = await getSupabase()
             .from('matches')
             .select(`
-                id, round_id, date_time, venue, status, score, live_enabled, tournament_id, home_club_id, away_club_id,
-                tournament:tournaments(id, name, sport, season_id),
+                id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id,
+                tournament:tournaments(id, name, sport_id, season_id),
                 home_team:clubs!matches_home_club_id_fkey(id, name, logo_url, primary_color),
                 away_team:clubs!matches_away_club_id_fkey(id, name, logo_url, primary_color)
             `)
@@ -409,7 +407,15 @@ export async function fetchDisciplineIncidents(force = false): Promise<IncidentR
             .select('id, tournament_id, match_id, player_id, player_name, club_id, incident_type, description, severity, status, created_at, club:clubs(name)')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        // Table may have been dropped in schema simplification — treat as empty
+        if (error) {
+            const msg = error.message || '';
+            if (msg.includes('schema cache') || msg.includes('does not exist') || (error as any).code === 'PGRST200') {
+                console.warn('[Cache] discipline_incidents table not found, returning []');
+                return [];
+            }
+            throw error;
+        }
         return (data as any[]) ?? [];
     });
 }
@@ -424,7 +430,15 @@ export async function fetchDisciplineSanctions(force = false): Promise<SanctionR
             .select('id, incident_id, summary, weeks, start_date, end_date, status, created_at')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        // Table may have been dropped in schema simplification — treat as empty
+        if (error) {
+            const msg = error.message || '';
+            if (msg.includes('schema cache') || msg.includes('does not exist') || (error as any).code === 'PGRST200') {
+                console.warn('[Cache] discipline_sanctions table not found, returning []');
+                return [];
+            }
+            throw error;
+        }
         return (data as SanctionRow[]) ?? [];
     });
 }
@@ -446,7 +460,15 @@ export async function fetchRegulations(force = false): Promise<RegulationRow[]> 
             .from('regulations')
             .select('id, scope_type, scope_id, content, updated_at');
 
-        if (error) throw error;
+        // Table may have been dropped in schema simplification — treat as empty
+        if (error) {
+            const msg = error.message || '';
+            if (msg.includes('schema cache') || msg.includes('does not exist') || (error as any).code === 'PGRST200') {
+                console.warn('[Cache] regulations table not found, returning []');
+                return [];
+            }
+            throw error;
+        }
         return (data as RegulationRow[]) ?? [];
     });
 }

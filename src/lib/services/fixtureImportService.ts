@@ -219,7 +219,7 @@ export class FixtureImportService {
       const matchPayload = {
         tournament_id: params.tournamentId,
         phase_id: params.phaseId,
-        round_id: roundId,
+        round_uuid: roundId,
         group_id: groupId,
         home_club_id: homeClubId,
         away_club_id: awayClubId,
@@ -231,7 +231,6 @@ export class FixtureImportService {
             ? { home: Number(normalized.scoreHome || 0), away: Number(normalized.scoreAway || 0) }
             : { home: 0, away: 0 },
         notes: null,
-        live_enabled: status === 'live',
       };
 
       if (existingMatchId && duplicateAction === 'update_existing_match') {
@@ -595,7 +594,7 @@ export class FixtureImportService {
         this.safeSelect(supabase, 'venue_aliases', 'alias, canonical_name', (query: any) => query.eq('tournament_id', tournamentId)),
         supabase
           .from('matches')
-          .select('id, round_id, group_id, home_club_id, away_club_id, date_time')
+          .select('id, round_uuid, group_id, home_club_id, away_club_id, date_time')
           .eq('tournament_id', tournamentId)
           .eq('phase_id', phaseId),
       ]);
@@ -1088,7 +1087,7 @@ export class FixtureImportService {
         match.home_club_id === homeClubId &&
         match.away_club_id === awayClubId &&
         storedDate === matchDate &&
-        (!roundId || match.round_id === roundId) &&
+        (!roundId || match.round_uuid === roundId) &&
         (!groupId || match.group_id === groupId)
       );
     });
