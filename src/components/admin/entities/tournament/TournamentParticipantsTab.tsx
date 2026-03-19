@@ -136,7 +136,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             if (!response.ok) throw new Error('Error al cargar participantes');
             const data = await response.json();
             setParticipants(data);
-        } catch {
+        } catch (err) {
             const message = getErrorMessage(err, 'Error al cargar participantes');
             showToast('error', message);
         } finally {
@@ -243,7 +243,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             setParticipants(prev => prev.map(p => p.id === id ? updated : p));
             setEditingParticipant(null);
             showToast('success', 'Participante actualizado correctamente');
-        } catch {
+        } catch (err) {
             showToast('error', getErrorMessage(err, 'Error al actualizar participante'));
         }
     };
@@ -262,7 +262,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 return next;
             });
             showToast('success', 'Participante eliminado correctamente');
-        } catch {
+        } catch (err) {
             showToast('error', getErrorMessage(err, 'Error al eliminar participante'));
         }
     };

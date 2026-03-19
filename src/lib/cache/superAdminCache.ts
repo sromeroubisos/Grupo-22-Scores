@@ -251,17 +251,9 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
                 });
 
             if (error) {
-                // PGRST202 is "function not found"
-                if (error.code === 'PGRST202' || error.message?.includes('not find the function')) {
-                    console.warn('[Cache] get_all_tournaments RPC not found, falling back to direct query');
-                    return fetchTournamentsFallback();
-                }
-                console.error('[fetchTournaments][RAW] Supabase RPC error:', error);
-                console.error('[fetchTournaments][RAW] JSON (all props):',
-                    JSON.stringify(error, Object.getOwnPropertyNames(error)));
-                const normalized = normalizeError(error);
-                console.error('[fetchTournaments][NORMALIZED]:', normalized);
-                throw normalized;
+                // Fall back on any RPC error — function may reference removed columns
+                console.warn('[Cache] get_all_tournaments RPC failed, falling back to direct query:', error.message);
+                return fetchTournamentsFallback();
             }
 
             return (data || []).map(t => ({
@@ -270,10 +262,8 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
                 country: t.country_name || t.country_id // For grouping by country
             })) as unknown as TournamentRow[];
         } catch (err: any) {
-             if (err.code === 'PGRST202' || err.message?.includes('not find the function')) {
-                return fetchTournamentsFallback();
-             }
-             throw err;
+            console.warn('[Cache] get_all_tournaments exception, falling back to direct query:', err?.message);
+            return fetchTournamentsFallback();
         }
     });
 }

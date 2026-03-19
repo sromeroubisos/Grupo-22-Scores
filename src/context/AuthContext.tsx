@@ -243,16 +243,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshOnboardingStatus = async () => {
         if (!user) return;
         try {
-            const { data } = await (supabase as any)
-                .from('user_onboarding_status')
-                .select('preferences_onboarding_completed, skipped')
-                .eq('user_id', user.id)
-                .single();
+            const response = await fetch('/api/onboarding/preferences?mode=status', {
+                cache: 'no-store',
+                credentials: 'same-origin',
+            });
 
-            const row = data as { preferences_onboarding_completed: boolean; skipped: boolean } | null;
-            const onboardingCompleted = row
-                ? (row.preferences_onboarding_completed || row.skipped)
-                : false;
+            if (!response.ok) {
+                throw new Error(`Status request failed: ${response.status}`);
+            }
+
+            const data = await response.json() as { onboardingCompleted?: boolean };
+            const onboardingCompleted = !!data.onboardingCompleted;
 
             if (isMounted.current) {
                 setUser(prev => prev ? { ...prev, onboardingCompleted } : null);

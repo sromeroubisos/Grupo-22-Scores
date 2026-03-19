@@ -1,22 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { useAuth } from '@/context/AuthContext'
-import {
-    getOnboardingStatus,
-    completeOnboarding,
-    saveFavoriteSports,
-    saveFavoriteLeagues,
-    getFavoriteSports,
-    getFavoriteLeagues,
-    getLeaguesBySports,
-    type LeagueItem,
-} from '@/lib/services/preferencesService'
-import styles from './onboarding.module.css'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { useAuth } from '@/context/AuthContext'
+import { type LeagueItem } from '@/lib/services/preferencesService'
+
+import styles from './onboarding.module.css'
 
 interface SportOption {
     id: string
@@ -26,7 +16,30 @@ interface SportOption {
     displayOrder: number
 }
 
-// ─── Check Icon ───────────────────────────────────────────────────────────────
+interface PreferencesResponse {
+    sports: SportOption[]
+    leagues: LeagueItem[]
+    favoriteSports: string[]
+    favoriteLeagues: { leagueId: string; sportId: string }[]
+}
+
+async function readJson<T>(response: Response): Promise<T> {
+    const payload = await response.json().catch(() => null)
+
+    if (!response.ok) {
+        const message =
+            payload &&
+                typeof payload === 'object' &&
+                'error' in payload &&
+                typeof payload.error === 'string'
+                ? payload.error
+                : `Request failed with status ${response.status}`
+
+        throw new Error(message)
+    }
+
+    return payload as T
+}
 
 function CheckIcon({ size = 12 }: { size?: number }) {
     return (
@@ -39,7 +52,8 @@ function CheckIcon({ size = 12 }: { size?: number }) {
 function SearchIcon() {
     return (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
         </svg>
     )
 }
@@ -60,14 +74,11 @@ function ArrowRightIcon() {
     )
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 function OnboardingPreferencesContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const isEditMode = searchParams.get('edit') === 'true'
     const { user, refreshOnboardingStatus } = useAuth()
-    const supabase = createClient()
 
     const [step, setStep] = useState<1 | 2>(1)
     const [sports, setSports] = useState<SportOption[]>([])
@@ -81,96 +92,86 @@ function OnboardingPreferencesContent() {
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    // ── Load sports ────────────────────────────────────────────────────────────
-
     useEffect(() => {
         async function loadSports() {
             setLoadingSports(true)
+
             try {
-                // Use neq(is_visible, false) to include both true AND null values
-                // Also exclude grouped sports (show parent only)
-                const { data, error: dbErr } = await supabase
-                    .from('sports')
-                    .select('id, name, name_es, icon, display_order')
-                    .neq('is_visible', false)
-                    .is('group_key', null)
-                    .order('display_order', { ascending: true })
+                const response = await fetch('/api/onboarding/preferences', {
+                    cache: 'no-store',
+                    credentials: 'same-origin',
+                })
+                const payload = await readJson<PreferencesResponse>(response)
 
-                if (dbErr) {
-                    console.warn('[Onboarding] loadSports DB error (using fallback):', dbErr.message || dbErr)
-                }
+                let mapped = payload.sports || []
 
-                let mapped: SportOption[] = (data || []).map((s: any) => ({
-                    id: s.id,
-                    name: s.name,
-                    nameEs: s.name_es || s.name,
-                    icon: s.icon || '🏆',
-                    displayOrder: s.display_order ?? 100,
-                }))
-
-                // Fall back to static sports data if DB returns nothing
                 if (mapped.length === 0) {
-                    const { getActiveSports: getStatic } = await import('@/lib/data/sports')
-                    mapped = getStatic()
-                        .filter(s => !s.groupKey)
-                        .map(s => ({
-                            id: s.id,
-                            name: s.name,
-                            nameEs: s.nameEs,
-                            icon: s.icon,
-                            displayOrder: s.displayOrder ?? s.priority ?? 100,
+                    const { getActiveSports } = await import('@/lib/data/sports')
+                    mapped = getActiveSports()
+                        .filter(sport => !sport.groupKey)
+                        .map(sport => ({
+                            id: sport.id,
+                            name: sport.name,
+                            nameEs: sport.nameEs,
+                            icon: sport.icon,
+                            displayOrder: sport.displayOrder ?? sport.priority ?? 100,
                         }))
                 }
 
                 setSports(mapped)
 
-                // In edit mode, preload existing favorites
                 if (isEditMode && user) {
-                    const existing = await getFavoriteSports(supabase, user.id)
-                    setSelectedSportIds(existing)
+                    setSelectedSportIds(payload.favoriteSports || [])
                 }
-            } catch (err: any) {
-                console.error('[Onboarding] loadSports try/catch error:', err.message || err)
-                setError('No se pudieron cargar los deportes. Intentá de nuevo.')
+            } catch (err: unknown) {
+                console.error('[Onboarding] loadSports error:', err)
+                setError('No se pudieron cargar los deportes. Intenta de nuevo.')
             } finally {
                 setLoadingSports(false)
             }
         }
 
         loadSports()
-    }, [isEditMode, user?.id])
-
-    // ── Load leagues when entering step 2 ─────────────────────────────────────
+    }, [isEditMode, user])
 
     const loadLeagues = useCallback(async () => {
         if (selectedSportIds.length === 0) return
+
         setLoadingLeagues(true)
         setLeagueLoadError(false)
+
         try {
-            const items = await getLeaguesBySports(supabase, selectedSportIds)
-            console.log('[Onboarding] Leagues loaded:', items.length, 'for sports:', selectedSportIds)
+            const params = new URLSearchParams({
+                sportIds: selectedSportIds.join(','),
+            })
+            const response = await fetch(`/api/onboarding/preferences?${params.toString()}`, {
+                cache: 'no-store',
+                credentials: 'same-origin',
+            })
+            const payload = await readJson<PreferencesResponse>(response)
+            const items = payload.leagues || []
+
             setLeagues(items)
 
-            // In edit mode, preload existing league favorites
             if (isEditMode && user && selectedLeagueEntries.length === 0) {
-                const existing = await getFavoriteLeagues(supabase, user.id)
-                const filtered = existing.filter(e => selectedSportIds.includes(e.sportId))
-                setSelectedLeagueEntries(filtered.map(e => ({ leagueId: e.leagueId, sportId: e.sportId })))
+                const filtered = (payload.favoriteLeagues || []).filter(entry => selectedSportIds.includes(entry.sportId))
+                setSelectedLeagueEntries(filtered.map(entry => ({
+                    leagueId: entry.leagueId,
+                    sportId: entry.sportId,
+                })))
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error('[Onboarding] loadLeagues error:', err)
             setLeagueLoadError(true)
         } finally {
             setLoadingLeagues(false)
         }
-    }, [selectedSportIds, isEditMode, user?.id])
+    }, [isEditMode, selectedLeagueEntries.length, selectedSportIds, user])
 
     useEffect(() => {
         if (step !== 2) return
         loadLeagues()
-    }, [step, selectedSportIds.join(',')])
-
-    // ── Sport toggle ───────────────────────────────────────────────────────────
+    }, [loadLeagues, step])
 
     const toggleSport = useCallback((sportId: string) => {
         setSelectedSportIds(prev =>
@@ -180,64 +181,71 @@ function OnboardingPreferencesContent() {
         )
     }, [])
 
-    // ── League toggle ──────────────────────────────────────────────────────────
-
     const toggleLeague = useCallback((leagueId: string, sportId: string) => {
         setSelectedLeagueEntries(prev => {
-            const exists = prev.find(e => e.leagueId === leagueId)
+            const exists = prev.some(entry => entry.leagueId === leagueId)
             if (exists) {
-                return prev.filter(e => e.leagueId !== leagueId)
+                return prev.filter(entry => entry.leagueId !== leagueId)
             }
+
             return [...prev, { leagueId, sportId }]
         })
     }, [])
 
     const isLeagueSelected = useCallback((leagueId: string) => {
-        return selectedLeagueEntries.some(e => e.leagueId === leagueId)
+        return selectedLeagueEntries.some(entry => entry.leagueId === leagueId)
     }, [selectedLeagueEntries])
-
-    // ── Filtered leagues for search ────────────────────────────────────────────
 
     const filteredLeagues = useMemo(() => {
         if (!searchQuery.trim()) return leagues
-        const q = searchQuery.toLowerCase()
-        return leagues.filter(l =>
-            l.name.toLowerCase().includes(q) ||
-            (l.country || '').toLowerCase().includes(q)
+
+        const query = searchQuery.toLowerCase()
+        return leagues.filter(league =>
+            league.name.toLowerCase().includes(query) ||
+            (league.country || '').toLowerCase().includes(query)
         )
     }, [leagues, searchQuery])
-
-    // ── Leagues grouped by sport ───────────────────────────────────────────────
 
     const groupedLeagues = useMemo(() => {
         const groups: Record<string, { sport: SportOption; leagues: LeagueItem[] }> = {}
 
         for (const sportId of selectedSportIds) {
-            const sport = sports.find(s => s.id === sportId)
+            const sport = sports.find(item => item.id === sportId)
             if (!sport) continue
-            const sportLeagues = filteredLeagues.filter(l => l.sport === sportId)
+
+            const sportLeagues = filteredLeagues.filter(league => league.sport === sportId)
             if (sportLeagues.length > 0) {
                 groups[sportId] = { sport, leagues: sportLeagues }
             }
         }
 
         return groups
-    }, [selectedSportIds, filteredLeagues, sports])
-
-    // ── Skip / Complete actions ────────────────────────────────────────────────
+    }, [filteredLeagues, selectedSportIds, sports])
 
     const handleSkip = async () => {
         if (!user) {
             router.push('/')
             return
         }
+
         setIsSaving(true)
+
         try {
-            await completeOnboarding(supabase, user.id, { skipped: true })
+            const response = await fetch('/api/onboarding/preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ skipped: true }),
+            })
+
+            await readJson<{ ok: boolean }>(response)
             await refreshOnboardingStatus()
             router.push('/')
-        } catch (err: any) {
-            setError('Ocurrió un error. Intentá de nuevo.')
+        } catch (err) {
+            console.error('[Onboarding] handleSkip error:', err)
+            setError('Ocurrio un error. Intenta de nuevo.')
         } finally {
             setIsSaving(false)
         }
@@ -245,6 +253,7 @@ function OnboardingPreferencesContent() {
 
     const handleContinue = () => {
         if (selectedSportIds.length === 0) return
+
         setStep(2)
         setSearchQuery('')
         setError(null)
@@ -260,23 +269,26 @@ function OnboardingPreferencesContent() {
             router.push('/')
             return
         }
+
         setIsSaving(true)
         setError(null)
+
         try {
-            // Save sports
-            await saveFavoriteSports(supabase, user.id, selectedSportIds)
-
-            // Save leagues (or empty if skipping)
             const leaguesToSave = skipLeagues ? [] : selectedLeagueEntries
-            await saveFavoriteLeagues(supabase, user.id, leaguesToSave)
-
-            // Mark onboarding complete
-            await completeOnboarding(supabase, user.id, {
-                skipped: false,
-                sportsCompleted: selectedSportIds.length > 0,
-                leaguesCompleted: leaguesToSave.length > 0,
+            const response = await fetch('/api/onboarding/preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    skipped: false,
+                    sportIds: selectedSportIds,
+                    leagues: leaguesToSave,
+                }),
             })
 
+            await readJson<{ ok: boolean }>(response)
             await refreshOnboardingStatus()
 
             if (isEditMode) {
@@ -284,27 +296,24 @@ function OnboardingPreferencesContent() {
             } else {
                 router.push('/')
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error('[Onboarding] handleFinish error:', err)
-            setError('Error al guardar tus preferencias. Intentá de nuevo.')
+            setError('Error al guardar tus preferencias. Intenta de nuevo.')
         } finally {
             setIsSaving(false)
         }
     }
 
-    // ── Render ─────────────────────────────────────────────────────────────────
-
     const progressPct = step === 1 ? 50 : 100
 
     return (
         <div className={styles.page}>
-            {/* Header */}
             <div className={styles.header}>
                 <div className={styles.brandMark}>
                     <span className={styles.brandLogo}>G22</span>
                     <span className={styles.brandSep} />
                     <span className={styles.brandTagline}>
-                        {isEditMode ? 'EDITAR PREFERENCIAS' : 'CONFIGURACIÓN INICIAL'}
+                        {isEditMode ? 'EDITAR PREFERENCIAS' : 'CONFIGURACION INICIAL'}
                     </span>
                 </div>
 
@@ -320,26 +329,23 @@ function OnboardingPreferencesContent() {
                 {step === 1 ? (
                     <>
                         <h1 className={styles.title}>
-                            {isEditMode ? 'Editá tus deportes favoritos' : 'Elegí tus deportes favoritos'}
+                            {isEditMode ? 'Edita tus deportes favoritos' : 'Elegi tus deportes favoritos'}
                         </h1>
                         <p className={styles.subtitle}>
-                            Te vamos a mostrar primero el contenido que más te interesa.
+                            Te vamos a mostrar primero el contenido que mas te interesa.
                         </p>
                     </>
                 ) : (
                     <>
-                        <h1 className={styles.title}>Elegí tus ligas favoritas</h1>
+                        <h1 className={styles.title}>Elegi tus ligas favoritas</h1>
                         <p className={styles.subtitle}>
-                            Personaliza tu feed con las competencias que seguís de cerca.
+                            Personaliza tu feed con las competencias que seguis de cerca.
                         </p>
                     </>
                 )}
             </div>
 
-            {/* Content */}
             <div className={`${styles.container} ${styles.stepEnter}`} key={step}>
-
-                {/* Error */}
                 {error && (
                     <div style={{
                         padding: '12px 16px',
@@ -355,7 +361,6 @@ function OnboardingPreferencesContent() {
                     </div>
                 )}
 
-                {/* ── STEP 1: Sports ── */}
                 {step === 1 && (
                     <>
                         <div className={`${styles.selectionBadge} ${selectedSportIds.length === 0 ? styles.hidden : ''}`}>
@@ -370,7 +375,7 @@ function OnboardingPreferencesContent() {
                             <div className={styles.emptyState}>
                                 <div className={styles.emptyStateIcon}>🏆</div>
                                 <div className={styles.emptyStateText}>No hay deportes disponibles</div>
-                                <div className={styles.emptyStateSub}>Podés continuar y configurar esto más adelante.</div>
+                                <div className={styles.emptyStateSub}>Podes continuar y configurar esto mas adelante.</div>
                             </div>
                         ) : (
                             <div className={styles.sportsGrid}>
@@ -397,7 +402,6 @@ function OnboardingPreferencesContent() {
                     </>
                 )}
 
-                {/* ── STEP 2: Leagues ── */}
                 {step === 2 && (
                     <>
                         {selectedLeagueEntries.length > 0 && (
@@ -406,15 +410,14 @@ function OnboardingPreferencesContent() {
                             </div>
                         )}
 
-                        {/* Search */}
                         <div className={styles.searchWrapper}>
                             <span className={styles.searchIcon}><SearchIcon /></span>
                             <input
                                 type="text"
                                 className={styles.searchInput}
-                                placeholder="Buscar liga, país o división..."
+                                placeholder="Buscar liga, pais o division..."
                                 value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
+                                onChange={event => setSearchQuery(event.target.value)}
                             />
                         </div>
 
@@ -429,7 +432,7 @@ function OnboardingPreferencesContent() {
                             <div className={styles.emptyState}>
                                 <div className={styles.emptyStateIcon}>⚠️</div>
                                 <div className={styles.emptyStateText}>No se pudieron cargar las ligas</div>
-                                <div className={styles.emptyStateSub}>Verificá tu conexión e intentá de nuevo.</div>
+                                <div className={styles.emptyStateSub}>Verifica tu conexion e intenta de nuevo.</div>
                                 <button
                                     onClick={() => loadLeagues()}
                                     type="button"
@@ -459,8 +462,8 @@ function OnboardingPreferencesContent() {
                                 </div>
                                 <div className={styles.emptyStateSub}>
                                     {searchQuery
-                                        ? 'Probá con otro término de búsqueda.'
-                                        : 'Podés finalizar igual y configurar esto más adelante desde tu perfil.'}
+                                        ? 'Proba con otro termino de busqueda.'
+                                        : 'Podes finalizar igual y configurar esto mas adelante desde tu perfil.'}
                                 </div>
                             </div>
                         ) : (
@@ -488,9 +491,9 @@ function OnboardingPreferencesContent() {
                                                                 <img
                                                                     src={league.logoUrl}
                                                                     alt={league.name}
-                                                                    onError={e => {
-                                                                        e.currentTarget.style.display = 'none'
-                                                                        const next = e.currentTarget.nextElementSibling as HTMLElement
+                                                                    onError={event => {
+                                                                        event.currentTarget.style.display = 'none'
+                                                                        const next = event.currentTarget.nextElementSibling as HTMLElement | null
                                                                         if (next) next.style.display = 'flex'
                                                                     }}
                                                                 />
@@ -523,7 +526,6 @@ function OnboardingPreferencesContent() {
                 )}
             </div>
 
-            {/* Bottom Bar */}
             <div className={styles.bottomBar}>
                 <div className={styles.bottomBarInner}>
                     {step === 1 ? (
