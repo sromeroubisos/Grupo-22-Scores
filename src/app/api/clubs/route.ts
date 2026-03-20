@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
 
     let query = readClient
         .from('clubs')
-        .select('id, name, slug, logo_url, city, country, is_visible, status, sport_id, legacy_sport:sport, sport_ref:sports(name)')
+        .select('*')
         .order('name');
 
     if (!isSuperAdmin) {
@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
             city: club.city,
             country: club.country,
             is_visible: club.is_visible !== false,
-            sport: club.sport_ref?.name || club.sport_id || club.legacy_sport || 'rugby',
+            sport: club.sport_id || club.legacy_sport || 'rugby',
             status: club.status ?? 'published',
         }))
     });

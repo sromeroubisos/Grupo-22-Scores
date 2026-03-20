@@ -52,6 +52,48 @@ async function getReadClient() {
     return createClient();
 }
 
+type DbTournamentLite = {
+    id: string;
+    name: string;
+    sport_id?: string | null;
+    sport?: string | null;
+    season_id?: string | null;
+    status?: string | null;
+    country_id?: string | null;
+    union_id?: string | null;
+};
+
+type DbClubLite = {
+    id: string;
+    name: string;
+    short_name?: string | null;
+    logo_url?: string | null;
+    primary_color?: string | null;
+};
+
+async function fetchDbLookupMaps(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    tournamentIds: string[],
+    clubIds: string[]
+) {
+    const [tournamentsRes, clubsRes] = await Promise.all([
+        tournamentIds.length > 0
+            ? supabase.from('tournaments').select('id, name, sport_id, sport, season_id, status, country_id, union_id').in('id', tournamentIds)
+            : Promise.resolve({ data: [], error: null }),
+        clubIds.length > 0
+            ? supabase.from('clubs').select('id, name, short_name, logo_url, primary_color').in('id', clubIds)
+            : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    if (tournamentsRes.error) throw tournamentsRes.error;
+    if (clubsRes.error) throw clubsRes.error;
+
+    return {
+        tournamentMap: new Map((tournamentsRes.data || []).map((t: any) => [t.id, t as DbTournamentLite])),
+        clubMap: new Map((clubsRes.data || []).map((c: any) => [c.id, c as DbClubLite])),
+    };
+}
+
 // GET /api/matches
 // Parameters: 
 // - date: YYYY-MM-DD
@@ -132,31 +174,33 @@ export async function GET(request: Request) {
                     persistFromExternalMatches(liveMatches, sport);
                 }
 
-                let finalLiveMatches = [...enrichedLive];
+                let finalLiveMatches: any[] = [...enrichedLive];
 
                 // Append DB live matches
                 try {
                     const supabase = await getReadClient();
                     const { data: dbLiveMatches, error: dbError } = await supabase
                         .from('matches')
-                        .select(`
-                            id, date_time, round_label, venue, status, score,
-                            tournament_id, home_club_id, away_club_id, notes,
-                            tournament:tournaments(id, name, sport_id, season_id, status, country_id, union:unions(id, name, country)),
-                            home_team:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, primary_color),
-                            away_team:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, primary_color)
-                        `)
+                        .select('*')
                         .eq('status', 'live');
 
                     if (!dbError && dbLiveMatches) {
+                        const tournamentIds = [...new Set(dbLiveMatches.map((m: any) => m.tournament_id).filter(Boolean))];
+                        const clubIds = [...new Set(dbLiveMatches.flatMap((m: any) => [m.home_club_id, m.away_club_id]).filter(Boolean))];
+                        const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
                         const sportVariants = getSportVariants(sport);
                         const enrichedDbLive = dbLiveMatches.filter((m: any) => {
-                            if (m.tournament && m.tournament.status && !['published', 'active'].includes(m.tournament.status)) return false;
-                            if (sportVariants && m.tournament?.sport_id) {
-                                return sportVariants.includes(m.tournament.sport_id.toLowerCase());
+                            const tournament = tournamentMap.get(m.tournament_id);
+                            if (tournament?.status && !['published', 'active'].includes(tournament.status)) return false;
+                            const tournamentSport = tournament?.sport_id || tournament?.sport || null;
+                            if (sportVariants && tournamentSport) {
+                                return sportVariants.includes(tournamentSport.toLowerCase());
                             }
                             return true;
                         }).map((m: any) => {
+                           const tournament = tournamentMap.get(m.tournament_id);
+                           const homeTeam = clubMap.get(m.home_club_id);
+                           const awayTeam = clubMap.get(m.away_club_id);
                            const { localTime } = toLocalMatch(m.date_time, timeZone);
                            return {
                                 id: m.id,
@@ -166,28 +210,28 @@ export async function GET(request: Request) {
                                 status: m.status || 'scheduled',
                                 score: m.status === 'scheduled' ? null : (m.score ?? null),
                                 clock: { running: true, seconds: 0, period: 'En Vivo' },
-                                roundId: m.round_label || 'General',
+                                roundId: m.round_label || m.round_id || 'General',
                                 venue: m.venue || 'Sede',
                                 homeClubId: m.home_club_id,
                                 awayClubId: m.away_club_id,
-                                homeTeam: m.home_team ? {
-                                    id: m.home_team.id,
-                                    name: m.home_team.name,
-                                    logo: m.home_team.logo_url || '',
-                                    shortName: m.home_team.short_name || m.home_team.name?.substring(0, 3).toUpperCase() || 'LOC'
+                                homeTeam: homeTeam ? {
+                                    id: homeTeam.id,
+                                    name: homeTeam.name,
+                                    logo: homeTeam.logo_url || '',
+                                    shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC'
                                 } : { id: m.home_club_id, name: 'Local', logo: '', shortName: 'LOC' },
-                                awayTeam: m.away_team ? {
-                                    id: m.away_team.id,
-                                    name: m.away_team.name,
-                                    logo: m.away_team.logo_url || '',
-                                    shortName: m.away_team.short_name || m.away_team.name?.substring(0, 3).toUpperCase() || 'VIS'
+                                awayTeam: awayTeam ? {
+                                    id: awayTeam.id,
+                                    name: awayTeam.name,
+                                    logo: awayTeam.logo_url || '',
+                                    shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS'
                                 } : { id: m.away_club_id, name: 'Visitante', logo: '', shortName: 'VIS' },
-                                tournament: m.tournament ? {
-                                    id: m.tournament.id,
-                                    name: m.tournament.name,
-                                    sport: m.tournament.sport_id || sport,
-                                    status: m.tournament.status || 'published',
-                                    country: resolveTournamentCountry(m.tournament)
+                                tournament: tournament ? {
+                                    id: tournament.id,
+                                    name: tournament.name,
+                                    sport: tournament.sport_id || tournament.sport || sport,
+                                    status: tournament.status || 'published',
+                                    country: resolveTournamentCountry(tournament)
                                 } : { id: m.tournament_id || 'db-local', name: 'Partido Local', sport, status: 'published', country: 'Internacional' },
                                 liveEnabled: m.status === 'live',
                                 source: 'db'
@@ -228,7 +272,8 @@ export async function GET(request: Request) {
 
         // Per-source tracking (returned in response for client error visibility)
         let fsOk = false, fsCount = 0, fsFromCache = false;
-        let dbOk = false, dbCount = 0, dbFallback = false;
+        let dbOk = false, dbCount = 0;
+        const dbFallback = false;
         let fsReason: string | null = null;
         let fsMessage: string | null = null;
         let dbReason: string | null = null;
@@ -294,7 +339,7 @@ export async function GET(request: Request) {
                 let fsFetchFailed = false;
 
                 // Parallel fetch if today, otherwise just list
-                let [externalMatches, liveMatches] = await Promise.all([
+                const [externalMatches, liveMatches] = await Promise.all([
                     getFlashScoreMatches(localDate, sport || 'rugby', {
                         timeZone,
                         targetDateKey: date || undefined
@@ -334,22 +379,24 @@ export async function GET(request: Request) {
 
                 if (!fsFetchFailed) {
                 // Merge live data into list
-                if (liveMatches && liveMatches.length > 0) {
-                    const liveMap = new Map(liveMatches.map(m => [m.id, m]));
-                    externalMatches = externalMatches.map(match => {
-                        const liveMatch = liveMap.get(match.id);
-                        if (liveMatch) {
-                            return {
-                                ...match,
-                                status: 'live',
-                                score: liveMatch.score,
-                            };
-                        }
-                        return match;
-                    });
-                }
+                const mergedExternalMatches = liveMatches && liveMatches.length > 0
+                    ? (() => {
+                        const liveMap = new Map(liveMatches.map(m => [m.id, m]));
+                        return externalMatches.map(match => {
+                            const liveMatch = liveMap.get(match.id);
+                            if (liveMatch) {
+                                return {
+                                    ...match,
+                                    status: 'live',
+                                    score: liveMatch.score,
+                                };
+                            }
+                            return match;
+                        });
+                    })()
+                    : externalMatches;
 
-                const enrichedExternalMatches = (externalMatches || []).map(m => {
+                const enrichedExternalMatches = (mergedExternalMatches || []).map(m => {
                     // Defensive date conversion
                     let dateStr = new Date().toISOString();
                     try {
@@ -408,8 +455,8 @@ export async function GET(request: Request) {
                 fsMessage = fsCount === 0 ? 'No hay partidos de FlashScore para este filtro.' : null;
                 console.log(`[matches] FlashScore: ${fsCount} matches for date=${date}`);
 
-                if (externalMatches && externalMatches.length > 0) {
-                    persistFromExternalMatches(externalMatches, sport || 'rugby');
+                if (mergedExternalMatches && mergedExternalMatches.length > 0) {
+                    persistFromExternalMatches(mergedExternalMatches, sport || 'rugby');
                 }
                 } // end if (!fsFetchFailed)
             } catch (e) {
@@ -439,63 +486,37 @@ export async function GET(request: Request) {
             // Filter by sport through tournament relationship
             const sportVariants = sport ? getSportVariants(sport) : null;
 
-            // Attempt 1: named FK joins (works when FK constraint names are stable)
             const query = supabase
                 .from('matches')
-                .select(`
-                    id, date_time, round_label, venue, status, score,
-                    tournament_id, home_club_id, away_club_id, notes,
-                    tournament:tournaments!inner(id, name, sport_id, season_id, status, country_id, union:unions(id, name, country)),
-                    home_team:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, primary_color),
-                    away_team:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, primary_color)
-                `)
+                .select('*')
                 .gte('date_time', localStart)
                 .lte('date_time', localEnd)
                 .order('date_time', { ascending: true });
 
-            let { data: dbMatches, error: dbError } = await query;
-
-            // Attempt 2: if FK names changed, fall back to manual join but KEEP FILTERS
-            if (dbError && /fkey|relationship|foreign/i.test(dbError.message)) {
-                dbFallback = true;
-                console.warn('[matches] FK join failed, falling back to manual club join:', dbError.message);
-
-                const mQuery = supabase.from('matches').select(`
-                        id, date_time, round_label, venue, status, score,
-                        tournament_id, home_club_id, away_club_id, notes,
-                        tournament:tournaments!inner(id, name, sport_id, season_id, status, country_id)
-                    `)
-                    .gte('date_time', localStart)
-                    .lte('date_time', localEnd)
-                    .order('date_time', { ascending: true });
-
-                const [mRes, cRes] = await Promise.all([
-                    mQuery,
-                    supabase.from('clubs').select('id, name, short_name, logo_url, primary_color')
-                ]);
-                const clubMap = new Map((cRes.data || []).map((c: any) => [c.id, c]));
-                dbMatches = (mRes.data || []).map((m: any) => ({
-                    ...m,
-                    home_team: clubMap.get(m.home_club_id) || null,
-                    away_team: clubMap.get(m.away_club_id) || null,
-                })) as any;
-                dbError = mRes.error;
-            }
-
-            // Post-process sport filter (more reliable than embedded-resource .in() in PostgREST)
-            if (!dbError && dbMatches && sportVariants) {
-                dbMatches = dbMatches.filter((m: any) =>
-                    sportVariants.includes(m.tournament?.sport_id) || sportVariants.includes(m.tournament?.sport)
-                );
-            }
+            const { data: dbMatches, error: dbError } = await query;
 
             if (!dbError && dbMatches) {
+                const tournamentIds = [...new Set(dbMatches.map((m: any) => m.tournament_id).filter(Boolean))];
+                const clubIds = [...new Set(dbMatches.flatMap((m: any) => [m.home_club_id, m.away_club_id]).filter(Boolean))];
+                const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
+
                 dbOk = true;
                 const existingIds = new Set(enrichedMatches.map((m: any) => m.id));
 
                 const enrichedDbMatches = dbMatches
-                    .filter((m: any) => !existingIds.has(m.id))
+                    .filter((m: any) => {
+                        if (existingIds.has(m.id)) return false;
+                        const tournament = tournamentMap.get(m.tournament_id);
+                        const tournamentStatus = tournament?.status || null;
+                        if (tournamentStatus && !['published', 'active'].includes(tournamentStatus)) return false;
+                        if (!sportVariants) return true;
+                        const tournamentSport = tournament?.sport_id || tournament?.sport || null;
+                        return tournamentSport ? sportVariants.includes(tournamentSport) : true;
+                    })
                     .map((m: any) => {
+                        const tournament = tournamentMap.get(m.tournament_id);
+                        const homeTeam = clubMap.get(m.home_club_id);
+                        const awayTeam = clubMap.get(m.away_club_id);
                         const { localTime } = toLocalMatch(m.date_time, timeZone);
                         return {
                             id: m.id,
@@ -509,38 +530,38 @@ export async function GET(request: Request) {
                                 seconds: 0,
                                 period: m.status === 'live' ? 'En Vivo' : (m.status === 'final' ? 'Final' : '1T')
                             },
-                            roundId: m.round_label || 'General',
+                            roundId: m.round_label || m.round_id || 'General',
                             venue: m.venue || 'Sede',
                             homeClubId: m.home_club_id,
                             awayClubId: m.away_club_id,
-                            homeTeam: m.home_team ? {
-                                id: m.home_team.id,
-                                name: m.home_team.name,
-                                logo: m.home_team.logo_url || '',
-                                shortName: m.home_team.short_name || m.home_team.name?.substring(0, 3).toUpperCase() || 'LOC'
+                            homeTeam: homeTeam ? {
+                                id: homeTeam.id,
+                                name: homeTeam.name,
+                                logo: homeTeam.logo_url || '',
+                                shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC'
                             } : {
                                 id: m.home_club_id,
                                 name: 'Local',
                                 logo: '',
                                 shortName: 'LOC'
                             },
-                            awayTeam: m.away_team ? {
-                                id: m.away_team.id,
-                                name: m.away_team.name,
-                                logo: m.away_team.logo_url || '',
-                                shortName: m.away_team.short_name || m.away_team.name?.substring(0, 3).toUpperCase() || 'VIS'
+                            awayTeam: awayTeam ? {
+                                id: awayTeam.id,
+                                name: awayTeam.name,
+                                logo: awayTeam.logo_url || '',
+                                shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS'
                             } : {
                                 id: m.away_club_id,
                                 name: 'Visitante',
                                 logo: '',
                                 shortName: 'VIS'
                             },
-                            tournament: m.tournament ? {
-                                id: m.tournament.id,
-                                name: m.tournament.name,
-                                sport: m.tournament.sport_id || m.tournament.sport || (sport || 'rugby'),
-                                status: m.tournament.status || 'published',
-                                country: resolveTournamentCountry(m.tournament)
+                            tournament: tournament ? {
+                                id: tournament.id,
+                                name: tournament.name,
+                                sport: tournament.sport_id || tournament.sport || (sport || 'rugby'),
+                                status: tournament.status || 'published',
+                                country: resolveTournamentCountry(tournament)
                             } : {
                                 id: m.tournament_id || 'db-local',
                                 name: 'Partido Local',

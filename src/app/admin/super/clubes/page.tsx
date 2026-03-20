@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
@@ -63,13 +63,13 @@ export default function SuperadminClubesPage() {
         // Optimistic update
         setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], is_visible: newVal } }));
         try {
-            const { error } = await supabase.from('clubs').update({ is_visible: newVal } as any).eq('id', club.id);
+            const { error } = await supabase.from('clubs').update({ is_visible: newVal }).eq('id', club.id);
             if (error) throw error;
             invalidateCache('clubs_list');
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Revert
             setLocalOverrides(prev => ({ ...prev, [club.id]: { ...prev[club.id], is_visible: currentVal } }));
-            alert(`Error: ${err.message}`);
+            alert(`Error: ${err instanceof Error ? err.message : 'Error desconocido'}`);
         } finally {
             setTogglingId(null);
         }
@@ -85,8 +85,8 @@ export default function SuperadminClubesPage() {
             // Optimistic remove
             setDeletedIds(prev => new Set([...prev, clubId]));
             invalidateCache('clubs_list');
-        } catch (err: any) {
-            alert(`Error al eliminar: ${err.message}`);
+        } catch (err: unknown) {
+            alert(`Error al eliminar: ${err instanceof Error ? err.message : 'Error desconocido'}`);
         } finally {
             setDeletingId(null);
         }
@@ -106,9 +106,23 @@ export default function SuperadminClubesPage() {
         [...new Set(displayClubs.map(c => c.union?.name).filter(Boolean) as string[])].sort()
     , [displayClubs]);
 
+    useEffect(() => {
+        if (filters.country === 'all') return;
+
+        const normalizedSelected = filters.country.trim().toLowerCase();
+        const hasMatchingCountry = availableCountries.some((country) => country.trim().toLowerCase() === normalizedSelected);
+
+        if (!hasMatchingCountry) {
+            setFilters((prev) => ({ ...prev, country: 'all' }));
+        }
+    }, [availableCountries, filters.country, setFilters]);
+
     const filtered = useMemo(() => displayClubs.filter(club => {
         if (filters.search && !club.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
-        if (filters.country !== 'all' && club.country !== filters.country) return false;
+        if (
+            filters.country !== 'all' &&
+            (club.country || '').trim().toLowerCase() !== filters.country.trim().toLowerCase()
+        ) return false;
         if (unionFilter !== 'all' && (!club.union || club.union.name !== unionFilter)) return false;
         if (visibilityFilter === 'visible' && club.is_visible === false) return false;
         if (visibilityFilter === 'oculto' && club.is_visible !== false) return false;
