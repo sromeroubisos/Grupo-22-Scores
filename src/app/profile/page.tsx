@@ -11,25 +11,27 @@ import {
 import { useRouter } from 'next/navigation';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { getActiveSports } from '@/lib/data/sports';
+import { fetchResolvedFavorites, type ResolvedFavorite } from '@/lib/favorites/fetchFavorites';
 import styles from './profile.module.css';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
 type MainTab = 'seguidos' | 'competiciones' | 'clubes' | 'actividad' | 'ajustes';
 
-interface FavoriteItem {
-    id: string;
-    entity_id: string;
-    entity_type: string;
-    name: string;
-    logo_url?: string;
-    color?: string;
-}
+type FavoriteItem = ResolvedFavorite;
 
 interface ProfileStats {
     total: number;
     clubes: number;
     torneos: number;
+}
+
+interface ProfileUser {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    role?: string | null;
+    avatarUrl?: string | null;
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
@@ -54,21 +56,11 @@ export default function ProfilePage() {
         let alive = true;
         (async () => {
             try {
-                const { data, error } = await supabase.rpc(
-                    'get_my_favorites_enriched_v2',
-                    { p_limit: 50, p_cursor: undefined }
-                );
+                const data = await fetchResolvedFavorites(supabase);
                 if (!alive) return;
-                if (!error && Array.isArray(data)) {
-                    setFavorites(data.map((d: any) => ({
-                        ...d,
-                        id: d.favorite_id
-                    } as FavoriteItem)));
-                } else {
-                    setFavorites([]);
-                }
-            } catch (err: any) {
-                if (err?.name === 'AbortError') return;
+                setFavorites(data);
+            } catch (err: unknown) {
+                if (err instanceof DOMException && err.name === 'AbortError') return;
             } finally {
                 if (alive) setFavLoading(false);
             }
@@ -161,7 +153,7 @@ export default function ProfilePage() {
 
 // ─── PROFILE HEADER ───────────────────────────────────────────────────────────
 
-function ProfileHeader({ user, stats }: { user: any; stats: ProfileStats }) {
+function ProfileHeader({ user, stats }: { user: ProfileUser | null | undefined; stats: ProfileStats }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
@@ -244,7 +236,7 @@ function SeguridosPanel({ favorites, loading }: { favorites: FavoriteItem[]; loa
             </div>
             <div className={styles.seguridosGrid}>
                 {favorites.map(fav => (
-                    <Link key={fav.entity_id} href="/favorites" className={styles.seguridoCard}>
+                    <Link key={`${fav.entity_type}-${fav.id}`} href="/favorites" className={styles.seguridoCard}>
                         {fav.logo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={fav.logo_url} alt={fav.name} className={styles.seguridoImg} />
