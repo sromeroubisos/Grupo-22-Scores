@@ -213,34 +213,35 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     }
   };
 
-  // Build a map: club_id → UiLabel[] for fast lookup in StandingsTable
+  // Build a map: position → UiLabel[] for fast lookup in StandingsTable
   const labelsMap = useMemo<Record<string, UiLabel[]>>(() => {
     const map: Record<string, UiLabel[]> = {};
     const allowedLabelIds = new Set(allLabels.map((label) => label.id));
     for (const a of assignments) {
       if (!allowedLabelIds.has(a.label.id)) continue;
-      if (!map[a.club_id]) map[a.club_id] = [];
-      map[a.club_id].push(a.label);
+      const key = String(a.position);
+      if (!map[key]) map[key] = [];
+      map[key].push(a.label);
     }
     return map;
   }, [allLabels, assignments]);
 
-  // assignment id lookup: labelId+clubId → assignment id (for unassign)
+  // assignment id lookup: labelId+position → assignment id (for unassign)
   const assignmentIdMap = useMemo<Record<string, string>>(() => {
     const map: Record<string, string> = {};
     for (const a of assignments) {
-      map[`${a.label_id}__${a.club_id}`] = a.id;
+      map[`${a.label_id}__${a.position}`] = a.id;
     }
     return map;
   }, [assignments]);
 
-  const handleAssignLabel = async (clubId: string, labelId: string) => {
+  const handleAssignLabel = async (posKey: string, labelId: string) => {
     const res = await fetch('/api/admin/team-labels', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         label_id: labelId,
-        club_id: clubId,
+        position: parseInt(posKey, 10),
         tournament_id: tournamentId,
         phase_id: selectedPhase,
         group_id: selectedGroup,
@@ -252,8 +253,8 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     }
   };
 
-  const handleUnassignLabel = async (clubId: string, labelId: string) => {
-    const assignmentId = assignmentIdMap[`${labelId}__${clubId}`];
+  const handleUnassignLabel = async (posKey: string, labelId: string) => {
+    const assignmentId = assignmentIdMap[`${labelId}__${posKey}`];
     if (!assignmentId) return;
     const res = await fetch(`/api/admin/team-labels/${assignmentId}`, { method: 'DELETE' });
     const json = await res.json();

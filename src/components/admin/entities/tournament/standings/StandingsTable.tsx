@@ -266,7 +266,8 @@ function MobileStandingsCards({
     <div className={styles.mobileCards}>
       {data.map((row, index) => {
         const key = row.teamId || row.team?.id || row.teamName || String(index);
-        const accentStyle = createAccentVars(labelsMap?.[key]?.[0]?.color);
+        const posKey = String(row.position ?? index + 1);
+        const accentStyle = createAccentVars(labelsMap?.[posKey]?.[0]?.color);
         return (
           <details
             key={key}
@@ -478,7 +479,8 @@ export function StandingsTable({
             <tbody>
               {data.map((row, index) => {
                 const rowKey = row.teamId || row.team?.id || row.teamName || String(index);
-                const accentStyle = createAccentVars(labelsMap?.[rowKey]?.[0]?.color);
+                const posKey = String(row.position ?? index + 1);
+                const accentStyle = createAccentVars(labelsMap?.[posKey]?.[0]?.color);
                 return (
                   <tr
                     key={rowKey}
@@ -499,14 +501,14 @@ export function StandingsTable({
                         )}
                         <div className={styles.teamNameBlock}>
                           <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
-                          {labelsMap && rowKey && labelsMap[rowKey] && labelsMap[rowKey].length > 0 && (
+                          {labelsMap && labelsMap[posKey] && labelsMap[posKey].length > 0 && (
                             <div className={styles.teamLabels}>
-                              {labelsMap[rowKey].map((label) => (
+                              {labelsMap[posKey].map((label) => (
                                 <LabelChip
                                   key={label.id}
                                   name={label.name}
                                   color={label.color}
-                                  onRemove={onUnassignLabel ? () => onUnassignLabel(rowKey, label.id) : undefined}
+                                  onRemove={onUnassignLabel ? () => onUnassignLabel(posKey, label.id) : undefined}
                                 />
                               ))}
                             </div>
@@ -528,7 +530,7 @@ export function StandingsTable({
                             type="button"
                             className={styles.iconButton}
                             title="Asignar etiqueta"
-                            onClick={() => setOpenDropdownRow(openDropdownRow === rowKey ? null : rowKey)}
+                            onClick={() => setOpenDropdownRow(openDropdownRow === posKey ? null : posKey)}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <circle cx="12" cy="12" r="1" />
@@ -536,12 +538,12 @@ export function StandingsTable({
                               <circle cx="5" cy="12" r="1" />
                             </svg>
                           </button>
-                          {openDropdownRow === rowKey && (
+                          {openDropdownRow === posKey && (
                             <AssignLabelDropdown
                               allLabels={allLabels}
-                              assignedLabelIds={new Set((labelsMap?.[rowKey] ?? []).map((l) => l.id))}
-                              onAssign={(labelId) => onAssignLabel(rowKey, labelId)}
-                              onUnassign={(labelId) => onUnassignLabel(rowKey, labelId)}
+                              assignedLabelIds={new Set((labelsMap?.[posKey] ?? []).map((l) => l.id))}
+                              onAssign={(labelId) => onAssignLabel(posKey, labelId)}
+                              onUnassign={(labelId) => onUnassignLabel(posKey, labelId)}
                               onClose={() => setOpenDropdownRow(null)}
                             />
                           )}

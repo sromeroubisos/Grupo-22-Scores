@@ -46,6 +46,13 @@ export async function GET(
         }
     }
 
+    type TournamentGroupWithPhaseFilter = {
+        id: string;
+        name: string;
+        phase_id: string;
+        order_index: number | null;
+    };
+
     const [tournamentRes, participantsRes, matchesRes, standingsRes, phasesRes, groupsRes, teamLabelsRes] = await Promise.all([
         supabase
             .from('tournaments')
@@ -96,9 +103,9 @@ export async function GET(
 
         supabase
             .from('tournament_groups')
-            .select('*')
-            .eq('tournament_id', tournament_id)
-            .order('name', { ascending: true }),
+            .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
+            .eq('tournament_phases.tournament_id', tournament_id)
+            .order('order_index', { ascending: true }),
 
         supabase
             .from('team_labels')
@@ -145,7 +152,15 @@ export async function GET(
         matches: matchesRes.data || [],
         standings: standingsRes.data || [],
         phases: phasesRes.data || [],
-        groups: groupsRes.data || [],
+        groups: (groupsRes.data || []).map((group) => {
+            const normalizedGroup = group as TournamentGroupWithPhaseFilter;
+            return {
+                id: normalizedGroup.id,
+                name: normalizedGroup.name,
+                phase_id: normalizedGroup.phase_id,
+                order_index: normalizedGroup.order_index,
+            };
+        }),
         teamLabels: teamLabelsRes.data || [],
         debug: {
             id,

@@ -6,7 +6,9 @@ import LogoUploader from '@/components/LogoUploader';
 import { getActiveSports } from '@/lib/data/sports';
 import styles from './styles.module.css';
 import { createClub } from '@/lib/services/clubService';
+import { createUnion } from '@/lib/services/unionService';
 import type { ClubCreateInput } from '@/lib/types/clubs';
+import { slugifyUnion } from '@/lib/unions';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
 
@@ -25,6 +27,32 @@ const COUNTRIES = [
   { value: 'CHL', label: 'Chile' },
   { value: 'BRA', label: 'Brasil' },
 ];
+
+const UNION_LEVEL_OPTIONS = [
+  { value: 'regional', label: 'Regional' },
+  { value: 'provincial', label: 'Provincial' },
+  { value: 'national', label: 'Nacional' },
+  { value: 'international', label: 'Internacional' },
+];
+
+type UnionOption = {
+  id: string;
+  name: string;
+  country?: string | null;
+};
+
+interface InlineUnionFormState {
+  name: string;
+  slug: string;
+  country: string;
+  sport: string;
+  union_level: string;
+  slugManuallyEdited: boolean;
+}
+
+function sortUnionOptions(list: UnionOption[]) {
+  return [...list].sort((a, b) => a.name.localeCompare(b.name));
+}
 
 interface FormState extends Omit<ClubCreateInput, 'slug'> {
   slug: string;
@@ -94,11 +122,24 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
   const [createdClubId, setCreatedClubId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [availableUnions, setAvailableUnions] = useState<UnionOption[]>(() => sortUnionOptions(unions));
 
   // Estado para autocomplete de unión
   const [unionSearch, setUnionSearch] = useState('');
   const [showUnionSuggestions, setShowUnionSuggestions] = useState(false);
-  const [filteredUnions, setFilteredUnions] = useState(unions);
+  const [filteredUnions, setFilteredUnions] = useState<UnionOption[]>(() => sortUnionOptions(unions));
+  const [showUnionCreator, setShowUnionCreator] = useState(false);
+  const [creatingUnion, setCreatingUnion] = useState(false);
+  const [unionCreateError, setUnionCreateError] = useState<string | null>(null);
+  const [unionCreateSuccess, setUnionCreateSuccess] = useState<string | null>(null);
+  const [unionCreateForm, setUnionCreateForm] = useState<InlineUnionFormState>({
+    name: '',
+    slug: '',
+    country: 'ARG',
+    sport: 'rugby',
+    union_level: 'regional',
+    slugManuallyEdited: false,
+  });
 
   // Estado para URL de logo
   const [logoUrlInput, setLogoUrlInput] = useState('');
@@ -114,15 +155,43 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
     }
   }, [form.name, form.slugManuallyEdited]);
 
+  useEffect(() => {
+    setAvailableUnions(sortUnionOptions(unions));
+  }, [unions]);
+
   // Sincronizar nombre de unión cuando se selecciona un ID
   useEffect(() => {
     if (form.union_id && !unionSearch) {
-      const selectedUnion = unions.find(u => u.id === form.union_id);
+      const selectedUnion = availableUnions.find(u => u.id === form.union_id);
       if (selectedUnion) {
         setUnionSearch(selectedUnion.name);
       }
     }
-  }, [form.union_id, unions, unionSearch]);
+  }, [availableUnions, form.union_id, unionSearch]);
+
+  useEffect(() => {
+    const query = unionSearch.trim().toLowerCase();
+    if (!query) {
+      setFilteredUnions(availableUnions);
+      return;
+    }
+
+    setFilteredUnions(
+      availableUnions.filter((union) =>
+        union.name.toLowerCase().includes(query)
+        || (union.country && union.country.toLowerCase().includes(query))
+      )
+    );
+  }, [availableUnions, unionSearch]);
+
+  useEffect(() => {
+    if (!unionCreateForm.slugManuallyEdited) {
+      setUnionCreateForm((prev) => ({
+        ...prev,
+        slug: slugifyUnion(prev.name),
+      }));
+    }
+  }, [unionCreateForm.name, unionCreateForm.slugManuallyEdited]);
 
   // Navigation blocker
   useEffect(() => {
@@ -181,22 +250,110 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
   const handleUnionSearchChange = (value: string) => {
     setUnionSearch(value);
     setShowUnionSuggestions(value.length > 0);
-
-    if (value.length > 0) {
-      const filtered = unions.filter(u =>
-        u.name.toLowerCase().includes(value.toLowerCase()) ||
-        (u.country && u.country.toLowerCase().includes(value.toLowerCase()))
-      );
-      setFilteredUnions(filtered);
-    } else {
-      setFilteredUnions(unions);
-    }
   };
 
   const handleSelectUnion = (unionId: string, unionName: string) => {
     updateField('union_id', unionId);
     setUnionSearch(unionName);
     setShowUnionSuggestions(false);
+    setUnionCreateError(null);
+    setUnionCreateSuccess(null);
+  };
+
+  const updateUnionCreateField = useCallback(<K extends keyof InlineUnionFormState>(
+    field: K,
+    value: InlineUnionFormState[K]
+  ) => {
+    setUnionCreateForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleUnionCreateSlugChange = (value: string) => {
+    setUnionCreateForm((prev) => ({
+      ...prev,
+      slug: slugifyUnion(value),
+      slugManuallyEdited: true,
+    }));
+  };
+
+  const handleToggleUnionCreator = () => {
+    setUnionCreateError(null);
+    setUnionCreateSuccess(null);
+
+    setShowUnionCreator((prev) => {
+      const nextOpen = !prev;
+      if (nextOpen) {
+        setUnionCreateForm((current) => ({
+          ...current,
+          name: current.name || unionSearch.trim(),
+          slug: current.slug || slugifyUnion(current.name || unionSearch.trim()),
+          country: form.country || current.country || 'ARG',
+          sport: form.sport || current.sport || 'rugby',
+          union_level: current.union_level || 'regional',
+        }));
+      }
+      return nextOpen;
+    });
+  };
+
+  const handleCreateUnion = async () => {
+    const unionName = unionCreateForm.name.trim();
+    const unionSlug = slugifyUnion(unionCreateForm.slug || unionName);
+
+    if (unionName.length < 2) {
+      setUnionCreateError('Ingresa un nombre valido para la union.');
+      return;
+    }
+
+    if (!unionSlug) {
+      setUnionCreateError('Ingresa un slug valido para la union.');
+      return;
+    }
+
+    setCreatingUnion(true);
+    setUnionCreateError(null);
+    setUnionCreateSuccess(null);
+
+    try {
+      const result = await createUnion({
+        name: unionName,
+        slug: unionSlug,
+        country: unionCreateForm.country || form.country || null,
+        sport: unionCreateForm.sport || form.sport || null,
+        union_level: unionCreateForm.union_level || 'regional',
+      });
+
+      if (!result.success || !result.union) {
+        setUnionCreateError(result.error || 'No se pudo crear la union.');
+        return;
+      }
+
+      const createdUnion: UnionOption = {
+        id: result.union.id,
+        name: result.union.name,
+        country: result.union.country || unionCreateForm.country || null,
+      };
+
+      setAvailableUnions((prev) => {
+        const deduped = prev.filter((union) => union.id !== createdUnion.id);
+        return sortUnionOptions([...deduped, createdUnion]);
+      });
+      invalidateCache('unions_list');
+      handleSelectUnion(createdUnion.id, createdUnion.name);
+      setUnionCreateSuccess('Union creada y seleccionada.');
+      setShowUnionCreator(false);
+      setUnionCreateForm({
+        name: '',
+        slug: '',
+        country: form.country || 'ARG',
+        sport: form.sport || 'rugby',
+        union_level: 'regional',
+        slugManuallyEdited: false,
+      });
+    } catch (error) {
+      setUnionCreateError(error instanceof Error ? error.message : 'No se pudo crear la union.');
+    } finally {
+      setCreatingUnion(false);
+    }
   };
 
   // Handler para logo URL
@@ -657,8 +814,114 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
 
             {form.union_id && (
               <span className={styles.helper}>
-                ✓ Unión seleccionada: <strong>{unions.find(u => u.id === form.union_id)?.name}</strong>
+                ✓ Unión seleccionada: <strong>{availableUnions.find((union) => union.id === form.union_id)?.name}</strong>
               </span>
+            )}
+            <div className={styles.unionHelperRow}>
+              <span className={styles.helper}>Si no existe en el catalogo, podes crear la union desde aca.</span>
+              <button type="button" className={styles.linkButton} onClick={handleToggleUnionCreator}>
+                {showUnionCreator ? 'Cancelar' : 'Crear union'}
+              </button>
+            </div>
+
+            {unionCreateSuccess && (
+              <span className={`${styles.helper} ${styles.helperSuccess}`}>{unionCreateSuccess}</span>
+            )}
+
+            {showUnionCreator && (
+              <div className={styles.inlineUnionCard}>
+                <div className={styles.inlineUnionHeader}>
+                  <div>
+                    <p className={styles.inlineUnionTitle}>Nueva union</p>
+                    <p className={styles.inlineUnionText}>Se crea con datos minimos y queda seleccionada en el club.</p>
+                  </div>
+                </div>
+
+                <div className={styles.gridRow2}>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Nombre</label>
+                    <input
+                      type="text"
+                      className={styles.input}
+                      value={unionCreateForm.name}
+                      onChange={(e) => updateUnionCreateField('name', e.target.value)}
+                      placeholder="Ej: Union de Rugby de Salta"
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Slug</label>
+                    <input
+                      type="text"
+                      className={styles.input}
+                      value={unionCreateForm.slug}
+                      onChange={(e) => handleUnionCreateSlugChange(e.target.value)}
+                      placeholder="union-rugby-salta"
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.gridRow}>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Pais</label>
+                    <select
+                      className={styles.select}
+                      value={unionCreateForm.country}
+                      onChange={(e) => updateUnionCreateField('country', e.target.value)}
+                    >
+                      {COUNTRIES.map((country) => (
+                        <option key={country.value} value={country.value}>{country.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Deporte</label>
+                    <select
+                      className={styles.select}
+                      value={unionCreateForm.sport}
+                      onChange={(e) => updateUnionCreateField('sport', e.target.value)}
+                    >
+                      {activeSports.map((sport) => (
+                        <option key={sport.id} value={sport.id}>{sport.nameEs}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Alcance</label>
+                    <select
+                      className={styles.select}
+                      value={unionCreateForm.union_level}
+                      onChange={(e) => updateUnionCreateField('union_level', e.target.value)}
+                    >
+                      {UNION_LEVEL_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {unionCreateError && (
+                  <div className={styles.inlineUnionError}>{unionCreateError}</div>
+                )}
+
+                <div className={styles.inlineUnionActions}>
+                  <button
+                    type="button"
+                    className={styles.btnCancelModal}
+                    onClick={handleToggleUnionCreator}
+                    disabled={creatingUnion}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btnConfirmModal}
+                    onClick={handleCreateUnion}
+                    disabled={creatingUnion}
+                  >
+                    {creatingUnion ? 'Creando...' : 'Crear y seleccionar'}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
           <div className={styles.field}>
