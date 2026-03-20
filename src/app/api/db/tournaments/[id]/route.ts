@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getReadClient } from '@/lib/supabase/read';
 
 export async function GET(
     _req: NextRequest,
@@ -7,12 +7,12 @@ export async function GET(
 ) {
     const { id } = await params;
 
-    const supabase = createAdminClient();
+    const supabase = await getReadClient();
 
     // Try to find a tournament by ID (UUID) or by slug
     const { data, error } = await supabase
         .from('tournaments')
-        .select('id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status')
+        .select('id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status')
         .or(`id.eq.${id},slug.eq.${id}`)
         .maybeSingle();
 
@@ -20,5 +20,11 @@ export async function GET(
         return NextResponse.json({ ok: false }, { status: 404 });
     }
 
-    return NextResponse.json({ ok: true, tournament: data });
+    return NextResponse.json({
+        ok: true,
+        tournament: {
+            ...data,
+            sport_id: data.sport_id || data.legacy_sport || 'rugby',
+        }
+    });
 }

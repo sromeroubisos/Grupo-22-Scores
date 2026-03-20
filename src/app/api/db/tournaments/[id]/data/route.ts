@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getReadClient } from '@/lib/supabase/read';
 
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     const { id } = await params;
-    const supabase = createAdminClient();
+    const supabase = await getReadClient();
 
     console.log(`[BACKEND] Fetching manual tournament data for ID/Slug: ${id}`);
     
@@ -30,7 +30,7 @@ export async function GET(
     const [tournamentRes, participantsRes, matchesRes, standingsRes, phasesRes, groupsRes, teamLabelsRes] = await Promise.all([
         supabase
             .from('tournaments')
-            .select('id, name, display_name, sport_id, country_id, logo_url, status, is_visible, slug')
+            .select('id, name, display_name, sport_id, legacy_sport:sport, country_id, logo_url, status, is_visible, slug')
             .eq('id', tournament_id)
             .maybeSingle(),
 
@@ -103,7 +103,10 @@ export async function GET(
 
     return NextResponse.json({
         ok: true,
-        tournament: tournamentRes.data || null,
+        tournament: tournamentRes.data ? {
+            ...tournamentRes.data,
+            sport_id: tournamentRes.data.sport_id || tournamentRes.data.legacy_sport || 'rugby',
+        } : null,
         participants: participantsRes.data || [],
         matches: matchesRes.data || [],
         standings: standingsRes.data || [],

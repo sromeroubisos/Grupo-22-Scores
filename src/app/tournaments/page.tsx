@@ -6,15 +6,11 @@ import { Search, ChevronRight, ChevronDown, ChevronUp, Star, Globe } from 'lucid
 import { useFavorites } from '@/hooks/useFavorites';
 import { useSport } from '@/context/SportContext';
 import { getCountryById } from '@/lib/data/countries';
-import { createClient } from '@/lib/supabase/client';
 import type { SportId } from '@/lib/types';
 import { getCachedLogo } from '@/lib/utils/logoCache';
 
 const TROPHY_FALLBACK = '\u{1F3C6}';
 const FLAG_FALLBACK = '\u{1F3F3}\u{FE0F}';
-
-// Sport IDs that roll up under the 'rugby' selector
-const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
 
 interface DbTournament {
     id: string;
@@ -24,6 +20,14 @@ interface DbTournament {
     sport_id: string | null;
     logo_url: string | null;
     slug: string | null;
+}
+
+interface TournamentCountry {
+    id: string;
+    name: string;
+    nameEs?: string;
+    code?: string;
+    flagEmoji?: string;
 }
 
 const TournamentLogo = React.memo(({ tournament }: { tournament: DbTournament }) => {
@@ -56,7 +60,7 @@ const TournamentLogo = React.memo(({ tournament }: { tournament: DbTournament })
 });
 TournamentLogo.displayName = 'TournamentLogo';
 
-const CountryFlag = React.memo(({ country }: { country: any }) => {
+const CountryFlag = React.memo(({ country }: { country: TournamentCountry }) => {
     if (country.code && country.code.length === 2) {
         const code = country.code.toLowerCase();
         return (
@@ -102,7 +106,7 @@ const CountryAccordion = React.memo(({
     isExpanded,
     onToggle,
 }: {
-    country: any;
+    country: TournamentCountry;
     tournaments: DbTournament[];
     isExpanded: boolean;
     onToggle: (id: string) => void;
@@ -138,30 +142,41 @@ export default function TorneosPage() {
     const [loadingTournaments, setLoadingTournaments] = useState(false);
 
     const { activeSports } = useSport();
-    const supabase = createClient();
 
     // Fetch tournaments from DB whenever selected sport changes
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetchTournaments = async () => {
             setLoadingTournaments(true);
             setAllTournaments([]);
 
-            // For 'rugby', include all rugby variants
-            const sportFilter = selectedSport === 'rugby' ? RUGBY_SPORT_IDS : [selectedSport];
+            try {
+                const searchParams = new URLSearchParams();
+                searchParams.set('sport', selectedSport);
 
-            const { data, error } = await supabase
-                .from('tournaments')
-                .select('id, name, display_name, country_id, sport_id, logo_url, slug')
-                .in('sport_id', sportFilter)
-                .order('name', { ascending: true }) as any;
+                const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
+                    cache: 'no-store',
+                    signal: controller.signal,
+                });
+                const payload = await response.json().catch(() => ({}));
 
-            if (!error && data) {
-                setAllTournaments(data as DbTournament[]);
+                if (response.ok) {
+                    const data = Array.isArray(payload.data) ? payload.data : [];
+                    setAllTournaments(data as DbTournament[]);
+                }
+            } catch (error) {
+                if ((error as Error).name !== 'AbortError') {
+                    console.error('Error fetching tournaments:', error);
+                }
             }
+
             setLoadingTournaments(false);
         };
 
         fetchTournaments();
+
+        return () => controller.abort();
     }, [selectedSport]);
 
     // Filter by search term

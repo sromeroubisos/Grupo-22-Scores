@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getReadClient } from '@/lib/supabase/read';
 import { RUGBY_TOURNAMENTS_INTERNATIONAL } from '@/lib/data/tournaments/rugby';
 
 export async function GET(request: Request) {
@@ -7,8 +7,11 @@ export async function GET(request: Request) {
     const search = searchParams.get('search') || '';
     const limit = parseInt(searchParams.get('limit') || '10', 10);
 
-    const supabase = await createClient();
-    let query = supabase.from('tournaments').select('id, name, display_name');
+    const supabase = await getReadClient();
+    let query = supabase
+        .from('tournaments')
+        .select('id, name, display_name, is_visible, status')
+        .neq('is_visible', false);
 
     if (search) {
         query = query.or(`name.ilike.%${search}%,display_name.ilike.%${search}%`);
@@ -31,8 +34,13 @@ export async function GET(request: Request) {
             url: t.url
         }));
 
+    const dbResults = (data || []).filter((t) => {
+        const status = t.status?.toLowerCase?.() || null;
+        return status !== 'archived' && status !== 'deleted';
+    });
+
     const results = [
-        ...data.map(t => ({
+        ...dbResults.map(t => ({
             id: t.id,
             label: t.display_name || t.name,
             meta: t.id.split('-')[0]

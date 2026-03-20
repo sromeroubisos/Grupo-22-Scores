@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getReadClient } from '@/lib/supabase/read';
 
 export async function GET() {
     try {
-        const supabase = await createClient();
+        const supabase = await getReadClient();
         const { data, error } = await supabase
             .from('tournaments')
             .select(`
@@ -11,16 +11,17 @@ export async function GET() {
                 name,
                 display_name,
                 sport_id,
+                legacy_sport:sport,
                 country_id,
                 logo_url,
                 category,
                 season_id,
+                status,
                 is_visible,
                 age_grade,
                 format
             `)
-            .eq('status', 'published')
-            .eq('is_visible', true)
+            .neq('is_visible', false)
             .order('display_name', { ascending: true });
 
         if (error) {
@@ -31,7 +32,15 @@ export async function GET() {
             );
         }
 
-        return NextResponse.json({ data: data || [] });
+        const visibleTournaments = (data || []).filter((tournament) => {
+            const status = tournament.status?.toLowerCase?.() || null;
+            return status !== 'archived' && status !== 'deleted';
+        }).map((tournament) => ({
+            ...tournament,
+            sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
+        }));
+
+        return NextResponse.json({ data: visibleTournaments });
     } catch (error) {
         console.error('[GET /api/home/manual-tournaments] unexpected error:', error);
         return NextResponse.json(

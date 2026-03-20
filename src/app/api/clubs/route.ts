@@ -28,8 +28,17 @@ type PublicClubRow = {
     is_visible: boolean | null;
     status: string | null;
     sport_id: string | null;
-    sport: { name: string } | null;
+    legacy_sport: string | null;
+    sport_ref: { name: string } | null;
 };
+
+function resolveSportFilter(rawSport: string | null) {
+    if (!rawSport || rawSport === 'rugby') {
+        return ['rugby', 'rugby-union', 'rugby-league'];
+    }
+
+    return [rawSport];
+}
 
 async function getAuthenticatedUser(supabase: Awaited<ReturnType<typeof createClient>>) {
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -114,6 +123,7 @@ export async function POST(request: NextRequest) {
         id: slug,          // TEXT PK = slug
         slug,
         name: name.trim(),
+        sport_id: sport || 'rugby',
         sport: sport || 'rugby',
         union_id,
         status: 'draft',
@@ -148,6 +158,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const unionId = searchParams.get('union_id');
     const sport = searchParams.get('sport');
+    const sportFilter = resolveSportFilter(sport);
 
     const authUser = await getAuthenticatedUser(supabase);
     let isSuperAdmin = false;
@@ -165,20 +176,25 @@ export async function GET(request: NextRequest) {
 
     let query = readClient
         .from('clubs')
-        .select('id, name, slug, logo_url, city, country, is_visible, status, sport_id, sport:sports(name)')
+        .select('id, name, slug, logo_url, city, country, is_visible, status, sport_id, legacy_sport:sport, sport_ref:sports(name)')
         .order('name');
 
     if (!isSuperAdmin) {
         query = query.neq('is_visible', false);
     }
     if (unionId) query = query.eq('union_id', unionId);
-    if (sport) query = query.eq('sport_id', sport);
 
     const { data, error } = await query;
     if (error) return err('Error al obtener clubes', 500, error.message);
 
+    const clubs = ((data || []) as PublicClubRow[]).filter((club) => {
+        if (!sport) return true;
+        const normalizedSport = club.sport_id || club.legacy_sport || 'rugby';
+        return sportFilter.includes(normalizedSport);
+    });
+
     return NextResponse.json({
-        data: ((data || []) as PublicClubRow[]).map((club) => ({
+        data: clubs.map((club) => ({
             id: club.id,
             name: club.name,
             slug: club.slug,
@@ -186,7 +202,7 @@ export async function GET(request: NextRequest) {
             city: club.city,
             country: club.country,
             is_visible: club.is_visible !== false,
-            sport: club.sport?.name || club.sport_id || 'rugby',
+            sport: club.sport_ref?.name || club.sport_id || club.legacy_sport || 'rugby',
             status: club.status ?? 'published',
         }))
     });
