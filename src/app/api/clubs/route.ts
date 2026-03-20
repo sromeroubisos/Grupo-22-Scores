@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,19 @@ function slugify(value: string): string {
         .replace(/^-+|-+$/g, '')
         .slice(0, 60);
 }
+
+type PublicClubRow = {
+    id: string;
+    name: string;
+    slug: string | null;
+    logo_url: string | null;
+    city: string | null;
+    country: string | null;
+    is_visible: boolean | null;
+    status: string | null;
+    sport_id: string | null;
+    sport: { name: string } | null;
+};
 
 async function getAuthenticatedUser(supabase: Awaited<ReturnType<typeof createClient>>) {
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -133,7 +147,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const unionId = searchParams.get('union_id');
-    const sport   = searchParams.get('sport');
+    const sport = searchParams.get('sport');
 
     const authUser = await getAuthenticatedUser(supabase);
     let isSuperAdmin = false;
@@ -147,15 +161,33 @@ export async function GET(request: NextRequest) {
         isSuperAdmin = profile?.role === 'super_admin';
     }
 
-    let query = supabase.from('clubs').select('*').order('name');
+    const readClient = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
+
+    let query = readClient
+        .from('clubs')
+        .select('id, name, slug, logo_url, city, country, is_visible, status, sport_id, sport:sports(name)')
+        .order('name');
 
     if (!isSuperAdmin) {
-        query = query.eq('is_visible', true);
+        query = query.neq('is_visible', false);
     }
     if (unionId) query = query.eq('union_id', unionId);
+    if (sport) query = query.eq('sport_id', sport);
 
     const { data, error } = await query;
     if (error) return err('Error al obtener clubes', 500, error.message);
 
-    return NextResponse.json({ data });
+    return NextResponse.json({
+        data: ((data || []) as PublicClubRow[]).map((club) => ({
+            id: club.id,
+            name: club.name,
+            slug: club.slug,
+            logo_url: club.logo_url,
+            city: club.city,
+            country: club.country,
+            is_visible: club.is_visible !== false,
+            sport: club.sport?.name || club.sport_id || 'rugby',
+            status: club.status ?? 'published',
+        }))
+    });
 }

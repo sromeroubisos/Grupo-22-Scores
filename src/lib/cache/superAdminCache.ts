@@ -134,6 +134,21 @@ function getSupabase() {
     return createClient();
 }
 
+async function fetchAdminConsoleResource<T>(resource: 'clubs' | 'matches'): Promise<T[]> {
+    const response = await fetch(`/api/admin/super/console-data?resource=${resource}`, {
+        credentials: 'include',
+        cache: 'no-store',
+    });
+
+    const payload = await response.json();
+
+    if (!response.ok) {
+        throw new Error(payload?.error || `Failed to load ${resource}`);
+    }
+
+    return (payload?.data || []) as T[];
+}
+
 export interface ClubRow {
     id: string;
     name: string;
@@ -157,13 +172,7 @@ export async function fetchClubs(force = false): Promise<ClubWithUnion[]> {
     if (force) invalidateCache(KEY);
 
     return cachedFetch(KEY, async () => {
-        const { data, error } = await getSupabase()
-            .from('clubs')
-            .select('id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, union:unions(id, name)')
-            .order('name');
-
-        if (error) throw error;
-        return (data as unknown as ClubWithUnion[]) ?? [];
+        return fetchAdminConsoleResource<ClubWithUnion>('clubs');
     });
 }
 
@@ -187,18 +196,7 @@ export async function fetchMatches(force = false): Promise<MatchRow[]> {
     if (force) invalidateCache(KEY);
 
     return cachedFetch(KEY, async () => {
-        const { data, error } = await getSupabase()
-            .from('matches')
-            .select(`
-                id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id,
-                tournament:tournaments(id, name, sport_id, season_id),
-                home_team:clubs!matches_home_club_id_fkey(id, name, logo_url, primary_color),
-                away_team:clubs!matches_away_club_id_fkey(id, name, logo_url, primary_color)
-            `)
-            .order('date_time', { ascending: false });
-
-        if (error) throw error;
-        return (data as unknown as MatchRow[]) ?? [];
+        return fetchAdminConsoleResource<MatchRow>('matches');
     });
 }
 

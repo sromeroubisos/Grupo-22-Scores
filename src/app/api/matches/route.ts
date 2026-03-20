@@ -4,6 +4,7 @@ import { getFlashScoreMatches, getFlashScoreLiveMatches } from '@/lib/services/f
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
 import { formatDateKey, canonicalizeTimezone, toLocalMatch } from '@/lib/timezone';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getCountryById } from '@/lib/data/countries';
 import {
     getMatchesForDate,
@@ -41,6 +42,14 @@ function resolveTournamentCountry(tournament: any): string {
     }
 
     return 'Internacional';
+}
+
+async function getReadClient() {
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return createAdminClient();
+    }
+
+    return createClient();
 }
 
 // GET /api/matches
@@ -127,7 +136,7 @@ export async function GET(request: Request) {
 
                 // Append DB live matches
                 try {
-                    const supabase = await createClient();
+                    const supabase = await getReadClient();
                     const { data: dbLiveMatches, error: dbError } = await supabase
                         .from('matches')
                         .select(`
@@ -194,7 +203,7 @@ export async function GET(request: Request) {
             } catch (e) {
                 console.error('Live-only fetch failed, trying external_match_cache:', e);
                 try {
-                    const supabase = await createClient();
+                    const supabase = await getReadClient();
                     const cachedLive = await getLiveMatches(sport, supabase);
                     const enriched = cachedLive.map(m => mapCachedToEnrichedMatch(m, sport));
                     return NextResponse.json({
@@ -305,7 +314,7 @@ export async function GET(request: Request) {
                 // ── Cache fallback when FlashScore is unavailable ─────────────
                 if (fsFetchFailed) {
                     try {
-                        const supabaseForCache = await createClient();
+                        const supabaseForCache = await getReadClient();
                         const cached = await getMatchesForDate(date, sport || 'rugby', supabaseForCache);
                         if (cached.length > 0) {
                             const fromCache = cached.map(m => mapCachedToEnrichedMatch(m, sport || 'rugby'));
@@ -414,7 +423,7 @@ export async function GET(request: Request) {
         // Always fetch matches stored in the database (created via admin panel)
         // and merge them with external (FlashScore) matches.
         try {
-            const supabase = await createClient();
+            const supabase = await getReadClient();
 
             // Build the base query for the selected date
             const { localStart, localEnd } = (() => {
