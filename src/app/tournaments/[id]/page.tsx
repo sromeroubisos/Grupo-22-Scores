@@ -11,6 +11,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import { getCountryById } from '@/lib/data/countries';
 
 // Tabs
 const TABS = [
@@ -178,6 +179,110 @@ function resolveStandingsRowLabel(row: any, assignments: any[]) {
     return assignments
         .filter((assignment) => assignment.club_id === teamId && assignment.label?.color)
         .sort((left, right) => priority(right) - priority(left))[0]?.label || null;
+}
+
+function isGroupedStandingsData(rows: any[]): boolean {
+    return Array.isArray(rows) && rows.length > 0 && Array.isArray(rows[0]?.rows);
+}
+
+function normalizeStandingsRows(raw: any[]): any[] {
+    if (!Array.isArray(raw) || raw.length === 0) return [];
+    if (isGroupedStandingsData(raw)) return raw;
+    if (raw[0]?.team_id || raw[0]?.participant || raw[0]?.name || raw[0]?.team) return raw;
+    return [];
+}
+
+function flattenStandingsRows(raw: any[]): any[] {
+    const normalized = normalizeStandingsRows(raw);
+    if (normalized.length === 0) return [];
+    if (isGroupedStandingsData(normalized)) {
+        return normalized.flatMap((group: any) => Array.isArray(group.rows) ? group.rows : []);
+    }
+    return normalized;
+}
+
+function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants: any[]) {
+    if (!Array.isArray(dbGroups) || dbGroups.length === 0) return [];
+
+    const participantGroupByClubId = new Map<string, string>();
+    participants.forEach((participant: any) => {
+        if (participant?.club_id && participant?.group_id) {
+            participantGroupByClubId.set(String(participant.club_id), String(participant.group_id));
+        }
+    });
+
+    const groupPhaseById = new Map<string, string>();
+    dbGroups.forEach((group: any) => {
+        if (group?.id && group?.phase_id) {
+            groupPhaseById.set(String(group.id), String(group.phase_id));
+        }
+    });
+
+    const resolveTeamId = (row: any) =>
+        row.team?.id || row.club_id || row.team_id || row.participant?.id || null;
+
+    const resolveGroupId = (row: any) => {
+        if (row.group_id) return String(row.group_id);
+        const teamId = resolveTeamId(row);
+        if (!teamId) return null;
+        return participantGroupByClubId.get(String(teamId)) || null;
+    };
+
+    const grouped = [...dbGroups]
+        .sort((left: any, right: any) => {
+            const leftOrder = typeof left?.order_index === 'number' ? left.order_index : Number.MAX_SAFE_INTEGER;
+            const rightOrder = typeof right?.order_index === 'number' ? right.order_index : Number.MAX_SAFE_INTEGER;
+            if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+            return String(left?.name || '').localeCompare(String(right?.name || ''));
+        })
+        .map((group: any) => {
+            const groupId = String(group.id);
+            const rows = dbStandings
+                .filter((row: any) => {
+                    const effectiveGroupId = resolveGroupId(row);
+                    if (effectiveGroupId !== groupId) return false;
+
+                    const rowPhaseId = row.phase_id ? String(row.phase_id) : null;
+                    const groupPhaseId = groupPhaseById.get(groupId) || null;
+                    if (rowPhaseId && groupPhaseId && rowPhaseId !== groupPhaseId) return false;
+
+                    return true;
+                })
+                .sort((left: any, right: any) => (left.position || 0) - (right.position || 0));
+
+            return {
+                group_name: group.name,
+                rows,
+            };
+        })
+        .filter((group: any) => group.rows.length > 0);
+
+    if (grouped.length > 0) return grouped;
+
+    if (dbGroups.length === 1 && dbStandings.length > 0) {
+        return [{
+            group_name: dbGroups[0].name,
+            rows: [...dbStandings].sort((left: any, right: any) => (left.position || 0) - (right.position || 0)),
+        }];
+    }
+
+    return [];
+}
+
+function resolveCountryName(detailsData: any, tournamentData: any): string {
+    const detailsCountry = detailsData?.country?.name || detailsData?.country || detailsData?.country_name;
+    if (detailsCountry) return detailsCountry;
+
+    const tournamentCountryId = tournamentData?.countryId || tournamentData?.country_id || null;
+    if (typeof tournamentCountryId === 'string' && tournamentCountryId.trim()) {
+        const normalizedId = tournamentCountryId.trim().toLowerCase();
+        const mappedCountry = getCountryById(normalizedId);
+        if (mappedCountry?.nameEs) return mappedCountry.nameEs;
+        if (mappedCountry?.name) return mappedCountry.name;
+        return tournamentCountryId;
+    }
+
+    return 'Internacional';
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
@@ -388,23 +493,11 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                             // Grouping Logic for Standings
                             if (dbData.groups?.length > 0) {
                                 console.log('[FRONTEND] Processing grouped standings for', dbData.groups.length, 'groups');
-                                const grouped: any[] = dbData.groups.map((g: any) => {
-                                    const groupRows = dbStandings.filter((s: any) => {
-                                        const match = String(s.group_id) === String(g.id);
-                                        return match;
-                                    });
-                                    
-                                    console.log(`[FRONTEND] Group "${g.name}" (${g.id}) matches:`, groupRows.length, 'rows');
-                                    
-                                    if (groupRows.length === 0 && dbStandings.length > 0 && dbData.groups.length === 1 && !dbStandings[0].group_id) {
-                                        console.log('[FRONTEND] Single group fallback: assigning all rows');
-                                        return { group_name: g.name, rows: dbStandings };
-                                    }
-                                    return {
-                                        group_name: g.name,
-                                        rows: groupRows.sort((a: any, b: any) => a.position - b.position)
-                                    };
-                                }).filter((g: any) => g.rows.length > 0);
+                                const grouped = buildGroupedStandings(
+                                    dbStandings,
+                                    dbData.groups ?? [],
+                                    dbData.participants ?? [],
+                                );
 
                                 console.log('[FRONTEND] final rows passed to standings component (grouped):', grouped.length, 'groups');
                                 if (grouped.length > 0) {
@@ -522,22 +615,14 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
     // ── Derived data ──────────────────────────────────────────────────────
 
-    const normalizeStandingsRows = (raw: any[]): any[] => {
-        if (!Array.isArray(raw) || raw.length === 0) return [];
-        if (raw[0]?.rows) {
-            return raw.length > 1 ? raw : raw[0].rows || [];
-        }
-        if (raw[0]?.team_id || raw[0]?.participant || raw[0]?.name || raw[0]?.team) return raw;
-        return [];
-    };
-
-    const overallRows = normalizeStandingsRows(standings);
+    const overallRows = flattenStandingsRows(standings);
     const standingsSource =
         standingsView === 'form' ? standingsForm :
             standingsView === 'htft' ? standingsHtFt :
                 standingsView === 'overunder' ? standingsOverUnder :
                     standings;
     const activeRows = normalizeStandingsRows(standingsSource);
+    const activeFlatRows = flattenStandingsRows(standingsSource);
 
     const resolvedQualRules = (() => {
         try {
@@ -580,7 +665,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
             ? `${details.start_year}/${details.end_year}`
             : (details?.season || new Date().getFullYear());
 
-    const countryName = details?.country?.name || details?.country || 'Internacional';
+    const countryName = resolveCountryName(details, tournamentData);
     const tournamentLogo = getTournamentLogo(details, tournamentData);
     const tournamentName = details?.name || details?.tournament?.name || tournamentData?.name || 'Torneo';
     const sportLabel = tournamentData?.sportId ? tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1) : '';
@@ -595,9 +680,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
     const featured = getFeaturedMatch(results, fixtures);
 
     // Standings preview (top 8 flat rows only)
-    const standingsPreviewRows: any[] = overallRows.length > 0
-        ? (overallRows[0]?.rows ? overallRows[0].rows.slice(0, 8) : overallRows.slice(0, 8))
-        : [];
+    const standingsPreviewRows: any[] = overallRows.slice(0, 8);
 
     // ── Render helpers ────────────────────────────────────────────────────
 
@@ -696,7 +779,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
         </div>
     );
 
-    const renderStandingsRow = (row: any, idx: number) => {
+    const renderStandingsRow = (row: any, idx: number, totalTeams = activeFlatRows.length) => {
         const pos = row.position || (idx + 1);
         const logo = row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
             row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo;
@@ -704,7 +787,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
         const teamId = row.team?.id || row.team?.team_id || row.participant?.id || row.team_id;
         const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
         const accentColor = rowLabel?.color
-            ?? getAutoZoneColor(pos, activeRows.length, resolvedQualRules, phaseGroupLabels);
+            ?? getAutoZoneColor(pos, totalTeams, resolvedQualRules, phaseGroupLabels);
         const rowAccentStyle = buildRowAccentStyle(accentColor);
 
         return (
@@ -1129,7 +1212,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                                 data={{
                                     title: tournamentData?.name || 'Tabla de Posiciones',
                                     subtitle: details?.season || 'Clasificación',
-                                    rows: activeRows.map((row: any, idx: number) => ({
+                                    rows: activeFlatRows.map((row: any, idx: number) => ({
                                         pos: row.position || (idx + 1),
                                         team: row.team?.name || row.participant?.name || row.name || 'Equipo',
                                         played: row.matches_total || row.matches_played || 0,
@@ -1153,7 +1236,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                                                 <h3 className={styles.groupTitleLarge}>{group.group_name}</h3>
                                                 <div className={styles.tableCard}>
                                                     {renderStandingsHeader()}
-                                                    {(group.rows || []).map((row: any, idx: number) => renderStandingsRow(row, idx))}
+                                                    {(group.rows || []).map((row: any, idx: number) => renderStandingsRow(row, idx, group.rows.length))}
                                                 </div>
                                             </div>
                                         ))}

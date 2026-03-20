@@ -4,6 +4,7 @@ import { getFlashScoreMatches, getFlashScoreLiveMatches } from '@/lib/services/f
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
 import { formatDateKey, canonicalizeTimezone, toLocalMatch } from '@/lib/timezone';
 import { createClient } from '@/lib/supabase/server';
+import { getCountryById } from '@/lib/data/countries';
 import {
     getMatchesForDate,
     getLiveMatches,
@@ -21,6 +22,25 @@ function getSportVariants(sport: string): string[] {
         case 'hockey': return ['hockey', 'field-hockey'];
         default: return [lower];
     }
+}
+
+function resolveTournamentCountry(tournament: any): string {
+    const relationCountry = tournament?.country?.nameEs || tournament?.country?.name || null;
+    if (relationCountry) return relationCountry;
+
+    const countryId = tournament?.country_id;
+    if (typeof countryId === 'string' && countryId.trim()) {
+        const mapped = getCountryById(countryId.trim().toLowerCase());
+        if (mapped?.nameEs) return mapped.nameEs;
+        if (mapped?.name) return mapped.name;
+        return countryId;
+    }
+
+    if (typeof tournament?.union?.country === 'string' && tournament.union.country.trim()) {
+        return tournament.union.country;
+    }
+
+    return 'Internacional';
 }
 
 // GET /api/matches
@@ -113,7 +133,7 @@ export async function GET(request: Request) {
                         .select(`
                             id, date_time, round_label, venue, status, score,
                             tournament_id, home_club_id, away_club_id, notes,
-                            tournament:tournaments(id, name, sport_id, season_id, status, union:unions(id, name, country)),
+                            tournament:tournaments(id, name, sport_id, season_id, status, country_id, union:unions(id, name, country)),
                             home_team:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, primary_color),
                             away_team:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, primary_color)
                         `)
@@ -158,7 +178,7 @@ export async function GET(request: Request) {
                                     name: m.tournament.name,
                                     sport: m.tournament.sport_id || sport,
                                     status: m.tournament.status || 'published',
-                                    country: (m.tournament as any).union?.country || 'Internacional'
+                                    country: resolveTournamentCountry(m.tournament)
                                 } : { id: m.tournament_id || 'db-local', name: 'Partido Local', sport, status: 'published', country: 'Internacional' },
                                 liveEnabled: m.status === 'live',
                                 source: 'db'
@@ -416,7 +436,7 @@ export async function GET(request: Request) {
                 .select(`
                     id, date_time, round_label, venue, status, score,
                     tournament_id, home_club_id, away_club_id, notes,
-                    tournament:tournaments!inner(id, name, sport_id, season_id, status, union:unions(id, name, country)),
+                    tournament:tournaments!inner(id, name, sport_id, season_id, status, country_id, union:unions(id, name, country)),
                     home_team:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, primary_color),
                     away_team:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, primary_color)
                 `)
@@ -434,7 +454,7 @@ export async function GET(request: Request) {
                 const mQuery = supabase.from('matches').select(`
                         id, date_time, round_label, venue, status, score,
                         tournament_id, home_club_id, away_club_id, notes,
-                        tournament:tournaments!inner(id, name, sport_id, season_id, status)
+                        tournament:tournaments!inner(id, name, sport_id, season_id, status, country_id)
                     `)
                     .gte('date_time', localStart)
                     .lte('date_time', localEnd)
@@ -511,7 +531,7 @@ export async function GET(request: Request) {
                                 name: m.tournament.name,
                                 sport: m.tournament.sport_id || m.tournament.sport || (sport || 'rugby'),
                                 status: m.tournament.status || 'published',
-                                country: (m.tournament as any).union?.country || 'Internacional'
+                                country: resolveTournamentCountry(m.tournament)
                             } : {
                                 id: m.tournament_id || 'db-local',
                                 name: 'Partido Local',

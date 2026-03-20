@@ -19,9 +19,29 @@ type TournamentDetailsRow = TournamentRow & {
     ruleset?: Record<string, unknown> | null;
 };
 
-const COUNTRIES = ['Argentina', 'Brasil', 'Chile', 'Colombia', 'Uruguay', 'Paraguay', 'Bolivia', 'Perú', 'Ecuador', 'Venezuela', 'United Kingdom', 'France', 'Spain', 'Italy', 'New Zealand', 'South Africa', 'Australia'];
 const REGIONS = ['Sudamérica', 'Norteamérica', 'Europa Occidental', 'Europa del Este', 'Oceanía', 'África', 'Asia'];
 const AGE_GRADES = ['Mayores', 'M23 (Sub-23)', 'M19 (Sub-19)', 'M17 (Sub-17)', 'M16 (Sub-16)', 'Femenino', 'Veteranos'];
+
+const COUNTRY_OPTIONS = [
+    { id: 'argentina', label: 'Argentina' },
+    { id: 'brazil', label: 'Brasil' },
+    { id: 'chile', label: 'Chile' },
+    { id: 'colombia', label: 'Colombia' },
+    { id: 'uruguay', label: 'Uruguay' },
+    { id: 'paraguay', label: 'Paraguay' },
+    { id: 'bolivia', label: 'Bolivia' },
+    { id: 'peru', label: 'PerÃº' },
+    { id: 'ecuador', label: 'Ecuador' },
+    { id: 'venezuela', label: 'Venezuela' },
+    { id: 'united-kingdom', label: 'United Kingdom' },
+    { id: 'france', label: 'France' },
+    { id: 'spain', label: 'Spain' },
+    { id: 'italy', label: 'Italy' },
+    { id: 'new-zealand', label: 'New Zealand' },
+    { id: 'south-africa', label: 'South Africa' },
+    { id: 'australia', label: 'Australia' },
+    { id: 'international', label: 'Internacional' },
+] as const;
 
 const SPORT_OPTIONS = Object.values(SPORTS).sort((a, b) => a.priority - b.priority);
 
@@ -34,6 +54,13 @@ function slugify(s: string) {
         .trim()
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-');
+}
+
+function normalizeCountryId(value?: string | null): string {
+    if (!value) return '';
+    const normalized = slugify(value);
+    const matched = COUNTRY_OPTIONS.find((option) => option.id === normalized || slugify(option.label) === normalized);
+    return matched?.id || normalized;
 }
 
 interface TournamentDetailsTabProps {
@@ -60,7 +87,7 @@ export function TournamentDetailsTab({ data, id, unions }: TournamentDetailsTabP
         season_id: tournament.season_id ?? '2026',
         sport_id: tournament.sport_id ?? '',
         union_id: tournament.union_id ?? '',
-        country: tournament.country ?? '',
+        country_id: normalizeCountryId(tournament.country_id ?? tournament.country ?? ''),
         region: tournament.region ?? '',
         category: tournament.category ?? '',
         age_grade: tournament.age_grade ?? '',
@@ -108,7 +135,7 @@ export function TournamentDetailsTab({ data, id, unions }: TournamentDetailsTabP
                     season_id: form.season_id || null,
                     sport_id: form.sport_id || null,
                     union_id: form.union_id || null,
-                    country: form.country || null,
+                    country_id: form.country_id || null,
                     region: form.region || null,
                     category: form.category || null,
                     age_grade: form.age_grade || null,
@@ -332,12 +359,14 @@ export function TournamentDetailsTab({ data, id, unions }: TournamentDetailsTabP
                             <label className="manager-field-label">País</label>
                             <select
                                 className={`manager-url-select ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                value={form.country}
-                                onChange={e => update('country', e.target.value)}
+                                value={form.country_id}
+                                onChange={e => update('country_id', e.target.value)}
                                 disabled={isApiManaged}
                             >
                                 <option value="">No especificado</option>
-                                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                {COUNTRY_OPTIONS.map((country) => (
+                                    <option key={country.id} value={country.id}>{country.label}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="manager-input-group">

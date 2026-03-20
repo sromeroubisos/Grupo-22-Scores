@@ -21,7 +21,7 @@ export async function GET() {
         // Test sport filter approach (the previously failing query pattern)
         const { error: sportFilterError } = await supabase
             .from('matches')
-            .select('id, tournament:tournaments!inner(id, sport)')
+            .select('id, tournament:tournaments!inner(id, sport_id)')
             .limit(1);
 
         results['sport_filter_test'] = sportFilterError
@@ -30,7 +30,8 @@ export async function GET() {
 
         const allOk = Object.values(results).every(r => r.ok);
         return NextResponse.json({ ok: allOk, tables: results });
-    } catch (err: any) {
-        return NextResponse.json({ ok: false, error: err?.message ?? String(err), tables: results });
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return NextResponse.json({ ok: false, error: message, tables: results });
     }
 }

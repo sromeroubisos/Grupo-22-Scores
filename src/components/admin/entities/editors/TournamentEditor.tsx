@@ -214,7 +214,7 @@ export function TournamentEditor({
         age_grade: data.age_grade ?? 'Mayores (Adults)',
         status: data.status ?? 'draft',
         is_visible: data.is_visible ?? true,
-        country: data.country ?? '',
+        country_id: data.country_id ?? data.country ?? '',
         region: data.region ?? '',
         format: data.format ?? 'league',
     });
@@ -332,6 +332,7 @@ export function TournamentEditor({
             const effectiveFormat = ruleset.phases[0]?.format || form.format;
             const payload = {
                 ...form,
+                country_id: form.country_id ? slugify(form.country_id) : null,
                 union_id: actualUnionId,
                 format: effectiveFormat,
                 ruleset: {
@@ -571,8 +572,8 @@ export function TournamentEditor({
                                     type="text"
                                     style={S.input}
                                     placeholder="e.g. Argentina"
-                                    value={form.country}
-                                    onChange={e => handleChange('country', e.target.value)}
+                                    value={form.country_id}
+                                    onChange={e => handleChange('country_id', e.target.value)}
                                     onFocus={e => { e.target.style.borderColor = T.neon; e.target.style.boxShadow = `0 0 10px ${T.neonDim}`; }}
                                     onBlur={e => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
                                 />
