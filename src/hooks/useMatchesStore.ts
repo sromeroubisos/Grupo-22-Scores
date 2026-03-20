@@ -111,7 +111,7 @@ export function useMatchesStore(
       flashscoreReason: flashscore.reason ?? null,
       supabaseReason: supabase.reason ?? null,
       message,
-      scenario: null
+      scenario,
     };
   }
 

@@ -101,6 +101,7 @@ type DbTournamentLite = {
     sport?: string | null;
     season_id?: string | null;
     status?: string | null;
+    is_visible?: boolean | null;
     country_id?: string | null;
     union_id?: string | null;
 };
@@ -112,6 +113,16 @@ type DbClubLite = {
     logo_url?: string | null;
     primary_color?: string | null;
 };
+
+function isTournamentPubliclyVisible(tournament?: DbTournamentLite | null) {
+    if (!tournament) return true;
+    if (tournament.is_visible === false) return false;
+
+    const status = tournament.status?.toLowerCase?.() || null;
+    if (!status) return true;
+
+    return status !== 'archived' && status !== 'deleted';
+}
 
 async function fetchDbLookupMaps(
     supabase: Awaited<ReturnType<typeof getReadClient>>,
@@ -126,10 +137,12 @@ async function fetchDbLookupMaps(
             tournamentIds,
             [
                 'id, name, sport_id, sport, season_id, status, country_id, union_id',
-                'id, name, sport_id, sport, status, country_id, union_id',
-                'id, name, sport_id, status, country_id, union_id',
-                'id, name, sport, status, country_id, union_id',
-                'id, name, status, country_id, union_id',
+                'id, name, sport_id, sport, season_id, status, is_visible, country_id, union_id',
+                'id, name, sport_id, sport, status, is_visible, country_id, union_id',
+                'id, name, sport_id, status, is_visible, country_id, union_id',
+                'id, name, sport, status, is_visible, country_id, union_id',
+                'id, name, status, is_visible, country_id, union_id',
+                'id, name, is_visible',
                 'id, name'
             ]
         ),
@@ -253,7 +266,7 @@ export async function GET(request: Request) {
                         const sportVariants = getSportVariants(sport);
                         const enrichedDbLive = dbLiveMatches.filter((m: any) => {
                             const tournament = tournamentMap.get(m.tournament_id);
-                            if (tournament?.status && !['published', 'active'].includes(tournament.status)) return false;
+                            if (!isTournamentPubliclyVisible(tournament)) return false;
                             const tournamentSport = tournament?.sport_id || tournament?.sport || null;
                             if (sportVariants && tournamentSport) {
                                 return sportVariants.includes(tournamentSport.toLowerCase());
@@ -569,11 +582,10 @@ export async function GET(request: Request) {
                     .filter((m: any) => {
                         if (existingIds.has(m.id)) return false;
                         const tournament = tournamentMap.get(m.tournament_id);
-                        const tournamentStatus = tournament?.status || null;
-                        if (tournamentStatus && !['published', 'active'].includes(tournamentStatus)) return false;
+                        if (!isTournamentPubliclyVisible(tournament)) return false;
                         if (!sportVariants) return true;
                         const tournamentSport = tournament?.sport_id || tournament?.sport || null;
-                        return tournamentSport ? sportVariants.includes(tournamentSport) : true;
+                        return tournamentSport ? sportVariants.includes(tournamentSport.toLowerCase()) : true;
                     })
                     .map((m: any) => {
                         const tournament = tournamentMap.get(m.tournament_id);
