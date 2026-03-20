@@ -309,6 +309,10 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
     router.back();
   };
 
+  const handleCreateAnotherClub = () => {
+    window.location.assign('/admin/entities/new?type=club');
+  };
+
   return (
     <div className={styles.formWrapper} ref={wrapperRef} onMouseMove={handleMouseMove}>
 
@@ -338,7 +342,7 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
             <h2 className={styles.modalHeader}>¡Club creado exitosamente!</h2>
             <p className={styles.modalText}>¿Qué querés hacer ahora?</p>
             <div className={styles.modalActions}>
-              <button className={styles.btnCancelModal} onClick={() => router.push('/admin/super/clubes/crear')}>
+              <button className={styles.btnCancelModal} onClick={handleCreateAnotherClub}>
                 Crear otro club
               </button>
               <button className={styles.btnConfirmModal} onClick={() => router.push(`/admin/entities/${createdClubId}/manage?type=club`)}>

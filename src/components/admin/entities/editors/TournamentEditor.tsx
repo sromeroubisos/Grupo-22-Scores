@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createEntity, updateEntity } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
+import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { useAdminConsole } from '@/app/admin/AdminContext';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
+type CountryRow = Pick<Database['public']['Tables']['countries']['Row'], 'id' | 'name' | 'code' | 'flag_emoji'>;
 
 /* ─── design tokens (Flash UI) ─────────────────────────────────────── */
 const T = {
@@ -182,15 +184,24 @@ function slugify(s: string) {
         .trim().replace(/\s+/g, '-').replace(/-+/g, '-');
 }
 
+function normalizeCountryId(value: string | null | undefined, options: TournamentCountryOption[]): string {
+    if (!value) return '';
+    const normalized = slugify(value);
+    const matched = options.find((option) => slugify(option.id) === normalized || slugify(option.label) === normalized);
+    return matched?.id || normalized;
+}
+
 /* ─── component ─────────────────────────────────────────────────────── */
 export function TournamentEditor({
     data,
     id,
     unions = [],
+    countries = [],
 }: {
     data: Partial<TournamentRow>;
     id: string;
     unions?: { id: string; name: string }[];
+    countries?: CountryRow[];
 }) {
     const isCreate = id === 'new';
     const router = useRouter();
@@ -203,8 +214,20 @@ export function TournamentEditor({
     const [newBonusLabel, setNewBonusLabel] = useState('');
     const [isCreatingUnion, setIsCreatingUnion] = useState(false);
     const [newUnionName, setNewUnionName] = useState('');
+    const baseCountryOptions = useMemo(
+        () =>
+            getTournamentCountryOptions(
+                countries.map((country) => ({
+                    id: country.id,
+                    name: country.name,
+                    code: country.code,
+                    flag_emoji: country.flag_emoji,
+                })),
+            ),
+        [countries],
+    );
 
-    const [form, setForm] = useState({
+    const [form, setForm] = useState(() => ({
         name: data.name ?? '',
         slug: data.slug ?? '',
         season_id: data.season_id ?? new Date().getFullYear().toString(),
@@ -214,10 +237,29 @@ export function TournamentEditor({
         age_grade: data.age_grade ?? 'Mayores (Adults)',
         status: data.status ?? 'draft',
         is_visible: data.is_visible ?? true,
-        country_id: data.country_id ?? data.country ?? '',
+        country_id: normalizeCountryId(data.country_id ?? data.country ?? '', baseCountryOptions),
         region: data.region ?? '',
         format: data.format ?? 'league',
-    });
+    }));
+    const countryOptions = useMemo(() => {
+        if (!form.country_id) return baseCountryOptions;
+
+        const normalizedCountryId = normalizeCountryId(form.country_id, baseCountryOptions);
+        const existingOption = baseCountryOptions.find((option) => option.id === normalizedCountryId);
+        if (existingOption) return baseCountryOptions;
+
+        return [
+            {
+                id: normalizedCountryId,
+                label: data.country || form.country_id,
+            },
+            ...baseCountryOptions,
+        ];
+    }, [baseCountryOptions, data.country, form.country_id]);
+    const selectedCountryLabel = useMemo(
+        () => countryOptions.find((option) => option.id === form.country_id)?.label || null,
+        [countryOptions, form.country_id],
+    );
 
     const [ruleset, setRuleset] = useState(() => {
         const r = (data.ruleset && typeof data.ruleset === 'object') ? { ...data.ruleset as any } : {};
@@ -332,7 +374,8 @@ export function TournamentEditor({
             const effectiveFormat = ruleset.phases[0]?.format || form.format;
             const payload = {
                 ...form,
-                country_id: form.country_id ? slugify(form.country_id) : null,
+                country: form.country_id ? (selectedCountryLabel || form.country_id) : null,
+                country_id: form.country_id || null,
                 union_id: actualUnionId,
                 format: effectiveFormat,
                 ruleset: {
@@ -568,15 +611,18 @@ export function TournamentEditor({
                             </div>
                             <div style={S.formGroup}>
                                 <label style={S.label}>Country</label>
-                                <input
-                                    type="text"
+                                <select
                                     style={S.input}
-                                    placeholder="e.g. Argentina"
                                     value={form.country_id}
                                     onChange={e => handleChange('country_id', e.target.value)}
-                                    onFocus={e => { e.target.style.borderColor = T.neon; e.target.style.boxShadow = `0 0 10px ${T.neonDim}`; }}
-                                    onBlur={e => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
-                                />
+                                    onFocus={e => { e.target.style.borderColor = T.neon; }}
+                                    onBlur={e => { e.target.style.borderColor = T.border; }}
+                                >
+                                    <option value="">No especificado</option>
+                                    {countryOptions.map((country) => (
+                                        <option key={country.id} value={country.id}>{country.label}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div style={S.formGroup}>
                                 <label style={S.label}>Region</label>

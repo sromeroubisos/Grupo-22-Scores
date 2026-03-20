@@ -563,3 +563,88 @@ export const getCountriesByRegion = (region: Country['region']): Country[] => {
 export const getAllCountries = (): Country[] => {
     return Object.values(COUNTRIES).sort((a, b) => a.name.localeCompare(b.name));
 };
+
+export type TournamentCountryOption = {
+    id: string;
+    label: string;
+    code?: string | null;
+    flagEmoji?: string | null;
+};
+
+type TournamentCountrySource = {
+    id: string;
+    name?: string | null;
+    nameEs?: string | null;
+    code?: string | null;
+    flagEmoji?: string | null;
+    flag_emoji?: string | null;
+};
+
+const NON_TOURNAMENT_COUNTRY_IDS = new Set(
+    Object.values(COUNTRIES)
+        .filter((country) => country.id !== 'international' && country.code.trim().length !== 2)
+        .map((country) => country.id),
+);
+
+function normalizeCountryKey(value: string): string {
+    return value.trim().toLowerCase();
+}
+
+export const isTournamentCountrySelectable = (id?: string | null): boolean => {
+    if (!id?.trim()) return false;
+
+    const normalizedId = normalizeCountryKey(id);
+    if (normalizedId === 'international') return true;
+
+    const staticCountry = COUNTRIES[normalizedId];
+    if (!staticCountry) return true;
+
+    return !NON_TOURNAMENT_COUNTRY_IDS.has(staticCountry.id);
+};
+
+export const getTournamentCountryOptions = (
+    extraCountries: TournamentCountrySource[] = [],
+): TournamentCountryOption[] => {
+    const options = new Map<string, TournamentCountryOption>();
+
+    const upsertOption = (source: TournamentCountrySource) => {
+        if (!source.id?.trim()) return;
+        if (!isTournamentCountrySelectable(source.id)) return;
+
+        const normalizedId = normalizeCountryKey(source.id);
+        const staticCountry = COUNTRIES[normalizedId];
+        const label =
+            source.nameEs?.trim() ||
+            staticCountry?.nameEs ||
+            source.name?.trim() ||
+            staticCountry?.name ||
+            source.id.trim();
+
+        if (!label) return;
+
+        if (!options.has(normalizedId)) {
+            options.set(normalizedId, {
+                id: source.id.trim(),
+                label,
+                code: source.code ?? staticCountry?.code ?? null,
+                flagEmoji: source.flagEmoji ?? source.flag_emoji ?? staticCountry?.flagEmoji ?? null,
+            });
+        }
+    };
+
+    Object.values(COUNTRIES).forEach(upsertOption);
+    extraCountries.forEach(upsertOption);
+    upsertOption({ id: 'international', nameEs: 'Internacional' });
+
+    const internationalOption = options.get('international') ?? {
+        id: 'international',
+        label: 'Internacional',
+    };
+
+    options.delete('international');
+
+    return [
+        ...Array.from(options.values()).sort((left, right) => left.label.localeCompare(right.label, 'es')),
+        internationalOption,
+    ];
+};

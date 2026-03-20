@@ -34,6 +34,8 @@ function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; c
     );
 }
 
+const CLUBS_PER_PAGE = 20;
+
 export default function SuperadminClubesPage() {
     // ─── Read from shared context (already prefetched by layout) ─────────────────
     const { filters, clubs, loading, errors, refresh, setFilters } = useSuperConsole();
@@ -48,6 +50,7 @@ export default function SuperadminClubesPage() {
     const [unionFilter, setUnionFilter] = useState('all');
     const [visibilityFilter, setVisibilityFilter] = useState('all');
     const [logoFilter, setLogoFilter] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Local state for optimistic mutations (avoid full context refresh unless needed)
     const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<ClubWithUnion>>>({});
@@ -131,6 +134,26 @@ export default function SuperadminClubesPage() {
         return true;
     }), [displayClubs, filters.search, filters.country, unionFilter, visibilityFilter, logoFilter]);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters.search, filters.country, unionFilter, visibilityFilter, logoFilter]);
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / CLUBS_PER_PAGE));
+
+    useEffect(() => {
+        setCurrentPage(prev => Math.min(prev, totalPages));
+    }, [totalPages]);
+
+    const paginatedClubs = useMemo(() => {
+        const startIndex = (currentPage - 1) * CLUBS_PER_PAGE;
+        return filtered.slice(startIndex, startIndex + CLUBS_PER_PAGE);
+    }, [filtered, currentPage]);
+
+    const paginationPages = useMemo(
+        () => Array.from({ length: totalPages }, (_, index) => index + 1),
+        [totalPages],
+    );
+
     const hasActiveFilters = filters.search || filters.country !== 'all' || unionFilter !== 'all' || visibilityFilter !== 'all' || logoFilter !== 'all';
 
     const clearFilters = () => {
@@ -138,10 +161,13 @@ export default function SuperadminClubesPage() {
         setUnionFilter('all');
         setVisibilityFilter('all');
         setLogoFilter('all');
+        setCurrentPage(1);
     };
 
     const visibleCount = filtered.filter(c => c.is_visible !== false).length;
     const hiddenCount = filtered.filter(c => c.is_visible === false).length;
+    const pageStart = filtered.length === 0 ? 0 : (currentPage - 1) * CLUBS_PER_PAGE + 1;
+    const pageEnd = Math.min(currentPage * CLUBS_PER_PAGE, filtered.length);
 
     return (
         <div style={{ paddingBottom: 40 }} onClick={() => setActionMenuOpenId(null)}>
@@ -259,6 +285,7 @@ export default function SuperadminClubesPage() {
             )}
 
             {!isLoading && filtered.length > 0 && (
+                <>
                 <div className={styles.slab} style={{ padding: 0, overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead>
@@ -273,7 +300,7 @@ export default function SuperadminClubesPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.map(club => {
+                            {paginatedClubs.map(club => {
                                 const isVisible = club.is_visible !== false;
                                 return (
                                     <tr
@@ -359,6 +386,63 @@ export default function SuperadminClubesPage() {
                         </tbody>
                     </table>
                 </div>
+                <div
+                    className={styles.filterBar}
+                    style={{ marginTop: 16, marginBottom: 0, justifyContent: 'space-between', alignItems: 'center' }}
+                    onClick={e => e.stopPropagation()}
+                >
+                    <div className={styles.filterLabel} style={{ fontSize: 11 }}>
+                        Mostrando {pageStart}-{pageEnd} de {filtered.length} clubes
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                            <button
+                                type="button"
+                                className={styles.cardAction}
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                style={{ padding: '8px 14px' }}
+                            >
+                                Anterior
+                            </button>
+
+                            {paginationPages.map(page => {
+                                const isActive = page === currentPage;
+                                return (
+                                    <button
+                                        key={page}
+                                        type="button"
+                                        className={styles.cardAction}
+                                        onClick={() => setCurrentPage(page)}
+                                        aria-current={isActive ? 'page' : undefined}
+                                        style={{
+                                            minWidth: 40,
+                                            padding: '8px 12px',
+                                            background: isActive ? 'var(--color-accent)' : undefined,
+                                            borderColor: isActive ? 'var(--color-accent)' : undefined,
+                                            color: isActive ? '#012e1d' : undefined,
+                                            fontWeight: isActive ? 700 : undefined,
+                                        }}
+                                    >
+                                        {page}
+                                    </button>
+                                );
+                            })}
+
+                            <button
+                                type="button"
+                                className={styles.cardAction}
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                style={{ padding: '8px 14px' }}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    )}
+                </div>
+                </>
             )}
 
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

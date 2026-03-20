@@ -588,6 +588,19 @@ export class FixtureService {
     if (data.notes !== undefined) updateData.notes = data.notes;
     if (data.score) updateData.score = data.score;
 
+    // Guard: if nothing to update (e.g. only events/lineups were sent but those columns
+    // were removed in schema simplification), skip the UPDATE to avoid PostgREST returning
+    // 0 rows which causes .single() to throw "Cannot coerce the result to a single JSON object".
+    if (Object.keys(updateData).length === 0) {
+      const { data: fullMatch, error: fetchErr } = await supabase
+        .from('matches')
+        .select('*')
+        .eq('id', matchId)
+        .single();
+      if (fetchErr || !fullMatch) throw new Error('No se pudo obtener el partido.');
+      return this.mapMatch(fullMatch);
+    }
+
     const { data: match, error } = await supabase
       .from('matches')
       .update(updateData)

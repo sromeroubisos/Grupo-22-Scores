@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_STORE_HEADERS = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+};
+
+function jsonNoStore(body: unknown, init?: ResponseInit) {
+    return NextResponse.json(body, {
+        ...init,
+        headers: {
+            ...NO_STORE_HEADERS,
+            ...(init?.headers ?? {}),
+        },
+    });
+}
+
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
@@ -23,14 +42,14 @@ export async function GET(
             tournament_id = t.id;
             console.log(`[BACKEND] Slug resolved to UUID: ${tournament_id}`);
         } else {
-            return NextResponse.json({ ok: false, error: 'Tournament not found' }, { status: 404 });
+            return jsonNoStore({ ok: false, error: 'Tournament not found' }, { status: 404 });
         }
     }
 
     const [tournamentRes, participantsRes, matchesRes, standingsRes, phasesRes, groupsRes, teamLabelsRes] = await Promise.all([
         supabase
             .from('tournaments')
-            .select('id, name, display_name, sport_id, legacy_sport:sport, country_id, logo_url, status, is_visible, slug')
+            .select('id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, status, is_visible, slug')
             .eq('id', tournament_id)
             .maybeSingle(),
 
@@ -88,6 +107,20 @@ export async function GET(
     ]);
 
     const standingsCount = standingsRes.data?.length || 0;
+    const queryErrors = {
+        tournament: tournamentRes.error?.message ?? null,
+        participants: participantsRes.error?.message ?? null,
+        matches: matchesRes.error?.message ?? null,
+        standings: standingsRes.error?.message ?? null,
+        phases: phasesRes.error?.message ?? null,
+        groups: groupsRes.error?.message ?? null,
+        teamLabels: teamLabelsRes.error?.message ?? null,
+    };
+
+    if (Object.values(queryErrors).some(Boolean)) {
+        console.warn('[BACKEND] Query errors while fetching manual tournament data:', queryErrors);
+    }
+
     console.log(`[BACKEND] Data fetched: 
         Participants: ${participantsRes.data?.length || 0}
         Matches: ${matchesRes.data?.length || 0}
@@ -101,11 +134,12 @@ export async function GET(
         console.log('[BACKEND] Standings raw sample:', JSON.stringify(standingsRes.data?.[0], null, 2));
     }
 
-    return NextResponse.json({
+    return jsonNoStore({
         ok: true,
         tournament: tournamentRes.data ? {
             ...tournamentRes.data,
             sport_id: tournamentRes.data.sport_id || tournamentRes.data.legacy_sport || 'rugby',
+            country_name: tournamentRes.data.country || (tournamentRes.data.country_ref as { name?: string } | null)?.name || null,
         } : null,
         participants: participantsRes.data || [],
         matches: matchesRes.data || [],
@@ -116,7 +150,8 @@ export async function GET(
         debug: {
             id,
             standingsCount,
-            phaseCount: phasesRes.data?.length || 0
+            phaseCount: phasesRes.data?.length || 0,
+            queryErrors,
         }
     });
 }

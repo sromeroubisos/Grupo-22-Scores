@@ -9,7 +9,8 @@ import {
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
 import { createClient } from '@/lib/supabase/client';
 import { createEntity, updateEntity } from '@/app/admin/entities/actions';
-import { SPORTS, getActiveSports } from '@/lib/data/sports';
+import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
+import { getActiveSports } from '@/lib/data/sports';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 import '../../creation-forms.css';
 
@@ -55,6 +56,24 @@ const steps = [
     { id: 5, name: 'Publicar', icon: <Globe size={14} /> },
 ] as const;
 
+function slugify(value: string) {
+    return value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
+
+function normalizeCountryId(value: string | null | undefined, options: TournamentCountryOption[]): string {
+    if (!value) return '';
+    const normalized = slugify(value);
+    const matched = options.find((option) => slugify(option.id) === normalized || slugify(option.label) === normalized);
+    return matched?.id || normalized;
+}
+
 export default function SuperCreateTournament() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -68,6 +87,7 @@ export default function SuperCreateTournament() {
     const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [saving, setSaving] = useState(false);
+    const [countryOptions, setCountryOptions] = useState<TournamentCountryOption[]>(() => getTournamentCountryOptions());
 
     const [formData, setFormData] = useState({
         name: '',
@@ -95,6 +115,9 @@ export default function SuperCreateTournament() {
         supabase.from('clubs').select('*').order('name').then(({ data }) => {
             setClubs(data || []);
         });
+        supabase.from('countries').select('id, name, code, flag_emoji').order('name').then(({ data }) => {
+            setCountryOptions(getTournamentCountryOptions(data || []));
+        });
     }, [supabase]);
 
     // Load tournament data when editing
@@ -120,7 +143,7 @@ export default function SuperCreateTournament() {
                     season: data.season_id || '2026',
                     category: data.category || prev.category,
                     format: data.format || prev.format,
-                    country: data.country_id || '',
+                    country: normalizeCountryId(data.country_id || data.country || '', countryOptions),
                     unionId: data.union_id || '',
                     rules: {
                         ...prev.rules,
@@ -140,7 +163,7 @@ export default function SuperCreateTournament() {
             .then(({ data }) => {
                 setSelectedClubs(data?.map((p: any) => p.club_id) || []);
             });
-    }, [tournamentId, supabase]);
+    }, [countryOptions, supabase, tournamentId]);
 
     const handleSportChange = (sportId: string) => {
         const d = sportDefaults[sportId];
@@ -179,6 +202,9 @@ export default function SuperCreateTournament() {
                 season_id: formData.season || '2026',
                 category: formData.category || null,
                 format: formData.format || null,
+                country: formData.country
+                    ? (countryOptions.find((option) => option.id === formData.country)?.label || formData.country)
+                    : null,
                 country_id: formData.country || null,
                 union_id: formData.unionId || null,
                 status: 'published' as const,
@@ -334,10 +360,10 @@ export default function SuperCreateTournament() {
                                             value={formData.country}
                                             onChange={e => setFormData({ ...formData, country: e.target.value })}
                                         >
-                                            <option value="">Global / Internacional</option>
-                                            <option value="Argentina">Argentina</option>
-                                            <option value="Uruguay">Uruguay</option>
-                                            <option value="Chile">Chile</option>
+                                            <option value="">No especificado</option>
+                                            {countryOptions.map((country) => (
+                                                <option key={country.id} value={country.id}>{country.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="field-group">

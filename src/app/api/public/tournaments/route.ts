@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
         const { data, error } = await supabase
             .from('tournaments')
-            .select('id, name, display_name, country_id, sport_id, legacy_sport:sport, logo_url, slug, is_visible, status')
+            .select('id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status')
             .neq('is_visible', false)
             .order('display_name', { ascending: true })
             .order('name', { ascending: true });
@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
                 id: tournament.id,
                 name: tournament.name,
                 display_name: tournament.display_name,
+                country: tournament.country || (tournament.country_ref as { name?: string } | null)?.name || null,
                 country_id: tournament.country_id,
                 sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
                 logo_url: tournament.logo_url,

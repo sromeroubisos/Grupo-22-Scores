@@ -16,6 +16,7 @@ interface DbTournament {
     id: string;
     name: string;
     display_name: string | null;
+    country: string | null;
     country_id: string | null;
     sport_id: string | null;
     logo_url: string | null;
@@ -99,6 +100,10 @@ const TournamentItem = React.memo(({ tournament, isFavorite }: { tournament: DbT
     </Link>
 ));
 TournamentItem.displayName = 'TournamentItem';
+
+function normalizeTournamentCountry(tournament: DbTournament): string {
+    return (tournament.country_id || tournament.country || '').trim().toLowerCase();
+}
 
 const CountryAccordion = React.memo(({
     country,
@@ -192,7 +197,7 @@ export default function TorneosPage() {
     // Argentina / popular section
     const recommended = useMemo(() => {
         return filteredTournaments.filter(t =>
-            t.country_id === 'argentina' || t.country_id === 'Argentina'
+            normalizeTournamentCountry(t) === 'argentina'
         );
     }, [filteredTournaments]);
 
@@ -202,9 +207,9 @@ export default function TorneosPage() {
 
         filteredTournaments.forEach(t => {
             // Skip Argentina (shown in recommended)
-            if (t.country_id === 'argentina' || t.country_id === 'Argentina') return;
+            if (normalizeTournamentCountry(t) === 'argentina') return;
 
-            const key = t.country_id || '__sin-pais__';
+            const key = t.country_id || t.country || '__sin-pais__';
             if (!groups[key]) groups[key] = [];
             groups[key].push(t);
         });
@@ -219,7 +224,9 @@ export default function TorneosPage() {
                 }
                 // Try to resolve via static country data (supports both id and name)
                 const resolved = getCountryById(countryKey) ||
-                    { id: countryKey, name: countryKey, nameEs: countryKey, code: '', flagEmoji: FLAG_FALLBACK };
+                    (tournaments[0]?.country
+                        ? { id: countryKey, name: tournaments[0].country, nameEs: tournaments[0].country, code: '', flagEmoji: FLAG_FALLBACK }
+                        : { id: countryKey, name: countryKey, nameEs: countryKey, code: '', flagEmoji: FLAG_FALLBACK });
                 return { country: resolved, tournaments };
             })
             .sort((a, b) => {

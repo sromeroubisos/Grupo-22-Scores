@@ -273,6 +273,12 @@ function resolveCountryName(detailsData: any, tournamentData: any): string {
     const detailsCountry = detailsData?.country?.name || detailsData?.country || detailsData?.country_name;
     if (detailsCountry) return detailsCountry;
 
+    const persistedCountry =
+        tournamentData?.country_name ||
+        tournamentData?.country?.name ||
+        tournamentData?.country;
+    if (persistedCountry) return persistedCountry;
+
     const tournamentCountryId = tournamentData?.countryId || tournamentData?.country_id || null;
     if (typeof tournamentCountryId === 'string' && tournamentCountryId.trim()) {
         const normalizedId = tournamentCountryId.trim().toLowerCase();
@@ -371,12 +377,25 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
                 // ── DB-only path (manually created tournaments) ───────────
                 if ((localTournament as any)?.__isDbOnly) {
-                    const dbDataRes = await fetch(`/api/db/tournaments/${id}/data`, { signal: controller.signal });
-                    if (dbDataRes.ok) {
-                        const dbData = await dbDataRes.json();
-                        console.log('[FRONTEND] payload recibido desde API (DB-only):', dbData);
-                        
-                        if (dbData.ok) {
+                    const dbDataRes = await fetch(`/api/db/tournaments/${id}/data`, {
+                        cache: 'no-store',
+                        signal: controller.signal,
+                    });
+                    const dbData = await dbDataRes.json();
+                    if (!dbDataRes.ok || !dbData?.ok) {
+                        console.error('[FRONTEND] Error fetching dbData:', dbDataRes.status, dbData);
+                        if (!controller.signal.aborted) {
+                            setError(dbData?.error || 'No se pudieron cargar los datos del torneo.');
+                        }
+                        return;
+                    }
+
+                    console.log('[FRONTEND] payload recibido desde API (DB-only):', dbData);
+                    if (dbData.debug?.queryErrors && Object.values(dbData.debug.queryErrors).some(Boolean)) {
+                        console.warn('[FRONTEND] DB-only query errors:', dbData.debug.queryErrors);
+                    }
+
+                    if (dbData.ok) {
                             // Update tournament metadata from the /data response
                             if (dbData.tournament) {
                                 const t = dbData.tournament;
@@ -510,9 +529,6 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                                 console.log('[FRONTEND] final rows passed to standings component (flat):', dbStandings.length);
                                 setStandings(dbStandings);
                             }
-                        }
-                    } else {
-                        console.error('[FRONTEND] Error fetching dbData:', dbDataRes.status);
                     }
                     return; // Skip FlashScore for DB-only tournaments
                 }

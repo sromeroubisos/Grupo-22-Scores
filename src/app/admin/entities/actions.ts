@@ -18,6 +18,7 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         sport_id: z.string().optional().nullable(),
         category: z.string().optional().nullable(),
         age_grade: z.string().optional().nullable(),
+        country: z.string().optional().nullable(),
         country_id: z.string().optional().nullable(),
         region: z.string().optional().nullable(),
         status: z.enum(['draft', 'published', 'active', 'archived']).optional().nullable(),

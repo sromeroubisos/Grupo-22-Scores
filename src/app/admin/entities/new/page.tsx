@@ -112,9 +112,14 @@ export default async function NewEntityPage({ searchParams }: NewEntityPageProps
 
     // Fetch unions for tournament if needed
     let tUnions: any[] = [];
+    let tCountries: Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> = [];
     if (isTournament) {
-        const { data } = await supabase.from('unions').select('id, name').order('name');
-        tUnions = data ?? [];
+        const [{ data: unionsData }, { data: countriesData }] = await Promise.all([
+            supabase.from('unions').select('id, name').order('name'),
+            supabase.from('countries').select('id, name, code, flag_emoji').order('name'),
+        ]);
+        tUnions = unionsData ?? [];
+        tCountries = countriesData ?? [];
     }
 
     return (
@@ -141,7 +146,7 @@ export default async function NewEntityPage({ searchParams }: NewEntityPageProps
             )}
 
             <div className={isTournament ? '' : 'bg-surface border border-divider rounded-xl p-6 shadow-sm'}>
-                {entityType === 'tournament' && <TournamentEditor data={emptyData.tournament} id="new" unions={tUnions} />}
+                {entityType === 'tournament' && <TournamentEditor data={emptyData.tournament} id="new" unions={tUnions} countries={tCountries} />}
                 {entityType === 'match' && <MatchEditor data={emptyData.match} id="new" />}
                 {entityType === 'player' && <PlayerEditor data={emptyData.player} id="new" />}
                 {entityType === 'union' && (

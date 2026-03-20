@@ -127,15 +127,18 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     // For tournament tabs: fetch unions + match count in parallel
     let tournamentUnions: Array<{ id: string; name: string }> = [];
+    let tournamentCountries: Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> = [];
     let tournamentMatchCount = 0;
     let tournamentUnionName: string | undefined;
     if (isTournament) {
         const tournamentData = result.data as TournamentRow;
-        const [{ data: unionsData }, { count }] = await Promise.all([
+        const [{ data: unionsData }, { count }, { data: countriesData }] = await Promise.all([
             supabase.from('unions').select('id, name').order('name'),
             supabase.from('matches').select('id', { count: 'exact', head: true }).eq('tournament_id', id),
+            supabase.from('countries').select('id, name, code, flag_emoji').order('name'),
         ]);
         tournamentUnions = unionsData ?? [];
+        tournamentCountries = countriesData ?? [];
         tournamentMatchCount = count ?? 0;
         if (tournamentData.union_id) {
             tournamentUnionName = tournamentUnions.find(u => u.id === (result.data as TournamentRow).union_id)?.name;
@@ -190,6 +193,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                             data={result.data as TournamentRow}
                             id={id}
                             unions={tournamentUnions}
+                            countries={tournamentCountries}
                         />
                     )}
                     {effectiveTab === 'estructura' && (

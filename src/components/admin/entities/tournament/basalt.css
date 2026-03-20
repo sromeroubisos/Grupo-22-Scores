@@ -1599,7 +1599,7 @@ select.basalt-input {
 
 .operation-fixture-workspace {
     display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.75fr);
+    grid-template-columns: minmax(0, 1.9fr) minmax(320px, 0.68fr);
     gap: 24px;
     align-items: start;
 }
@@ -1685,6 +1685,44 @@ select.basalt-input {
     color: rgba(255, 255, 255, 0.56);
 }
 
+.operation-fixture-side-desktop {
+    display: grid;
+}
+
+.operation-mobile-side-trigger {
+    display: none;
+    gap: 14px;
+    padding: 18px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(135deg, rgba(0, 163, 101, 0.12), transparent 58%),
+        rgba(8, 12, 18, 0.78);
+}
+
+.operation-mobile-side-trigger-copy {
+    display: grid;
+    gap: 6px;
+}
+
+.operation-mobile-side-trigger-copy strong {
+    font-size: 16px;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.96);
+}
+
+.operation-mobile-side-trigger-copy small {
+    color: rgba(228, 233, 241, 0.62);
+    line-height: 1.45;
+}
+
+.operation-side-sheet-backdrop {
+    z-index: 116;
+}
+
+.operation-fixture-side-sheet {
+    display: none;
+}
+
 .operation-fixture-panel,
 .operation-side-panel {
     gap: 16px;
@@ -1707,11 +1745,17 @@ select.basalt-input {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+    align-items: stretch;
+    width: 100%;
 }
 
 .operation-fixture-subtab {
     display: grid;
+    grid-template-rows: auto 1fr;
     gap: 4px;
+    width: 100%;
+    min-width: 0;
+    align-content: start;
     padding: 16px 18px;
     text-align: left;
     border-radius: 18px;
@@ -1726,11 +1770,14 @@ select.basalt-input {
 .operation-fixture-subtab span {
     font-size: 15px;
     font-weight: 800;
+    min-width: 0;
 }
 
 .operation-fixture-subtab small {
     color: rgba(228, 233, 241, 0.62);
     line-height: 1.4;
+    min-width: 0;
+    text-wrap: balance;
 }
 
 .operation-fixture-subtab:hover {
@@ -1744,6 +1791,24 @@ select.basalt-input {
     background:
         radial-gradient(circle at top left, rgba(0, 163, 101, 0.18), transparent 54%),
         rgba(0, 46, 75, 0.84);
+}
+
+.operation-fixture-main > .operation-fixture-subtabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-self: stretch;
+    justify-self: start;
+    justify-content: flex-start;
+    inline-size: min(100%, 860px);
+    min-inline-size: 0;
+}
+
+.operation-fixture-main > .operation-fixture-subtabs > .operation-fixture-subtab {
+    flex: 1 1 320px;
+    min-inline-size: 280px;
+    max-inline-size: 404px;
+    min-block-size: 120px;
 }
 
 .operation-method-grid {
@@ -2444,6 +2509,90 @@ select.basalt-input {
     }
 }
 
+@media (max-width: 1180px) {
+    .operation-fixture-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .operation-fixture-main > .operation-fixture-subtabs {
+        inline-size: 100%;
+    }
+
+    .operation-fixture-side-desktop {
+        display: none;
+    }
+
+    .operation-mobile-side-trigger {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+    }
+
+    .operation-mobile-side-trigger .basalt-btn {
+        min-height: 40px;
+        white-space: nowrap;
+    }
+
+    .operation-fixture-side-sheet {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        z-index: 117;
+        display: flex;
+        max-height: calc(100vh - 24px);
+        flex-direction: column;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+            rgba(7, 12, 20, 0.96);
+        box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.42);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(18px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        backdrop-filter: blur(20px);
+    }
+
+    .operation-fixture-side-sheet.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    .operation-fixture-side-sheet-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .operation-fixture-side-sheet-head strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.96);
+    }
+
+    .operation-fixture-side-sheet-close {
+        min-width: 40px;
+        width: 40px;
+        padding-inline: 0;
+    }
+
+    .operation-fixture-side-sheet-body {
+        display: grid;
+        gap: 12px;
+        overflow-y: auto;
+        padding-right: 2px;
+    }
+}
+
 @media (max-width: 1023px) {
     .basalt-body {
         --basalt-header-offset: 148px;
@@ -2586,6 +2735,17 @@ select.basalt-input {
         min-width: 0;
     }
 
+    .operation-mobile-side-trigger {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+    }
+
+    .operation-mobile-side-trigger .basalt-btn {
+        min-height: 40px;
+        white-space: nowrap;
+    }
+
     .basalt-shell-layout {
         padding-top: 16px;
         gap: 16px;
@@ -2641,6 +2801,7 @@ select.basalt-input {
 
     .operation-manage-toolbar-grid.is-open {
         display: grid;
+        gap: 10px;
     }
 
     .operation-manage-list-meta {
@@ -2648,17 +2809,153 @@ select.basalt-input {
     }
 
     .operation-fixture-subtabs {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 6px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .operation-fixture-subtab {
-        min-width: 240px;
+        min-width: 0;
     }
 
     .operation-form-field-span-2 {
         grid-column: auto;
+    }
+
+    .operation-fixture-side-desktop {
+        display: none;
+    }
+
+    .operation-fixture-panel-head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .operation-inline-actions,
+    .operation-empty-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .operation-inline-actions .basalt-btn,
+    .operation-empty-actions .basalt-btn,
+    .operation-manage-create {
+        width: 100%;
+    }
+
+    .operation-manage-toolbar {
+        position: static;
+        top: auto;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .operation-manage-inline-groups {
+        gap: 6px;
+    }
+
+    .operation-manage-toggle {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .operation-manage-toggle button {
+        width: 100%;
+        min-height: 38px;
+        padding-inline: 10px;
+    }
+
+    .operation-manage-list-row {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .operation-manage-list-main strong {
+        font-size: 14px;
+        line-height: 1.35;
+    }
+
+    .operation-match-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .operation-match-action {
+        width: 100%;
+        min-height: 40px;
+    }
+
+    .operation-round-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .operation-manage-round-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .operation-validation-item {
+        grid-template-columns: 1fr;
+    }
+
+    .operation-fixture-side-sheet {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        z-index: 117;
+        display: flex;
+        max-height: calc(100vh - 24px);
+        flex-direction: column;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+            rgba(7, 12, 20, 0.96);
+        box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.42);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(18px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        backdrop-filter: blur(20px);
+    }
+
+    .operation-fixture-side-sheet.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    .operation-fixture-side-sheet-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .operation-fixture-side-sheet-head strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.96);
+    }
+
+    .operation-fixture-side-sheet-close {
+        min-width: 40px;
+        width: 40px;
+        padding-inline: 0;
+    }
+
+    .operation-fixture-side-sheet-body {
+        display: grid;
+        gap: 12px;
+        overflow-y: auto;
+        padding-right: 2px;
     }
 
     .basalt-body .manager-card {
@@ -2725,6 +3022,15 @@ select.basalt-input {
         --basalt-header-offset: 188px;
     }
 
+    .operation-fixture-subtabs {
+        grid-template-columns: 1fr;
+    }
+
+    .operation-fixture-main > .operation-fixture-subtabs > .operation-fixture-subtab {
+        flex-basis: 100%;
+        min-inline-size: 100%;
+    }
+
     .basalt-h1 {
         font-size: 20px;
     }
@@ -2737,6 +3043,14 @@ select.basalt-input {
 
     .operation-mobile-picker-grid {
         grid-template-columns: 1fr;
+    }
+
+    .operation-mobile-side-trigger {
+        grid-template-columns: 1fr;
+    }
+
+    .operation-mobile-side-trigger .basalt-btn {
+        width: 100%;
     }
 
     .operation-method-grid {
@@ -2784,6 +3098,19 @@ select.basalt-input {
         .operation-mobile-trigger-copy small {
             font-size: 10px;
         }
+
+    .operation-manage-toggle,
+    .operation-match-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .operation-fixture-side-sheet {
+        left: 8px;
+        right: 8px;
+        bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+        max-height: calc(100vh - 16px);
+        padding: 12px;
+    }
 }
 
 /* Tournament console visual system override */

@@ -22,6 +22,7 @@ import {
   Trash2,
   Upload,
   WandSparkles,
+  X,
   Zap,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -30,6 +31,7 @@ import type { MatchStatus, MatchWithClubs, RoundWithMatches } from '@/lib/types/
 import type { FixtureImportPreviewResult } from '@/lib/types/fixture-import';
 import { FixtureImportWizard } from './FixtureImportWizard';
 import { useFixture } from './FixtureContext';
+import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 import './fixture-management.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -244,9 +246,11 @@ export function TournamentOperationFixtureWorkspace({
   const [manageView, setManageView] = useState<ManageViewMode>('cards');
   const [manageGrouping, setManageGrouping] = useState<ManageGroupingMode>('rounds');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [mobileInsightsOpen, setMobileInsightsOpen] = useState(false);
   const [collapsedContainerIds, setCollapsedContainerIds] = useState<Set<string>>(new Set());
   const [roundDraft, setRoundDraft] = useState<RoundDraftState | null>(null);
   const deferredManageSearch = useDeferredValue(manageSearch);
+  const mobileInsightsSheet = useAnimatedDisclosure(mobileInsightsOpen, 180);
 
   useEffect(() => {
     if (selectedPhaseId) selectPhase(selectedPhaseId);
@@ -435,6 +439,10 @@ export function TournamentOperationFixtureWorkspace({
     ].reduce((sum, value) => sum + value, 0),
     [manageGroupFilter, manageGrouping, manageRoundFilter, manageSearch, manageStatusFilter],
   );
+
+  useEffect(() => {
+    setMobileInsightsOpen(false);
+  }, [activeSubtab, selectedMethod, selectedPhaseId]);
 
   const setManualField = <K extends keyof ManualFormState>(field: K, value: ManualFormState[K]) => {
     setManualForm((current) => {
@@ -672,6 +680,136 @@ export function TournamentOperationFixtureWorkspace({
   }
 
   const activeMeta = WORKSPACE_SUBTABS.find((item) => item.id === activeSubtab) || WORKSPACE_SUBTABS[0];
+  const mobileInsightsSummary = activeSubtab === 'manage_fixture'
+    ? `${filteredManageEntries.length} partidos visibles${activeFilterCount > 0 ? ` · ${activeFilterCount} filtros` : ''}`
+    : `${summary.roundsCreated} jornadas · ${summary.matchesPending} pendientes`;
+
+  const renderSidebarContent = () => (
+    <>
+      <section className="operation-side-panel basalt-card">
+        <div className="operation-fixture-panel-head">
+          <div>
+            <span className="operation-fixture-kicker">Resumen</span>
+            <h4>Estado de la fase</h4>
+          </div>
+        </div>
+        <div className="operation-summary-grid">
+          <div className="operation-summary-card"><span>Partidos listos</span><strong>{summary.matchesReady}</strong></div>
+          <div className="operation-summary-card"><span>Partidos pendientes</span><strong>{summary.matchesPending}</strong></div>
+          <div className="operation-summary-card"><span>Jornadas creadas</span><strong>{summary.roundsCreated}</strong></div>
+          <div className="operation-summary-card"><span>Jornadas vacias</span><strong>{summary.roundsEmpty}</strong></div>
+        </div>
+      </section>
+
+      {activeSubtab === 'manage_fixture' ? (
+        <section className="operation-side-panel basalt-card">
+          <div className="operation-fixture-panel-head">
+            <div>
+              <span className="operation-fixture-kicker">Vista actual</span>
+              <h4>Gestion sobre el fixture</h4>
+            </div>
+          </div>
+          <div className="operation-summary-grid">
+            <div className="operation-summary-card"><span>Partidos visibles</span><strong>{filteredManageEntries.length}</strong></div>
+            <div className="operation-summary-card"><span>Bloques visibles</span><strong>{manageContainers.length}</strong></div>
+            <div className="operation-summary-card"><span>Filtros activos</span><strong>{activeFilterCount}</strong></div>
+            <div className="operation-summary-card"><span>Vista</span><strong>{manageView === 'cards' ? 'Cards' : 'Lista'}</strong></div>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="operation-side-panel basalt-card">
+        <div className="operation-fixture-panel-head">
+          <div>
+            <span className="operation-fixture-kicker">Chequeo estructural</span>
+            <h4>Validacion de la operacion</h4>
+          </div>
+          <button type="button" className="basalt-btn basalt-btn-ghost" onClick={() => void afterMutation('Chequeo estructural actualizado.', 'ok')}>
+            <RefreshCw size={15} />
+          </button>
+        </div>
+        <div className="operation-validation-list">
+          {structuralChecks.map((item) => (
+            <div key={item.label} className={`operation-validation-item ${item.ok ? 'tone-ok' : 'tone-warn'}`}>
+              <span className="operation-validation-icon">{item.ok ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}</span>
+              <div>
+                <strong>{item.label}</strong>
+                <p>{item.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {activeSubtab === 'add_matches' && selectedMethod === 'import_fixture' ? (
+        <section className="operation-side-panel basalt-card">
+          <div className="operation-fixture-panel-head">
+            <div>
+              <span className="operation-fixture-kicker">Preview actual</span>
+              <h4>Estado de la importacion</h4>
+            </div>
+          </div>
+          <div className="operation-summary-grid">
+            <div className="operation-summary-card"><span>Clubes vinculados</span><strong>{Math.max((importPreview?.summary.totalRows || 0) - (importPreview?.summary.unmatchedEntities || 0), 0)}</strong></div>
+            <div className="operation-summary-card"><span>Clubes sin match</span><strong>{importPreview?.summary.unmatchedEntities || 0}</strong></div>
+            <div className="operation-summary-card"><span>Duplicados</span><strong>{importPreview?.summary.duplicateRows || 0}</strong></div>
+            <div className="operation-summary-card"><span>Filas invalidas</span><strong>{importPreview?.summary.errorRows || 0}</strong></div>
+          </div>
+        </section>
+      ) : null}
+
+      {activeSubtab === 'manage_fixture' && roundDraft ? (
+        <section className="operation-side-panel basalt-card">
+          <div className="operation-fixture-panel-head">
+            <div>
+              <span className="operation-fixture-kicker">Editar jornada</span>
+              <h4>Ajustes rapidos</h4>
+            </div>
+          </div>
+          <div className="operation-form-grid">
+            <label className="operation-form-field operation-form-field-span-2">
+              <span>Nombre</span>
+              <input className="basalt-input" type="text" value={roundDraft.name} onChange={(event) => setRoundDraft((current) => current ? { ...current, name: event.target.value } : current)} />
+            </label>
+            <label className="operation-form-field">
+              <span>Fecha inicial</span>
+              <input className="basalt-input" type="date" value={roundDraft.startDate} onChange={(event) => setRoundDraft((current) => current ? { ...current, startDate: event.target.value } : current)} />
+            </label>
+            <label className="operation-form-field">
+              <span>Fecha final</span>
+              <input className="basalt-input" type="date" value={roundDraft.endDate} onChange={(event) => setRoundDraft((current) => current ? { ...current, endDate: event.target.value } : current)} />
+            </label>
+          </div>
+          <div className="operation-inline-actions">
+            <button type="button" className="basalt-btn" onClick={() => setRoundDraft(null)}>Cancelar</button>
+            <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === `round-${roundDraft.id}`} onClick={() => void handleRoundSave()}>
+              {busyAction === `round-${roundDraft.id}` ? <RefreshCw size={15} className="spin" /> : <Pencil size={15} />}
+              Guardar jornada
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {validationData?.diagnostics?.length ? (
+        <section className="operation-side-panel basalt-card">
+          <div className="operation-fixture-panel-head">
+            <div>
+              <span className="operation-fixture-kicker">Alertas</span>
+              <h4>Diagnostico actual</h4>
+            </div>
+          </div>
+          <div className="operation-context-list">
+            {validationData.diagnostics.slice(0, 5).map((item, index) => (
+              <div key={`${item.message}-${index}`} className="operation-context-row">
+                <AlertTriangle size={15} />
+                <span>{item.message || item.context || 'Advertencia estructural'}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </>
+  );
 
   return (
     <div className="operation-fixture-workspace">
@@ -687,6 +825,18 @@ export function TournamentOperationFixtureWorkspace({
             <strong>{selectedPhase?.name || 'Sin fase'}</strong>
             <small>{tournament.name || 'Torneo'} · {summary.roundsCreated} jornadas detectadas</small>
           </div>
+        </section>
+
+        <section className="operation-mobile-side-trigger basalt-card" aria-label="Panel compacto de fase">
+          <div className="operation-mobile-side-trigger-copy">
+            <span className="operation-fixture-kicker">Panel de fase</span>
+            <strong>{mobileInsightsSummary}</strong>
+            <small>Resumen, chequeos y alertas sin sacar foco del flujo principal.</small>
+          </div>
+          <button type="button" className="basalt-btn basalt-btn-primary" onClick={() => setMobileInsightsOpen(true)}>
+            <ClipboardList size={15} />
+            Ver panel
+          </button>
         </section>
 
         {feedback ? (
@@ -1195,130 +1345,44 @@ export function TournamentOperationFixtureWorkspace({
         )}
       </div>
 
-      <aside className="operation-fixture-side">
-        <section className="operation-side-panel basalt-card">
-          <div className="operation-fixture-panel-head">
-            <div>
-              <span className="operation-fixture-kicker">Resumen</span>
-              <h4>Estado de la fase</h4>
-            </div>
-          </div>
-          <div className="operation-summary-grid">
-            <div className="operation-summary-card"><span>Partidos listos</span><strong>{summary.matchesReady}</strong></div>
-            <div className="operation-summary-card"><span>Partidos pendientes</span><strong>{summary.matchesPending}</strong></div>
-            <div className="operation-summary-card"><span>Jornadas creadas</span><strong>{summary.roundsCreated}</strong></div>
-            <div className="operation-summary-card"><span>Jornadas vacias</span><strong>{summary.roundsEmpty}</strong></div>
-          </div>
-        </section>
+      <aside className="operation-fixture-side operation-fixture-side-desktop">
+        {renderSidebarContent()}
+      </aside>
 
-        {activeSubtab === 'manage_fixture' ? (
-          <section className="operation-side-panel basalt-card">
-            <div className="operation-fixture-panel-head">
+      {mobileInsightsSheet.shouldRender ? (
+        <>
+          <button
+            type="button"
+            className={`basalt-sheet-backdrop operation-side-sheet-backdrop ${mobileInsightsSheet.isVisible ? 'is-open' : ''}`}
+            aria-label="Cerrar panel de fase"
+            onClick={() => setMobileInsightsOpen(false)}
+          />
+          <aside
+            className={`operation-fixture-side-sheet ${mobileInsightsSheet.isVisible ? 'is-open' : ''}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Panel de fase"
+          >
+            <div className="operation-fixture-side-sheet-head">
               <div>
-                <span className="operation-fixture-kicker">Vista actual</span>
-                <h4>Gestion sobre el fixture</h4>
+                <span className="operation-fixture-kicker">Panel de fase</span>
+                <strong>Resumen operativo</strong>
               </div>
-            </div>
-            <div className="operation-summary-grid">
-              <div className="operation-summary-card"><span>Partidos visibles</span><strong>{filteredManageEntries.length}</strong></div>
-              <div className="operation-summary-card"><span>Bloques visibles</span><strong>{manageContainers.length}</strong></div>
-              <div className="operation-summary-card"><span>Filtros activos</span><strong>{activeFilterCount}</strong></div>
-              <div className="operation-summary-card"><span>Vista</span><strong>{manageView === 'cards' ? 'Cards' : 'Lista'}</strong></div>
-            </div>
-          </section>
-        ) : null}
-
-        <section className="operation-side-panel basalt-card">
-          <div className="operation-fixture-panel-head">
-            <div>
-              <span className="operation-fixture-kicker">Chequeo estructural</span>
-              <h4>Validacion de la operacion</h4>
-            </div>
-            <button type="button" className="basalt-btn basalt-btn-ghost" onClick={() => void afterMutation('Chequeo estructural actualizado.', 'ok')}>
-              <RefreshCw size={15} />
-            </button>
-          </div>
-          <div className="operation-validation-list">
-            {structuralChecks.map((item) => (
-              <div key={item.label} className={`operation-validation-item ${item.ok ? 'tone-ok' : 'tone-warn'}`}>
-                <span className="operation-validation-icon">{item.ok ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}</span>
-                <div>
-                  <strong>{item.label}</strong>
-                  <p>{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {activeSubtab === 'add_matches' && selectedMethod === 'import_fixture' ? (
-          <section className="operation-side-panel basalt-card">
-            <div className="operation-fixture-panel-head">
-              <div>
-                <span className="operation-fixture-kicker">Preview actual</span>
-                <h4>Estado de la importacion</h4>
-              </div>
-            </div>
-            <div className="operation-summary-grid">
-              <div className="operation-summary-card"><span>Clubes vinculados</span><strong>{Math.max((importPreview?.summary.totalRows || 0) - (importPreview?.summary.unmatchedEntities || 0), 0)}</strong></div>
-              <div className="operation-summary-card"><span>Clubes sin match</span><strong>{importPreview?.summary.unmatchedEntities || 0}</strong></div>
-              <div className="operation-summary-card"><span>Duplicados</span><strong>{importPreview?.summary.duplicateRows || 0}</strong></div>
-              <div className="operation-summary-card"><span>Filas invalidas</span><strong>{importPreview?.summary.errorRows || 0}</strong></div>
-            </div>
-          </section>
-        ) : null}
-
-        {activeSubtab === 'manage_fixture' && roundDraft ? (
-          <section className="operation-side-panel basalt-card">
-            <div className="operation-fixture-panel-head">
-              <div>
-                <span className="operation-fixture-kicker">Editar jornada</span>
-                <h4>Ajustes rapidos</h4>
-              </div>
-            </div>
-            <div className="operation-form-grid">
-              <label className="operation-form-field operation-form-field-span-2">
-                <span>Nombre</span>
-                <input className="basalt-input" type="text" value={roundDraft.name} onChange={(event) => setRoundDraft((current) => current ? { ...current, name: event.target.value } : current)} />
-              </label>
-              <label className="operation-form-field">
-                <span>Fecha inicial</span>
-                <input className="basalt-input" type="date" value={roundDraft.startDate} onChange={(event) => setRoundDraft((current) => current ? { ...current, startDate: event.target.value } : current)} />
-              </label>
-              <label className="operation-form-field">
-                <span>Fecha final</span>
-                <input className="basalt-input" type="date" value={roundDraft.endDate} onChange={(event) => setRoundDraft((current) => current ? { ...current, endDate: event.target.value } : current)} />
-              </label>
-            </div>
-            <div className="operation-inline-actions">
-              <button type="button" className="basalt-btn" onClick={() => setRoundDraft(null)}>Cancelar</button>
-              <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === `round-${roundDraft.id}`} onClick={() => void handleRoundSave()}>
-                {busyAction === `round-${roundDraft.id}` ? <RefreshCw size={15} className="spin" /> : <Pencil size={15} />}
-                Guardar jornada
+              <button
+                type="button"
+                className="basalt-btn basalt-btn-ghost operation-fixture-side-sheet-close"
+                onClick={() => setMobileInsightsOpen(false)}
+                aria-label="Cerrar panel"
+              >
+                <X size={18} />
               </button>
             </div>
-          </section>
-        ) : null}
-
-        {validationData?.diagnostics?.length ? (
-          <section className="operation-side-panel basalt-card">
-            <div className="operation-fixture-panel-head">
-              <div>
-                <span className="operation-fixture-kicker">Alertas</span>
-                <h4>Diagnostico actual</h4>
-              </div>
+            <div className="operation-fixture-side-sheet-body">
+              {renderSidebarContent()}
             </div>
-            <div className="operation-context-list">
-              {validationData.diagnostics.slice(0, 5).map((item, index) => (
-                <div key={`${item.message}-${index}`} className="operation-context-row">
-                  <AlertTriangle size={15} />
-                  <span>{item.message || item.context || 'Advertencia estructural'}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
-      </aside>
+          </aside>
+        </>
+      ) : null}
     </div>
   );
 }
