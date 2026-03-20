@@ -4,6 +4,7 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
 import type {
   TournamentFixture,
@@ -162,14 +163,25 @@ export class FixtureService {
    * Get complete fixture structure for a tournament
    */
   static async getTournamentFixture(tournamentId: string): Promise<TournamentFixture | null> {
-    const supabase = await createClient();
+    const supabase = await getReadClient();
 
-    // 1. Get tournament info (FIX: removed non-existent 'season' column)
-    const { data: tournament, error: tournamentError } = await supabase
-      .from('tournaments')
-      .select('id, name')
-      .eq('id', tournamentId)
-      .single();
+    const [
+      { data: tournament, error: tournamentError },
+      { data: phases, error: phasesError },
+    ] = await Promise.all([
+      // 1. Get tournament info (FIX: removed non-existent 'season' column)
+      supabase
+        .from('tournaments')
+        .select('id, name')
+        .eq('id', tournamentId)
+        .single(),
+      // 2. Get phases
+      supabase
+        .from('tournament_phases')
+        .select('*')
+        .eq('tournament_id', tournamentId)
+        .order('order_index', { ascending: true }),
+    ]);
 
     if (tournamentError || !tournament) {
       console.error(`[FixtureService] Tournament not found for ID: ${tournamentId}`, tournamentError);
@@ -178,56 +190,62 @@ export class FixtureService {
 
     console.log(`[FixtureService] Tournament found: ${tournament.name}`);
 
-    // 2. Get phases
-    const { data: phases, error: phasesError } = await supabase
-      .from('tournament_phases')
-      .select('*')
-      .eq('tournament_id', tournamentId)
-      .order('order_index', { ascending: true });
-
     if (phasesError) {
       console.error(`[FixtureService] Error fetching phases for tournament ${tournamentId}:`, phasesError);
       return null;
     }
 
-    // 3. Get ALL rounds for this tournament to avoid N+1
-    const { data: allRounds, error: roundsError } = await supabase
-      .from('tournament_rounds')
-      .select('*')
-      .in('phase_id', (phases || []).map(p => p.id))
-      .order('order_index', { ascending: true });
+    const phaseIds = (phases || []).map((phase) => phase.id);
+
+    // 3-5. Load the remaining fixture data in parallel to keep the admin workspace responsive.
+    const roundsPromise = phaseIds.length > 0
+      ? supabase
+        .from('tournament_rounds')
+        .select('*')
+        .in('phase_id', phaseIds)
+        .order('order_index', { ascending: true })
+      : Promise.resolve({ data: [], error: null });
+
+    const [
+      { data: allRounds, error: roundsError },
+      { data: allMatches, error: matchesError },
+      { data: participants, error: participantsError },
+    ] = await Promise.all([
+      roundsPromise,
+      // 4. Get ALL matches for this tournament directly by tournament_id
+      // This captures even "orphaned" matches and is much more efficient.
+      // Explicit columns exclude heavy JSONB fields (events, lineups, weather, clock)
+      // that are not needed for the fixture list view.
+      supabase
+        .from('matches')
+        .select(`
+          id, tournament_id, round_uuid, phase_id, group_id,
+          date_time, venue, status, score,
+          round_label, notes,
+          home_club_id, away_club_id,
+          home_base_points, away_base_points,
+          home_bonus_points, away_bonus_points,
+          points_autocalculated, points_override_reason,
+          home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
+          away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
+        `)
+        .eq('tournament_id', tournamentId)
+        .order('date_time', { ascending: true }),
+      // 5. Get participants
+      supabase
+        .from('tournament_participants')
+        .select('id, club_id, name, short_code, clubs:club_id(logo_url)')
+        .eq('tournament_id', tournamentId)
+        .eq('status', 'active'),
+    ]);
 
     if (roundsError) {
       console.error('[FixtureService] Error fetching all rounds:', roundsError);
     }
 
-    // 4. Get ALL matches for this tournament directly by tournament_id
-    // This captures even "orphaned" matches and is much more efficient.
-    // Explicit columns exclude heavy JSONB fields (events, lineups, weather, clock)
-    // that are not needed for the fixture list view.
-    const { data: allMatches, error: matchesError } = await supabase
-      .from('matches')
-      .select(`
-        id, tournament_id, round_uuid, phase_id, group_id,
-        date_time, venue, status, score,
-        round_label, notes,
-        home_club_id, away_club_id,
-        home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
-        away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
-      `)
-      .eq('tournament_id', tournamentId)
-      .order('date_time', { ascending: true });
-
     if (matchesError) {
       console.error('[FixtureService] Error fetching all matches:', matchesError);
     }
-
-    // 5. Get participants
-    const { data: participants, error: participantsError } = await supabase
-      .from('tournament_participants')
-      .select('id, club_id, name, short_code, clubs:club_id(logo_url)')
-      .eq('tournament_id', tournamentId)
-      .eq('status', 'active');
 
     if (participantsError) {
       console.error('Error fetching participants:', participantsError);

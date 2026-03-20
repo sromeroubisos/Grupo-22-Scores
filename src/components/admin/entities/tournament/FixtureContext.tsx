@@ -16,10 +16,20 @@ import type {
 } from '@/lib/types/fixture-import';
 
 type JsonRecord = Record<string, unknown>;
+const FIXTURE_REQUEST_TIMEOUT_MS = 20_000;
+
+function isAbortLikeError(error: unknown): error is Error {
+  return (
+    error instanceof Error &&
+    (error.name === 'AbortError' || error.message.toLowerCase().includes('abort'))
+  );
+}
 
 interface FixtureContextValue {
   // Data
   fixture: TournamentFixture | null;
+  isLoadingFixture: boolean;
+  fixtureError: string | null;
   selectedPhaseId: string | null;
   selectedRoundId: string | null;
 
@@ -75,6 +85,8 @@ interface FixtureProviderProps {
 export function FixtureProvider({ children, initialFixture, tournamentId }: FixtureProviderProps) {
   // Data state
   const [fixture, setFixture] = useState<TournamentFixture | null>(initialFixture);
+  const [isLoadingFixture, setIsLoadingFixture] = useState(false);
+  const [fixtureError, setFixtureError] = useState<string | null>(null);
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(
     initialFixture?.currentPhaseId || null
   );
@@ -111,16 +123,62 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
   }, []);
 
   const refreshFixture = useCallback(async () => {
+    const abortController = new AbortController();
+    const timeoutReason = new DOMException('Fixture request timed out', 'AbortError');
+    const timeoutId = window.setTimeout(() => {
+      if (!abortController.signal.aborted) {
+        abortController.abort(timeoutReason);
+      }
+    }, FIXTURE_REQUEST_TIMEOUT_MS);
+
+    setIsLoadingFixture(true);
+    setFixtureError(null);
+
     try {
       const response = await fetch(`/api/tournaments/${tournamentId}/fixture`, {
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: abortController.signal,
       });
-      if (response.ok) {
-        const newFixture = await response.json();
-        setFixture(newFixture);
+
+      const contentType = response.headers.get('content-type') || '';
+      const payload: unknown = contentType.includes('application/json')
+        ? await response.json()
+        : null;
+
+      if (!response.ok) {
+        throw new Error(
+          (payload as { error?: string } | null)?.error ||
+          `No se pudo cargar el fixture del torneo (HTTP ${response.status}).`,
+        );
       }
+
+      if (!payload) {
+        throw new Error('El endpoint devolvio una respuesta invalida al cargar el fixture.');
+      }
+
+      setFixture(payload as TournamentFixture);
     } catch (error) {
+      const isTimeoutAbort =
+        abortController.signal.aborted && abortController.signal.reason === timeoutReason;
+
+      if (isTimeoutAbort) {
+        setFixtureError(
+          'La carga del workspace excedio los 20 segundos. Esto suele indicar una consulta pesada o un problema de RLS en la base.'
+        );
+        return;
+      }
+
+      if (isAbortLikeError(error)) {
+        return;
+      }
+
       console.error('Error refreshing fixture:', error);
+      setFixtureError(
+        error instanceof Error ? error.message : 'No se pudo cargar el fixture.'
+      );
+    } finally {
+      window.clearTimeout(timeoutId);
+      setIsLoadingFixture(false);
     }
   }, [tournamentId]);
 
@@ -413,6 +471,8 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
 
   const value: FixtureContextValue = {
     fixture,
+    isLoadingFixture,
+    fixtureError,
     selectedPhaseId,
     selectedRoundId,
     viewMode,
