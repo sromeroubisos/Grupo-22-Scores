@@ -13,6 +13,46 @@ function hasMissingColumnError(error: { code?: string | null; message?: string |
     return error.code === 'PGRST204' || haystack.includes(column.toLowerCase());
 }
 
+async function selectWithFallback<T>(
+    baseQuery: {
+        select: (columns: string) => PromiseLike<{
+            data: T[] | null;
+            error: { code?: string | null; message?: string | null; details?: string | null } | null;
+        }> & {
+            order: (
+                column: string,
+                options?: { ascending?: boolean }
+            ) => PromiseLike<{
+                data: T[] | null;
+                error: { code?: string | null; message?: string | null; details?: string | null } | null;
+            }>;
+        };
+    },
+    variants: string[],
+    orderBy?: { column: string; ascending?: boolean }
+) {
+    let lastError: { code?: string | null; message?: string | null; details?: string | null } | null = null;
+
+    for (const columns of variants) {
+        const query = baseQuery.select(columns);
+        const result = orderBy
+            ? await query.order(orderBy.column, { ascending: orderBy.ascending })
+            : await query;
+
+        if (!result?.error) {
+            return { data: result?.data || [], error: null };
+        }
+
+        lastError = result.error;
+
+        if (result.error.code !== 'PGRST204') {
+            return { data: null, error: result.error };
+        }
+    }
+
+    return { data: null, error: lastError };
+}
+
 type MatchConsoleRow = {
     id: string;
     round_id: string | null;
@@ -44,10 +84,17 @@ export async function GET(request: NextRequest) {
 
         if (resource === 'clubs') {
             const [{ data: clubs, error: clubsError }, { data: unions, error: unionsError }] = await Promise.all([
-                readClient
-                    .from('clubs')
-                    .select('id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id')
-                    .order('name'),
+                selectWithFallback(
+                    readClient.from('clubs'),
+                    [
+                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id',
+                        'id, name, short_name, city, country, logo_url, slug, is_visible, union_id',
+                        'id, name, city, country, logo_url, slug, is_visible, union_id',
+                        'id, name, city, country, logo_url, union_id',
+                        'id, name, union_id'
+                    ],
+                    { column: 'name', ascending: true }
+                ),
                 readClient
                     .from('unions')
                     .select('id, name'),
@@ -81,12 +128,24 @@ export async function GET(request: NextRequest) {
         }
 
         const [{ data: tournaments, error: tournamentsError }, { data: clubs, error: clubsError }] = await Promise.all([
-            readClient
-                .from('tournaments')
-                .select('id, name, sport_id, sport, season_id'),
-            readClient
-                .from('clubs')
-                .select('id, name, logo_url, primary_color'),
+            selectWithFallback(
+                readClient.from('tournaments'),
+                [
+                    'id, name, sport_id, sport, season_id',
+                    'id, name, sport_id, sport',
+                    'id, name, sport_id, season_id',
+                    'id, name, sport',
+                    'id, name'
+                ]
+            ),
+            selectWithFallback(
+                readClient.from('clubs'),
+                [
+                    'id, name, logo_url, primary_color',
+                    'id, name, logo_url',
+                    'id, name'
+                ]
+            ),
         ]);
 
         const { data: matches, error: matchesError } = matchesResult;

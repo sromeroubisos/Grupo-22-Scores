@@ -44,6 +44,48 @@ function resolveTournamentCountry(tournament: any): string {
     return 'Internacional';
 }
 
+async function selectManyWithFallback<T>(
+    client: {
+        from: (table: string) => {
+            select: (columns: string) => {
+                in: (column: string, values: string[]) => Promise<{
+                    data: T[] | null;
+                    error: { code?: string | null; message?: string | null; details?: string | null } | null;
+                }>;
+            };
+        };
+    },
+    table: string,
+    idColumn: string,
+    ids: string[],
+    variants: string[]
+) {
+    if (ids.length === 0) {
+        return { data: [] as T[], error: null };
+    }
+
+    let lastError: { code?: string | null; message?: string | null; details?: string | null } | null = null;
+
+    for (const columns of variants) {
+        const result = await client
+            .from(table)
+            .select(columns)
+            .in(idColumn, ids);
+
+        if (!result.error) {
+            return { data: result.data || [], error: null };
+        }
+
+        lastError = result.error;
+
+        if (result.error.code !== 'PGRST204') {
+            return { data: [] as T[], error: result.error };
+        }
+    }
+
+    return { data: [] as T[], error: lastError };
+}
+
 async function getReadClient() {
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         return createAdminClient();
@@ -77,12 +119,32 @@ async function fetchDbLookupMaps(
     clubIds: string[]
 ) {
     const [tournamentsRes, clubsRes] = await Promise.all([
-        tournamentIds.length > 0
-            ? supabase.from('tournaments').select('id, name, sport_id, sport, season_id, status, country_id, union_id').in('id', tournamentIds)
-            : Promise.resolve({ data: [], error: null }),
-        clubIds.length > 0
-            ? supabase.from('clubs').select('id, name, short_name, logo_url, primary_color').in('id', clubIds)
-            : Promise.resolve({ data: [], error: null }),
+        selectManyWithFallback<DbTournamentLite>(
+            supabase,
+            'tournaments',
+            'id',
+            tournamentIds,
+            [
+                'id, name, sport_id, sport, season_id, status, country_id, union_id',
+                'id, name, sport_id, sport, status, country_id, union_id',
+                'id, name, sport_id, status, country_id, union_id',
+                'id, name, sport, status, country_id, union_id',
+                'id, name, status, country_id, union_id',
+                'id, name'
+            ]
+        ),
+        selectManyWithFallback<DbClubLite>(
+            supabase,
+            'clubs',
+            'id',
+            clubIds,
+            [
+                'id, name, short_name, logo_url, primary_color',
+                'id, name, short_name, logo_url',
+                'id, name, logo_url',
+                'id, name'
+            ]
+        ),
     ]);
 
     if (tournamentsRes.error) throw tournamentsRes.error;
