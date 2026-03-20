@@ -320,7 +320,7 @@ export class FixtureService {
    * Fetches rounds and matches in parallel (2 queries total, not N+1).
    */
   static async getRoundsForPhase(phaseId: string): Promise<RoundWithMatches[] | null> {
-    const supabase = await createClient();
+    const supabase = await getReadClient();
 
     const [{ data: rounds, error: roundsError }, { data: allMatches, error: matchesError }] =
       await Promise.all([
@@ -336,6 +336,9 @@ export class FixtureService {
             date_time, venue, status, score,
             round_label, notes,
             home_club_id, away_club_id,
+            home_base_points, away_base_points,
+            home_bonus_points, away_bonus_points,
+            points_autocalculated, points_override_reason,
             home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
             away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
           `)
@@ -374,7 +377,7 @@ export class FixtureService {
    * Get a specific match by ID with club details
    */
   static async getMatch(matchId: string): Promise<MatchWithClubs | null> {
-    const supabase = await createClient();
+    const supabase = await getReadClient();
 
     const { data: match, error: matchError } = await supabase
       .from('matches')
@@ -394,7 +397,7 @@ export class FixtureService {
    * Get matches for a specific round
    */
   static async getMatchesForRound(roundId: string): Promise<MatchWithClubs[] | null> {
-    const supabase = await createClient();
+    const supabase = await getReadClient();
 
     const { data: matches, error: matchesError } = await supabase
       .from('matches')
@@ -514,6 +517,13 @@ export class FixtureService {
       score: data.score || { home: 0, away: 0 },
     };
 
+    if (data.homeBasePoints !== undefined) insertData.home_base_points = data.homeBasePoints;
+    if (data.awayBasePoints !== undefined) insertData.away_base_points = data.awayBasePoints;
+    if (data.homeBonusPoints !== undefined) insertData.home_bonus_points = data.homeBonusPoints;
+    if (data.awayBonusPoints !== undefined) insertData.away_bonus_points = data.awayBonusPoints;
+    if (data.pointsAutocalculated !== undefined) insertData.points_autocalculated = data.pointsAutocalculated;
+    if (data.pointsOverrideReason !== undefined) insertData.points_override_reason = data.pointsOverrideReason;
+
     if (supportsRoundLabel) {
       insertData.round_label = data.roundLabel || null;
     }
@@ -604,7 +614,13 @@ export class FixtureService {
     if (data.phaseId) updateData.phase_id = data.phaseId;
     if (data.groupId !== undefined) updateData.group_id = data.groupId;
     if (data.notes !== undefined) updateData.notes = data.notes;
-    if (data.score) updateData.score = data.score;
+    if (data.score !== undefined) updateData.score = data.score;
+    if (data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
+    if (data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;
+    if (data.homeBonusPoints !== undefined) updateData.home_bonus_points = data.homeBonusPoints;
+    if (data.awayBonusPoints !== undefined) updateData.away_bonus_points = data.awayBonusPoints;
+    if (data.pointsAutocalculated !== undefined) updateData.points_autocalculated = data.pointsAutocalculated;
+    if (data.pointsOverrideReason !== undefined) updateData.points_override_reason = data.pointsOverrideReason;
 
     // Guard: if nothing to update (e.g. only events/lineups were sent but those columns
     // were removed in schema simplification), skip the UPDATE to avoid PostgREST returning
@@ -1077,7 +1093,7 @@ export class FixtureService {
    * Validate fixture structure and common issues
    */
   static async validateFixture(tournamentId: string): Promise<any> {
-    const supabase = await createClient();
+    const supabase = await getReadClient();
     const diagnostics: any[] = [];
 
     // 1. Check for rounds without matches
@@ -1189,6 +1205,12 @@ export class FixtureService {
       status: match.status,
       score: match.score || { home: 0, away: 0 },
       notes: match.notes,
+      homeBasePoints: match.home_base_points ?? null,
+      awayBasePoints: match.away_base_points ?? null,
+      homeBonusPoints: match.home_bonus_points ?? null,
+      awayBonusPoints: match.away_bonus_points ?? null,
+      pointsAutocalculated: match.points_autocalculated ?? null,
+      pointsOverrideReason: match.points_override_reason ?? null,
       roundLabel: match.round_label || null,
       createdAt: match.created_at,
       updatedAt: match.updated_at,

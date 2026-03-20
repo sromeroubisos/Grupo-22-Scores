@@ -57,7 +57,7 @@ export async function GET(
         // 3. Fetch final matches for this phase
         let mQuery = supabase
             .from('matches')
-            .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id')
+            .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phaseId)
             .eq('status', 'final');
@@ -79,7 +79,9 @@ export async function GET(
         const metrics = {
             counted_matches: finalMatches.length,
             pending_results: 0,
-            manual_overrides: resolvedRules.adjustments?.length || 0,
+            manual_overrides:
+                finalMatches.filter((match) => match.points_autocalculated === false).length +
+                (resolvedRules.adjustments?.length || 0),
         };
 
         // Count non-final matches for this phase
@@ -108,7 +110,7 @@ export async function GET(
             if (groupId) {
                 cQuery = cQuery.eq('group_id', groupId);
             } else {
-                cQuery = (cQuery as any).is('group_id', null);
+                cQuery = (cQuery as typeof cQuery & { is: (column: string, value: null) => typeof cQuery }).is('group_id', null);
             }
             const { data: cached } = await cQuery;
             lastCalculatedAt = cached?.[0]?.last_updated ?? null;
@@ -121,10 +123,11 @@ export async function GET(
             rules: resolvedRules,
             last_calculated_at: lastCalculatedAt,
         });
-    } catch (e: any) {
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
         console.error('Exception generating standings:', e);
         return NextResponse.json(
-            { error: 'Internal server error', details: e.message },
+            { error: 'Internal server error', details: message },
             { status: 500 },
         );
     }

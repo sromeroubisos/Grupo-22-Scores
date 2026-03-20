@@ -52,7 +52,7 @@ export async function POST(
         // 3. Fetch final matches for this phase
         let mQuery = supabase
             .from('matches')
-            .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id')
+            .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phaseId)
             .eq('status', 'final');
@@ -83,7 +83,7 @@ export async function POST(
             if (groupId) {
                 delQuery = delQuery.eq('group_id', groupId);
             } else {
-                delQuery = (delQuery as any).is('group_id', null);
+                delQuery = (delQuery as typeof delQuery & { is: (column: string, value: null) => typeof delQuery }).is('group_id', null);
             }
             await delQuery;
 
@@ -138,10 +138,11 @@ export async function POST(
             rows_calculated: table.length,
             calculated_at: calculatedAt,
         });
-    } catch (e: any) {
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
         console.error('Exception recalculating standings:', e);
         return NextResponse.json(
-            { error: 'Failed to recalculate standings', details: e.message },
+            { error: 'Failed to recalculate standings', details: message },
             { status: 500 },
         );
     }

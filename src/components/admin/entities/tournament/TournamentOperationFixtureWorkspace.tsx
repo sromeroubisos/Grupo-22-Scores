@@ -40,6 +40,14 @@ type WorkspaceSubtabId = 'add_matches' | 'manage_fixture';
 type ManageViewMode = 'cards' | 'list';
 type ManageGroupingMode = 'rounds' | 'groups' | 'orphans';
 type ValidationResult = { isValid?: boolean; diagnostics?: Array<{ type?: string; message?: string; context?: string }> } | null;
+type PointsRules = { win: number; draw: number; loss: number };
+type RulesConfig = {
+  points?: {
+    win?: number;
+    draw?: number;
+    loss?: number;
+  };
+} & Record<string, unknown>;
 
 type ManualFormState = {
   roundMode: 'existing' | 'new';
@@ -65,6 +73,18 @@ type RoundDraftState = {
 type ManageEntry = {
   match: MatchWithClubs;
   round: RoundWithMatches;
+};
+
+type QuickResultFormState = {
+  status: MatchStatus;
+  homeScore: string;
+  awayScore: string;
+  homeBasePoints: string;
+  awayBasePoints: string;
+  homeBonusPoints: string;
+  awayBonusPoints: string;
+  pointsAutocalculated: boolean;
+  pointsOverrideReason: string;
 };
 
 type ManageContainer = {
@@ -183,6 +203,78 @@ function getStatusLabel(status: MatchStatus) {
   return STATUS_OPTIONS.find((option) => option.value === status)?.label || status;
 }
 
+function resolvePointsRules(phaseSettings: RulesConfig | null | undefined, tournamentRuleset: RulesConfig | null | undefined): PointsRules {
+  return {
+    win: Number(phaseSettings?.points?.win ?? tournamentRuleset?.points?.win ?? 4),
+    draw: Number(phaseSettings?.points?.draw ?? tournamentRuleset?.points?.draw ?? 2),
+    loss: Number(phaseSettings?.points?.loss ?? tournamentRuleset?.points?.loss ?? 0),
+  };
+}
+
+function parseQuickNumber(value: string, fallback = 0) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatQuickNumber(value: number | null | undefined, fallback = 0) {
+  const normalized = Number(value);
+  return Number.isFinite(normalized) ? String(normalized) : String(fallback);
+}
+
+function calculateBasePoints(score: { home: number; away: number }, rules: PointsRules) {
+  if (score.home > score.away) return { home: rules.win, away: rules.loss };
+  if (score.home < score.away) return { home: rules.loss, away: rules.win };
+  return { home: rules.draw, away: rules.draw };
+}
+
+function applyQuickPointsAutofill(form: QuickResultFormState, rules: PointsRules): QuickResultFormState {
+  if (form.status !== 'final') {
+    return {
+      ...form,
+      homeBasePoints: '0',
+      awayBasePoints: '0',
+      homeBonusPoints: '0',
+      awayBonusPoints: '0',
+      pointsAutocalculated: true,
+      pointsOverrideReason: '',
+    };
+  }
+
+  const basePoints = calculateBasePoints(
+    {
+      home: Math.max(0, parseQuickNumber(form.homeScore)),
+      away: Math.max(0, parseQuickNumber(form.awayScore)),
+    },
+    rules,
+  );
+
+  return {
+    ...form,
+    homeBasePoints: String(basePoints.home),
+    awayBasePoints: String(basePoints.away),
+    pointsAutocalculated: true,
+    pointsOverrideReason: '',
+  };
+}
+
+function buildQuickResultForm(match: MatchWithClubs, rules: PointsRules): QuickResultFormState {
+  const initialForm: QuickResultFormState = {
+    status: match.status,
+    homeScore: formatQuickNumber(match.score?.home, 0),
+    awayScore: formatQuickNumber(match.score?.away, 0),
+    homeBasePoints: formatQuickNumber(match.homeBasePoints, 0),
+    awayBasePoints: formatQuickNumber(match.awayBasePoints, 0),
+    homeBonusPoints: formatQuickNumber(match.homeBonusPoints, 0),
+    awayBonusPoints: formatQuickNumber(match.awayBonusPoints, 0),
+    pointsAutocalculated: match.pointsAutocalculated ?? true,
+    pointsOverrideReason: match.pointsOverrideReason ?? '',
+  };
+
+  return initialForm.pointsAutocalculated
+    ? applyQuickPointsAutofill(initialForm, rules)
+    : initialForm;
+}
+
 function getMatchTone(status: MatchStatus) {
   if (status === 'live') return 'fixture-status-live';
   if (status === 'final') return 'fixture-status-finished';
@@ -219,6 +311,8 @@ export function TournamentOperationFixtureWorkspace({
 }) {
   const {
     fixture,
+    isLoadingFixture,
+    fixtureError,
     selectPhase,
     refreshFixture,
     generateFixture,
@@ -233,6 +327,9 @@ export function TournamentOperationFixtureWorkspace({
   const [manualForm, setManualForm] = useState<ManualFormState>(() => defaultManualForm());
   const [manualErrors, setManualErrors] = useState<Record<string, string>>({});
   const [editingMatchId, setEditingMatchId] = useState<string | null>(null);
+  const [quickResultMatchId, setQuickResultMatchId] = useState<string | null>(null);
+  const [quickResultForm, setQuickResultForm] = useState<QuickResultFormState | null>(null);
+  const [quickResultErrors, setQuickResultErrors] = useState<Record<string, string>>({});
   const [structureForm, setStructureForm] = useState({ numRounds: 9, namePattern: 'Fecha {n}' });
   const [bergerForm, setBergerForm] = useState({ clubIds: [] as string[], startDate: todayInputValue(), matchTime: '16:00', venue: '', homeAndAway: false });
   const [importPreview, setImportPreview] = useState<FixtureImportPreviewResult | null>(null);
@@ -272,6 +369,10 @@ export function TournamentOperationFixtureWorkspace({
   const selectedPhase = useMemo(
     () => fixture?.phases.find((phase) => phase.id === selectedPhaseId) || null,
     [fixture, selectedPhaseId],
+  );
+  const pointsRules = useMemo(
+    () => resolvePointsRules((selectedPhase?.settings as RulesConfig | null | undefined), tournament.ruleset as RulesConfig | null | undefined),
+    [selectedPhase?.settings, tournament.ruleset],
   );
 
   const realRounds = useMemo(
@@ -444,6 +545,14 @@ export function TournamentOperationFixtureWorkspace({
     setMobileInsightsOpen(false);
   }, [activeSubtab, selectedMethod, selectedPhaseId]);
 
+  useEffect(() => {
+    if (activeSubtab !== 'manage_fixture') {
+      setQuickResultMatchId(null);
+      setQuickResultForm(null);
+      setQuickResultErrors({});
+    }
+  }, [activeSubtab, selectedPhaseId]);
+
   const setManualField = <K extends keyof ManualFormState>(field: K, value: ManualFormState[K]) => {
     setManualForm((current) => {
       if (field === 'roundMode') {
@@ -538,6 +647,93 @@ export function TournamentOperationFixtureWorkspace({
     });
   };
 
+  const openQuickResultEditor = (match: MatchWithClubs) => {
+    setQuickResultErrors({});
+    setFeedback(null);
+    if (quickResultMatchId === match.id) {
+      setQuickResultMatchId(null);
+      setQuickResultForm(null);
+      return;
+    }
+    setQuickResultMatchId(match.id);
+    setQuickResultForm(buildQuickResultForm(match, pointsRules));
+  };
+
+  const setQuickResultField = <K extends keyof QuickResultFormState>(field: K, value: QuickResultFormState[K]) => {
+    setQuickResultForm((current) => {
+      if (!current) return current;
+      const next = { ...current, [field]: value };
+      if ((field === 'status' || field === 'homeScore' || field === 'awayScore') && next.pointsAutocalculated) {
+        return applyQuickPointsAutofill(next, pointsRules);
+      }
+      return next;
+    });
+    setQuickResultErrors((current) => {
+      if (!current[field as string]) return current;
+      const next = { ...current };
+      delete next[field as string];
+      return next;
+    });
+  };
+
+  const setQuickPointsField = (
+    field: 'homeBasePoints' | 'awayBasePoints' | 'homeBonusPoints' | 'awayBonusPoints' | 'pointsOverrideReason',
+    value: string,
+  ) => {
+    setQuickResultForm((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        [field]: value,
+        pointsAutocalculated: false,
+      };
+    });
+    setQuickResultErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const autofillQuickPoints = () => {
+    setQuickResultForm((current) => {
+      if (!current) return current;
+      return applyQuickPointsAutofill({ ...current, pointsAutocalculated: true }, pointsRules);
+    });
+    setQuickResultErrors((current) => {
+      const next = { ...current };
+      delete next.homeBasePoints;
+      delete next.awayBasePoints;
+      delete next.homeBonusPoints;
+      delete next.awayBonusPoints;
+      return next;
+    });
+  };
+
+  const validateQuickResultForm = () => {
+    if (!quickResultForm) return false;
+    const nextErrors: Record<string, string> = {};
+    const homeScore = Number.parseInt(quickResultForm.homeScore, 10);
+    const awayScore = Number.parseInt(quickResultForm.awayScore, 10);
+
+    if (!Number.isFinite(homeScore) || homeScore < 0) nextErrors.homeScore = 'Ingresa un marcador local valido.';
+    if (!Number.isFinite(awayScore) || awayScore < 0) nextErrors.awayScore = 'Ingresa un marcador visitante valido.';
+
+    if (quickResultForm.status === 'final') {
+      const homeBasePoints = Number.parseInt(quickResultForm.homeBasePoints, 10);
+      const awayBasePoints = Number.parseInt(quickResultForm.awayBasePoints, 10);
+
+      if (!Number.isFinite(homeBasePoints) || homeBasePoints < 0) nextErrors.homeBasePoints = 'Los puntos base del local deben ser 0 o mas.';
+      if (!Number.isFinite(awayBasePoints) || awayBasePoints < 0) nextErrors.awayBasePoints = 'Los puntos base del visitante deben ser 0 o mas.';
+      if (!Number.isFinite(Number.parseInt(quickResultForm.homeBonusPoints, 10))) nextErrors.homeBonusPoints = 'Ingresa un bonus local valido.';
+      if (!Number.isFinite(Number.parseInt(quickResultForm.awayBonusPoints, 10))) nextErrors.awayBonusPoints = 'Ingresa un bonus visitante valido.';
+    }
+
+    setQuickResultErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
   const validateManualForm = () => {
     const nextErrors: Record<string, string> = {};
     if (!selectedPhaseId) nextErrors.phase = 'Debes seleccionar una fase.';
@@ -557,6 +753,39 @@ export function TournamentOperationFixtureWorkspace({
     await refreshFixture();
     setValidationData((await validateFixture()) as ValidationResult);
     setFeedback({ tone, message });
+  };
+
+  const handleQuickResultSave = async (match: MatchWithClubs) => {
+    if (!quickResultForm || !validateQuickResultForm()) return;
+    setBusyAction(`quick-save-${match.id}`);
+    setFeedback(null);
+    try {
+      const homeScore = Math.max(0, parseQuickNumber(quickResultForm.homeScore));
+      const awayScore = Math.max(0, parseQuickNumber(quickResultForm.awayScore));
+      const isFinal = quickResultForm.status === 'final';
+
+      await saveMatch({
+        id: match.id,
+        status: quickResultForm.status,
+        score: { home: homeScore, away: awayScore },
+        homeBasePoints: isFinal ? Math.max(0, parseQuickNumber(quickResultForm.homeBasePoints)) : 0,
+        awayBasePoints: isFinal ? Math.max(0, parseQuickNumber(quickResultForm.awayBasePoints)) : 0,
+        homeBonusPoints: isFinal ? parseQuickNumber(quickResultForm.homeBonusPoints) : 0,
+        awayBonusPoints: isFinal ? parseQuickNumber(quickResultForm.awayBonusPoints) : 0,
+        pointsAutocalculated: isFinal ? quickResultForm.pointsAutocalculated : true,
+        pointsOverrideReason: isFinal && !quickResultForm.pointsAutocalculated
+          ? quickResultForm.pointsOverrideReason.trim() || null
+          : null,
+      });
+      await afterMutation('Resultado y puntos guardados.');
+      setQuickResultMatchId(null);
+      setQuickResultForm(null);
+      setQuickResultErrors({});
+    } catch (error) {
+      setFeedback({ tone: 'error', message: error instanceof Error ? error.message : 'No se pudo guardar el resultado rapido.' });
+    } finally {
+      setBusyAction(null);
+    }
   };
 
   const handleManualSave = async (keepWorking: boolean) => {
@@ -634,6 +863,11 @@ export function TournamentOperationFixtureWorkspace({
     try {
       await deleteMatch(match.id);
       await afterMutation('El partido fue eliminado.');
+      if (quickResultMatchId === match.id) {
+        setQuickResultMatchId(null);
+        setQuickResultForm(null);
+        setQuickResultErrors({});
+      }
     } catch (error) {
       setFeedback({ tone: 'error', message: error instanceof Error ? error.message : 'No se pudo eliminar el partido.' });
     } finally {
@@ -671,6 +905,22 @@ export function TournamentOperationFixtureWorkspace({
   };
 
   if (!fixture) {
+    if (fixtureError && !isLoadingFixture) {
+      return (
+        <section className="operation-fixture-loading">
+          <AlertTriangle size={22} />
+          <div className="flex flex-col items-center gap-3 text-center">
+            <strong>No se pudo cargar el workspace de fixture.</strong>
+            <p className="text-sm text-dim max-w-xl">{fixtureError}</p>
+            <button type="button" className="basalt-btn basalt-btn-primary" onClick={() => void refreshFixture()}>
+              <RefreshCw size={15} />
+              Reintentar
+            </button>
+          </div>
+        </section>
+      );
+    }
+
     return (
       <section className="operation-fixture-loading">
         <Loader2 size={22} className="spin" />
@@ -1277,7 +1527,15 @@ export function TournamentOperationFixtureWorkspace({
                                   key={entry.match.id}
                                   entry={entry}
                                   busyAction={busyAction}
+                                  quickResultForm={quickResultMatchId === entry.match.id ? quickResultForm : null}
+                                  quickResultErrors={quickResultMatchId === entry.match.id ? quickResultErrors : {}}
+                                  quickResultOpen={quickResultMatchId === entry.match.id}
                                   onEdit={() => openEditMatch(entry.match, 'edit')}
+                                  onQuickResult={() => openQuickResultEditor(entry.match)}
+                                  onQuickResultFieldChange={setQuickResultField}
+                                  onQuickPointsFieldChange={setQuickPointsField}
+                                  onQuickPointsAutofill={autofillQuickPoints}
+                                  onQuickResultSave={() => void handleQuickResultSave(entry.match)}
                                   onMove={() => openEditMatch(entry.match, 'move')}
                                   onDuplicate={() => openDuplicateMatch(entry.match)}
                                   onDelete={() => void handleDeleteMatch(entry.match)}
@@ -1390,23 +1648,46 @@ export function TournamentOperationFixtureWorkspace({
 function MatchCard({
   entry,
   busyAction,
+  quickResultForm,
+  quickResultErrors,
+  quickResultOpen,
   onEdit,
+  onQuickResult,
+  onQuickResultFieldChange,
+  onQuickPointsFieldChange,
+  onQuickPointsAutofill,
+  onQuickResultSave,
   onMove,
   onDuplicate,
   onDelete,
 }: {
   entry: ManageEntry;
   busyAction: string | null;
+  quickResultForm: QuickResultFormState | null;
+  quickResultErrors: Record<string, string>;
+  quickResultOpen: boolean;
   onEdit: () => void;
+  onQuickResult: () => void;
+  onQuickResultFieldChange: <K extends keyof QuickResultFormState>(field: K, value: QuickResultFormState[K]) => void;
+  onQuickPointsFieldChange: (
+    field: 'homeBasePoints' | 'awayBasePoints' | 'homeBonusPoints' | 'awayBonusPoints' | 'pointsOverrideReason',
+    value: string,
+  ) => void;
+  onQuickPointsAutofill: () => void;
+  onQuickResultSave: () => void;
   onMove: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
   const router = useRouter();
   const { match, round } = entry;
+  const quickBusy = busyAction === `quick-save-${match.id}`;
+  const scoreVisible = match.status === 'live' || match.status === 'final';
+  const totalHomePoints = quickResultForm ? parseQuickNumber(quickResultForm.homeBasePoints) + parseQuickNumber(quickResultForm.homeBonusPoints) : 0;
+  const totalAwayPoints = quickResultForm ? parseQuickNumber(quickResultForm.awayBasePoints) + parseQuickNumber(quickResultForm.awayBonusPoints) : 0;
 
   return (
-    <article 
+    <article
       className={`fixture-match-card fixture-glass ${getMatchTone(match.status)}`}
       style={{ cursor: 'pointer' }}
       onClick={() => router.push(`/admin/matches/${match.id}/manage`)}
@@ -1425,8 +1706,8 @@ function MatchCard({
       <div className="fixture-match-teams">
         <TeamBlock side="Local" team={match.homeClub} fallback="Local" />
         <div className="fixture-match-center">
-          <span className="fixture-match-center-label">Versus</span>
-          <strong>VS</strong>
+          <span className="fixture-match-center-label">{scoreVisible ? 'Resultado' : 'Versus'}</span>
+          <strong>{scoreVisible ? `${match.score?.home ?? 0}-${match.score?.away ?? 0}` : 'VS'}</strong>
         </div>
         <TeamBlock side="Visitante" team={match.awayClub} fallback="Visitante" />
       </div>
@@ -1442,6 +1723,10 @@ function MatchCard({
             <Pencil size={14} />
             <span>Editar</span>
           </button>
+          <button className={`fixture-mini-btn ${quickResultOpen ? 'is-active' : ''}`} onClick={onQuickResult}>
+            <Zap size={14} />
+            <span>Resultado rapido</span>
+          </button>
           <button className="fixture-icon-btn" title="Mover de jornada" onClick={onMove}>
             <Grip size={14} />
           </button>
@@ -1453,6 +1738,103 @@ function MatchCard({
           </button>
         </div>
       </div>
+
+      {quickResultOpen && quickResultForm ? (
+        <div className="fixture-quick-editor" onClick={(event) => event.stopPropagation()}>
+          <div className="fixture-quick-editor-head">
+            <div>
+              <span className="fixture-quick-kicker">Carga express</span>
+              <strong>Resultado y puntos para la tabla</strong>
+            </div>
+            <button type="button" className="fixture-icon-btn" title="Cerrar carga rapida" onClick={onQuickResult}>
+              <X size={14} />
+            </button>
+          </div>
+
+          <div className="fixture-quick-grid fixture-quick-grid-score">
+            <label className="fixture-quick-field">
+              <span>Estado</span>
+              <select value={quickResultForm.status} onChange={(event) => onQuickResultFieldChange('status', event.target.value as MatchStatus)}>
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="fixture-quick-field">
+              <span>Local</span>
+              <input type="number" min={0} value={quickResultForm.homeScore} onChange={(event) => onQuickResultFieldChange('homeScore', event.target.value)} />
+              {quickResultErrors.homeScore ? <small className="operation-field-error">{quickResultErrors.homeScore}</small> : null}
+            </label>
+            <label className="fixture-quick-field">
+              <span>Visitante</span>
+              <input type="number" min={0} value={quickResultForm.awayScore} onChange={(event) => onQuickResultFieldChange('awayScore', event.target.value)} />
+              {quickResultErrors.awayScore ? <small className="operation-field-error">{quickResultErrors.awayScore}</small> : null}
+            </label>
+          </div>
+
+          <div className="fixture-quick-points-head">
+            <div>
+              <span className="fixture-quick-kicker">Tabla</span>
+              <strong>{quickResultForm.status === 'final' ? 'Puntos del partido' : 'Se limpiaran hasta finalizar el partido'}</strong>
+            </div>
+            <button type="button" className="basalt-btn basalt-btn-ghost fixture-quick-autofill" onClick={onQuickPointsAutofill}>
+              <RefreshCw size={14} />
+              Autocompletar
+            </button>
+          </div>
+
+          <div className="fixture-quick-grid">
+            <label className="fixture-quick-field">
+              <span>Base local</span>
+              <input type="number" min={0} value={quickResultForm.homeBasePoints} onChange={(event) => onQuickPointsFieldChange('homeBasePoints', event.target.value)} />
+              {quickResultErrors.homeBasePoints ? <small className="operation-field-error">{quickResultErrors.homeBasePoints}</small> : null}
+            </label>
+            <label className="fixture-quick-field">
+              <span>Base visitante</span>
+              <input type="number" min={0} value={quickResultForm.awayBasePoints} onChange={(event) => onQuickPointsFieldChange('awayBasePoints', event.target.value)} />
+              {quickResultErrors.awayBasePoints ? <small className="operation-field-error">{quickResultErrors.awayBasePoints}</small> : null}
+            </label>
+            <label className="fixture-quick-field">
+              <span>Bonus / ajuste local</span>
+              <input type="number" value={quickResultForm.homeBonusPoints} onChange={(event) => onQuickPointsFieldChange('homeBonusPoints', event.target.value)} />
+              {quickResultErrors.homeBonusPoints ? <small className="operation-field-error">{quickResultErrors.homeBonusPoints}</small> : null}
+            </label>
+            <label className="fixture-quick-field">
+              <span>Bonus / ajuste visitante</span>
+              <input type="number" value={quickResultForm.awayBonusPoints} onChange={(event) => onQuickPointsFieldChange('awayBonusPoints', event.target.value)} />
+              {quickResultErrors.awayBonusPoints ? <small className="operation-field-error">{quickResultErrors.awayBonusPoints}</small> : null}
+            </label>
+          </div>
+
+          <div className="fixture-quick-totals">
+            <div className="fixture-quick-total-card">
+              <span>Total local</span>
+              <strong>{quickResultForm.status === 'final' ? totalHomePoints : 0}</strong>
+            </div>
+            <div className="fixture-quick-total-card">
+              <span>Total visitante</span>
+              <strong>{quickResultForm.status === 'final' ? totalAwayPoints : 0}</strong>
+            </div>
+          </div>
+
+          {!quickResultForm.pointsAutocalculated && quickResultForm.status === 'final' ? (
+            <label className="fixture-quick-field">
+              <span>Motivo del ajuste</span>
+              <textarea rows={2} value={quickResultForm.pointsOverrideReason} onChange={(event) => onQuickPointsFieldChange('pointsOverrideReason', event.target.value)} placeholder="Ej: sancion, correccion o bonus manual" />
+            </label>
+          ) : null}
+
+          <div className="fixture-quick-actions">
+            <span className={`fixture-quick-badge ${quickResultForm.pointsAutocalculated ? 'is-auto' : 'is-manual'}`}>
+              {quickResultForm.pointsAutocalculated ? 'Puntos autocompletados' : 'Puntos editados manualmente'}
+            </span>
+            <button type="button" className="basalt-btn basalt-btn-primary" disabled={quickBusy} onClick={onQuickResultSave}>
+              {quickBusy ? <RefreshCw size={14} className="spin" /> : <CheckCircle2 size={14} />}
+              Guardar rapido
+            </button>
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }

@@ -1,11 +1,16 @@
 'use client';
 
-import React, { use, useState, useEffect, Suspense } from 'react';
+import React, { use, useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { ArrowLeft, ChevronRight, Star } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
+import { SPORTS_BY_ID } from '@/lib/sports';
+
+const SPORT_LABEL: Record<string, string> = Object.fromEntries(
+    Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
+);
 
 const TABS = [
     { id: 'summary', label: 'Resumen' },
@@ -123,6 +128,9 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const [squad, setSquad] = useState<any>(null);
     const [transfers, setTransfers] = useState<any[]>([]);
 
+    const [selectedSport, setSelectedSport] = useState<string>('all');
+    const [selectedSquadTab, setSelectedSquadTab] = useState<string>('');
+
     // Strip fs-team- prefix for the raw FlashScore ID
     const rawId = id.startsWith('fs-team-') ? id.slice(8) : id;
 
@@ -163,6 +171,34 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
 
         fetchData();
     }, [rawId, hintName, hintTeamUrl]);
+
+    // Derived: unique sports from matches
+    const availableSports = useMemo(() => {
+        const seen = new Set<string>();
+        [...results, ...fixtures].forEach(m => { if (m.sport_id) seen.add(String(m.sport_id)); });
+        return Array.from(seen);
+    }, [results, fixtures]);
+
+    // Derived: squad tabs
+    const squadTabs: string[] = useMemo(() => {
+        if (Array.isArray(squad) && squad.length > 0 && squad[0]?.tab_name) {
+            const seen = new Set<string>();
+            squad.forEach((t: any) => { if (t.tab_name) seen.add(t.tab_name); });
+            return Array.from(seen);
+        }
+        return [];
+    }, [squad]);
+
+    // Auto-select first squad tab when squad loads
+    useEffect(() => {
+        if (squadTabs.length > 0 && !selectedSquadTab) {
+            setSelectedSquadTab(squadTabs[0]);
+        }
+    }, [squadTabs]);
+
+    // Filtered matches by sport
+    const filteredResults = selectedSport === 'all' ? results : results.filter(m => String(m.sport_id) === selectedSport);
+    const filteredFixtures = selectedSport === 'all' ? fixtures : fixtures.filter(m => String(m.sport_id) === selectedSport);
 
     if (loading) {
         return (
@@ -260,8 +296,11 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         );
     };
 
-    // Group squad by position
-    const squadGroups = groupSquadByPosition(squad);
+    // Group squad by position, filtered by selected tab
+    const selectedSquadData = squadTabs.length > 0 && selectedSquadTab
+        ? (Array.isArray(squad) ? squad.filter((t: any) => t.tab_name === selectedSquadTab) : squad)
+        : squad;
+    const squadGroups = groupSquadByPosition(selectedSquadData);
     const sortedPositionKeys = Object.keys(squadGroups).map(Number).sort((a, b) => a - b);
 
     return (
@@ -296,6 +335,33 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                 )}
                                 {venue && <span>{venue}</span>}
                             </div>
+                            {(availableSports.length > 1 || squadTabs.length > 1) && (
+                                <div className={styles.headerDropdowns}>
+                                    {availableSports.length > 1 && (
+                                        <select
+                                            className={styles.headerSelect}
+                                            value={selectedSport}
+                                            onChange={e => setSelectedSport(e.target.value)}
+                                        >
+                                            <option value="all">Todos los deportes</option>
+                                            {availableSports.map(s => (
+                                                <option key={s} value={s}>{SPORT_LABEL[s] || s}</option>
+                                            ))}
+                                        </select>
+                                    )}
+                                    {squadTabs.length > 1 && (
+                                        <select
+                                            className={styles.headerSelect}
+                                            value={selectedSquadTab}
+                                            onChange={e => setSelectedSquadTab(e.target.value)}
+                                        >
+                                            {squadTabs.map(t => (
+                                                <option key={t} value={t}>{t}</option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <button
                             className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
@@ -328,31 +394,31 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                         {/* Summary Tab */}
                         {activeTab === 'summary' && (
                             <>
-                                {results.length > 0 && (
+                                {filteredResults.length > 0 && (
                                     <div className={styles.section}>
                                         <div className={styles.sectionHeader}>
                                             <h2>Ultimos Resultados</h2>
                                             <button className={styles.linkButton} onClick={() => setActiveTab('results')}>Ver todos</button>
                                         </div>
                                         <div className={styles.matchList}>
-                                            {results.slice(0, 5).map(m => renderMatchItem(m))}
+                                            {filteredResults.slice(0, 5).map(m => renderMatchItem(m))}
                                         </div>
                                     </div>
                                 )}
 
-                                {fixtures.length > 0 && (
+                                {filteredFixtures.length > 0 && (
                                     <div className={styles.section} style={{ marginTop: '32px' }}>
                                         <div className={styles.sectionHeader}>
                                             <h2>Proximos Partidos</h2>
                                             <button className={styles.linkButton} onClick={() => setActiveTab('fixtures')}>Ver todos</button>
                                         </div>
                                         <div className={styles.matchList}>
-                                            {fixtures.slice(0, 5).map(m => renderMatchItem(m))}
+                                            {filteredFixtures.slice(0, 5).map(m => renderMatchItem(m))}
                                         </div>
                                     </div>
                                 )}
 
-                                {results.length === 0 && fixtures.length === 0 && (
+                                {filteredResults.length === 0 && filteredFixtures.length === 0 && (
                                     <p className={styles.emptyState}>No hay datos de partidos disponibles.</p>
                                 )}
                             </>
@@ -363,8 +429,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                             <div className={styles.section}>
                                 <h2 className={styles.pageTitle} style={{ marginBottom: '16px' }}>Resultados</h2>
                                 <div className={styles.matchList}>
-                                    {results.length > 0
-                                        ? results.map(m => renderMatchItem(m))
+                                    {filteredResults.length > 0
+                                        ? filteredResults.map(m => renderMatchItem(m))
                                         : <p className={styles.emptyState}>No hay resultados registrados.</p>
                                     }
                                 </div>
@@ -376,8 +442,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                             <div className={styles.section}>
                                 <h2 className={styles.pageTitle} style={{ marginBottom: '16px' }}>Fixture</h2>
                                 <div className={styles.matchList}>
-                                    {fixtures.length > 0
-                                        ? fixtures.map(m => renderMatchItem(m))
+                                    {filteredFixtures.length > 0
+                                        ? filteredFixtures.map(m => renderMatchItem(m))
                                         : <p className={styles.emptyState}>No hay partidos programados.</p>
                                     }
                                 </div>

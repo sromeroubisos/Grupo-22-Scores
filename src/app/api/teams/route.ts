@@ -1,10 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import {
     getTeamDetails,
-    getTeamResults,
-    getTeamFixtures,
     getTeamSquad,
-    getTeamTransfers
 } from '@/lib/services/flashscore';
 
 function stripFsTeamPrefix(val: string): string {
@@ -22,38 +19,37 @@ function slugify(name: string): string {
         .replace(/^-|-$/g, '');
 }
 
-/**
- * Extract team info (name, logo, team_url) from the results/fixtures response.
- * Results are grouped by tournament, each containing matches with home_team/away_team.
- */
-function extractTeamFromResults(teamId: string, data: any[]): { name: string; image_path: string; teamUrl: string } | null {
-    for (const tournament of data) {
-        const matches = tournament?.matches || [];
-        for (const m of matches) {
-            if (String(m.home_team?.team_id) === teamId) {
-                return {
-                    name: m.home_team.name || '',
-                    image_path: m.home_team.small_image_path || m.home_team.image_path || '',
-                    teamUrl: '', // results don't include team_url
-                };
-            }
-            if (String(m.away_team?.team_id) === teamId) {
-                return {
-                    name: m.away_team.name || '',
-                    image_path: m.away_team.small_image_path || m.away_team.image_path || '',
-                    teamUrl: '',
-                };
-            }
-        }
-    }
-    return null;
-}
 
 const normalize = (res: PromiseSettledResult<any>) => {
     if (res.status !== 'fulfilled' || !res.value) return null;
     const v = res.value;
     return v?.DATA || v?.data || v;
 };
+
+function normalizeInternalMatch(m: any): any {
+    const dt = m.date_time ? new Date(m.date_time) : null;
+    const timestamp = dt ? dt.getTime() / 1000 : 0;
+    const scoreHome = m.score?.home ?? m.score?.home_score ?? null;
+    const scoreAway = m.score?.away ?? m.score?.away_score ?? null;
+    return {
+        match_id: m.id,
+        home_team: {
+            name: m.home_name || m.home_club_id || '',
+            small_image_path: m.home_logo || '',
+            team_id: m.home_club_id || '',
+        },
+        away_team: {
+            name: m.away_name || m.away_club_id || '',
+            small_image_path: m.away_logo || '',
+            team_id: m.away_club_id || '',
+        },
+        scores: { home: scoreHome, away: scoreAway },
+        match_status: m.status || 'NS',
+        timestamp,
+        tournament_name: m.tournament_name || '',
+        sport_id: m.sport_id || null,
+    };
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -67,6 +63,11 @@ export async function GET(request: Request) {
 
     // 1. Check Supabase for internal club info first
     let details: any = null;
+    let internalResults: any[] = [];
+    let internalFixtures: any[] = [];
+    let internalExternalId: string | null = null;
+    let internalClubName: string = '';
+
     try {
         const supabase = await createClient();
         const { data: internalClub } = await supabase
@@ -87,6 +88,55 @@ export async function GET(request: Request) {
                 region: internalClub.region,
                 is_internal: true
             };
+            internalExternalId = internalClub.external_id || null;
+            internalClubName = internalClub.name || '';
+
+            // Query internal matches from Supabase
+            const { data: matchRows } = await supabase
+                .from('matches')
+                .select(`
+                    id, date_time, status, score,
+                    home_club_id, away_club_id, tournament_id,
+                    home_club:clubs!matches_home_club_id_fkey(name, logo_url),
+                    away_club:clubs!matches_away_club_id_fkey(name, logo_url),
+                    tournament:tournaments(name, sport_id)
+                `)
+                .or(`home_club_id.eq.${rawTeamId},away_club_id.eq.${rawTeamId}`)
+                .order('date_time', { ascending: false });
+
+            if (matchRows && matchRows.length > 0) {
+                const FINISHED_STATUSES = new Set([
+                    'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',
+                    'finalizado', 'jugado', 'played', 'result'
+                ]);
+                const SCHEDULED_STATUSES = new Set([
+                    'scheduled', 'ns', 'not started', 'pendiente', 'programado', 'upcoming'
+                ]);
+                const now = Date.now();
+                for (const row of matchRows) {
+                    const homeClub = Array.isArray(row.home_club) ? row.home_club[0] : row.home_club;
+                    const awayClub = Array.isArray(row.away_club) ? row.away_club[0] : row.away_club;
+                    const tournament = Array.isArray(row.tournament) ? row.tournament[0] : row.tournament;
+                    const normalized = normalizeInternalMatch({
+                        ...row,
+                        home_name: homeClub?.name,
+                        home_logo: homeClub?.logo_url,
+                        away_name: awayClub?.name,
+                        away_logo: awayClub?.logo_url,
+                        tournament_name: tournament?.name,
+                        sport_id: tournament?.sport_id,
+                    });
+                    const st = (row.status || '').toLowerCase();
+                    const matchDate = row.date_time ? new Date(row.date_time).getTime() : 0;
+                    const isPast = matchDate > 0 && matchDate < now;
+                    const isFinished = FINISHED_STATUSES.has(st) || (isPast && !SCHEDULED_STATUSES.has(st));
+                    if (isFinished) {
+                        internalResults.push(normalized);
+                    } else {
+                        internalFixtures.push(normalized);
+                    }
+                }
+            }
         }
     } catch (dbErr) {
         // Silently continue if not found or DB error
@@ -94,58 +144,22 @@ export async function GET(request: Request) {
 
     const teamId = stripFsTeamPrefix(rawTeamId);
     const isExternalId = /^[a-zA-Z0-9]+$/.test(teamId) && !teamId.includes('-');
+    // Also treat internal clubs with external_id as having external data
+    const effectiveExternalId = isExternalId ? teamId : (internalExternalId ? stripFsTeamPrefix(internalExternalId) : null);
 
     try {
-        // Phase 1: Fetch endpoints that use team_id (only if it looks like an external ID)
-        let resultsArr: any[] = [];
-        let fixturesArr: any[] = [];
-        let transfers: any[] = [];
-        let resultsGrouped: any[] = [];
+        // Matches come exclusively from local Supabase DB (internalResults/internalFixtures)
+        // FlashScore is only used for team details and squad if external_id is available
 
-        if (isExternalId) {
-            const [resultsRes, fixturesRes, transfersRes] = await Promise.allSettled([
-                getTeamResults(teamId),
-                getTeamFixtures(teamId),
-                getTeamTransfers(teamId)
-            ]);
-
-            const resultsRaw = normalize(resultsRes);
-            const fixturesRaw = normalize(fixturesRes);
-            transfers = normalize(transfersRes) || [];
-
-            const flattenMatches = (data: any): any[] => {
-                if (!Array.isArray(data)) return [];
-                if (data.length > 0 && data[0]?.match_id) return data;
-                const flat: any[] = [];
-                for (const group of data) {
-                    const matches = group?.matches || [];
-                    for (const m of matches) {
-                        flat.push({ ...m, tournament_name: group.name || group.full_name || '' });
-                    }
-                }
-                return flat;
-            };
-
-            resultsArr = flattenMatches(resultsRaw);
-            fixturesArr = flattenMatches(fixturesRaw);
-            resultsGrouped = Array.isArray(resultsRaw) ? resultsRaw : [];
-        }
-
-        // Phase 2: Handle Details & Squad
         let teamUrl = teamUrlParam;
-        let extractedName = teamName;
+        const extractedName = teamName || internalClubName;
 
-        if (!teamUrl && !extractedName && isExternalId) {
-            const info = extractTeamFromResults(teamId, resultsGrouped);
-            if (info?.name) extractedName = info.name;
-        }
-
-        if (!teamUrl && extractedName && isExternalId) {
-            teamUrl = `/team/${slugify(extractedName)}/${teamId}/`;
+        if (!teamUrl && extractedName && effectiveExternalId) {
+            teamUrl = `/team/${slugify(extractedName)}/${effectiveExternalId}/`;
         }
 
         let squad: any = null;
-        if (teamUrl && isExternalId) {
+        if (teamUrl && effectiveExternalId) {
             const [detailsRes, squadRes] = await Promise.allSettled([
                 getTeamDetails(teamUrl),
                 getTeamSquad(teamUrl)
@@ -154,27 +168,18 @@ export async function GET(request: Request) {
             const remoteDetails = normalize(detailsRes);
             squad = normalize(squadRes);
 
-            // Merge/Override details if external found and we don't have internal or want to prefer remote
             if (remoteDetails && !Array.isArray(remoteDetails)) {
                 details = { ...details, ...remoteDetails };
-            }
-        }
-
-        // Final Fallback for details
-        if (!details && isExternalId) {
-            const info = extractTeamFromResults(teamId, resultsGrouped);
-            if (info) {
-                details = { name: info.name, image_path: info.image_path };
             }
         }
 
         return Response.json({
             ok: true,
             details,
-            results: resultsArr,
-            fixtures: fixturesArr,
+            results: internalResults,
+            fixtures: internalFixtures,
             squad: squad || [],
-            transfers: Array.isArray(transfers) ? transfers : []
+            transfers: []
         });
     } catch (e: any) {
         console.error('Teams API error', e);

@@ -174,6 +174,35 @@
     color: #fff;
 }
 
+/* Header Dropdowns */
+.headerDropdowns {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.headerSelect {
+    appearance: none;
+    background: var(--color-bg-tertiary, rgba(255,255,255,0.07));
+    border: 1px solid var(--color-border, rgba(255,255,255,0.12));
+    border-radius: var(--radius-sm, 6px);
+    color: var(--color-text-primary, #fff);
+    font-size: 0.8rem;
+    padding: 5px 28px 5px 10px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: border-color 0.2s;
+}
+
+.headerSelect:hover,
+.headerSelect:focus {
+    border-color: var(--color-accent, #00a365);
+    outline: none;
+}
+
 /* Tabs */
 .navTabs {
     display: flex;

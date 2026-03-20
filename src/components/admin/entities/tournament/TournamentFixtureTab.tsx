@@ -489,12 +489,12 @@ function FixtureManagementCenter({
                 awayClub: matchData.awayClub ? { id: matchData.awayClub.id, name: matchData.awayClub.name, short_name: matchData.awayClub.shortName, logo_url: matchData.awayClub.logo, primary_color: null } : null,
                 tournament: tournamentData ? { id: tournamentData.id, name: tournamentData.name } : null,
                 // Points
-                home_base_points: (matchData as any).home_base_points ?? null,
-                away_base_points: (matchData as any).away_base_points ?? null,
-                home_bonus_points: (matchData as any).home_bonus_points ?? 0,
-                away_bonus_points: (matchData as any).away_bonus_points ?? 0,
-                points_autocalculated: (matchData as any).points_autocalculated ?? true,
-                points_override_reason: (matchData as any).points_override_reason ?? null,
+                home_base_points: matchData.homeBasePoints ?? null,
+                away_base_points: matchData.awayBasePoints ?? null,
+                home_bonus_points: matchData.homeBonusPoints ?? 0,
+                away_bonus_points: matchData.awayBonusPoints ?? 0,
+                points_autocalculated: matchData.pointsAutocalculated ?? true,
+                points_override_reason: matchData.pointsOverrideReason ?? null,
             };
             return (
                 <div className="fixture-management-center" style={{ padding: 0 }}>

@@ -171,6 +171,23 @@ export class StandingsEngine {
       const { home: homeScore, away: awayScore } = this.parseScore(m.score);
       const homeTries: number = Number(m.score?.homeTries ?? 0);
       const awayTries: number = Number(m.score?.awayTries ?? 0);
+      const hasManualPoints = m.points_autocalculated === false;
+      let homeBasePoints = rules.points_for_draw;
+      let awayBasePoints = rules.points_for_draw;
+      let homeResult = 'D';
+      let awayResult = 'D';
+
+      if (homeScore > awayScore) {
+        homeBasePoints = rules.points_for_win;
+        awayBasePoints = rules.points_for_loss;
+        homeResult = 'W';
+        awayResult = 'L';
+      } else if (homeScore < awayScore) {
+        homeBasePoints = rules.points_for_loss;
+        awayBasePoints = rules.points_for_win;
+        homeResult = 'L';
+        awayResult = 'W';
+      }
 
       // HOME side stats
       if (tableType === 'general' || tableType === 'home') {
@@ -179,29 +196,31 @@ export class StandingsEngine {
         homeStats.points_against += awayScore;
         homeStats._matchIds.push(m.id);
 
-        if (homeScore > awayScore) {
+        if (homeResult === 'W') {
           homeStats.won += 1;
-          homeStats.base_points += rules.points_for_win;
-          homeStats.form.push('W');
-        } else if (homeScore < awayScore) {
+        } else if (homeResult === 'L') {
           homeStats.lost += 1;
-          homeStats.base_points += rules.points_for_loss;
-          homeStats.form.push('L');
           // Defensive bonus: lost by ≤ threshold (default 7 pts)
-          if (rules.defensive_bonus_rule) {
+          if (!hasManualPoints && rules.defensive_bonus_rule && homeResult === 'L') {
             const margin = rules.defensive_bonus_rule?.margin ?? 7;
             if (awayScore - homeScore <= margin) homeStats.bonus_defensive += 1;
           }
         } else {
           homeStats.drawn += 1;
-          homeStats.base_points += rules.points_for_draw;
-          homeStats.form.push('D');
         }
 
+        homeStats.base_points += hasManualPoints
+          ? Number(m.home_base_points ?? homeBasePoints)
+          : homeBasePoints;
+        homeStats.form.push(homeResult);
+
         // Offensive bonus: scored ≥ threshold tries (default 4)
-        if (rules.offensive_bonus_rule) {
+        if (!hasManualPoints && rules.offensive_bonus_rule) {
           const threshold = rules.offensive_bonus_rule?.tries ?? rules.offensive_bonus_rule?.threshold ?? 4;
           if (homeTries >= threshold) homeStats.bonus_offensive += 1;
+        }
+        if (hasManualPoints) {
+          homeStats.adjustments += Number(m.home_bonus_points ?? 0);
         }
       }
 
@@ -212,27 +231,29 @@ export class StandingsEngine {
         awayStats.points_against += homeScore;
         awayStats._matchIds.push(m.id);
 
-        if (awayScore > homeScore) {
+        if (awayResult === 'W') {
           awayStats.won += 1;
-          awayStats.base_points += rules.points_for_win;
-          awayStats.form.push('W');
-        } else if (awayScore < homeScore) {
+        } else if (awayResult === 'L') {
           awayStats.lost += 1;
-          awayStats.base_points += rules.points_for_loss;
-          awayStats.form.push('L');
-          if (rules.defensive_bonus_rule) {
+          if (!hasManualPoints && rules.defensive_bonus_rule && awayResult === 'L') {
             const margin = rules.defensive_bonus_rule?.margin ?? 7;
             if (homeScore - awayScore <= margin) awayStats.bonus_defensive += 1;
           }
         } else {
           awayStats.drawn += 1;
-          awayStats.base_points += rules.points_for_draw;
-          awayStats.form.push('D');
         }
 
-        if (rules.offensive_bonus_rule) {
+        awayStats.base_points += hasManualPoints
+          ? Number(m.away_base_points ?? awayBasePoints)
+          : awayBasePoints;
+        awayStats.form.push(awayResult);
+
+        if (!hasManualPoints && rules.offensive_bonus_rule) {
           const threshold = rules.offensive_bonus_rule?.tries ?? rules.offensive_bonus_rule?.threshold ?? 4;
           if (awayTries >= threshold) awayStats.bonus_offensive += 1;
+        }
+        if (hasManualPoints) {
+          awayStats.adjustments += Number(m.away_bonus_points ?? 0);
         }
       }
     });

@@ -35,6 +35,12 @@ export interface Match {
   status: MatchStatus;
   score: MatchScore;
   notes: string | null;
+  homeBasePoints?: number | null;
+  awayBasePoints?: number | null;
+  homeBonusPoints?: number | null;
+  awayBonusPoints?: number | null;
+  pointsAutocalculated?: boolean | null;
+  pointsOverrideReason?: string | null;
 
   // Broadcasting & Media
   streamUrl?: string | null;
@@ -146,6 +152,12 @@ export interface MatchFormData {
   referee?: string | null;
   pitch?: string | null;
   score?: MatchScore | null;
+  homeBasePoints?: number | null;
+  awayBasePoints?: number | null;
+  homeBonusPoints?: number | null;
+  awayBonusPoints?: number | null;
+  pointsAutocalculated?: boolean | null;
+  pointsOverrideReason?: string | null;
   lineups?: {
     home: any[];
     away: any[];
