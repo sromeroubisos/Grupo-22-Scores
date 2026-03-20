@@ -96,9 +96,9 @@ export async function cachedFetch<T>(
             return data;
         } catch (err: any) {
             const msg = err.message || 'Unknown error';
-            console.warn(`[Cache] Primary fetch failed for '${key}'. Rethrying WITHOUT timeout. Error: ${msg}`);
+            console.warn(`[Cache] Primary fetch failed for '${key}'. Retrying once with timeout. Error: ${msg}`);
             try {
-                const fallbackData = await fetcher();
+                const fallbackData = await withTimeout(fetcher(), FETCH_TIMEOUT_MS, `${key}:retry`);
                 cache.set(key, { data: fallbackData, fetchedAt: Date.now(), ttl });
                 return fallbackData;
             } catch (retryErr: any) {

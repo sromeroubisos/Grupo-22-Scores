@@ -1,10 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getReadClient } from '@/lib/supabase/read';
 
 function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
 }
+
+function hasMissingColumnError(error: { code?: string | null; message?: string | null; details?: string | null } | null, column: string) {
+    if (!error) return false;
+
+    const haystack = `${error.message || ''} ${error.details || ''}`.toLowerCase();
+    return error.code === 'PGRST204' || haystack.includes(column.toLowerCase());
+}
+
+type MatchConsoleRow = {
+    id: string;
+    round_id: string | null;
+    round_label?: string | null;
+    date_time: string;
+    venue: string | null;
+    status: string | null;
+    score: unknown;
+    tournament_id: string | null;
+    home_club_id: string | null;
+    away_club_id: string | null;
+};
 
 export async function GET(request: NextRequest) {
     try {
@@ -20,15 +40,15 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const admin = createAdminClient();
+        const readClient = await getReadClient();
 
         if (resource === 'clubs') {
             const [{ data: clubs, error: clubsError }, { data: unions, error: unionsError }] = await Promise.all([
-                admin
+                readClient
                     .from('clubs')
                     .select('id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id')
                     .order('name'),
-                admin
+                readClient
                     .from('unions')
                     .select('id, name'),
             ]);
@@ -45,18 +65,31 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ data });
         }
 
-        const [{ data: matches, error: matchesError }, { data: tournaments, error: tournamentsError }, { data: clubs, error: clubsError }] = await Promise.all([
-            admin
+        const matchesQueryWithRoundLabel = readClient
+            .from('matches')
+            .select('id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id')
+            .order('date_time', { ascending: false });
+
+        let matchesResult: { data: MatchConsoleRow[] | null; error: { code?: string | null; message?: string | null; details?: string | null } | null } =
+            await matchesQueryWithRoundLabel;
+
+        if (hasMissingColumnError(matchesResult.error, 'round_label')) {
+            matchesResult = await readClient
                 .from('matches')
-                .select('id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id')
-                .order('date_time', { ascending: false }),
-            admin
+                .select('id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id')
+                .order('date_time', { ascending: false });
+        }
+
+        const [{ data: tournaments, error: tournamentsError }, { data: clubs, error: clubsError }] = await Promise.all([
+            readClient
                 .from('tournaments')
                 .select('id, name, sport_id, sport, season_id'),
-            admin
+            readClient
                 .from('clubs')
                 .select('id, name, logo_url, primary_color'),
         ]);
+
+        const { data: matches, error: matchesError } = matchesResult;
 
         if (matchesError) return jsonError('Failed to load matches', 500, matchesError.message);
         if (tournamentsError) return jsonError('Failed to load tournaments for matches', 500, tournamentsError.message);
