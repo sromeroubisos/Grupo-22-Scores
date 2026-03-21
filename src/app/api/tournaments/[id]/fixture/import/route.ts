@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { FixtureImportService } from '@/lib/services/fixtureImportService';
+import { FIXTURE_IMPORT_SCHEMA_MESSAGE, isFixtureImportSchemaError } from '@/lib/utils/fixtureImportErrors';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,6 +68,17 @@ export async function POST(
         return NextResponse.json(result);
     } catch (error: unknown) {
         console.error('Error in POST /api/tournaments/[id]/fixture/import:', error);
+
+        if (isFixtureImportSchemaError(error)) {
+            return NextResponse.json(
+                {
+                    error: FIXTURE_IMPORT_SCHEMA_MESSAGE,
+                    code: 'FIXTURE_IMPORT_SCHEMA_MISSING',
+                },
+                { status: 503 }
+            );
+        }
+
         const message = error instanceof Error ? error.message : 'Internal server error';
         return NextResponse.json(
             { error: message },

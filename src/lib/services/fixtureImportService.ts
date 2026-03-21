@@ -416,7 +416,7 @@ export class FixtureImportService {
           row_index: row.rowIndex,
           source_label: row.sourceLabel,
           raw_payload: row.raw,
-          extracted_payload: row.normalized,
+          extracted_payload: this.buildStoredPreviewPayload(row, confidence),
           normalized_payload: row.normalized,
           validation_status: row.status,
           confidence_level: row.matched.homeClub?.confidence || row.matched.awayClub?.confidence || confidence,
@@ -427,6 +427,9 @@ export class FixtureImportService {
 
     if (!primaryRowsInsert.error && primaryRowsInsert.data) {
       const rowIds = new Map<number, string>(primaryRowsInsert.data.map((item: any) => [item.row_index, item.id]));
+      rows.forEach((row) => {
+        row.previewId = rowIds.get(row.rowIndex) || row.previewId;
+      });
       const primaryPreviewInsert = await supabase
         .from('import_match_previews')
         .insert(
@@ -456,6 +459,7 @@ export class FixtureImportService {
         if (!this.isCompatRetryableError(primaryPreviewInsert.error)) {
           throw new Error(primaryPreviewInsert.error?.message || 'No se pudo crear la previsualización.');
         }
+        return;
       } else {
         const previewIds = new Map<string, string>(primaryPreviewInsert.data.map((item: any) => [item.row_id, item.id]));
         rows.forEach((row) => {
@@ -541,6 +545,20 @@ export class FixtureImportService {
       throw new Error(primaryQuery.error?.message || 'No se pudo cargar la previsualización.');
     }
 
+    const modernRows = await supabase
+      .from('import_rows')
+      .select('id, row_index, source_label, raw_payload, extracted_payload, normalized_payload, issues, validation_status')
+      .eq('job_id', jobId)
+      .order('row_index');
+
+    if (!modernRows.error && modernRows.data) {
+      return modernRows.data.map((row: any) => this.restorePreviewFromModernRow(row));
+    }
+
+    if (modernRows.error && !this.isCompatRetryableError(modernRows.error)) {
+      throw new Error(modernRows.error.message || 'No se pudo cargar la previsualizaciÃ³n.');
+    }
+
     const fallbackQuery = await supabase
       .from('import_match_previews')
       .select('id, created_at')
@@ -559,14 +577,7 @@ export class FixtureImportService {
 
     return fallbackQuery.data.map((preview: any, index: number) => {
       const row = fallbackRows.data[index];
-      const payload = row?.raw_data || {};
-      return {
-        id: preview.id,
-        preview_payload: payload,
-        duplicate_action: payload.duplicateAction || 'skip_row',
-        duplicate_match_id: payload.matched?.duplicateMatchId || null,
-        row_index: row?.row_index || null,
-      };
+      return this.restorePreviewFromLegacyRow(preview.id, row?.row_index || null, row?.raw_data || {});
     });
   }
 
@@ -1242,6 +1253,19 @@ export class FixtureImportService {
     return combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
   }
 
+  private static buildStoredPreviewPayload(row: FixtureImportPreviewRow, confidence: FixtureImportConfidence) {
+    return {
+      raw: row.raw,
+      normalized: row.normalized,
+      matched: row.matched,
+      issues: row.issues,
+      sourceLabel: row.sourceLabel,
+      duplicateAction: row.duplicateAction,
+      action: row.action,
+      confidence: row.matched.homeClub?.confidence || row.matched.awayClub?.confidence || confidence,
+    };
+  }
+
   private static extractNumericRoundLabel(value: string): string | null {
     const normalized = this.normalizeKey(value);
     const match = normalized.match(/\b(?:round|jornada|fecha|matchday)\s*(?:n|no|numero)?\s*(\d+)\b/);
@@ -1381,6 +1405,86 @@ export class FixtureImportService {
     if (['manual_review', 'skipped_duplicate', 'omitted'].includes(approvalStatus)) return 'warning';
     if (['rejected'].includes(approvalStatus)) return 'invalid';
     return 'pending';
+  }
+
+  private static restorePreviewFromModernRow(row: any) {
+    const extracted = this.asRecord(row?.extracted_payload);
+    const rawPayload = this.asRecord(row?.raw_payload);
+    const normalizedPayload = this.asRecord(row?.normalized_payload);
+    const storedNormalized = this.asRecord(extracted.normalized);
+    const matched = this.asRecord(extracted.matched);
+    const duplicateAction = typeof extracted.duplicateAction === 'string' ? extracted.duplicateAction : 'skip_row';
+    const action = typeof extracted.action === 'string'
+      ? extracted.action
+      : row?.validation_status === 'error'
+        ? 'omit'
+        : 'approve';
+    const normalized = Object.keys(storedNormalized).length
+      ? storedNormalized
+      : (Object.keys(normalizedPayload).length ? normalizedPayload : extracted);
+
+    return {
+      id: String(row?.id || randomUUID()),
+      preview_payload: {
+        raw: Object.keys(rawPayload).length ? rawPayload : this.asRecord(extracted.raw),
+        normalized,
+        matched: {
+          homeClub: matched.homeClub || null,
+          awayClub: matched.awayClub || null,
+          round: matched.round || null,
+          group: matched.group || null,
+          venue: matched.venue || null,
+          competition: matched.competition || null,
+          duplicateMatchId: matched.duplicateMatchId || null,
+        },
+        issues: Array.isArray(extracted.issues)
+          ? extracted.issues
+          : Array.isArray(row?.issues)
+            ? row.issues
+            : [],
+        sourceLabel: typeof extracted.sourceLabel === 'string' ? extracted.sourceLabel : String(row?.source_label || row?.id || 'Fila importada'),
+        duplicateAction,
+        action,
+      },
+      duplicate_action: duplicateAction,
+      duplicate_match_id: matched.duplicateMatchId || null,
+      row_index: row?.row_index || null,
+    };
+  }
+
+  private static restorePreviewFromLegacyRow(previewId: string, rowIndex: number | null, payload: any) {
+    const record = this.asRecord(payload);
+    const matched = this.asRecord(record.matched);
+    const duplicateAction = typeof record.duplicateAction === 'string' ? record.duplicateAction : 'skip_row';
+    const action = typeof record.action === 'string' ? record.action : 'approve';
+
+    return {
+      id: previewId,
+      preview_payload: {
+        raw: this.asRecord(record.raw),
+        normalized: this.asRecord(record.normalized),
+        matched: {
+          homeClub: matched.homeClub || null,
+          awayClub: matched.awayClub || null,
+          round: matched.round || null,
+          group: matched.group || null,
+          venue: matched.venue || null,
+          competition: matched.competition || null,
+          duplicateMatchId: matched.duplicateMatchId || null,
+        },
+        issues: Array.isArray(record.issues) ? record.issues : [],
+        sourceLabel: typeof record.sourceLabel === 'string' ? record.sourceLabel : previewId,
+        duplicateAction,
+        action,
+      },
+      duplicate_action: duplicateAction,
+      duplicate_match_id: matched.duplicateMatchId || null,
+      row_index: rowIndex,
+    };
+  }
+
+  private static asRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
   }
 
   private static createEphemeralJobId() {
