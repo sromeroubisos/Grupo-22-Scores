@@ -65,16 +65,19 @@ export default function ResultadosPage() {
                             <ExportImage
                                 template="dailyMatches"
                                 data={{
-                                    date: resultsByDate[0]?.label || 'Resultados',
+                                    date: 'Resultados',
                                     tournament: 'Torneo Apertura 2026',
-                                    matches: resultsByDate[0]?.matches.map(m => ({
-                                        homeTeam: m.home,
-                                        awayTeam: m.away,
-                                        homeScore: m.homeScore,
-                                        awayScore: m.awayScore,
-                                        time: m.time,
-                                        status: m.status as 'scheduled' | 'live' | 'finished',
-                                    })) || [],
+                                    matches: resultsByDate.flatMap(group =>
+                                        group.matches.map(m => ({
+                                            homeTeam: m.home,
+                                            awayTeam: m.away,
+                                            homeScore: m.homeScore,
+                                            awayScore: m.awayScore,
+                                            time: m.time,
+                                            status: m.status as 'scheduled' | 'live' | 'finished',
+                                            dateLabel: group.label,
+                                        }))
+                                    ),
                                 }}
                                 filename="resultados"
                             />

@@ -1608,10 +1608,76 @@
   min-width: 0;
 }
 
+.teamNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
 .teamLabels {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.teamLabelTrigger {
+  --team-label-accent: var(--accent);
+  --team-label-bg: rgba(0, 163, 101, 0.14);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--team-label-accent) 36%, rgba(255, 255, 255, 0.08));
+  background: var(--team-label-bg);
+  color: var(--team-label-accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+}
+
+.teamLabelTrigger:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--team-label-accent) 52%, rgba(255, 255, 255, 0.08));
+}
+
+.teamLabelTrigger:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.teamLabelTriggerEmpty {
+  --team-label-accent: rgba(228, 236, 241, 0.66);
+  --team-label-bg: rgba(255, 255, 255, 0.05);
+}
+
+.teamLabelTriggerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.teamLabelTriggerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.teamLabelTriggerText {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Spinner animation */

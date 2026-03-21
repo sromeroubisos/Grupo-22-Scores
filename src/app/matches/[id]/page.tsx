@@ -21,8 +21,9 @@ import {
 } from '@/lib/services/flashscore';
 import { parseAnyMatches, UIMatch, withStats } from '@/lib/matchSchema';
 import { apiFetch, ApiDebug } from '@/lib/apiFetch';
+import { APP_TIMEZONE } from '@/lib/timezone';
 
-const USER_TZ = typeof window !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC';
+const USER_TZ = APP_TIMEZONE;
 
 function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }) {
     const params = new URLSearchParams();
@@ -117,10 +118,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         const controller = new AbortController();
 
         async function fetchData() {
-            // Only set loading on first fetch
-            if (state.kind === 'loading') {
-                setState(prev => ({ ...prev, kind: 'loading' }));
-            }
+            setState(prev => prev.matchData ? prev : { ...prev, kind: 'loading' });
 
             try {
                 if (isFlashScore) {
@@ -154,12 +152,56 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     const startTime = new Date(Number(tsTotal) * 1000);
                     const fsStatus = mapStatus(evt.match_status, evt.STAGE_TYPE || evt.status);
 
+                    // Use the NEW router parser on the ORIGINAL payload
+                    const { matches, issues: zodIssues } = parseAnyMatches(detailsRes);
+                    const baseMatch = matches[0];
+
+                    if (!baseMatch) {
+                        setState(prev => ({
+                            ...prev,
+                            kind: 'error',
+                            message: 'No se pudo parsear el partido (Formato desconocido)',
+                            debug: { ...prev.debug, details: debugDetails },
+                            issues: zodIssues
+                        }));
+                        return;
+                    }
+
+                    const initialHomeScore = evt.scores?.home ?? evt.HOME_SCORE_CURRENT ?? baseMatch.scoreHome;
+                    const initialAwayScore = evt.scores?.away ?? evt.AWAY_SCORE_CURRENT ?? baseMatch.scoreAway;
+
+                    statusRef.current = fsStatus;
+                    setState(prev => ({
+                        ...prev,
+                        kind: 'ok',
+                        matchData: {
+                            ...baseMatch,
+                            sportId,
+                            status: fsStatus,
+                            round: evt.tournament?.stage_id || evt.ROUND_NAME || 'General',
+                            category: evt.country?.name || evt.COUNTRY_NAME || baseMatch.category || 'Internacional',
+                            tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
+                            home: { ...baseMatch.home, score: initialHomeScore, teamUrl: evt.home_team?.team_url || '' },
+                            away: { ...baseMatch.away, score: initialAwayScore, teamUrl: evt.away_team?.team_url || '' },
+                            lineups: null,
+                            standings: [],
+                            h2h: [],
+                            draw: [],
+                        },
+                        eventsData: [],
+                        statsData: [],
+                        playerStats: null,
+                        commentaryData: [],
+                        issues: zodIssues,
+                        debug: { ...prev.debug, details: debugDetails }
+                    }));
+
                     // Calculate day offset from today to the match's start time
                     const nowDays = Math.floor(Date.now() / 86400000);
                     const matchDays = Math.floor(startTime.getTime() / 86400000);
                     const matchDayOffset = Math.max(-7, Math.min(7, matchDays - nowDays));
 
-                    const promises: any[] = [
+                    const results = await Promise.allSettled([
                         getFlashScoreMatchSummary(id),
                         getFlashScoreMatchStats(id),
                         getFlashScoreMatchH2H(id),
@@ -170,10 +212,11 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         getFlashScorePlayerStats(id),
                         getFlashScoreMatchCommentary(id),
                         getFlashScoreMatchDraw(id)
-                    ];
+                    ]);
 
-                    const results = await Promise.allSettled(promises);
-                    const [summaryRes, statsRes, h2hRes, formRes, lineupsRes, standingsRes, dayMatchesRes, playerStatsRes, commentaryRes, drawRes] = results.map((r: any) => r.status === 'fulfilled' ? r.value : null);
+                    if (controller.signal.aborted) return;
+
+                    const [summaryRes, statsRes, h2hRes, _formRes, lineupsRes, standingsRes, dayMatchesRes, playerStatsRes, commentaryRes, drawRes] = results.map((r: any) => r.status === 'fulfilled' ? r.value : null);
 
                     // Cross-reference with daily list to find better scores/status
                     let listMatchEvt: any = null;
@@ -190,42 +233,20 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         }
                     }
 
-                    // Use the NEW router parser on the ORIGINAL payload
-                    const { matches, issues: zodIssues } = parseAnyMatches(detailsRes);
-                    const baseMatch = matches[0];
-
-                    if (!baseMatch) {
-                        setState(prev => ({
-                            ...prev,
-                            kind: 'error',
-                            message: 'No se pudo parsear el partido (Formato desconocido)',
-                            debug: { ...prev.debug, details: debugDetails },
-                            issues: zodIssues
-                        }));
-                        return;
-                    }
-
                     const rawSummary = summaryRes?.DATA || summaryRes || [];
                     const summaryItemsRaw = Array.isArray(rawSummary) ? rawSummary : (rawSummary.INCIDENTS || rawSummary.incidents || []);
 
-                    // Handle empty or invalid summary data gracefully
                     const { out: incidents } = withStats(
                         Array.isArray(summaryItemsRaw) ? summaryItemsRaw : [],
                         (incident: any) => {
-                            // Skip invalid incidents
                             if (!incident || typeof incident !== 'object') return null;
 
-                            // Accept both old format (INCIDENT_TYPE) and new format (type)
                             const type = incident.type || incident.INCIDENT_TYPE || incident.event_type;
                             if (!type) return null;
 
-                            // Accept minutes (new) or INCIDENT_MINUTE (old) or period for basketball
                             const time = incident.minutes || incident.INCIDENT_MINUTE || incident.time || incident.period || '?';
-
-                            // Accept name (new) or INCIDENT_PARTICIPANT_NAME (old)
                             const player = incident.name || incident.INCIDENT_PARTICIPANT_NAME || incident.player_name || 'Jugador';
 
-                            // Accept team (new 'home'/'away' strings) or INCIDENT_TEAM (old 1/2 ints)
                             let teamSide: 'home' | 'away' = 'home';
                             if (incident.team) {
                                 teamSide = incident.team === 'home' ? 'home' : 'away';
@@ -248,11 +269,6 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     );
 
                     const rawSummaryData = summaryRes?.DATA || {};
-                    // Priority: 
-                    // 1. Explicit scores from individual details (if any)
-                    // 2. Scores from the daily matches list (often more reliable for current score)
-                    // 3. Fallbacks from various detail fields (HOME_SCORE_CURRENT, etc)
-                    // 4. Default to 0 if finished
                     let hScoreFinal = baseMatch.scoreHome;
                     let aScoreFinal = baseMatch.scoreAway;
 
@@ -260,54 +276,33 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         const candidateH = evt.scores?.home ?? listMatchEvt?.scores?.home ?? evt.HOME_SCORE_CURRENT ?? rawSummaryData.SCORE_HOME ?? rawSummaryData.HOME_SCORE ?? null;
                         const candidateA = evt.scores?.away ?? listMatchEvt?.scores?.away ?? evt.AWAY_SCORE_CURRENT ?? rawSummaryData.SCORE_AWAY ?? rawSummaryData.AWAY_SCORE ?? null;
 
-                        // Only override if we found something non-null
                         if (candidateH !== null) hScoreFinal = Number(candidateH);
                         if (candidateA !== null) aScoreFinal = Number(candidateA);
                     }
 
-                    // Final safety: if finished and still null, then it's 0-0
                     if ((fsStatus === 'live' || fsStatus === 'final') && hScoreFinal === null) {
                         hScoreFinal = 0;
                         aScoreFinal = 0;
                     }
 
-                    const processedMatch = {
-                        ...baseMatch,
-                        sportId,
-                        status: listMatchEvt?.match_status ? mapStatus(listMatchEvt.match_status) : fsStatus,
-                        round: evt.tournament?.stage_id || evt.ROUND_NAME || 'General',
-                        category: evt.country?.name || evt.COUNTRY_NAME || baseMatch.category || 'Internacional',
-                        tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
-                        home: { ...baseMatch.home, score: hScoreFinal, teamUrl: evt.home_team?.team_url || '' },
-                        away: { ...baseMatch.away, score: aScoreFinal, teamUrl: evt.away_team?.team_url || '' },
-                        lineups: lineupsRes?.DATA || lineupsRes || null,
-                        standings: (() => {
-                            // Try multiple paths for standings data
-                            if (Array.isArray(standingsRes)) return standingsRes;
-                            if (standingsRes?.DATA?.[0]?.ROWS) return standingsRes.DATA[0].ROWS;
-                            if (standingsRes?.DATA?.rows) return standingsRes.DATA.rows;
-                            if (standingsRes?.DATA?.standings) return standingsRes.DATA.standings;
-                            if (standingsRes?.rows) return standingsRes.rows;
-                            if (standingsRes?.standings) return standingsRes.standings;
-                            if (standingsRes?.DATA && Array.isArray(standingsRes.DATA)) return standingsRes.DATA;
+                    const resolvedStandings = (() => {
+                        if (Array.isArray(standingsRes)) return standingsRes;
+                        if (standingsRes?.DATA?.[0]?.ROWS) return standingsRes.DATA[0].ROWS;
+                        if (standingsRes?.DATA?.rows) return standingsRes.DATA.rows;
+                        if (standingsRes?.DATA?.standings) return standingsRes.DATA.standings;
+                        if (standingsRes?.rows) return standingsRes.rows;
+                        if (standingsRes?.standings) return standingsRes.standings;
+                        if (standingsRes?.DATA && Array.isArray(standingsRes.DATA)) return standingsRes.DATA;
+                        return [];
+                    })();
 
-                            // Log the actual structure for debugging
-                            if (standingsRes && Object.keys(standingsRes).length > 0) {
-                                console.log('Standings structure:', JSON.stringify(standingsRes, null, 2));
-                            }
-                            return [];
-                        })(),
-                        h2h: Array.isArray(h2hRes)
-                            ? h2hRes
-                            : (h2hRes?.DATA || h2hRes?.data || h2hRes?.matches || []),
-                        draw: (() => {
-                            const raw = drawRes?.DATA || drawRes;
-                            if (Array.isArray(raw) && raw.length > 0) return raw;
-                            if (raw?.rounds && Array.isArray(raw.rounds)) return raw.rounds;
-                            if (raw?.draw && Array.isArray(raw.draw)) return raw.draw;
-                            return [];
-                        })(),
-                    };
+                    const resolvedDraw = (() => {
+                        const raw = drawRes?.DATA || drawRes;
+                        if (Array.isArray(raw) && raw.length > 0) return raw;
+                        if (raw?.rounds && Array.isArray(raw.rounds)) return raw.rounds;
+                        if (raw?.draw && Array.isArray(raw.draw)) return raw.draw;
+                        return [];
+                    })();
 
                     const rawStats = statsRes?.DATA || statsRes || {};
                     let statItems: any[] = [];
@@ -315,36 +310,46 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     if (Array.isArray(rawStats)) {
                         statItems = rawStats;
                     } else if (rawStats.match && Array.isArray(rawStats.match)) {
-                        // Rugby format: prioritize the full "match" stats
                         statItems = rawStats.match;
                     } else if (rawStats.STATS && Array.isArray(rawStats.STATS)) {
                         statItems = rawStats.STATS;
                     } else if (rawStats.stats && Array.isArray(rawStats.stats)) {
-                        // Alternative stats format
                         statItems = rawStats.stats;
                     } else if (rawStats.statistics && Array.isArray(rawStats.statistics)) {
-                        // Basketball/other sports format
                         statItems = rawStats.statistics;
                     }
 
                     const stats = statItems
-                        .filter((s: any) => s && typeof s === 'object') // Filter out invalid items
+                        .filter((s: any) => s && typeof s === 'object')
                         .map((s: any) => ({
                             label: s.name || s.SECT_NAME || s.label || s.stat_name || 'General',
                             home: String(s.home_team ?? s.HOME_VALUE ?? s.home ?? s.home_value ?? '0'),
                             away: String(s.away_team ?? s.AWAY_VALUE ?? s.away ?? s.away_value ?? '0')
                         }));
 
-                    statusRef.current = fsStatus;
-                    setState({
-                        kind: 'ok',
-                        matchData: processedMatch,
-                        eventsData: incidents,
-                        statsData: stats,
-                        playerStats: playerStatsRes?.DATA || playerStatsRes || null,
-                        commentaryData: commentaryRes?.DATA || commentaryRes || [],
-                        issues: zodIssues,
-                        debug: { ...state.debug, details: debugDetails }
+                    setState(prev => {
+                        if (!prev.matchData) return prev;
+
+                        return {
+                            ...prev,
+                            kind: 'ok',
+                            matchData: {
+                                ...prev.matchData,
+                                status: listMatchEvt?.match_status ? mapStatus(listMatchEvt.match_status) : fsStatus,
+                                home: { ...prev.matchData.home, score: hScoreFinal, teamUrl: evt.home_team?.team_url || '' },
+                                away: { ...prev.matchData.away, score: aScoreFinal, teamUrl: evt.away_team?.team_url || '' },
+                                lineups: lineupsRes?.DATA || lineupsRes || null,
+                                standings: resolvedStandings,
+                                h2h: Array.isArray(h2hRes) ? h2hRes : (h2hRes?.DATA || h2hRes?.data || h2hRes?.matches || []),
+                                draw: resolvedDraw,
+                            },
+                            eventsData: incidents,
+                            statsData: stats,
+                            playerStats: playerStatsRes?.DATA || playerStatsRes || null,
+                            commentaryData: commentaryRes?.DATA || commentaryRes || [],
+                            issues: zodIssues,
+                            debug: { ...prev.debug, details: debugDetails }
+                        };
                     });
                 } else {
                     // DATABASE MATCH LOGIC - Fetch from Supabase via API
@@ -359,6 +364,51 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             const awayClubId = matchData.awayClub?.id || matchData.awayClubId || '';
                             const tournamentId = matchData.tournamentId || '';
 
+                            const baseProcessedMatch = {
+                                id: matchData.id,
+                                status: matchData.status || 'scheduled',
+                                sportId,
+                                date: matchData.dateTime,
+                                time: matchData.dateTime
+                                    ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
+                                    : '--:--',
+                                tournament: matchData.tournament?.name || 'Partido Local',
+                                tournamentId,
+                                category: 'General',
+                                round: matchData.roundId || '',
+                                venue: matchData.venue || 'Por definir',
+                                referee: matchData.referee || null,
+                                home: {
+                                    id: homeClubId || 'home',
+                                    name: matchData.homeClub?.name || 'Local',
+                                    logo: matchData.homeClub?.logo || null,
+                                    score: score.home ?? 0
+                                },
+                                away: {
+                                    id: awayClubId || 'away',
+                                    name: matchData.awayClub?.name || 'Visitante',
+                                    logo: matchData.awayClub?.logo || null,
+                                    score: score.away ?? 0
+                                },
+                                events: matchData.events || [],
+                                lineups: matchData.lineups || null,
+                                standings: [],
+                                h2h: [],
+                                draw: []
+                            };
+
+                            statusRef.current = matchData.status || 'scheduled';
+                            setState({
+                                kind: 'ok',
+                                matchData: baseProcessedMatch,
+                                eventsData: matchData.events || [],
+                                statsData: [],
+                                playerStats: null,
+                                commentaryData: [],
+                                issues: [],
+                                debug: {}
+                            });
+
                             // Parallel-fetch standings + H2H
                             const [standingsRes, h2hRes] = await Promise.allSettled([
                                 tournamentId
@@ -368,6 +418,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     ? fetch(`/api/db/h2h?home=${homeClubId}&away=${awayClubId}`, { signal: controller.signal }).then(r => r.ok ? r.json() : null)
                                     : Promise.resolve(null),
                             ]);
+
+                            if (controller.signal.aborted) return;
 
                             // Map DB standings rows → format expected by the match detail standings renderer
                             const rawStandings = standingsRes.status === 'fulfilled' && standingsRes.value?.standings
@@ -440,14 +492,20 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         console.error('Error fetching DB match:', fetchErr);
                         setState(prev => ({
                             ...prev,
-                            kind: 'error',
-                            message: 'Error al cargar el partido desde la base de datos'
+                            kind: prev.matchData ? prev.kind : 'error',
+                            message: prev.matchData
+                                ? 'No se pudo actualizar el partido desde la base de datos.'
+                                : 'Error al cargar el partido desde la base de datos'
                         }));
                     }
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                setState(prev => ({ ...prev, kind: 'error', message: 'Error cargando datos' }));
+                setState(prev => ({
+                    ...prev,
+                    kind: prev.matchData ? prev.kind : 'error',
+                    message: prev.matchData ? 'No se pudo actualizar la información del partido.' : 'Error cargando datos'
+                }));
             }
         }
 

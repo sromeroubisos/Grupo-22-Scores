@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
+import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
 
 export async function PATCH(
     request: NextRequest,
@@ -17,6 +18,18 @@ export async function PATCH(
             return NextResponse.json(
                 { error: 'Failed to update match' },
                 { status: 500 }
+            );
+        }
+
+        // Auto-recalculate standings when a match result is finalized or score changes on a final match
+        const affectsStandings = match.status === 'final' && match.tournamentId && match.phaseId;
+        if (affectsStandings) {
+            recalculateAndPersistStandings(
+                match.tournamentId,
+                match.phaseId,
+                match.groupId ?? null,
+            ).catch((err) =>
+                console.error('[PATCH match] Auto-recalculate standings failed:', err)
             );
         }
 

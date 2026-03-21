@@ -64,6 +64,7 @@ interface FixtureContextValue {
   validateFixture: () => Promise<unknown>;
   saveMatch: (match: JsonRecord) => Promise<void>;
   deleteMatch: (matchId: string) => Promise<void>;
+  deleteMatches: (matchIds: string[]) => Promise<void>;
 }
 
 const FixtureContext = createContext<FixtureContextValue | undefined>(undefined);
@@ -469,6 +470,39 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
     }
   }, [tournamentId, refreshFixture]);
 
+  const deleteMatches = useCallback(async (matchIds: string[]) => {
+    const ids = Array.from(new Set(matchIds.filter(Boolean)));
+    if (ids.length === 0) return;
+
+    try {
+      const responses = await Promise.all(
+        ids.map((matchId) =>
+          fetch(`/api/tournaments/${tournamentId}/matches/${matchId}`, {
+            method: 'DELETE',
+          })
+        )
+      );
+
+      const failures: string[] = [];
+      for (let index = 0; index < responses.length; index += 1) {
+        const response = responses[index];
+        if (!response.ok) {
+          const errorPayload = await response.json().catch(() => null);
+          failures.push(errorPayload?.error || `No se pudo eliminar el partido ${ids[index]}.`);
+        }
+      }
+
+      if (failures.length > 0) {
+        throw new Error(failures[0]);
+      }
+
+      await refreshFixture();
+    } catch (error) {
+      console.error('Error deleting matches:', error);
+      throw error;
+    }
+  }, [tournamentId, refreshFixture]);
+
   const value: FixtureContextValue = {
     fixture,
     isLoadingFixture,
@@ -499,6 +533,7 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
     validateFixture,
     saveMatch,
     deleteMatch,
+    deleteMatches,
   };
 
   return <FixtureContext.Provider value={value}>{children}</FixtureContext.Provider>;

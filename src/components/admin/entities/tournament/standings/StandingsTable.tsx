@@ -1,9 +1,7 @@
 'use client';
 
-import { type CSSProperties, type ReactNode, useState } from 'react';
+import { type CSSProperties, type ReactNode } from 'react';
 import { normalizeStandingsRules } from './rules';
-import { LabelChip } from './LabelChip';
-import { AssignLabelDropdown } from './AssignLabelDropdown';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsRow, StandingsRules, UiLabel } from './types';
 
@@ -114,6 +112,66 @@ function createAccentVars(color: string | null | undefined): CSSProperties | und
     '--standings-row-bg': hexToRgba(color, 0.12),
     '--standings-row-bg-strong': hexToRgba(color, 0.18),
   } as CSSProperties;
+}
+
+function getPrimaryLabel(labels: UiLabel[] | undefined): UiLabel | null {
+  return labels?.[0] ?? null;
+}
+
+function getLabelLookupKeyForRow(row: StandingsRow): string | null {
+  if (row.teamId) return row.teamId;
+  if (row.team?.id) return row.team.id;
+  if (typeof row.position === 'number') return String(row.position);
+  return null;
+}
+
+function getCycleTargetKeyForRow(row: StandingsRow): string | null {
+  return row.teamId || row.team?.id || null;
+}
+
+function TeamLabelCycleButton({
+  label,
+  isBusy,
+  disabled,
+  onClick,
+}: {
+  label: UiLabel | null;
+  isBusy: boolean;
+  disabled: boolean;
+  onClick?: () => void;
+}) {
+  const style = label
+    ? ({
+        '--team-label-accent': label.color,
+        '--team-label-bg': hexToRgba(label.color, 0.16),
+      } as CSSProperties)
+    : undefined;
+
+  return (
+    <button
+      type="button"
+      className={`${styles.teamLabelTrigger} ${!label ? styles.teamLabelTriggerEmpty : ''}`}
+      style={style}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onClick?.();
+      }}
+      disabled={disabled}
+      title={label ? `Cambiar etiqueta (${label.name})` : 'Asignar etiqueta'}
+    >
+      <span className={styles.teamLabelTriggerIcon} aria-hidden="true">
+        {isBusy ? (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.spinnerIcon}>
+            <path d="M12 2a10 10 0 0110 10" />
+          </svg>
+        ) : (
+          <span className={styles.teamLabelTriggerDot} />
+        )}
+      </span>
+      <span className={styles.teamLabelTriggerText}>{label?.name ?? 'Base'}</span>
+    </button>
+  );
 }
 
 function getActiveColumns({
@@ -254,20 +312,29 @@ function MobileStandingsCards({
   activeColumns,
   compactMobile,
   labelsMap,
+  allLabels,
+  onCycleLabel,
+  pendingLabelPosition,
 }: {
   data: StandingsRow[];
   activeColumns: ActiveColumn[];
   compactMobile?: boolean;
   labelsMap?: Record<string, UiLabel[]>;
+  allLabels?: UiLabel[];
+  onCycleLabel?: (position: string) => Promise<void> | void;
+  pendingLabelPosition?: string | null;
 }) {
   const hasForm = activeColumns.some((column) => column.id === 'form');
+  const hasLabelControls = !!allLabels?.length && !!onCycleLabel;
 
   return (
     <div className={styles.mobileCards}>
       {data.map((row, index) => {
         const key = row.teamId || row.team?.id || row.teamName || String(index);
-        const posKey = String(row.position ?? index + 1);
-        const accentStyle = createAccentVars(labelsMap?.[posKey]?.[0]?.color);
+        const labelLookupKey = getLabelLookupKeyForRow(row);
+        const cycleTargetKey = getCycleTargetKeyForRow(row);
+        const currentLabel = getPrimaryLabel(labelLookupKey ? labelsMap?.[labelLookupKey] : undefined);
+        const accentStyle = createAccentVars(currentLabel?.color);
         return (
           <details
             key={key}
@@ -286,7 +353,17 @@ function MobileStandingsCards({
                       <div className={styles.teamLogoFallback}>LOG</div>
                     )}
                     <div className={styles.mobileTeamText}>
-                      <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
+                      <div className={styles.teamNameRow}>
+                        <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
+                        {hasLabelControls ? (
+                          <TeamLabelCycleButton
+                            label={currentLabel}
+                            isBusy={pendingLabelPosition === cycleTargetKey}
+                            disabled={!cycleTargetKey || !!pendingLabelPosition}
+                            onClick={cycleTargetKey ? () => onCycleLabel?.(cycleTargetKey) : undefined}
+                          />
+                        ) : null}
+                      </div>
                       {row.status ? <StatusBadge status={row.status} /> : null}
                     </div>
                   </div>
@@ -373,8 +450,8 @@ export function StandingsTable({
   compactMobile = false,
   labelsMap,
   allLabels,
-  onAssignLabel,
-  onUnassignLabel,
+  onCycleLabel,
+  pendingLabelPosition,
 }: {
   data: StandingsRow[];
   isLoading: boolean;
@@ -386,10 +463,9 @@ export function StandingsTable({
   compactMobile?: boolean;
   labelsMap?: Record<string, UiLabel[]>;
   allLabels?: UiLabel[];
-  onAssignLabel?: (clubId: string, labelId: string) => Promise<void>;
-  onUnassignLabel?: (clubId: string, labelId: string) => Promise<void>;
+  onCycleLabel?: (position: string) => Promise<void> | void;
+  pendingLabelPosition?: string | null;
 }) {
-  const [openDropdownRow, setOpenDropdownRow] = useState<string | null>(null);
   if (isLoading) {
     return (
       <section className={`${styles.glassPanel} ${styles.tableShell}`}>
@@ -431,6 +507,7 @@ export function StandingsTable({
 
   const activeColumns = getActiveColumns({ data, tableColumns, rules });
   const tableMinWidth = 240 + 64 + activeColumns.length * 86;
+  const hasLabelControls = !!allLabels?.length && !!onCycleLabel;
 
   return (
     <section className={`${styles.glassPanel} ${styles.tableShell}`}>
@@ -479,8 +556,10 @@ export function StandingsTable({
             <tbody>
               {data.map((row, index) => {
                 const rowKey = row.teamId || row.team?.id || row.teamName || String(index);
-                const posKey = String(row.position ?? index + 1);
-                const accentStyle = createAccentVars(labelsMap?.[posKey]?.[0]?.color);
+                const labelLookupKey = getLabelLookupKeyForRow(row);
+                const cycleTargetKey = getCycleTargetKeyForRow(row);
+                const currentLabel = getPrimaryLabel(labelLookupKey ? labelsMap?.[labelLookupKey] : undefined);
+                const accentStyle = createAccentVars(currentLabel?.color);
                 return (
                   <tr
                     key={rowKey}
@@ -500,19 +579,17 @@ export function StandingsTable({
                           <div className={styles.teamLogoFallback}>LOG</div>
                         )}
                         <div className={styles.teamNameBlock}>
-                          <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
-                          {labelsMap && labelsMap[posKey] && labelsMap[posKey].length > 0 && (
-                            <div className={styles.teamLabels}>
-                              {labelsMap[posKey].map((label) => (
-                                <LabelChip
-                                  key={label.id}
-                                  name={label.name}
-                                  color={label.color}
-                                  onRemove={onUnassignLabel ? () => onUnassignLabel(posKey, label.id) : undefined}
-                                />
-                              ))}
-                            </div>
-                          )}
+                          <div className={styles.teamNameRow}>
+                            <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
+                            {hasLabelControls ? (
+                              <TeamLabelCycleButton
+                                label={currentLabel}
+                                isBusy={pendingLabelPosition === cycleTargetKey}
+                                disabled={!cycleTargetKey || !!pendingLabelPosition}
+                                onClick={cycleTargetKey ? () => onCycleLabel?.(cycleTargetKey) : undefined}
+                              />
+                            ) : null}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -524,39 +601,13 @@ export function StandingsTable({
                     ))}
 
                     <td className={styles.actionCell} style={{ position: 'relative' }}>
-                      {allLabels && allLabels.length > 0 && onAssignLabel && onUnassignLabel ? (
-                        <>
-                          <button
-                            type="button"
-                            className={styles.iconButton}
-                            title="Asignar etiqueta"
-                            onClick={() => setOpenDropdownRow(openDropdownRow === posKey ? null : posKey)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <circle cx="12" cy="12" r="1" />
-                              <circle cx="19" cy="12" r="1" />
-                              <circle cx="5" cy="12" r="1" />
-                            </svg>
-                          </button>
-                          {openDropdownRow === posKey && (
-                            <AssignLabelDropdown
-                              allLabels={allLabels}
-                              assignedLabelIds={new Set((labelsMap?.[posKey] ?? []).map((l) => l.id))}
-                              onAssign={(labelId) => onAssignLabel(posKey, labelId)}
-                              onUnassign={(labelId) => onUnassignLabel(posKey, labelId)}
-                              onClose={() => setOpenDropdownRow(null)}
-                            />
-                          )}
-                        </>
-                      ) : (
-                        <button type="button" className={styles.iconButton} title="Ver detalles">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="19" cy="12" r="1" />
-                            <circle cx="5" cy="12" r="1" />
-                          </svg>
-                        </button>
-                      )}
+                      <button type="button" className={styles.iconButton} title="Ver detalles">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="1" />
+                          <circle cx="19" cy="12" r="1" />
+                          <circle cx="5" cy="12" r="1" />
+                        </svg>
+                      </button>
                     </td>
                   </tr>
                 );
@@ -566,7 +617,15 @@ export function StandingsTable({
         </div>
       </div>
 
-      <MobileStandingsCards data={data} activeColumns={activeColumns} compactMobile={compactMobile} labelsMap={labelsMap} />
+      <MobileStandingsCards
+        data={data}
+        activeColumns={activeColumns}
+        compactMobile={compactMobile}
+        labelsMap={labelsMap}
+        allLabels={allLabels}
+        onCycleLabel={onCycleLabel}
+        pendingLabelPosition={pendingLabelPosition}
+      />
     </section>
   );
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
 
 export async function PUT(
     request: NextRequest,
@@ -63,8 +64,12 @@ export async function PUT(
             entity_id: phaseId,
             action: 'updated_phase_standings_rules',
             payload: updatedSettings
-            // actor_user_id will be derived on server if auth object was available, assuming DB handles it via trigger or middleware
         });
+
+        // Auto-recalculate standings so the public site reflects the new rules immediately
+        recalculateAndPersistStandings(tournamentId, phaseId).catch((err) =>
+            console.error('[PUT standings/rules] Auto-recalculate standings failed:', err)
+        );
 
         return NextResponse.json({ ok: true });
     } catch (e: any) {

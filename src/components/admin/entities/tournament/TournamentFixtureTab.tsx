@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import type { Database } from '@/lib/database.types';
 import type { MatchStatus, MatchWithClubs, PhaseWithRounds, RoundWithMatches } from '@/lib/types/fixture';
+import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 import { FixtureProvider, useFixture } from './FixtureContext';
 import { FixtureMatchEditor } from './FixtureMatchEditor';
 import MatchCenterClient, { MatchRow } from '@/app/admin/super/partidos/[id]/MatchCenterClient';
@@ -69,32 +70,21 @@ const VIEW_OPTIONS = [
 ] as const;
 
 function formatShortDate(value: string | null | undefined) {
-    if (!value) return 'Sin fecha';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Sin fecha';
-    return date
-        .toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
-        .replace('.', '')
-        .toUpperCase();
+    const formatted = formatDateInTimeZone(value, 'es-AR', { day: '2-digit', month: 'short' }, APP_TIMEZONE);
+    return formatted ? formatted.replace('.', '').toUpperCase() : 'Sin fecha';
 }
 
 function formatLongDate(value: string | null | undefined) {
-    if (!value) return 'Sin fecha definida';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Sin fecha definida';
-    return date.toLocaleDateString('es-AR', {
+    return formatDateInTimeZone(value, 'es-AR', {
         weekday: 'short',
         day: '2-digit',
         month: 'short',
         year: 'numeric',
-    });
+    }, APP_TIMEZONE) || 'Sin fecha definida';
 }
 
 function formatShortTime(value: string | null | undefined) {
-    if (!value) return '--:--';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '--:--';
-    return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    return formatDateInTimeZone(value, 'es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }, APP_TIMEZONE) || '--:--';
 }
 
 function formatRoundRange(round: RoundWithMatches) {

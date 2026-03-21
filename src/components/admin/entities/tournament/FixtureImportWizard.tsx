@@ -390,6 +390,16 @@ export function FixtureImportWizard({
                     </select>
                   </div>
                   <div className="editor-field">
+                    <label>Etiqueta de jornada</label>
+                    <input
+                      type="text"
+                      className="glass-input"
+                      value={String(row.overrides.round || row.normalized.round || '')}
+                      onChange={(event) => updateRow(row.previewId, { overrides: { round: event.target.value || null } })}
+                      placeholder="Fecha 1"
+                    />
+                  </div>
+                  <div className="editor-field">
                     <label>Grupo</label>
                     <select
                       className="glass-input"

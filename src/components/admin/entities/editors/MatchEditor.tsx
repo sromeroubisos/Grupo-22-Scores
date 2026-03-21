@@ -7,6 +7,7 @@ import { Database } from '@/lib/database.types';
 import { EntitySelect, EntityOption } from '../fields/EntitySelect';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { useAdminConsole } from '@/app/admin/AdminContext';
+import { APP_TIMEZONE, combineLocalDateTimeToUtcIso, toInputDateInTimeZone, toInputTimeInTimeZone } from '@/lib/timezone';
 
 type MatchRow = Database['public']['Tables']['matches']['Row'];
 
@@ -19,6 +20,12 @@ const fetchClubs = async (q: string, limit: number): Promise<EntityOption[]> => 
     return json.data;
 };
 
+function toDateTimeLocalInput(value: string | Date | null | undefined) {
+    const date = toInputDateInTimeZone(value, APP_TIMEZONE);
+    const time = toInputTimeInTimeZone(value, APP_TIMEZONE);
+    return date && time ? `${date}T${time}` : '';
+}
+
 export function MatchEditor({ data, id }: { data: MatchRow; id: string }) {
     const isCreate = id === 'new';
     const router = useRouter();
@@ -30,9 +37,7 @@ export function MatchEditor({ data, id }: { data: MatchRow; id: string }) {
     let defaultDateTime = '';
     if (data.date_time) {
         try {
-            const d = new Date(data.date_time);
-            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-            defaultDateTime = d.toISOString().slice(0, 16);
+            defaultDateTime = toDateTimeLocalInput(data.date_time);
         } catch (e) { }
     }
 
@@ -72,7 +77,12 @@ export function MatchEditor({ data, id }: { data: MatchRow; id: string }) {
         setMessage('');
 
         const updates = {
-            date_time: formState.date_time ? new Date(formState.date_time).toISOString() : data.date_time,
+            date_time: formState.date_time
+                ? (() => {
+                    const [date, time] = formState.date_time.split('T');
+                    return combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
+                })()
+                : data.date_time,
             home_club_id: formState.home_club_id || null,
             away_club_id: formState.away_club_id || null,
             venue: formState.venue,

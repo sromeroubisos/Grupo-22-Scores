@@ -97,16 +97,19 @@ export default function FixturesPage() {
                             <ExportImage
                                 template="dailyMatches"
                                 data={{
-                                    date: new Date(selectedDate).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }),
+                                    date: 'Fixture',
                                     tournament: 'Torneo Apertura 2026',
-                                    matches: filteredMatches.map(m => ({
-                                        homeTeam: m.home,
-                                        awayTeam: m.away,
-                                        homeScore: m.homeScore,
-                                        awayScore: m.awayScore,
-                                        time: m.time,
-                                        status: m.status as 'scheduled' | 'live' | 'finished',
-                                    })),
+                                    matches: matchesByDate.flatMap(d =>
+                                        d.matches.map(m => ({
+                                            homeTeam: m.home,
+                                            awayTeam: m.away,
+                                            homeScore: m.homeScore,
+                                            awayScore: m.awayScore,
+                                            time: m.time,
+                                            status: m.status as 'scheduled' | 'live' | 'finished',
+                                            dateLabel: d.label,
+                                        }))
+                                    ),
                                 }}
                                 filename="fixtures"
                             />

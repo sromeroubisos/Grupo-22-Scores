@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { FixtureService } from '@/lib/services/fixtureService';
+import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { isMissingRelationError } from '@/lib/utils/fixtureImportErrors';
 import type {
   FixtureColumnMapping,
@@ -818,7 +819,7 @@ export class FixtureImportService {
       id: round.id,
       label: round.name,
       normalized: this.normalizeKey(round.name),
-      aliases: [this.normalizeKey(round.name.replace(/^fecha\s*/i, '').trim())],
+      aliases: this.buildRoundAliases(round.name),
     }));
     const groups: MatchableEntry[] = context.groups.map((group) => ({
       id: group.id,
@@ -1009,7 +1010,8 @@ export class FixtureImportService {
     const metadataSegments = teamSegmentIndex >= 0 ? segments.slice(0, teamSegmentIndex) : [];
     const trailingSegments = teamSegmentIndex >= 0 ? segments.slice(teamSegmentIndex + 1) : [];
 
-    let round: string | null = null;
+    let round: string | null = this.extractNumericRoundLabel(line);
+    const hasCanonicalRound = Boolean(round);
     let matchDate: string | null = null;
     let matchTime: string | null = null;
     let venue: string | null = null;
@@ -1019,13 +1021,13 @@ export class FixtureImportService {
       if (dateMatch) {
         matchDate = dateMatch[1];
         const roundCandidate = segment.replace(dateMatch[0], '').replace(/^[\s-]+|[\s-]+$/g, '').trim();
-        if (roundCandidate) {
+        if (roundCandidate && !round) {
           round = roundCandidate;
         }
         return;
       }
 
-      if (segment) {
+      if (segment && !hasCanonicalRound) {
         round = round ? `${round} ${segment}`.trim() : segment;
       }
     });
@@ -1059,6 +1061,7 @@ export class FixtureImportService {
 
     const teamSegment = teamSegmentIndex >= 0 ? segments[teamSegmentIndex] : line;
     const cleanedTeamSegment = teamSegment
+      .replace(/\b(?:round|jornada|fecha|matchday)\s*(?:n[°ºo]\s*)?\d+\b/gi, '')
       .replace(matchDate || '', '')
       .replace(matchTime || '', '')
       .replace(/^[\s-]+|[\s-]+$/g, '')
@@ -1236,8 +1239,31 @@ export class FixtureImportService {
 
   private static combineDateTime(date: string | null, time: string | null): string | null {
     if (!date) return null;
-    const parsed = new Date(`${date}T${time || '00:00'}:00`);
-    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+    return combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
+  }
+
+  private static extractNumericRoundLabel(value: string): string | null {
+    const normalized = this.normalizeKey(value);
+    const match = normalized.match(/\b(?:round|jornada|fecha|matchday)\s*(?:n|no|numero)?\s*(\d+)\b/);
+    return match ? `Fecha ${match[1]}` : null;
+  }
+
+  private static buildRoundAliases(roundName: string): string[] {
+    const aliases = new Set<string>();
+    const normalizedName = this.normalizeKey(roundName);
+    const strippedName = this.normalizeKey(roundName.replace(/^(?:fecha|jornada|round|matchday)\s*/i, '').trim());
+    const numericRound = this.extractNumericRoundLabel(roundName)?.match(/(\d+)/)?.[1] || strippedName.match(/^\d+$/)?.[0] || null;
+
+    if (strippedName && strippedName !== normalizedName) aliases.add(strippedName);
+    if (numericRound) {
+      aliases.add(numericRound);
+      aliases.add(`fecha ${numericRound}`);
+      aliases.add(`jornada ${numericRound}`);
+      aliases.add(`round ${numericRound}`);
+      aliases.add(`matchday ${numericRound}`);
+    }
+
+    return Array.from(aliases);
   }
 
   private static issue(

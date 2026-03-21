@@ -43,6 +43,106 @@ export async function GET(
 
         const resolvedRules = StandingsEngine.resolveRules(phase.settings, tournament?.ruleset);
 
+        if (resolvedRules.calculation_mode === 'fully_manual') {
+            let standingsQuery = supabase
+                .from('tournament_standings')
+                .select('club_id, position, played, won, drawn, lost, points, scored, conceded, bonus_points, form, stats, last_updated')
+                .eq('tournament_id', tournamentId)
+                .eq('phase_id', phaseId)
+                .order('position', { ascending: true });
+
+            if (groupId) {
+                standingsQuery = standingsQuery.eq('group_id', groupId);
+            } else {
+                standingsQuery = (standingsQuery as typeof standingsQuery & { is: (column: string, value: null) => typeof standingsQuery }).is('group_id', null);
+            }
+
+            const [{ data: persistedRows, error: persistedError }, { data: participants, error: pError }, { data: matches, error: mError }] = await Promise.all([
+                standingsQuery,
+                (groupId
+                    ? supabase
+                        .from('tournament_participants')
+                        .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
+                        .eq('tournament_id', tournamentId)
+                        .eq('group_id', groupId)
+                        .not('status', 'in', '("withdrawn","disqualified")')
+                    : supabase
+                        .from('tournament_participants')
+                        .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
+                        .eq('tournament_id', tournamentId)
+                        .not('status', 'in', '("withdrawn","disqualified")')),
+                (groupId
+                    ? supabase
+                        .from('matches')
+                        .select('id, status')
+                        .eq('tournament_id', tournamentId)
+                        .eq('phase_id', phaseId)
+                        .eq('group_id', groupId)
+                    : supabase
+                        .from('matches')
+                        .select('id, status')
+                        .eq('tournament_id', tournamentId)
+                        .eq('phase_id', phaseId)),
+            ]);
+
+            if (persistedError) {
+                throw persistedError;
+            }
+            if (pError) throw pError;
+            if (mError) throw mError;
+
+            const participantMap = new Map(
+                (participants || []).map((participant) => [
+                    participant.club_id || participant.id,
+                    participant,
+                ])
+            );
+
+            const table = (persistedRows || []).map((row) => {
+                const participant = participantMap.get(row.club_id);
+                const participantClub = Array.isArray(participant?.clubs) ? participant.clubs[0] : participant?.clubs;
+                return {
+                    participantId: participant?.id || row.club_id,
+                    teamId: row.club_id,
+                    team: {
+                        id: row.club_id,
+                        name: row.stats?.team_name || participantClub?.name || participant?.name || 'Equipo',
+                        logo: row.stats?.team_logo || participantClub?.logo_url || null,
+                    },
+                    position: row.position,
+                    played: row.played,
+                    won: row.won,
+                    drawn: row.drawn,
+                    lost: row.lost,
+                    points_for: row.scored,
+                    points_against: row.conceded,
+                    difference: row.stats?.difference ?? (row.scored - row.conceded),
+                    base_points: row.points - row.bonus_points,
+                    bonus_offensive: row.stats?.try_bonus ?? row.stats?.bonus_offensive ?? 0,
+                    bonus_defensive: row.stats?.losing_bonus ?? row.stats?.bonus_defensive ?? 0,
+                    adjustments: row.stats?.adjustments ?? 0,
+                    total_points: row.points,
+                    form: row.form ? String(row.form).split('') : [],
+                    status: row.stats?.status || null,
+                };
+            });
+
+            const allMatches = matches || [];
+            const metrics = {
+                counted_matches: allMatches.filter((match) => match.status === 'final').length,
+                pending_results: allMatches.filter((match) => ['scheduled', 'live', 'suspended', 'delayed', 'postponed'].includes(match.status)).length,
+                manual_overrides: table.length,
+            };
+
+            return NextResponse.json({
+                ok: true,
+                table,
+                metrics,
+                rules: resolvedRules,
+                last_calculated_at: persistedRows?.[0]?.last_updated ?? null,
+            });
+        }
+
         // 2. Fetch participants (exclude explicitly inactive)
         let pQuery = supabase
             .from('tournament_participants')

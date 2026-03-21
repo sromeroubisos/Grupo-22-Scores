@@ -1,18 +1,27 @@
 'use client';
 
-import { MoreHorizontal } from 'lucide-react';
+import { ArchiveRestore, ChevronDown, MoreHorizontal } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 type TournamentDisplayRow = TournamentRow & { sport?: string | null };
+type TournamentSeasonMenuItem = {
+    id: string;
+    label: string;
+    subtitle: string;
+    href: string;
+    isCurrent: boolean;
+};
 
 export interface TournamentHeaderProps {
     data: TournamentRow;
     isDirty: boolean;
     isTransitioning: boolean;
     menuOpen: boolean;
+    seasonMenuOpen: boolean;
+    seasonItems: TournamentSeasonMenuItem[];
     onSave: () => void;
     onStatusTransition: () => void;
     onRecalculate: () => void;
@@ -21,6 +30,9 @@ export interface TournamentHeaderProps {
     onDelete: () => void;
     onMenuToggle: () => void;
     onMenuClose: () => void;
+    onSeasonMenuToggle: () => void;
+    onSeasonMenuClose: () => void;
+    onOpenHistoricalSeasonImport: () => void;
 }
 
 export function computeHealth(data: TournamentRow): 'OK' | 'WARNING' | 'ERROR' {
@@ -31,15 +43,16 @@ export function computeHealth(data: TournamentRow): 'OK' | 'WARNING' | 'ERROR' {
 }
 
 export function TournamentHeader({
-    data, isDirty, isTransitioning, menuOpen,
+    data, isDirty, isTransitioning, menuOpen, seasonMenuOpen, seasonItems,
     onSave, onStatusTransition, onRecalculate, onDuplicate, onExport, onDelete,
-    onMenuToggle, onMenuClose,
+    onMenuToggle, onMenuClose, onSeasonMenuToggle, onSeasonMenuClose, onOpenHistoricalSeasonImport,
 }: TournamentHeaderProps) {
     const tournament = data as TournamentDisplayRow;
     const status = (data.status ?? 'draft').toUpperCase();
     const health = computeHealth(data);
     const isVisible = data.is_visible;
     const { shouldRender, isVisible: menuVisible } = useAnimatedDisclosure(menuOpen, 180);
+    const { shouldRender: shouldRenderSeasonMenu, isVisible: seasonMenuVisible } = useAnimatedDisclosure(seasonMenuOpen, 180);
 
     const menuActions = [
         {
@@ -96,7 +109,82 @@ export function TournamentHeader({
 
                 <div className="basalt-header-title-row">
                     <h1 className="basalt-h1">{data.name || 'TORNEO SIN NOMBRE'}</h1>
-                    <span className="basalt-header-season">{data.season_id || '--'}</span>
+                    <div className="basalt-header-season-shell">
+                        <button
+                            type="button"
+                            className={`basalt-header-season basalt-header-season-trigger ${seasonMenuOpen ? 'is-open' : ''}`}
+                            onClick={onSeasonMenuToggle}
+                            aria-haspopup="menu"
+                            aria-expanded={seasonMenuOpen}
+                            aria-label="Abrir acciones de temporada"
+                        >
+                            <span>{data.season_id || '--'}</span>
+                            <ChevronDown size={14} />
+                        </button>
+
+                        {shouldRenderSeasonMenu ? (
+                            <>
+                                <div
+                                    className={`basalt-floating-backdrop ${seasonMenuVisible ? 'is-open' : ''}`}
+                                    onClick={onSeasonMenuClose}
+                                />
+                                <div
+                                    className={`basalt-overflow-menu basalt-season-menu ${seasonMenuVisible ? 'is-open' : ''}`}
+                                    role="menu"
+                                    aria-label="Acciones de temporada"
+                                >
+                                    <div className="basalt-overflow-menu-header">
+                                        <span className="basalt-overflow-menu-kicker">Temporadas</span>
+                                        <strong className="basalt-overflow-menu-title">Edicion {data.season_id || '--'}</strong>
+                                    </div>
+
+                                    <div className="basalt-overflow-menu-list">
+                                        {seasonItems.length > 0 ? (
+                                            <>
+                                                <span className="basalt-season-menu-section-label">Temporadas disponibles</span>
+                                                {seasonItems.map((item) => (
+                                                    <a
+                                                        key={item.id}
+                                                        href={item.href}
+                                                        className={`basalt-overflow-item basalt-season-nav-item ${item.isCurrent ? 'is-current' : ''}`}
+                                                        role="menuitem"
+                                                        onClick={onSeasonMenuClose}
+                                                    >
+                                                        <span className="basalt-season-nav-copy">
+                                                            <strong>{item.label}</strong>
+                                                            {item.isCurrent ? <span className="basalt-season-nav-badge">Actual</span> : null}
+                                                        </span>
+                                                        <small>{item.subtitle}</small>
+                                                    </a>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            <div className="basalt-season-menu-empty">
+                                                No hay otras temporadas vinculadas todavia.
+                                            </div>
+                                        )}
+
+                                        <span className="basalt-season-menu-section-label">Acciones</span>
+                                        <button
+                                            type="button"
+                                            className="basalt-overflow-item"
+                                            role="menuitem"
+                                            onClick={() => {
+                                                onSeasonMenuClose();
+                                                onOpenHistoricalSeasonImport();
+                                            }}
+                                        >
+                                            <span className="basalt-season-menu-copy">
+                                                <ArchiveRestore size={16} />
+                                                <span>Agregar temporada antigua</span>
+                                            </span>
+                                            <small>Importa fixture, tabla final, posiciones y campeon desde texto estructurado.</small>
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : null}
+                    </div>
                 </div>
 
                 <div className="basalt-header-meta">

@@ -130,6 +130,7 @@ export class StandingsEngine {
         participantId: p.id,
         teamId,
         team: {
+          id: teamId,
           name: p.clubs?.name || p.name || 'Equipo',
           logo: p.clubs?.logo_url || null,
         },

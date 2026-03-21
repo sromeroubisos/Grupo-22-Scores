@@ -8,6 +8,7 @@ import { RefreshCw, Plus, Radio, CheckCircle, Clock, AlertTriangle, CalendarDays
 import type { MatchRow } from '@/lib/cache/superAdminCache';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
+import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 
 type MatchStatus = 'scheduled' | 'live' | 'final' | 'postponed' | 'suspended';
 
@@ -20,7 +21,7 @@ const STATUS_CONFIG: Record<MatchStatus, { label: string; color: string; bg: str
 };
 
 function formatDateTime(iso: string) {
-    try { return new Date(iso).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }); }
+    try { return formatDateInTimeZone(iso, 'es-AR', { dateStyle: 'short', timeStyle: 'short' }, APP_TIMEZONE) || iso; }
     catch { return iso; }
 }
 

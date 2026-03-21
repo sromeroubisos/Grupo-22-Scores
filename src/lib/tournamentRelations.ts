@@ -1,4 +1,6 @@
 export const TOURNAMENT_RELATION_TYPE_LABELS = {
+    previous_season: 'Temporada anterior',
+    next_season: 'Temporada siguiente',
     international_tournament: 'Torneo internacional',
     promotion_relegation: 'Ascenso / Descenso',
     qualification: 'Clasificacion',
@@ -101,6 +103,9 @@ export function getTournamentRelationTypeBadgeClass(value: string | null | undef
     switch (value) {
         case 'international_tournament':
             return 'bg-sky-500/15 text-sky-200 border-sky-400/20';
+        case 'previous_season':
+        case 'next_season':
+            return 'bg-emerald-500/15 text-emerald-200 border-emerald-400/20';
         case 'promotion_relegation':
             return 'bg-amber-500/15 text-amber-200 border-amber-400/20';
         case 'qualification':

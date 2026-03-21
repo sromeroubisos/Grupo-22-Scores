@@ -17,6 +17,8 @@ import { db } from '@/lib/mock-db';
 import { persistFromTournamentPayload } from '@/lib/sync/catalog';
 import { getTabSnapshot, hasMeaningfulPayload, upsertTabSnapshot } from '@/lib/sync/tabSnapshots';
 
+const TAB_TIMEOUT_MS = 5000;
+
 function normalizeId(val: any): string | undefined {
     if (val === null || val === undefined) return undefined;
     const str = String(val).trim();
@@ -140,70 +142,112 @@ function normalizeDetails(raw: any) {
     return data;
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const timeoutPromise = new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => {
+            reject(new Error(`[${label}] timeout after ${ms}ms`));
+        }, ms);
+    });
+
+    return Promise.race([promise, timeoutPromise]).finally(() => {
+        if (timeoutId) clearTimeout(timeoutId);
+    });
+}
+
+function timedTab<T>(label: string, promise: Promise<T>, ms: number = TAB_TIMEOUT_MS): Promise<T> {
+    return withTimeout(promise, ms, label).catch((error) => {
+        console.warn(`[Tournament API] ${label} failed:`, error);
+        throw error;
+    });
+}
+
+async function fetchAndExtractFromOffset(
+    tournamentId: string,
+    sportId: string,
+    offset: number,
+): Promise<ResolvedIds> {
+    try {
+        const raw = await getFlashScoreMatchesRaw(offset, sportId);
+        const tournaments = Array.isArray(raw) ? raw : (raw?.DATA || raw?.data || []);
+
+        const matchTournament = tournaments.find((t: any) => {
+            const tId = String(t?.tournament_id || '').trim();
+            const sId = String(t?.tournament_stage_id || '').trim();
+            return tId === tournamentId || sId === tournamentId;
+        });
+
+        if (!matchTournament) return {};
+
+        console.log(`Found tournament match on offset ${offset}:`, matchTournament.tournament_id);
+
+        const extracted = extractIds(matchTournament);
+        const urlFromTournament = extractUrl(matchTournament);
+        let partial: ResolvedIds = {
+            tournamentId: extracted.tournamentId || tournamentId,
+            stageId: extracted.stageId,
+            templateId: extracted.templateId,
+            seasonId: extracted.seasonId,
+            drawStageId: extracted.drawStageId,
+            tournamentUrl: urlFromTournament,
+        };
+
+        if (partial.stageId && partial.templateId && partial.seasonId && partial.drawStageId) {
+            return partial;
+        }
+
+        const match = Array.isArray(matchTournament.matches) ? matchTournament.matches[0] : null;
+        const matchId = match?.match_id || match?.event_key || match?.id;
+        if (!matchId) return partial;
+
+        const matchDetailsRes = await getFlashScoreMatchDetails(String(matchId));
+        const matchDetails = normalizeDetails(matchDetailsRes);
+
+        if (matchDetails) {
+            const extractedFromMatch = extractIds(matchDetails);
+            const urlFromMatch = extractUrl(matchDetails);
+            partial = mergeResolvedIds(partial, {
+                tournamentId: extractedFromMatch.tournamentId || tournamentId,
+                stageId: extractedFromMatch.stageId,
+                templateId: extractedFromMatch.templateId,
+                seasonId: extractedFromMatch.seasonId,
+                drawStageId: extractedFromMatch.drawStageId,
+                tournamentUrl: urlFromMatch,
+            });
+        }
+
+        return partial;
+    } catch (err) {
+        console.error(`Error resolving IDs at offset ${offset}:`, err);
+        return {};
+    }
+}
+
 async function resolveIdsFromTournamentId(tournamentId: string, sportId: string = 'rugby'): Promise<ResolvedIds> {
-    const offsets = [0, -1, 1, -2, 2, -3, 3, -5, 5, -7, 7];
     let resolved: ResolvedIds = { tournamentId };
 
     console.log(`Resolving IDs for tournamentId: ${tournamentId} (Sport: ${sportId})`);
 
-    for (const offset of offsets) {
-        try {
-            const raw = await getFlashScoreMatchesRaw(offset, sportId);
-            const tournaments = Array.isArray(raw) ? raw : (raw?.DATA || raw?.data || []);
+    // Round 1: try today (offset 0) — most likely to have any active tournament
+    const round1 = await fetchAndExtractFromOffset(tournamentId, sportId, 0);
+    resolved = mergeResolvedIds(resolved, round1);
+    if (resolved.stageId && resolved.templateId && resolved.seasonId) {
+        return resolved;
+    }
 
-            // Try to find by tournament_id match OR tournament_stage_id match
-            const matchTournament = tournaments.find((t: any) => {
-                const tId = String(t?.tournament_id || '').trim();
-                const sId = String(t?.tournament_stage_id || '').trim();
-                return tId === tournamentId || sId === tournamentId;
-            });
+    // Round 2: try all remaining offsets in parallel
+    const remainingOffsets = [-1, 1, -2, 2, -3, 3, -5, 5, -7, 7];
+    const results = await Promise.allSettled(
+        remainingOffsets.map(offset => fetchAndExtractFromOffset(tournamentId, sportId, offset))
+    );
 
-            if (!matchTournament) continue;
-
-            console.log(`Found tournament match on offset ${offset}:`, matchTournament.tournament_id);
-
-            const extracted = extractIds(matchTournament);
-            const urlFromTournament = extractUrl(matchTournament);
-            resolved = mergeResolvedIds(resolved, {
-                tournamentId: extracted.tournamentId || tournamentId,
-                stageId: extracted.stageId,
-                templateId: extracted.templateId,
-                seasonId: extracted.seasonId,
-                drawStageId: extracted.drawStageId,
-                tournamentUrl: urlFromTournament
-            });
-
-            if (resolved.stageId && resolved.templateId && resolved.seasonId && resolved.drawStageId) {
-                return resolved;
-            }
-
-            const match = Array.isArray(matchTournament.matches) ? matchTournament.matches[0] : null;
-            const matchId = match?.match_id || match?.event_key || match?.id;
-            if (!matchId) continue;
-
-            // Fetch match details to get deeper IDs
-            const matchDetailsRes = await getFlashScoreMatchDetails(String(matchId));
-            const matchDetails = normalizeDetails(matchDetailsRes);
-
-            if (matchDetails) {
-                const extractedFromMatch = extractIds(matchDetails);
-                const urlFromMatch = extractUrl(matchDetails);
-
-                resolved = mergeResolvedIds(resolved, {
-                    tournamentId: extractedFromMatch.tournamentId || tournamentId,
-                    stageId: extractedFromMatch.stageId,
-                    templateId: extractedFromMatch.templateId,
-                    seasonId: extractedFromMatch.seasonId,
-                    drawStageId: extractedFromMatch.drawStageId,
-                    tournamentUrl: urlFromMatch
-                });
-            }
-
+    for (const result of results) {
+        if (result.status === 'fulfilled' && result.value) {
+            resolved = mergeResolvedIds(resolved, result.value);
             if (resolved.stageId && resolved.templateId && resolved.seasonId) {
-                return resolved;
+                break;
             }
-        } catch (err) {
-            console.error('Error in resolveIds loop:', err);
         }
     }
 
@@ -432,16 +476,16 @@ export async function GET(request: Request) {
         };
 
         const settled = await Promise.allSettled([
-            canFetchMatches ? getTournamentResults(templateId!, seasonId!) : Promise.resolve([]),
-            canFetchMatches ? getTournamentFixtures(templateId!, seasonId!) : Promise.resolve([]),
-            canFetchStandings ? getTournamentStandings(tournamentId!, stageId!) : Promise.resolve([]),
-            canFetchStandings ? getTournamentTopScorers(tournamentId!, stageId!) : Promise.resolve([]),
-            canFetchStandings ? getTournamentStandingsForm(tournamentId!, stageId!) : Promise.resolve([]),
-            canFetchStandings ? getTournamentStandingsHtFt(tournamentId!, stageId!) : Promise.resolve([]),
-            canFetchStandings ? getTournamentStandingsOverUnder(tournamentId!, stageId!) : Promise.resolve([]),
-            detailsPromise,
-            canFetchDraw ? getTournamentDraw(tournamentId!, stageId!) : Promise.resolve([]),
-            canFetchArchives ? getTournamentArchives(stageId!) : Promise.resolve([])
+            canFetchMatches ? timedTab('results', getTournamentResults(templateId!, seasonId!)) : Promise.resolve([]),
+            canFetchMatches ? timedTab('fixtures', getTournamentFixtures(templateId!, seasonId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standings', getTournamentStandings(tournamentId!, stageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('topScorers', getTournamentTopScorers(tournamentId!, stageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsForm', getTournamentStandingsForm(tournamentId!, stageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsHtFt', getTournamentStandingsHtFt(tournamentId!, stageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsOverUnder', getTournamentStandingsOverUnder(tournamentId!, stageId!)) : Promise.resolve([]),
+            timedTab('details', detailsPromise),
+            canFetchDraw ? timedTab('draw', getTournamentDraw(tournamentId!, stageId!)) : Promise.resolve([]),
+            canFetchArchives ? timedTab('archives', getTournamentArchives(stageId!)) : Promise.resolve([])
         ]);
 
         const resultsRes = settled[0].status === 'fulfilled' ? settled[0].value : null;

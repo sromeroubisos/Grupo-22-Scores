@@ -7,6 +7,13 @@ import {
     BarChart2, Shield, Settings, ImageIcon, Plus, RefreshCw, X, Edit3, Video, FileText, Search, AlertTriangle, CheckCircle
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import {
+    APP_TIMEZONE,
+    combineLocalDateTimeToUtcIso,
+    formatDateInTimeZone,
+    toInputDateInTimeZone,
+    toInputTimeInTimeZone,
+} from '@/lib/timezone';
 import './match-center.css';
 
 /* ─────────────────── TYPES ─────────────────── */
@@ -26,6 +33,12 @@ interface MatchEvent {
     team: 'home' | 'away' | null;
     playerName: string;
     detail: string;
+}
+
+function toDateTimeLocalInput(value: string | Date | null | undefined) {
+    const date = toInputDateInTimeZone(value, APP_TIMEZONE);
+    const time = toInputTimeInTimeZone(value, APP_TIMEZONE);
+    return date && time ? `${date}T${time}` : '';
 }
 
 interface MatchLineups {
@@ -391,7 +404,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const awayLogo = match.awayClub?.logo_url || null;
 
     const formattedDate = match.date_time
-        ? new Date(match.date_time).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })
+        ? formatDateInTimeZone(match.date_time, 'es-AR', { day: 'numeric', month: 'short', year: 'numeric' }, APP_TIMEZONE)
         : 'Sin fecha';
 
     // Parcials: derive from events by minute
@@ -1046,11 +1059,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <label>Fecha y Hora</label>
                                 <input
                                     type="datetime-local"
-                                    defaultValue={match.date_time ? new Date(match.date_time).toISOString().slice(0, 16) : ''}
+                                    defaultValue={toDateTimeLocalInput(match.date_time)}
                                     style={{ borderRadius: 4 }}
                                     onBlur={async (e) => {
                                         if (e.target.value) {
-                                            await supabase.from('matches').update({ date_time: new Date(e.target.value).toISOString() }).eq('id', matchId);
+                                            const [date, time] = e.target.value.split('T');
+                                            const nextDateTime = combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
+                                            if (!nextDateTime) return;
+                                            await supabase.from('matches').update({ date_time: nextDateTime }).eq('id', matchId);
                                             fetchMatch();
                                         }
                                     }}

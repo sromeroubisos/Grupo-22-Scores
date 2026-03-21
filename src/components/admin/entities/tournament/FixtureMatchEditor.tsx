@@ -12,6 +12,7 @@ import {
 import { useFixture } from './FixtureContext';
 import { DarkSelect, type DarkSelectOption } from './DarkSelect';
 import type { MatchStatus } from '@/lib/types/fixture';
+import { APP_TIMEZONE, toInputDateInTimeZone, toInputTimeInTimeZone } from '@/lib/timezone';
 
 // ─── Local types for direct API loading ──────────────────────────────────────
 
@@ -35,6 +36,12 @@ const STATUS_OPTIONS: DarkSelectOption[] = [
   { value: 'suspended', label: 'Suspendido' },
   { value: 'cancelled', label: 'Cancelado' },
 ];
+
+function toDateTimeLocalInput(value: string | Date | null | undefined) {
+  const date = toInputDateInTimeZone(value, APP_TIMEZONE);
+  const time = toInputTimeInTimeZone(value, APP_TIMEZONE);
+  return date && time ? `${date}T${time}` : '';
+}
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -132,7 +139,7 @@ export const FixtureMatchEditor = ({
     roundLabel: '',
     homeClubId: '',
     awayClubId: '',
-    dateTime: new Date().toISOString().slice(0, 16),
+    dateTime: toDateTimeLocalInput(new Date()),
     venue: '',
     referee: '',
     pitch: '',
@@ -155,8 +162,8 @@ export const FixtureMatchEditor = ({
         homeClubId: editingMatch.homeClubId || '',
         awayClubId: editingMatch.awayClubId || '',
         dateTime: editingMatch.dateTime
-          ? new Date(editingMatch.dateTime).toISOString().slice(0, 16)
-          : new Date().toISOString().slice(0, 16),
+          ? toDateTimeLocalInput(editingMatch.dateTime)
+          : toDateTimeLocalInput(new Date()),
         venue: editingMatch.venue || '',
         referee: editingMatch.referee || '',
         pitch: editingMatch.pitch || '',
@@ -176,7 +183,7 @@ export const FixtureMatchEditor = ({
       roundLabel: '',
       homeClubId: '',
       awayClubId: '',
-      dateTime: new Date().toISOString().slice(0, 16),
+      dateTime: toDateTimeLocalInput(new Date()),
       venue: '',
       referee: '',
       pitch: '',

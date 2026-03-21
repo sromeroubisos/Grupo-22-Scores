@@ -9,6 +9,12 @@ import { PhaseLabelsPanel } from './PhaseLabelsPanel';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsDataPayload, StandingsPhase, StandingsRow, TeamLabelAssignment, TournamentContextData, UiLabel } from './types';
 
+function getAssignmentKey(assignment: TeamLabelAssignment): string | null {
+  if (assignment.club_id) return assignment.club_id;
+  if (typeof assignment.position === 'number') return String(assignment.position);
+  return null;
+}
+
 function formatRelativeTime(iso: string | null): string {
   if (!iso) return 'Nunca calculada';
   const diff = Date.now() - new Date(iso).getTime();
@@ -56,6 +62,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   const [recalcFeedback, setRecalcFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [logicPanelError, setLogicPanelError] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<TeamLabelAssignment[]>([]);
+  const [pendingLabelPosition, setPendingLabelPosition] = useState<string | null>(null);
   const [showLabelsPanel, setShowLabelsPanel] = useState(false);
 
   const loadContextAndLite = useCallback(async () => {
@@ -217,51 +224,89 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
   const labelsMap = useMemo<Record<string, UiLabel[]>>(() => {
     const map: Record<string, UiLabel[]> = {};
     const allowedLabelIds = new Set(allLabels.map((label) => label.id));
+    const labelOrder = new Map(allLabels.map((label, index) => [label.id, index]));
     for (const a of assignments) {
-      if (!allowedLabelIds.has(a.label.id)) continue;
-      const key = String(a.position);
+      if (!a.label || !allowedLabelIds.has(a.label.id)) continue;
+      const key = getAssignmentKey(a);
+      if (!key) continue;
       if (!map[key]) map[key] = [];
       map[key].push(a.label);
     }
+    Object.values(map).forEach((labels) => {
+      labels.sort(
+        (a, b) =>
+          (labelOrder.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+          (labelOrder.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+      );
+    });
     return map;
   }, [allLabels, assignments]);
 
-  // assignment id lookup: labelId+position → assignment id (for unassign)
-  const assignmentIdMap = useMemo<Record<string, string>>(() => {
-    const map: Record<string, string> = {};
-    for (const a of assignments) {
-      map[`${a.label_id}__${a.position}`] = a.id;
-    }
-    return map;
-  }, [assignments]);
+  const handleCycleLabel = useCallback(async (clubId: string) => {
+    if (!selectedPhase || allLabels.length === 0 || pendingLabelPosition) return;
 
-  const handleAssignLabel = async (posKey: string, labelId: string) => {
-    const res = await fetch('/api/admin/team-labels', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        label_id: labelId,
-        position: parseInt(posKey, 10),
-        tournament_id: tournamentId,
-        phase_id: selectedPhase,
-        group_id: selectedGroup,
-      }),
-    });
-    const json = await res.json();
-    if (json.ok) {
-      setAssignments((prev) => [...prev, json.data]);
-    }
-  };
+    const labelOrder = new Map(allLabels.map((label, index) => [label.id, index]));
+    const activeAssignments = assignments
+      .filter((assignment) => assignment.club_id === clubId && labelOrder.has(assignment.label_id))
+      .sort(
+        (a, b) =>
+          (labelOrder.get(a.label_id) ?? Number.MAX_SAFE_INTEGER) -
+          (labelOrder.get(b.label_id) ?? Number.MAX_SAFE_INTEGER),
+      );
 
-  const handleUnassignLabel = async (posKey: string, labelId: string) => {
-    const assignmentId = assignmentIdMap[`${labelId}__${posKey}`];
-    if (!assignmentId) return;
-    const res = await fetch(`/api/admin/team-labels/${assignmentId}`, { method: 'DELETE' });
-    const json = await res.json();
-    if (json.ok) {
-      setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+    const currentLabelId = activeAssignments[0]?.label_id ?? null;
+    const currentIndex = currentLabelId ? allLabels.findIndex((label) => label.id === currentLabelId) + 1 : 0;
+    const nextIndex = (currentIndex + 1) % (allLabels.length + 1);
+    const nextLabel = nextIndex === 0 ? null : allLabels[nextIndex - 1];
+
+    setPendingLabelPosition(clubId);
+    setRecalcFeedback(null);
+
+    try {
+      for (const assignment of activeAssignments) {
+        const deleteRes = await fetch(`/api/admin/team-labels/${assignment.id}`, { method: 'DELETE' });
+        const deleteJson = await deleteRes.json();
+        if (!deleteRes.ok || !deleteJson.ok) {
+          throw new Error(deleteJson.error || 'No se pudo limpiar la etiqueta anterior.');
+        }
+      }
+
+      let nextAssignment: TeamLabelAssignment | null = null;
+
+      if (nextLabel) {
+        const createRes = await fetch('/api/admin/team-labels', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            label_id: nextLabel.id,
+            club_id: clubId,
+            tournament_id: tournamentId,
+            phase_id: selectedPhase,
+            group_id: selectedGroup,
+          }),
+        });
+        const createJson = await createRes.json();
+        if (!createRes.ok || !createJson.ok) {
+          throw new Error(createJson.error || 'No se pudo asignar la nueva etiqueta.');
+        }
+        nextAssignment = createJson.data;
+      }
+
+      const removableIds = new Set(activeAssignments.map((assignment) => assignment.id));
+      setAssignments((prev) => {
+        const base = prev.filter((assignment) => !removableIds.has(assignment.id));
+        return nextAssignment ? [...base, nextAssignment] : base;
+      });
+    } catch (error: unknown) {
+      setRecalcFeedback({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'No se pudo actualizar la etiqueta.',
+      });
+      setTimeout(() => setRecalcFeedback(null), 4000);
+    } finally {
+      setPendingLabelPosition(null);
     }
-  };
+  }, [allLabels, assignments, pendingLabelPosition, selectedGroup, selectedPhase, tournamentId]);
 
   if (loadingContext) {
     return <div className={styles.loadingState}>Loading standings context...</div>;
@@ -474,11 +519,11 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
               tableColumns={phaseTableColumns}
               rules={resolvedRules}
               compactMobile={isCompactMobile}
-                  labelsMap={labelsMap}
-                  allLabels={allLabels}
-                  onAssignLabel={handleAssignLabel}
-                  onUnassignLabel={handleUnassignLabel}
-                />
+              labelsMap={labelsMap}
+              allLabels={allLabels}
+              onCycleLabel={handleCycleLabel}
+              pendingLabelPosition={pendingLabelPosition}
+            />
           </section>
 
           <aside className={styles.rightRail}>

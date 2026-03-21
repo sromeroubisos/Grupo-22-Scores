@@ -6,11 +6,19 @@ import { updateEntity, deleteEntity, duplicateTournament } from '@/app/admin/ent
 import { Database } from '@/lib/database.types';
 import { TournamentDirtyCtx } from './TournamentContext';
 import { TournamentHeader } from './TournamentHeader';
+import { HistoricalSeasonImportDrawer } from './HistoricalSeasonImportDrawer';
 import { TournamentTabs } from './TournamentTabs';
 import { TournamentRightSidebar } from './TournamentRightSidebar';
 import './basalt.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
+type TournamentSeasonMenuItem = {
+    id: string;
+    label: string;
+    subtitle: string;
+    href: string;
+    isCurrent: boolean;
+};
 
 const NEXT_STATUS: Record<string, string> = {
     draft: 'published',
@@ -23,16 +31,20 @@ interface ShellProps {
     id: string;
     data: TournamentRow;
     currentTab: string;
+    currentSubtab?: string | null;
     children: React.ReactNode;
     backHref?: string;
     matchCount?: number;
+    seasonMenuItems?: TournamentSeasonMenuItem[];
 }
 
-export function TournamentManageShell({ id, data, currentTab, children }: ShellProps) {
+export function TournamentManageShell({ id, data, currentTab, children, seasonMenuItems = [] }: ShellProps) {
     const router = useRouter();
     const [isDirty, setDirty] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [seasonMenuOpen, setSeasonMenuOpen] = useState(false);
+    const [historicalImportOpen, setHistoricalImportOpen] = useState(false);
 
     // Keyboard shortcut: Ctrl/Cmd+S
     useEffect(() => {
@@ -136,14 +148,29 @@ export function TournamentManageShell({ id, data, currentTab, children }: ShellP
                     isDirty={isDirty}
                     isTransitioning={isTransitioning}
                     menuOpen={menuOpen}
+                    seasonMenuOpen={seasonMenuOpen}
+                    seasonItems={seasonMenuItems}
                     onSave={handleSave}
                     onStatusTransition={handleStatusTransition}
                     onRecalculate={handleRecalculate}
                     onDuplicate={handleDuplicate}
                     onExport={handleExport}
                     onDelete={handleDelete}
-                    onMenuToggle={() => setMenuOpen(!menuOpen)}
+                    onMenuToggle={() => {
+                        setSeasonMenuOpen(false);
+                        setMenuOpen((current) => !current);
+                    }}
                     onMenuClose={() => setMenuOpen(false)}
+                    onSeasonMenuToggle={() => {
+                        setMenuOpen(false);
+                        setSeasonMenuOpen((current) => !current);
+                    }}
+                    onSeasonMenuClose={() => setSeasonMenuOpen(false)}
+                    onOpenHistoricalSeasonImport={() => {
+                        setMenuOpen(false);
+                        setSeasonMenuOpen(false);
+                        setHistoricalImportOpen(true);
+                    }}
                 />
 
                 <div className="basalt-shell-stage">
@@ -199,6 +226,13 @@ export function TournamentManageShell({ id, data, currentTab, children }: ShellP
                         </div>
                     </footer>
                 </div>
+
+                <HistoricalSeasonImportDrawer
+                    open={historicalImportOpen}
+                    tournamentId={id}
+                    seasonLabel={data.season_id}
+                    onClose={() => setHistoricalImportOpen(false)}
+                />
 
             </div>
         </TournamentDirtyCtx.Provider>

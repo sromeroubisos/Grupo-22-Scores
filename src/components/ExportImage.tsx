@@ -10,10 +10,12 @@ export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'play
 interface StandingsData {
     title: string;
     subtitle: string;
+    tournamentLogo?: string;
     rows: Array<{
         pos: number;
         team: string;
         teamLogo?: string;
+        zoneColor?: string;
         played: number;
         won: number;
         lost: number;
@@ -32,6 +34,7 @@ interface DailyMatchesData {
         awayScore?: number;
         time: string;
         status: 'scheduled' | 'live' | 'finished';
+        dateLabel?: string;
     }>;
 }
 
@@ -94,6 +97,13 @@ export default function ExportImage({
     const [customTitle, setCustomTitle] = useState<string>('');
     const [accentColor, setAccentColor] = useState<string>('#00a365');
     const [bgColor, setBgColor] = useState<string>('#ffffff');
+    const [selectedMatchIndices, setSelectedMatchIndices] = useState<Set<number>>(() => {
+        if (template === 'dailyMatches') {
+            const matches = (data as DailyMatchesData).matches ?? [];
+            return new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, i) => i));
+        }
+        return new Set<number>();
+    });
 
     const presets = [
         { name: 'Light Clean', bg: '#ffffff', accent: '#00a365' },
@@ -102,6 +112,18 @@ export default function ExportImage({
         { name: 'UAR Orange', bg: '#111827', accent: '#f97316' },
         { name: 'Silver Sky', bg: '#f8fafc', accent: '#6366f1' },
     ];
+
+    const toggleMatch = (i: number) => {
+        setSelectedMatchIndices(prev => {
+            const next = new Set(prev);
+            if (next.has(i)) {
+                next.delete(i);
+            } else if (next.size < 10) {
+                next.add(i);
+            }
+            return next;
+        });
+    };
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -122,11 +144,13 @@ export default function ExportImage({
                     ...md,
                     mainTitle: customTitle || md.mainTitle || statusTitle
                 };
-                await drawWebMatchStats(ctx, canvas, matchData, formatConfig, accentColor, bgColor);
+                await drawMatchResult(ctx, canvas, matchData, formatConfig, accentColor, bgColor);
             } else if (template === 'standings') {
-                drawStandings(ctx, canvas, data as StandingsData, formatConfig, accentColor, bgColor);
+                await drawStandings(ctx, canvas, data as StandingsData, formatConfig, accentColor, bgColor);
             } else if (template === 'dailyMatches') {
-                drawDailyMatches(ctx, canvas, data as DailyMatchesData, formatConfig, accentColor, bgColor);
+                const dm = data as DailyMatchesData;
+                const selectedMatches = dm.matches.filter((_, i) => selectedMatchIndices.has(i));
+                await drawDailyMatches(ctx, canvas, { ...dm, matches: selectedMatches }, formatConfig, accentColor, bgColor);
             } else {
                 drawPlayerStats(ctx, canvas, data as PlayerStatsData, formatConfig, accentColor, bgColor);
             }
@@ -146,6 +170,8 @@ export default function ExportImage({
             setIsExporting(false);
         }
     };
+
+    const dailyMatches = template === 'dailyMatches' ? (data as DailyMatchesData).matches : [];
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -186,6 +212,40 @@ export default function ExportImage({
                             </div>
                         )}
 
+                        {template === 'dailyMatches' && dailyMatches.length > 0 && (
+                            <div className={styles.modalSection}>
+                                <div className={styles.matchSelectHeader}>
+                                    <span className={styles.modalLabel}>Seleccionar Partidos</span>
+                                    <span className={styles.matchCounter}>{selectedMatchIndices.size}/10</span>
+                                </div>
+                                <div className={styles.matchSelectList}>
+                                    {dailyMatches.map((m, i) => {
+                                        const isChecked = selectedMatchIndices.has(i);
+                                        const isDisabled = !isChecked && selectedMatchIndices.size >= 10;
+                                        return (
+                                            <label
+                                                key={i}
+                                                className={`${styles.matchSelectRow} ${isDisabled ? styles.matchSelectDisabled : ''}`}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked}
+                                                    disabled={isDisabled}
+                                                    onChange={() => toggleMatch(i)}
+                                                />
+                                                <span className={styles.matchSelectTeams}>
+                                                    {m.homeTeam} vs {m.awayTeam}
+                                                </span>
+                                                {m.dateLabel && (
+                                                    <span className={styles.matchSelectDate}>{m.dateLabel}</span>
+                                                )}
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         <div className={styles.modalSection}>
                             <label className={styles.modalLabel}>Identidad Visual</label>
                             <div className={styles.presetGrid}>
@@ -213,7 +273,13 @@ export default function ExportImage({
 
                         <div className={styles.modalActions}>
                             <button className={styles.cancelBtn} onClick={() => setShowModal(false)}>Cancelar</button>
-                            <button className={styles.exportBtn} onClick={handleExport}>📥 Exportar Imagen</button>
+                            <button
+                                className={styles.exportBtn}
+                                onClick={handleExport}
+                                disabled={template === 'dailyMatches' && selectedMatchIndices.size === 0}
+                            >
+                                📥 Exportar Imagen
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -274,7 +340,8 @@ function drawGeneralWatermark(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasE
 
 // ============ TEMPLATES ============
 
-async function drawWebMatchStats(
+// Partido único — solo resultado (sin sección de estadísticas)
+async function drawMatchResult(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: MatchStatsData,
@@ -296,14 +363,14 @@ async function drawWebMatchStats(
     for (let x = 0; x < canvas.width; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
     for (let y = 0; y < canvas.height; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-    // 2. Main Title (Cleaner Typography)
+    // 2. Main Title
     ctx.fillStyle = textColor;
     ctx.font = `950 ${isStory ? '135px' : '110px'} Montserrat, sans-serif`;
     ctx.textAlign = 'center';
     const title = data.mainTitle || 'Finalizado';
     ctx.fillText(title, safe.centerX, safe.top);
 
-    // 3. Scoreboard Card (Web UI Fragment Style)
+    // 3. Scoreboard Card
     const cardW = canvas.width * 0.92;
     const cardH = isStory ? 580 : 480;
     const cardX = (canvas.width - cardW) / 2;
@@ -320,7 +387,7 @@ async function drawWebMatchStats(
     if (isDark) { ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.stroke(); }
     ctx.restore();
 
-    // Badges inside Card - Top status badge
+    // Status badge inside card
     const statusLabel = data.status === 'live' ? 'EN VIVO' : data.status === 'final' ? 'FINALIZADO' : 'PROGRAMADO';
     ctx.font = '800 14px Montserrat, sans-serif';
     const statusMetrics = ctx.measureText(statusLabel);
@@ -354,7 +421,7 @@ async function drawWebMatchStats(
     drawUiLogo(hImg, homeX, teamY);
     drawUiLogo(aImg, awayX, teamY);
 
-    // Labels & Names
+    // Team labels & names
     ctx.font = '800 12px Montserrat, sans-serif';
     ctx.fillStyle = isDark ? 'rgba(255,255,255,0.4)' : '#64748b';
     ctx.fillText('ANFITRIÓN', homeX, teamY + (isStory ? 125 : 105));
@@ -370,7 +437,7 @@ async function drawWebMatchStats(
     ctx.fillStyle = textColor;
     ctx.fillText(`${data.homeScore} : ${data.awayScore}`, safe.centerX, teamY + (isStory ? 80 : 65));
 
-    // Bottom Badge: time | status
+    // Footer badge: time | status
     const footerStatus = data.status === 'live' ? 'En Vivo' : data.status === 'final' ? 'Final' : 'Pendiente';
     const footerText = `${data.time || data.date}  |  ${footerStatus}`;
     ctx.font = '800 16px Montserrat, sans-serif';
@@ -382,83 +449,151 @@ async function drawWebMatchStats(
     ctx.fillStyle = isDark ? 'rgba(255,255,255,0.6)' : '#64748b';
     ctx.fillText(footerText, safe.centerX, footerBadgeY + 8);
 
-    // 4. Stats Section (Web Style)
-    const statsTop = cardY + cardH + (isStory ? 160 : 120);
-    const statsW = canvas.width * 0.90;
-    const statsX = (canvas.width - statsW) / 2;
-    const rowH = isStory ? 95 : 80;
+    // Tournament name below card
+    ctx.font = '700 22px Montserrat, sans-serif';
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.4)' : '#64748b';
+    ctx.fillText(data.tournament, safe.centerX, cardY + cardH + 60);
 
-    ctx.textAlign = 'left';
-    ctx.fillStyle = textColor;
-    ctx.font = '900 32px Montserrat, sans-serif';
-    ctx.fillText('Visión General', statsX, statsTop - 60);
-
-    data.stats.forEach((s, i) => {
-        const y = statsTop + i * rowH;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8';
-        ctx.font = '700 13px Montserrat, sans-serif';
-        ctx.fillText(s.label.toUpperCase(), safe.centerX, y);
-
-        ctx.font = '900 28px Montserrat, sans-serif';
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'left'; ctx.fillText(String(s.home), statsX, y + 2);
-        ctx.textAlign = 'right'; ctx.fillText(String(s.away), statsX + statsW, y + 2);
-
-        // Bar
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9';
-        const barY = y + 22;
-        ctx.beginPath(); ctx.roundRect(statsX, barY, statsW, 12, 6); ctx.fill();
-
-        const total = (Number(s.home) + Number(s.away)) || 1;
-        const hW = (Number(s.home) / total) * (statsW / 2 - 40);
-        const aW = (Number(s.away) / total) * (statsW / 2 - 40);
-
-        ctx.fillStyle = accentColor;
-        ctx.beginPath(); ctx.roundRect(safe.centerX - 12 - hW, barY, hW, 12, 6); ctx.fill();
-        ctx.beginPath(); ctx.roundRect(safe.centerX + 12, barY, aW, 12, 6); ctx.fill();
-    });
-
-    // 5. Watermark
-    const lastY = statsTop + (data.stats.length * rowH);
-    const wmY = Math.min(canvas.height - 60, lastY + 120);
+    // Watermark
+    const wmY = cardY + cardH + (isStory ? 160 : 130);
     drawGeneralWatermark(ctx, canvas, textColor, accentColor, wmY);
 }
 
-function drawStandings(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, data: StandingsData, _cfg: any, accentColor: string, bgColor: string) {
+// Tabla de posiciones — con logos de torneo y equipos
+async function drawStandings(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    _cfg: any,
+    accentColor: string,
+    bgColor: string
+) {
     const textColor = getContrastColor(bgColor);
     const isDark = textColor === '#ffffff';
-    ctx.fillStyle = bgColor; ctx.fillRect(0, 0, canvas.width, canvas.height);
     const safe = getSafeArea(canvas);
+    const isStory = canvas.height > 1500;
+
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Grid
     ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
+    ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
 
-    ctx.fillStyle = textColor; ctx.font = '950 64px Montserrat, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(data.title.toUpperCase(), safe.centerX, safe.top);
-    ctx.fillStyle = accentColor; ctx.font = '800 24px Montserrat, sans-serif';
-    ctx.fillText(data.subtitle.toUpperCase(), safe.centerX, safe.top + 60);
+    const visibleRows = data.rows.slice(0, 14);
 
-    const tableTop = safe.top + 180;
-    const rowH = 75;
+    // Cargar logos en paralelo
+    const [tournamentImg, ...teamImgs] = await Promise.all([
+        loadImage(data.tournamentLogo || ''),
+        ...visibleRows.map(r => loadImage(r.teamLogo || ''))
+    ]);
+
+    // Encabezado con logo del torneo
+    const headerY = safe.top;
+    if (tournamentImg) {
+        const logoSize = isStory ? 90 : 72;
+        const logoX = safe.centerX - logoSize / 2;
+        const logoY = headerY - logoSize - (isStory ? 30 : 20);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(safe.centerX, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc';
+        ctx.fill();
+        ctx.drawImage(tournamentImg, logoX + 6, logoY + 6, logoSize - 12, logoSize - 12);
+        ctx.restore();
+    }
+
+    ctx.fillStyle = textColor;
+    ctx.font = `950 ${isStory ? '64px' : '54px'} Montserrat, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(data.title.toUpperCase(), safe.centerX, headerY);
+
+    ctx.fillStyle = accentColor;
+    ctx.font = `800 ${isStory ? '28px' : '24px'} Montserrat, sans-serif`;
+    ctx.fillText(data.subtitle.toUpperCase(), safe.centerX, headerY + (isStory ? 70 : 58));
+
+    const tableTop = headerY + (isStory ? 180 : 150);
+    const rowH = isStory ? 80 : 70;
     const tableW = canvas.width * 0.92;
     const startX = (canvas.width - tableW) / 2;
+    const logoSize = isStory ? 46 : 40;
 
-    data.rows.slice(0, 14).forEach((r, i) => {
+    visibleRows.forEach((r, i) => {
         const y = tableTop + i * rowH;
+
+        // Fondo de fila
         ctx.fillStyle = i % 2 === 0 ? hexToRGBA(accentColor, 0.05) : 'transparent';
-        ctx.beginPath(); ctx.roundRect(startX, y, tableW, rowH - 10, 16); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(startX, y, tableW, rowH - 8, 14); ctx.fill();
 
-        ctx.fillStyle = textColor; ctx.font = '700 24px Montserrat'; ctx.textAlign = 'left';
-        ctx.fillText(`${r.pos}.`, startX + 30, y + 42);
-        ctx.font = '800 24px Montserrat';
-        ctx.fillText(r.team, startX + 100, y + 42, tableW * 0.6);
+        // Indicador de zona (borde izquierdo)
+        if (r.zoneColor) {
+            ctx.fillStyle = r.zoneColor;
+            ctx.beginPath(); ctx.roundRect(startX, y, 5, rowH - 8, [14, 0, 0, 14]); ctx.fill();
+        }
 
-        ctx.fillStyle = accentColor; ctx.font = '950 32px Montserrat'; ctx.textAlign = 'right';
-        ctx.fillText(String(r.points), startX + tableW - 30, y + 45);
+        // Posición
+        ctx.fillStyle = textColor;
+        ctx.font = `700 ${isStory ? '26px' : '22px'} Montserrat, sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.fillText(`${r.pos}.`, startX + (r.zoneColor ? 22 : 18), y + rowH / 2 + 9);
+
+        // Logo del equipo
+        const img = teamImgs[i];
+        const logoX = startX + 80;
+        const logoY = y + (rowH - logoSize) / 2;
+        if (img) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc';
+            ctx.fill();
+            ctx.drawImage(img, logoX + 3, logoY + 3, logoSize - 6, logoSize - 6);
+            ctx.restore();
+        } else {
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9';
+            ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8';
+            ctx.font = `600 ${isStory ? '16px' : '14px'} Montserrat, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(r.team.slice(0, 2).toUpperCase(), logoX + logoSize / 2, logoY + logoSize / 2 + 5);
+        }
+
+        // Nombre del equipo
+        ctx.fillStyle = textColor;
+        ctx.font = `800 ${isStory ? '26px' : '22px'} Montserrat, sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.fillText(r.team, startX + 80 + logoSize + 16, y + rowH / 2 + 9, tableW * 0.5);
+
+        // Puntos
+        ctx.fillStyle = accentColor;
+        ctx.font = `950 ${isStory ? '34px' : '30px'} Montserrat, sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.fillText(String(r.points), startX + tableW - 20, y + rowH / 2 + 11);
+
+        // Estadísticas secundarias: PJ / G / P / Dif
+        const statsX = startX + tableW - 260;
+        const secondaryItems = [
+            { label: 'PJ', val: String(r.played) },
+            { label: 'G', val: String(r.won) },
+            { label: 'P', val: String(r.lost) },
+            { label: 'Dif', val: r.diff },
+        ];
+        secondaryItems.forEach((s, si) => {
+            const sx = statsX + si * 56;
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.25)' : '#94a3b8';
+            ctx.font = `600 ${isStory ? '12px' : '11px'} Montserrat, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(s.label, sx, y + rowH / 2 - 4);
+            ctx.fillStyle = textColor;
+            ctx.font = `700 ${isStory ? '16px' : '14px'} Montserrat, sans-serif`;
+            ctx.fillText(s.val, sx, y + rowH / 2 + 14);
+        });
     });
-    drawGeneralWatermark(ctx, canvas, textColor, accentColor, canvas.height - 100);
+
+    drawGeneralWatermark(ctx, canvas, textColor, accentColor, canvas.height - 80);
 }
 
 function drawDailyMatches(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, data: DailyMatchesData, _cfg: any, accentColor: string, bgColor: string) {
@@ -477,12 +612,12 @@ function drawDailyMatches(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEleme
     const rowW = canvas.width * 0.94;
     const startX = (canvas.width - rowW) / 2;
 
-    data.matches.slice(0, 11).forEach((m, i) => {
+    data.matches.slice(0, 10).forEach((m, i) => {
         const y = matchTop + i * rowH;
         ctx.fillStyle = isDark ? 'rgba(255,255,255,0.04)' : '#f1f5f9';
         ctx.beginPath(); ctx.roundRect(startX, y, rowW, rowH - 15, 20); ctx.fill();
 
-        ctx.fillStyle = textColor; ctx.font = 'bold 26px system-ui';
+        ctx.fillStyle = textColor; ctx.font = 'bold 26px Montserrat, sans-serif';
         ctx.textAlign = 'right'; ctx.fillText(m.homeTeam, safe.centerX - 130, y + 60, 260);
         ctx.textAlign = 'left'; ctx.fillText(m.awayTeam, safe.centerX + 130, y + 60, 260);
 

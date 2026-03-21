@@ -29,6 +29,13 @@ import { useRouter } from 'next/navigation';
 import type { Database } from '@/lib/database.types';
 import type { MatchStatus, MatchWithClubs, RoundWithMatches } from '@/lib/types/fixture';
 import type { FixtureImportPreviewResult } from '@/lib/types/fixture-import';
+import {
+  APP_TIMEZONE,
+  combineLocalDateTimeToUtcIso,
+  formatDateInTimeZone,
+  toInputDateInTimeZone,
+  toInputTimeInTimeZone,
+} from '@/lib/timezone';
 import { FixtureImportWizard } from './FixtureImportWizard';
 import { useFixture } from './FixtureContext';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
@@ -138,7 +145,7 @@ const IMPORT_STEPS = [
 ];
 
 function todayInputValue() {
-  return new Date().toISOString().slice(0, 10);
+  return toInputDateInTimeZone(new Date(), APP_TIMEZONE);
 }
 
 function defaultManualForm(): ManualFormState {
@@ -157,42 +164,27 @@ function defaultManualForm(): ManualFormState {
 }
 
 function formatDateLabel(value: string | null | undefined) {
-  if (!value) return 'Sin fecha';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Sin fecha';
-  return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+  return formatDateInTimeZone(value, 'es-AR', { day: '2-digit', month: 'short' }, APP_TIMEZONE) || 'Sin fecha';
 }
 
 function formatLongDateLabel(value: string | null | undefined) {
-  if (!value) return 'Sin fecha definida';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Sin fecha definida';
-  return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+  return formatDateInTimeZone(value, 'es-AR', { day: '2-digit', month: 'short', year: 'numeric' }, APP_TIMEZONE) || 'Sin fecha definida';
 }
 
 function formatTimeLabel(value: string | null | undefined) {
-  if (!value) return '--:--';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '--:--';
-  return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return formatDateInTimeZone(value, 'es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }, APP_TIMEZONE) || '--:--';
 }
 
 function toInputDate(value: string | null | undefined) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().slice(0, 10);
+  return toInputDateInTimeZone(value, APP_TIMEZONE);
 }
 
 function toInputTime(value: string | null | undefined) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().slice(11, 16);
+  return toInputTimeInTimeZone(value, APP_TIMEZONE);
 }
 
 function buildDateTime(date: string, time: string) {
-  return `${date}T${time || '00:00'}:00`;
+  return combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
 }
 
 function getStorageKey(tournamentId: string) {
@@ -283,7 +275,7 @@ function getMatchTone(status: MatchStatus) {
 }
 
 function getContainerTone(round: RoundWithMatches): ManageContainer['tone'] {
-  if (round.matchCount === 0) return 'empty';
+  if (round.matches.length === 0) return 'empty';
   if (round.isCompleted) return 'complete';
   return 'active';
 }
@@ -321,6 +313,7 @@ export function TournamentOperationFixtureWorkspace({
     saveMatch,
     saveRound,
     deleteMatch,
+    deleteMatches,
   } = useFixture();
   const [activeSubtab, setActiveSubtab] = useState<WorkspaceSubtabId>('add_matches');
   const [selectedMethod, setSelectedMethod] = useState<MethodId>('manual_match');
@@ -342,6 +335,7 @@ export function TournamentOperationFixtureWorkspace({
   const [manageStatusFilter, setManageStatusFilter] = useState<MatchStatus | 'all'>('all');
   const [manageView, setManageView] = useState<ManageViewMode>('cards');
   const [manageGrouping, setManageGrouping] = useState<ManageGroupingMode>('rounds');
+  const [selectedManageMatchIds, setSelectedManageMatchIds] = useState<Set<string>>(new Set());
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [mobileInsightsOpen, setMobileInsightsOpen] = useState(false);
   const [collapsedContainerIds, setCollapsedContainerIds] = useState<Set<string>>(new Set());
@@ -419,7 +413,7 @@ export function TournamentOperationFixtureWorkspace({
     matchesReady: phaseMatches.filter((match) => match.homeClubId && match.awayClubId && match.dateTime && match.status === 'scheduled').length,
     matchesPending: phaseMatches.filter((match) => match.status !== 'final').length,
     roundsCreated: realRounds.length,
-    roundsEmpty: realRounds.filter((round) => round.matchCount === 0).length,
+    roundsEmpty: realRounds.filter((round) => round.matches.length === 0).length,
   }), [phaseMatches, realRounds]);
 
   const structuralChecks = useMemo(() => {
@@ -521,7 +515,7 @@ export function TournamentOperationFixtureWorkspace({
       .map((round) => ({
         id: round.id,
         title: round.name,
-        subtitle: round.startDate ? `${formatLongDateLabel(round.startDate)} · ${round.matchCount} partidos` : `${round.matchCount} partidos · Sin fecha general`,
+        subtitle: round.startDate ? `${formatLongDateLabel(round.startDate)} · ${round.matches.length} partidos` : `${round.matches.length} partidos · Sin fecha general`,
         matches: filteredManageEntries.filter((entry) => entry.round.id === round.id),
         roundId: round.id.startsWith('orphaned-') ? null : round.id,
         editable: !round.id.startsWith('orphaned-'),
@@ -541,6 +535,27 @@ export function TournamentOperationFixtureWorkspace({
     [manageGroupFilter, manageGrouping, manageRoundFilter, manageSearch, manageStatusFilter],
   );
 
+  const selectedPhaseMatchCount = useMemo(
+    () => selectedPhase?.rounds.reduce((sum, round) => sum + round.matches.length, 0) || 0,
+    [selectedPhase],
+  );
+  const visibleManageMatchIds = useMemo(
+    () => filteredManageEntries.map((entry) => entry.match.id),
+    [filteredManageEntries],
+  );
+  const visibleSelectedManageMatchIds = useMemo(
+    () => visibleManageMatchIds.filter((matchId) => selectedManageMatchIds.has(matchId)),
+    [selectedManageMatchIds, visibleManageMatchIds],
+  );
+  const allVisibleManageMatchesSelected = visibleManageMatchIds.length > 0 && visibleSelectedManageMatchIds.length === visibleManageMatchIds.length;
+
+  const orphanMatchCount = useMemo(
+    () => selectedPhase?.rounds
+      .filter((round) => round.id.startsWith('orphaned-'))
+      .reduce((sum, round) => sum + round.matches.length, 0) || 0,
+    [selectedPhase],
+  );
+
   useEffect(() => {
     setMobileInsightsOpen(false);
   }, [activeSubtab, selectedMethod, selectedPhaseId]);
@@ -552,6 +567,14 @@ export function TournamentOperationFixtureWorkspace({
       setQuickResultErrors({});
     }
   }, [activeSubtab, selectedPhaseId]);
+
+  useEffect(() => {
+    const currentPhaseMatchIds = new Set(phaseMatches.map((match) => match.id));
+    setSelectedManageMatchIds((current) => {
+      const next = new Set(Array.from(current).filter((matchId) => currentPhaseMatchIds.has(matchId)));
+      return next.size === current.size ? current : next;
+    });
+  }, [phaseMatches]);
 
   const setManualField = <K extends keyof ManualFormState>(field: K, value: ManualFormState[K]) => {
     setManualForm((current) => {
@@ -862,6 +885,11 @@ export function TournamentOperationFixtureWorkspace({
     setFeedback(null);
     try {
       await deleteMatch(match.id);
+      setSelectedManageMatchIds((current) => {
+        const next = new Set(current);
+        next.delete(match.id);
+        return next;
+      });
       await afterMutation('El partido fue eliminado.');
       if (quickResultMatchId === match.id) {
         setQuickResultMatchId(null);
@@ -870,6 +898,52 @@ export function TournamentOperationFixtureWorkspace({
       }
     } catch (error) {
       setFeedback({ tone: 'error', message: error instanceof Error ? error.message : 'No se pudo eliminar el partido.' });
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const toggleManageMatchSelection = (matchId: string) => {
+    setSelectedManageMatchIds((current) => {
+      const next = new Set(current);
+      if (next.has(matchId)) next.delete(matchId);
+      else next.add(matchId);
+      return next;
+    });
+  };
+
+  const toggleSelectAllVisibleManageMatches = () => {
+    setSelectedManageMatchIds((current) => {
+      const next = new Set(current);
+      if (allVisibleManageMatchesSelected) {
+        visibleManageMatchIds.forEach((matchId) => next.delete(matchId));
+      } else {
+        visibleManageMatchIds.forEach((matchId) => next.add(matchId));
+      }
+      return next;
+    });
+  };
+
+  const handleBulkDeleteMatches = async () => {
+    if (selectedManageMatchIds.size === 0) return;
+    if (!window.confirm(`Eliminar ${selectedManageMatchIds.size} partidos seleccionados? Esta accion no se puede deshacer.`)) return;
+
+    const selectedIds = Array.from(selectedManageMatchIds);
+    const totalSelected = selectedIds.length;
+    setBusyAction('delete-selected');
+    setFeedback(null);
+    try {
+      await deleteMatches(selectedIds);
+      setSelectedManageMatchIds(new Set());
+      if (quickResultMatchId && selectedIds.includes(quickResultMatchId)) {
+        setQuickResultMatchId(null);
+        setQuickResultForm(null);
+        setQuickResultErrors({});
+      }
+      setValidationData((await validateFixture()) as ValidationResult);
+      setFeedback({ tone: 'warn', message: `${totalSelected} partidos eliminados.` });
+    } catch (error) {
+      setFeedback({ tone: 'error', message: error instanceof Error ? error.message : 'No se pudieron eliminar los partidos seleccionados.' });
     } finally {
       setBusyAction(null);
     }
@@ -1380,6 +1454,7 @@ export function TournamentOperationFixtureWorkspace({
                 />
               </section>
             ) : null}
+
           </>
         ) : (
           <section className="operation-fixture-panel basalt-card operation-manage-panel">
@@ -1459,6 +1534,32 @@ export function TournamentOperationFixtureWorkspace({
                 </button>
               </div>
             </div>
+
+            {manageView === 'list' && filteredManageEntries.length > 0 ? (
+              <div className="operation-manage-bulkbar fixture-glass">
+                <label className="operation-manage-bulkselect">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleManageMatchesSelected}
+                    onChange={toggleSelectAllVisibleManageMatches}
+                  />
+                  <span>Seleccionar visibles ({visibleSelectedManageMatchIds.length}/{visibleManageMatchIds.length})</span>
+                </label>
+
+                <div className="operation-manage-bulkactions">
+                  <span className="operation-manage-badge">
+                    {selectedManageMatchIds.size} seleccionados
+                  </span>
+                  <button type="button" className="btn-secondary" onClick={() => setSelectedManageMatchIds(new Set())} disabled={selectedManageMatchIds.size === 0 || busyAction === 'delete-selected'}>
+                    Limpiar
+                  </button>
+                  <button type="button" className="btn-danger-outline" onClick={() => void handleBulkDeleteMatches()} disabled={selectedManageMatchIds.size === 0 || busyAction === 'delete-selected'}>
+                    {busyAction === 'delete-selected' ? <RefreshCw size={14} className="spin" /> : <Trash2 size={14} />}
+                    <span>Eliminar seleccionados</span>
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             {manageContainers.length > 0 ? (
               manageView === 'cards' ? (
@@ -1557,7 +1658,17 @@ export function TournamentOperationFixtureWorkspace({
               ) : (
                 <div className="operation-manage-list">
                   {filteredManageEntries.map((entry) => (
-                    <div key={entry.match.id} className="operation-manage-list-row">
+                    <div key={entry.match.id} className={`operation-manage-list-row ${selectedManageMatchIds.has(entry.match.id) ? 'is-selected' : ''}`}>
+                      <label
+                        className="operation-manage-check"
+                        aria-label={`Seleccionar ${entry.match.homeClub?.name || 'Local'} vs ${entry.match.awayClub?.name || 'Visitante'}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedManageMatchIds.has(entry.match.id)}
+                          onChange={() => toggleManageMatchSelection(entry.match.id)}
+                        />
+                      </label>
                       <div className="operation-manage-list-main">
                         <strong>{entry.match.homeClub?.name || 'Local'} vs {entry.match.awayClub?.name || 'Visitante'}</strong>
                         <small>
@@ -1585,17 +1696,34 @@ export function TournamentOperationFixtureWorkspace({
             ) : (
               <div className="operation-empty-state">
                 <span className="operation-empty-icon"><Calendar size={24} /></span>
-                <strong>No hay partidos para los filtros actuales</strong>
-                <p>Prueba con otra combinacion de filtros o vuelve a Agregar para cargar nuevos encuentros.</p>
+                <strong>
+                  {manageGrouping === 'orphans' && selectedPhaseMatchCount > 0 && orphanMatchCount === 0
+                    ? 'Todos los partidos ya estan asignados a jornadas'
+                    : 'No hay partidos para los filtros actuales'}
+                </strong>
+                <p>
+                  {manageGrouping === 'orphans' && selectedPhaseMatchCount > 0 && orphanMatchCount === 0
+                    ? 'Esta vista solo muestra partidos sin jornada. Cambia a Por jornada para ver los encuentros ya importados.'
+                    : 'Prueba con otra combinacion de filtros o vuelve a Agregar para cargar nuevos encuentros.'}
+                </p>
                 <div className="operation-empty-actions">
-                  <button type="button" className="basalt-btn basalt-btn-primary" onClick={() => openManualCreate()}>
-                    <Plus size={15} />
-                    Crear partido manual
-                  </button>
-                  <button type="button" className="basalt-btn" onClick={() => { setActiveSubtab('add_matches'); setSelectedMethod('import_fixture'); }}>
-                    <Upload size={15} />
-                    Importar fixture
-                  </button>
+                  {manageGrouping === 'orphans' && selectedPhaseMatchCount > 0 && orphanMatchCount === 0 ? (
+                    <button type="button" className="basalt-btn basalt-btn-primary" onClick={() => setManageGrouping('rounds')}>
+                      <Calendar size={15} />
+                      Ver por jornada
+                    </button>
+                  ) : (
+                    <>
+                      <button type="button" className="basalt-btn basalt-btn-primary" onClick={() => openManualCreate()}>
+                        <Plus size={15} />
+                        Crear partido manual
+                      </button>
+                      <button type="button" className="basalt-btn" onClick={() => { setActiveSubtab('add_matches'); setSelectedMethod('import_fixture'); }}>
+                        <Upload size={15} />
+                        Importar fixture
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}

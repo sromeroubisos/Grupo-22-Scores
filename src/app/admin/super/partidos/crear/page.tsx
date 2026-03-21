@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar, ArrowLeft, Trophy, Users, MapPin, Shield, Clock, Info, CheckCircle, Star, Globe } from 'lucide-react';
+import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import '../../creation-forms.css';
 import './monolith.css';
 import { CustomSelect } from './CustomSelect';
@@ -285,7 +286,10 @@ export default function CreateMatchPage() {
       }
 
       const isoDate = formData.date;
-      const dateTime = new Date(`${isoDate}T${formData.time}`).toISOString();
+      const dateTime = combineLocalDateTimeToUtcIso(isoDate, formData.time, APP_TIMEZONE);
+      if (!dateTime) {
+        throw new Error('La fecha u hora del partido no son validas.');
+      }
 
       const matchData = {
         tournamentId: isFriendly ? null : formData.tournamentId,

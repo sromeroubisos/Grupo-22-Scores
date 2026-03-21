@@ -6,6 +6,14 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
+import {
+  APP_TIMEZONE,
+  addDaysToIsoDate,
+  combineLocalDateTimeToUtcIso,
+  ensureUtcDateTimeString,
+  toInputDateInTimeZone,
+  toInputTimeInTimeZone,
+} from '@/lib/timezone';
 import type {
   TournamentFixture,
   TournamentPhase,
@@ -24,6 +32,10 @@ import type {
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
   private static _warnedWriteFallback = false;
+
+  private static getMatchRoundId(match: { round_uuid?: string | null; round_id?: string | null }) {
+    return match.round_uuid ?? match.round_id ?? null;
+  }
 
   private static async getWriteClient() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -219,15 +231,15 @@ export class FixtureService {
       supabase
         .from('matches')
         .select(`
-          id, tournament_id, round_uuid, phase_id, group_id,
+          id, tournament_id, round_uuid, round_id, phase_id, group_id,
           date_time, venue, status, score,
           round_label, notes,
           home_club_id, away_club_id,
           home_base_points, away_base_points,
           home_bonus_points, away_bonus_points,
           points_autocalculated, points_override_reason,
-          home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
-          away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
+          home_club:clubs!matches_home_club_id_fkey(id, name, short_name),
+          away_club:clubs!matches_away_club_id_fkey(id, name, short_name)
         `)
         .eq('tournament_id', tournamentId)
         .order('date_time', { ascending: true }),
@@ -252,7 +264,13 @@ export class FixtureService {
     }
 
     // 6. Map everything together in-memory
-    const mappedMatches = (allMatches || []).map(m => this.mapMatchWithClubs(m));
+    const mappedParticipants = (participants || []).map(p => this.mapParticipant(p));
+    const clubLogos = new Map(
+      mappedParticipants
+        .filter((participant) => participant.clubId)
+        .map((participant) => [participant.clubId, participant.logo ?? null]),
+    );
+    const mappedMatches = (allMatches || []).map(m => this.mapMatchWithClubs(m, clubLogos));
     const mappedRounds = (allRounds || []).map(r => this.mapRound(r));
 
     const phasesWithRounds: PhaseWithRounds[] = (phases || []).map((phase, index) => {
@@ -311,7 +329,7 @@ export class FixtureService {
       currentPhaseId: currentPhase?.id || null,
       currentRoundId: currentRound?.id || null,
       phases: phasesWithRounds,
-      participants: (participants || []).map(p => this.mapParticipant(p)),
+      participants: mappedParticipants,
     };
   }
 
@@ -332,7 +350,7 @@ export class FixtureService {
         supabase
           .from('matches')
           .select(`
-            id, tournament_id, round_uuid, phase_id, group_id,
+            id, tournament_id, round_uuid, round_id, phase_id, group_id,
             date_time, venue, status, score,
             round_label, notes,
             home_club_id, away_club_id,
@@ -358,7 +376,7 @@ export class FixtureService {
     // Group matches by round_uuid in memory — avoids N+1
     const matchesByRound = new Map<string, any[]>();
     for (const m of allMatches || []) {
-      const key = m.round_uuid ?? '__orphan__';
+      const key = this.getMatchRoundId(m) ?? '__orphan__';
       if (!matchesByRound.has(key)) matchesByRound.set(key, []);
       matchesByRound.get(key)!.push(m);
     }
@@ -381,7 +399,17 @@ export class FixtureService {
 
     const { data: match, error: matchError } = await supabase
       .from('matches')
-      .select('*, home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url), away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url), tournament:tournaments(id, name)')
+      .select(`
+        id, tournament_id, phase_id, round_uuid, round_id, round_label, group_id,
+        home_club_id, away_club_id, date_time, venue, status, score, notes,
+        referee, home_base_points, away_base_points,
+        home_bonus_points, away_bonus_points,
+        points_autocalculated, points_override_reason,
+        created_at, updated_at, lineups, events,
+        home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
+        away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url),
+        tournament:tournaments(id, name)
+      `)
       .eq('id', matchId)
       .single();
 
@@ -406,7 +434,7 @@ export class FixtureService {
         home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
         away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
       `)
-      .eq('round_uuid', roundId)
+      .or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`)
       .order('date_time', { ascending: true });
 
     if (matchesError) {
@@ -477,6 +505,11 @@ export class FixtureService {
       throw new Error('Debes seleccionar una fecha para el partido.');
     }
 
+    const normalizedDateTime = ensureUtcDateTimeString(data.dateTime, APP_TIMEZONE);
+    if (!normalizedDateTime) {
+      throw new Error('La fecha del partido no es valida.');
+    }
+
     // Validation: teams must be different
     if (data.homeClubId === data.awayClubId) {
       throw new Error('El equipo local y el visitante no pueden ser el mismo.');
@@ -510,7 +543,7 @@ export class FixtureService {
       round_uuid: finalRoundId,
       home_club_id: data.homeClubId,
       away_club_id: data.awayClubId,
-      date_time: data.dateTime,
+      date_time: normalizedDateTime,
       venue: data.venue,
       status: data.status,
       notes: data.notes || null,
@@ -560,7 +593,7 @@ export class FixtureService {
 
     const { data: existingMatch, error: existingMatchError } = await supabase
       .from('matches')
-      .select('id, tournament_id, phase_id, round_uuid, home_club_id, away_club_id')
+      .select('id, tournament_id, phase_id, round_uuid, round_id, home_club_id, away_club_id')
       .eq('id', matchId)
       .single();
 
@@ -594,14 +627,20 @@ export class FixtureService {
     await this.assertMatchContext(supabase, {
       tournamentId: existingMatch.tournament_id,
       phaseId: nextPhaseId,
-      roundId: updateData.round_uuid !== undefined ? updateData.round_uuid : existingMatch.round_uuid,
+      roundId: updateData.round_uuid !== undefined ? updateData.round_uuid : this.getMatchRoundId(existingMatch),
       homeClubId: nextHomeClubId,
       awayClubId: nextAwayClubId,
     });
 
     if (data.homeClubId !== undefined) updateData.home_club_id = data.homeClubId;
     if (data.awayClubId !== undefined) updateData.away_club_id = data.awayClubId;
-    if (data.dateTime !== undefined) updateData.date_time = data.dateTime;
+    if (data.dateTime !== undefined) {
+      const normalizedDateTime = ensureUtcDateTimeString(data.dateTime, APP_TIMEZONE);
+      if (!normalizedDateTime) {
+        throw new Error('La fecha del partido no es valida.');
+      }
+      updateData.date_time = normalizedDateTime;
+    }
     if (data.venue !== undefined) updateData.venue = data.venue;
     if (data.status) {
       updateData.status = data.status;
@@ -858,15 +897,15 @@ export class FixtureService {
 
     // 5. Generate pairs using Berger algorithm
     const matches: any[] = [];
-    const baseDate = new Date(params.startDate);
-    const [hours, minutes] = (params.matchTime || '00:00').split(':').map(Number);
-    baseDate.setHours(hours || 0, minutes || 0, 0, 0);
-
     for (let r = 0; r < totalRoundsNeeded; r++) {
       const roundIdxInCycle = r % roundsPerCycle;
       const roundId = rounds[r].id;
-      const roundDate = new Date(baseDate);
-      roundDate.setDate(baseDate.getDate() + (r * 7)); // Default: 1 round per week
+      const roundDate = addDaysToIsoDate(params.startDate, r * 7);
+      const roundDateTime = combineLocalDateTimeToUtcIso(roundDate, params.matchTime || '00:00', APP_TIMEZONE);
+
+      if (!roundDateTime) {
+        throw new Error('No se pudo construir la fecha de uno de los cruces generados.');
+      }
 
       for (let i = 0; i < n / 2; i++) {
         const homeIdx = (roundIdxInCycle + i) % (n - 1);
@@ -901,7 +940,7 @@ export class FixtureService {
           group_id: params.groupId || null,
           home_club_id: homeClubId,
           away_club_id: awayClubId,
-          date_time: roundDate.toISOString(),
+          date_time: roundDateTime,
           venue: params.venue,
           status: 'scheduled',
           score: { home: 0, away: 0 }
@@ -1017,21 +1056,21 @@ export class FixtureService {
       const { data: matches } = await supabase
         .from('matches')
         .select('id, date_time')
-        .eq('round_uuid', params.roundId);
+        .or(`round_uuid.eq.${params.roundId},round_id.eq.${params.roundId}`);
 
       if (matches) {
         for (const match of matches) {
-          const existingDate = new Date(match.date_time);
-          const [hours, minutes] = params.newTime
-            ? params.newTime.split(':').map(Number)
-            : [existingDate.getHours(), existingDate.getMinutes()];
+          const nextDate = params.newDate;
+          const nextTime = params.newTime || toInputTimeInTimeZone(match.date_time, APP_TIMEZONE) || '00:00';
+          const nextDateTime = combineLocalDateTimeToUtcIso(nextDate, nextTime, APP_TIMEZONE);
 
-          const newDate = new Date(params.newDate);
-          newDate.setHours(hours, minutes);
+          if (!nextDateTime) {
+            throw new Error('No se pudo recalcular la fecha de la jornada.');
+          }
 
           await supabase
             .from('matches')
-            .update({ date_time: newDate.toISOString() })
+            .update({ date_time: nextDateTime })
             .eq('id', match.id);
         }
       }
@@ -1039,17 +1078,20 @@ export class FixtureService {
       const { data: matches } = await supabase
         .from('matches')
         .select('id, date_time')
-        .eq('round_uuid', params.roundId);
+        .or(`round_uuid.eq.${params.roundId},round_id.eq.${params.roundId}`);
 
       if (matches) {
         for (const match of matches) {
-          const existingDate = new Date(match.date_time);
-          const [hours, minutes] = params.newTime.split(':').map(Number);
-          existingDate.setHours(hours, minutes);
+          const existingDate = toInputDateInTimeZone(match.date_time, APP_TIMEZONE);
+          const nextDateTime = combineLocalDateTimeToUtcIso(existingDate, params.newTime, APP_TIMEZONE);
+
+          if (!nextDateTime) {
+            throw new Error('No se pudo recalcular la hora de la jornada.');
+          }
 
           await supabase
             .from('matches')
-            .update({ date_time: existingDate.toISOString() })
+            .update({ date_time: nextDateTime })
             .eq('id', match.id);
         }
       }
@@ -1059,7 +1101,7 @@ export class FixtureService {
       const { error } = await supabase
         .from('matches')
         .update({ venue: params.newVenue })
-        .eq('round_uuid', params.roundId);
+        .or(`round_uuid.eq.${params.roundId},round_id.eq.${params.roundId}`);
 
       if (error) {
         console.error('Error updating venue:', error);
@@ -1076,7 +1118,7 @@ export class FixtureService {
   static async resetRound(roundId: string): Promise<boolean> {
     const supabase = await this.getWriteClient();
 
-    const { error } = await supabase.from('matches').delete().eq('round_uuid', roundId);
+    const { error } = await supabase.from('matches').delete().or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`);
 
     if (error) {
       console.error('Error resetting round:', error);
@@ -1107,7 +1149,7 @@ export class FixtureService {
         const { count } = await supabase
           .from('matches')
           .select('*', { count: 'exact', head: true })
-          .eq('round_uuid', round.id);
+          .or(`round_uuid.eq.${round.id},round_id.eq.${round.id}`);
 
         if (count === 0) {
           diagnostics.push({
@@ -1123,20 +1165,22 @@ export class FixtureService {
     // 2. Check for teams with multiple matches in same round
     const { data: matches } = await supabase
       .from('matches')
-      .select('id, round_uuid, home_club_id, away_club_id')
+      .select('id, round_uuid, round_id, home_club_id, away_club_id')
       .eq('tournament_id', tournamentId);
 
     if (matches) {
       const roundTeams = new Map<string, Set<string>>();
       matches.forEach(m => {
-        if (!roundTeams.has(m.round_uuid)) roundTeams.set(m.round_uuid, new Set());
-        const teams = roundTeams.get(m.round_uuid)!;
+        const roundId = this.getMatchRoundId(m);
+        if (!roundId) return;
+        if (!roundTeams.has(roundId)) roundTeams.set(roundId, new Set());
+        const teams = roundTeams.get(roundId)!;
 
         if (teams.has(m.home_club_id)) {
           diagnostics.push({
             type: 'error',
             message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
-            context: m.round_uuid
+            context: roundId
           });
         }
         teams.add(m.home_club_id);
@@ -1145,7 +1189,7 @@ export class FixtureService {
           diagnostics.push({
             type: 'error',
             message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
-            context: m.round_uuid
+            context: roundId
           });
         }
         teams.add(m.away_club_id);
@@ -1219,7 +1263,7 @@ export class FixtureService {
     };
   }
 
-  private static mapMatchWithClubs(match: any): MatchWithClubs {
+  private static mapMatchWithClubs(match: any, clubLogos?: Map<string, string | null>): MatchWithClubs {
     return {
       ...this.mapMatch(match),
       homeClub: match.home_club
@@ -1227,7 +1271,7 @@ export class FixtureService {
           id: match.home_club.id,
           name: match.home_club.name,
           shortName: match.home_club.short_name,
-          logo: match.home_club.logo,
+          logo: match.home_club.logo ?? clubLogos?.get(match.home_club.id) ?? null,
         }
         : null,
       awayClub: match.away_club
@@ -1235,19 +1279,20 @@ export class FixtureService {
           id: match.away_club.id,
           name: match.away_club.name,
           shortName: match.away_club.short_name,
-          logo: match.away_club.logo,
+          logo: match.away_club.logo ?? clubLogos?.get(match.away_club.id) ?? null,
         }
         : null,
     };
   }
 
   private static mapParticipant(p: any): any {
+    const clubData = Array.isArray(p.clubs) ? p.clubs[0] : p.clubs;
     return {
       id: p.id,
       clubId: p.club_id,
       name: p.name,
       shortCode: p.short_code,
-      logo: p.clubs?.logo_url || null,
+      logo: clubData?.logo_url || null,
     };
   }
 }

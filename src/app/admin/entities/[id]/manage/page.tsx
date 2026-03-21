@@ -19,18 +19,25 @@ import { TournamentParticipantsTab } from '@/components/admin/entities/tournamen
 import { TournamentOperationTab } from '@/components/admin/entities/tournament/TournamentOperationTab';
 import { TournamentRelatedTab } from '@/components/admin/entities/tournament/TournamentRelatedTab';
 import { Database } from '@/lib/database.types';
-import { getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
+import { getTournamentLinkedRelations, getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
+type TournamentSeasonMenuItem = {
+    id: string;
+    label: string;
+    subtitle: string;
+    href: string;
+    isCurrent: boolean;
+};
 
 interface ManagePageProps {
     params: Promise<{ id: string }>;
-    searchParams: Promise<{ type?: string; tab?: string; offset?: string; from?: string }>;
+    searchParams: Promise<{ type?: string; tab?: string; subtab?: string; offset?: string; from?: string }>;
 }
 
 export default async function ManageEntityPage({ params, searchParams }: ManagePageProps) {
     const { id } = await params;
-    const { type, tab, offset: offsetParam, from } = await searchParams;
+    const { type, tab, subtab, offset: offsetParam, from } = await searchParams;
     const currentTab = tab || 'overview';
     const offset = parseInt(offsetParam || '0', 10);
     const limit = 20;
@@ -130,12 +137,14 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
     let tournamentCountries: Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> = [];
     let tournamentMatchCount = 0;
     let tournamentUnionName: string | undefined;
+    let tournamentSeasonMenuItems: TournamentSeasonMenuItem[] = [];
     if (isTournament) {
         const tournamentData = result.data as TournamentRow;
-        const [{ data: unionsData }, { count }, { data: countriesData }] = await Promise.all([
+        const [{ data: unionsData }, { count }, { data: countriesData }, linkedRelations] = await Promise.all([
             supabase.from('unions').select('id, name').order('name'),
             supabase.from('matches').select('id', { count: 'exact', head: true }).eq('tournament_id', id),
             supabase.from('countries').select('id, name, code, flag_emoji').order('name'),
+            getTournamentLinkedRelations(id),
         ]);
         tournamentUnions = unionsData ?? [];
         tournamentCountries = countriesData ?? [];
@@ -143,6 +152,52 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         if (tournamentData.union_id) {
             tournamentUnionName = tournamentUnions.find(u => u.id === (result.data as TournamentRow).union_id)?.name;
         }
+
+        const activeTab = currentTab === 'overview' ? 'resumen' : currentTab;
+        const activeParams = new URLSearchParams();
+        activeParams.set('type', 'tournament');
+        activeParams.set('tab', activeTab);
+        if (subtab && activeTab === 'operacion') {
+            activeParams.set('subtab', subtab);
+        }
+
+        const seasonRelationTypes = new Set(['previous_season', 'next_season']);
+        const linkedSeasonItems = linkedRelations.items
+            .filter((item) => seasonRelationTypes.has(item.relationType))
+            .reduce<TournamentSeasonMenuItem[]>((items, item) => {
+                if (items.some((existing) => existing.id === item.linkedTournamentId)) {
+                    return items;
+                }
+
+                const params = new URLSearchParams(activeParams.toString());
+                items.push({
+                    id: item.linkedTournamentId,
+                    label: item.season || item.linkedTournamentName,
+                    subtitle: item.linkedTournamentName,
+                    href: `/admin/entities/${item.linkedTournamentId}/manage?${params.toString()}`,
+                    isCurrent: false,
+                });
+                return items;
+            }, [])
+            .sort((left, right) => {
+                const leftYear = Number.parseInt(left.label, 10);
+                const rightYear = Number.parseInt(right.label, 10);
+                if (Number.isFinite(leftYear) && Number.isFinite(rightYear) && leftYear !== rightYear) {
+                    return rightYear - leftYear;
+                }
+                return right.label.localeCompare(left.label, 'es');
+            });
+
+        tournamentSeasonMenuItems = [
+            {
+                id,
+                label: tournamentData.season_id || '--',
+                subtitle: tournamentData.display_name || tournamentData.name,
+                href: `/admin/entities/${id}/manage?${activeParams.toString()}`,
+                isCurrent: true,
+            },
+            ...linkedSeasonItems,
+        ];
     }
 
     // Default tab: tournaments use 'resumen', others use 'overview'
@@ -176,8 +231,10 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                 id={id}
                 data={result.data as TournamentRow}
                 currentTab={effectiveTab}
+                currentSubtab={subtab ?? null}
                 backHref={from ?? '/admin/super/torneos'}
                 matchCount={tournamentMatchCount}
+                seasonMenuItems={tournamentSeasonMenuItems}
             >
                 <div className="min-h-[300px] animate-in fade-in duration-300">
                     {effectiveTab === 'resumen' && (

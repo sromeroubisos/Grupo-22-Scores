@@ -336,3 +336,106 @@
     opacity: 0;
     /* Only show the background gradient */
 }
+
+/* Match selection for dailyMatches export */
+.matchSelectHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.matchCounter {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    background: rgba(0, 163, 101, 0.15);
+    border: 1px solid rgba(0, 163, 101, 0.4);
+    border-radius: 20px;
+    color: #00a365;
+    font-family: var(--font-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.matchSelectList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.matchSelectList::-webkit-scrollbar {
+    width: 4px;
+}
+
+.matchSelectList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.matchSelectList::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.matchSelectRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+}
+
+.matchSelectRow:hover:not(.matchSelectDisabled) {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.matchSelectRow:has(input:checked) {
+    background: rgba(0, 163, 101, 0.12);
+    border-color: rgba(0, 163, 101, 0.35);
+}
+
+.matchSelectRow input[type="checkbox"] {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #00a365;
+    cursor: pointer;
+}
+
+.matchSelectDisabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.matchSelectDisabled input {
+    cursor: not-allowed;
+}
+
+.matchSelectTeams {
+    flex: 1;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.matchSelectDate {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--color-text-secondary, rgba(255,255,255,0.45));
+    white-space: nowrap;
+}

@@ -65,6 +65,7 @@ export default function TablasPage() {
                                     rows: standings.map(s => ({
                                         pos: s.pos,
                                         team: s.team,
+                                        teamLogo: undefined,
                                         played: s.played,
                                         won: s.won,
                                         lost: s.lost,

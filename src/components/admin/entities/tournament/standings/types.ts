@@ -102,12 +102,12 @@ export interface UiLabel {
 export interface TeamLabelAssignment {
   id: string;
   label_id: string;
-  position: number;
+  position?: number;
   club_id?: string | null;
   tournament_id: string | null;
   phase_id: string | null;
   group_id: string | null;
-  label: UiLabel;
+  label: UiLabel | null;
 }
 
 export interface AuditEntry {
