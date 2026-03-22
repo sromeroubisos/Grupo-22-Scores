@@ -135,6 +135,7 @@ export default function SuperadminTorneosPage() {
     const handleUpdateMeta = async (id: string, updates: Partial<TournamentUpdate>) => {
         // Find the full tournament object for logging
         const tournament = tournaments.find(t => t.id === id);
+        const previousLocalMetadata = localMetadata[id];
         console.log('[SuperadminTorneosPage] USER CLICK - Update triggered:', {
             id,
             request_keys: Object.keys(updates),
@@ -154,6 +155,15 @@ export default function SuperadminTorneosPage() {
                 invalidateCache('tournaments_list');
             }
         } catch (err: unknown) {
+            setLocalMetadata(prev => {
+                const next = { ...prev };
+                if (previousLocalMetadata) {
+                    next[id] = previousLocalMetadata;
+                } else {
+                    delete next[id];
+                }
+                return next;
+            });
             console.error('[SuperadminTorneosPage] Update failed:', err);
             const normalized = normalizeError(err);
             const msg = normalized.message || 'Error inesperado';

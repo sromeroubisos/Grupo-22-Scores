@@ -1,6 +1,7 @@
 import { supabase } from '../supabase';
 import { Database } from '../database.types';
 import { normalizeError } from '../utils/errorUtils';
+import { isMissingColumnError } from '../utils/supabaseSchema';
 
 export interface TournamentGlobal {
   id: string;
@@ -27,6 +28,24 @@ export interface TournamentGlobal {
 
 export type TournamentUpdate = Database['public']['Tables']['tournaments']['Update'];
 
+const TOURNAMENT_FALLBACK_SELECT_WITH_PRIORITY = `
+  id, name, slug, sport_id, country_id, union_id,
+  logo_url, is_popular, is_visible, display_name, status, priority,
+  created_at, updated_at,
+  sport:sports(name),
+  country:countries(name),
+  union:unions(name)
+`;
+
+const TOURNAMENT_FALLBACK_SELECT = `
+  id, name, slug, sport_id, country_id, union_id,
+  logo_url, is_popular, is_visible, display_name, status,
+  created_at, updated_at,
+  sport:sports(name),
+  country:countries(name),
+  union:unions(name)
+`;
+
 export const tournamentService = {
   /**
    * Fetches all tournaments from all sports in a single request.
@@ -43,17 +62,13 @@ export const tournamentService = {
       });
 
       if (error) {
-        // If it's a "function not found" error, trigger fallback
-        if (error.code === 'PGRST202' || error.message?.includes('not find the function')) {
-          console.warn('[tournamentService] RPC not found, falling back to direct table query');
-          return this.getTournamentsFallback(options);
-        }
-        throw error;
+        console.warn('[tournamentService] RPC failed, falling back to direct table query:', error.message);
+        return this.getTournamentsFallback(options);
       }
 
       return data as TournamentGlobal[];
     } catch (err: any) {
-      if (err.code === 'PGRST202' || err.message?.includes('not find the function')) {
+      if (err.code === 'PGRST202' || err.message?.includes('not find the function') || err.message?.includes('priority')) {
         return this.getTournamentsFallback(options);
       }
       const normalized = normalizeError(err);
@@ -66,31 +81,35 @@ export const tournamentService = {
    * Fallback method when RPC is missing or failing
    */
   async getTournamentsFallback(options: { includeHidden?: boolean }): Promise<TournamentGlobal[]> {
-    let query = supabase
-      .from('tournaments')
-      .select(`
-        id, name, slug, sport_id, country_id, union_id,
-        logo_url, is_popular, is_visible, display_name, status, priority,
-        created_at, updated_at,
-        sport:sports(name),
-        country:countries(name),
-        union:unions(name)
-      `);
-    
-    if (!options.includeHidden) {
-      // is_active was dropped, use status and is_visible
-      query = query.eq('status', 'published').or('is_visible.eq.true,is_visible.is.null');
-    }
+    const buildQuery = (select: string) => {
+      let query = supabase
+        .from('tournaments')
+        .select(select);
 
-    const { data, error } = await query;
+      if (!options.includeHidden) {
+        // is_active was dropped, use status and is_visible
+        query = query.eq('status', 'published').or('is_visible.eq.true,is_visible.is.null');
+      }
+
+      return query;
+    };
+
+    let { data, error } = await buildQuery(TOURNAMENT_FALLBACK_SELECT_WITH_PRIORITY);
+
+    if (error && isMissingColumnError(error, 'priority')) {
+      ({ data, error } = await buildQuery(TOURNAMENT_FALLBACK_SELECT));
+    }
 
     if (error) {
       console.error('[tournamentService] Fallback also failed:', error);
       throw error;
     }
 
+    // Dynamic selects degrade Supabase inference here; normalize to a plain row array.
+    const rows = (data as any[]) || [];
+
     // Map to TournamentGlobal shape
-    return (data || []).map(t => ({
+    return rows.map(t => ({
       id: t.id,
       name: t.name,
       slug: t.slug || '',
@@ -191,12 +210,26 @@ export const tournamentService = {
     }
 
     // 4. PERFORM UPDATE
-    const { data, error, status } = await supabase
-      .from('tournaments')
-      .update(filteredUpdates)
-      .eq('id', id)
-      .select()
-      .maybeSingle();
+    const runUpdate = (payload: Record<string, unknown>) =>
+      supabase
+        .from('tournaments')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+
+    let { data, error, status } = await runUpdate(filteredUpdates);
+
+    if (error && filteredUpdates.priority !== undefined && isMissingColumnError(error, 'priority')) {
+      const { priority: _ignoredPriority, ...retryUpdates } = filteredUpdates;
+
+      if (Object.keys(retryUpdates).length === 0) {
+        throw new Error("La columna 'priority' no existe en este esquema. No se puede guardar la prioridad.");
+      }
+
+      console.warn('[tournamentService] priority column missing. Retrying update without priority.');
+      ({ data, error, status } = await runUpdate(retryUpdates));
+    }
 
     if (error) {
       const normalized = normalizeError(error);

@@ -4,8 +4,10 @@ import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority';
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status';
 
 type PublicTournamentRow = {
     id: string;
@@ -23,12 +25,61 @@ type PublicTournamentRow = {
     priority: number | null;
 };
 
+type PublicTournamentQueryResult = {
+    data: PublicTournamentRow[] | null;
+    error: { code?: string | null; message?: string | null; details?: string | null } | null;
+};
+
 function resolveSportFilter(rawSport: string | null) {
     if (!rawSport || rawSport === 'rugby') {
         return RUGBY_SPORT_IDS;
     }
 
     return [rawSport];
+}
+
+async function queryVisiblePublicTournaments(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+): Promise<PublicTournamentQueryResult> {
+    const attempts: Array<{ select: string; usesLegacySport: boolean; usesPriority: boolean }> = [
+        { select: SELECT_WITH_LEGACY_SPORT_AND_PRIORITY, usesLegacySport: true, usesPriority: true },
+        { select: SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY, usesLegacySport: false, usesPriority: true },
+        { select: SELECT_WITH_LEGACY_SPORT, usesLegacySport: true, usesPriority: false },
+        { select: SELECT_WITHOUT_LEGACY_SPORT, usesLegacySport: false, usesPriority: false },
+    ];
+
+    for (const attempt of attempts) {
+        let query = supabase
+            .from('tournaments')
+            .select(attempt.select)
+            .neq('is_visible', false);
+
+        if (attempt.usesPriority) {
+            query = query.order('priority', { ascending: false, nullsFirst: false });
+        }
+
+        const result = await query
+            .order('display_name', { ascending: true })
+            .order('name', { ascending: true }) as unknown as PublicTournamentQueryResult;
+
+        if (!result.error) {
+            return result;
+        }
+
+        const missingSport = attempt.usesLegacySport && isMissingColumnError(result.error, 'sport');
+        const missingPriority = attempt.usesPriority && isMissingColumnError(result.error, 'priority');
+
+        if (missingSport || missingPriority) {
+            continue;
+        }
+
+        return result;
+    }
+
+    return {
+        data: null,
+        error: { message: 'No compatible tournament query could be built for the current schema.' },
+    };
 }
 
 export async function GET(request: NextRequest) {
@@ -40,26 +91,7 @@ export async function GET(request: NextRequest) {
         const supabase = await getReadClient();
         const sportFilter = resolveSportFilter(sport);
 
-        let queryResult: {
-            data: PublicTournamentRow[] | null;
-            error: { code?: string | null; message?: string | null; details?: string | null } | null;
-        } = await supabase
-            .from('tournaments')
-            .select(SELECT_WITH_LEGACY_SPORT)
-            .neq('is_visible', false)
-            .order('priority', { ascending: false, nullsFirst: false })
-            .order('display_name', { ascending: true })
-            .order('name', { ascending: true });
-
-        if (isMissingColumnError(queryResult.error, 'sport')) {
-            queryResult = await supabase
-                .from('tournaments')
-                .select(SELECT_WITHOUT_LEGACY_SPORT)
-                .neq('is_visible', false)
-                .order('priority', { ascending: false, nullsFirst: false })
-                .order('display_name', { ascending: true })
-                .order('name', { ascending: true });
-        }
+        const queryResult = await queryVisiblePublicTournaments(supabase);
 
         const { data, error } = queryResult;
 

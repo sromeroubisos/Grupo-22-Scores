@@ -4,6 +4,7 @@ import { getActiveSports } from '@/lib/data/sports';
 import { getAllCountries } from '@/lib/data/countries';
 import { getAllTournaments } from '@/lib/data/tournaments';
 import { Database } from '@/lib/database.types';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 // Use the service role key to bypass RLS for this admin import script
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -107,9 +108,16 @@ export async function POST(request: Request) {
                 logo_url: existingTournament?.logo_url || t.logoUrl,
             };
 
-            const { error: tError } = await supabase
+            let { error: tError } = await supabase
                 .from('tournaments')
                 .upsert(tournamentPayload, { onConflict: 'id' });
+
+            if (tError && isMissingColumnError(tError, 'priority')) {
+                const { priority: _ignoredPriority, ...payloadWithoutPriority } = tournamentPayload;
+                ({ error: tError } = await supabase
+                    .from('tournaments')
+                    .upsert(payloadWithoutPriority, { onConflict: 'id' }));
+            }
 
             if (tError) {
                 console.error(`Error upserting tournament ${t.name}:`, tError);

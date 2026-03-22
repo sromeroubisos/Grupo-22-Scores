@@ -7,6 +7,7 @@ import {
     getSeasonsByTournament, 
     getFixturesByTournamentOrSeason 
 } from '@/lib/services/flashscore';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 export interface ExternalEntity {
     id: string;
@@ -165,21 +166,32 @@ export class TournamentIngestionService {
      */
     static async createFromExternal(externalTournament: any, internalParams: any) {
         const supabase = await createClient();
-        
-        const { data, error } = await supabase
+
+        const payload = {
+            name: internalParams.name || externalTournament.name,
+            display_name: internalParams.display_name || externalTournament.name,
+            slug: normalizeSlug(internalParams.name || externalTournament.name),
+            sport_id: externalTournament.sport_id,
+            country_id: externalTournament.country_id,
+            logo_url: externalTournament.logo_url,
+            is_visible: true,
+            priority: internalParams.priority ?? 0
+        };
+
+        let { data, error } = await supabase
             .from('tournaments')
-            .insert({
-                name: internalParams.name || externalTournament.name,
-                display_name: internalParams.display_name || externalTournament.name,
-                slug: normalizeSlug(internalParams.name || externalTournament.name),
-                sport_id: externalTournament.sport_id,
-                country_id: externalTournament.country_id,
-                logo_url: externalTournament.logo_url,
-                is_visible: true,
-                priority: internalParams.priority ?? 0
-            })
+            .insert(payload)
             .select()
             .single();
+
+        if (error && isMissingColumnError(error, 'priority')) {
+            const { priority: _ignoredPriority, ...payloadWithoutPriority } = payload;
+            ({ data, error } = await supabase
+                .from('tournaments')
+                .insert(payloadWithoutPriority)
+                .select()
+                .single());
+        }
 
         if (error) throw error;
         return data;
