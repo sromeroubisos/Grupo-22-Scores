@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { EntityType } from '@/lib/services/entityResolver';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { z } from 'zod';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -75,6 +76,37 @@ const TABLE: Record<EntityType, string> = {
     union: 'unions',
 };
 
+async function runTournamentWriteWithPriorityFallback(
+    type: EntityType,
+    payload: Record<string, any>,
+    mutate: (nextPayload: Record<string, any>) => PromiseLike<{ data: any; error: any }>
+): Promise<{ data: any; error: any }> {
+    const firstAttempt = await mutate(payload);
+
+    if (
+        type !== 'tournament'
+        || firstAttempt.error == null
+        || payload.priority === undefined
+        || !isMissingColumnError(firstAttempt.error, 'priority')
+    ) {
+        return firstAttempt;
+    }
+
+    const { priority: _ignoredPriority, ...payloadWithoutPriority } = payload;
+
+    if (Object.keys(payloadWithoutPriority).length === 0) {
+        return {
+            data: null,
+            error: {
+                message: "La columna 'priority' no existe en este esquema. No se puede guardar la prioridad.",
+            },
+        };
+    }
+
+    console.warn('[admin/entities/actions] priority column missing. Retrying tournament write without priority.');
+    return mutate(payloadWithoutPriority);
+}
+
 function sanitizeFields(type: EntityType, updates: Record<string, any>): Record<string, any> {
     const schema = SCHEMAS[type];
     if (!schema) throw new Error(`Invalid entity type: ${type}`);
@@ -135,7 +167,9 @@ export async function createEntity(
 
     const table = TABLE[type];
 
-    const { data, error } = await supabase.from(table).insert(cleanPayload).select().single();
+    const { data, error } = await runTournamentWriteWithPriorityFallback(type, cleanPayload, (nextPayload) =>
+        supabase.from(table).insert(nextPayload).select().single()
+    );
     if (error) {
         throw new Error(error.message);
     }
@@ -178,7 +212,9 @@ export async function updateEntity(
     // Pre-state for audit diff
     const { data: oldData } = await supabase.from(table as any).select('*').eq('id', id).single();
 
-    const { data, error } = await supabase.from(table).update(cleanUpdates).eq('id', id).select().single();
+    const { data, error } = await runTournamentWriteWithPriorityFallback(type, cleanUpdates, (nextPayload) =>
+        supabase.from(table).update(nextPayload).eq('id', id).select().single()
+    );
     if (error) {
         throw new Error(error.message);
     }
@@ -281,7 +317,9 @@ export async function duplicateTournament(
     };
 
     // Remove ID if zod strips it, or just use it since it's a new insert
-    const { data, error } = await supabase.from('tournaments').insert(copy).select().single();
+    const { data, error } = await runTournamentWriteWithPriorityFallback('tournament', copy, (nextPayload) =>
+        supabase.from('tournaments').insert(nextPayload).select().single()
+    );
     if (error) throw new Error(error.message);
 
     await writeAuditLog(user.id, 'tournament', newId, 'create', { duplicated_from: id });
