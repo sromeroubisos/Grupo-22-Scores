@@ -971,6 +971,7 @@ export type Database = {
           logo_url: string | null
           name: string
           primary_color: string | null
+          priority: number
           region: string | null
           ruleset: { [key: string]: any } | null
           season_id: string | null
@@ -996,6 +997,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           primary_color?: string | null
+          priority?: number
           region?: string | null
           ruleset?: { [key: string]: any } | null
           season_id?: string | null
@@ -1021,6 +1023,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           primary_color?: string | null
+          priority?: number
           region?: string | null
           ruleset?: { [key: string]: any } | null
           season_id?: string | null
@@ -1390,6 +1393,7 @@ export type Database = {
           is_popular: boolean
           is_active: boolean
           display_order: number | null
+          priority: number | null
           followers_count: number
           is_followed_by_user: boolean
           created_at: string

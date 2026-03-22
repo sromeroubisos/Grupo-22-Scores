@@ -1,5 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+
+type TournamentLookupRow = {
+    id: string;
+    name: string | null;
+    display_name: string | null;
+    logo_url: string | null;
+    sport_id: string | null;
+    legacy_sport?: string | null;
+    country_id: string | null;
+    slug: string | null;
+    is_visible: boolean | null;
+    status: string | null;
+};
+
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status';
 
 export async function GET(
     _req: NextRequest,
@@ -10,11 +27,24 @@ export async function GET(
     const supabase = await getReadClient();
 
     // Try to find a tournament by ID (UUID) or by slug
-    const { data, error } = await supabase
+    let queryResult: {
+        data: TournamentLookupRow | null;
+        error: { code?: string | null; message?: string | null; details?: string | null } | null;
+    } = await supabase
         .from('tournaments')
-        .select('id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status')
+        .select(SELECT_WITH_LEGACY_SPORT)
         .or(`id.eq.${id},slug.eq.${id}`)
         .maybeSingle();
+
+    if (isMissingColumnError(queryResult.error, 'sport')) {
+        queryResult = await supabase
+            .from('tournaments')
+            .select(SELECT_WITHOUT_LEGACY_SPORT)
+            .or(`id.eq.${id},slug.eq.${id}`)
+            .maybeSingle();
+    }
+
+    const { data, error } = queryResult;
 
     if (error || !data) {
         return NextResponse.json({ ok: false }, { status: 404 });

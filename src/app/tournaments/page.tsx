@@ -8,6 +8,7 @@ import { useSport } from '@/context/SportContext';
 import { getCountryById } from '@/lib/data/countries';
 import type { SportId } from '@/lib/types';
 import { getCachedLogo } from '@/lib/utils/logoCache';
+import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 const TROPHY_FALLBACK = '\u{1F3C6}';
 const FLAG_FALLBACK = '\u{1F3F3}\u{FE0F}';
@@ -21,6 +22,7 @@ interface DbTournament {
     sport_id: string | null;
     logo_url: string | null;
     slug: string | null;
+    priority?: number | null;
 }
 
 interface TournamentCountry {
@@ -196,9 +198,9 @@ export default function TorneosPage() {
 
     // Argentina / popular section
     const recommended = useMemo(() => {
-        return filteredTournaments.filter(t =>
+        return sortTournamentsByPriority(filteredTournaments.filter(t =>
             normalizeTournamentCountry(t) === 'argentina'
-        );
+        ));
     }, [filteredTournaments]);
 
     // Group remaining by country
@@ -219,7 +221,7 @@ export default function TorneosPage() {
                 if (countryKey === '__sin-pais__') {
                     return {
                         country: { id: '__sin-pais__', name: 'Sin país', nameEs: 'Sin país', code: '', flagEmoji: FLAG_FALLBACK },
-                        tournaments,
+                        tournaments: sortTournamentsByPriority(tournaments),
                     };
                 }
                 // Try to resolve via static country data (supports both id and name)
@@ -227,7 +229,7 @@ export default function TorneosPage() {
                     (tournaments[0]?.country
                         ? { id: countryKey, name: tournaments[0].country, nameEs: tournaments[0].country, code: '', flagEmoji: FLAG_FALLBACK }
                         : { id: countryKey, name: countryKey, nameEs: countryKey, code: '', flagEmoji: FLAG_FALLBACK });
-                return { country: resolved, tournaments };
+                return { country: resolved, tournaments: sortTournamentsByPriority(tournaments) };
             })
             .sort((a, b) => {
                 // 'Sin país' always last

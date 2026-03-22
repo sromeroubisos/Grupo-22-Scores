@@ -57,6 +57,11 @@ export interface Match {
 }
 
 export interface MatchWithClubs extends Match {
+  tournament?: {
+    id: string;
+    name: string;
+    logo: string | null;
+  } | null;
   homeClub: {
     id: string;
     name: string;

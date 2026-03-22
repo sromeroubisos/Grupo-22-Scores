@@ -15,6 +15,7 @@ export interface TournamentGlobal {
   is_active: boolean;
   is_popular: boolean;
   display_order: number | null;
+  priority: number | null;
   followers_count: number;
   is_followed_by_user: boolean;
   created_at: string;
@@ -69,7 +70,7 @@ export const tournamentService = {
       .from('tournaments')
       .select(`
         id, name, slug, sport_id, country_id, union_id,
-        logo_url, is_popular, is_visible, display_name, status,
+        logo_url, is_popular, is_visible, display_name, status, priority,
         created_at, updated_at,
         sport:sports(name),
         country:countries(name),
@@ -104,6 +105,7 @@ export const tournamentService = {
       is_active: t.status === 'published' && t.is_visible !== false,
       is_popular: t.is_popular === true,
       display_order: 0,
+      priority: typeof t.priority === 'number' ? t.priority : 0,
       followers_count: 0,
       is_followed_by_user: false,
       created_at: t.created_at,
@@ -122,10 +124,10 @@ export const tournamentService = {
     // 1. Strict whitelist of REAL columns in 'tournaments' table
     const ALLOWED_COLUMNS = [
       'name', 'slug', 'sport_id', 'country_id', 'union_id',
-      'logo_url', 'banner_url', 'is_visible', 
+      'logo_url', 'banner_url', 'is_visible', 'is_popular',
       'display_name', 'status', 'season_id',
       'category', 'age_grade', 'format', 'ruleset',
-      'primary_color', 'secondary_color'
+      'primary_color', 'secondary_color', 'priority'
     ];
 
     // 2. Filter payload strictly

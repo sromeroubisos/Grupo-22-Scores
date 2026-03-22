@@ -175,7 +175,8 @@ export class TournamentIngestionService {
                 sport_id: externalTournament.sport_id,
                 country_id: externalTournament.country_id,
                 logo_url: externalTournament.logo_url,
-                is_visible: true
+                is_visible: true,
+                priority: internalParams.priority ?? 0
             })
             .select()
             .single();

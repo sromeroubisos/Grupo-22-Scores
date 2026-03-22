@@ -1,10 +1,13 @@
 import { getReadClient } from '@/lib/supabase/read';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SLUG_LOOKUP_TIMEOUT_MS = 5000;
 const PREFETCH_TIMEOUT_MS = 5000;
 const MATCHES_TIMEOUT_MS = 12000;
 const STANDINGS_TIMEOUT_MS = 12000;
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, status, is_visible, slug, ruleset';
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, status, is_visible, slug, ruleset';
 
 export type TournamentQueryErrors = {
     tournament: string | null;
@@ -32,7 +35,7 @@ export type TournamentInitialData = {
 
 type SupabaseQueryResult<T> = {
     data: T | null;
-    error: { message?: string } | null;
+    error: { code?: string | null; message?: string | null; details?: string | null } | null;
 };
 
 type SettledQuery<T> = {
@@ -65,7 +68,7 @@ type TournamentRow = {
     name: string | null;
     display_name: string | null;
     sport_id: string | null;
-    legacy_sport: string | null;
+    legacy_sport?: string | null;
     country: string | null;
     country_id: string | null;
     country_ref: { name?: string } | null;
@@ -237,6 +240,27 @@ async function settleSupabaseQuery<T>(
     }
 }
 
+async function getTournamentByIdWithSportFallback(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    tournamentId: string,
+): Promise<SupabaseQueryResult<TournamentRow | null>> {
+    let result: SupabaseQueryResult<TournamentRow | null> = await supabase
+        .from('tournaments')
+        .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT)
+        .eq('id', tournamentId)
+        .maybeSingle();
+
+    if (isMissingColumnError(result.error, 'sport')) {
+        result = await supabase
+            .from('tournaments')
+            .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT)
+            .eq('id', tournamentId)
+            .maybeSingle();
+    }
+
+    return result;
+}
+
 export async function fetchTournamentData(id: string): Promise<TournamentInitialData | null> {
     try {
         const supabase = await getReadClient();
@@ -272,11 +296,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
         ] = await Promise.all([
             settleSupabaseQuery(
                 'tournament',
-                supabase
-                    .from('tournaments')
-                    .select('id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, status, is_visible, slug, ruleset')
-                    .eq('id', tournamentId)
-                    .maybeSingle(),
+                getTournamentByIdWithSportFallback(supabase, tournamentId),
                 null as TournamentRow | null,
             ),
             settleSupabaseQuery(

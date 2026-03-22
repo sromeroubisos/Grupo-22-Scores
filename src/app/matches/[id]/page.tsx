@@ -373,6 +373,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
                                     : '--:--',
                                 tournament: matchData.tournament?.name || 'Partido Local',
+                                tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
                                 category: 'General',
                                 round: matchData.roundId || '',
@@ -445,6 +446,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
                                     : '--:--',
                                 tournament: matchData.tournament?.name || 'Partido Local',
+                                tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
                                 category: 'General',
                                 round: matchData.roundId || '',
@@ -627,6 +629,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                             homeLogo: matchData.home.logo,
                                             awayLogo: matchData.away.logo,
                                             tournament: matchData.tournament,
+                                            tournamentLogo: matchData.tournamentLogo,
                                             date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                             time: matchData.time,
                                             venue: matchData.venue,
@@ -1220,6 +1223,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     homeLogo: matchData.home.logo,
                                     awayLogo: matchData.away.logo,
                                     tournament: matchData.tournament,
+                                    tournamentLogo: matchData.tournamentLogo,
                                     date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                     time: matchData.time,
                                     stats: statsData

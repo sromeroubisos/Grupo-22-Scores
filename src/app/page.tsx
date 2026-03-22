@@ -15,6 +15,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import TournamentLeader from '@/components/TournamentLeader';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
+import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -41,7 +42,7 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
 
   // Sort tournaments within each group by priority
   Object.values(groups).forEach(group => {
-    group.tournaments.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    group.tournaments.sort(compareTournamentsByPriority);
   });
 
   return groups;
@@ -211,6 +212,7 @@ export default function HomePage() {
   const [dates, setDates] = useState<ReturnType<typeof generateDates>>([]);
   const [news, setNews] = useState<any[]>([]);
   const [manualTournamentsList, setManualTournamentsList] = useState<Tournament[]>([]);
+  const [showLiveOnly, setShowLiveOnly] = useState(false);
 
   const { selectedSport, setSelectedSport, activeSports } = useSport();
   const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
@@ -358,6 +360,17 @@ export default function HomePage() {
     });
   }, [matches, isLeagueFavorite, userTimeZone]);
 
+  const displayedMatchesByLeague = useMemo<LeagueMatches[]>(() => {
+    if (!showLiveOnly) return matchesByLeague;
+
+    return matchesByLeague
+      .map((league) => ({
+        ...league,
+        matches: league.matches.filter((match) => match.status === 'live'),
+      }))
+      .filter((league) => league.matches.length > 0);
+  }, [matchesByLeague, showLiveOnly]);
+
   const toggleCountry = (countryId: string) => {
     setExpandedCountries(prev => {
       const next = new Set(prev);
@@ -426,7 +439,7 @@ export default function HomePage() {
           type: 'local',
           sportId: t.sport_id as any,
           countryId: (t.country_id || 'Argentina').toLowerCase(),
-          priority: 50,
+          priority: typeof t.priority === 'number' ? t.priority : 0,
           logoUrl: t.logo_url,
           categories: t.category ? [t.category.toLowerCase()] : [],
           seasons: t.season_id ? [{ seasonId: String(t.season_id), teamsCount: 0, isActive: true }] : [],
@@ -483,6 +496,16 @@ export default function HomePage() {
 
   const liveMatchesCount = hookLiveCount;
   const isIndividualSport = INDIVIDUAL_SPORTS.has(selectedSport.id);
+
+  useEffect(() => {
+    setShowLiveOnly(false);
+  }, [selectedDate, selectedSport.id]);
+
+  useEffect(() => {
+    if (liveMatchesCount === 0) {
+      setShowLiveOnly(false);
+    }
+  }, [liveMatchesCount]);
 
   const navigateDate = (direction: 'prev' | 'next') => {
     if (!selectedDate || dates.length === 0) return;
@@ -803,10 +826,18 @@ export default function HomePage() {
           <div className={styles.matchesSection}>
             {/* Live Banner - Outside Grid for Layout Consistency */}
             {liveMatchesCount > 0 && (
-              <div className={styles.liveBanner}>
+              <button
+                type="button"
+                className={`${styles.liveBanner} ${showLiveOnly ? styles.liveBannerActive : ''}`}
+                onClick={() => setShowLiveOnly((prev) => !prev)}
+                aria-pressed={showLiveOnly}
+              >
                 <span className={styles.liveDot}></span>
                 <span>{liveMatchesCount} partido{liveMatchesCount > 1 ? 's' : ''} en vivo</span>
-              </div>
+                <span className={styles.liveBannerAction}>
+                  {showLiveOnly ? 'Ver todos' : 'Ver en vivo'}
+                </span>
+              </button>
             )}
 
             <div className={styles.matchesContainer}>
@@ -906,15 +937,19 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && matchesByLeague.length === 0 && !sourceError && (
+              {!loading && displayedMatchesByLeague.length === 0 && !sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
-                  <h3>No hay partidos programados</h3>
-                  <p>No se encontraron encuentros para esta fecha.</p>
+                  <h3>{showLiveOnly ? 'No hay partidos en vivo' : 'No hay partidos programados'}</h3>
+                  <p>
+                    {showLiveOnly
+                      ? 'No se encontraron encuentros en vivo para esta fecha.'
+                      : 'No se encontraron encuentros para esta fecha.'}
+                  </p>
                 </div>
               )}
 
-              {!loading && matchesByLeague.length === 0 && sourceError && (
+              {!loading && displayedMatchesByLeague.length === 0 && sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
                   <h3>No se pudieron cargar los partidos</h3>
@@ -923,7 +958,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && matchesByLeague.map((league) => {
+              {!loading && displayedMatchesByLeague.map((league) => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
                 const isFavorite = isLeagueFavorite(league.leagueId);
 

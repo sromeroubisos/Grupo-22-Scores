@@ -214,6 +214,7 @@ export interface TournamentRow {
     is_popular: boolean;
     is_active: boolean;
     display_order: number | null;
+    priority: number | null;
     followers_count: number;
     is_followed_by_user: boolean;
     created_at: string;
@@ -295,6 +296,7 @@ async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
             country: (row.country as any)?.name || row.country_id,
             followers_count: 0,
             is_followed_by_user: false,
+            priority: typeof row.priority === 'number' ? row.priority : 0,
             display_name: row.display_name || row.name,
             original_name: row.original_name || row.name,
             is_api_managed: row.is_api_managed || false,

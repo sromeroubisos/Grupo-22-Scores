@@ -71,6 +71,8 @@ export default function ResultadosPage() {
                                         group.matches.map(m => ({
                                             homeTeam: m.home,
                                             awayTeam: m.away,
+                                            homeLogo: m.homeLogo,
+                                            awayLogo: m.awayLogo,
                                             homeScore: m.homeScore,
                                             awayScore: m.awayScore,
                                             time: m.time,

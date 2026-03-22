@@ -69,9 +69,9 @@ const upsertTournament = async (t: Tournament, sportId: SportId, results: any) =
                 data_source: 'static_ts_files',
                 display_name: t.name, // Default to name
                 status: 'active',
+                priority: t.priority ?? 0,
                 // Map other relevant fields if they exist in schema
                 // url: t.url,
-                // priority: t.priority,
             }, {
                 onConflict: 'id'
             });

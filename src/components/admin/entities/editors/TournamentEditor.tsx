@@ -237,6 +237,7 @@ export function TournamentEditor({
         age_grade: data.age_grade ?? 'Mayores (Adults)',
         status: data.status ?? 'draft',
         is_visible: data.is_visible ?? true,
+        priority: data.priority ?? 0,
         country_id: normalizeCountryId(data.country_id ?? data.country ?? '', baseCountryOptions),
         region: data.region ?? '',
         format: data.format ?? 'league',
@@ -378,6 +379,7 @@ export function TournamentEditor({
                 country_id: form.country_id || null,
                 union_id: actualUnionId,
                 format: effectiveFormat,
+                priority: form.priority ?? 0,
                 ruleset: {
                     ...ruleset,
                     standings: ruleset.phases[0]?.standings || ruleset.standings,
@@ -646,6 +648,23 @@ export function TournamentEditor({
                                     onFocus={e => { e.target.style.borderColor = T.neon; e.target.style.boxShadow = `0 0 10px ${T.neonDim}`; }}
                                     onBlur={e => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
                                 />
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(180px, 280px)', gap: '1.5rem', marginTop: '1rem' }}>
+                            <div style={S.formGroup}>
+                                <label style={S.label}>Public Priority</label>
+                                <input
+                                    type="number"
+                                    style={{ ...S.input, ...S.inputMono }}
+                                    value={form.priority}
+                                    onChange={e => handleChange('priority', Number.parseInt(e.target.value, 10) || 0)}
+                                    onFocus={e => { e.target.style.borderColor = T.neon; e.target.style.boxShadow = `0 0 10px ${T.neonDim}`; }}
+                                    onBlur={e => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
+                                />
+                                <div style={{ color: T.textDim, fontSize: '0.72rem', marginTop: '0.45rem' }}>
+                                    Higher numbers appear first in the public view. Equal priority falls back to alphabetical order.
+                                </div>
                             </div>
                         </div>
 

@@ -10,6 +10,7 @@ import { invalidateCache } from '@/lib/cache/superAdminCache';
 import { tournamentService } from '@/lib/services/tournamentService';
 import type { TournamentUpdate } from '@/lib/services/tournamentService';
 import { normalizeError } from '@/lib/utils/errorUtils';
+import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -48,7 +49,8 @@ export default function SuperadminTorneosPage() {
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
     
     // Performance: local state for instant toggles
-    const [localMetadata, setLocalMetadata] = useState<Record<string, { status?: string, is_visible?: boolean, is_popular?: boolean }>>({});
+    const [localMetadata, setLocalMetadata] = useState<Record<string, { status?: string, is_visible?: boolean, is_popular?: boolean, priority?: number }>>({});
+    const [priorityDrafts, setPriorityDrafts] = useState<Record<string, string>>({});
 
     // ── Enriched Data ─────────────────────────────────────────────────────────
 
@@ -71,6 +73,7 @@ export default function SuperadminTorneosPage() {
                     status: local.status ?? t.status,
                     is_visible: local.is_visible ?? t.is_visible,
                     is_popular: local.is_popular ?? t.is_popular,
+                    priority: local.priority ?? t.priority ?? 0,
                     source, 
                     groupKey: countryName 
                 };
@@ -113,7 +116,7 @@ export default function SuperadminTorneosPage() {
                 return a.localeCompare(b);
             })
             .reduce<Record<string, typeof filtered>>((acc, key) => {
-                acc[key] = groups[key];
+                acc[key] = [...groups[key]].sort(compareTournamentsByPriority);
                 return acc;
             }, {});
     }, [filtered]);
@@ -147,6 +150,8 @@ export default function SuperadminTorneosPage() {
             const result = await tournamentService.updateTournamentMeta(id, updates);
             if (!result && Object.keys(updates).length > 0) {
                 console.warn('[SuperadminTorneosPage] Update discarded (all fields were invalid/filtered)', Object.keys(updates));
+            } else {
+                invalidateCache('tournaments_list');
             }
         } catch (err: unknown) {
             console.error('[SuperadminTorneosPage] Update failed:', err);
@@ -198,6 +203,31 @@ export default function SuperadminTorneosPage() {
 
     const toggleActionMenu = (id: string) =>
         setActionMenuOpenId(prev => prev === id ? null : id);
+
+    const handlePriorityCommit = async (id: string) => {
+        const draftValue = priorityDrafts[id];
+        if (draftValue === undefined) return;
+
+        const parsedValue = Number.parseInt(draftValue, 10);
+        const nextPriority = Number.isFinite(parsedValue) ? Math.trunc(parsedValue) : 0;
+        const currentPriority = tournaments.find((t) => t.id === id)?.priority ?? 0;
+
+        if (nextPriority === currentPriority) {
+            setPriorityDrafts(prev => {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            });
+            return;
+        }
+
+        await handleUpdateMeta(id, { priority: nextPriority });
+        setPriorityDrafts(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+        });
+    };
 
     // ── Render ────────────────────────────────────────────────────────────────
 
@@ -408,10 +438,16 @@ export default function SuperadminTorneosPage() {
                                         <span>Prioridad: </span>
                                         <input 
                                             type="number" 
-                                            value={0} 
-                                            disabled
-                                            title="La ordenación personalizada fue desactivada"
-                                            style={{ width: 40, background: 'transparent', border: '1px solid #333', color: 'rgba(255,255,255,0.3)', borderRadius: 4, padding: '0 4px', fontSize: 11, cursor: 'not-allowed' }}
+                                            value={priorityDrafts[t.id] ?? String(t.priority ?? 0)}
+                                            title="Mayor número = más prioridad. Si empatan, se ordenan alfabéticamente."
+                                            onChange={(e) => setPriorityDrafts(prev => ({ ...prev, [t.id]: e.target.value }))}
+                                            onBlur={() => handlePriorityCommit(t.id)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.currentTarget.blur();
+                                                }
+                                            }}
+                                            style={{ width: 56, background: 'transparent', border: '1px solid #333', color: '#fff', borderRadius: 4, padding: '0 4px', fontSize: 11 }}
                                         />
                                     </div>
                                 </div>

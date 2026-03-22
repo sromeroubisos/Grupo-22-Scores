@@ -103,6 +103,8 @@ export default function FixturesPage() {
                                         d.matches.map(m => ({
                                             homeTeam: m.home,
                                             awayTeam: m.away,
+                                            homeLogo: m.homeLogo,
+                                            awayLogo: m.awayLogo,
                                             homeScore: m.homeScore,
                                             awayScore: m.awayScore,
                                             time: m.time,

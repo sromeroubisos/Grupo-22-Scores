@@ -408,7 +408,7 @@ export class FixtureService {
         created_at, updated_at, lineups, events,
         home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
         away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url),
-        tournament:tournaments(id, name)
+        tournament:tournaments(id, name, logo:logo_url)
       `)
       .eq('id', matchId)
       .single();
@@ -1266,6 +1266,13 @@ export class FixtureService {
   private static mapMatchWithClubs(match: any, clubLogos?: Map<string, string | null>): MatchWithClubs {
     return {
       ...this.mapMatch(match),
+      tournament: match.tournament
+        ? {
+          id: match.tournament.id,
+          name: match.tournament.name,
+          logo: match.tournament.logo ?? null,
+        }
+        : null,
       homeClub: match.home_club
         ? {
           id: match.home_club.id,

@@ -1370,9 +1370,12 @@ export default function TournamentDetailPage({
                                 data={{
                                     date: details?.season || 'Resultados',
                                     tournament: tournamentData?.name || 'Torneo',
+                                    tournamentLogo,
                                     matches: results.map(m => ({
                                         homeTeam: m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
                                         awayTeam: m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
+                                        homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
+                                        awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         homeScore: m.scores?.home ?? m.scores?.home_score ?? m.home_score,
                                         awayScore: m.scores?.away ?? m.scores?.away_score ?? m.away_score,
                                         time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
@@ -1403,9 +1406,12 @@ export default function TournamentDetailPage({
                                 data={{
                                     date: 'Próximos Partidos',
                                     tournament: tournamentData?.name || 'Torneo',
+                                    tournamentLogo,
                                     matches: fixtures.map(m => ({
                                         homeTeam: m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
                                         awayTeam: m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
+                                        homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
+                                        awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
                                             formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
                                         status: 'scheduled' as const,
@@ -1440,7 +1446,7 @@ export default function TournamentDetailPage({
                                 data={{
                                     title: tournamentData?.name || 'Tabla de Posiciones',
                                     subtitle: details?.season || 'Clasificación',
-                                    tournamentLogo: tournamentData?.logo,
+                                    tournamentLogo,
                                     rows: activeFlatRows.map((row: any, idx: number) => ({
                                         pos: row.position || (idx + 1),
                                         team: row.team?.name || row.participant?.name || row.name || 'Equipo',
