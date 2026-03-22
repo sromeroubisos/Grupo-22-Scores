@@ -86,6 +86,14 @@ type LogoBadgeOptions = {
     isDark: boolean;
 };
 
+type ExportPalette = {
+    id: string;
+    name: string;
+    description: string;
+    bg: string;
+    accent: string;
+};
+
 const FORMATS: Array<{ value: ExportFormat; label: string; width: number; height: number }> = [
     { value: '1080x1350', label: 'Post (1080x1350)', width: 1080, height: 1350 },
     { value: '1080x1920', label: 'Story (1080x1920)', width: 1080, height: 1920 },
@@ -94,6 +102,16 @@ const FORMATS: Array<{ value: ExportFormat; label: string; width: number; height
 const FONT_DISPLAY = '"Outfit", "Inter", system-ui, sans-serif';
 const FONT_BODY = '"Outfit", "Inter", system-ui, sans-serif';
 const FONT_MONO = '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+const BRAND_ACCENT = '#00a365';
+const EXPORT_PALETTES: ExportPalette[] = [
+    { id: 'g22-dark', name: 'G22 Dark', description: 'Carbono y verde marca', bg: '#0a0a0b', accent: '#00a365' },
+    { id: 'g22-light', name: 'G22 Light', description: 'Claro con acento marca', bg: '#f8fafc', accent: '#00a365' },
+    { id: 'rugby-navy', name: 'Rugby Navy', description: 'Azul profundo y cian', bg: '#0f172a', accent: '#38bdf8' },
+    { id: 'crimson-night', name: 'Crimson Night', description: 'Grafito con rojo intenso', bg: '#111827', accent: '#ef4444' },
+    { id: 'gold-ink', name: 'Gold Ink', description: 'Negro con dorado editorial', bg: '#161616', accent: '#eab308' },
+    { id: 'silver-sky', name: 'Silver Sky', description: 'Blanco con azul limpio', bg: '#ffffff', accent: '#2563eb' },
+];
+const DEFAULT_PALETTE = EXPORT_PALETTES[0];
 
 export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
     const [isExporting, setIsExporting] = useState(false);
@@ -101,21 +119,14 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
     const [customTitle, setCustomTitle] = useState('');
-    const [accentColor, setAccentColor] = useState('#00a365');
-    const [bgColor, setBgColor] = useState('#0a0a0b');
+    const [selectedPaletteId, setSelectedPaletteId] = useState(DEFAULT_PALETTE.id);
+    const [accentColor, setAccentColor] = useState(DEFAULT_PALETTE.accent);
+    const [bgColor, setBgColor] = useState(DEFAULT_PALETTE.bg);
     const [selectedMatchIndices, setSelectedMatchIndices] = useState<Set<number>>(() => {
         if (template !== 'dailyMatches') return new Set<number>();
         const matches = (data as DailyMatchesData).matches ?? [];
         return new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, index) => index));
     });
-
-    const presets = [
-        { name: 'G22 Dark', bg: '#0a0a0b', accent: '#00a365' },
-        { name: 'G22 Light', bg: '#f8fafc', accent: '#00a365' },
-        { name: 'Rugby Navy', bg: '#0f172a', accent: '#38bdf8' },
-        { name: 'UAR Orange', bg: '#111827', accent: '#f97316' },
-        { name: 'Silver Sky', bg: '#ffffff', accent: '#2563eb' },
-    ];
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -124,6 +135,22 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             else if (next.size < 10) next.add(index);
             return next;
         });
+    };
+
+    const applyPalette = (palette: ExportPalette) => {
+        setSelectedPaletteId(palette.id);
+        setBgColor(palette.bg);
+        setAccentColor(palette.accent);
+    };
+
+    const handleBgColorChange = (value: string) => {
+        setSelectedPaletteId('custom');
+        setBgColor(value);
+    };
+
+    const handleAccentColorChange = (value: string) => {
+        setSelectedPaletteId('custom');
+        setAccentColor(value);
     };
 
     const handleExport = async () => {
@@ -239,30 +266,36 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                         )}
 
                         <div className={styles.modalSection}>
-                            <label className={styles.modalLabel}>Identidad visual</label>
-                            <div className={styles.presetGrid}>
-                                {presets.map((preset) => (
+                            <label className={styles.modalLabel}>Paleta de colores</label>
+                            <div className={styles.paletteGrid}>
+                                {EXPORT_PALETTES.map((palette) => (
                                     <button
-                                        key={preset.name}
-                                        className={styles.presetBtn}
-                                        style={{ background: `linear-gradient(135deg, ${preset.bg} 50%, ${preset.accent} 50%)` }}
-                                        onClick={() => {
-                                            setBgColor(preset.bg);
-                                            setAccentColor(preset.accent);
-                                        }}
-                                        title={preset.name}
+                                        key={palette.id}
+                                        className={`${styles.paletteBtn} ${selectedPaletteId === palette.id ? styles.paletteBtnActive : ''}`}
+                                        onClick={() => applyPalette(palette)}
+                                        title={palette.name}
                                         type="button"
-                                    />
+                                    >
+                                        <div
+                                            className={styles.paletteSwatch}
+                                            style={{ background: `linear-gradient(135deg, ${palette.bg} 0%, ${palette.bg} 62%, ${palette.accent} 62%, ${palette.accent} 100%)` }}
+                                        />
+                                        <div className={styles.paletteMeta}>
+                                            <span className={styles.paletteName}>{palette.name}</span>
+                                            <span className={styles.paletteDesc}>{palette.description}</span>
+                                        </div>
+                                    </button>
                                 ))}
                             </div>
+                            <p className={styles.modalHint}>La marca de agua G22 se mantiene en todas las exportaciones.</p>
                             <div className={styles.customColors}>
                                 <div className={styles.colorInp}>
                                     <span>Fondo</span>
-                                    <input type="color" value={bgColor} onChange={(event) => setBgColor(event.target.value)} />
+                                    <input type="color" value={bgColor} onChange={(event) => handleBgColorChange(event.target.value)} />
                                 </div>
                                 <div className={styles.colorInp}>
                                     <span>Acento</span>
-                                    <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} />
+                                    <input type="color" value={accentColor} onChange={(event) => handleAccentColorChange(event.target.value)} />
                                 </div>
                             </div>
                         </div>
@@ -529,7 +562,7 @@ function drawTournamentRibbon(
     ctx.restore();
 }
 
-function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, brandLogo: HTMLImageElement | null, accentColor: string, isDark: boolean) {
+function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, brandLogo: HTMLImageElement | null, isDark: boolean) {
     const isStory = canvas.height > 1500;
     const labelY = canvas.height - (isStory ? 126 : 108);
     const wordmarkY = labelY + (isStory ? 48 : 42);
@@ -551,7 +584,7 @@ function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.font = `800 ${isStory ? 28 : 24}px ${FONT_DISPLAY}`;
-    ctx.fillStyle = accentColor;
+    ctx.fillStyle = BRAND_ACCENT;
     ctx.fillText('G22', textX, wordmarkY);
     ctx.font = `800 ${isStory ? 28 : 24}px ${FONT_BODY}`;
     ctx.fillStyle = getTextColor(isDark);
@@ -737,7 +770,7 @@ async function drawMatchResult(
         });
     }
 
-    drawBrandFooter(ctx, canvas, brandLogo, accentColor, isDark);
+    drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
 async function drawStandings(
     ctx: CanvasRenderingContext2D,
@@ -873,7 +906,7 @@ async function drawStandings(
         ctx.restore();
     });
 
-    drawBrandFooter(ctx, canvas, brandLogo, accentColor, isDark);
+    drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
 async function drawDailyMatches(
     ctx: CanvasRenderingContext2D,
@@ -1004,7 +1037,7 @@ async function drawDailyMatches(
         ctx.restore();
     });
 
-    drawBrandFooter(ctx, canvas, brandLogo, accentColor, isDark);
+    drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
 
 async function drawPlayerStats(
@@ -1091,5 +1124,5 @@ async function drawPlayerStats(
         ctx.restore();
     });
 
-    drawBrandFooter(ctx, canvas, brandLogo, accentColor, isDark);
+    drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
