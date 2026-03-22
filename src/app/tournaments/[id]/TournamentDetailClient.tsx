@@ -14,6 +14,7 @@ import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getCountryById } from '@/lib/data/countries';
 import { addDaysToIsoDate, APP_TIMEZONE, formatDateInTimeZone, formatDateKey } from '@/lib/timezone';
 import type { TournamentInitialData } from '@/lib/server/fetchTournamentData';
+import { useAuth } from '@/context/AuthContext';
 
 // Tabs
 const TABS = [
@@ -27,6 +28,8 @@ const TABS = [
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function getTeamLogo(team: any): string {
     if (!team) return '';
@@ -45,6 +48,36 @@ function getTournamentLogo(detailsData: any, localData: any): string {
         );
     }
     return localData?.logoUrl || '';
+}
+
+function buildClubHref(team: { id?: string | number | null; name?: string | null; teamUrl?: string | null }) {
+    const rawId = String(team.id ?? '').trim();
+    if (!rawId) return null;
+
+    if (UUID_RE.test(rawId)) {
+        return `/clubs/${rawId}`;
+    }
+
+    const normalizedId = rawId.startsWith('fs-team-')
+        ? rawId
+        : rawId.startsWith('fs-')
+            ? `fs-team-${rawId.slice(3)}`
+            : `fs-team-${rawId}`;
+
+    const params = new URLSearchParams();
+    if (team.name) params.set('name', team.name);
+    if (team.teamUrl) params.set('team_url', team.teamUrl);
+
+    const query = params.toString();
+    return `/clubs/${normalizedId}${query ? `?${query}` : ''}`;
+}
+
+function getParticipantClub(participant: any) {
+    if (!participant) return null;
+    if (Array.isArray(participant.clubs) && participant.clubs.length > 0) {
+        return participant.clubs[0];
+    }
+    return participant.club ?? null;
 }
 
 function formatArgentinaDate(value: string | Date | null, options: Intl.DateTimeFormatOptions) {
@@ -164,22 +197,9 @@ function buildRowAccentStyle(color?: string | null): CSSProperties | undefined {
     } as CSSProperties;
 }
 
-function getAutoZoneColor(
-    position: number,
-    totalTeams: number,
-    qualRules: any,
-    groupLabels: any[],
-): string | null {
-    if (!qualRules || !Array.isArray(groupLabels) || groupLabels.length === 0) return null;
-    const status = StandingsEngine.resolveStatus(position, totalTeams, qualRules);
-    if (!status) return null;
-    const label = groupLabels.find((l: any) => l.name === status);
-    return label?.color ?? null;
-}
-
 function resolveStandingsRowLabel(row: any, assignments: any[]) {
-    const teamId = row.team?.id || row.team?.team_id || row.participant?.id || row.team_id || null;
-    if (!teamId) return null;
+    const position = typeof row?.position === 'number' ? row.position : Number(row?.position);
+    if (!Number.isInteger(position)) return null;
 
     const phaseId = row.phase_id ?? null;
     const groupId = row.group_id ?? null;
@@ -193,7 +213,7 @@ function resolveStandingsRowLabel(row: any, assignments: any[]) {
     };
 
     return assignments
-        .filter((assignment) => assignment.club_id === teamId && assignment.label?.color)
+        .filter((assignment) => Number(assignment.position) === position && assignment.label?.color)
         .sort((left, right) => priority(right) - priority(left))[0]?.label || null;
 }
 
@@ -352,13 +372,19 @@ function isDbFinalStatus(status: unknown) {
 }
 
 function mapDbMatchToFrontend(match: any) {
+    const normalizedStatus = isDbFinalStatus(match?.status) ? 'finished' : (match?.status ?? 'scheduled');
+    const scores =
+        normalizedStatus === 'scheduled'
+            ? { home: null, away: null }
+            : (match.score ?? { home: null, away: null });
+
     return {
         match_id: match.id,
         timestamp: match?.date_time ? Math.floor(new Date(match.date_time as string).getTime() / 1000) : null,
-        status: isDbFinalStatus(match?.status) ? 'finished' : (match?.status ?? 'scheduled'),
-        scores: match.score ?? { home: null, away: null },
-        home_team: { name: match.home?.name ?? '', logo: match.home?.logo_url ?? '' },
-        away_team: { name: match.away?.name ?? '', logo: match.away?.logo_url ?? '' },
+        status: normalizedStatus,
+        scores,
+        home_team: { id: match.home?.id ?? match.home_club_id ?? null, name: match.home?.name ?? '', logo: match.home?.logo_url ?? '' },
+        away_team: { id: match.away?.id ?? match.away_club_id ?? null, name: match.away?.name ?? '', logo: match.away?.logo_url ?? '' },
         home_club_id: match.home_club_id,
         away_club_id: match.away_club_id,
         phase_id: match.phase_id,
@@ -514,7 +540,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
 
     return {
         tournamentMeta: tournament ? {
-            id,
+            id: tournament.id || id,
             name: tournament.display_name || tournament.name || 'Torneo',
             sportId: tournament.sport_id || 'rugby',
             countryId: tournament.country_id || 'international',
@@ -581,6 +607,7 @@ export default function TournamentDetailPage({
 }: TournamentDetailPageProps) {
     const router = useRouter();
     const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
+    const { user } = useAuth();
 
     // Pre-process initialData once (synchronously) so SSR renders full content
     const [preloaded] = useState<ReturnType<typeof processDbData> | null>(() =>
@@ -604,8 +631,6 @@ export default function TournamentDetailPage({
     const [draw, setDraw] = useState<any[]>([]);
     const [standingsView, setStandingsView] = useState<'overall' | 'form' | 'htft' | 'overunder'>('overall');
     const [dbParticipants, setDbParticipants] = useState<any[]>(preloaded?.dbParticipants ?? []);
-    const [dbPhases, setDbPhases] = useState<any[]>(preloaded?.dbPhases ?? []);
-    const [dbGroups, setDbGroups] = useState<any[]>(preloaded?.dbGroups ?? []);
     const [dbTeamLabels, setDbTeamLabels] = useState<any[]>(preloaded?.dbTeamLabels ?? []);
 
     // ── Data fetch ────────────────────────────────────────────────────────
@@ -636,15 +661,13 @@ export default function TournamentDetailPage({
                 const overrideStageId = sp.get('tournament_stage_id') || sp.get('tournamentStageId') || sp.get('stageId');
                 const urlParam = sp.get('url');
 
-                const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
                 localTournament = getTournamentById(id);
 
                 if (shouldPreferDbSource) {
                     localTournament = {
                         ...(localTournament ?? {}),
                         ...(preloaded?.tournamentMeta ?? {}),
-                        id,
+                        id: preloaded?.tournamentMeta?.id || id,
                         sportId: preloaded?.tournamentMeta?.sportId || localTournament?.sportId || (overrideSport || 'rugby'),
                         countryId: preloaded?.tournamentMeta?.countryId || localTournament?.countryId || 'international',
                         name: preloaded?.tournamentMeta?.name || localTournament?.name || 'Cargando...',
@@ -721,8 +744,6 @@ export default function TournamentDetailPage({
                         if (!controller.signal.aborted) {
                             setTournamentData(snapshot.tournamentMeta ?? localTournament);
                             setDbParticipants(snapshot.dbParticipants);
-                            setDbPhases(snapshot.dbPhases);
-                            setDbGroups(snapshot.dbGroups);
                             setDbTeamLabels(snapshot.dbTeamLabels);
                             setResults(snapshot.results);
                             setFixtures(snapshot.fixtures);
@@ -846,39 +867,48 @@ export default function TournamentDetailPage({
     const activeRows = normalizeStandingsRows(standingsSource);
     const activeFlatRows = flattenStandingsRows(standingsSource);
     const hasBonus = activeFlatRows.some((r: any) => (r.bonus_points ?? 0) > 0);
+    const teamMap = new Map<string, { id: string | null; name: string; logo: string; href: string | null }>();
+    const registerTeam = (team: { id?: string | number | null; name?: string | null; logo?: string | null; teamUrl?: string | null }) => {
+        const name = String(team.name ?? '').trim();
+        if (!name) return;
 
-    const activeDbPhase = getPreferredDbPhase(dbPhases, [...results, ...fixtures], overallRows);
-    const resolvedQualRules = (() => {
-        try {
-            return activeDbPhase
-                ? StandingsEngine.resolveRules(activeDbPhase.settings ?? {}, tournamentData?.ruleset ?? {}).qualification_rules
-                : null;
-        } catch { return null; }
-    })();
-    const phaseGroupLabels: any[] = (() => {
-        try { return activeDbPhase?.settings?.groupLabels ?? []; } catch { return []; }
-    })();
+        const normalizedId = team.id != null ? String(team.id) : null;
+        const key = normalizedId ? `id:${normalizedId}` : `name:${name.toLowerCase()}`;
+        const href = buildClubHref({ id: normalizedId, name, teamUrl: team.teamUrl });
+        const previous = teamMap.get(key);
 
-    // Team map (for Teams tab)
-    const teamMap = new Map<string, { name: string; logo: string }>();
-    const addFromMatches = (list: any[]) => {
-        list.forEach(match => {
-            const homeName = match.home_team?.name || match.event_home_team || match.home_team_name;
-            const awayName = match.away_team?.name || match.event_away_team || match.away_team_name;
-            const homeLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
-            const awayLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
-            if (homeName) teamMap.set(homeName, { name: homeName, logo: homeLogo });
-            if (awayName) teamMap.set(awayName, { name: awayName, logo: awayLogo });
+        teamMap.set(key, {
+            id: previous?.id ?? normalizedId,
+            name: previous?.name ?? name,
+            logo: previous?.logo || team.logo || '',
+            href: previous?.href ?? href,
         });
     };
-    if (overallRows.length > 0) {
-        overallRows.forEach((row: any) => {
-            const name = row.team?.name || row.participant?.name || row.name;
-            const logo = row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
-                row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo || '';
-            if (name) teamMap.set(name, { name, logo });
+    const addFromMatches = (list: any[]) => {
+        list.forEach((match) => {
+            registerTeam({
+                id: match.home_team?.id || match.home_team?.team_id || match.home_club_id || null,
+                name: match.home_team?.name || match.event_home_team || match.home_team_name,
+                logo: getTeamLogo(match.home_team) || match.home_team_logo || '',
+                teamUrl: match.home_team?.team_url || null,
+            });
+            registerTeam({
+                id: match.away_team?.id || match.away_team?.team_id || match.away_club_id || null,
+                name: match.away_team?.name || match.event_away_team || match.away_team_name,
+                logo: getTeamLogo(match.away_team) || match.away_team_logo || '',
+                teamUrl: match.away_team?.team_url || null,
+            });
         });
-    }
+    };
+    overallRows.forEach((row: any) => {
+        registerTeam({
+            id: row.team?.id || row.team?.team_id || row.participant?.id || row.team_id || null,
+            name: row.team?.name || row.participant?.name || row.name,
+            logo: row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
+                row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo || '',
+            teamUrl: row.team?.team_url || row.participant?.team_url || null,
+        });
+    });
     if (results.length > 0) addFromMatches(results);
     if (fixtures.length > 0) addFromMatches(fixtures);
     const teamsList = Array.from(teamMap.values()).sort((a, b) => a.name.localeCompare(b.name));
@@ -893,6 +923,11 @@ export default function TournamentDetailPage({
     const tournamentLogo = getTournamentLogo(details, tournamentData);
     const tournamentName = details?.name || details?.tournament?.name || tournamentData?.name || 'Torneo';
     const sportLabel = tournamentData?.sportId ? tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1) : '';
+    const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const adminTournamentId = (() => {
+        const candidate = String((initialData?.tournament as any)?.id || tournamentData?.id || '').trim();
+        return UUID_RE.test(candidate) ? candidate : null;
+    })();
 
     // Quick stats
     const stats = getQuickStats(results, fixtures, overallRows, teamsList.length);
@@ -1004,16 +1039,26 @@ export default function TournamentDetailPage({
         </div>
     );
 
-    const renderStandingsRow = (row: any, idx: number, totalTeams = activeFlatRows.length) => {
+    const renderStandingsRow = (row: any, idx: number) => {
         const pos = row.position || (idx + 1);
         const logo = row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
             row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo;
         const teamName = row.team?.name || row.participant?.name || row.name;
         const teamId = row.team?.id || row.team?.team_id || row.participant?.id || row.team_id;
+        const teamHref = buildClubHref({
+            id: teamId,
+            name: teamName,
+            teamUrl: row.team?.team_url || row.participant?.team_url || null,
+        });
         const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
-        const accentColor = getAutoZoneColor(pos, totalTeams, resolvedQualRules, phaseGroupLabels)
-            ?? rowLabel?.color;
+        const accentColor = rowLabel?.color ?? null;
         const rowAccentStyle = buildRowAccentStyle(accentColor);
+        const goalDifference =
+            typeof row.goal_difference === 'number'
+                ? row.goal_difference
+                : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
+                    ? row.goals_for - row.goals_against
+                    : 0;
 
         return (
             <div
@@ -1026,17 +1071,15 @@ export default function TournamentDetailPage({
                     {logo
                         ? <img src={logo} alt={teamName} className={styles.teamLogo} />
                         : <div className={styles.teamLogoPlaceholder} />}
-                    {teamId
-                        ? <Link href={`/clubs/fs-team-${teamId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{teamName}</Link>
+                    {teamHref
+                        ? <Link href={teamHref} style={{ color: 'inherit', textDecoration: 'none' }}>{teamName}</Link>
                         : <span>{teamName}</span>}
                 </div>
                 <div className={`${styles.colVal} ${styles.colValPJ}`}>{row.matches_total || row.matches_played}</div>
                 <div className={styles.colVal}>{row.wins_total || row.wins}</div>
                 <div className={styles.colVal}>{row.draws_total || row.draws}</div>
                 <div className={styles.colVal}>{row.losses_total || row.losses}</div>
-                <div className={`${styles.colVal} ${styles.colValDG}`}>
-                    {(row.goals_for && row.goals_against) ? (row.goals_for - row.goals_against) : (row.goal_difference || '0')}
-                </div>
+                <div className={`${styles.colVal} ${styles.colValDG}`}>{goalDifference}</div>
                 {hasBonus && <div className={styles.colVal}>{row.bonus_points ?? 0}</div>}
                 <div className={styles.colPts}>{row.points_total ?? row.points ?? 0}</div>
             </div>
@@ -1198,6 +1241,11 @@ export default function TournamentDetailPage({
                                 >
                                     Ver Tabla
                                 </button>
+                                {isSuperAdminUser && adminTournamentId && (
+                                    <Link href={`/admin/super/torneos/${adminTournamentId}`} className={styles.ctaBtnSecondary}>
+                                        Editar torneo
+                                    </Link>
+                                )}
                                 <button
                                     className={`${styles.followBtn} ${isLeagueFavorite(id) ? styles.followBtnActive : ''}`}
                                     onClick={() => toggleLeagueFavorite(id, tournamentName)}
@@ -1447,20 +1495,28 @@ export default function TournamentDetailPage({
                                     title: tournamentData?.name || 'Tabla de Posiciones',
                                     subtitle: details?.season || 'Clasificación',
                                     tournamentLogo,
-                                    rows: activeFlatRows.map((row: any, idx: number) => ({
-                                        pos: row.position || (idx + 1),
-                                        team: row.team?.name || row.participant?.name || row.name || 'Equipo',
-                                        teamLogo: row.team?.logo || row.participant?.logo || row.logo,
-                                        zoneColor: row.promotion_type === 'promotion' ? '#00a365'
-                                            : row.promotion_type === 'playoff' ? '#f59e0b'
-                                            : row.promotion_type === 'relegation' ? '#ef4444'
-                                            : undefined,
-                                        played: row.matches_total || row.matches_played || 0,
-                                        won: row.wins_total || row.wins || 0,
-                                        lost: row.losses_total || row.losses || 0,
-                                        diff: String((row.goals_for && row.goals_against) ? (row.goals_for - row.goals_against) : (row.goal_difference || '0')),
-                                        points: row.points_total || row.points || 0,
-                                    })),
+                                    rows: activeFlatRows.map((row: any, idx: number) => {
+                                        const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
+                                        const goalDifference =
+                                            typeof row.goal_difference === 'number'
+                                                ? row.goal_difference
+                                                : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
+                                                    ? row.goals_for - row.goals_against
+                                                    : 0;
+
+                                        return {
+                                            pos: row.position || (idx + 1),
+                                            team: row.team?.name || row.participant?.name || row.name || 'Equipo',
+                                            teamLogo: row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
+                                                row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo,
+                                            zoneColor: rowLabel?.color ?? undefined,
+                                            played: row.matches_total || row.matches_played || 0,
+                                            won: row.wins_total || row.wins || 0,
+                                            lost: row.losses_total || row.losses || 0,
+                                            diff: String(goalDifference),
+                                            points: row.points_total || row.points || 0,
+                                        };
+                                    }),
                                 }}
                             />
                         </div>
@@ -1476,7 +1532,7 @@ export default function TournamentDetailPage({
                                                 <h3 className={styles.groupTitleLarge}>{group.group_name}</h3>
                                                 <div className={styles.tableCard}>
                                                     {renderStandingsHeader()}
-                                                    {(group.rows || []).map((row: any, idx: number) => renderStandingsRow(row, idx, group.rows.length))}
+                                                    {(group.rows || []).map((row: any, idx: number) => renderStandingsRow(row, idx))}
                                                 </div>
                                             </div>
                                         ))}
@@ -1561,10 +1617,16 @@ export default function TournamentDetailPage({
                         {(() => {
                             const isDbOnly = (tournamentData as any)?.__isDbOnly;
                             const participantTeams = dbParticipants
-                                .map((p: any) => ({
-                                    name: p.club?.name ?? p.name ?? '',
-                                    logo: p.club?.logo_url ?? '',
-                                }))
+                                .map((participant: any) => {
+                                    const club = getParticipantClub(participant);
+                                    const name = club?.name ?? participant.name ?? '';
+                                    return {
+                                        id: participant.club_id || club?.id || null,
+                                        name,
+                                        logo: club?.logo_url ?? '',
+                                        href: buildClubHref({ id: participant.club_id || club?.id || null, name }),
+                                    };
+                                })
                                 .filter((t: any) => t.name);
                             // For DB-only tournaments, participants are the authoritative source
                             const displayTeams = isDbOnly && participantTeams.length > 0
@@ -1574,14 +1636,27 @@ export default function TournamentDetailPage({
                                     : participantTeams;
                             return displayTeams.length > 0 ? (
                                 <div className={styles.teamsGrid}>
-                                    {displayTeams.map((team: any) => (
-                                        <div key={team.name} className={styles.teamCard}>
-                                            {team.logo
-                                                ? <img src={team.logo} alt={team.name} className={styles.teamCardLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
-                                                : <div className={styles.teamCardLogoPlaceholder}>{team.name[0]}</div>}
-                                            <span className={styles.teamCardName}>{team.name}</span>
-                                        </div>
-                                    ))}
+                                    {displayTeams.map((team: any) => {
+                                        const key = team.id || team.name;
+                                        const content = (
+                                            <>
+                                                {team.logo
+                                                    ? <img src={team.logo} alt={team.name} className={styles.teamCardLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                                    : <div className={styles.teamCardLogoPlaceholder}>{team.name[0]}</div>}
+                                                <span className={styles.teamCardName}>{team.name}</span>
+                                            </>
+                                        );
+
+                                        return team.href ? (
+                                            <Link key={key} href={team.href} className={styles.teamCard}>
+                                                {content}
+                                            </Link>
+                                        ) : (
+                                            <div key={key} className={styles.teamCard}>
+                                                {content}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <p className={styles.emptyState}>Equipos no disponibles.</p>

@@ -45,8 +45,8 @@ interface MatchStatsData {
     status?: 'scheduled' | 'live' | 'final';
     homeTeam: string;
     awayTeam: string;
-    homeScore: number;
-    awayScore: number;
+    homeScore: number | null;
+    awayScore: number | null;
     homeLogo?: string;
     awayLogo?: string;
     tournament: string;
@@ -622,6 +622,7 @@ async function drawMatchResult(
     brandLogo: HTMLImageElement | null
 ) {
     const isDark = getContrastColor(bgColor) === '#ffffff';
+    const isScheduled = data.status === 'scheduled';
     const textColor = getTextColor(isDark);
     const mutedColor = getMutedColor(isDark, 0.72);
     const softColor = getMutedColor(isDark, 0.12);
@@ -698,13 +699,25 @@ async function drawMatchResult(
     ctx.fillText('LOCAL', leftX, nameY + (isStory ? 34 : 28));
     ctx.fillText('VISITANTE', rightX, nameY + (isStory ? 34 : 28));
 
-    ctx.fillStyle = accentColor;
-    ctx.font = `800 ${isStory ? 118 : 102}px ${FONT_MONO}`;
-    ctx.fillText(String(data.homeScore), safe.centerX - (isStory ? 84 : 74), scoreY + (isStory ? 20 : 18));
-    ctx.fillText(String(data.awayScore), safe.centerX + (isStory ? 84 : 74), scoreY + (isStory ? 20 : 18));
-    ctx.fillStyle = mutedColor;
-    ctx.font = `700 ${isStory ? 52 : 44}px ${FONT_DISPLAY}`;
-    ctx.fillText(':', safe.centerX, scoreY + (isStory ? 10 : 8));
+    if (isScheduled) {
+        ctx.fillStyle = accentColor;
+        ctx.font = `800 ${isStory ? 42 : 36}px ${FONT_DISPLAY}`;
+        ctx.fillText((data.date || 'Fecha por confirmar').toUpperCase(), safe.centerX, scoreY - (isStory ? 2 : 4));
+        ctx.fillStyle = textColor;
+        ctx.font = `800 ${isStory ? 62 : 52}px ${FONT_MONO}`;
+        ctx.fillText(data.time || '--:--', safe.centerX, scoreY + (isStory ? 56 : 50));
+        ctx.fillStyle = mutedColor;
+        ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
+        ctx.fillText('HORARIO DEL PARTIDO', safe.centerX, scoreY + (isStory ? 92 : 82));
+    } else {
+        ctx.fillStyle = accentColor;
+        ctx.font = `800 ${isStory ? 118 : 102}px ${FONT_MONO}`;
+        ctx.fillText(String(data.homeScore ?? '-'), safe.centerX - (isStory ? 84 : 74), scoreY + (isStory ? 20 : 18));
+        ctx.fillText(String(data.awayScore ?? '-'), safe.centerX + (isStory ? 84 : 74), scoreY + (isStory ? 20 : 18));
+        ctx.fillStyle = mutedColor;
+        ctx.font = `700 ${isStory ? 52 : 44}px ${FONT_DISPLAY}`;
+        ctx.fillText(':', safe.centerX, scoreY + (isStory ? 10 : 8));
+    }
     ctx.restore();
 
     const stats = data.stats.slice(0, isStory ? 6 : 5);

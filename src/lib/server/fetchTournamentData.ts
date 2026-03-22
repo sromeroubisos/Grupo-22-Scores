@@ -366,7 +366,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
                 'teamLabels',
                 supabase
                     .from('team_labels')
-                    .select('id, label_id, club_id, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)')
+                    .select('id, label_id, club_id, position, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)')
                     .eq('tournament_id', tournamentId),
                 [] as unknown[],
             ),

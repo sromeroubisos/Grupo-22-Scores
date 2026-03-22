@@ -169,6 +169,26 @@ async function fetchDbLookupMaps(
     };
 }
 
+function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | null }) {
+    const headers = new Headers();
+
+    if (options.liveOnly) {
+        headers.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=30');
+        return headers;
+    }
+
+    if (options.date) {
+        headers.set('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=60');
+    }
+
+    return headers;
+}
+
+function jsonWithPublicCache(payload: unknown, options: { liveOnly: boolean; date?: string | null }) {
+    const headers = buildPublicCacheHeaders(options);
+    return NextResponse.json(payload, headers.size > 0 ? { headers } : undefined);
+}
+
 // GET /api/matches
 // Parameters: 
 // - date: YYYY-MM-DD
@@ -318,19 +338,19 @@ export async function GET(request: Request) {
                     console.error('DB Live-only fetch failed:', dbErr);
                 }
 
-                return NextResponse.json({ data: finalLiveMatches });
+                return jsonWithPublicCache({ data: finalLiveMatches }, { liveOnly: true });
             } catch (e) {
                 console.error('Live-only fetch failed, trying external_match_cache:', e);
                 try {
                     const supabase = await getReadClient();
                     const cachedLive = await getLiveMatches(sport, supabase);
                     const enriched = cachedLive.map(m => mapCachedToEnrichedMatch(m, sport));
-                    return NextResponse.json({
+                    return jsonWithPublicCache({
                         data: enriched,
                         sources: { flashscore: { ok: false, count: 0, fromCache: cachedLive.length > 0 } }
-                    });
+                    }, { liveOnly: true });
                 } catch {
-                    return NextResponse.json({ data: [] });
+                    return jsonWithPublicCache({ data: [] }, { liveOnly: true });
                 }
             }
         }
@@ -684,13 +704,13 @@ export async function GET(request: Request) {
 
         console.log(`[matches] Final after filter (${date ?? 'no-date'}): ${enrichedMatches.length} total (fs=${fsCount}, db=${dbCount})`);
 
-        return NextResponse.json({
+        return jsonWithPublicCache({
             data: enrichedMatches,
             sources: {
                 flashscore: { ok: fsOk, count: fsCount, fromCache: fsFromCache, reason: fsReason, message: fsMessage },
                 supabase: { ok: dbOk, count: dbCount, fallback: dbFallback, reason: dbReason, message: dbMessage }
             }
-        });
+        }, { liveOnly: false, date });
     } catch (error) {
         console.error('Fatal API Error [GET /api/matches]:', error);
         return NextResponse.json({ error: 'Internal Server Error', details: String(error) }, { status: 500 });

@@ -10,7 +10,6 @@ import styles from './TournamentStandingsTab.module.css';
 import type { StandingsDataPayload, StandingsPhase, StandingsRow, TeamLabelAssignment, TournamentContextData, UiLabel } from './types';
 
 function getAssignmentKey(assignment: TeamLabelAssignment): string | null {
-  if (assignment.club_id) return assignment.club_id;
   if (typeof assignment.position === 'number') return String(assignment.position);
   return null;
 }
@@ -242,12 +241,15 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     return map;
   }, [allLabels, assignments]);
 
-  const handleCycleLabel = useCallback(async (clubId: string) => {
+  const handleCycleLabel = useCallback(async (positionKey: string) => {
     if (!selectedPhase || allLabels.length === 0 || pendingLabelPosition) return;
+
+    const normalizedPosition = Number(positionKey);
+    if (!Number.isInteger(normalizedPosition)) return;
 
     const labelOrder = new Map(allLabels.map((label, index) => [label.id, index]));
     const activeAssignments = assignments
-      .filter((assignment) => assignment.club_id === clubId && labelOrder.has(assignment.label_id))
+      .filter((assignment) => assignment.position === normalizedPosition && labelOrder.has(assignment.label_id))
       .sort(
         (a, b) =>
           (labelOrder.get(a.label_id) ?? Number.MAX_SAFE_INTEGER) -
@@ -259,7 +261,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     const nextIndex = (currentIndex + 1) % (allLabels.length + 1);
     const nextLabel = nextIndex === 0 ? null : allLabels[nextIndex - 1];
 
-    setPendingLabelPosition(clubId);
+    setPendingLabelPosition(positionKey);
     setRecalcFeedback(null);
 
     try {
@@ -279,7 +281,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             label_id: nextLabel.id,
-            club_id: clubId,
+            position: normalizedPosition,
             tournament_id: tournamentId,
             phase_id: selectedPhase,
             group_id: selectedGroup,

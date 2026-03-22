@@ -7,6 +7,7 @@ import ExportImage from '@/components/ExportImage';
 import styles from './page.module.css';
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { APP_TIMEZONE } from '@/lib/timezone';
+import { useAuth } from '@/context/AuthContext';
 
 const USER_TZ = APP_TIMEZONE;
 
@@ -139,6 +140,7 @@ function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamN
 export default function PartidoDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params);
     const router = useRouter();
+    const { user } = useAuth();
 
     const [state, setState] = useState<{
         kind: 'loading' | 'error' | 'empty' | 'ok';
@@ -164,6 +166,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const statusRef = useRef<string>('scheduled');
     const [showAllEvents, setShowAllEvents] = useState(false);
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
+    const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
 
     useEffect(() => {
         const controller = new AbortController();
@@ -457,13 +460,13 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     id: homeClubId || 'home',
                                     name: matchData.homeClub?.name || 'Local',
                                     logo: matchData.homeClub?.logo || null,
-                                    score: score.home ?? 0
+                                    score: matchData.status === 'scheduled' ? null : (score.home ?? 0)
                                 },
                                 away: {
                                     id: awayClubId || 'away',
                                     name: matchData.awayClub?.name || 'Visitante',
                                     logo: matchData.awayClub?.logo || null,
-                                    score: score.away ?? 0
+                                    score: matchData.status === 'scheduled' ? null : (score.away ?? 0)
                                 },
                                 events: matchData.events || [],
                                 lineups: matchData.lineups || null,
@@ -530,13 +533,13 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     id: homeClubId || 'home',
                                     name: matchData.homeClub?.name || 'Local',
                                     logo: matchData.homeClub?.logo || null,
-                                    score: score.home ?? 0
+                                    score: matchData.status === 'scheduled' ? null : (score.home ?? 0)
                                 },
                                 away: {
                                     id: awayClubId || 'away',
                                     name: matchData.awayClub?.name || 'Visitante',
                                     logo: matchData.awayClub?.logo || null,
-                                    score: score.away ?? 0
+                                    score: matchData.status === 'scheduled' ? null : (score.away ?? 0)
                                 },
                                 events: matchData.events || [],
                                 lineups: matchData.lineups || null,
@@ -653,6 +656,11 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         </div>
                     </div>
                     <div className={styles.matchActions}>
+                        {isSuperAdminUser && !isFlashScore && (
+                            <Link href={`/admin/super/partidos/${id}`} className={`${styles.btn} ${styles.btnPrimary}`}>
+                                Editar partido
+                            </Link>
+                        )}
                         <button className={styles.btn}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                             Exportar

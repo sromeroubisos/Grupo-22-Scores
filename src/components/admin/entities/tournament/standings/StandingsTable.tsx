@@ -119,14 +119,12 @@ function getPrimaryLabel(labels: UiLabel[] | undefined): UiLabel | null {
 }
 
 function getLabelLookupKeyForRow(row: StandingsRow): string | null {
-  if (row.teamId) return row.teamId;
-  if (row.team?.id) return row.team.id;
   if (typeof row.position === 'number') return String(row.position);
   return null;
 }
 
 function getCycleTargetKeyForRow(row: StandingsRow): string | null {
-  return row.teamId || row.team?.id || null;
+  return typeof row.position === 'number' ? String(row.position) : null;
 }
 
 function TeamLabelCycleButton({

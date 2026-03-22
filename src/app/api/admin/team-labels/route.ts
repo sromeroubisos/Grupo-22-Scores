@@ -26,7 +26,12 @@ function normalizeAssignment(row: RawAssignment | null | undefined) {
   return {
     ...row,
     club_id: row?.club_id ?? null,
-    position: typeof row?.position === 'number' ? row.position : undefined,
+    position:
+      typeof row?.position === 'number'
+        ? row.position
+        : typeof row?.position === 'string' && row.position.trim() !== ''
+          ? Number(row.position)
+          : undefined,
     label: rawLabel
       ? {
           id: rawLabel.id,
@@ -49,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('team_labels')
-      .select('id, label_id, club_id, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)');
+      .select('id, label_id, club_id, position, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)');
 
     if (tournament_id) query = query.eq('tournament_id', tournament_id);
     if (phase_id) query = query.eq('phase_id', phase_id);
@@ -67,17 +72,33 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { label_id, club_id, tournament_id, phase_id = null, group_id = null } = body;
+    const { label_id, club_id = null, position, tournament_id, phase_id = null, group_id = null } = body;
+    const normalizedPosition =
+      typeof position === 'number'
+        ? position
+        : typeof position === 'string' && position.trim() !== ''
+          ? Number(position)
+          : null;
 
-    if (!label_id || !club_id) {
-      return NextResponse.json({ ok: false, error: 'label_id and club_id are required' }, { status: 400 });
+    if (!label_id || (!club_id && !Number.isInteger(normalizedPosition))) {
+      return NextResponse.json(
+        { ok: false, error: 'label_id and either club_id or position are required' },
+        { status: 400 },
+      );
     }
 
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('team_labels')
-      .insert({ label_id, club_id, tournament_id: tournament_id ?? null, phase_id, group_id })
-      .select('id, label_id, club_id, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)')
+      .insert({
+        label_id,
+        club_id,
+        position: normalizedPosition,
+        tournament_id: tournament_id ?? null,
+        phase_id,
+        group_id,
+      })
+      .select('id, label_id, club_id, position, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)')
       .single();
 
     if (error) {

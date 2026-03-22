@@ -22,8 +22,9 @@ interface MatchesStoreResult {
   error: SourceError | null;
 }
 
-const STALE_TTL = 60 * 1000;      // 60 seconds · Cache standard (matches request)
-const LIVE_POLL_INTERVAL = 10_000;   // 10 seconds - Live polling
+const ERROR_RECOVERY_TTL = 60 * 1000; // 1 minute - retry faster when a source fails
+const PUBLIC_STALE_TTL = 5 * 60 * 1000;     // 5 minutes - shared public cache window
+const PUBLIC_LIVE_POLL_INTERVAL = 60_000;   // 1 minute - live refresh cadence
 const PREFETCH_BATCH_SIZE = 3;
 
 // Module-level cache shared across hook instances
@@ -126,10 +127,10 @@ export function useMatchesStore(
         const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
         const sources = data.sources || null;
 
-        // Use short TTL (~10s) when a source failed so errors self-correct quickly;
-        // normal 60s TTL when everything is healthy.
+        // Use a shorter retry window when a source failed so errors self-correct quickly;
+        // normal 5 minute TTL when everything is healthy.
         const hasError = sources && (!sources.flashscore?.ok || !sources.supabase?.ok);
-        const SHORT_MISS = STALE_TTL - 10_000; // shift timestamp back so cache is stale in ~10s
+        const SHORT_MISS = PUBLIC_STALE_TTL - ERROR_RECOVERY_TTL; // shift timestamp back so cache is stale in ~1m
         matchesCache.set(cacheKey(date, sportId), arr);
         lastFetchedAt.set(cacheKey(date, sportId), hasError ? Date.now() - SHORT_MISS : Date.now());
 
@@ -171,7 +172,7 @@ export function useMatchesStore(
     const key = cacheKey(selectedDate, sportId);
     const cached = matchesCache.get(key);
     const lastFetched = lastFetchedAt.get(key) || 0;
-    const isStale = Date.now() - lastFetched > STALE_TTL;
+    const isStale = Date.now() - lastFetched > PUBLIC_STALE_TTL;
 
     if (cached) {
       // Show cached data immediately
@@ -269,7 +270,7 @@ export function useMatchesStore(
     // ── Interval helpers (scoped — no stale closure risk) ─────────────────
     function startLivePolling(tick: () => Promise<void>): void {
       if (pollingRef.current != null) return;
-      pollingRef.current = setInterval(() => { void tick(); }, LIVE_POLL_INTERVAL);
+      pollingRef.current = setInterval(() => { void tick(); }, PUBLIC_LIVE_POLL_INTERVAL);
     }
 
     function stopLivePolling(): void {
@@ -306,7 +307,7 @@ export function useMatchesStore(
         // 4. Full refresh when cache is stale (runs regardless of live count).
         //    Can restart polling if fresh data surfaces new live matches.
         const lastFull = lastFetchedAt.get(key) ?? 0;
-        if (Date.now() - lastFull > STALE_TTL) {
+        if (Date.now() - lastFull > PUBLIC_STALE_TTL) {
           const { matches: freshData } = await fetchDate(selectedDate, controller.signal);
           if (!controller.signal.aborted && freshData.length > 0) {
             matchesCache.set(key, freshData);
