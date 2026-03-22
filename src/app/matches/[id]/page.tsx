@@ -1,36 +1,89 @@
 'use client';
 
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ExportImage from '@/components/ExportImage';
 import styles from './page.module.css';
-import {
-    getFlashScoreMatchSummary,
-    getFlashScoreMatchStats,
-    getFlashScoreMatchH2H,
-    getFlashScoreStandingsForm,
-    getFlashScoreMatchLineups,
-    getFlashScoreMatchStandings,
-    getFlashScoreStandingsHtFt,
-    getFlashScoreMatchesRaw,
-    getFlashScorePlayerStats,
-    getFlashScoreMatchCommentary,
-    getFlashScoreMatchDraw,
-    mapStatus
-} from '@/lib/services/flashscore';
-import { parseAnyMatches, UIMatch, withStats } from '@/lib/matchSchema';
-import { apiFetch, ApiDebug } from '@/lib/apiFetch';
+import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { APP_TIMEZONE } from '@/lib/timezone';
 
 const USER_TZ = APP_TIMEZONE;
 
+function isExternalEntityId(value?: string) {
+    return Boolean(value) && /^[A-Za-z0-9]+$/.test(value || '');
+}
+
 function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }) {
+    if (!team.id) return '/clubs';
+
     const params = new URLSearchParams();
     if (team.name) params.set('name', team.name);
     if (team.teamUrl) params.set('team_url', team.teamUrl);
     const qs = params.toString();
-    return `/clubs/fs-team-${team.id}${qs ? `?${qs}` : ''}`;
+    const id = team.id.startsWith('fs-team-')
+        ? team.id
+        : (team.teamUrl || isExternalEntityId(team.id))
+            ? `fs-team-${team.id}`
+            : team.id;
+
+    return `/clubs/${id}${qs ? `?${qs}` : ''}`;
+}
+
+function buildTournamentHref(tournamentId?: string) {
+    if (!tournamentId) return null;
+
+    const id = tournamentId.startsWith('fs-')
+        ? tournamentId
+        : isExternalEntityId(tournamentId)
+            ? `fs-${tournamentId}`
+            : tournamentId;
+
+    return `/tournaments/${id}`;
+}
+
+function mapMatchStatus(matchStatusObj: any, simpleStatus?: string) {
+    if (matchStatusObj) {
+        if (matchStatusObj.type === 'inprogress') return 'live';
+        if (matchStatusObj.type === 'finished') return 'final';
+        if (matchStatusObj.type === 'postponed') return 'postponed';
+        if (matchStatusObj.type === 'canceled' || matchStatusObj.type === 'cancelled') return 'cancelled';
+
+        if (matchStatusObj.is_finished) return 'final';
+        if (matchStatusObj.is_in_progress || matchStatusObj.is_started) return 'live';
+        if (matchStatusObj.is_postponed) return 'postponed';
+        if (matchStatusObj.is_cancelled) return 'cancelled';
+
+        if (matchStatusObj.code) {
+            const code = String(matchStatusObj.code).toLowerCase();
+            if (code === 'ht' || code.includes('half') || code.includes('period') || code.includes('quarter') || code.includes('live')) {
+                return 'live';
+            }
+        }
+    }
+
+    const status = String(simpleStatus || '').toLowerCase();
+    const liveIndicators = [
+        'live', 'playing', 'current', 'inprogress',
+        '1st half', '2nd half', '1st period', '2nd period', '3rd period',
+        '1st quarter', '2nd quarter', '3rd quarter', '4th quarter',
+        'set 1', 'set 2', 'set 3', 'set 4', 'set 5',
+        'inning', 'batting', 'fielding',
+        'timeout', 'break', 'halftime', 'ht', 'pause'
+    ];
+
+    if (status.includes('finished') || status.includes('final') || status.includes('ended') || status.includes('full time') || status === 'ft') {
+        return 'final';
+    }
+
+    if (liveIndicators.some((indicator) => status.includes(indicator))) {
+        return 'live';
+    }
+
+    if (status.includes('postponed') || status.includes('aplazado')) return 'postponed';
+    if (status.includes('cancelled') || status.includes('cancelado') || status.includes('abandoned')) return 'cancelled';
+
+    return 'scheduled';
 }
 
 function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamName?: string }) {
@@ -95,7 +148,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         playerStats: any;
         commentaryData: any[];
         issues: any[];
-        debug: Record<string, ApiDebug>;
+        debug: Record<string, unknown>;
         message?: string;
     }>({
         kind: 'loading',
@@ -109,10 +162,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
     const [activeTab, setActiveTab] = useState('summary');
     const statusRef = useRef<string>('scheduled');
-    const [showDebug, setShowDebug] = useState(false);
     const [showAllEvents, setShowAllEvents] = useState(false);
-
-    const isFlashScore = useMemo(() => /^[A-Za-z0-9]{8}$/.test(id) || id.length === 8, [id]);
+    const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -122,18 +173,32 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
             try {
                 if (isFlashScore) {
-                    // Using our service but we want the individual debug for the main call 
-                    // (Actually the service now uses apiFetch, so we can't easily get the debug data unless we refactor the service to return it)
-                    // For now, let's call apiFetch directly for details to get debug info
-                    const urlDetails = `https://flashscore4.p.rapidapi.com/api/flashscore/v2/matches/details?match_id=${id}`;
-                    const { data: detailsRes, debug: debugDetails } = await apiFetch<any>(urlDetails, {
-                        headers: {
-                            'x-rapidapi-host': process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com',
-                            'x-rapidapi-key': process.env.NEXT_PUBLIC_RAPIDAPI_KEY || ''
-                        },
-                        debugTag: 'MatchPageInit',
-                        signal: controller.signal
-                    });
+                    const apiRes = await fetch(`/api/matches/${id}`, { signal: controller.signal });
+                    const payload = await apiRes.json().catch(() => null);
+
+                    if (!apiRes.ok) {
+                        setState(prev => ({
+                            ...prev,
+                            kind: apiRes.status === 404 ? 'empty' : 'error',
+                            message: payload?.error || (apiRes.status === 404 ? 'No se encontró el partido' : 'Error cargando datos'),
+                            debug: { ...prev.debug, details: payload }
+                        }));
+                        return;
+                    }
+
+                    const detailsRes = payload?.details;
+                    const summaryRes = payload?.summary;
+                    const statsRes = payload?.stats;
+                    const h2hRes = payload?.h2h;
+                    const formRes = payload?.form;
+                    const lineupsRes = payload?.lineups;
+                    const standingsRes = payload?.standings;
+                    const dayMatchesRes = payload?.dayMatches;
+                    const playerStatsRes = payload?.playerStats;
+                    const commentaryRes = payload?.commentary;
+                    const drawRes = payload?.draw;
+                    const topScorersRes = payload?.topScorers;
+                    const debugDetails = payload?.details ?? payload;
 
                     const evt = detailsRes?.DATA?.EVENT || detailsRes;
 
@@ -148,9 +213,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     }
 
                     const sportId = evt.sport?.sport_id || evt.SPORT_ID || 1;
-                    const tsTotal = evt.timestamp || evt.start_time || evt.START_TIME || evt.time || evt.event_timestamp || 0;
-                    const startTime = new Date(Number(tsTotal) * 1000);
-                    const fsStatus = mapStatus(evt.match_status, evt.STAGE_TYPE || evt.status);
+                    const fsStatus = mapMatchStatus(evt.match_status, evt.STAGE_TYPE || evt.status);
 
                     // Use the NEW router parser on the ORIGINAL payload
                     const { matches, issues: zodIssues } = parseAnyMatches(detailsRes);
@@ -196,27 +259,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         debug: { ...prev.debug, details: debugDetails }
                     }));
 
-                    // Calculate day offset from today to the match's start time
-                    const nowDays = Math.floor(Date.now() / 86400000);
-                    const matchDays = Math.floor(startTime.getTime() / 86400000);
-                    const matchDayOffset = Math.max(-7, Math.min(7, matchDays - nowDays));
-
-                    const results = await Promise.allSettled([
-                        getFlashScoreMatchSummary(id),
-                        getFlashScoreMatchStats(id),
-                        getFlashScoreMatchH2H(id),
-                        getFlashScoreStandingsForm(id),
-                        getFlashScoreMatchLineups(id),
-                        getFlashScoreMatchStandings(id),
-                        getFlashScoreMatchesRaw(matchDayOffset, sportId),
-                        getFlashScorePlayerStats(id),
-                        getFlashScoreMatchCommentary(id),
-                        getFlashScoreMatchDraw(id)
-                    ]);
-
                     if (controller.signal.aborted) return;
-
-                    const [summaryRes, statsRes, h2hRes, _formRes, lineupsRes, standingsRes, dayMatchesRes, playerStatsRes, commentaryRes, drawRes] = results.map((r: any) => r.status === 'fulfilled' ? r.value : null);
 
                     // Cross-reference with daily list to find better scores/status
                     let listMatchEvt: any = null;
@@ -327,6 +370,35 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             away: String(s.away_team ?? s.AWAY_VALUE ?? s.away ?? s.away_value ?? '0')
                         }));
 
+                    const resolvedForm = (() => {
+                        const raw = formRes?.DATA || formRes || [];
+                        if (!Array.isArray(raw)) return [];
+
+                        return raw
+                            .map((group: any, index: number) => {
+                                const items = group.items || group.FORM || group.form || group.rows || group.RESULTS || [];
+                                return {
+                                    title: group.title || group.name || group.team_name || group.TEAM_NAME || `Equipo ${index + 1}`,
+                                    items: Array.isArray(items)
+                                        ? items.map((item: any) => ({
+                                            result: item.result || item.RESULT || item.form || item.code || '',
+                                            score: item.score || item.SCORE || item.result_text || '',
+                                        }))
+                                        : [],
+                                };
+                            })
+                            .filter((group: any) => Array.isArray(group.items) && group.items.length > 0);
+                    })();
+
+                    const resolvedTopScorers = (() => {
+                        const raw = topScorersRes?.DATA || topScorersRes;
+                        if (Array.isArray(raw)) return raw;
+                        if (Array.isArray(raw?.ROWS)) return raw.ROWS;
+                        if (Array.isArray(raw?.topScorers)) return raw.topScorers;
+                        if (Array.isArray(raw?.top_scorers)) return raw.top_scorers;
+                        return [];
+                    })();
+
                     setState(prev => {
                         if (!prev.matchData) return prev;
 
@@ -335,13 +407,15 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             kind: 'ok',
                             matchData: {
                                 ...prev.matchData,
-                                status: listMatchEvt?.match_status ? mapStatus(listMatchEvt.match_status) : fsStatus,
+                                status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
                                 home: { ...prev.matchData.home, score: hScoreFinal, teamUrl: evt.home_team?.team_url || '' },
                                 away: { ...prev.matchData.away, score: aScoreFinal, teamUrl: evt.away_team?.team_url || '' },
                                 lineups: lineupsRes?.DATA || lineupsRes || null,
                                 standings: resolvedStandings,
                                 h2h: Array.isArray(h2hRes) ? h2hRes : (h2hRes?.DATA || h2hRes?.data || h2hRes?.matches || []),
                                 draw: resolvedDraw,
+                                form: resolvedForm,
+                                topScorers: resolvedTopScorers,
                             },
                             eventsData: incidents,
                             statsData: stats,
@@ -376,7 +450,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
                                 category: 'General',
-                                round: matchData.roundId || '',
+                                round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
                                 referee: matchData.referee || null,
                                 home: {
@@ -449,7 +523,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
                                 category: 'General',
-                                round: matchData.roundId || '',
+                                round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
                                 referee: matchData.referee || null,
                                 home: {
@@ -501,7 +575,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         }));
                     }
                 }
-            } catch (error) {
+            } catch (error: any) {
+                if (error?.name === 'AbortError' || controller.signal.aborted) {
+                    return;
+                }
                 console.error("Fetch Error:", error);
                 setState(prev => ({
                     ...prev,
@@ -520,10 +597,13 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         }, 60000);
 
         return () => {
-            controller.abort();
             clearInterval(interval);
+
+            if (!controller.signal.aborted) {
+                controller.abort(new DOMException('Match detail effect cleanup', 'AbortError'));
+            }
         };
-    }, [id, isFlashScore]);
+    }, [id]);
 
     if (state.kind === 'loading') return <div className={styles.page}><div className={styles.appContainer}>Cargando datos...</div></div>;
 
@@ -562,7 +642,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         <div className={styles.breadcrumbs}>
                             <span className={styles.breadcrumbItem}>{matchData.category}</span>
                             {matchData.tournamentId ? (
-                                <Link href={`/tournaments/fs-${matchData.tournamentId}`} className={styles.breadcrumbItem} style={{ color: 'var(--color-accent, var(--accent))', textDecoration: 'none' }}>
+                                <Link href={buildTournamentHref(matchData.tournamentId) || '#'} className={styles.breadcrumbItem} style={{ color: 'var(--color-accent, var(--accent))', textDecoration: 'none' }}>
                                     {matchData.tournament}
                                 </Link>
                             ) : (

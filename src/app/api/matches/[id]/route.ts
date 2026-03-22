@@ -1,6 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
+import {
+  getFlashScoreMatchCommentary,
+  getFlashScoreMatchDetails,
+  getFlashScoreMatchDraw,
+  getFlashScoreMatchH2H,
+  getFlashScoreMatchLineups,
+  getFlashScoreMatchStandings,
+  getFlashScoreMatchStats,
+  getFlashScoreMatchSummary,
+  getFlashScoreMatchesRaw,
+  getFlashScorePlayerStats,
+  getFlashScoreStandingsForm,
+  getFlashScoreTopScorers,
+} from '@/lib/services/flashscore';
+
+function isFlashScoreMatchId(matchId: string) {
+  return /^[A-Za-z0-9]{8}$/.test(matchId);
+}
+
+async function getFlashScoreMatchBundle(matchId: string) {
+  const details = await getFlashScoreMatchDetails(matchId);
+  const evt = details?.DATA?.EVENT || details;
+
+  if (!evt || !(evt.match_id || evt.EVENT_ID)) {
+    return null;
+  }
+
+  const sportId = evt.sport?.sport_id || evt.SPORT_ID || 1;
+  const tsTotal = evt.timestamp || evt.start_time || evt.START_TIME || evt.time || evt.event_timestamp || 0;
+  const startTimeMs = Number(tsTotal) * 1000;
+  const nowDays = Math.floor(Date.now() / 86400000);
+  const matchDays = Math.floor(startTimeMs / 86400000);
+  const matchDayOffset = Math.max(-7, Math.min(7, matchDays - nowDays));
+
+  const results = await Promise.allSettled([
+    getFlashScoreMatchSummary(matchId),
+    getFlashScoreMatchStats(matchId),
+    getFlashScoreMatchH2H(matchId),
+    getFlashScoreStandingsForm(matchId),
+    getFlashScoreMatchLineups(matchId),
+    getFlashScoreMatchStandings(matchId),
+    getFlashScoreMatchesRaw(matchDayOffset, sportId),
+    getFlashScorePlayerStats(matchId),
+    getFlashScoreMatchCommentary(matchId),
+    getFlashScoreMatchDraw(matchId),
+    getFlashScoreTopScorers(matchId),
+  ]);
+
+  const [
+    summary,
+    stats,
+    h2h,
+    form,
+    lineups,
+    standings,
+    dayMatches,
+    playerStats,
+    commentary,
+    draw,
+    topScorers,
+  ] = results.map((result) => (result.status === 'fulfilled' ? result.value : null));
+
+  return {
+    source: 'flashscore' as const,
+    details,
+    summary,
+    stats,
+    h2h,
+    form,
+    lineups,
+    standings,
+    dayMatches,
+    playerStats,
+    commentary,
+    draw,
+    topScorers,
+  };
+}
 
 export async function GET(
   request: NextRequest,
@@ -8,6 +86,20 @@ export async function GET(
 ) {
   try {
     const matchId = (await params).id;
+
+    if (isFlashScoreMatchId(matchId)) {
+      const bundle = await getFlashScoreMatchBundle(matchId);
+
+      if (!bundle) {
+        return NextResponse.json(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(bundle);
+    }
+
     const match = await FixtureService.getMatch(matchId);
 
     if (!match) {

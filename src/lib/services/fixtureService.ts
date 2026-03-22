@@ -400,12 +400,7 @@ export class FixtureService {
     const { data: match, error: matchError } = await supabase
       .from('matches')
       .select(`
-        id, tournament_id, phase_id, round_uuid, round_id, round_label, group_id,
-        home_club_id, away_club_id, date_time, venue, status, score, notes,
-        referee, home_base_points, away_base_points,
-        home_bonus_points, away_bonus_points,
-        points_autocalculated, points_override_reason,
-        created_at, updated_at, lineups, events,
+        *,
         home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
         away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url),
         tournament:tournaments(id, name, logo:logo_url)
