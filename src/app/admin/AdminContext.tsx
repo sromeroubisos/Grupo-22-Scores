@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
     fetchTournaments,
@@ -59,6 +60,8 @@ const AdminConsoleContext = createContext<AdminContextType | undefined>(undefine
 
 export function AdminConsoleProvider({ children }: { children: ReactNode }) {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+    const pathname = usePathname();
+    const isSuperConsoleRoute = pathname?.startsWith('/admin/super') ?? false;
     const [tournaments, setTournaments] = useState<TournamentRow[]>([]);
     const [clubs, setClubs] = useState<ClubRow[]>([]);
     const [unions, setUnions] = useState<UnionRow[]>([]);
@@ -124,7 +127,7 @@ export function AdminConsoleProvider({ children }: { children: ReactNode }) {
 
     const loadAll = useCallback((force = false) => {
         // Wait for both auth status to be settled AND user to be available
-        if (!isAuthenticated || !user) return;
+        if (!isAuthenticated || !user || isSuperConsoleRoute) return;
 
         // Entidades cargan de forma independiente para no bloquear el panel global
         // We no longer wrap this in an awaited Promise.allSettled
@@ -139,13 +142,15 @@ export function AdminConsoleProvider({ children }: { children: ReactNode }) {
 
         // Disable global loading state immediately to avoid blocking UI entirely
         setLoading(prev => ({ ...prev, all: false }));
-    }, [isAuthenticated, user, loadEntity]);
+    }, [isAuthenticated, user, isSuperConsoleRoute, loadEntity]);
 
     const refresh = useCallback(() => {
         loadAll(true);
     }, [loadAll]);
 
     const refreshEntity = useCallback(async (entity: keyof AdminContextType['errors']) => {
+        if (isSuperConsoleRoute) return;
+
         switch (entity) {
             case 'tournaments': await loadEntity('tournaments', fetchTournaments, setTournaments, true); break;
             case 'clubs': await loadEntity('clubs', fetchClubs, setClubs, true); break;
@@ -156,14 +161,16 @@ export function AdminConsoleProvider({ children }: { children: ReactNode }) {
             case 'disciplineSanctions': await loadEntity('disciplineSanctions', fetchDisciplineSanctions, setDisciplineSanctions, true, 'discipline'); break;
             case 'regulations': await loadEntity('regulations', fetchRegulations, setRegulations, true, 'regulations'); break;
         }
-    }, [loadEntity]);
+    }, [isSuperConsoleRoute, loadEntity]);
 
     useEffect(() => {
+        if (isSuperConsoleRoute) return;
+
         if (isAuthenticated && !authLoading && user && !prefetched.current) {
             prefetched.current = true;
             loadAll();
         }
-    }, [isAuthenticated, authLoading, user, loadAll]);
+    }, [isAuthenticated, authLoading, user, isSuperConsoleRoute, loadAll]);
 
     return (
         <AdminConsoleContext.Provider value={{

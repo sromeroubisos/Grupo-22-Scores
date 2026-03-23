@@ -12,6 +12,8 @@ import { createClient } from '@/lib/supabase/client';
 import { normalizeError } from '@/lib/utils/errorUtils';
 
 const DEFAULT_TTL_MS = 5 * 60_000; // 5 minutes
+const FETCH_TIMEOUT_MS = 15_000; // 15 seconds
+const CONSOLE_RESOURCE_TIMEOUT_MS = 30_000; // Larger budget for heavyweight super admin datasets
 
 interface CacheEntry<T> {
     data: T;
@@ -23,6 +25,8 @@ interface CacheEntry<T> {
 const cache = new Map<string, CacheEntry<unknown>>();
 // Track active promises to prevent redundant simultaneous fetches
 const activeFetches = new Map<string, Promise<unknown>>();
+
+type CachedFetcher<T> = (context?: { signal?: AbortSignal }) => Promise<T>;
 
 function isStale<T>(entry: CacheEntry<T>): boolean {
     return Date.now() - entry.fetchedAt > entry.ttl;
@@ -58,28 +62,34 @@ export function isCacheEntryStale(key: string): boolean {
     return isStale(entry);
 }
 
-const FETCH_TIMEOUT_MS = 15_000; // 15 seconds
+function createCacheTimeoutError(ms: number, label: string) {
+    return new Error(`[Cache] Timeout after ${ms}ms fetching '${label}'`);
+}
 
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-    let timeoutId: NodeJS.Timeout;
-    const timeoutPromise = new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => {
-            reject(new Error(`[Cache] Timeout after ${ms}ms fetching '${label}'`));
+function withTimeout<T>(fetcher: CachedFetcher<T>, ms: number, label: string): Promise<T> {
+    const controller = new AbortController();
+
+    return new Promise<T>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            controller.abort();
+            reject(createCacheTimeoutError(ms, label));
         }, ms);
-    });
 
-    return Promise.race([
-        promise.finally(() => clearTimeout(timeoutId)),
-        timeoutPromise
-    ]);
+        fetcher({ signal: controller.signal })
+            .then(resolve)
+            .catch(reject)
+            .finally(() => clearTimeout(timeoutId));
+    });
 }
 
 export async function cachedFetch<T>(
     key: string,
-    fetcher: () => Promise<T>,
+    fetcher: CachedFetcher<T>,
     ttl: number = DEFAULT_TTL_MS,
+    options?: { timeoutMs?: number },
 ): Promise<T> {
     const existing = cache.get(key) as CacheEntry<T> | undefined;
+    const timeoutMs = options?.timeoutMs ?? FETCH_TIMEOUT_MS;
 
     if (existing && !isStale(existing)) {
         return existing.data;
@@ -91,14 +101,14 @@ export async function cachedFetch<T>(
 
     const fetchPromise = (async () => {
         try {
-            const data = await withTimeout(fetcher(), FETCH_TIMEOUT_MS, key);
+            const data = await withTimeout(fetcher, timeoutMs, key);
             cache.set(key, { data, fetchedAt: Date.now(), ttl });
             return data;
         } catch (err: any) {
             const msg = err.message || 'Unknown error';
             console.warn(`[Cache] Primary fetch failed for '${key}'. Retrying once with timeout. Error: ${msg}`);
             try {
-                const fallbackData = await withTimeout(fetcher(), FETCH_TIMEOUT_MS, `${key}:retry`);
+                const fallbackData = await withTimeout(fetcher, timeoutMs, `${key}:retry`);
                 cache.set(key, { data: fallbackData, fetchedAt: Date.now(), ttl });
                 return fallbackData;
             } catch (retryErr: any) {
@@ -134,10 +144,11 @@ function getSupabase() {
     return createClient();
 }
 
-async function fetchAdminConsoleResource<T>(resource: 'clubs' | 'matches'): Promise<T[]> {
+async function fetchAdminConsoleResource<T>(resource: 'clubs' | 'matches', signal?: AbortSignal): Promise<T[]> {
     const response = await fetch(`/api/admin/super/console-data?resource=${resource}`, {
         credentials: 'include',
         cache: 'no-store',
+        signal,
     });
 
     const payload = await response.json();
@@ -171,9 +182,9 @@ export async function fetchClubs(force = false): Promise<ClubWithUnion[]> {
     const KEY = 'clubs_list';
     if (force) invalidateCache(KEY);
 
-    return cachedFetch(KEY, async () => {
-        return fetchAdminConsoleResource<ClubWithUnion>('clubs');
-    });
+    return cachedFetch(KEY, async (context) => {
+        return fetchAdminConsoleResource<ClubWithUnion>('clubs', context?.signal);
+    }, DEFAULT_TTL_MS, { timeoutMs: CONSOLE_RESOURCE_TIMEOUT_MS });
 }
 
 export interface MatchRow {
@@ -195,9 +206,9 @@ export async function fetchMatches(force = false): Promise<MatchRow[]> {
     const KEY = 'matches_list';
     if (force) invalidateCache(KEY);
 
-    return cachedFetch(KEY, async () => {
-        return fetchAdminConsoleResource<MatchRow>('matches');
-    });
+    return cachedFetch(KEY, async (context) => {
+        return fetchAdminConsoleResource<MatchRow>('matches', context?.signal);
+    }, DEFAULT_TTL_MS, { timeoutMs: CONSOLE_RESOURCE_TIMEOUT_MS });
 }
 
 export interface TournamentRow {

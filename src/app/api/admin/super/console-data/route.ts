@@ -66,6 +66,33 @@ type MatchConsoleRow = {
     away_club_id: string | null;
 };
 
+type ClubConsoleRow = {
+    id: string;
+    name: string;
+    short_name?: string | null;
+    city?: string | null;
+    region?: string | null;
+    country?: string | null;
+    logo_url?: string | null;
+    primary_color?: string | null;
+    slug?: string | null;
+    is_visible?: boolean | null;
+    union_id?: string | null;
+};
+
+type UnionConsoleRow = {
+    id: string;
+    name: string;
+};
+
+type TournamentConsoleRow = {
+    id: string;
+    name: string;
+    sport_id?: string | null;
+    sport?: string | null;
+    season_id?: string | null;
+};
+
 export async function GET(request: NextRequest) {
     try {
         await requireAdminApiUser();
@@ -84,7 +111,7 @@ export async function GET(request: NextRequest) {
 
         if (resource === 'clubs') {
             const [{ data: clubs, error: clubsError }, { data: unions, error: unionsError }] = await Promise.all([
-                selectWithFallback(
+                selectWithFallback<ClubConsoleRow>(
                     readClient.from('clubs'),
                     [
                         'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id',
@@ -97,7 +124,10 @@ export async function GET(request: NextRequest) {
                 ),
                 readClient
                     .from('unions')
-                    .select('id, name'),
+                    .select('id, name') as PromiseLike<{
+                    data: UnionConsoleRow[] | null;
+                    error: { code?: string | null; message?: string | null; details?: string | null } | null;
+                }>,
             ]);
 
             if (clubsError) return jsonError('Failed to load clubs', 500, clubsError.message);
@@ -112,13 +142,30 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ data });
         }
 
-        const matchesQueryWithRoundLabel = readClient
-            .from('matches')
-            .select('id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id')
-            .order('date_time', { ascending: false });
+        const tournamentsPromise = selectWithFallback<TournamentConsoleRow>(
+            readClient.from('tournaments'),
+            [
+                'id, name, sport_id, sport, season_id',
+                'id, name, sport_id, sport',
+                'id, name, sport_id, season_id',
+                'id, name, sport',
+                'id, name'
+            ]
+        );
+        const clubsPromise = selectWithFallback<ClubConsoleRow>(
+            readClient.from('clubs'),
+            [
+                'id, name, logo_url, primary_color',
+                'id, name, logo_url',
+                'id, name'
+            ]
+        );
 
         let matchesResult: { data: MatchConsoleRow[] | null; error: { code?: string | null; message?: string | null; details?: string | null } | null } =
-            await matchesQueryWithRoundLabel;
+            await readClient
+                .from('matches')
+                .select('id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id')
+                .order('date_time', { ascending: false });
 
         if (hasMissingColumnError(matchesResult.error, 'round_label')) {
             matchesResult = await readClient
@@ -128,24 +175,8 @@ export async function GET(request: NextRequest) {
         }
 
         const [{ data: tournaments, error: tournamentsError }, { data: clubs, error: clubsError }] = await Promise.all([
-            selectWithFallback(
-                readClient.from('tournaments'),
-                [
-                    'id, name, sport_id, sport, season_id',
-                    'id, name, sport_id, sport',
-                    'id, name, sport_id, season_id',
-                    'id, name, sport',
-                    'id, name'
-                ]
-            ),
-            selectWithFallback(
-                readClient.from('clubs'),
-                [
-                    'id, name, logo_url, primary_color',
-                    'id, name, logo_url',
-                    'id, name'
-                ]
-            ),
+            tournamentsPromise,
+            clubsPromise,
         ]);
 
         const { data: matches, error: matchesError } = matchesResult;
