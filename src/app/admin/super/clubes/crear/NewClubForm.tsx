@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import LogoUploader from '@/components/LogoUploader';
+import { getAllCountries } from '@/lib/data/countries';
 import { getActiveSports } from '@/lib/data/sports';
 import styles from './styles.module.css';
 import { createClub } from '@/lib/services/clubService';
@@ -21,12 +22,13 @@ const ENTITY_TYPES = [
   { value: 'franquicia', label: 'Franquicia', icon: '🏢' },
 ];
 
-const COUNTRIES = [
-  { value: 'ARG', label: 'Argentina' },
-  { value: 'URY', label: 'Uruguay' },
-  { value: 'CHL', label: 'Chile' },
-  { value: 'BRA', label: 'Brasil' },
-];
+const COUNTRIES = getAllCountries()
+  .filter((country) => country.code.trim().length === 2)
+  .map((country) => {
+    const label = country.nameEs || country.name;
+    return { value: label, label };
+  })
+  .sort((a, b) => a.label.localeCompare(b.label, 'es'));
 
 const UNION_LEVEL_OPTIONS = [
   { value: 'regional', label: 'Regional' },
@@ -81,7 +83,7 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
     gender: 'Masculino',
     age_grade: '',
 
-    country: 'ARG',
+    country: 'Argentina',
     region: '',
     city: '',
     address: '',
@@ -135,7 +137,7 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
   const [unionCreateForm, setUnionCreateForm] = useState<InlineUnionFormState>({
     name: '',
     slug: '',
-    country: 'ARG',
+    country: 'Argentina',
     sport: 'rugby',
     union_level: 'regional',
     slugManuallyEdited: false,
@@ -286,7 +288,7 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
           ...current,
           name: current.name || unionSearch.trim(),
           slug: current.slug || slugifyUnion(current.name || unionSearch.trim()),
-          country: form.country || current.country || 'ARG',
+          country: form.country || current.country || 'Argentina',
           sport: form.sport || current.sport || 'rugby',
           union_level: current.union_level || 'regional',
         }));
@@ -344,7 +346,7 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
       setUnionCreateForm({
         name: '',
         slug: '',
-        country: form.country || 'ARG',
+        country: form.country || 'Argentina',
         sport: form.sport || 'rugby',
         union_level: 'regional',
         slugManuallyEdited: false,

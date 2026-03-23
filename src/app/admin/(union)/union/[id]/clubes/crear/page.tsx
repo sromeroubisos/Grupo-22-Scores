@@ -4,7 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Trash2, Edit2, Star, Plus, X } from 'lucide-react';
 import LogoUploader from '@/components/LogoUploader';
+import { getAllCountries } from '@/lib/data/countries';
 import { db } from '@/lib/mock-db';
+
+const COUNTRIES = getAllCountries()
+    .filter((country) => country.code.trim().length === 2)
+    .map((country) => country.nameEs || country.name)
+    .sort((a, b) => a.localeCompare(b, 'es'));
 
 export default function CreateClub() {
     const params = useParams();
@@ -481,11 +487,9 @@ export default function CreateClub() {
                                     País
                                 </label>
                                 <select className="form-input" value={formData.country} onChange={(e) => updateFormData('country', e.target.value)}>
-                                    <option>Argentina</option>
-                                    <option>Uruguay</option>
-                                    <option>Chile</option>
-                                    <option>Paraguay</option>
-                                    <option>Brasil</option>
+                                    {COUNTRIES.map((country) => (
+                                        <option key={country} value={country}>{country}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
