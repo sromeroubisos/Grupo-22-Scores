@@ -188,6 +188,35 @@
     animation: slideDownFade 0.2s ease-out;
 }
 
+.scifi-select-search {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 10px 12px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--border);
+}
+
+.scifi-select-search-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+}
+
+.scifi-select-search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent-muted);
+}
+
+.scifi-select-search-input::placeholder {
+    color: var(--text-muted);
+}
+
 @keyframes slideDownFade {
     from {
         opacity: 0;

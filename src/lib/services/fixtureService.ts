@@ -542,6 +542,7 @@ export class FixtureService {
       venue: data.venue,
       status: data.status,
       notes: data.notes || null,
+      broadcast_url: data.streamUrl || null,
       score: data.score || { home: 0, away: 0 },
     };
 
@@ -648,6 +649,7 @@ export class FixtureService {
     if (data.phaseId) updateData.phase_id = data.phaseId;
     if (data.groupId !== undefined) updateData.group_id = data.groupId;
     if (data.notes !== undefined) updateData.notes = data.notes;
+    if (data.streamUrl !== undefined) updateData.broadcast_url = data.streamUrl || null;
     if (data.score !== undefined) updateData.score = data.score;
     if (data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
     if (data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;
@@ -1237,6 +1239,8 @@ export class FixtureService {
       phaseId: match.phase_id,
       roundId: match.round_uuid ?? match.round_id ?? null,
       groupId: match.group_id || null,
+      referee: match.referee ?? null,
+      pitch: match.pitch ?? null,
       homeClubId: match.home_club_id,
       awayClubId: match.away_club_id,
       dateTime: match.date_time,
@@ -1244,6 +1248,8 @@ export class FixtureService {
       status: match.status,
       score: match.score || { home: 0, away: 0 },
       notes: match.notes,
+      streamUrl: match.stream_url ?? match.broadcast_url ?? null,
+      replayUrl: match.replay_url ?? null,
       homeBasePoints: match.home_base_points ?? null,
       awayBasePoints: match.away_base_points ?? null,
       homeBonusPoints: match.home_bonus_points ?? null,

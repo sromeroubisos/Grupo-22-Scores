@@ -81,6 +81,7 @@ export interface MatchRow {
     clock: MatchClock;
     events: MatchEvent[] | null;
     lineups: MatchLineups | null;
+    broadcast_url?: string | null;
     stream_url?: string | null;
     replay_url?: string | null;
     created_at: string;
@@ -402,6 +403,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const awayName = match.awayClub?.short_name || match.awayClub?.name || 'Visitante';
     const homeLogo = match.homeClub?.logo_url || null;
     const awayLogo = match.awayClub?.logo_url || null;
+    const watchUrl = match.broadcast_url || match.stream_url || null;
 
     const formattedDate = match.date_time
         ? formatDateInTimeZone(match.date_time, 'es-AR', { day: 'numeric', month: 'short', year: 'numeric' }, APP_TIMEZONE)
@@ -651,9 +653,9 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <div className="mc-card-body" style={{ display: 'flex', gap: 16 }}>
                                     <button
                                         className="mc-btn mc-btn-outline"
-                                        style={{ flex: 1, padding: 16, justifyContent: 'center', opacity: match.stream_url ? 1 : 0.4 }}
-                                        disabled={!match.stream_url}
-                                        onClick={() => match.stream_url && window.open(match.stream_url, '_blank')}
+                                        style={{ flex: 1, padding: 16, justifyContent: 'center', opacity: watchUrl ? 1 : 0.4 }}
+                                        disabled={!watchUrl}
+                                        onClick={() => watchUrl && window.open(watchUrl, '_blank')}
                                     >
                                         <Video size={16} /> Transmisión
                                     </button>
@@ -941,7 +943,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Transmisión en Vivo (URL)</label>
                                 <input
                                     type="text"
-                                    defaultValue={match.stream_url || ''}
+                                    defaultValue={watchUrl || ''}
                                     placeholder="https://youtube.com/..."
                                     style={{ width: '100%', background: '#000', border: '1px solid #333', padding: 12, color: '#fff', borderRadius: 4, outline: 'none', boxSizing: 'border-box' }}
                                 />

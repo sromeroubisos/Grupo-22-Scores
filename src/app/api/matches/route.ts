@@ -5,12 +5,32 @@ import { persistFromExternalMatches } from '@/lib/sync/catalog';
 import { formatDateKey, canonicalizeTimezone, toLocalMatch } from '@/lib/timezone';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getCountryById } from '@/lib/data/countries';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import {
     getMatchesForDate,
     getLiveMatches,
     mapCachedToEnrichedMatch
 } from '@/lib/services/externalMatchCache';
+
+function isUuidLike(value: unknown): value is string {
+    return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+async function supportsMatchesColumn(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    column: string
+) {
+    const { error } = await supabase
+        .from('matches')
+        .select(column)
+        .limit(0);
+
+    if (!error) return true;
+    if (isMissingColumnError(error, column)) return false;
+    return false;
+}
 
 // Maps internal sport IDs to all DB variants that should match
 function getSportVariants(sport: string): string[] {
@@ -722,18 +742,15 @@ export async function GET(request: Request) {
 // Create a new match
 export async function POST(request: Request) {
     try {
-        const { createClient } = await import('@/lib/supabase/server');
-        const supabase = await createClient();
-
-        // Check authentication
-        const {
-            data: { user },
-            error: authError,
-        } = await supabase.auth.getUser();
-
-        if (authError || !user) {
+        try {
+            await requireAdminApiUser();
+        } catch {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+            ? createAdminClient()
+            : await createClient();
 
         const body = await request.json();
 
@@ -748,6 +765,13 @@ export async function POST(request: Request) {
             status,
             notes,
         } = body;
+        const normalizedRoundId = isUuidLike(roundId) ? roundId : null;
+        const normalizedRoundLabel = typeof body.roundLabel === 'string' && body.roundLabel.trim()
+            ? body.roundLabel.trim()
+            : null;
+        const normalizedWatchUrl = typeof body.watchUrl === 'string' && body.watchUrl.trim()
+            ? body.watchUrl.trim()
+            : (typeof body.streamUrl === 'string' && body.streamUrl.trim() ? body.streamUrl.trim() : null);
 
         // Validate required fields
         if (!homeClubId || !awayClubId) {
@@ -774,11 +798,11 @@ export async function POST(request: Request) {
 
         // Get tournament_id if roundId is provided
         let finalTournamentId = tournamentId;
-        if (roundId && !finalTournamentId) {
+        if (normalizedRoundId && !finalTournamentId) {
             const { data: round } = await supabase
                 .from('tournament_rounds')
                 .select('phase_id, tournament_phases(tournament_id)')
-                .eq('id', roundId)
+                .eq('id', normalizedRoundId)
                 .single();
 
             if (round && round.tournament_phases) {
@@ -786,11 +810,23 @@ export async function POST(request: Request) {
             }
         }
 
+        const [
+            supportsRoundUuid,
+            supportsRoundLabel,
+            supportsReferee,
+            supportsBroadcastUrl,
+        ] = await Promise.all([
+            normalizedRoundId ? supportsMatchesColumn(supabase, 'round_uuid') : Promise.resolve(false),
+            normalizedRoundLabel ? supportsMatchesColumn(supabase, 'round_label') : Promise.resolve(false),
+            body.referee ? supportsMatchesColumn(supabase, 'referee') : Promise.resolve(false),
+            normalizedWatchUrl ? supportsMatchesColumn(supabase, 'broadcast_url') : Promise.resolve(false),
+        ]);
+
         // Insert match
         // Only include columns that are confirmed in the database schema
         const matchPayload: any = {
             tournament_id: finalTournamentId || null,
-            round_id: roundId || null,
+            phase_id: phaseId || null,
             home_club_id: homeClubId,
             away_club_id: awayClubId,
             date_time: dateTime,
@@ -798,18 +834,32 @@ export async function POST(request: Request) {
             status: status || 'scheduled',
             score: { home: 0, away: 0 },
             notes: notes || null,
-            stream_url: body.streamUrl || null,
-            replay_url: body.replayUrl || null,
-            round_label: body.roundLabel || null,
         };
 
-        // Note: The following columns were removed because they are not currently in the DB schema:
-        // phase_id, city, address, is_neutral_venue, home_squad_id, away_squad_id, is_public, is_featured, referee
+        if (normalizedRoundId) {
+            if (supportsRoundUuid) {
+                matchPayload.round_uuid = normalizedRoundId;
+            } else {
+                matchPayload.round_id = normalizedRoundId;
+            }
+        }
+
+        if (supportsRoundLabel) {
+            matchPayload.round_label = normalizedRoundLabel;
+        }
+
+        if (supportsReferee) {
+            matchPayload.referee = body.referee || null;
+        }
+
+        if (supportsBroadcastUrl) {
+            matchPayload.broadcast_url = normalizedWatchUrl;
+        }
 
         const { data: match, error: insertError } = await supabase
             .from('matches')
             .insert(matchPayload)
-            .select('id, notes, stream_url, replay_url')
+            .select(supportsBroadcastUrl ? 'id, broadcast_url' : 'id')
             .single();
 
         if (insertError) {

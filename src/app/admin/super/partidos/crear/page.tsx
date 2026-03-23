@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Calendar, ArrowLeft, Trophy, Users, MapPin, Shield, Clock, Info, CheckCircle, Star, Globe } from 'lucide-react';
+import { Calendar, ArrowLeft } from 'lucide-react';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
+import { invalidateCache } from '@/lib/cache/superAdminCache';
+import { useSuperConsole } from '../../SuperConsoleContext';
 import '../../creation-forms.css';
 import './monolith.css';
 import { CustomSelect } from './CustomSelect';
@@ -60,6 +62,7 @@ export default function CreateMatchPage() {
   // 1. Hooks
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refresh } = useSuperConsole();
   const tournamentIdParam = searchParams.get('tournamentId');
   const dateInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,6 +84,7 @@ export default function CreateMatchPage() {
     city: '',
     isNeutralVenue: false,
     address: '',
+    watchUrl: '',
     referee: '',
     assistants: '',
     status: 'scheduled' as MatchStatus,
@@ -95,7 +99,6 @@ export default function CreateMatchPage() {
   const [homeSquads, setHomeSquads] = useState<Squad[]>([]);
   const [awaySquads, setAwaySquads] = useState<Squad[]>([]);
   const [loading, setLoading] = useState(false);
-  const [contextTournament, setContextTournament] = useState<Tournament | null>(null);
 
   // 3. Functional Definitions
 
@@ -238,7 +241,6 @@ export default function CreateMatchPage() {
     if (tournamentIdParam && tournaments.length > 0) {
       const tournament = tournaments.find(t => t.id === tournamentIdParam);
       if (tournament) {
-        setContextTournament(tournament);
         setFormData(prev => ({ ...prev, tournamentId: tournament.id }));
       }
     }
@@ -256,7 +258,7 @@ export default function CreateMatchPage() {
     }
   }, [formData.awayClubId]);
 
-  const handleSubmit = async (redirectToMatchCenter: boolean = false) => {
+  const handleSubmit = async () => {
     if (loading) return;
     setLoading(true);
 
@@ -294,7 +296,7 @@ export default function CreateMatchPage() {
       const matchData = {
         tournamentId: isFriendly ? null : formData.tournamentId,
         phaseId: isFriendly ? null : (formData.phase || null),
-        roundId: isFriendly ? null : (formData.round || null),
+        roundLabel: isFriendly ? null : (formData.round.trim() || null),
         homeClubId: formData.homeClubId,
         awayClubId: formData.awayClubId,
         homeSquadId: formData.homeSquadId || null,
@@ -305,6 +307,7 @@ export default function CreateMatchPage() {
         isNeutralVenue: formData.isNeutralVenue,
         address: formData.address || null,
         referee: formData.referee || null,
+        watchUrl: formData.watchUrl.trim() || null,
         status: formData.status,
         isPublic: formData.isPublic,
         isFeatured: formData.isFeatured,
@@ -323,13 +326,10 @@ export default function CreateMatchPage() {
         throw new Error(`${errorMessage}${errorDetails}`);
       }
 
-      const createdMatch = await response.json();
-
-      if (redirectToMatchCenter) {
-        router.push(`/admin/super/partidos/${createdMatch.id}`);
-      } else {
-        router.push('/admin/super/partidos');
-      }
+      await response.json();
+      invalidateCache('matches_list');
+      refresh('matches');
+      router.push('/admin/super/partidos');
     } catch (error) {
       console.error('Error creating match:', error);
       alert(error instanceof Error ? error.message : 'Error al crear el partido');
@@ -477,6 +477,8 @@ export default function CreateMatchPage() {
               value={formData.homeClubId}
               onChange={(val) => setFormData({ ...formData, homeClubId: val, homeSquadId: '' })}
               placeholder="-- Local --"
+              searchable
+              searchPlaceholder="Buscar equipo local..."
               options={[{ value: '', label: '-- Local --' }, ...availableClubs.map(club => ({ value: club.id, label: club.name }))]}
             />
             <div style={{ marginTop: '15px' }}>
@@ -498,6 +500,8 @@ export default function CreateMatchPage() {
               value={formData.awayClubId}
               onChange={(val) => setFormData({ ...formData, awayClubId: val, awaySquadId: '' })}
               placeholder="-- Visitante --"
+              searchable
+              searchPlaceholder="Buscar equipo visitante..."
               options={[{ value: '', label: '-- Visitante --' }, ...availableClubs.map(club => ({ value: club.id, label: club.name }))]}
             />
             <div style={{ marginTop: '15px' }}>
@@ -583,6 +587,15 @@ export default function CreateMatchPage() {
               </label>
               <span style={{ fontFamily: 'Space Mono', fontSize: '10px' }}>ACTIVAR SI EL ESTADIO NO PERTENECE AL LOCAL</span>
             </div>
+          </div>
+          <div className="cell col-12">
+            <label>Link para verlo (Opcional)</label>
+            <input
+              type="url"
+              placeholder="https://youtube.com/... o https://twitch.tv/..."
+              value={formData.watchUrl}
+              onChange={(e) => setFormData({ ...formData, watchUrl: e.target.value })}
+            />
           </div>
         </div>
 
@@ -672,19 +685,11 @@ export default function CreateMatchPage() {
           <button
             type="button"
             className="btn-primary"
-            onClick={() => handleSubmit(false)}
+            onClick={handleSubmit}
             disabled={loading}
-            style={{ background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', marginRight: 'auto', marginLeft: '20px' }}
+            style={{ background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', marginLeft: 'auto' }}
           >
-            {loading ? '...' : 'Solo Crear'}
-          </button>
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => handleSubmit(true)}
-            disabled={loading}
-          >
-            {loading ? 'CREANDO...' : 'Programar Partido'}
+            {loading ? 'CREANDO...' : 'Crear Partido'}
           </button>
         </footer>
       </div>

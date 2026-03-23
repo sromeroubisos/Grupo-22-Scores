@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 interface Option {
@@ -15,13 +15,32 @@ interface CustomSelectProps {
     placeholder?: string;
     disabled?: boolean;
     style?: React.CSSProperties;
+    searchable?: boolean;
+    searchPlaceholder?: string;
 }
 
-export function CustomSelect({ value, onChange, options, placeholder = 'Seleccionar...', disabled, style }: CustomSelectProps) {
+export function CustomSelect({
+    value,
+    onChange,
+    options,
+    placeholder = 'Seleccionar...',
+    disabled,
+    style,
+    searchable = false,
+    searchPlaceholder = 'Escribir para buscar...',
+}: CustomSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     const selectedOption = options.find((opt) => opt.value === value);
+    const filteredOptions = useMemo(() => {
+        if (!searchable || !searchTerm.trim()) return options;
+
+        const normalizedSearch = searchTerm.trim().toLowerCase();
+        return options.filter((option) => option.label.toLowerCase().includes(normalizedSearch));
+    }, [options, searchTerm, searchable]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -32,6 +51,18 @@ export function CustomSelect({ value, onChange, options, placeholder = 'Seleccio
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setSearchTerm('');
+            return;
+        }
+
+        if (searchable) {
+            const timeoutId = window.setTimeout(() => searchInputRef.current?.focus(), 0);
+            return () => window.clearTimeout(timeoutId);
+        }
+    }, [isOpen, searchable]);
 
     return (
         <div
@@ -51,10 +82,23 @@ export function CustomSelect({ value, onChange, options, placeholder = 'Seleccio
 
             {isOpen && (
                 <div className="scifi-select-dropdown">
-                    {options.length === 0 ? (
+                    {searchable && (
+                        <div className="scifi-select-search">
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                value={searchTerm}
+                                onChange={(event) => setSearchTerm(event.target.value)}
+                                onClick={(event) => event.stopPropagation()}
+                                placeholder={searchPlaceholder}
+                                className="scifi-select-search-input"
+                            />
+                        </div>
+                    )}
+                    {filteredOptions.length === 0 ? (
                         <div className="scifi-select-empty">Sin opciones</div>
                     ) : (
-                        options.map((option) => (
+                        filteredOptions.map((option) => (
                             <div
                                 key={option.value}
                                 className={`scifi-select-item ${option.value === value ? 'selected' : ''}`}
