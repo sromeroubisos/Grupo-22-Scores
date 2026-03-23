@@ -1,6 +1,7 @@
 import type { Country } from '@/lib/types';
+import regionIndex from 'language-subtag-registry/data/json/region.json';
 
-export const COUNTRIES: Record<string, Country> = {
+const CURATED_COUNTRIES: Record<string, Country> = {
     // ===== INTERNATIONAL / REGIONS =====
     'international': {
         id: 'international',
@@ -552,6 +553,193 @@ export const COUNTRIES: Record<string, Country> = {
     },
 };
 
+const AUTO_COUNTRY_CODE_EXCLUSIONS = new Set([
+    'AA',
+    'AC',
+    'AN',
+    'BU',
+    'CP',
+    'CQ',
+    'CS',
+    'DD',
+    'DG',
+    'EA',
+    'EU',
+    'FX',
+    'IC',
+    'NT',
+    'SU',
+    'TA',
+    'TP',
+    'UK',
+    'UN',
+    'YD',
+    'YU',
+    'ZR',
+    'ZZ',
+]);
+
+const AUTO_COUNTRY_CODE_OVERRIDES: Record<string, Partial<Omit<Country, 'code'>>> = {
+    AQ: { id: 'antarctica', name: 'Antarctica', nameEs: 'Antartida' },
+    BN: { id: 'brunei', name: 'Brunei', nameEs: 'Brunei' },
+    CD: {
+        id: 'democratic-republic-of-the-congo',
+        name: 'Democratic Republic of the Congo',
+        nameEs: 'Republica Democratica del Congo',
+    },
+    CG: {
+        id: 'republic-of-the-congo',
+        name: 'Republic of the Congo',
+        nameEs: 'Republica del Congo',
+    },
+    CI: { id: 'ivory-coast', name: 'Ivory Coast', nameEs: 'Costa de Marfil' },
+    CV: { id: 'cape-verde', name: 'Cape Verde', nameEs: 'Cabo Verde' },
+    FM: { id: 'micronesia', name: 'Federated States of Micronesia', nameEs: 'Micronesia' },
+    GB: { id: 'united-kingdom', name: 'United Kingdom', nameEs: 'Reino Unido' },
+    HK: { id: 'hong-kong', name: 'Hong Kong', nameEs: 'Hong Kong' },
+    KN: { id: 'saint-kitts-and-nevis', name: 'Saint Kitts and Nevis', nameEs: 'San Cristobal y Nieves' },
+    KP: { id: 'north-korea', name: 'North Korea', nameEs: 'Corea del Norte' },
+    LA: { id: 'laos', name: 'Laos', nameEs: 'Laos' },
+    LC: { id: 'saint-lucia', name: 'Saint Lucia', nameEs: 'Santa Lucia' },
+    MD: { id: 'moldova', name: 'Moldova', nameEs: 'Moldavia' },
+    MK: { id: 'north-macedonia', name: 'North Macedonia', nameEs: 'Macedonia del Norte' },
+    MM: { id: 'myanmar', name: 'Myanmar', nameEs: 'Myanmar' },
+    MO: { id: 'macao', name: 'Macao', nameEs: 'Macao' },
+    PS: { id: 'palestine', name: 'Palestine', nameEs: 'Palestina' },
+    SX: { id: 'sint-maarten', name: 'Sint Maarten', nameEs: 'Sint Maarten' },
+    SZ: { id: 'eswatini', name: 'Eswatini', nameEs: 'Esuatini' },
+    TL: { id: 'timor-leste', name: 'Timor-Leste', nameEs: 'Timor Oriental' },
+    TW: { id: 'taiwan', name: 'Taiwan', nameEs: 'Taiwan' },
+    US: { id: 'usa', name: 'United States', nameEs: 'Estados Unidos' },
+    VA: { id: 'vatican-city', name: 'Vatican City', nameEs: 'Ciudad del Vaticano' },
+    VC: {
+        id: 'saint-vincent-and-the-grenadines',
+        name: 'Saint Vincent and the Grenadines',
+        nameEs: 'San Vicente y las Granadinas',
+    },
+    VG: { id: 'british-virgin-islands', name: 'British Virgin Islands', nameEs: 'Islas Virgenes Britanicas' },
+    VI: { id: 'us-virgin-islands', name: 'U.S. Virgin Islands', nameEs: 'Islas Virgenes de los Estados Unidos' },
+    XK: { id: 'kosovo', name: 'Kosovo', nameEs: 'Kosovo' },
+};
+
+const MANUAL_EXTRA_COUNTRIES: Record<string, Country> = {
+    'abkhazia': {
+        id: 'abkhazia',
+        name: 'Abkhazia',
+        nameEs: 'Abjasia',
+        code: 'XA',
+        region: 'europe',
+    },
+    'kosovo': {
+        id: 'kosovo',
+        name: 'Kosovo',
+        nameEs: 'Kosovo',
+        code: 'XK',
+        region: 'europe',
+    },
+    'northern-cyprus': {
+        id: 'northern-cyprus',
+        name: 'Northern Cyprus',
+        nameEs: 'Chipre del Norte',
+        code: 'XC',
+        region: 'europe',
+    },
+    'northern-ireland': {
+        id: 'northern-ireland',
+        name: 'Northern Ireland',
+        nameEs: 'Irlanda del Norte',
+        code: 'XI',
+        flagEmoji: '🏴',
+        region: 'europe',
+    },
+    'somaliland': {
+        id: 'somaliland',
+        name: 'Somaliland',
+        nameEs: 'Somalilandia',
+        code: 'XS',
+        region: 'africa',
+    },
+    'south-ossetia': {
+        id: 'south-ossetia',
+        name: 'South Ossetia',
+        nameEs: 'Osetia del Sur',
+        code: 'XO',
+        region: 'europe',
+    },
+    'transnistria': {
+        id: 'transnistria',
+        name: 'Transnistria',
+        nameEs: 'Transnistria',
+        code: 'XT',
+        region: 'europe',
+    },
+};
+
+const ENGLISH_DISPLAY_NAMES =
+    typeof Intl !== 'undefined' && typeof Intl.DisplayNames === 'function'
+        ? new Intl.DisplayNames(['en'], { type: 'region' })
+        : null;
+
+const SPANISH_DISPLAY_NAMES =
+    typeof Intl !== 'undefined' && typeof Intl.DisplayNames === 'function'
+        ? new Intl.DisplayNames(['es'], { type: 'region' })
+        : null;
+
+const CURATED_COUNTRY_CODES = new Set(
+    [...Object.values(CURATED_COUNTRIES), ...Object.values(MANUAL_EXTRA_COUNTRIES)]
+        .map((country) => country.code.toUpperCase()),
+);
+
+function slugifyCountryLabel(value: string): string {
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/&/g, ' and ')
+        .replace(/[^a-zA-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase();
+}
+
+function buildFlagEmoji(code: string): string | undefined {
+    if (!/^[A-Z]{2}$/.test(code)) return undefined;
+    return String.fromCodePoint(...code.split('').map((char) => 127397 + char.charCodeAt(0)));
+}
+
+function buildGeneratedCountryEntry(code: string): [string, Country] | null {
+    const override = AUTO_COUNTRY_CODE_OVERRIDES[code] ?? {};
+    const name = override.name || ENGLISH_DISPLAY_NAMES?.of(code);
+    const nameEs = override.nameEs || SPANISH_DISPLAY_NAMES?.of(code) || name;
+
+    if (!name || !nameEs) return null;
+
+    const country: Country = {
+        id: override.id || slugifyCountryLabel(name),
+        name,
+        nameEs,
+        code,
+        flagEmoji: override.flagEmoji || buildFlagEmoji(code),
+        region: override.region,
+    };
+
+    return [country.id, country];
+}
+
+const AUTO_GENERATED_COUNTRIES: Record<string, Country> = Object.fromEntries(
+    Object.keys(regionIndex)
+        .map((code) => code.toUpperCase())
+        .filter((code) => /^[A-Z]{2}$/.test(code))
+        .filter((code) => !AUTO_COUNTRY_CODE_EXCLUSIONS.has(code))
+        .filter((code) => !CURATED_COUNTRY_CODES.has(code))
+        .map((code) => buildGeneratedCountryEntry(code))
+        .filter((entry): entry is [string, Country] => entry !== null),
+);
+
+export const COUNTRIES: Record<string, Country> = {
+    ...AUTO_GENERATED_COUNTRIES,
+    ...CURATED_COUNTRIES,
+    ...MANUAL_EXTRA_COUNTRIES,
+};
+
 export const getCountryById = (id: string): Country | undefined => {
     return COUNTRIES[id];
 };
@@ -561,7 +749,7 @@ export const getCountriesByRegion = (region: Country['region']): Country[] => {
 };
 
 export const getAllCountries = (): Country[] => {
-    return Object.values(COUNTRIES).sort((a, b) => a.name.localeCompare(b.name));
+    return Object.values(COUNTRIES).sort((a, b) => (a.nameEs || a.name).localeCompare(b.nameEs || b.name, 'es'));
 };
 
 export type TournamentCountryOption = {
