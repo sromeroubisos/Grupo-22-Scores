@@ -196,6 +196,7 @@ export interface MatchRow {
     status: string | null;
     score: { home: number; away: number } | null;
     tournament_id: string | null;
+    sport_id: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
     tournament: { id: string; name: string; sport_id: string | null; season_id: string | null } | null;

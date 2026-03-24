@@ -6,13 +6,6 @@ function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
 }
 
-function hasMissingColumnError(error: { code?: string | null; message?: string | null; details?: string | null } | null, column: string) {
-    if (!error) return false;
-
-    const haystack = `${error.message || ''} ${error.details || ''}`.toLowerCase();
-    return error.code === 'PGRST204' || haystack.includes(column.toLowerCase());
-}
-
 async function selectWithFallback<T>(
     baseQuery: {
         select: (columns: string) => PromiseLike<{
@@ -64,6 +57,8 @@ type MatchConsoleRow = {
     tournament_id: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
 };
 
 type ClubConsoleRow = {
@@ -94,6 +89,11 @@ type TournamentConsoleRow = {
     sport?: string | null;
     season_id?: string | null;
 };
+
+function normalizeSportValue(value: string | null | undefined) {
+    const normalized = value?.trim().toLowerCase();
+    return normalized || null;
+}
 
 export async function GET(request: NextRequest) {
     try {
@@ -163,24 +163,31 @@ export async function GET(request: NextRequest) {
         const clubsPromise = selectWithFallback<ClubConsoleRow>(
             readClient.from('clubs'),
             [
-                'id, name, logo_url, primary_color',
+                'id, name, logo_url, primary_color, sport, sport_id',
+                'id, name, logo_url, primary_color, sport_id',
+                'id, name, logo_url, primary_color, sport',
+                'id, name, logo_url, sport, sport_id',
+                'id, name, logo_url, sport_id',
+                'id, name, logo_url, sport',
                 'id, name, logo_url',
                 'id, name'
             ]
         );
 
-        let matchesResult: { data: MatchConsoleRow[] | null; error: { code?: string | null; message?: string | null; details?: string | null } | null } =
-            await readClient
-                .from('matches')
-                .select('id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id')
-                .order('date_time', { ascending: false });
-
-        if (hasMissingColumnError(matchesResult.error, 'round_label')) {
-            matchesResult = await readClient
-                .from('matches')
-                .select('id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id')
-                .order('date_time', { ascending: false });
-        }
+        const matchesResult = await selectWithFallback<MatchConsoleRow>(
+            readClient.from('matches'),
+            [
+                'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport',
+                'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id',
+                'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport',
+                'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id',
+                'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport',
+                'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id',
+                'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport',
+                'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id'
+            ],
+            { column: 'date_time', ascending: false }
+        );
 
         const [{ data: tournaments, error: tournamentsError }, { data: clubs, error: clubsError }] = await Promise.all([
             tournamentsPromise,
@@ -204,13 +211,30 @@ export async function GET(request: NextRequest) {
         ]));
         const clubMap = new Map((clubs ?? []).map((club) => [club.id, club]));
 
-        const data = (matches ?? []).map((match) => ({
-            ...match,
-            round_id: match.round_label || match.round_id,
-            tournament: match.tournament_id ? tournamentMap.get(match.tournament_id) ?? null : null,
-            home_team: match.home_club_id ? clubMap.get(match.home_club_id) ?? null : null,
-            away_team: match.away_club_id ? clubMap.get(match.away_club_id) ?? null : null,
-        }));
+        const data = (matches ?? []).map((match) => {
+            const tournament = match.tournament_id ? tournamentMap.get(match.tournament_id) ?? null : null;
+            const homeTeam = match.home_club_id ? clubMap.get(match.home_club_id) ?? null : null;
+            const awayTeam = match.away_club_id ? clubMap.get(match.away_club_id) ?? null : null;
+            const resolvedSportId = normalizeSportValue(
+                match.sport_id ||
+                match.sport ||
+                tournament?.sport_id ||
+                homeTeam?.sport_id ||
+                homeTeam?.sport ||
+                awayTeam?.sport_id ||
+                awayTeam?.sport ||
+                null
+            );
+
+            return {
+                ...match,
+                sport_id: resolvedSportId,
+                round_id: match.round_label || match.round_id,
+                tournament,
+                home_team: homeTeam,
+                away_team: awayTeam,
+            };
+        });
 
         return NextResponse.json({ data });
     } catch (error) {

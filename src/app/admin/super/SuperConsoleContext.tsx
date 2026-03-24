@@ -3,9 +3,10 @@
 import React, {
     createContext, useContext, useMemo, useState, useEffect, useCallback, useRef
 } from 'react';
+import { usePathname } from 'next/navigation';
 import {
     fetchClubs, fetchMatches, fetchTournaments, fetchUnions, fetchNews,
-    invalidateCache, getCachedStale, isCacheEntryStale,
+    getCachedStale, isCacheEntryStale,
     type ClubWithUnion, type MatchRow, type TournamentRow, type UnionRow, type NewsRow
 } from '@/lib/cache/superAdminCache';
 import { normalizeError } from '@/lib/utils/errorUtils';
@@ -73,6 +74,8 @@ const STORAGE_KEY = 'super_console_filters';
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function SuperConsoleProvider({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const shouldPrefetchMatches = !(pathname?.startsWith('/admin/super/partidos') ?? false);
     // ── Filters ─────────────────────────────────────────────────────────────────
     const [filters, setFilters] = useState<SuperConsoleFilters>(() => {
         if (typeof window !== 'undefined') {
@@ -111,7 +114,7 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
     // If cache has data (even stale), loading starts false — data shows immediately.
     const [loading, setLoading] = useState({
         clubs: getCachedStale(KEYS.clubs) === null,
-        matches: getCachedStale(KEYS.matches) === null,
+        matches: shouldPrefetchMatches ? getCachedStale(KEYS.matches) === null : false,
         tournaments: getCachedStale(KEYS.tournaments) === null,
         unions: getCachedStale(KEYS.unions) === null,
         news: getCachedStale(KEYS.news) === null,
@@ -125,6 +128,7 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
     });
 
     const prefetched = useRef(false);
+    const matchesPrefetched = useRef(false);
 
     // ── Stale-while-revalidate loaders ──────────────────────────────────────────
     //
@@ -294,11 +298,21 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
         prefetched.current = true;
 
         loadClubs();
-        loadMatches();
         loadTournaments();
         loadUnions();
         loadNews();
     }, [loadClubs, loadMatches, loadTournaments, loadUnions, loadNews]);
+
+    useEffect(() => {
+        if (!shouldPrefetchMatches) {
+            setLoading(prev => ({ ...prev, matches: false }));
+            return;
+        }
+
+        if (matchesPrefetched.current) return;
+        matchesPrefetched.current = true;
+        loadMatches();
+    }, [loadMatches, shouldPrefetchMatches]);
 
     // ── Public refresh (called after mutations) ──────────────────────────────────
     // force=true → invalidates cache + shows spinner → guarantees fresh data.

@@ -597,12 +597,13 @@ export class FixtureService {
       throw new Error('El partido que intentás actualizar no existe.');
     }
 
-    const nextPhaseId = data.phaseId ?? existingMatch.phase_id;
-    if (!nextPhaseId) {
-      throw new Error('El partido debe pertenecer a una fase.');
-    }
-
     const updateData: any = {};
+    const requiresContextValidation =
+      data.phaseId !== undefined ||
+      data.roundId !== undefined ||
+      data.roundLabel !== undefined ||
+      data.homeClubId !== undefined ||
+      data.awayClubId !== undefined;
 
     // Automated Round Management for updates
     if (!data.roundId && data.phaseId && data.roundLabel) {
@@ -620,13 +621,20 @@ export class FixtureService {
       throw new Error('El equipo local y el visitante no pueden ser el mismo.');
     }
 
-    await this.assertMatchContext(supabase, {
-      tournamentId: existingMatch.tournament_id,
-      phaseId: nextPhaseId,
-      roundId: updateData.round_uuid !== undefined ? updateData.round_uuid : this.getMatchRoundId(existingMatch),
-      homeClubId: nextHomeClubId,
-      awayClubId: nextAwayClubId,
-    });
+    if (requiresContextValidation) {
+      const nextPhaseId = data.phaseId ?? existingMatch.phase_id;
+      if (!nextPhaseId) {
+        throw new Error('El partido debe pertenecer a una fase.');
+      }
+
+      await this.assertMatchContext(supabase, {
+        tournamentId: existingMatch.tournament_id,
+        phaseId: nextPhaseId,
+        roundId: updateData.round_uuid !== undefined ? updateData.round_uuid : this.getMatchRoundId(existingMatch),
+        homeClubId: nextHomeClubId,
+        awayClubId: nextAwayClubId,
+      });
+    }
 
     if (data.homeClubId !== undefined) updateData.home_club_id = data.homeClubId;
     if (data.awayClubId !== undefined) updateData.away_club_id = data.awayClubId;

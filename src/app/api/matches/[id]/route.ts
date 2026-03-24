@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { getReadClient } from '@/lib/supabase/read';
+import { createClient } from '@/lib/supabase/server';
+import {
+  fetchMatchCenterMatch,
+  persistMatchCenterSupplementalData,
+} from '@/lib/services/matchCenterService';
 import {
   getFlashScoreMatchCommentary,
   getFlashScoreMatchDetails,
@@ -18,6 +25,14 @@ import {
 
 function isFlashScoreMatchId(matchId: string) {
   return /^[A-Za-z0-9]{8}$/.test(matchId);
+}
+
+async function getWriteClient() {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return createAdminClient();
+  }
+
+  return createClient();
 }
 
 async function getFlashScoreMatchBundle(matchId: string) {
@@ -100,9 +115,10 @@ export async function GET(
       return NextResponse.json(bundle);
     }
 
-    const match = await FixtureService.getMatch(matchId);
+    const readClient = await getReadClient();
+    const { data: match, error: matchError } = await fetchMatchCenterMatch(readClient, matchId);
 
-    if (!match) {
+    if (matchError || !match) {
       return NextResponse.json(
         { error: 'Match not found' },
         { status: 404 }
@@ -130,15 +146,30 @@ export async function PATCH(
 
     console.log('[API PATCH /matches]', matchId, 'keys:', Object.keys(body));
 
-    // FixtureService expects camelCase keys for its known fields,
-    // but events and lineups are passed through directly
-    const match = await FixtureService.updateMatch(matchId, body);
+    const { events, lineups, ...matchFields } = body as Record<string, unknown>;
+    const hasFixtureFieldUpdate = Object.keys(matchFields).length > 0;
+    const writeClient = await getWriteClient();
 
-    if (!match) {
+    if (hasFixtureFieldUpdate) {
+      await FixtureService.updateMatch(matchId, matchFields);
+    }
+
+    const supplemental = await persistMatchCenterSupplementalData(writeClient, matchId, {
+      events: Array.isArray(events) ? events : undefined,
+      lineups: lineups as { home?: unknown[]; away?: unknown[] } | null | undefined,
+    });
+
+    const { data: match, error: matchError } = await fetchMatchCenterMatch(writeClient, matchId);
+
+    if (matchError || !match) {
       return NextResponse.json(
         { error: 'Failed to update match. Check server logs for Supabase error details.' },
         { status: 500 }
       );
+    }
+
+    if (lineups !== undefined && !supplemental.persistedLineups) {
+      match.lineups = supplemental.lineups;
     }
 
     return NextResponse.json(match);

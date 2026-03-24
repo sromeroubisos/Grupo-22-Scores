@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar, ArrowLeft } from 'lucide-react';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
-import { useSuperConsole } from '../../SuperConsoleContext';
+import { getActiveSports } from '@/lib/data/sports';
 import '../../creation-forms.css';
 import './monolith.css';
 import { CustomSelect } from './CustomSelect';
@@ -15,6 +15,7 @@ interface Tournament {
   name: string;
   season: string | null;
   division_id: string | null;
+  sportId?: string | null;
   type?: 'internal' | 'external';
   externalId?: string;
   url?: string;
@@ -31,6 +32,7 @@ interface Club {
   name: string;
   short_name: string | null;
   logo: string | null;
+  sport?: string | null;
 }
 
 interface Squad {
@@ -59,6 +61,31 @@ interface TournamentGroupOption {
 
 type MatchStatus = 'scheduled' | 'postponed' | 'suspended';
 
+const ACTIVE_SPORTS = getActiveSports();
+
+function getSportVariants(sport: string): string[] {
+  const lower = sport.toLowerCase();
+  switch (lower) {
+    case 'rugby': return ['rugby', 'rugby-union', 'rugby-league'];
+    case 'rugby-union': return ['rugby', 'rugby-union'];
+    case 'rugby-league': return ['rugby', 'rugby-league'];
+    case 'football': return ['football', 'soccer'];
+    case 'hockey': return ['hockey', 'field-hockey'];
+    default: return [lower];
+  }
+}
+
+function normalizeSportValue(value: string | null | undefined) {
+  const normalized = value?.trim().toLowerCase();
+  return normalized || null;
+}
+
+function sportMatchesSelection(clubSport: string | null | undefined, selectedSportId: string) {
+  const normalizedClubSport = normalizeSportValue(clubSport);
+  if (!normalizedClubSport) return false;
+  return getSportVariants(selectedSportId).includes(normalizedClubSport);
+}
+
 // Helpers for date conversion
 const toDisplayDate = (isoDate: string) => {
   if (!isoDate) return '';
@@ -81,7 +108,6 @@ export default function CreateMatchPage() {
   // 1. Hooks
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refresh } = useSuperConsole();
   const tournamentIdParam = searchParams.get('tournamentId');
   const dateInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,6 +116,7 @@ export default function CreateMatchPage() {
   const [formData, setFormData] = useState({
     season: new Date().getFullYear().toString(),
     tournamentId: tournamentIdParam || '',
+    sportId: '',
     phase: '',
     roundId: '',
     round: '',
@@ -138,6 +165,7 @@ export default function CreateMatchPage() {
         setTournaments(internalTournaments.map((t: any) => ({
           id: t.id,
           name: t.label,
+          sportId: t.sportId || t.sport_id || t.sport || null,
           type: 'internal',
           externalId: t.external_id,
           url: t.url,
@@ -158,7 +186,8 @@ export default function CreateMatchPage() {
         const clubsArray = Array.isArray(data) ? data : (data.data || []);
         setClubs(clubsArray.map((c: any) => ({
           ...c,
-          logo: c.logo || c.logo_url
+          logo: c.logo || c.logo_url,
+          sport: c.sport_id || c.sport || null,
         })));
       }
     } catch (error) {
@@ -386,6 +415,45 @@ export default function CreateMatchPage() {
   }, [formData.awayClubId]);
 
   useEffect(() => {
+    if (!isFriendly || formData.sportId) return;
+    const tournamentSportId = tournaments.find((t) => t.id === formData.tournamentId)?.sportId || '';
+    if (!tournamentSportId) return;
+
+    setFormData((prev) => {
+      if (prev.sportId) return prev;
+      return { ...prev, sportId: tournamentSportId };
+    });
+  }, [formData.sportId, formData.tournamentId, isFriendly, tournaments]);
+
+  useEffect(() => {
+    if (!isFriendly || !formData.sportId) return;
+
+    const clubsWithSport = clubs.filter((club) => normalizeSportValue(club.sport));
+    if (clubsWithSport.length === 0) return;
+
+    setFormData((prev) => {
+      const nextHomeClubId = prev.homeClubId && sportMatchesSelection(clubs.find((club) => club.id === prev.homeClubId)?.sport, prev.sportId)
+        ? prev.homeClubId
+        : '';
+      const nextAwayClubId = prev.awayClubId && sportMatchesSelection(clubs.find((club) => club.id === prev.awayClubId)?.sport, prev.sportId)
+        ? prev.awayClubId
+        : '';
+
+      if (nextHomeClubId === prev.homeClubId && nextAwayClubId === prev.awayClubId) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        homeClubId: nextHomeClubId,
+        awayClubId: nextAwayClubId,
+        homeSquadId: nextHomeClubId ? prev.homeSquadId : '',
+        awaySquadId: nextAwayClubId ? prev.awaySquadId : '',
+      };
+    });
+  }, [clubs, formData.sportId, isFriendly]);
+
+  useEffect(() => {
     setFormData((prev) => {
       const nextRoundId = tournamentRounds.some((round) => round.phaseId === prev.phase && round.id === prev.roundId)
         ? prev.roundId
@@ -408,12 +476,26 @@ export default function CreateMatchPage() {
 
   const availableRounds = tournamentRounds.filter((round) => round.phaseId === formData.phase);
   const availableGroups = tournamentGroups.filter((group) => group.phaseId === formData.phase);
+  const selectedTournament = tournaments.find((t) => t.id === formData.tournamentId) || null;
+  const selectedFriendlySport = ACTIVE_SPORTS.find((sport) => sport.id === formData.sportId) || null;
+  const availableFriendlyClubs = (() => {
+    if (!formData.sportId) return [];
+    const clubsWithSport = clubs.filter((club) => normalizeSportValue(club.sport));
+    if (clubsWithSport.length === 0) return clubs;
+    return clubsWithSport.filter((club) => sportMatchesSelection(club.sport, formData.sportId));
+  })();
 
   const handleSubmit = async () => {
     if (loading) return;
     setLoading(true);
 
     try {
+      if (isFriendly && !formData.sportId) {
+        alert('Selecciona el deporte del amistoso');
+        setLoading(false);
+        return;
+      }
+
       if (!formData.homeClubId || !formData.awayClubId) {
         alert('Por favor selecciona ambos equipos');
         setLoading(false);
@@ -453,6 +535,7 @@ export default function CreateMatchPage() {
       const useTournamentFixtureRoute = !isFriendly && Boolean(formData.tournamentId && formData.phase);
       const matchData = {
         tournamentId: isFriendly ? null : formData.tournamentId,
+        sportId: isFriendly ? formData.sportId : null,
         phaseId: isFriendly ? null : (formData.phase || null),
         roundId: isFriendly ? null : (formData.roundId || null),
         roundLabel: isFriendly ? null : (formData.round.trim() || null),
@@ -492,7 +575,6 @@ export default function CreateMatchPage() {
 
       await response.json();
       invalidateCache('matches_list');
-      refresh('matches');
       router.push('/admin/super/partidos');
     } catch (error) {
       console.error('Error creating match:', error);
@@ -506,7 +588,9 @@ export default function CreateMatchPage() {
     router.back();
   };
 
-  const availableClubs = (isFriendly || !formData.tournamentId || tournamentParticipants.length === 0)
+  const availableClubs = isFriendly
+    ? availableFriendlyClubs
+    : (!formData.tournamentId || tournamentParticipants.length === 0)
     ? clubs
     : tournamentParticipants;
 
@@ -598,7 +682,13 @@ export default function CreateMatchPage() {
                     const nextFriendly = e.target.checked;
                     setIsFriendly(nextFriendly);
                     if (nextFriendly) {
-                      setFormData((prev) => ({ ...prev, phase: '', roundId: '', groupId: '' }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        sportId: prev.sportId || selectedTournament?.sportId || '',
+                        phase: '',
+                        roundId: '',
+                        groupId: '',
+                      }));
                     }
                   }}
                 />
@@ -606,6 +696,29 @@ export default function CreateMatchPage() {
               </label>
               <span style={{ fontFamily: 'Space Mono', fontSize: '10px' }}>OFF / ON</span>
             </div>
+          </div>
+          <div className="cell col-6">
+            <label>Deporte del amistoso</label>
+            <CustomSelect
+              value={formData.sportId}
+              onChange={(val) => setFormData({
+                ...formData,
+                sportId: val,
+                homeClubId: '',
+                awayClubId: '',
+                homeSquadId: '',
+                awaySquadId: '',
+              })}
+              disabled={!isFriendly}
+              placeholder={isFriendly ? 'Seleccionar deporte...' : 'Se hereda del torneo'}
+              options={[
+                { value: '', label: isFriendly ? 'Seleccionar deporte...' : 'Se hereda del torneo' },
+                ...ACTIVE_SPORTS.map((sport) => ({
+                  value: sport.id,
+                  label: sport.nameEs,
+                })),
+              ]}
+            />
           </div>
           <div className="cell col-4">
             <label>Fase</label>
@@ -687,6 +800,26 @@ export default function CreateMatchPage() {
         <div className="m-section-label">
           <span>02. EQUIPOS Y PLANTELES</span>
         </div>
+        {isFriendly && !formData.sportId && (
+          <div className="m-section" style={{ marginBottom: 16 }}>
+            <div className="cell col-12">
+              <label>Deporte requerido</label>
+              <div style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: 12 }}>
+                Define primero el deporte del amistoso para mostrar solo clubes de esa disciplina.
+              </div>
+            </div>
+          </div>
+        )}
+        {isFriendly && formData.sportId && (
+          <div className="m-section" style={{ marginBottom: 16 }}>
+            <div className="cell col-12">
+              <label>Disciplina seleccionada</label>
+              <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>
+                {selectedFriendlySport?.nameEs || formData.sportId}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="m-section">
           <div className="cell col-6">
             <label>Equipo Local</label>

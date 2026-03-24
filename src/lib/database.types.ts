@@ -346,6 +346,8 @@ export type Database = {
           pitch: string | null
           referee: string | null
           round_id: string | null
+          sport: string | null
+          sport_id: string | null
           round_uuid: string | null
           score: Json | null
           status: string
@@ -375,6 +377,8 @@ export type Database = {
           pitch?: string | null
           referee?: string | null
           round_id?: string | null
+          sport?: string | null
+          sport_id?: string | null
           round_uuid?: string | null
           score?: Json | null
           status?: string
@@ -404,6 +408,8 @@ export type Database = {
           pitch?: string | null
           referee?: string | null
           round_id?: string | null
+          sport?: string | null
+          sport_id?: string | null
           round_uuid?: string | null
           score?: Json | null
           status?: string

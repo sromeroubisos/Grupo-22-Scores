@@ -45,6 +45,12 @@ function getSportVariants(sport: string): string[] {
     }
 }
 
+function normalizeSportValue(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim().toLowerCase();
+    return normalized || null;
+}
+
 function resolveTournamentCountry(tournament: any): string {
     const relationCountry = tournament?.country?.nameEs || tournament?.country?.name || null;
     if (relationCountry) return relationCountry;
@@ -65,16 +71,7 @@ function resolveTournamentCountry(tournament: any): string {
 }
 
 async function selectManyWithFallback<T>(
-    client: {
-        from: (table: string) => {
-            select: (columns: string) => {
-                in: (column: string, values: string[]) => Promise<{
-                    data: T[] | null;
-                    error: { code?: string | null; message?: string | null; details?: string | null } | null;
-                }>;
-            };
-        };
-    },
+    client: LookupMapsClient,
     table: string,
     idColumn: string,
     ids: string[],
@@ -93,7 +90,7 @@ async function selectManyWithFallback<T>(
             .in(idColumn, ids);
 
         if (!result.error) {
-            return { data: result.data || [], error: null };
+            return { data: (result.data as T[] | null) || [], error: null };
         }
 
         lastError = result.error;
@@ -114,6 +111,17 @@ async function getReadClient() {
     return createClient();
 }
 
+type LookupMapsClient = {
+    from: (table: string) => {
+        select: (columns: string) => {
+            in: (column: string, values: string[]) => PromiseLike<{
+                data: unknown[] | null;
+                error: { code?: string | null; message?: string | null; details?: string | null } | null;
+            }>;
+        };
+    };
+};
+
 type DbTournamentLite = {
     id: string;
     name: string;
@@ -132,7 +140,39 @@ type DbClubLite = {
     short_name?: string | null;
     logo_url?: string | null;
     primary_color?: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
 };
+
+function resolveClubSport(club?: DbClubLite | null) {
+    return normalizeSportValue(club?.sport_id || club?.sport || null);
+}
+
+function resolveTournamentSport(tournament?: DbTournamentLite | null) {
+    return normalizeSportValue(tournament?.sport_id || tournament?.sport || null);
+}
+
+function resolveMatchSport(
+    match: { sport_id?: string | null; sport?: string | null },
+    tournament?: DbTournamentLite | null,
+    homeClub?: DbClubLite | null,
+    awayClub?: DbClubLite | null
+) {
+    const directSport = normalizeSportValue(match.sport_id || match.sport || null);
+    if (directSport) return directSport;
+
+    const tournamentSport = resolveTournamentSport(tournament);
+    if (tournamentSport) return tournamentSport;
+
+    const homeSport = resolveClubSport(homeClub);
+    const awaySport = resolveClubSport(awayClub);
+
+    if (homeSport && awaySport && homeSport === awaySport) {
+        return homeSport;
+    }
+
+    return homeSport || awaySport || null;
+}
 
 function isTournamentPubliclyVisible(tournament?: DbTournamentLite | null) {
     if (!tournament) return true;
@@ -145,13 +185,14 @@ function isTournamentPubliclyVisible(tournament?: DbTournamentLite | null) {
 }
 
 async function fetchDbLookupMaps(
-    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    supabase: unknown,
     tournamentIds: string[],
     clubIds: string[]
 ) {
+    const lookupClient = supabase as LookupMapsClient;
     const [tournamentsRes, clubsRes] = await Promise.all([
         selectManyWithFallback<DbTournamentLite>(
-            supabase,
+            lookupClient,
             'tournaments',
             'id',
             tournamentIds,
@@ -167,13 +208,20 @@ async function fetchDbLookupMaps(
             ]
         ),
         selectManyWithFallback<DbClubLite>(
-            supabase,
+            lookupClient,
             'clubs',
             'id',
             clubIds,
             [
+                'id, name, short_name, logo_url, primary_color, sport_id, sport',
+                'id, name, short_name, logo_url, primary_color, sport_id',
+                'id, name, short_name, logo_url, primary_color, sport',
                 'id, name, short_name, logo_url, primary_color',
+                'id, name, short_name, logo_url, sport_id',
+                'id, name, short_name, logo_url, sport',
                 'id, name, short_name, logo_url',
+                'id, name, logo_url, sport_id',
+                'id, name, logo_url, sport',
                 'id, name, logo_url',
                 'id, name'
             ]
@@ -206,7 +254,7 @@ function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | n
 
 function jsonWithPublicCache(payload: unknown, options: { liveOnly: boolean; date?: string | null }) {
     const headers = buildPublicCacheHeaders(options);
-    return NextResponse.json(payload, headers.size > 0 ? { headers } : undefined);
+    return NextResponse.json(payload, headers.get('Cache-Control') ? { headers } : undefined);
 }
 
 // GET /api/matches
@@ -306,16 +354,16 @@ export async function GET(request: Request) {
                         const sportVariants = getSportVariants(sport);
                         const enrichedDbLive = dbLiveMatches.filter((m: any) => {
                             const tournament = tournamentMap.get(m.tournament_id);
+                            const homeTeam = clubMap.get(m.home_club_id);
+                            const awayTeam = clubMap.get(m.away_club_id);
                             if (!isTournamentPubliclyVisible(tournament)) return false;
-                            const tournamentSport = tournament?.sport_id || tournament?.sport || null;
-                            if (sportVariants && tournamentSport) {
-                                return sportVariants.includes(tournamentSport.toLowerCase());
-                            }
-                            return true;
+                            const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
+                            return resolvedSport ? sportVariants.includes(resolvedSport) : false;
                         }).map((m: any) => {
                            const tournament = tournamentMap.get(m.tournament_id);
                            const homeTeam = clubMap.get(m.home_club_id);
                            const awayTeam = clubMap.get(m.away_club_id);
+                           const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
                            const { localTime } = toLocalMatch(m.date_time, timeZone);
                            return {
                                 id: m.id,
@@ -344,10 +392,10 @@ export async function GET(request: Request) {
                                 tournament: tournament ? {
                                     id: tournament.id,
                                     name: tournament.name,
-                                    sport: tournament.sport_id || tournament.sport || sport,
+                                    sport: resolvedSport || tournament.sport_id || tournament.sport || null,
                                     status: tournament.status || 'published',
                                     country: resolveTournamentCountry(tournament)
-                                } : { id: m.tournament_id || 'db-local', name: 'Partido Local', sport, status: 'published', country: 'Internacional' },
+                                } : { id: m.tournament_id || 'db-local', name: 'Partido Local', sport: resolvedSport, status: 'published', country: 'Internacional' },
                                 liveEnabled: m.status === 'live',
                                 source: 'db'
                            }
@@ -622,15 +670,18 @@ export async function GET(request: Request) {
                     .filter((m: any) => {
                         if (existingIds.has(m.id)) return false;
                         const tournament = tournamentMap.get(m.tournament_id);
+                        const homeTeam = clubMap.get(m.home_club_id);
+                        const awayTeam = clubMap.get(m.away_club_id);
                         if (!isTournamentPubliclyVisible(tournament)) return false;
                         if (!sportVariants) return true;
-                        const tournamentSport = tournament?.sport_id || tournament?.sport || null;
-                        return tournamentSport ? sportVariants.includes(tournamentSport.toLowerCase()) : true;
+                        const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
+                        return resolvedSport ? sportVariants.includes(resolvedSport) : false;
                     })
                     .map((m: any) => {
                         const tournament = tournamentMap.get(m.tournament_id);
                         const homeTeam = clubMap.get(m.home_club_id);
                         const awayTeam = clubMap.get(m.away_club_id);
+                        const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
                         const { localTime } = toLocalMatch(m.date_time, timeZone);
                         return {
                             id: m.id,
@@ -673,13 +724,13 @@ export async function GET(request: Request) {
                             tournament: tournament ? {
                                 id: tournament.id,
                                 name: tournament.name,
-                                sport: tournament.sport_id || tournament.sport || (sport || 'rugby'),
+                                sport: resolvedSport || tournament.sport_id || tournament.sport || null,
                                 status: tournament.status || 'published',
                                 country: resolveTournamentCountry(tournament)
                             } : {
                                 id: m.tournament_id || 'db-local',
                                 name: 'Partido Local',
-                                sport: sport || 'rugby',
+                                sport: resolvedSport,
                                 status: 'published',
                                 country: 'Internacional'
                             },
@@ -758,6 +809,7 @@ export async function POST(request: Request) {
             tournamentId,
             phaseId,
             roundId,
+            sportId,
             homeClubId,
             awayClubId,
             dateTime,
@@ -766,6 +818,7 @@ export async function POST(request: Request) {
             notes,
         } = body;
         const normalizedRoundId = isUuidLike(roundId) ? roundId : null;
+        const normalizedSportId = normalizeSportValue(sportId ?? body.sport ?? null);
         const normalizedRoundLabel = typeof body.roundLabel === 'string' && body.roundLabel.trim()
             ? body.roundLabel.trim()
             : null;
@@ -810,16 +863,27 @@ export async function POST(request: Request) {
             }
         }
 
+        if (!finalTournamentId && !normalizedSportId) {
+            return NextResponse.json(
+                { error: 'Sport is required for friendly matches' },
+                { status: 400 }
+            );
+        }
+
         const [
             supportsRoundUuid,
             supportsRoundLabel,
             supportsReferee,
             supportsBroadcastUrl,
+            supportsSportId,
+            supportsSport,
         ] = await Promise.all([
             normalizedRoundId ? supportsMatchesColumn(supabase, 'round_uuid') : Promise.resolve(false),
             normalizedRoundLabel ? supportsMatchesColumn(supabase, 'round_label') : Promise.resolve(false),
             body.referee ? supportsMatchesColumn(supabase, 'referee') : Promise.resolve(false),
             normalizedWatchUrl ? supportsMatchesColumn(supabase, 'broadcast_url') : Promise.resolve(false),
+            normalizedSportId ? supportsMatchesColumn(supabase, 'sport_id') : Promise.resolve(false),
+            normalizedSportId ? supportsMatchesColumn(supabase, 'sport') : Promise.resolve(false),
         ]);
 
         // Insert match
@@ -854,6 +918,15 @@ export async function POST(request: Request) {
 
         if (supportsBroadcastUrl) {
             matchPayload.broadcast_url = normalizedWatchUrl;
+        }
+
+        if (normalizedSportId) {
+            if (supportsSportId) {
+                matchPayload.sport_id = normalizedSportId;
+            }
+            if (supportsSport) {
+                matchPayload.sport = normalizedSportId;
+            }
         }
 
         const { data: match, error: insertError } = await supabase

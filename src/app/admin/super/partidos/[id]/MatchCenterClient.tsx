@@ -196,7 +196,13 @@ async function fetchPhaseRules(matchId: string, roundId: string | null): Promise
             .select('settings')
             .eq('id', round.phase_id)
             .single();
-        const settings = phase?.settings as any;
+        const settings = phase?.settings as {
+            points?: { win?: number; draw?: number; loss?: number };
+            bonus?: {
+                offensive?: { tries?: number; threshold?: number };
+                defensive?: { margin?: number };
+            };
+        } | undefined;
         return {
             win:  settings?.points?.win  ?? defaults.win,
             draw: settings?.points?.draw ?? defaults.draw,
@@ -268,26 +274,26 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     /* ─── REFRESH (for after saves / config changes) ─── */
     const fetchMatch = useCallback(async () => {
         try {
-            const { data, error: fetchErr } = await supabase
-                .from('matches')
-                .select(`
-                    *,
-                    homeClub:home_club_id (id, name, short_name, logo_url, primary_color),
-                    awayClub:away_club_id (id, name, short_name, logo_url, primary_color),
-                    tournament:tournament_id (id, name)
-                `)
-                .eq('id', matchId)
-                .single();
+            const res = await fetch(`/api/matches/${matchId}`, { cache: 'no-store' });
+            const payload = await res.json();
 
-            if (fetchErr) throw fetchErr;
-            const m = data as unknown as MatchRow;
+            if (!res.ok) {
+                throw new Error(payload?.error || `HTTP ${res.status}`);
+            }
+
+            const m = payload as MatchRow;
             setMatch(m);
             setLocalEvents(Array.isArray(m.events) ? m.events : []);
-            setLocalLineups(m.lineups || { home: [], away: [] });
+            setLocalLineups((prev) => {
+                const next = m.lineups || { home: [], away: [] };
+                const hasNext = next.home.length > 0 || next.away.length > 0;
+                const hasPrev = prev.home.length > 0 || prev.away.length > 0;
+                return hasNext || !hasPrev ? next : prev;
+            });
         } catch (err: unknown) {
             console.error('Error refreshing match:', err);
         }
-    }, [matchId, supabase]);
+    }, [matchId]);
 
     /* ─── POINTS: RECALCULATE & SAVE ─── */
     const handleRecalculate = useCallback(async () => {
@@ -383,12 +389,15 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 return;
             }
 
-            await fetchMatch();
+            const updatedMatch = result as MatchRow;
+            setMatch(updatedMatch);
+            setLocalEvents(Array.isArray(updatedMatch.events) ? updatedMatch.events : []);
+            setLocalLineups(updatedMatch.lineups || { home: [], away: [] });
             setSaveMsg({ type: 'ok', text: '✓ Guardado correctamente' });
             setTimeout(() => setSaveMsg(null), 3000);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('[MatchCenter] Save error:', err);
-            setSaveMsg({ type: 'err', text: `Error de red: ${err?.message || err}` });
+            setSaveMsg({ type: 'err', text: `Error de red: ${err instanceof Error ? err.message : String(err)}` });
         } finally {
             setSaving(false);
         }
@@ -1026,7 +1035,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     style={{ borderRadius: 4 }}
                                     onBlur={async (e) => {
                                         const newScore = { ...score, home: parseInt(e.target.value) || 0 };
-                                        await supabase.from('matches').update({ score: newScore as any }).eq('id', matchId);
+                                        await supabase.from('matches').update({ score: newScore as unknown as Record<string, number> }).eq('id', matchId);
                                         fetchMatch();
                                     }}
                                 />
@@ -1040,7 +1049,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     style={{ borderRadius: 4 }}
                                     onBlur={async (e) => {
                                         const newScore = { ...score, away: parseInt(e.target.value) || 0 };
-                                        await supabase.from('matches').update({ score: newScore as any }).eq('id', matchId);
+                                        await supabase.from('matches').update({ score: newScore as unknown as Record<string, number> }).eq('id', matchId);
                                         fetchMatch();
                                     }}
                                 />

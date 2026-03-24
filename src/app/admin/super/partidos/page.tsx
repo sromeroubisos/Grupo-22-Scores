@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
@@ -11,6 +11,19 @@ import { invalidateCache } from '@/lib/cache/superAdminCache';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 
 type MatchStatus = 'scheduled' | 'live' | 'final' | 'postponed' | 'suspended';
+const PAGE_SIZE = 20;
+
+type PaginatedMatchesResponse = {
+    data: MatchRow[];
+    pagination?: {
+        page: number;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+    };
+    error?: string;
+    details?: unknown;
+};
 
 const STATUS_CONFIG: Record<MatchStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
     scheduled: { label: 'Programado', color: '#60a5fa', bg: 'rgba(96,165,250,0.1)', icon: <Clock size={10} /> },
@@ -19,6 +32,22 @@ const STATUS_CONFIG: Record<MatchStatus, { label: string; color: string; bg: str
     postponed: { label: 'Postergado', color: '#eab308', bg: 'rgba(234,179,8,0.1)', icon: <AlertTriangle size={10} /> },
     suspended: { label: 'Suspendido', color: '#ef4444', bg: 'rgba(239,68,68,0.1)', icon: <AlertTriangle size={10} /> },
 };
+
+function getSportVariants(sport: string): string[] {
+    const lower = sport.toLowerCase();
+    switch (lower) {
+        case 'rugby': return ['rugby', 'rugby-union', 'rugby-league'];
+        case 'rugby-union': return ['rugby', 'rugby-union'];
+        case 'rugby-league': return ['rugby', 'rugby-league'];
+        case 'football': return ['football', 'soccer'];
+        case 'hockey': return ['hockey', 'field-hockey'];
+        default: return [lower];
+    }
+}
+
+function resolveMatchSportId(match: MatchRow) {
+    return (match.sport_id || match.tournament?.sport_id || '').toLowerCase() || null;
+}
 
 function formatDateTime(iso: string) {
     try { return formatDateInTimeZone(iso, 'es-AR', { dateStyle: 'short', timeStyle: 'short' }, APP_TIMEZONE) || iso; }
@@ -47,17 +76,121 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function SuperadminPartidosPage() {
     // ─── Read from shared context (already prefetched by layout) ─────────────────
-    const { filters, matches, loading, errors, refresh } = useSuperConsole();
-    const isLoading = loading.matches;
-    const errorMsg = errors.matches;
+    const { filters } = useSuperConsole();
     const supabase = createClient();
 
     const [statusFilter, setStatusFilter] = useState<MatchStatus | 'all'>('all');
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageMatches, setPageMatches] = useState<MatchRow[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [totalMatches, setTotalMatches] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     // Optimistic local state
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
     const [statusOverrides, setStatusOverrides] = useState<Map<string, string>>(new Map());
+
+    const loadMatchesPage = useCallback(async (page = currentPage) => {
+        setIsLoading(true);
+        setErrorMsg(null);
+
+        try {
+            const params = new URLSearchParams({
+                page: String(page),
+                pageSize: String(PAGE_SIZE),
+            });
+
+            if (statusFilter !== 'all') params.set('status', statusFilter);
+            if (filters.sport !== 'all') params.set('sport', filters.sport);
+
+            const response = await fetch(`/api/admin/super/matches?${params.toString()}`, {
+                cache: 'no-store',
+                credentials: 'include',
+            });
+            const payload = await response.json() as PaginatedMatchesResponse;
+
+            if (!response.ok) {
+                const detail = typeof payload?.details === 'string' ? payload.details : null;
+                throw new Error(detail ? `${payload?.error || 'Failed to load matches'}: ${detail}` : (payload?.error || 'Failed to load matches'));
+            }
+
+            const nextMatches = Array.isArray(payload.data) ? payload.data : [];
+            const nextTotal = payload.pagination?.total ?? nextMatches.length;
+            const nextTotalPages = payload.pagination?.totalPages ?? (nextTotal > 0 ? Math.ceil(nextTotal / PAGE_SIZE) : 0);
+
+            if (page > 1 && nextMatches.length === 0 && nextTotalPages > 0) {
+                setCurrentPage(nextTotalPages);
+                return;
+            }
+
+            setPageMatches(nextMatches);
+            setTotalMatches(nextTotal);
+            setTotalPages(nextTotalPages);
+        } catch (error) {
+            console.error('Failed to load paginated matches, falling back to legacy source:', error);
+
+            try {
+                const fallbackResponse = await fetch('/api/admin/super/console-data?resource=matches', {
+                    cache: 'no-store',
+                    credentials: 'include',
+                });
+                const fallbackPayload = await fallbackResponse.json() as { data?: MatchRow[]; error?: string; details?: unknown };
+
+                if (!fallbackResponse.ok) {
+                    const detail = typeof fallbackPayload?.details === 'string' ? fallbackPayload.details : null;
+                    throw new Error(detail ? `${fallbackPayload?.error || 'Failed to load matches'}: ${detail}` : (fallbackPayload?.error || 'Failed to load matches'));
+                }
+
+                const baseMatches = Array.isArray(fallbackPayload.data) ? fallbackPayload.data : [];
+                const serverEquivalentMatches = baseMatches.filter(match => {
+                    if (statusFilter !== 'all' && match.status !== statusFilter) return false;
+                    if (filters.sport !== 'all') {
+                        const sportId = resolveMatchSportId(match);
+                        if (!sportId || !getSportVariants(filters.sport).includes(sportId)) return false;
+                    }
+                    return true;
+                });
+
+                const fallbackTotal = serverEquivalentMatches.length;
+                const fallbackTotalPages = fallbackTotal > 0 ? Math.ceil(fallbackTotal / PAGE_SIZE) : 0;
+
+                if (page > 1 && fallbackTotalPages > 0 && page > fallbackTotalPages) {
+                    setCurrentPage(fallbackTotalPages);
+                    return;
+                }
+
+                const start = (page - 1) * PAGE_SIZE;
+                const nextMatches = serverEquivalentMatches.slice(start, start + PAGE_SIZE);
+
+                setPageMatches(nextMatches);
+                setTotalMatches(fallbackTotal);
+                setTotalPages(fallbackTotalPages);
+                setErrorMsg(null);
+            } catch (fallbackError) {
+                console.error('Failed to load matches from legacy source:', fallbackError);
+                setPageMatches([]);
+                setTotalMatches(0);
+                setTotalPages(0);
+                setErrorMsg(fallbackError instanceof Error ? fallbackError.message : 'Failed to load matches');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    }, [currentPage, filters.sport, statusFilter]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters.search, filters.sport, statusFilter]);
+
+    useEffect(() => {
+        void loadMatchesPage(currentPage);
+    }, [currentPage, loadMatchesPage]);
+
+    const refreshPage = useCallback(() => {
+        void loadMatchesPage(currentPage);
+    }, [currentPage, loadMatchesPage]);
 
     const handleDelete = async (id: string) => {
         if (!confirm('¿Seguro que deseas eliminar este partido?')) return;
@@ -69,7 +202,7 @@ export default function SuperadminPartidosPage() {
             return;
         }
         invalidateCache('matches_list');
-        refresh('matches');
+        refreshPage();
     };
 
     const handleStatusChange = async (id: string, newStatus: string) => {
@@ -81,27 +214,31 @@ export default function SuperadminPartidosPage() {
             return;
         }
         invalidateCache('matches_list');
-        refresh('matches');
+        refreshPage();
     };
 
     const enrichedMatches = useMemo(() =>
-        matches
+        pageMatches
             .filter(m => !deletedIds.has(m.id))
             .map(m => ({
                 ...m,
                 status: statusOverrides.has(m.id) ? statusOverrides.get(m.id)! : (m.status ?? 'scheduled'),
             })),
-        [matches, deletedIds, statusOverrides]);
+        [pageMatches, deletedIds, statusOverrides]);
 
     const filtered = useMemo(() => enrichedMatches.filter(m => {
         if (statusFilter !== 'all' && m.status !== statusFilter) return false;
+        if (filters.sport !== 'all') {
+            const sportId = resolveMatchSportId(m);
+            if (!sportId || !getSportVariants(filters.sport).includes(sportId)) return false;
+        }
         if (filters.search) {
             const term = filters.search.toLowerCase();
             const text = [m.home_team?.name, m.away_team?.name, m.tournament?.name, m.venue].join(' ').toLowerCase();
             if (!text.includes(term)) return false;
         }
         return true;
-    }), [enrichedMatches, statusFilter, filters.search]);
+    }), [enrichedMatches, statusFilter, filters.search, filters.sport]);
 
     const grouped = useMemo(() => filtered.reduce<Record<string, Record<string, MatchRow[]>>>((acc, m) => {
         const tournament = m.tournament?.name || 'Sin torneo';
@@ -113,6 +250,8 @@ export default function SuperadminPartidosPage() {
     }, {}), [filtered]);
 
     const liveCount = enrichedMatches.filter(m => m.status === 'live').length;
+    const loadedFrom = totalMatches === 0 ? 0 : ((currentPage - 1) * PAGE_SIZE) + 1;
+    const loadedTo = totalMatches === 0 ? 0 : Math.min(currentPage * PAGE_SIZE, totalMatches);
 
     return (
         <div style={{ paddingBottom: 40 }}>
@@ -122,7 +261,10 @@ export default function SuperadminPartidosPage() {
                     <div className={styles.consoleSubtitle}>
                         {isLoading ? 'Cargando…' : (
                             <span>
-                                {filtered.length} de {enrichedMatches.length} partidos
+                                {filtered.length} visibles en esta pagina
+                                <span style={{ color: 'var(--basalt-400)', marginLeft: 8 }}>
+                                    {loadedFrom}-{loadedTo} de {totalMatches}
+                                </span>
                                 {liveCount > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>● {liveCount} en vivo</span>}
                             </span>
                         )}
@@ -146,7 +288,7 @@ export default function SuperadminPartidosPage() {
                         {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                     </select>
 
-                    <button className={styles.cardAction} onClick={() => refresh('matches')} disabled={isLoading}>
+                    <button className={styles.cardAction} onClick={refreshPage} disabled={isLoading}>
                         <RefreshCw size={13} style={{ marginRight: 4, animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
                         Refrescar
                     </button>
@@ -166,7 +308,6 @@ export default function SuperadminPartidosPage() {
                 <div className={styles.slab} style={{ padding: 48, textAlign: 'center', color: 'var(--basalt-400)' }}>
                     <RefreshCw size={20} style={{ marginBottom: 12, animation: 'spin 1s linear infinite' }} />
                     <div>Cargando partidos…</div>
-                    <pre style={{ textAlign: 'left', background: '#111', padding: 10, marginTop: 20, fontSize: 10 }}>{JSON.stringify({ loading, errors }, null, 2)}</pre>
                 </div>
             )}
 
@@ -329,6 +470,32 @@ export default function SuperadminPartidosPage() {
                         ))}
                     </div>
                 ))
+            )}
+
+            {!isLoading && totalPages > 1 && (
+                <div className={styles.slab} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 20 }}>
+                    <div style={{ color: 'var(--basalt-400)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+                        Pagina {currentPage} de {totalPages}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <button
+                            type="button"
+                            className={styles.cardAction}
+                            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                            disabled={currentPage === 1 || isLoading}
+                        >
+                            Anterior
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.cardAction}
+                            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                            disabled={currentPage >= totalPages || isLoading}
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
             )}
 
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
