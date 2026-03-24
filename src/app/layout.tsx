@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import ConditionalLayout from "@/components/ConditionalLayout";
 // Force rebuild for ChunkLoadError fix
 import { AuthProvider } from "@/context/AuthContext";
@@ -65,6 +66,7 @@ export default function RootLayout({
         <AuthProvider>
           <ConditionalLayout>{children}</ConditionalLayout>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
