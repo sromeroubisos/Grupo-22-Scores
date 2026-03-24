@@ -1234,13 +1234,16 @@
     }
 
     .mobileTopControls {
-        position: sticky;
-        top: var(--h-header, 52px);
-        padding: 8px 0 12px;
-        margin: 0 -4px;
-        background: linear-gradient(180deg, rgba(10, 10, 11, 0.98) 0%, rgba(10, 10, 11, 0.95) 72%, rgba(10, 10, 11, 0.8) 88%, rgba(10, 10, 11, 0) 100%);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        position: relative;
+        top: auto;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        border-bottom: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        z-index: auto;
     }
 
     .mobileSportSelector {
@@ -1309,7 +1312,7 @@
     }
 
     .mobileTopControls {
-        top: var(--h-header, 52px);
+        top: auto;
     }
 }
 
@@ -1317,6 +1320,7 @@
 @media (max-width: 768px) {
     .matchesSection {
         gap: 20px;
+        padding-top: 0;
     }
 
     .mobileSportSelector {
