@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Download, Filter, MoreVertical, Search, Shield, User as UserIcon } from 'lucide-react';
 import styles from '../page.module.css';
-import { createClient } from '@/lib/supabase/client';
 import { getRoleLabel } from '@/lib/auth/roles';
+import { normalizeError, serializeUnknownError } from '@/lib/utils/errorUtils';
 
 type AppUserRow = {
     id: string;
@@ -22,7 +22,7 @@ type MembershipRow = {
     scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
     scope_id: string;
     role: 'admin' | 'editor' | 'operator' | 'viewer';
-    created_at: string;
+    created_at: string | null;
 };
 
 type RoleAssignment = {
@@ -32,10 +32,55 @@ type RoleAssignment = {
     email: string;
     roleLabel: string;
     scopeLabel: string;
-    assignedAt: string;
+    assignedAt: string | null;
     accessLevel: string;
     status: 'active' | 'inactive';
 };
+
+type PersonasRolesResponse = {
+    data?: {
+        users?: AppUserRow[];
+        memberships?: MembershipRow[];
+        entityNames?: Record<string, string>;
+    };
+    error?: string;
+    details?: unknown;
+};
+
+function stringifyDetails(details: unknown) {
+    if (typeof details === 'string') {
+        return details;
+    }
+
+    if (details == null) {
+        return null;
+    }
+
+    try {
+        return JSON.stringify(details);
+    } catch {
+        return serializeUnknownError(details);
+    }
+}
+
+function getResponsePreview(rawBody: string) {
+    return rawBody
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 220);
+}
+
+function formatShortDate(value?: string | null) {
+    return value ? new Date(value).toLocaleDateString() : '-';
+}
+
+function getDisplayInitials(value?: string | null) {
+    return (value || '?').substring(0, 2).toUpperCase();
+}
+
+function getAccessSummary(accessCount: number) {
+    return accessCount === 0 ? 'Sin alcances especificos' : `${accessCount} asignacion(es)`;
+}
 
 const MANAGEMENT_PRESETS = [
     {
@@ -80,8 +125,6 @@ const LOCAL_ROLE_LABELS: Record<MembershipRow['role'], string> = {
 };
 
 export default function PersonasRolesPage() {
-    const supabase = createClient();
-
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<'all' | 'roles'>('all');
     const [users, setUsers] = useState<AppUserRow[]>([]);
@@ -91,64 +134,71 @@ export default function PersonasRolesPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchUsers();
+        void fetchUsers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         setLoading(true);
         setError(null);
 
         const abortController = new AbortController();
-        const timeoutId = setTimeout(() => abortController.abort(), 6000);
+        const timeoutId = setTimeout(
+            () => abortController.abort(new DOMException('Personas y roles request timed out', 'AbortError')),
+            12000
+        );
 
         try {
-            const [
-                usersResult,
-                membershipsResult,
-                sportsResult,
-                unionsResult,
-                tournamentsResult,
-                clubsResult,
-                matchesResult,
-            ] = await Promise.all([
-                supabase
-                    .from('users')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .abortSignal(abortController.signal),
-                supabase
-                    .from('memberships')
-                    .select('id, user_id, scope_type, scope_id, role, created_at')
-                    .order('created_at', { ascending: false })
-                    .abortSignal(abortController.signal),
-                supabase.from('sports').select('id, name').order('name').abortSignal(abortController.signal),
-                supabase.from('unions').select('id, name').order('name').abortSignal(abortController.signal),
-                supabase.from('tournaments').select('id, name').order('name').abortSignal(abortController.signal),
-                supabase.from('clubs').select('id, name').order('name').abortSignal(abortController.signal),
-                supabase
-                    .from('matches')
-                    .select('id, date_time, tournament_id')
-                    .order('date_time', { ascending: false })
-                    .limit(500)
-                    .abortSignal(abortController.signal),
-            ]);
+            const response = await fetch('/api/admin/super/personas-roles', {
+                cache: 'no-store',
+                credentials: 'include',
+                signal: abortController.signal,
+            });
+            const rawBody = await response.text();
+            let payload: PersonasRolesResponse | null = null;
 
-            clearTimeout(timeoutId);
+            if (rawBody) {
+                try {
+                    payload = JSON.parse(rawBody) as PersonasRolesResponse;
+                } catch {
+                    const preview = getResponsePreview(rawBody);
+                    const statusLabel = `${response.status} ${response.statusText}`.trim();
 
-            if (usersResult.error) throw usersResult.error;
-            if (membershipsResult.error) throw membershipsResult.error;
-            if (sportsResult.error) throw sportsResult.error;
-            if (unionsResult.error) throw unionsResult.error;
-            if (tournamentsResult.error) throw tournamentsResult.error;
-            if (clubsResult.error) throw clubsResult.error;
-            if (matchesResult.error) throw matchesResult.error;
+                    throw new Error(
+                        response.ok
+                            ? `La API de personas y roles devolvio una respuesta invalida (${statusLabel}).`
+                            : `No se pudieron cargar los accesos (${statusLabel}). ${preview || 'Respuesta no JSON del servidor.'}`
+                    );
+                }
+            }
+
+            if (!response.ok) {
+                const detail = stringifyDetails(payload?.details);
+
+                throw new Error(
+                    detail
+                        ? `${payload?.error || 'No se pudieron cargar los accesos'}: ${detail}`
+                        : (payload?.error || 'No se pudieron cargar los accesos')
+                );
+            }
+
+            const usersResult = { data: payload?.data?.users ?? [] };
+            const membershipsResult = { data: payload?.data?.memberships ?? [] };
+            const sportsResult = { data: [] as Array<{ id: string; name: string }> };
+            const unionsResult = { data: [] as Array<{ id: string; name: string }> };
+            const tournamentsResult = { data: [] as Array<{ id: string; name: string }> };
+            const clubsResult = { data: [] as Array<{ id: string; name: string }> };
+            const matchesResult = { data: [] as Array<{ id: string; date_time?: string | null; tournament_id?: string | null }> };
 
             const tournamentsById = new Map(
                 (tournamentsResult.data || []).map((tournament) => [tournament.id, tournament.name])
             );
 
-            const nextEntityNames: Record<string, string> = {};
+            const nextEntityNames: Record<string, string> = { ...(payload?.data?.entityNames ?? {}) };
+
+            setUsers((payload?.data?.users ?? []) as AppUserRow[]);
+            setMemberships((payload?.data?.memberships ?? []) as MembershipRow[]);
+            setEntityNames(payload?.data?.entityNames ?? {});
 
             (sportsResult.data || []).forEach((sport) => {
                 nextEntityNames[`sport:${sport.id}`] = sport.name;
@@ -186,18 +236,42 @@ export default function PersonasRolesPage() {
             setMemberships((membershipsResult.data || []) as MembershipRow[]);
             setEntityNames(nextEntityNames);
         } catch (err: unknown) {
-            console.error('Error fetching personas/roles:', err);
-            const message = err instanceof Error ? err.message : 'Error desconocido al cargar accesos';
+            const normalized = normalizeError(err);
+            console.error('Error fetching personas/roles:', {
+                message: normalized.message,
+                details: normalized.details,
+                code: normalized.code,
+                raw: serializeUnknownError(normalized.raw),
+            });
+
+            const isAbort =
+                normalized.message.toLowerCase().includes('abort') ||
+                normalized.message.toLowerCase().includes('timed out') ||
+                normalized.code === 'AbortError';
+
+            if (isAbort) {
+                setError('La consulta tardó demasiado. Revisá RLS, el service role o la conectividad con Supabase.');
+            } else {
+                setError(
+                    normalized.details
+                        ? `${normalized.message}. ${normalized.details}`
+                        : normalized.message
+                );
+            }
+
+            return;
+            /* legacy client-side error handler removed
             if (message.includes('abort')) {
                 setError('La consulta tardó demasiado. Revisá RLS o la conectividad con Supabase.');
             } else {
                 setError(message);
             }
+            */
         } finally {
             clearTimeout(timeoutId);
             setLoading(false);
         }
-    };
+    }, []);
 
     const filteredUsers = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
@@ -325,7 +399,7 @@ export default function PersonasRolesPage() {
             </section>
 
             <div className={styles.slab} style={{ marginBottom: 24, padding: '0 24px' }}>
-                <div style={{ display: 'flex', gap: 24 }}>
+                <div className={styles.personasTabBar}>
                     <button
                         className={styles.tabInfo}
                         style={{
@@ -358,12 +432,12 @@ export default function PersonasRolesPage() {
             </div>
 
             <div className={styles.slab} style={{ marginBottom: 24 }}>
-                <div className={styles.slabHeader} style={{ justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div className={styles.filterInput} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', width: 320 }}>
-                            <Search size={16} style={{ color: '#666', marginRight: 8 }} />
+                <div className={`${styles.slabHeader} ${styles.personasToolbar}`}>
+                    <div className={styles.personasToolbarLead}>
+                        <div className={`${styles.filterInput} ${styles.personasSearch}`}>
+                            <Search size={16} className={styles.personasSearchIcon} />
                             <input
-                                style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%' }}
+                                className={styles.personasSearchInput}
                                 placeholder={activeTab === 'all' ? 'Buscar usuario por nombre o email...' : 'Buscar por alcance, rol o entidad...'}
                                 value={searchQuery}
                                 onChange={(event) => setSearchQuery(event.target.value)}
@@ -394,6 +468,7 @@ export default function PersonasRolesPage() {
                             <h2 className={styles.sectionTitle}>Directorio de Usuarios ({filteredUsers.length})</h2>
                         </div>
                         <div className={styles.card}>
+                            <div className={styles.personasDesktopTable}>
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
@@ -476,6 +551,73 @@ export default function PersonasRolesPage() {
                                     )}
                                 </tbody>
                             </table>
+                            </div>
+                            <div className={styles.personasMobileList}>
+                                {filteredUsers.length === 0 ? (
+                                    <div className={styles.personasEmptyState}>No se encontraron usuarios</div>
+                                ) : (
+                                    filteredUsers.map((user) => {
+                                        const accessCount = memberships.filter((membership) => membership.user_id === user.id).length;
+                                        const isGlobalAdmin = ['super_admin', 'admin_general'].includes(user.role);
+
+                                        return (
+                                            <article key={`mobile-${user.id}`} className={styles.personasMobileCard}>
+                                                <div className={styles.personasMobileCardHeader}>
+                                                    <div className={styles.personasMobileIdentity}>
+                                                        <div className={styles.personasAvatar}>
+                                                            {user.avatar_url ? (
+                                                                <img src={user.avatar_url} alt={user.name || 'User'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            ) : (
+                                                                getDisplayInitials(user.name || user.email)
+                                                            )}
+                                                        </div>
+                                                        <div className={styles.personasIdentityBody}>
+                                                            <div className={styles.personasMobileName}>{user.name || user.email || 'Sin nombre'}</div>
+                                                            <div className={styles.personasMobileEmail}>{user.email}</div>
+                                                        </div>
+                                                    </div>
+                                                    <span
+                                                        className={styles.badge}
+                                                        style={{
+                                                            background: isGlobalAdmin ? 'var(--color-accent)' : 'var(--basalt-800)',
+                                                            color: isGlobalAdmin ? '#000' : '#fff',
+                                                        }}
+                                                    >
+                                                        {getRoleLabel(user.role)}
+                                                    </span>
+                                                </div>
+
+                                                <div className={styles.personasMetaGrid}>
+                                                    <div className={styles.personasMetaItem}>
+                                                        <span className={styles.personasMetaLabel}>Accesos</span>
+                                                        <span className={styles.personasMetaValue}>{getAccessSummary(accessCount)}</span>
+                                                    </div>
+                                                    <div className={styles.personasMetaItem}>
+                                                        <span className={styles.personasMetaLabel}>Registro</span>
+                                                        <span className={styles.personasMetaValue}>{formatShortDate(user.created_at)}</span>
+                                                    </div>
+                                                    <div className={styles.personasMetaItem}>
+                                                        <span className={styles.personasMetaLabel}>Ultimo acceso</span>
+                                                        <span className={styles.personasMetaValue}>{formatShortDate(user.last_login_at)}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className={styles.personasCardActions}>
+                                                    <button
+                                                        className={styles.btn}
+                                                        style={{ width: '100%', justifyContent: 'center', opacity: 0.65 }}
+                                                        type="button"
+                                                        disabled
+                                                        title="Vista de lectura. La ediciÃ³n programÃ¡tica estÃ¡ disponible en /api/admin/users/:id/access"
+                                                    >
+                                                        <MoreVertical size={16} /> Solo lectura
+                                                    </button>
+                                                </div>
+                                            </article>
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
                     </section>
                 )}
@@ -486,6 +628,7 @@ export default function PersonasRolesPage() {
                             <h2 className={styles.sectionTitle}>Asignaciones por Alcance ({filteredAssignments.length})</h2>
                         </div>
                         <div className={styles.card}>
+                            <div className={styles.personasDesktopTable}>
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
@@ -542,7 +685,7 @@ export default function PersonasRolesPage() {
                                                     </span>
                                                 </td>
                                                 <td>{assignment.accessLevel}</td>
-                                                <td>{new Date(assignment.assignedAt).toLocaleDateString()}</td>
+                                                <td>{assignment.assignedAt ? new Date(assignment.assignedAt).toLocaleDateString() : '-'}</td>
                                                 <td>
                                                     <span className={`${styles.pill} ${styles.pillSuccess}`}>ACTIVO</span>
                                                 </td>
@@ -562,6 +705,65 @@ export default function PersonasRolesPage() {
                                     )}
                                 </tbody>
                             </table>
+                            </div>
+                            <div className={styles.personasMobileList}>
+                                {filteredAssignments.length === 0 ? (
+                                    <div className={styles.personasEmptyState}>No hay accesos especiales asignados</div>
+                                ) : (
+                                    filteredAssignments.map((assignment) => (
+                                        <article key={`mobile-${assignment.id}`} className={styles.personasMobileCard}>
+                                            <div className={styles.personasMobileCardHeader}>
+                                                <div className={styles.personasMobileIdentity}>
+                                                    <div className={`${styles.personasAvatar} ${styles.personasAvatarAccent}`}>
+                                                        {getDisplayInitials(assignment.userName)}
+                                                    </div>
+                                                    <div className={styles.personasIdentityBody}>
+                                                        <div className={styles.personasMobileName}>{assignment.userName}</div>
+                                                        <div className={styles.personasMobileEmail}>{assignment.email}</div>
+                                                    </div>
+                                                </div>
+                                                <span className={`${styles.pill} ${styles.pillSuccess}`}>Activo</span>
+                                            </div>
+
+                                            <div className={styles.personasMetaGrid}>
+                                                <div className={styles.personasMetaItem}>
+                                                    <span className={styles.personasMetaLabel}>Tipo</span>
+                                                    <span className={styles.personasMetaValue}>
+                                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                                            <Shield size={14} color="var(--color-accent)" />
+                                                            {assignment.roleLabel}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                                <div className={styles.personasMetaItem}>
+                                                    <span className={styles.personasMetaLabel}>Entidad</span>
+                                                    <span className={styles.personasMetaValue}>{assignment.scopeLabel}</span>
+                                                </div>
+                                                <div className={styles.personasMetaItem}>
+                                                    <span className={styles.personasMetaLabel}>Nivel</span>
+                                                    <span className={styles.personasMetaValue}>{assignment.accessLevel}</span>
+                                                </div>
+                                                <div className={styles.personasMetaItem}>
+                                                    <span className={styles.personasMetaLabel}>Desde</span>
+                                                    <span className={styles.personasMetaValue}>{formatShortDate(assignment.assignedAt)}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.personasCardActions}>
+                                                <button
+                                                    className={`${styles.btn} ${styles.btnPrimary}`}
+                                                    style={{ width: '100%', justifyContent: 'center', fontSize: 11, opacity: 0.65 }}
+                                                    type="button"
+                                                    disabled
+                                                    title="Vista de lectura. La ediciÃ³n programÃ¡tica estÃ¡ disponible en /api/admin/users/:id/access"
+                                                >
+                                                    Solo lectura
+                                                </button>
+                                            </div>
+                                        </article>
+                                    ))
+                                )}
+                            </div>
                         </div>
                     </section>
                 )}
