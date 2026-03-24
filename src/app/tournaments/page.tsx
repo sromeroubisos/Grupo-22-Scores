@@ -8,6 +8,7 @@ import { useSport } from '@/context/SportContext';
 import { getCountryById } from '@/lib/data/countries';
 import type { SportId } from '@/lib/types';
 import { getCachedLogo } from '@/lib/utils/logoCache';
+import type { TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 const TROPHY_FALLBACK = '\u{1F3C6}';
@@ -144,6 +145,7 @@ export default function TorneosPage() {
     const { isLeagueFavorite } = useFavorites();
     const [search, setSearch] = useState('');
     const [selectedSport, setSelectedSport] = useState<SportId>('rugby');
+    const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
     const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
     const [allTournaments, setAllTournaments] = useState<DbTournament[]>([]);
     const [loadingTournaments, setLoadingTournaments] = useState(false);
@@ -161,6 +163,7 @@ export default function TorneosPage() {
             try {
                 const searchParams = new URLSearchParams();
                 searchParams.set('sport', selectedSport);
+                searchParams.set('audience', selectedAudience);
 
                 const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
                     cache: 'no-store',
@@ -184,7 +187,7 @@ export default function TorneosPage() {
         fetchTournaments();
 
         return () => controller.abort();
-    }, [selectedSport]);
+    }, [selectedAudience, selectedSport]);
 
     // Filter by search term
     const filteredTournaments = useMemo(() => {
@@ -283,6 +286,22 @@ export default function TorneosPage() {
                         </div>
                     ))}
                 </div>
+
+                <div className="g22-audienceSelector" role="tablist" aria-label="Tipo de torneos">
+                    {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+                        <button
+                            key={audience}
+                            type="button"
+                            className={`g22-audienceChip ${selectedAudience === audience ? 'active' : ''}`}
+                            onClick={() => {
+                                setSelectedAudience(audience);
+                                setExpandedCountry(null);
+                            }}
+                        >
+                            {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                        </button>
+                    ))}
+                </div>
             </header>
 
             {loadingTournaments ? (
@@ -317,7 +336,11 @@ export default function TorneosPage() {
 
                         {countriesWithTournaments.length === 0 && !loadingTournaments && (
                             <div style={{ padding: '24px 16px', opacity: 0.5 }}>
-                                <p>No hay torneos para este deporte.</p>
+                                <p>
+                                    {selectedAudience === 'juveniles'
+                                        ? 'No hay torneos juveniles para este deporte.'
+                                        : 'No hay torneos de mayores para este deporte.'}
+                                </p>
                             </div>
                         )}
 

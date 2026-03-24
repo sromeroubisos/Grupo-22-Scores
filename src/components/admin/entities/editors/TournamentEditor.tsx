@@ -234,7 +234,7 @@ export function TournamentEditor({
         union_id: data.union_id ?? '',
         sport_id: data.sport_id ?? 'rugby',
         category: data.category ?? '',
-        age_grade: data.age_grade ?? 'Mayores (Adults)',
+        age_grade: data.age_grade ?? 'Mayores',
         status: data.status ?? 'draft',
         is_visible: data.is_visible ?? true,
         priority: data.priority ?? 0,
@@ -814,10 +814,8 @@ export function TournamentEditor({
                                     onFocus={e => { e.target.style.borderColor = T.neon; }}
                                     onBlur={e => { e.target.style.borderColor = T.border; }}
                                 >
-                                    <option>Mayores (Adults)</option>
-                                    <option>M19 (Under 19)</option>
-                                    <option>U16 (Under 16)</option>
-                                    <option>Veteranos</option>
+                                    <option>Mayores</option>
+                                    <option>Juveniles</option>
                                 </select>
                             </div>
                         </div>

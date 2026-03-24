@@ -22,7 +22,7 @@ type TournamentDetailsRow = TournamentRow & {
 type CountryRow = Pick<Database['public']['Tables']['countries']['Row'], 'id' | 'name' | 'code' | 'flag_emoji'>;
 
 const REGIONS = ['Sudamérica', 'Norteamérica', 'Europa Occidental', 'Europa del Este', 'Oceanía', 'África', 'Asia'];
-const AGE_GRADES = ['Mayores', 'M23 (Sub-23)', 'M19 (Sub-19)', 'M17 (Sub-17)', 'M16 (Sub-16)', 'Femenino', 'Veteranos'];
+const AGE_GRADES = ['Mayores', 'Juveniles'];
 
 const COUNTRY_OPTIONS = [
     { id: 'argentina', label: 'Argentina' },

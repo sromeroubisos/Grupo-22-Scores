@@ -13,6 +13,7 @@ import { createEntity, updateEntity } from '@/app/admin/entities/actions';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports } from '@/lib/data/sports';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
+import { resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import '../../creation-forms.css';
 
 const sportsCatalog = getAllSports();
@@ -77,6 +78,7 @@ function normalizeCountryId(value: string | null | undefined, options: Tournamen
 
 const AGE_GRADE_OPTIONS = [
     'Mayores (Adults)',
+    'Juveniles',
     'U23',
     'U20',
     'U18',
@@ -287,6 +289,7 @@ export default function SuperCreateTournament() {
         season: '2026',
         format: 'league',
         category: 'Profesional',
+        publicAudience: 'mayores' as TournamentAudience,
         ageGrade: 'Mayores (Adults)',
         country: '',
         unionId: '',
@@ -327,6 +330,7 @@ export default function SuperCreateTournament() {
 
                 const sportVal = data.sport_id ? mapExternalSportToInternalSport(data.sport_id) : 'rugby';
                 const defaults = sportDefaults[sportVal as string] || {};
+                const inferredAudience = resolveTournamentAudience({ ageGrade: data.age_grade, category: data.category });
 
                 setFormData(prev => ({
                     ...prev,
@@ -335,7 +339,8 @@ export default function SuperCreateTournament() {
                     visibility: data.is_visible ? 'public' : 'private',
                     season: data.season_id || '2026',
                     category: data.category || prev.category,
-                    ageGrade: data.age_grade || prev.ageGrade,
+                    publicAudience: inferredAudience,
+                    ageGrade: data.age_grade || syncAgeGradeWithAudience(prev.ageGrade, inferredAudience),
                     format: data.format || prev.format,
                     country: normalizeCountryId(data.country_id || data.country || '', countryOptions),
                     unionId: data.union_id || '',
@@ -389,6 +394,22 @@ export default function SuperCreateTournament() {
                 ...prev.rules,
                 ...(d ? { pointsWin: d.win, pointsDraw: d.draw, pointsLoss: d.loss } : {})
             }
+        }));
+    };
+
+    const handlePublicAudienceChange = (audience: TournamentAudience) => {
+        setFormData((prev) => ({
+            ...prev,
+            publicAudience: audience,
+            ageGrade: syncAgeGradeWithAudience(prev.ageGrade, audience),
+        }));
+    };
+
+    const handleAgeGradeChange = (ageGrade: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            ageGrade,
+            publicAudience: resolveTournamentAudience({ ageGrade, category: prev.category }),
         }));
     };
 
@@ -647,6 +668,27 @@ export default function SuperCreateTournament() {
                                         <p className="field-help">Se muestran todos los deportes soportados por la web, no solo los activos.</p>
                                     </div>
 
+                                    <div className="field-group">
+                                        <label>SECCION PUBLICA</label>
+                                        <div className="choice-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+                                            {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+                                                <button
+                                                    key={audience}
+                                                    type="button"
+                                                    className={`choice-btn ${formData.publicAudience === audience ? 'selected' : ''}`}
+                                                    onClick={() => handlePublicAudienceChange(audience)}
+                                                >
+                                                    <span className="choice-icon">{audience === 'mayores' ? 'A' : 'U'}</span>
+                                                    <span className="choice-label">{audience === 'mayores' ? 'Mayores' : 'Juveniles'}</span>
+                                                    <span className="choice-status">
+                                                        {audience === 'mayores' ? 'Portada principal' : 'Pagina juvenil'}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <p className="field-help">Esta seleccion define en que vista publica aparece el torneo local.</p>
+                                    </div>
+
                                     <div className="grid-2">
                                         <div className="field-group">
                                             <label>TEMPORADA</label>
@@ -677,7 +719,7 @@ export default function SuperCreateTournament() {
                                         <select
                                             className="form-select"
                                             value={formData.ageGrade}
-                                            onChange={e => setFormData({ ...formData, ageGrade: e.target.value })}
+                                            onChange={e => handleAgeGradeChange(e.target.value)}
                                         >
                                             {AGE_GRADE_OPTIONS.map((option) => (
                                                 <option key={option} value={option}>{option}</option>

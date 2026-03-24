@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
-const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority';
-const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority';
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
 
 type PublicTournamentRow = {
     id: string;
@@ -23,6 +24,8 @@ type PublicTournamentRow = {
     is_visible: boolean | null;
     status: string | null;
     priority: number | null;
+    category: string | null;
+    age_grade: string | null;
 };
 
 type PublicTournamentQueryResult = {
@@ -36,6 +39,10 @@ function resolveSportFilter(rawSport: string | null) {
     }
 
     return [rawSport];
+}
+
+function resolveAudienceFilter(rawAudience: string | null): TournamentAudience {
+    return rawAudience === 'juveniles' ? 'juveniles' : 'mayores';
 }
 
 async function queryVisiblePublicTournaments(
@@ -87,6 +94,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const sport = searchParams.get('sport');
         const search = searchParams.get('search')?.trim().toLowerCase() || '';
+        const audience = resolveAudienceFilter(searchParams.get('audience'));
 
         const supabase = await getReadClient();
         const sportFilter = resolveSportFilter(sport);
@@ -109,6 +117,9 @@ export async function GET(request: NextRequest) {
                 if (status === 'archived' || status === 'deleted') return false;
                 const normalizedSport = tournament.sport_id || tournament.legacy_sport || 'rugby';
                 if (!sportFilter.includes(normalizedSport)) return false;
+                if (resolveTournamentAudience({ ageGrade: tournament.age_grade, category: tournament.category }) !== audience) {
+                    return false;
+                }
                 if (!search) return true;
 
                 const name = tournament.name?.toLowerCase?.() || '';

@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
 import { db } from '@/lib/mock-db';
 import { createClient } from '@/lib/supabase/client';
+import { resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 
 export default function CreateTournament() {
     const params = useParams();
@@ -36,6 +37,8 @@ export default function CreateTournament() {
         rulePreset: 'standard',
         gender: 'Masculino',
         category: 'Profesional',
+        publicAudience: 'mayores' as TournamentAudience,
+        ageGrade: 'Mayores (Adults)',
         country: '',
     });
 
@@ -53,6 +56,10 @@ export default function CreateTournament() {
                 : tournament.sport === 'hockey'
                     ? 'Hockey'
                     : tournament.sport;
+        const inferredAudience = resolveTournamentAudience({
+            ageGrade: (tournament as { age_grade?: string | null }).age_grade,
+            category: tournament.category || undefined,
+        });
 
         setFormData(prev => ({
             ...prev,
@@ -60,6 +67,8 @@ export default function CreateTournament() {
             sport: mappedSport,
             season: tournament.seasonId,
             category: tournament.category || prev.category,
+            publicAudience: inferredAudience,
+            ageGrade: (tournament as { age_grade?: string | null }).age_grade || syncAgeGradeWithAudience(prev.ageGrade, inferredAudience),
             format: tournament.format?.toLowerCase().includes('league') ? 'league' : prev.format,
             location: db.unions.find(u => u.id === unionId)?.name || prev.location,
         }));
@@ -287,6 +296,22 @@ export default function CreateTournament() {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    const handlePublicAudienceChange = (audience: TournamentAudience) => {
+        setFormData((prev) => ({
+            ...prev,
+            publicAudience: audience,
+            ageGrade: syncAgeGradeWithAudience(prev.ageGrade, audience),
+        }));
+    };
+
+    const handleAgeGradeChange = (ageGrade: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            ageGrade,
+            publicAudience: resolveTournamentAudience({ ageGrade, category: prev.category }),
+        }));
+    };
+
     const handleSportChange = (sport: string) => {
         const sportData = sportsData[sport as keyof typeof sportsData];
         if (sportData) {
@@ -409,6 +434,7 @@ export default function CreateTournament() {
             status: 'draft',
             sport: formData.sport.toLowerCase().includes('rugby') ? 'rugby' : 'football',
             category: formData.category,
+            age_grade: formData.ageGrade,
             format: formData.format,
             is_visible: formData.visibility === 'public',
         };
@@ -426,7 +452,7 @@ export default function CreateTournament() {
                 alert('Cambios guardados correctamente en Supabase.');
             }
         } else {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('tournaments')
                 .insert([payload])
                 .select()
@@ -1145,7 +1171,7 @@ export default function CreateTournament() {
                         </div>
                         <div className="header-actions">
                             <div className="status-chip">{isEdit ? 'Edicion' : 'Borrador'}</div>
-                            <button className="btn btn-secondary">{isEdit ? 'Guardar cambios' : 'Guardar borrador'}</button>
+                            <button className="btn btn-secondary" onClick={handleSave}>{isEdit ? 'Guardar cambios' : 'Guardar borrador'}</button>
                         </div>
                     </header>
 
@@ -1196,6 +1222,25 @@ export default function CreateTournament() {
                                     </div>
 
                                     <div className="form-group">
+                                        <label>SECCION PUBLICA</label>
+                                        <div className="chip-group">
+                                            {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+                                                <div
+                                                    key={audience}
+                                                    onClick={() => handlePublicAudienceChange(audience)}
+                                                    className={`chip-select ${formData.publicAudience === audience ? 'active' : ''}`}
+                                                    style={{ textAlign: 'center', flex: 1 }}
+                                                >
+                                                    {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                            Define en que vista publica se mostrara este torneo local.
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
                                         <label>CATEGORÍA</label>
                                         <select value={formData.category} onChange={(e) => updateFormData('category', e.target.value)}>
                                             <option>Profesional</option>
@@ -1203,6 +1248,18 @@ export default function CreateTournament() {
                                             <option>Amateur</option>
                                             <option>Juvenil</option>
                                             <option>Amistoso Recreativo</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>CLASIFICACION DE EDAD</label>
+                                        <select value={formData.ageGrade} onChange={(e) => handleAgeGradeChange(e.target.value)}>
+                                            <option>Mayores (Adults)</option>
+                                            <option>Juveniles</option>
+                                            <option>U23</option>
+                                            <option>U20</option>
+                                            <option>U18</option>
+                                            <option>U16</option>
                                         </select>
                                     </div>
 
@@ -1943,10 +2000,10 @@ export default function CreateTournament() {
                                 Atrás
                             </button>
                             <div style={{ display: 'flex', gap: '12px' }}>
-                                <button className="btn btn-secondary">{isEdit ? 'Guardar cambios' : 'Guardar borrador'}</button>
+                                <button className="btn btn-secondary" onClick={handleSave}>{isEdit ? 'Guardar cambios' : 'Guardar borrador'}</button>
                                 <button
                                     className="btn btn-primary"
-                                    onClick={handleNext}
+                                    onClick={currentStep === 5 ? handleSave : handleNext}
                                     disabled={currentStep === 1 && formData.name.length < 3}
                                 >
                                     {currentStep === 5 ? (isEdit ? 'Guardar cambios' : 'Publicar Torneo') : 'Siguiente'}

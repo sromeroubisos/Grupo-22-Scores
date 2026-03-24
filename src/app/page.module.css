@@ -32,6 +32,33 @@
     display: none;
 }
 
+.mobileAudienceSwitch {
+    display: none;
+    gap: 8px;
+    padding: 8px 16px 0;
+}
+
+.mobileAudienceSwitchBtn {
+    flex: 1;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.mobileAudienceSwitchBtnActive {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--color-accent);
+}
+
 .sportChip {
     display: flex;
     align-items: center;
@@ -1062,6 +1089,46 @@
     color: var(--color-accent);
 }
 
+.audienceSwitch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.audienceSwitchBtn {
+    flex: 1;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.audienceSwitchBtn:hover {
+    border-color: var(--color-border-light);
+    color: var(--color-text-primary);
+}
+
+.audienceSwitchBtnActive {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--color-accent);
+    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.18) inset;
+}
+
+.audienceEmptyState {
+    padding: 14px 8px;
+    color: var(--color-text-tertiary);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
 
 
 
@@ -1172,6 +1239,11 @@
         background: transparent;
         border: none;
         box-shadow: none;
+    }
+
+    .mobileAudienceSwitch {
+        display: flex;
+        padding: 8px 12px 0;
     }
 
     .mobileSportSelector::-webkit-scrollbar {

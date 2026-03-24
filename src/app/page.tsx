@@ -1,20 +1,19 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, memo } from 'react';
-import { Trophy, MapPin, ChevronRight, ChevronLeft, Star } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
+import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
-import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib/data/tournaments/index';
+import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamentById } from '@/lib/data/tournaments/index';
 import { getCountryById } from '@/lib/data/countries';
-import { getActiveSports } from '@/lib/data/sports';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import TournamentLeader from '@/components/TournamentLeader';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
+import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 // Individual sports use player faces instead of team shields
@@ -46,6 +45,23 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
   });
 
   return groups;
+}
+
+function cleanLeagueName(name: string, country?: string | null): string {
+  if (!name || !country) return name || '';
+  const prefix = country.toUpperCase() + ':';
+  if (name.toUpperCase().trimStart().startsWith(prefix)) {
+    return name.slice(name.indexOf(':') + 1).trim();
+  }
+  return name;
+}
+
+function normalizeTournamentLookupKey(value: string | null | undefined): string {
+  return (value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
 }
 
 // Type definitions
@@ -105,7 +121,7 @@ function generateDates(timeZone: string) {
 // --- Memoized Sub-components for Performance ---
 
 const LiveMinute = ({ dateTime, sport }: { dateTime: string, sport: any }) => {
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 1000);
@@ -213,6 +229,7 @@ export default function HomePage() {
   const [news, setNews] = useState<any[]>([]);
   const [manualTournamentsList, setManualTournamentsList] = useState<Tournament[]>([]);
   const [showLiveOnly, setShowLiveOnly] = useState(false);
+  const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
 
   const { selectedSport, setSelectedSport, activeSports } = useSport();
   const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
@@ -253,18 +270,111 @@ export default function HomePage() {
   const localTournaments = useMemo(() => {
     const sportManualTournaments = manualTournamentsList.filter(t => t.sportId === selectedSport.id);
     const combined = [...sportManualTournaments, ...allTournaments];
-    return combined.filter(t => t.type === 'local' || t.type === 'cup');
-  }, [allTournaments, manualTournamentsList, selectedSport.id]);
+    return combined.filter((tournament) => {
+      if (tournament.type !== 'local' && tournament.type !== 'cup') {
+        return false;
+      }
+
+      return resolveTournamentAudience({
+        ageGroup: tournament.ageGroup,
+        categories: tournament.categories,
+        isYouth: tournament.isYouth,
+      }) === selectedAudience;
+    });
+  }, [allTournaments, manualTournamentsList, selectedAudience, selectedSport.id]);
 
   const groupedTournaments = useMemo(() => groupTournamentsByCountry(localTournaments), [localTournaments]);
 
+  const tournamentAudienceById = useMemo(() => {
+    const map = new Map<string, TournamentAudience>();
+    const catalog = [...manualTournamentsList, ...allTournaments, ...internationalTournaments];
+
+    catalog.forEach((tournament) => {
+      map.set(tournament.id, resolveTournamentAudience({
+        ageGroup: tournament.ageGroup,
+        categories: tournament.categories,
+        isYouth: tournament.isYouth,
+        name: tournament.name,
+        displayName: tournament.displayName || tournament.nameEs,
+        originalName: tournament.originalName,
+      }));
+    });
+
+    return map;
+  }, [allTournaments, internationalTournaments, manualTournamentsList]);
+
+  const tournamentAudienceByName = useMemo(() => {
+    const map = new Map<string, TournamentAudience>();
+    const catalog = [...manualTournamentsList, ...allTournaments, ...internationalTournaments];
+
+    const registerName = (value: string | null | undefined, audience: TournamentAudience) => {
+      const key = normalizeTournamentLookupKey(value);
+      if (!key || map.has(key)) return;
+      map.set(key, audience);
+    };
+
+    catalog.forEach((tournament) => {
+      const audience = resolveTournamentAudience({
+        ageGroup: tournament.ageGroup,
+        categories: tournament.categories,
+        isYouth: tournament.isYouth,
+        name: tournament.name,
+        displayName: tournament.displayName || tournament.nameEs,
+        originalName: tournament.originalName,
+      });
+
+      registerName(tournament.name, audience);
+      registerName(tournament.displayName, audience);
+      registerName(tournament.nameEs, audience);
+      registerName(tournament.originalName, audience);
+    });
+
+    return map;
+  }, [allTournaments, internationalTournaments, manualTournamentsList]);
+
+  const resolveMatchAudience = useCallback((tournament: { id?: string | null; name?: string | null; country?: string | null }) => {
+    if (tournament.id) {
+      const storedAudience = tournamentAudienceById.get(tournament.id);
+      if (storedAudience) return storedAudience;
+
+      const staticTournament = getTournamentById(tournament.id);
+      if (staticTournament) {
+        return resolveTournamentAudience({
+          ageGroup: staticTournament.ageGroup,
+          categories: staticTournament.categories,
+          isYouth: staticTournament.isYouth,
+          name: staticTournament.name,
+          displayName: staticTournament.displayName || staticTournament.nameEs,
+          originalName: staticTournament.originalName,
+        });
+      }
+    }
+
+    const cleanedName = cleanLeagueName(tournament.name || '', tournament.country || null);
+    const byCleanName = tournamentAudienceByName.get(normalizeTournamentLookupKey(cleanedName));
+    if (byCleanName) return byCleanName;
+
+    const byRawName = tournamentAudienceByName.get(normalizeTournamentLookupKey(tournament.name));
+    if (byRawName) return byRawName;
+
+    return resolveTournamentAudience({ name: cleanedName || tournament.name });
+  }, [tournamentAudienceById, tournamentAudienceByName]);
+
   // Filter logic
   const filteredInternational = useMemo(() => {
-    if (!searchQuery) return internationalTournaments.slice(0, 10);
-    return internationalTournaments.filter(t =>
+    const audienceFiltered = internationalTournaments.filter((tournament) => (
+      resolveTournamentAudience({
+        ageGroup: tournament.ageGroup,
+        categories: tournament.categories,
+        isYouth: tournament.isYouth,
+      }) === selectedAudience
+    ));
+
+    if (!searchQuery) return audienceFiltered.slice(0, 10);
+    return audienceFiltered.filter(t =>
       t.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [internationalTournaments, searchQuery]);
+  }, [internationalTournaments, searchQuery, selectedAudience]);
 
   const filteredGroups = useMemo(() => {
     if (!searchQuery) return groupedTournaments;
@@ -283,7 +393,7 @@ export default function HomePage() {
   }, [groupedTournaments, searchQuery]);
 
   // Matches via unified hook (cache + prefetch 7 days + live polling)
-  const { matches, loading, liveCount: hookLiveCount, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id);
+  const { matches, loading, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id);
 
   // --- Dynamic Matches Data Implementation ---
   const matchesByLeague = useMemo<LeagueMatches[]>(() => {
@@ -305,6 +415,7 @@ export default function HomePage() {
     matches.forEach(match => {
       const tournament = match.tournament;
       if (!tournament) return;
+      if (resolveMatchAudience(tournament) !== selectedAudience) return;
 
       const countryName = ((tournament as any).country || 'Internacional').replace(/\b\w/g, (c: string) => c.toUpperCase());
       const cleanedName = cleanLeagueName(tournament.name, countryName);
@@ -358,7 +469,7 @@ export default function HomePage() {
       if (!aIsFavorite && bIsFavorite) return 1;
       return a.league.localeCompare(b.league);
     });
-  }, [matches, isLeagueFavorite, userTimeZone]);
+  }, [matches, isLeagueFavorite, resolveMatchAudience, selectedAudience, userTimeZone]);
 
   const displayedMatchesByLeague = useMemo<LeagueMatches[]>(() => {
     if (!showLiveOnly) return matchesByLeague;
@@ -370,6 +481,12 @@ export default function HomePage() {
       }))
       .filter((league) => league.matches.length > 0);
   }, [matchesByLeague, showLiveOnly]);
+
+  const liveMatchesCount = useMemo(() => (
+    matchesByLeague.reduce((total, league) => (
+      total + league.matches.filter((match) => match.status === 'live').length
+    ), 0)
+  ), [matchesByLeague]);
 
   const toggleCountry = (countryId: string) => {
     setExpandedCountries(prev => {
@@ -445,7 +562,7 @@ export default function HomePage() {
           seasons: t.season_id ? [{ seasonId: String(t.season_id), teamsCount: 0, isActive: true }] : [],
           isVisible: t.is_visible,
           isWomen: t.category?.toLowerCase() === 'women',
-          isYouth: !!t.age_grade,
+          isYouth: resolveTournamentAudience({ ageGrade: t.age_grade, category: t.category }) === 'juveniles',
           ageGroup: t.age_grade,
           format: t.format,
         }));
@@ -494,7 +611,6 @@ export default function HomePage() {
 
   const selectedDateInfo = dates.find(d => d.date === selectedDate);
 
-  const liveMatchesCount = hookLiveCount;
   const isIndividualSport = INDIVIDUAL_SPORTS.has(selectedSport.id);
 
   useEffect(() => {
@@ -506,6 +622,12 @@ export default function HomePage() {
       setShowLiveOnly(false);
     }
   }, [liveMatchesCount]);
+
+  useEffect(() => {
+    setExpandedCountries(new Set(selectedAudience === 'mayores' ? ['international'] : []));
+    setExpandedLeagueIds(new Set());
+    setCollapsedLeagues(new Set());
+  }, [selectedAudience]);
 
   const navigateDate = (direction: 'prev' | 'next') => {
     if (!selectedDate || dates.length === 0) return;
@@ -566,6 +688,19 @@ export default function HomePage() {
               </div>
             </div>
 
+            <div className={styles.audienceSwitch} role="tablist" aria-label="Segmento de torneos">
+              {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+                <button
+                  key={audience}
+                  type="button"
+                  className={`${styles.audienceSwitchBtn} ${selectedAudience === audience ? styles.audienceSwitchBtnActive : ''}`}
+                  onClick={() => setSelectedAudience(audience)}
+                >
+                  {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                </button>
+              ))}
+            </div>
+
 
 
             {/* Search */}
@@ -576,7 +711,11 @@ export default function HomePage() {
               </svg>
               <input
                 type="text"
-                placeholder={selectedSport.id === 'tennis' ? `Filtrar torneos de ${selectedSport.nameEs}...` : `Filtrar ligas de ${selectedSport.nameEs}...`}
+                placeholder={selectedAudience === 'juveniles'
+                  ? `Filtrar juveniles de ${selectedSport.nameEs}...`
+                  : selectedSport.id === 'tennis'
+                    ? `Filtrar torneos de ${selectedSport.nameEs}...`
+                    : `Filtrar ligas de ${selectedSport.nameEs}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={styles.sidebarSearchInput}
@@ -760,6 +899,14 @@ export default function HomePage() {
                   </div>
                 );
               })}
+
+              {filteredInternational.length === 0 && sortedCountryIds.length === 0 && (
+                <div className={styles.audienceEmptyState}>
+                  {selectedAudience === 'juveniles'
+                    ? 'No hay torneos juveniles cargados para este deporte.'
+                    : 'No hay torneos disponibles para este deporte.'}
+                </div>
+              )}
             </div>
           </div>
         </aside>
@@ -776,6 +923,19 @@ export default function HomePage() {
               >
                 <span className={styles.sportIcon}>{sport.icon}</span>
                 <span className={styles.sportName}>{sport.nameEs}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.mobileAudienceSwitch} role="tablist" aria-label="Segmento de torneos">
+            {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+              <button
+                key={audience}
+                type="button"
+                className={`${styles.mobileAudienceSwitchBtn} ${selectedAudience === audience ? styles.mobileAudienceSwitchBtnActive : ''}`}
+                onClick={() => setSelectedAudience(audience)}
+              >
+                {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
               </button>
             ))}
           </div>
@@ -940,11 +1100,19 @@ export default function HomePage() {
               {!loading && displayedMatchesByLeague.length === 0 && !sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
-                  <h3>{showLiveOnly ? 'No hay partidos en vivo' : 'No hay partidos programados'}</h3>
+                  <h3>
+                    {showLiveOnly
+                      ? 'No hay partidos en vivo'
+                      : selectedAudience === 'juveniles'
+                        ? 'No hay partidos juveniles programados'
+                        : 'No hay partidos programados'}
+                  </h3>
                   <p>
                     {showLiveOnly
-                      ? 'No se encontraron encuentros en vivo para esta fecha.'
-                      : 'No se encontraron encuentros para esta fecha.'}
+                      ? `No se encontraron encuentros en vivo para ${selectedAudience}.`
+                      : selectedAudience === 'juveniles'
+                        ? 'No se encontraron encuentros juveniles para esta fecha.'
+                        : 'No se encontraron encuentros para esta fecha.'}
                   </p>
                 </div>
               )}

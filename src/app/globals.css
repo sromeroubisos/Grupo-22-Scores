@@ -772,6 +772,38 @@ a {
     display: none;
 }
 
+.g22-audienceSelector {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px 0;
+}
+
+.g22-audienceChip {
+    flex: 1;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.g22-audienceChip:hover {
+    border-color: var(--color-border-light);
+    color: var(--color-text-primary);
+}
+
+.g22-audienceChip.active {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--color-accent);
+    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.18) inset;
+}
+
 .g22-sportChip {
     display: flex;
     flex-direction: column;
