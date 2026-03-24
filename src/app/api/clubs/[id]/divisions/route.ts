@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { canManageClubContext, getClubManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
+import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 
 function err(message: string, status: number, details?: unknown) {
@@ -9,31 +11,14 @@ async function resolvePermission(
     supabase: Awaited<ReturnType<typeof createClient>>,
     clubId: string
 ): Promise<{ allowed: boolean } | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    const context = await requireUserAccessContext(supabase).catch(() => null);
+    if (!context) return null;
 
-    const { data: profile } = await supabase
-        .from('users').select('role').eq('id', user.id).single();
+    const target = await getClubManagementTarget(supabase, clubId);
 
-    if (profile?.role === 'super_admin') return { allowed: true };
-
-    const { data: club } = await supabase
-        .from('clubs').select('union_id').eq('id', clubId).single();
-
-    const unionId = club?.union_id;
-    const filter = unionId
-        ? `and(scope_type.eq.club,scope_id.eq.${clubId}),and(scope_type.eq.union,scope_id.eq.${unionId})`
-        : `and(scope_type.eq.club,scope_id.eq.${clubId})`;
-
-    const { data: membership } = await supabase
-        .from('memberships')
-        .select('role')
-        .eq('user_id', user.id)
-        .or(filter)
-        .in('role', ['admin', 'editor'])
-        .maybeSingle();
-
-    return { allowed: Boolean(membership) };
+    return {
+        allowed: Boolean(target && canManageClubContext(context, target, EDIT_MEMBERSHIP_ROLES)),
+    };
 }
 
 // ─── GET /api/clubs/:id/divisions ─────────────────────────────────────────────

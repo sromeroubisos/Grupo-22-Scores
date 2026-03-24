@@ -15,15 +15,9 @@ export async function createClient() {
                 setAll(cookiesToSet) {
                     try {
                         cookiesToSet.forEach(({ name, value, options }) => {
-                            // ✅ FIX: httpOnly must be false for the browser client to read the session.
-                            // If true, the client-side AuthContext will think the user is logged out.
-                            const cookieOptions = {
-                                ...options,
-                                httpOnly: false,
-                                sameSite: 'lax' as const,
-                                path: '/',
-                            };
-                            cookieStore.set(name, value, cookieOptions)
+                            // Respect Supabase's original cookie flags. Overriding them here
+                            // breaks refresh-token persistence and the session can disappear.
+                            cookieStore.set(name, value, options)
                         })
                     } catch {
                         // The `setAll` method was called from a Server Component.

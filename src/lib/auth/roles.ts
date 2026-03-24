@@ -7,9 +7,14 @@ export type AppUserRole =
     | 'admin_union'
     | 'admin_torneo'
     | 'operador'
-    | 'admin_club';
+    | 'admin_club'
+    | 'gestor_deportes'
+    | 'gestor_torneos'
+    | 'gestor_partidos'
+    | 'gestor_clubes';
 
-export type MembershipScope = 'union' | 'tournament' | 'club';
+export type MembershipScope = 'union' | 'sport' | 'tournament' | 'match' | 'club';
+export type MembershipRole = 'admin' | 'editor' | 'operator' | 'viewer';
 
 export interface MembershipLike {
     scopeType: MembershipScope;
@@ -22,7 +27,7 @@ export interface AdminPanelConfig {
     label: string;
 }
 
-const APP_ROLES: AppUserRole[] = [
+export const APP_ROLES: AppUserRole[] = [
     'fan',
     'jugador',
     'entrenador',
@@ -32,6 +37,10 @@ const APP_ROLES: AppUserRole[] = [
     'admin_torneo',
     'operador',
     'admin_club',
+    'gestor_deportes',
+    'gestor_torneos',
+    'gestor_partidos',
+    'gestor_clubes',
 ];
 
 const ROLE_ALIASES: Record<string, AppUserRole> = {
@@ -43,13 +52,63 @@ const ROLE_ALIASES: Record<string, AppUserRole> = {
     club_admin: 'admin_club',
     operador: 'operador',
     operator: 'operador',
+    gestor_deportes: 'gestor_deportes',
+    gestor_torneos: 'gestor_torneos',
+    gestor_partidos: 'gestor_partidos',
+    gestor_clubes: 'gestor_clubes',
+    sports_manager: 'gestor_deportes',
+    tournament_manager: 'gestor_torneos',
+    match_manager: 'gestor_partidos',
+    club_manager: 'gestor_clubes',
     fan: 'fan',
     user: 'fan',
     jugador: 'jugador',
     entrenador: 'entrenador',
 };
 
-const ADMIN_MEMBERSHIP_ROLES = new Set(['admin', 'operator', 'editor']);
+export const VIEW_MEMBERSHIP_ROLES = new Set<MembershipRole>(['admin', 'editor', 'operator', 'viewer']);
+export const MANAGEMENT_MEMBERSHIP_ROLES = new Set<MembershipRole>(['admin', 'editor', 'operator']);
+export const EDIT_MEMBERSHIP_ROLES = new Set<MembershipRole>(['admin', 'editor']);
+export const ADMIN_ONLY_MEMBERSHIP_ROLES = new Set<MembershipRole>(['admin']);
+
+export const ROLE_LABELS: Record<AppUserRole, string> = {
+    fan: 'Fan',
+    jugador: 'Jugador',
+    entrenador: 'Entrenador',
+    admin_general: 'Admin General',
+    super_admin: 'Super Admin',
+    admin_union: 'Admin Unión',
+    admin_torneo: 'Admin Torneo',
+    operador: 'Operador',
+    admin_club: 'Admin Club',
+    gestor_deportes: 'Gestor de Deportes',
+    gestor_torneos: 'Gestor de Torneos',
+    gestor_partidos: 'Gestor de Partidos',
+    gestor_clubes: 'Gestor de Clubes',
+};
+
+export const DEFAULT_SCOPE_FOR_ROLE: Partial<Record<AppUserRole, MembershipScope>> = {
+    admin_union: 'union',
+    admin_torneo: 'tournament',
+    admin_club: 'club',
+    gestor_deportes: 'sport',
+    gestor_torneos: 'tournament',
+    gestor_partidos: 'match',
+    gestor_clubes: 'club',
+};
+
+const ADMIN_PANEL_ROLES = new Set<AppUserRole>([
+    'admin_union',
+    'admin_torneo',
+    'operador',
+    'gestor_deportes',
+    'gestor_torneos',
+    'gestor_partidos',
+    'gestor_clubes',
+]);
+
+const CLUB_PANEL_SCOPE_TYPES = new Set<MembershipScope>(['club']);
+const ADMIN_PANEL_SCOPE_TYPES = new Set<MembershipScope>(['union', 'sport', 'tournament', 'match']);
 
 export function normalizeRole(rawRole?: string | null): AppUserRole {
     if (!rawRole) {
@@ -73,13 +132,52 @@ export function normalizeRole(rawRole?: string | null): AppUserRole {
     return 'fan';
 }
 
+export function isAppRole(value: string): value is AppUserRole {
+    return APP_ROLES.includes(value as AppUserRole);
+}
+
+export function isGlobalAdminRole(role?: string | null): boolean {
+    const normalized = normalizeRole(role);
+    return normalized === 'admin_general' || normalized === 'super_admin';
+}
+
+export function getRoleLabel(role?: string | null): string {
+    const normalized = normalizeRole(role);
+    return ROLE_LABELS[normalized];
+}
+
+export function getDefaultScopeForRole(role?: string | null): MembershipScope | null {
+    const normalized = normalizeRole(role);
+    return DEFAULT_SCOPE_FOR_ROLE[normalized] ?? null;
+}
+
+export function hasMembershipRoleAccess(
+    memberships: MembershipLike[] | null | undefined,
+    allowedRoles: ReadonlySet<string>,
+    scopeTypes?: ReadonlySet<MembershipScope>
+): boolean {
+    return Boolean(
+        memberships?.some((membership) => {
+            if (!allowedRoles.has(membership.role)) {
+                return false;
+            }
+
+            if (!scopeTypes) {
+                return true;
+            }
+
+            return scopeTypes.has(membership.scopeType);
+        })
+    );
+}
+
 export function resolveAdminPanel(
     role?: string | null,
     memberships?: MembershipLike[] | null
 ): AdminPanelConfig | null {
     const normalized = normalizeRole(role);
 
-    if (normalized === 'admin_general' || normalized === 'super_admin') {
+    if (isGlobalAdminRole(normalized)) {
         return { href: '/admin/super', label: 'Super Admin' };
     }
 
@@ -87,20 +185,27 @@ export function resolveAdminPanel(
         return { href: '/club-admin', label: 'Panel Club' };
     }
 
-    if (normalized === 'admin_union' || normalized === 'admin_torneo' || normalized === 'operador') {
+    if (ADMIN_PANEL_ROLES.has(normalized)) {
         return { href: '/admin', label: 'Panel Admin' };
     }
 
     if (memberships?.length) {
-        const hasUnionAccess = memberships.some((m) => m.scopeType === 'union' && ADMIN_MEMBERSHIP_ROLES.has(m.role));
-        const hasTournamentAccess = memberships.some((m) => m.scopeType === 'tournament' && ADMIN_MEMBERSHIP_ROLES.has(m.role));
-        const hasClubAccess = memberships.some((m) => m.scopeType === 'club' && ADMIN_MEMBERSHIP_ROLES.has(m.role));
+        const hasAdminPanelAccess = hasMembershipRoleAccess(
+            memberships,
+            MANAGEMENT_MEMBERSHIP_ROLES,
+            ADMIN_PANEL_SCOPE_TYPES
+        );
+        const hasClubPanelAccess = hasMembershipRoleAccess(
+            memberships,
+            MANAGEMENT_MEMBERSHIP_ROLES,
+            CLUB_PANEL_SCOPE_TYPES
+        );
 
-        if (hasUnionAccess || hasTournamentAccess) {
+        if (hasAdminPanelAccess) {
             return { href: '/admin', label: 'Panel Admin' };
         }
 
-        if (hasClubAccess) {
+        if (hasClubPanelAccess) {
             return { href: '/club-admin', label: 'Panel Club' };
         }
     }

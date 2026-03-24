@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+    canManageSportContext,
+    hasScopedMembershipAccess,
+    requireUserAccessContext,
+} from '@/lib/auth/permissions';
+import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
@@ -57,26 +63,16 @@ async function getAuthenticatedUser(supabase: Awaited<ReturnType<typeof createCl
 async function canCreateClub(
     supabase: Awaited<ReturnType<typeof createClient>>,
     userId: string,
-    unionId: string
+    unionId: string,
+    sportId: string | null
 ): Promise<boolean> {
-    const { data: profile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', userId)
-        .single();
+    const context = await requireUserAccessContext(supabase).catch(() => null);
+    if (!context || context.userId !== userId) return false;
 
-    if (profile?.role === 'super_admin') return true;
-
-    const { data: membership } = await supabase
-        .from('memberships')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('scope_type', 'union')
-        .eq('scope_id', unionId)
-        .in('role', ['admin', 'editor'])
-        .maybeSingle();
-
-    return Boolean(membership);
+    return (
+        hasScopedMembershipAccess(context, 'union', unionId, EDIT_MEMBERSHIP_ROLES) ||
+        canManageSportContext(context, sportId, EDIT_MEMBERSHIP_ROLES)
+    );
 }
 
 // ─── POST /api/clubs ─────────────────────────────────────────────────────────
@@ -107,7 +103,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Autorización
-    const allowed = await canCreateClub(supabase, authUser.id, union_id);
+    const normalizedSport = canonicalizeSportId(sport || 'rugby');
+    const allowed = await canCreateClub(supabase, authUser.id, union_id, normalizedSport);
     if (!allowed) return err('Sin permisos para crear clubes en esta unión', 403);
 
     const slug = rawSlug ? slugify(rawSlug) : slugify(name);
@@ -131,8 +128,8 @@ export async function POST(request: NextRequest) {
         id: slug,          // TEXT PK = slug
         slug,
         name: name.trim(),
-        sport_id: sport || 'rugby',
-        sport: sport || 'rugby',
+        sport_id: normalizedSport,
+        sport: normalizedSport,
         union_id,
         status: 'draft',
         is_visible: false,

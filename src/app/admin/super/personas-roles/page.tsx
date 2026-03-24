@@ -1,121 +1,329 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Download, Filter, MoreVertical, Search, Shield, User as UserIcon } from 'lucide-react';
 import styles from '../page.module.css';
-import { Search, User as UserIcon, Shield, MoreVertical, Filter, Download } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import type { User as AppUser, UserRole } from '@/lib/types/user';
+import { getRoleLabel } from '@/lib/auth/roles';
 
-// Extended type for display
-interface ExtendedUser extends AppUser {
-    status?: 'active' | 'suspended';
-}
+type AppUserRow = {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+    created_at?: string | null;
+    last_login_at?: string | null;
+    avatar_url?: string | null;
+};
+
+type MembershipRow = {
+    id: string;
+    user_id: string;
+    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
+    scope_id: string;
+    role: 'admin' | 'editor' | 'operator' | 'viewer';
+    created_at: string;
+};
 
 type RoleAssignment = {
     id: string;
     userId: string;
     userName: string;
     email: string;
-    role: string;
-    scope: string; // e.g., 'Global', 'Torneo: URBA Top 12', 'Club: SIC'
+    roleLabel: string;
+    scopeLabel: string;
     assignedAt: string;
+    accessLevel: string;
     status: 'active' | 'inactive';
 };
 
+const MANAGEMENT_PRESETS = [
+    {
+        id: 'gestor_deportes',
+        title: 'Gestor de Deportes',
+        desc: 'Administra uno o varios deportes y hereda acceso a sus torneos, clubes y partidos.',
+        accent: 'var(--color-accent)',
+    },
+    {
+        id: 'gestor_torneos',
+        title: 'Gestor de Torneos',
+        desc: 'Opera torneos específicos y todo su fixture asociado.',
+        accent: '#38bdf8',
+    },
+    {
+        id: 'gestor_partidos',
+        title: 'Gestor de Partidos',
+        desc: 'Gestiona partidos concretos sin necesidad de acceder al torneo completo.',
+        accent: '#f59e0b',
+    },
+    {
+        id: 'gestor_clubes',
+        title: 'Gestor de Clubes',
+        desc: 'Gestiona clubes específicos con permisos focalizados por entidad.',
+        accent: '#34d399',
+    },
+];
+
+const SCOPE_ROLE_LABELS: Record<MembershipRow['scope_type'], string> = {
+    union: 'Admin Unión',
+    sport: 'Gestor de Deportes',
+    tournament: 'Gestor de Torneos',
+    match: 'Gestor de Partidos',
+    club: 'Gestor de Clubes',
+};
+
+const LOCAL_ROLE_LABELS: Record<MembershipRow['role'], string> = {
+    admin: 'Admin',
+    editor: 'Editor',
+    operator: 'Operador',
+    viewer: 'Lectura',
+};
+
 export default function PersonasRolesPage() {
+    const supabase = createClient();
+
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<'all' | 'roles'>('all');
-
-    // Data state
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<AppUserRow[]>([]);
+    const [memberships, setMemberships] = useState<MembershipRow[]>([]);
+    const [entityNames, setEntityNames] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const supabase = createClient();
-
     useEffect(() => {
         fetchUsers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchUsers = async () => {
         setLoading(true);
         setError(null);
 
-        // Add timeout to prevent infinite hanging due to potential RLS recursion
         const abortController = new AbortController();
-        const timeoutId = setTimeout(() => abortController.abort(), 5000); // 5 seconds timeout
+        const timeoutId = setTimeout(() => abortController.abort(), 6000);
 
         try {
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .abortSignal(abortController.signal);
+            const [
+                usersResult,
+                membershipsResult,
+                sportsResult,
+                unionsResult,
+                tournamentsResult,
+                clubsResult,
+                matchesResult,
+            ] = await Promise.all([
+                supabase
+                    .from('users')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .abortSignal(abortController.signal),
+                supabase
+                    .from('memberships')
+                    .select('id, user_id, scope_type, scope_id, role, created_at')
+                    .order('created_at', { ascending: false })
+                    .abortSignal(abortController.signal),
+                supabase.from('sports').select('id, name').order('name').abortSignal(abortController.signal),
+                supabase.from('unions').select('id, name').order('name').abortSignal(abortController.signal),
+                supabase.from('tournaments').select('id, name').order('name').abortSignal(abortController.signal),
+                supabase.from('clubs').select('id, name').order('name').abortSignal(abortController.signal),
+                supabase
+                    .from('matches')
+                    .select('id, date_time, tournament_id')
+                    .order('date_time', { ascending: false })
+                    .limit(500)
+                    .abortSignal(abortController.signal),
+            ]);
 
             clearTimeout(timeoutId);
 
-            if (error) throw error;
+            if (usersResult.error) throw usersResult.error;
+            if (membershipsResult.error) throw membershipsResult.error;
+            if (sportsResult.error) throw sportsResult.error;
+            if (unionsResult.error) throw unionsResult.error;
+            if (tournamentsResult.error) throw tournamentsResult.error;
+            if (clubsResult.error) throw clubsResult.error;
+            if (matchesResult.error) throw matchesResult.error;
 
-            // Map and enhance user data (defaulting status to active for now)
-            const mappedUsers: any[] = (data || []).map((u: any) => ({
-                ...u,
-                status: 'active' // In a real app field could be 'status' or 'banned_at'
-            }));
+            const tournamentsById = new Map(
+                (tournamentsResult.data || []).map((tournament) => [tournament.id, tournament.name])
+            );
 
-            setUsers(mappedUsers);
-        } catch (err: any) {
-            console.error('Error fetching users:', err);
-            if (err.name === 'AbortError' || err.message?.includes('abort')) {
-                setError('La consulta tardó demasiado. Esto suele indicar un problema de "recursión infinita" en las políticas de seguridad de la base de datos (RLS). Por favor ejecuta el script de corrección en Supabase.');
+            const nextEntityNames: Record<string, string> = {};
+
+            (sportsResult.data || []).forEach((sport) => {
+                nextEntityNames[`sport:${sport.id}`] = sport.name;
+            });
+
+            (unionsResult.data || []).forEach((union) => {
+                nextEntityNames[`union:${union.id}`] = union.name;
+            });
+
+            (tournamentsResult.data || []).forEach((tournament) => {
+                nextEntityNames[`tournament:${tournament.id}`] = tournament.name;
+            });
+
+            (clubsResult.data || []).forEach((club) => {
+                nextEntityNames[`club:${club.id}`] = club.name;
+            });
+
+            (matchesResult.data || []).forEach((match) => {
+                const tournamentName = match.tournament_id ? tournamentsById.get(match.tournament_id) : null;
+                const dateLabel = match.date_time
+                    ? new Date(match.date_time).toLocaleString('es-AR', {
+                        day: '2-digit',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    })
+                    : match.id;
+
+                nextEntityNames[`match:${match.id}`] = tournamentName
+                    ? `${tournamentName} • ${dateLabel}`
+                    : `Partido ${dateLabel}`;
+            });
+
+            setUsers((usersResult.data || []) as AppUserRow[]);
+            setMemberships((membershipsResult.data || []) as MembershipRow[]);
+            setEntityNames(nextEntityNames);
+        } catch (err: unknown) {
+            console.error('Error fetching personas/roles:', err);
+            const message = err instanceof Error ? err.message : 'Error desconocido al cargar accesos';
+            if (message.includes('abort')) {
+                setError('La consulta tardó demasiado. Revisá RLS o la conectividad con Supabase.');
             } else {
-                setError(err.message || 'Error desconocido al cargar usuarios');
+                setError(message);
             }
         } finally {
+            clearTimeout(timeoutId);
             setLoading(false);
-            console.log('Fetch users finished');
         }
     };
 
-    // Filter logic
-    const filteredUsers = users.filter(user => {
-        const query = searchQuery.toLowerCase();
-        return (
-            user.name?.toLowerCase().includes(query) ||
-            user.email?.toLowerCase().includes(query) ||
-            user.role?.toLowerCase().includes(query)
-        );
-    });
+    const filteredUsers = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
 
-    // Derive role assignments from users with special roles
-    const derivedRoleAssignments: RoleAssignment[] = users
-        .filter(u => u.role && u.role !== 'fan' && u.role !== 'user')
-        .map(u => ({
-            id: `role-${u.id}`,
-            userId: u.id,
-            userName: u.name || 'Usuario',
-            email: u.email || '',
-            role: u.role || 'user',
-            scope: u.role === 'super_admin' ? 'Global' : 'N/A', // Simple scope logic for now
-            assignedAt: u.created_at || new Date().toISOString(), // Using created_at as proxy
-            status: 'active'
-        }));
+        return users.filter((user) => {
+            if (!query) return true;
+
+            return (
+                user.name?.toLowerCase().includes(query) ||
+                user.email?.toLowerCase().includes(query) ||
+                user.role?.toLowerCase().includes(query)
+            );
+        });
+    }, [searchQuery, users]);
+
+    const derivedRoleAssignments = useMemo<RoleAssignment[]>(() => {
+        const usersById = new Map(users.map((user) => [user.id, user]));
+
+        const globalAssignments = users
+            .filter((user) => ['super_admin', 'admin_general'].includes(user.role))
+            .map((user) => ({
+                id: `global-${user.id}`,
+                userId: user.id,
+                userName: user.name || 'Usuario',
+                email: user.email || '',
+                roleLabel: getRoleLabel(user.role),
+                scopeLabel: 'Global',
+                assignedAt: user.created_at || new Date().toISOString(),
+                accessLevel: 'Global',
+                status: 'active' as const,
+            }));
+
+        const membershipAssignments = memberships
+            .map((membership) => {
+                const user = usersById.get(membership.user_id);
+                if (!user) return null;
+
+                const scopeLabel =
+                    entityNames[`${membership.scope_type}:${membership.scope_id}`] ||
+                    `${membership.scope_type}:${membership.scope_id}`;
+
+                return {
+                    id: membership.id,
+                    userId: user.id,
+                    userName: user.name || 'Usuario',
+                    email: user.email || '',
+                    roleLabel: SCOPE_ROLE_LABELS[membership.scope_type],
+                    scopeLabel,
+                    assignedAt: membership.created_at,
+                    accessLevel: LOCAL_ROLE_LABELS[membership.role],
+                    status: 'active' as const,
+                };
+            })
+            .filter(Boolean) as RoleAssignment[];
+
+        return [...globalAssignments, ...membershipAssignments];
+    }, [entityNames, memberships, users]);
+
+    const filteredAssignments = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+
+        return derivedRoleAssignments.filter((assignment) => {
+            if (!query) return true;
+
+            return (
+                assignment.userName.toLowerCase().includes(query) ||
+                assignment.email.toLowerCase().includes(query) ||
+                assignment.roleLabel.toLowerCase().includes(query) ||
+                assignment.scopeLabel.toLowerCase().includes(query) ||
+                assignment.accessLevel.toLowerCase().includes(query)
+            );
+        });
+    }, [derivedRoleAssignments, searchQuery]);
 
     return (
         <div style={{ paddingBottom: 40 }}>
-            {/* Header */}
             <header className={styles.tectonicHeader}>
                 <div className={styles.headerInfo}>
-                    <p>Gestion de Accesos</p>
+                    <p>Gestión de Accesos</p>
                     <h1>Personas y Roles</h1>
                 </div>
                 <div className={styles.statusSync}>
-                    <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => alert('Función de invitación pendiente')}>
+                    <button className={`${styles.btn} ${styles.btnPrimary}`} type="button">
                         <UserIcon size={16} /> Invitar Usuario
                     </button>
                 </div>
             </header>
 
-            {/* Navigation Tabs */}
+            <section
+                className={styles.slab}
+                style={{
+                    marginBottom: 24,
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: 16,
+                }}
+            >
+                {MANAGEMENT_PRESETS.map((preset) => (
+                    <article
+                        key={preset.id}
+                        style={{
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: 18,
+                            padding: 18,
+                            background: 'rgba(255,255,255,0.02)',
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                            <span
+                                style={{
+                                    width: 10,
+                                    height: 10,
+                                    borderRadius: '50%',
+                                    background: preset.accent,
+                                    boxShadow: `0 0 12px ${preset.accent}`,
+                                }}
+                            />
+                            <h3 style={{ margin: 0, fontSize: 15 }}>{preset.title}</h3>
+                        </div>
+                        <p style={{ margin: 0, color: 'var(--basalt-400)', fontSize: 13, lineHeight: 1.55 }}>
+                            {preset.desc}
+                        </p>
+                    </article>
+                ))}
+            </section>
+
             <div className={styles.slab} style={{ marginBottom: 24, padding: '0 24px' }}>
                 <div style={{ display: 'flex', gap: 24 }}>
                     <button
@@ -125,9 +333,10 @@ export default function PersonasRolesPage() {
                             color: activeTab === 'all' ? '#fff' : 'var(--basalt-400)',
                             padding: '16px 0',
                             background: 'none',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
                         }}
                         onClick={() => setActiveTab('all')}
+                        type="button"
                     >
                         Todos los Usuarios ({users.length})
                     </button>
@@ -138,39 +347,38 @@ export default function PersonasRolesPage() {
                             color: activeTab === 'roles' ? '#fff' : 'var(--basalt-400)',
                             padding: '16px 0',
                             background: 'none',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
                         }}
                         onClick={() => setActiveTab('roles')}
+                        type="button"
                     >
-                        Roles Especiales ({derivedRoleAssignments.length})
+                        Accesos Granulares ({derivedRoleAssignments.length})
                     </button>
                 </div>
             </div>
 
-            {/* Filters */}
             <div className={styles.slab} style={{ marginBottom: 24 }}>
                 <div className={styles.slabHeader} style={{ justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div className={styles.filterInput} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', width: 300 }}>
+                        <div className={styles.filterInput} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', width: 320 }}>
                             <Search size={16} style={{ color: '#666', marginRight: 8 }} />
                             <input
                                 style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%' }}
-                                placeholder={activeTab === 'all' ? "Buscar usuario por nombre o email..." : "Buscar por rol..."}
+                                placeholder={activeTab === 'all' ? 'Buscar usuario por nombre o email...' : 'Buscar por alcance, rol o entidad...'}
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(event) => setSearchQuery(event.target.value)}
                             />
                         </div>
-                        <button className={styles.btn}>
+                        <button className={styles.btn} type="button">
                             <Filter size={14} /> Filtros
                         </button>
                     </div>
-                    <button className={styles.btn} onClick={fetchUsers}>
+                    <button className={styles.btn} onClick={fetchUsers} type="button">
                         <Download size={14} /> Recargar
                     </button>
                 </div>
             </div>
 
-            {/* Content Lists */}
             <div className={styles.content}>
                 {loading && <div style={{ padding: 20, textAlign: 'center', color: '#888' }}>Cargando usuarios...</div>}
 
@@ -191,10 +399,10 @@ export default function PersonasRolesPage() {
                                     <tr>
                                         <th>Usuario</th>
                                         <th>Email</th>
-                                        <th>Rol</th>
+                                        <th>Rol Base</th>
+                                        <th>Accesos</th>
                                         <th>Fecha Registro</th>
-                                        <th>Ultimo Acceso</th>
-                                        <th>Estado</th>
+                                        <th>Último Acceso</th>
                                         <th style={{ textAlign: 'right' }}>Acciones</th>
                                     </tr>
                                 </thead>
@@ -206,54 +414,65 @@ export default function PersonasRolesPage() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        filteredUsers.map((user) => (
-                                            <tr key={user.id} className={styles.tableRow}>
-                                                <td style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                    <div style={{
-                                                        width: 32, height: 32, borderRadius: '50%',
-                                                        background: 'var(--basalt-800)',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        fontSize: 12, fontWeight: 700,
-                                                        overflow: 'hidden'
-                                                    }}>
-                                                        {user.avatar_url ? (
-                                                            <img src={user.avatar_url} alt={user.name || 'User'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                        ) : (
-                                                            (user.name || user.email || '?').substring(0, 2).toUpperCase()
-                                                        )}
-                                                    </div>
-                                                    <span style={{ fontWeight: 600 }}>{user.name || user.email || 'Sin nombre'}</span>
-                                                </td>
-                                                <td style={{ color: 'var(--basalt-400)' }}>{user.email}</td>
-                                                <td>
-                                                    <span className={styles.badge} style={{
-                                                        background: user.role === 'super_admin' ? 'var(--color-accent)' : 'var(--basalt-800)',
-                                                        color: user.role === 'super_admin' ? '#000' : '#fff'
-                                                    }}>
-                                                        {user.role || 'User'}
-                                                    </span>
-                                                </td>
-                                                <td>{user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
-                                                <td>{user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : '-'}</td>
-                                                <td>
-                                                    <span
-                                                        className={styles.pill}
-                                                        style={{
-                                                            background: user.status === 'active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                                            color: user.status === 'active' ? '#34d399' : '#f87171',
-                                                            border: `1px solid ${user.status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
-                                                        }}
-                                                    >
-                                                        {user.status === 'active' ? 'Activo' : 'Suspendido'}
-                                                    </span>
-                                                </td>
-                                                <td style={{ textAlign: 'right' }}>
-                                                    <button className={styles.btn} style={{ padding: 8 }}>
-                                                        <MoreVertical size={16} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
+                                        filteredUsers.map((user) => {
+                                            const accessCount = memberships.filter((membership) => membership.user_id === user.id).length;
+
+                                            return (
+                                                <tr key={user.id} className={styles.tableRow}>
+                                                    <td style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                        <div
+                                                            style={{
+                                                                width: 32,
+                                                                height: 32,
+                                                                borderRadius: '50%',
+                                                                background: 'var(--basalt-800)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                fontSize: 12,
+                                                                fontWeight: 700,
+                                                                overflow: 'hidden',
+                                                            }}
+                                                        >
+                                                            {user.avatar_url ? (
+                                                                <img src={user.avatar_url} alt={user.name || 'User'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            ) : (
+                                                                (user.name || user.email || '?').substring(0, 2).toUpperCase()
+                                                            )}
+                                                        </div>
+                                                        <span style={{ fontWeight: 600 }}>{user.name || user.email || 'Sin nombre'}</span>
+                                                    </td>
+                                                    <td style={{ color: 'var(--basalt-400)' }}>{user.email}</td>
+                                                    <td>
+                                                        <span
+                                                            className={styles.badge}
+                                                            style={{
+                                                                background: ['super_admin', 'admin_general'].includes(user.role) ? 'var(--color-accent)' : 'var(--basalt-800)',
+                                                                color: ['super_admin', 'admin_general'].includes(user.role) ? '#000' : '#fff',
+                                                            }}
+                                                        >
+                                                            {getRoleLabel(user.role)}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ color: 'var(--basalt-400)' }}>
+                                                        {accessCount === 0 ? 'Sin alcances específicos' : `${accessCount} asignación(es)`}
+                                                    </td>
+                                                    <td>{user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
+                                                    <td>{user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : '-'}</td>
+                                                    <td style={{ textAlign: 'right' }}>
+                                                        <button
+                                                            className={styles.btn}
+                                                            style={{ padding: 8, opacity: 0.65 }}
+                                                            type="button"
+                                                            disabled
+                                                            title="Vista de lectura. La edición programática está disponible en /api/admin/users/:id/access"
+                                                        >
+                                                            <MoreVertical size={16} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     )}
                                 </tbody>
                             </table>
@@ -264,32 +483,46 @@ export default function PersonasRolesPage() {
                 {!loading && !error && activeTab === 'roles' && (
                     <section className={styles.section}>
                         <div className={styles.sectionHeaderRow} style={{ marginBottom: 16 }}>
-                            <h2 className={styles.sectionTitle}>Usuarios con Roles Asignados ({derivedRoleAssignments.length})</h2>
+                            <h2 className={styles.sectionTitle}>Asignaciones por Alcance ({filteredAssignments.length})</h2>
                         </div>
                         <div className={styles.card}>
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
                                         <th>Usuario</th>
-                                        <th>Rol Asignado</th>
-                                        <th>Alcance (Scope)</th>
+                                        <th>Tipo de Acceso</th>
+                                        <th>Entidad</th>
+                                        <th>Nivel</th>
                                         <th>Desde</th>
                                         <th>Estado</th>
                                         <th style={{ textAlign: 'right' }}>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {derivedRoleAssignments.length === 0 ? (
+                                    {filteredAssignments.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} style={{ textAlign: 'center', padding: 40, color: '#666' }}>
-                                                No hay roles especiales asignados
+                                            <td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#666' }}>
+                                                No hay accesos especiales asignados
                                             </td>
                                         </tr>
                                     ) : (
-                                        derivedRoleAssignments.map((assignment) => (
+                                        filteredAssignments.map((assignment) => (
                                             <tr key={assignment.id} className={styles.tableRow}>
                                                 <td style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--basalt-800)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--color-accent)' }}>
+                                                    <div
+                                                        style={{
+                                                            width: 32,
+                                                            height: 32,
+                                                            borderRadius: '50%',
+                                                            background: 'var(--basalt-800)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: 12,
+                                                            fontWeight: 700,
+                                                            color: 'var(--color-accent)',
+                                                        }}
+                                                    >
                                                         {assignment.userName.substring(0, 2).toUpperCase()}
                                                     </div>
                                                     <div>
@@ -300,21 +533,28 @@ export default function PersonasRolesPage() {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                         <Shield size={14} color="var(--color-accent)" />
-                                                        {assignment.role}
+                                                        {assignment.roleLabel}
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <span className={styles.badge} style={{ background: 'var(--basalt-800)', border: '1px solid var(--surface-edge)', padding: '2px 8px' }}>
-                                                        {assignment.scope}
+                                                        {assignment.scopeLabel}
                                                     </span>
                                                 </td>
+                                                <td>{assignment.accessLevel}</td>
                                                 <td>{new Date(assignment.assignedAt).toLocaleDateString()}</td>
                                                 <td>
                                                     <span className={`${styles.pill} ${styles.pillSuccess}`}>ACTIVO</span>
                                                 </td>
                                                 <td style={{ textAlign: 'right' }}>
-                                                    <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ fontSize: 11, padding: '4px 8px', height: 28 }}>
-                                                        Editar
+                                                    <button
+                                                        className={`${styles.btn} ${styles.btnPrimary}`}
+                                                        style={{ fontSize: 11, padding: '4px 8px', height: 28, opacity: 0.65 }}
+                                                        type="button"
+                                                        disabled
+                                                        title="Vista de lectura. La edición programática está disponible en /api/admin/users/:id/access"
+                                                    >
+                                                        Solo lectura
                                                     </button>
                                                 </td>
                                             </tr>

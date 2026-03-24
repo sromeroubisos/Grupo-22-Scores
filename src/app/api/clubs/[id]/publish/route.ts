@@ -1,4 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+    canManageClubContext,
+    getClubManagementTarget,
+    requireGlobalAdminContext,
+    requireUserAccessContext,
+} from '@/lib/auth/permissions';
+import { ADMIN_ONLY_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 
 function err(message: string, status: number) {
@@ -16,27 +23,14 @@ export async function POST(
     const { id } = await params;
     const supabase = await createClient();
 
-    // Auth
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return err('No autenticado', 401);
+    const context = await requireUserAccessContext(supabase).catch(() => null);
+    if (!context) return err('No autenticado', 401);
 
-    const { data: profile } = await supabase
-        .from('users').select('role').eq('id', user.id).single();
+    if (!isGlobalAdminRole(context.role)) {
+        const target = await getClubManagementTarget(supabase, id);
+        const canPublish = Boolean(target && canManageClubContext(context, target, ADMIN_ONLY_MEMBERSHIP_ROLES));
 
-    const isSuperAdmin = profile?.role === 'super_admin';
-    if (!isSuperAdmin) {
-        const { data: club } = await supabase
-            .from('clubs').select('union_id').eq('id', id).single();
-
-        const { data: membership } = await supabase
-            .from('memberships')
-            .select('role')
-            .eq('user_id', user.id)
-            .or(`and(scope_type.eq.club,scope_id.eq.${id}),and(scope_type.eq.union,scope_id.eq.${club?.union_id ?? 'none'})`)
-            .in('role', ['admin'])
-            .maybeSingle();
-
-        if (!membership) return err('Sin permisos para publicar este club', 403);
+        if (!canPublish) return err('Sin permisos para publicar este club', 403);
     }
 
     // Validar que tenga los requisitos mínimos
@@ -81,14 +75,8 @@ export async function DELETE(
 ) {
     const { id } = await params;
     const supabase = await createClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return err('No autenticado', 401);
-
-    const { data: profile } = await supabase
-        .from('users').select('role').eq('id', user.id).single();
-
-    if (profile?.role !== 'super_admin') return err('Solo super admin puede despublicar', 403);
+    const isGlobalAdmin = await requireGlobalAdminContext(supabase).catch(() => null);
+    if (!isGlobalAdmin) return err('Solo un administrador global puede despublicar', 403);
 
     const { data, error } = await supabase
         .from('clubs')

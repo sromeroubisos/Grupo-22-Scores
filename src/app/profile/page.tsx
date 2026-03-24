@@ -1,24 +1,75 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
-import { createClient } from '@/lib/supabase/client';
-import {
-    FileText, User, LogOut, Camera,
-    ChevronRight, Globe, Lock, Bell, Trophy, ShieldCheck, Star, Heart,
-} from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import {
+    Bell,
+    Camera,
+    ChevronRight,
+    CirclePlus,
+    ClipboardPenLine,
+    FileText,
+    Globe,
+    Heart,
+    LoaderCircle,
+    Lock,
+    LogOut,
+    Send,
+    ShieldCheck,
+    Star,
+    Trophy,
+    User,
+    Users,
+} from 'lucide-react';
+
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { getActiveSports } from '@/lib/data/sports';
 import { fetchResolvedFavorites, type ResolvedFavorite } from '@/lib/favorites/fetchFavorites';
+import { createClient } from '@/lib/supabase/client';
+import { getActiveSports } from '@/lib/data/sports';
+import { useAuth } from '@/context/AuthContext';
+
 import styles from './profile.module.css';
 
-// ─── TYPES ───────────────────────────────────────────────────────────────────
-
 type MainTab = 'seguidos' | 'competiciones' | 'clubes' | 'actividad' | 'ajustes';
-
 type FavoriteItem = ResolvedFavorite;
+type ProfileActionKind = 'collaborator' | 'tournament';
+
+type FormStatus =
+    | { type: 'idle' }
+    | { type: 'submitting'; message: string }
+    | { type: 'success'; message: string; mailtoUrl?: string }
+    | { type: 'error'; message: string };
+
+type RequestApiResponse = {
+    ok: true;
+    delivery: 'mailto' | 'webhook';
+    recipient: string;
+    message: string;
+    mailtoUrl?: string;
+};
+
+type CollaboratorRequestPayload = {
+    kind: 'collaborator';
+    fullName: string;
+    email: string;
+    city: string;
+    sport: string;
+    experience: string;
+    availability: string;
+};
+
+type TournamentRequestPayload = {
+    kind: 'tournament';
+    fullName: string;
+    email: string;
+    tournamentName: string;
+    sport: string;
+    location: string;
+    season: string;
+    website: string;
+    notes: string;
+};
 
 interface ProfileStats {
     total: number;
@@ -34,7 +85,23 @@ interface ProfileUser {
     avatarUrl?: string | null;
 }
 
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
+async function sendProfileRequest(
+    payload: CollaboratorRequestPayload | TournamentRequestPayload
+): Promise<RequestApiResponse> {
+    const response = await fetch('/api/profile/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo preparar tu solicitud.');
+    }
+
+    return data as RequestApiResponse;
+}
 
 export default function ProfilePage() {
     const { user, logout } = useAuth();
@@ -42,6 +109,7 @@ export default function ProfilePage() {
     const [isDesktop, setIsDesktop] = useState(false);
     const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
     const [favLoading, setFavLoading] = useState(true);
+    const [activeRequestForm, setActiveRequestForm] = useState<ProfileActionKind | null>(null);
     const supabase = createClient();
 
     useEffect(() => {
@@ -52,8 +120,13 @@ export default function ProfilePage() {
     }, []);
 
     useEffect(() => {
-        if (!user?.id) { setFavLoading(false); return; }
+        if (!user?.id) {
+            setFavLoading(false);
+            return;
+        }
+
         let alive = true;
+
         (async () => {
             try {
                 const data = await fetchResolvedFavorites(supabase);
@@ -65,13 +138,16 @@ export default function ProfilePage() {
                 if (alive) setFavLoading(false);
             }
         })();
-        return () => { alive = false; };
+
+        return () => {
+            alive = false;
+        };
     }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const stats: ProfileStats = {
         total: favorites.length,
-        clubes: favorites.filter(f => f.entity_type === 'club').length,
-        torneos: favorites.filter(f => ['league', 'tournament'].includes(f.entity_type)).length,
+        clubes: favorites.filter(favorite => favorite.entity_type === 'club').length,
+        torneos: favorites.filter(favorite => ['league', 'tournament'].includes(favorite.entity_type)).length,
     };
 
     const sportsTabs: { key: MainTab; label: string }[] = [
@@ -80,7 +156,7 @@ export default function ProfilePage() {
         { key: 'clubes', label: 'Clubes' },
         { key: 'actividad', label: 'Actividad' },
     ];
-    // On mobile, settings live in a tab. On desktop they live in the sidebar.
+
     const visibleTabs = isDesktop
         ? sportsTabs
         : [...sportsTabs, { key: 'ajustes' as MainTab, label: 'Ajustes' }];
@@ -88,11 +164,15 @@ export default function ProfilePage() {
     return (
         <div className={styles.page}>
             <div className={styles.container}>
-
-                {/* ── Header (full width) ── */}
                 <ProfileHeader user={user} stats={stats} />
 
-                {/* ── Main column ── */}
+                <ProfileActionHub
+                    user={user}
+                    activeRequestForm={activeRequestForm}
+                    onSelectForm={(kind) => setActiveRequestForm(current => current === kind ? null : kind)}
+                    onCloseForm={() => setActiveRequestForm(null)}
+                />
+
                 <div className={styles.mainColumn}>
                     <nav className={styles.tabsContainer} aria-label="Secciones del perfil">
                         {visibleTabs.map(({ key, label }) => (
@@ -108,52 +188,56 @@ export default function ProfilePage() {
 
                     <div className={styles.mainContent}>
                         {activeTab === 'seguidos' && (
-                            <SeguridosPanel favorites={favorites} loading={favLoading} />
+                            <SeguidosPanel favorites={favorites} loading={favLoading} />
                         )}
+
                         {activeTab === 'competiciones' && (
                             <EmptySection
                                 icon={<Trophy size={40} color="var(--color-text-tertiary)" />}
                                 title="Competiciones"
-                                message="Las competiciones que sigas aparecerán acá."
+                                message="Las competiciones que sigas apareceran aca."
                             />
                         )}
+
                         {activeTab === 'clubes' && (
                             <EmptySection
                                 icon={<ShieldCheck size={40} color="var(--color-text-tertiary)" />}
                                 title="Clubes"
-                                message="Los clubes que sigas aparecerán acá."
+                                message="Los clubes que sigas apareceran aca."
                             />
                         )}
+
                         {activeTab === 'actividad' && (
                             <EmptySection
                                 icon={<FileText size={40} color="var(--color-text-tertiary)" />}
                                 title="Actividad"
-                                message="Tu actividad reciente aparecerá acá."
+                                message="Tu actividad reciente aparecera aca."
                             />
                         )}
+
                         {activeTab === 'ajustes' && !isDesktop && (
                             <SettingsPanel logout={logout} />
                         )}
                     </div>
                 </div>
 
-                {/* ── Sidebar (desktop only) ── */}
                 {isDesktop && (
                     <aside className={styles.sidebar}>
                         <SettingsPanel logout={logout} />
                     </aside>
                 )}
-
-
-
             </div>
         </div>
     );
 }
 
-// ─── PROFILE HEADER ───────────────────────────────────────────────────────────
-
-function ProfileHeader({ user, stats }: { user: ProfileUser | null | undefined; stats: ProfileStats }) {
+function ProfileHeader({
+    user,
+    stats,
+}: {
+    user: ProfileUser | null | undefined;
+    stats: ProfileStats;
+}) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
@@ -168,11 +252,23 @@ function ProfileHeader({ user, stats }: { user: ProfileUser | null | undefined; 
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={user.avatarUrl} alt="Avatar" className={styles.avatar} />
                 ) : (
-                    <div className={styles.avatar} style={{ background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div
+                        className={styles.avatar}
+                        style={{
+                            background: '#333',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
                         <User size={32} color="#aaa" />
                     </div>
                 )}
-                <div className={styles.avatarOverlay}><Camera size={24} /></div>
+
+                <div className={styles.avatarOverlay}>
+                    <Camera size={24} />
+                </div>
+
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -190,28 +286,568 @@ function ProfileHeader({ user, stats }: { user: ProfileUser | null | undefined; 
                 </div>
                 <div className={styles.statsRow}>
                     <span className={styles.stat}><strong>{stats.total}</strong> Seguidos</span>
-                    <span className={styles.statDivider}>·</span>
+                    <span className={styles.statDivider}>.</span>
                     <span className={styles.stat}><strong>{stats.clubes}</strong> Clubes</span>
-                    <span className={styles.statDivider}>·</span>
+                    <span className={styles.statDivider}>.</span>
                     <span className={styles.stat}><strong>{stats.torneos}</strong> Torneos</span>
                 </div>
             </div>
 
-            <button className={styles.btnEditProfile} onClick={() => alert('Edición de perfil próximamente')}>
+            <button
+                className={styles.btnEditProfile}
+                onClick={() => alert('Edicion de perfil proximamente.')}
+            >
                 Editar
             </button>
         </header>
     );
 }
 
-// ─── SEGUIDOS PANEL ───────────────────────────────────────────────────────────
+function ProfileActionHub({
+    user,
+    activeRequestForm,
+    onSelectForm,
+    onCloseForm,
+}: {
+    user: ProfileUser | null | undefined;
+    activeRequestForm: ProfileActionKind | null;
+    onSelectForm: (kind: ProfileActionKind) => void;
+    onCloseForm: () => void;
+}) {
+    return (
+        <section className={styles.actionHub}>
+            <div className={styles.actionHubHeader}>
+                <div className={styles.actionIntro}>
+                    <p className={styles.actionEyebrow}>Acciones</p>
+                    <h2 className={styles.actionTitle}>Postulate o sumanos un torneo</h2>
+                    <p className={styles.actionDescription}>
+                        Desde tu perfil ahora podes enviar dos tipos de solicitudes directo a
+                        deportesgrupo@gmail.com.
+                    </p>
+                </div>
 
-function SeguridosPanel({ favorites, loading }: { favorites: FavoriteItem[]; loading: boolean }) {
+                <div className={styles.actionAside}>
+                    <div className={styles.actionMailBadge}>
+                        <span className={styles.actionMailLabel}>Destino</span>
+                        <strong>deportesgrupo@gmail.com</strong>
+                    </div>
+                    <div className={styles.actionBadgeRow}>
+                        <span className={styles.actionMiniBadge}>Desde tu perfil</span>
+                        <span className={styles.actionMiniBadge}>Mail listo para enviar</span>
+                    </div>
+                    {activeRequestForm && (
+                        <button className={styles.btnGhost} onClick={onCloseForm}>
+                            Cerrar formulario
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div className={styles.actionGrid}>
+                <button
+                    type="button"
+                    className={`${styles.actionCard} ${activeRequestForm === 'collaborator' ? styles.actionCardActive : ''}`}
+                    onClick={() => onSelectForm('collaborator')}
+                >
+                    <div className={styles.actionCardTop}>
+                        <div className={styles.actionIconWrap}>
+                            <Users size={22} />
+                        </div>
+                        <span className={styles.actionKicker}>Colaboradores</span>
+                    </div>
+                    <div className={styles.actionCopy}>
+                        <span className={styles.actionCardTitle}>Aplicar a colaboradores de resultados</span>
+                        <span className={styles.actionCardDesc}>
+                            Postulate para ayudar con carga, seguimiento y cobertura de resultados.
+                        </span>
+                    </div>
+                    <div className={styles.actionHighlights}>
+                        <span className={styles.actionHighlight}>Cobertura</span>
+                        <span className={styles.actionHighlight}>Carga de resultados</span>
+                        <span className={styles.actionHighlight}>Seguimiento de torneos</span>
+                    </div>
+                    <div className={styles.actionFooter}>
+                        <span className={styles.actionFooterText}>Completar solicitud</span>
+                        <ChevronRight size={18} className={styles.actionChevron} />
+                    </div>
+                </button>
+
+                <button
+                    type="button"
+                    className={`${styles.actionCard} ${activeRequestForm === 'tournament' ? styles.actionCardActive : ''}`}
+                    onClick={() => onSelectForm('tournament')}
+                >
+                    <div className={styles.actionCardTop}>
+                        <div className={styles.actionIconWrap}>
+                            <CirclePlus size={22} />
+                        </div>
+                        <span className={styles.actionKicker}>Catalogo</span>
+                    </div>
+                    <div className={styles.actionCopy}>
+                        <span className={styles.actionCardTitle}>Sumar un torneo especifico</span>
+                        <span className={styles.actionCardDesc}>
+                            Compartinos el torneo que queres ver en Grupo 22 y lo evaluamos.
+                        </span>
+                    </div>
+                    <div className={styles.actionHighlights}>
+                        <span className={styles.actionHighlight}>Nombre y edicion</span>
+                        <span className={styles.actionHighlight}>Link oficial</span>
+                        <span className={styles.actionHighlight}>Contexto del torneo</span>
+                    </div>
+                    <div className={styles.actionFooter}>
+                        <span className={styles.actionFooterText}>Proponer torneo</span>
+                        <ChevronRight size={18} className={styles.actionChevron} />
+                    </div>
+                </button>
+            </div>
+
+            {activeRequestForm === 'collaborator' && (
+                <CollaboratorRequestForm
+                    key={`collaborator-${user?.id ?? 'guest'}-${user?.email ?? ''}`}
+                    user={user}
+                    onCancel={onCloseForm}
+                />
+            )}
+
+            {activeRequestForm === 'tournament' && (
+                <TournamentRequestForm
+                    key={`tournament-${user?.id ?? 'guest'}-${user?.email ?? ''}`}
+                    user={user}
+                    onCancel={onCloseForm}
+                />
+            )}
+        </section>
+    );
+}
+
+function CollaboratorRequestForm({
+    user,
+    onCancel,
+}: {
+    user: ProfileUser | null | undefined;
+    onCancel: () => void;
+}) {
+    const [fullName, setFullName] = useState(() => user?.name || '');
+    const [email, setEmail] = useState(() => user?.email || '');
+    const [city, setCity] = useState('');
+    const [sport, setSport] = useState('');
+    const [experience, setExperience] = useState('');
+    const [availability, setAvailability] = useState('');
+    const [status, setStatus] = useState<FormStatus>({ type: 'idle' });
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setStatus({ type: 'submitting', message: 'Preparando tu solicitud...' });
+
+        try {
+            const result = await sendProfileRequest({
+                kind: 'collaborator',
+                fullName,
+                email,
+                city,
+                sport,
+                experience,
+                availability,
+            });
+
+            if (result.delivery === 'mailto' && result.mailtoUrl && typeof window !== 'undefined') {
+                window.location.href = result.mailtoUrl;
+            }
+
+            setStatus({
+                type: 'success',
+                message: result.message,
+                mailtoUrl: result.mailtoUrl,
+            });
+        } catch (error) {
+            setStatus({
+                type: 'error',
+                message: error instanceof Error ? error.message : 'No se pudo enviar la solicitud.',
+            });
+        }
+    };
+
+    return (
+        <form className={styles.formShell} onSubmit={handleSubmit}>
+            <div className={styles.formHeader}>
+                <div className={styles.formHeading}>
+                    <p className={styles.formEyebrow}>Solicitud</p>
+                    <h3 className={styles.formTitle}>Aplicar al equipo de colaboradores de resultados</h3>
+                    <p className={styles.formLead}>
+                        Ideal si ya seguis partidos, cubris resultados o queres aportar contexto competitivo.
+                    </p>
+                </div>
+                <div className={styles.formHeroAside}>
+                    <div className={styles.formHeroIcon}>
+                        <ClipboardPenLine size={18} className={styles.formHeaderIcon} />
+                    </div>
+                    <div className={styles.formHeroCopy}>
+                        <span className={styles.formHeroLabel}>Envio</span>
+                        <strong>Mail preparado al instante</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.formCallouts}>
+                <span className={styles.formCallout}>Respuesta manual</span>
+                <span className={styles.formCallout}>Se abre tu cliente de correo</span>
+                <span className={styles.formCallout}>Proceso en 2 minutos</span>
+            </div>
+
+            <div className={styles.fieldGrid}>
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="collab-full-name">Nombre completo</label>
+                    <input
+                        id="collab-full-name"
+                        className={styles.input}
+                        value={fullName}
+                        onChange={(event) => setFullName(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="collab-email">Email de contacto</label>
+                    <input
+                        id="collab-email"
+                        type="email"
+                        className={styles.input}
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="collab-city">Ciudad o pais</label>
+                    <input
+                        id="collab-city"
+                        className={styles.input}
+                        placeholder="Ej: Rosario, Argentina"
+                        value={city}
+                        onChange={(event) => setCity(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="collab-sport">Deporte principal</label>
+                    <input
+                        id="collab-sport"
+                        className={styles.input}
+                        placeholder="Ej: Rugby"
+                        value={sport}
+                        onChange={(event) => setSport(event.target.value)}
+                        required
+                    />
+                </div>
+            </div>
+
+            <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="collab-experience">Experiencia con resultados</label>
+                <p className={styles.fieldHint}>
+                    Conta competencias cubiertas, herramientas que uses o si ya hiciste seguimiento en vivo.
+                </p>
+                <textarea
+                    id="collab-experience"
+                    className={styles.textarea}
+                    rows={4}
+                    placeholder="Contanos si cubriste partidos, cargaste resultados o seguiste competencias."
+                    value={experience}
+                    onChange={(event) => setExperience(event.target.value)}
+                    minLength={20}
+                    required
+                />
+            </div>
+
+            <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="collab-availability">Disponibilidad</label>
+                <p className={styles.fieldHint}>
+                    Aclara dias, horarios o franjas donde podrias colaborar con carga y control.
+                </p>
+                <textarea
+                    id="collab-availability"
+                    className={styles.textarea}
+                    rows={3}
+                    placeholder="Dias, horarios o torneos que podrias cubrir."
+                    value={availability}
+                    onChange={(event) => setAvailability(event.target.value)}
+                    minLength={10}
+                    required
+                />
+            </div>
+
+            <FormStatusBanner status={status} />
+
+            <div className={styles.formActions}>
+                <button type="button" className={styles.btnGhost} onClick={onCancel}>
+                    Cancelar
+                </button>
+                <button
+                    type="submit"
+                    className={styles.btnPrimary}
+                    disabled={status.type === 'submitting'}
+                >
+                    {status.type === 'submitting' ? (
+                        <>
+                            <LoaderCircle size={16} className={styles.spinningIcon} />
+                            Preparando mail
+                        </>
+                    ) : (
+                        <>
+                            <Send size={16} />
+                            Enviar solicitud
+                        </>
+                    )}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+function TournamentRequestForm({
+    user,
+    onCancel,
+}: {
+    user: ProfileUser | null | undefined;
+    onCancel: () => void;
+}) {
+    const [fullName, setFullName] = useState(() => user?.name || '');
+    const [email, setEmail] = useState(() => user?.email || '');
+    const [tournamentName, setTournamentName] = useState('');
+    const [sport, setSport] = useState('');
+    const [location, setLocation] = useState('');
+    const [season, setSeason] = useState('');
+    const [website, setWebsite] = useState('');
+    const [notes, setNotes] = useState('');
+    const [status, setStatus] = useState<FormStatus>({ type: 'idle' });
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setStatus({ type: 'submitting', message: 'Preparando tu solicitud...' });
+
+        try {
+            const result = await sendProfileRequest({
+                kind: 'tournament',
+                fullName,
+                email,
+                tournamentName,
+                sport,
+                location,
+                season,
+                website,
+                notes,
+            });
+
+            if (result.delivery === 'mailto' && result.mailtoUrl && typeof window !== 'undefined') {
+                window.location.href = result.mailtoUrl;
+            }
+
+            setStatus({
+                type: 'success',
+                message: result.message,
+                mailtoUrl: result.mailtoUrl,
+            });
+        } catch (error) {
+            setStatus({
+                type: 'error',
+                message: error instanceof Error ? error.message : 'No se pudo enviar la solicitud.',
+            });
+        }
+    };
+
+    return (
+        <form className={styles.formShell} onSubmit={handleSubmit}>
+            <div className={styles.formHeader}>
+                <div className={styles.formHeading}>
+                    <p className={styles.formEyebrow}>Solicitud</p>
+                    <h3 className={styles.formTitle}>Sumar un torneo especifico</h3>
+                    <p className={styles.formLead}>
+                        Compartinos un torneo concreto con contexto suficiente para revisarlo e incorporarlo.
+                    </p>
+                </div>
+                <div className={styles.formHeroAside}>
+                    <div className={styles.formHeroIcon}>
+                        <Trophy size={18} className={styles.formHeaderIcon} />
+                    </div>
+                    <div className={styles.formHeroCopy}>
+                        <span className={styles.formHeroLabel}>Revision</span>
+                        <strong>Pedido listo para evaluar</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.formCallouts}>
+                <span className={styles.formCallout}>Nombre del torneo</span>
+                <span className={styles.formCallout}>Contexto y alcance</span>
+                <span className={styles.formCallout}>Referencia oficial opcional</span>
+            </div>
+
+            <div className={styles.fieldGrid}>
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="tournament-full-name">Nombre completo</label>
+                    <input
+                        id="tournament-full-name"
+                        className={styles.input}
+                        value={fullName}
+                        onChange={(event) => setFullName(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="tournament-email">Email de contacto</label>
+                    <input
+                        id="tournament-email"
+                        type="email"
+                        className={styles.input}
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="tournament-name">Nombre del torneo</label>
+                    <input
+                        id="tournament-name"
+                        className={styles.input}
+                        placeholder="Ej: Torneo Regional del Litoral"
+                        value={tournamentName}
+                        onChange={(event) => setTournamentName(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="tournament-sport">Deporte</label>
+                    <input
+                        id="tournament-sport"
+                        className={styles.input}
+                        placeholder="Ej: Hockey"
+                        value={sport}
+                        onChange={(event) => setSport(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="tournament-location">Pais o region</label>
+                    <input
+                        id="tournament-location"
+                        className={styles.input}
+                        placeholder="Ej: Uruguay"
+                        value={location}
+                        onChange={(event) => setLocation(event.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="tournament-season">Temporada o edicion</label>
+                    <input
+                        id="tournament-season"
+                        className={styles.input}
+                        placeholder="Ej: 2026"
+                        value={season}
+                        onChange={(event) => setSeason(event.target.value)}
+                        required
+                    />
+                </div>
+            </div>
+
+            <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="tournament-website">Sitio oficial o link de referencia</label>
+                <input
+                    id="tournament-website"
+                    type="url"
+                    className={styles.input}
+                    placeholder="https://..."
+                    value={website}
+                    onChange={(event) => setWebsite(event.target.value)}
+                />
+            </div>
+
+            <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="tournament-notes">Por que deberiamos sumarlo</label>
+                <p className={styles.fieldHint}>
+                    Suma equipos, region, audiencia o cualquier dato que ayude a priorizarlo.
+                </p>
+                <textarea
+                    id="tournament-notes"
+                    className={styles.textarea}
+                    rows={4}
+                    placeholder="Conta alcance, relevancia, equipos o cualquier detalle util."
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    minLength={20}
+                    required
+                />
+            </div>
+
+            <FormStatusBanner status={status} />
+
+            <div className={styles.formActions}>
+                <button type="button" className={styles.btnGhost} onClick={onCancel}>
+                    Cancelar
+                </button>
+                <button
+                    type="submit"
+                    className={styles.btnPrimary}
+                    disabled={status.type === 'submitting'}
+                >
+                    {status.type === 'submitting' ? (
+                        <>
+                            <LoaderCircle size={16} className={styles.spinningIcon} />
+                            Preparando mail
+                        </>
+                    ) : (
+                        <>
+                            <Send size={16} />
+                            Enviar solicitud
+                        </>
+                    )}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+function FormStatusBanner({ status }: { status: FormStatus }) {
+    if (status.type === 'idle') {
+        return null;
+    }
+
+    const statusClassName = status.type === 'error'
+        ? styles.statusError
+        : status.type === 'success'
+            ? styles.statusSuccess
+            : styles.statusPending;
+
+    return (
+        <div className={`${styles.statusBanner} ${statusClassName}`}>
+            <p>{status.message}</p>
+            {status.type === 'success' && status.mailtoUrl && (
+                <a href={status.mailtoUrl} className={styles.statusLink}>
+                    Abrir correo manualmente
+                </a>
+            )}
+        </div>
+    );
+}
+
+function SeguidosPanel({
+    favorites,
+    loading,
+}: {
+    favorites: FavoriteItem[];
+    loading: boolean;
+}) {
     if (loading) {
         return (
             <div className={styles.skeletonGrid}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className={styles.skeletonCard} />
+                {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className={styles.skeletonCard} />
                 ))}
             </div>
         );
@@ -222,7 +858,7 @@ function SeguridosPanel({ favorites, loading }: { favorites: FavoriteItem[]; loa
             <EmptySection
                 icon={<Star size={40} color="var(--color-text-tertiary)" />}
                 title="Sin seguidos"
-                message="Seguí clubes y torneos para verlos acá."
+                message="Segui clubes y torneos para verlos aca."
                 action={<Link href="/" className={styles.btnAccent}>Explorar</Link>}
             />
         );
@@ -232,25 +868,37 @@ function SeguridosPanel({ favorites, loading }: { favorites: FavoriteItem[]; loa
         <div>
             <div className={styles.seguridosHeader}>
                 <span className={styles.seguridosCount}>{favorites.length} seguidos</span>
-                <Link href="/favorites" className={styles.linkAccent}>Gestionar →</Link>
+                <Link href="/favorites" className={styles.linkAccent}>Gestionar -&gt;</Link>
             </div>
             <div className={styles.seguridosGrid}>
-                {favorites.map(fav => (
-                    <Link key={`${fav.entity_type}-${fav.id}`} href="/favorites" className={styles.seguridoCard}>
-                        {fav.logo_url ? (
+                {favorites.map(favorite => (
+                    <Link
+                        key={`${favorite.entity_type}-${favorite.id}`}
+                        href="/favorites"
+                        className={styles.seguridoCard}
+                    >
+                        {favorite.logo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={fav.logo_url} alt={fav.name} className={styles.seguridoImg} />
+                            <img src={favorite.logo_url} alt={favorite.name} className={styles.seguridoImg} />
                         ) : (
-                            <div className={styles.seguridoImg} style={{ background: fav.color || 'var(--color-bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {fav.entity_type === 'club'
+                            <div
+                                className={styles.seguridoImg}
+                                style={{
+                                    background: favorite.color || 'var(--color-bg-tertiary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                {favorite.entity_type === 'club'
                                     ? <ShieldCheck size={20} color="var(--color-text-tertiary)" />
                                     : <Trophy size={20} color="var(--color-text-tertiary)" />
                                 }
                             </div>
                         )}
-                        <span className={styles.seguridoName}>{fav.name}</span>
+                        <span className={styles.seguridoName}>{favorite.name}</span>
                         <span className={styles.seguridoType}>
-                            {fav.entity_type === 'club' ? 'Club' : 'Liga'}
+                            {favorite.entity_type === 'club' ? 'Club' : 'Liga'}
                         </span>
                     </Link>
                 ))}
@@ -259,13 +907,16 @@ function SeguridosPanel({ favorites, loading }: { favorites: FavoriteItem[]; loa
     );
 }
 
-// ─── EMPTY SECTION ────────────────────────────────────────────────────────────
-
-function EmptySection({ icon, title, message, action }: {
-    icon: React.ReactNode;
+function EmptySection({
+    icon,
+    title,
+    message,
+    action,
+}: {
+    icon: ReactNode;
     title?: string;
     message: string;
-    action?: React.ReactNode;
+    action?: ReactNode;
 }) {
     return (
         <div className={styles.emptySection}>
@@ -277,97 +928,47 @@ function EmptySection({ icon, title, message, action }: {
     );
 }
 
-// ─── SETTINGS PANEL (sidebar / mobile tab) ────────────────────────────────────
-
 function SettingsPanel({ logout }: { logout: () => void }) {
-    const [showStaffForm, setShowStaffForm] = useState(false);
     const router = useRouter();
     const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
     const allSports = getActiveSports();
-    const favoriteSports = allSports.filter(s => favoriteSportIds.includes(s.id));
-
-    if (showStaffForm) {
-        return (
-            <div>
-                <button className={styles.backBtn} onClick={() => setShowStaffForm(false)}>
-                    ← Volver
-                </button>
-                <AdminApplicationForm />
-            </div>
-        );
-    }
+    const favoriteSports = allSports.filter(sport => favoriteSportIds.includes(sport.id));
 
     return (
         <div className={styles.settingsList}>
-            <h3 className={styles.sidebarSectionTitle}>Configuración</h3>
+            <h3 className={styles.sidebarSectionTitle}>Configuracion</h3>
 
-            {/* Preferencias deportivas */}
-            <div style={{
-                background: 'var(--color-surface-2, rgba(255,255,255,0.04))',
-                border: '1px solid var(--color-border)',
-                borderRadius: '12px',
-                padding: '14px 16px',
-                marginBottom: '12px',
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: favoriteSports.length > 0 ? '10px' : '0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Heart size={15} style={{ color: 'var(--color-accent)' }} />
-                        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Preferencias deportivas</span>
+            <div className={styles.preferenceCard}>
+                <div className={styles.preferenceHeader}>
+                    <div className={styles.preferenceLabel}>
+                        <Heart size={15} className={styles.preferenceIcon} />
+                        <span>Preferencias deportivas</span>
                     </div>
                     <button
                         onClick={() => router.push('/onboarding/preferences?edit=true')}
-                        style={{
-                            background: 'transparent',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '8px',
-                            padding: '5px 12px',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            color: 'var(--color-accent)',
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap',
-                        }}
+                        className={styles.preferenceEditBtn}
                     >
                         Editar
                     </button>
                 </div>
+
                 {favoriteSports.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {favoriteSports.map(s => (
-                            <span key={s.id} style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '3px 10px',
-                                background: 'rgba(0,163,101,0.10)',
-                                border: '1px solid rgba(0,163,101,0.25)',
-                                borderRadius: '99px',
-                                fontSize: '0.78rem',
-                                fontWeight: 500,
-                                color: 'var(--color-text-secondary)',
-                            }}>
-                                {s.icon} {s.nameEs}
+                    <div className={styles.preferenceChips}>
+                        {favoriteSports.map(sport => (
+                            <span key={sport.id} className={styles.preferenceChip}>
+                                {sport.icon} {sport.nameEs}
                             </span>
                         ))}
+
                         {favoriteLeagueIds.length > 0 && (
-                            <span style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '3px 10px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '99px',
-                                fontSize: '0.78rem',
-                                color: 'var(--color-text-tertiary)',
-                            }}>
-                                🏆 {favoriteLeagueIds.length} liga{favoriteLeagueIds.length !== 1 ? 's' : ''}
+                            <span className={styles.preferenceChipMuted}>
+                                {favoriteLeagueIds.length} liga{favoriteLeagueIds.length !== 1 ? 's' : ''}
                             </span>
                         )}
                     </div>
                 ) : (
-                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', margin: 0 }}>
-                        Todavía no elegiste deportes favoritos.
+                    <p className={styles.preferenceEmptyText}>
+                        Todavia no elegiste deportes favoritos.
                     </p>
                 )}
             </div>
@@ -375,7 +976,7 @@ function SettingsPanel({ logout }: { logout: () => void }) {
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
                     <h4>Idioma</h4>
-                    <p>Español (Argentina)</p>
+                    <p>Espanol (Argentina)</p>
                 </div>
                 <ChevronRight size={16} color="var(--color-text-tertiary)" />
             </div>
@@ -399,109 +1000,31 @@ function SettingsPanel({ logout }: { logout: () => void }) {
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
                     <h4>Privacidad</h4>
-                    <p>Público</p>
+                    <p>Publico</p>
                 </div>
                 <Globe size={16} color="var(--color-text-tertiary)" />
             </div>
 
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>
-                    <h4>Cambiar Contraseña</h4>
+                    <h4>Cambiar contrasena</h4>
                 </div>
                 <Lock size={16} color="var(--color-text-tertiary)" />
             </div>
 
             <div className={styles.settingsDivider} />
 
-            <button className={styles.settingItemBtn} onClick={() => setShowStaffForm(true)}>
-                <div className={styles.settingInfo}>
-                    <h4>Aplicar a Staff</h4>
-                    <p>Colaborar con el equipo</p>
-                </div>
-                <ChevronRight size={16} color="var(--color-text-tertiary)" />
-            </button>
-
-            <div className={styles.settingsDivider} />
-
             <button className={styles.btnLogout} onClick={logout}>
                 <LogOut size={18} />
-                Cerrar Sesión
+                Cerrar sesion
             </button>
 
             <button
                 className={styles.btnDanger}
-                onClick={() => alert('Para eliminar tu cuenta, contactá a soporte.')}
+                onClick={() => alert('Para eliminar tu cuenta, contacta a soporte.')}
             >
                 Eliminar cuenta
             </button>
         </div>
-    );
-}
-
-// ─── ADMIN APPLICATION FORM ───────────────────────────────────────────────────
-
-function AdminApplicationForm() {
-    const [selectedRole, setSelectedRole] = useState('');
-    const [reason, setReason] = useState('');
-
-    const handleSubmit = (e: React.SyntheticEvent) => {
-        e.preventDefault();
-        alert('Solicitud enviada para revisión.');
-    };
-
-    const roles = [
-        { id: 'club_admin', title: 'Admin de Club', desc: 'Gestionar plantel, escudo y redes sociales de un club.' },
-        { id: 'tournament_admin', title: 'Admin de Torneo', desc: 'Cargar resultados y fixture.' },
-        { id: 'editor', title: 'Editor de Noticias', desc: 'Publicar contenido periodístico.' },
-        { id: 'moderator', title: 'Moderador', desc: 'Revisar reportes y moderar contenido.' },
-    ];
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <h3 className={styles.sidebarSectionTitle} style={{ marginBottom: '12px' }}>Aplicar para Staff</h3>
-            <p className={styles.sectionDesc}>Elegí el rol y contanos por qué querés sumarte.</p>
-
-            <div className={styles.formGroup}>
-                {roles.map(role => (
-                    <div
-                        key={role.id}
-                        className={`${styles.adminOption} ${selectedRole === role.id ? styles.selected : ''}`}
-                        onClick={() => setSelectedRole(role.id)}
-                    >
-                        <input
-                            type="radio"
-                            name="role"
-                            checked={selectedRole === role.id}
-                            onChange={() => setSelectedRole(role.id)}
-                            style={{ margin: 0, width: 18, height: 18, accentColor: 'var(--color-accent)', flexShrink: 0 }}
-                        />
-                        <div>
-                            <span className={styles.roleTitle}>{role.title}</span>
-                            <span className={styles.roleDesc}>{role.desc}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {selectedRole && (
-                <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="reason">¿Por qué querés aplicar?</label>
-                    <textarea
-                        id="reason"
-                        className={styles.textarea}
-                        rows={3}
-                        placeholder="Tu experiencia, motivación..."
-                        value={reason}
-                        onChange={e => setReason(e.target.value)}
-                        required
-                        minLength={20}
-                    />
-                </div>
-            )}
-
-            <button type="submit" className={styles.btnPrimary} disabled={!selectedRole || reason.length < 20}>
-                Enviar solicitud
-            </button>
-        </form>
     );
 }

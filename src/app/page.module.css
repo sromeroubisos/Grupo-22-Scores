@@ -9,23 +9,24 @@
     /* Reduced bottom nav space */
 }
 
+.mobileTopControls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 110;
+}
+
 /* Mobile Sport Selector - Visible on Mobile by default */
 .mobileSportSelector {
     display: none;
-    flex-wrap: wrap;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: 8px;
-    padding: 0 16px;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 4px 2px;
+    margin: 0 -4px;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    position: sticky;
-    top: var(--h-header, 52px);
-    z-index: 101;
-    margin-top: 0;
 }
 
 .mobileSportSelector::-webkit-scrollbar {
@@ -35,7 +36,7 @@
 .mobileAudienceSwitch {
     display: none;
     gap: 8px;
-    padding: 8px 16px 0;
+    padding: 0 4px;
 }
 
 .mobileAudienceSwitchBtn {
@@ -63,33 +64,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0;
-    padding: 6px 14px;
-    background: var(--color-bg-tertiary);
-    /* Chip background */
-    border: 1px solid transparent;
-    border-radius: 99px;
-    /* Pill shape */
+    flex: 0 0 auto;
+    width: 68px;
+    height: 48px;
+    padding: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
     white-space: nowrap;
     color: var(--color-text-secondary);
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    height: 36px;
-    /* Explicit height */
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.sportChip:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-border-light);
+    color: var(--color-text-primary);
 }
 
 .sportChip.active {
-    background: rgba(var(--color-accent-rgb), 0.15);
-    border-color: var(--color-accent);
+    background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.28) 0%, rgba(34, 197, 94, 0.18) 100%);
+    border-color: rgba(var(--color-accent-rgb), 0.55);
     color: var(--color-accent);
-    box-shadow: 0 0 8px rgba(var(--color-accent-rgb), 0.15);
-    /* Green glow */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(var(--color-accent-rgb), 0.16) inset;
 }
 
 .sportIcon {
-    font-size: 1rem;
+    font-size: 1.28rem;
+    line-height: 1;
 }
 
 /* Ocultar el texto del deporte en los chips, mostrar solo icono */
@@ -99,17 +105,13 @@
 
 /* Date Selector - Pill Style */
 .dateSelector {
-    background: var(--color-bg-primary);
-    position: sticky;
-    top: var(--h-header, 52px);
-    z-index: 100;
-    padding: 12px 0;
-    /* Adjusted padding for contained look */
+    background: rgba(18, 18, 20, 0.92);
+    padding: 10px 0;
     border: 1px solid var(--color-border);
-    /* Full border */
-    border-radius: 16px;
-    /* Rounded corners */
-    margin-top: 0;
+    border-radius: 18px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 18px 40px -30px rgba(0, 0, 0, 0.75);
 }
 
 .dateSelectorInner {
@@ -125,8 +127,7 @@
 .matchesSection {
     display: flex;
     flex-direction: column;
-    margin-top: 64px;
-    /* Increased margin for better separation from sticky dateSelector */
+    margin-top: 0;
     gap: 24px;
     width: 100%;
 }
@@ -1197,6 +1198,14 @@
 
 /* Breakpoints */
 
+@media (min-width: 1101px) {
+    .dateSelector {
+        position: sticky;
+        top: calc(var(--h-header, 60px) + 16px);
+        z-index: 100;
+    }
+}
+
 /* Desktop Narrow / Tablet Landscape */
 @media (max-width: 1500px) {
     .mainLayout {
@@ -1217,33 +1226,30 @@
     }
 
     .mainContent {
-        gap: 0;
+        gap: 16px;
     }
 
     .sidebarLeft {
         display: none;
     }
 
-    .mobileSportSelector {
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        padding: 4px 12px;
-        margin: 0;
-        scrollbar-width: none;
-        flex-wrap: nowrap;
-        height: auto;
+    .mobileTopControls {
         position: sticky;
         top: var(--h-header, 52px);
-        z-index: 101;
-        background: transparent;
-        border: none;
-        box-shadow: none;
+        padding: 8px 0 12px;
+        margin: 0 -4px;
+        background: linear-gradient(180deg, rgba(10, 10, 11, 0.98) 0%, rgba(10, 10, 11, 0.95) 72%, rgba(10, 10, 11, 0.8) 88%, rgba(10, 10, 11, 0) 100%);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .mobileSportSelector {
+        display: flex;
+        flex-wrap: nowrap;
     }
 
     .mobileAudienceSwitch {
         display: flex;
-        padding: 8px 12px 0;
     }
 
     .mobileSportSelector::-webkit-scrollbar {
@@ -1258,9 +1264,10 @@
         gap: 6px;
         background: var(--color-bg-secondary);
         border: 1px solid var(--color-border);
-        border-radius: 12px;
-        padding: 10px;
-        min-width: 72px;
+        border-radius: 18px;
+        width: 72px;
+        height: 52px;
+        padding: 0;
         /* Bloques un poco más anchos */
         text-align: center;
         cursor: pointer;
@@ -1269,15 +1276,14 @@
     }
 
     .sportChip.active {
-        background: var(--color-accent);
-        background: linear-gradient(135deg, var(--color-accent) 0%, #22c55e 100%);
-        border-color: transparent;
-        color: #000;
-        box-shadow: 0 4px 12px rgba(48, 209, 88, 0.2);
+        background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.28) 0%, rgba(34, 197, 94, 0.18) 100%);
+        border-color: rgba(var(--color-accent-rgb), 0.55);
+        color: var(--color-accent);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(var(--color-accent-rgb), 0.16) inset;
     }
 
     .sportIcon {
-        font-size: 1.25rem;
+        font-size: 1.35rem;
     }
 
     .sportName {
@@ -1302,29 +1308,15 @@
         padding: 0 12px;
     }
 
-    .dateSelector {
-        position: sticky;
-        top: calc(var(--h-header, 52px) + 52px);
-        /* Adjusted top to match tighter sport selector */
-        z-index: 100;
-        background: var(--color-bg-primary);
-        /* Use solid bg-primary for best results */
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--color-border);
-        /* Ensure full border on mobile too */
-        border-radius: 16px;
-        /* Ensure radius on mobile */
-        margin-bottom: 0;
+    .mobileTopControls {
+        top: var(--h-header, 52px);
     }
 }
 
 /* Specific Mobile Spacing Adjustments (≤768px) */
 @media (max-width: 768px) {
     .matchesSection {
-        margin-top: 0;
-        padding-top: 48px;
-        /* Push the entire section (including live banner) down below sticky header */
+        gap: 20px;
     }
 
     .mobileSportSelector {
@@ -1335,9 +1327,9 @@
     }
 
     .dateSelector {
-        margin-top: 14px;
+        margin-top: 0;
         /* mt-4 (~14-16px) separation from sports */
-        margin-bottom: 32px;
+        margin-bottom: 0;
         /* mb-8 (32px) large separation */
     }
 
@@ -1360,6 +1352,15 @@
 @media (max-width: 500px) {
     .mainLayout {
         padding: 0 8px;
+    }
+
+    .mobileTopControls {
+        gap: 12px;
+    }
+
+    .sportChip {
+        width: 64px;
+        height: 48px;
     }
 
     .matchesContainer {

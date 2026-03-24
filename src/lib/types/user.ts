@@ -2,7 +2,17 @@
 
 import { Database } from "../database.types";
 
-export type UserRole = 'fan' | 'user' | 'super_admin' | 'operator' | 'club_admin' | 'admin_general';
+export type UserRole =
+    | 'fan'
+    | 'user'
+    | 'super_admin'
+    | 'operator'
+    | 'club_admin'
+    | 'admin_general'
+    | 'gestor_deportes'
+    | 'gestor_torneos'
+    | 'gestor_partidos'
+    | 'gestor_clubes';
 
 export type EntityType = 'league' | 'club' | 'tournament' | 'team' | 'player';
 
@@ -45,5 +55,13 @@ export function isSuperAdmin(user: User | null): boolean {
 
 // Helper to check if user can access admin panel
 export function canAccessAdminPanel(user: User | null): boolean {
-    return isSuperAdmin(user) || user?.role === 'operator' || user?.role === 'club_admin';
+    return Boolean(
+        isSuperAdmin(user) ||
+        user?.role === 'operator' ||
+        user?.role === 'club_admin' ||
+        user?.role === 'gestor_deportes' ||
+        user?.role === 'gestor_torneos' ||
+        user?.role === 'gestor_partidos' ||
+        user?.role === 'gestor_clubes'
+    );
 }

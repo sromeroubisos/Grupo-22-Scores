@@ -913,74 +913,78 @@ export default function HomePage() {
 
         {/* Main Content - Matches */}
         <main className={styles.mainContent}>
-          {/* Sport Selector (Mobile) */}
-          <div className={styles.mobileSportSelector}>
-            {sortedActiveSports.map(sport => (
-              <button
-                key={sport.id}
-                className={`${styles.sportChip} ${selectedSport.id === sport.id ? styles.active : ''}`}
-                onClick={() => setSelectedSport(sport)}
-              >
-                <span className={styles.sportIcon}>{sport.icon}</span>
-                <span className={styles.sportName}>{sport.nameEs}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className={styles.mobileAudienceSwitch} role="tablist" aria-label="Segmento de torneos">
-            {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
-              <button
-                key={audience}
-                type="button"
-                className={`${styles.mobileAudienceSwitchBtn} ${selectedAudience === audience ? styles.mobileAudienceSwitchBtnActive : ''}`}
-                onClick={() => setSelectedAudience(audience)}
-              >
-                {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
-              </button>
-            ))}
-          </div>
-
-          {/* Date Selector */}
-          <section className={styles.dateSelector}>
-            <div className={styles.dateSelectorInner}>
-              {/* Desktop/Tablet Scrolling List */}
-              <div className={styles.dateList} ref={dateListRef}>
-                {dates.map((date) => (
-                  <button
-                    key={date.date}
-                    ref={selectedDate === date.date ? activeDateRef : null}
-                    className={`${styles.dateItem} ${selectedDate === date.date ? styles.active : ''} ${date.isToday ? styles.today : ''}`}
-                    onClick={() => setSelectedDate(date.date)}
-                  >
-                    <span className={styles.dateLabel}>{date.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Mobile Arrows Navigation */}
-              <div className={styles.mobileDateNav}>
+          <div className={styles.mobileTopControls}>
+            {/* Sport Selector (Mobile) */}
+            <div className={styles.mobileSportSelector}>
+              {sortedActiveSports.map(sport => (
                 <button
-                  className={styles.mobileNavArrow}
-                  onClick={() => navigateDate('prev')}
-                  disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) <= 0}
+                  key={sport.id}
+                  type="button"
+                  aria-label={sport.nameEs}
+                  className={`${styles.sportChip} ${selectedSport.id === sport.id ? styles.active : ''}`}
+                  onClick={() => setSelectedSport(sport)}
                 >
-                  <ChevronLeft size={20} />
+                  <span className={styles.sportIcon}>{sport.icon}</span>
+                  <span className={styles.sportName}>{sport.nameEs}</span>
                 </button>
-
-                <span className={styles.mobileCurrentDate}>
-                  {selectedDateInfo?.label || selectedDate}
-                </span>
-
-                <button
-                  className={styles.mobileNavArrow}
-                  onClick={() => navigateDate('next')}
-                  disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) >= dates.length - 1}
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
+              ))}
             </div>
-          </section>
+
+            <div className={styles.mobileAudienceSwitch} role="tablist" aria-label="Segmento de torneos">
+              {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+                <button
+                  key={audience}
+                  type="button"
+                  className={`${styles.mobileAudienceSwitchBtn} ${selectedAudience === audience ? styles.mobileAudienceSwitchBtnActive : ''}`}
+                  onClick={() => setSelectedAudience(audience)}
+                >
+                  {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                </button>
+              ))}
+            </div>
+
+            {/* Date Selector */}
+            <section className={styles.dateSelector}>
+              <div className={styles.dateSelectorInner}>
+                {/* Desktop/Tablet Scrolling List */}
+                <div className={styles.dateList} ref={dateListRef}>
+                  {dates.map((date) => (
+                    <button
+                      key={date.date}
+                      ref={selectedDate === date.date ? activeDateRef : null}
+                      className={`${styles.dateItem} ${selectedDate === date.date ? styles.active : ''} ${date.isToday ? styles.today : ''}`}
+                      onClick={() => setSelectedDate(date.date)}
+                    >
+                      <span className={styles.dateLabel}>{date.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Mobile Arrows Navigation */}
+                <div className={styles.mobileDateNav}>
+                  <button
+                    className={styles.mobileNavArrow}
+                    onClick={() => navigateDate('prev')}
+                    disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) <= 0}
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+
+                  <span className={styles.mobileCurrentDate}>
+                    {selectedDateInfo?.label || selectedDate}
+                  </span>
+
+                  <button
+                    className={styles.mobileNavArrow}
+                    onClick={() => navigateDate('next')}
+                    disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) >= dates.length - 1}
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
 
           {/* Matches by League */}
           <div className={styles.matchesSection}>

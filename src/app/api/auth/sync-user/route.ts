@@ -3,12 +3,15 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { isSuperAdminEmail } from '@/lib/types/user'
 import { NextResponse } from 'next/server'
 
-export async function POST(request: Request) {
+export async function POST() {
     try {
         const supabase = await createClient()
 
         // Get current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        const {
+            data: { session },
+            error: sessionError,
+        } = await supabase.auth.getSession()
 
         if (sessionError || !session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -16,27 +19,33 @@ export async function POST(request: Request) {
 
         const user = session.user
         const shouldBeSuperAdmin = isSuperAdminEmail(user.email)
+        const admin = createAdminClient()
+        const now = new Date().toISOString()
 
-        // Check if user exists in public.users
-        const { data: existingUser } = await supabase
+        // Query with the admin client so profile sync does not depend on RLS state.
+        const { data: existingUser, error: existingUserError } = await admin
             .from('users')
-            .select('*')
+            .select('id, role')
             .eq('id', user.id)
-            .single()
+            .maybeSingle()
+
+        if (existingUserError) {
+            console.error('Error loading existing user:', existingUserError)
+            return NextResponse.json({ error: 'Error loading user profile' }, { status: 500 })
+        }
 
         if (!existingUser) {
-            // Determine role
-            const role = shouldBeSuperAdmin ? 'super_admin' : 'user'
+            const role = shouldBeSuperAdmin ? 'super_admin' : 'fan'
 
-            // Create user in public.users
-            const { error: insertError } = await supabase
+            const { error: insertError } = await admin
                 .from('users')
                 .insert({
                     id: user.id,
                     email: user.email!,
                     name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
                     avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
-                    role: role,
+                    role,
+                    last_login_at: now,
                 })
 
             if (insertError) {
@@ -44,22 +53,22 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: 'Error creating user' }, { status: 500 })
             }
         } else {
-            // Update last_login_at
-            await supabase
-                .from('users')
-                .update({ last_login_at: new Date().toISOString() })
-                .eq('id', user.id)
-        }
+            const updates: { last_login_at: string; role?: 'super_admin' } = {
+                last_login_at: now,
+            }
 
-        if (shouldBeSuperAdmin) {
-            try {
-                const admin = createAdminClient()
-                await admin
-                    .from('users')
-                    .update({ role: 'super_admin' })
-                    .eq('id', user.id)
-            } catch (error) {
-                console.error('Error enforcing super admin role:', error)
+            if (shouldBeSuperAdmin && existingUser.role !== 'super_admin') {
+                updates.role = 'super_admin'
+            }
+
+            const { error: updateError } = await admin
+                .from('users')
+                .update(updates)
+                .eq('id', user.id)
+
+            if (updateError) {
+                console.error('Error updating user:', updateError)
+                return NextResponse.json({ error: 'Error updating user' }, { status: 500 })
             }
         }
 

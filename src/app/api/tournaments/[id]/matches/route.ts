@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { canManageTournamentContext, getTournamentManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
+import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
     request: NextRequest,
@@ -9,7 +11,24 @@ export async function POST(
 ) {
     try {
         const tournamentId = (await params).id;
-        await requireAdminApiUser();
+        const supabase = await createClient();
+        const context = await requireUserAccessContext(supabase).catch(() => null);
+        if (!context) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        const target = await getTournamentManagementTarget(supabase, tournamentId);
+
+        if (!target || !canManageTournamentContext(context, target, EDIT_MEMBERSHIP_ROLES)) {
+            return NextResponse.json(
+                { error: 'Forbidden' },
+                { status: 403 }
+            );
+        }
+
         const body = await request.json();
 
         // Ensure tournamentId is in the data

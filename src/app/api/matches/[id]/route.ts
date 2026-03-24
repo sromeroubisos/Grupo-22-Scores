@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { canManageMatchContext, getMatchManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
+import { EDIT_MEMBERSHIP_ROLES, MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
@@ -95,6 +96,23 @@ async function getFlashScoreMatchBundle(matchId: string) {
   };
 }
 
+async function ensureMatchAccess(
+  matchId: string,
+  allowedRoles: ReadonlySet<string>
+) {
+  const supabase = await createClient();
+  const context = await requireUserAccessContext(supabase).catch(() => null);
+  if (!context) {
+    throw new Error('Unauthorized');
+  }
+
+  const target = await getMatchManagementTarget(supabase, matchId);
+
+  if (!target || !canManageMatchContext(context, target, allowedRoles)) {
+    throw new Error('Forbidden');
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -140,8 +158,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAdminApiUser();
     const matchId = (await params).id;
+    await ensureMatchAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
     const body = await request.json();
 
     console.log('[API PATCH /matches]', matchId, 'keys:', Object.keys(body));
@@ -178,7 +196,7 @@ export async function PATCH(
     console.error('Error in PATCH /api/matches/[id]:', error);
     return NextResponse.json(
       { error: message },
-      { status: 500 }
+      { status: message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500 }
     );
   }
 }
@@ -188,8 +206,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAdminApiUser();
     const matchId = (await params).id;
+    await ensureMatchAccess(matchId, EDIT_MEMBERSHIP_ROLES);
     const success = await FixtureService.deleteMatch(matchId);
 
     if (!success) {
@@ -205,7 +223,7 @@ export async function DELETE(
     console.error('Error in DELETE /api/matches/[id]:', error);
     return NextResponse.json(
       { error: message },
-      { status: 500 }
+      { status: message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500 }
     );
   }
 }

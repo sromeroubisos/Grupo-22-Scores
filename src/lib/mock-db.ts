@@ -1,7 +1,7 @@
 import { isProd, USE_MOCK_DATA } from './mock-config';
 
 export type UserRole = 'admin' | 'operator' | 'viewer';
-export type ScopeType = 'union' | 'tournament' | 'club';
+export type ScopeType = 'union' | 'sport' | 'tournament' | 'match' | 'club';
 
 export interface User {
     id: string;
@@ -384,7 +384,9 @@ class MockDB {
         // Memberships
         this.memberships = [
             { userId: 'u1', scopeType: 'union', scopeId: 'uar', role: 'admin' },
+            { userId: 'u1', scopeType: 'sport', scopeId: 'rugby', role: 'admin' },
             { userId: 'u1', scopeType: 'tournament', scopeId: 'uar-top-12', role: 'admin' },
+            { userId: 'u2', scopeType: 'match', scopeId: 'm2', role: 'operator' },
             { userId: 'u2', scopeType: 'tournament', scopeId: 'uar-top-12', role: 'operator' },
             { userId: 'u3', scopeType: 'club', scopeId: 'sic', role: 'admin' }
         ];

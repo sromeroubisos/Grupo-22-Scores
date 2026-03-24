@@ -56,9 +56,16 @@ export default function TournamentLayout({ children }: { children: React.ReactNo
             m.role === 'admin'
         );
 
-        const isSuperAdmin = user?.role === 'admin_general';
+        const sportMembership = db.memberships.find(m =>
+            m.userId === user?.id &&
+            m.scopeType === 'sport' &&
+            m.scopeId === foundTournament.sport &&
+            ['admin', 'editor', 'operator'].includes(m.role)
+        );
 
-        if (membership || unionMembership || isSuperAdmin) {
+        const isSuperAdmin = user?.role === 'admin_general' || user?.role === 'super_admin';
+
+        if (membership || unionMembership || sportMembership || isSuperAdmin) {
             setIsAuthorized(true);
         } else {
             router.push('/admin?error=unauthorized');
