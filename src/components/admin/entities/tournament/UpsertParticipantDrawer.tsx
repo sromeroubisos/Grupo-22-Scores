@@ -19,6 +19,12 @@ interface Club {
 interface TournamentGroup {
     id: string;
     name: string;
+    phase_id: string | null;
+}
+
+interface TournamentPhase {
+    id: string;
+    name: string;
 }
 
 interface Participant {
@@ -40,6 +46,7 @@ interface Props {
     onSave: (data: Partial<Participant>) => Promise<void>;
     participant?: Participant | null;
     clubs: Club[];
+    phases: TournamentPhase[];
     groups: TournamentGroup[];
     existingParticipants: Participant[];
 }
@@ -63,6 +70,7 @@ export function UpsertParticipantDrawer({
     onSave,
     participant,
     clubs,
+    phases,
     groups,
     existingParticipants,
 }: Props) {
@@ -75,6 +83,7 @@ export function UpsertParticipantDrawer({
     const [type, setType] = useState<ParticipantType>('club');
     const [status, setStatus] = useState<ParticipantStatus>('active');
     const [seed, setSeed] = useState<number | ''>('');
+    const [selectedPhaseId, setSelectedPhaseId] = useState('');
     const [groupId, setGroupId] = useState('');
     const [shortCode, setShortCode] = useState('');
     const [notes, setNotes] = useState('');
@@ -89,6 +98,7 @@ export function UpsertParticipantDrawer({
         setType('club');
         setStatus('active');
         setSeed('');
+        setSelectedPhaseId('');
         setGroupId('');
         setShortCode('');
         setNotes('');
@@ -97,6 +107,7 @@ export function UpsertParticipantDrawer({
 
     useEffect(() => {
         if (participant) {
+            const currentGroup = groups.find((group) => group.id === participant.group_id);
             setSourceMode(participant.club_id ? 'database' : 'manual');
             setClubId(participant.club_id || '');
             setClubSearch(participant.club_id ? participant.name : '');
@@ -104,6 +115,7 @@ export function UpsertParticipantDrawer({
             setType(participant.type);
             setStatus(participant.status);
             setSeed(participant.seed || '');
+            setSelectedPhaseId(currentGroup?.phase_id || '');
             setGroupId(participant.group_id || '');
             setShortCode(participant.short_code || '');
             setNotes(participant.notes || '');
@@ -112,7 +124,7 @@ export function UpsertParticipantDrawer({
         }
 
         resetForm();
-    }, [participant]);
+    }, [groups, participant]);
 
     const filteredClubs = useMemo(() => {
         if (!clubSearch.trim()) {
@@ -129,6 +141,27 @@ export function UpsertParticipantDrawer({
     }, [clubs, clubSearch]);
 
     const selectedClub = clubs.find((club) => club.id === clubId);
+
+    const phasesWithGroups = useMemo(
+        () => phases.filter((phase) => groups.some((group) => group.phase_id === phase.id)),
+        [groups, phases]
+    );
+
+    const availableGroups = useMemo(() => {
+        if (!selectedPhaseId) return [];
+        return groups.filter((group) => group.phase_id === selectedPhaseId);
+    }, [groups, selectedPhaseId]);
+
+    useEffect(() => {
+        if (!selectedPhaseId) {
+            setGroupId('');
+            return;
+        }
+
+        setGroupId((current) =>
+            availableGroups.some((group) => group.id === current) ? current : ''
+        );
+    }, [availableGroups, selectedPhaseId]);
 
     const validateForm = (): string | null => {
         if (sourceMode === 'database' && !clubId) {
@@ -423,7 +456,48 @@ export function UpsertParticipantDrawer({
                                 </div>
                             </div>
 
-                            {groups.length > 0 && (
+                            {groups.length > 0 && phasesWithGroups.length > 0 && (
+                                <div className="pp-form-grid-2">
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label">Fase</label>
+                                        <div className="pp-select-wrap">
+                                            <select
+                                                value={selectedPhaseId}
+                                                onChange={(event) => setSelectedPhaseId(event.target.value)}
+                                                className="pp-form-input pp-form-select"
+                                            >
+                                                <option value="">Sin fase</option>
+                                                {phasesWithGroups.map((phase) => (
+                                                    <option key={phase.id} value={phase.id}>
+                                                        {phase.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label">Grupo</label>
+                                        <div className="pp-select-wrap">
+                                            <select
+                                                value={groupId}
+                                                onChange={(event) => setGroupId(event.target.value)}
+                                                className="pp-form-input pp-form-select"
+                                                disabled={!selectedPhaseId}
+                                            >
+                                                <option value="">Sin grupo asignado</option>
+                                                {availableGroups.map((group) => (
+                                                    <option key={group.id} value={group.id}>
+                                                        {group.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {groups.length > 0 && phasesWithGroups.length === 0 && (
                                 <div className="pp-form-field">
                                     <label className="pp-form-label">Grupo</label>
                                     <div className="pp-select-wrap">

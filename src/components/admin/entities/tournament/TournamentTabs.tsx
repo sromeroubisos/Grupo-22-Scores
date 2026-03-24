@@ -84,6 +84,14 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                 </button>
             </div>
 
+            <div className="basalt-tabs-desktop-head">
+                <span className="basalt-tabs-desktop-kicker">Navegacion</span>
+                <strong className="basalt-tabs-desktop-title">Gestion del torneo</strong>
+                <span className="basalt-tabs-desktop-meta">
+                    {activeTabIndex + 1} de {TOURNAMENT_TABS.length} modulos
+                </span>
+            </div>
+
             <div className="basalt-tabs-inner">
                 {TOURNAMENT_TABS.map((tab) => {
                     const Icon = tab.icon;

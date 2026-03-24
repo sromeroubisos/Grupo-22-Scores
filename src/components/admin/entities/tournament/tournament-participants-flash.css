@@ -937,3 +937,259 @@ tr:hover .participant-name {
         padding: 0;
     }
 }
+
+.phase-assignment-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    margin-bottom: 18px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 38%),
+        rgba(9, 15, 24, 0.86);
+    box-shadow: 0 18px 54px rgba(0, 0, 0, 0.22);
+}
+
+.phase-assignment-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent),
+        rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+    z-index: 2;
+}
+
+.phase-assignment-toggle:hover {
+    transform: translateY(-1px);
+    border-color: rgba(0, 163, 101, 0.24);
+    color: var(--text-primary);
+    background: rgba(0, 163, 101, 0.08);
+}
+
+.phase-assignment-toggle svg {
+    width: 16px;
+    height: 16px;
+}
+
+.phase-assignment-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-right: 68px;
+}
+
+.phase-assignment-copy-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 680px;
+}
+
+.phase-assignment-kicker {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+}
+
+.phase-assignment-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.phase-assignment-copy,
+.phase-assignment-hint,
+.phase-assignment-empty,
+.phase-group-phase {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+}
+
+.phase-assignment-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.phase-assignment-panel.is-collapsed {
+    gap: 0;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.phase-assignment-panel.is-collapsed .phase-assignment-header {
+    align-items: center;
+    min-height: 42px;
+}
+
+.phase-assignment-panel.is-collapsed .phase-assignment-copy-block {
+    gap: 0;
+}
+
+.phase-assignment-panel.is-collapsed .phase-assignment-title {
+    font-size: 18px;
+}
+
+.phase-assignment-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: min(100%, 340px);
+}
+
+.phase-assignment-controls .filter-select {
+    min-width: 0;
+}
+
+.phase-assignment-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.phase-group-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.phase-group-action:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: rgba(0, 163, 101, 0.28);
+    background: rgba(0, 163, 101, 0.08);
+}
+
+.phase-group-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.phase-group-action-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.phase-group-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.phase-group-count {
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+
+.phase-group-cta {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.phase-assignment-empty {
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.participant-group-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.participant-group-phase-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+}
+
+@media (max-width: 1024px) {
+    .phase-assignment-header {
+        flex-direction: column;
+        padding-right: 68px;
+    }
+
+    .phase-assignment-controls {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .phase-assignment-panel {
+        padding: 16px;
+        padding-top: 68px;
+    }
+
+    .phase-assignment-panel.is-collapsed {
+        padding-top: 16px;
+        padding-right: 64px;
+        padding-bottom: 16px;
+    }
+
+    .phase-assignment-toggle {
+        top: 16px;
+        right: 16px;
+    }
+
+    .phase-assignment-header {
+        padding-right: 0;
+    }
+
+    .phase-assignment-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .phase-assignment-controls .btn-flash {
+        width: 100%;
+    }
+
+    .phase-assignment-groups {
+        grid-template-columns: 1fr;
+    }
+}

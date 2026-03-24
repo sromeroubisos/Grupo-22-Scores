@@ -31,6 +31,12 @@ function isEntityType(value: unknown): value is EntityType {
     return typeof value === 'string' && ['club', 'league', 'tournament', 'match', 'player'].includes(value);
 }
 
+function isSyntheticMatchVote(entityType: unknown, entityId: unknown) {
+    return entityType === 'match'
+        && typeof entityId === 'string'
+        && entityId.startsWith('vote:match:');
+}
+
 function mapRpcRow(row: RpcFavoriteRow): ResolvedFavorite {
     return {
         id: typeof row.entity_id === 'string' ? row.entity_id : '',
@@ -59,6 +65,7 @@ function parseRpcPayload(data: unknown): ResolvedFavorite[] {
 
     return data
         .filter((row): row is RpcFavoriteRow => typeof row === 'object' && row !== null)
+        .filter((row) => !isSyntheticMatchVote(row.entity_type, row.entity_id))
         .map(mapRpcRow)
         .filter((row) => row.id.length > 0);
 }
@@ -95,7 +102,7 @@ async function fetchFavoritesFallback(
         typeof row?.entity_id === 'string' &&
         typeof row?.created_at === 'string' &&
         isEntityType(row?.entity_type)
-    ));
+    )).filter((row) => !isSyntheticMatchVote(row.entity_type, row.entity_id));
 
     const clubIds = favorites
         .filter((row) => row.entity_type === 'club')

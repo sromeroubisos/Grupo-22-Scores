@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import ExportImage from '@/components/ExportImage';
+import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import styles from './page.module.css';
 
 // Mock data
@@ -78,6 +79,7 @@ export default function ResultadosPage() {
                                             time: m.time,
                                             status: m.status as 'scheduled' | 'live' | 'finished',
                                             dateLabel: group.label,
+                                            kickoffAt: combineLocalDateTimeToUtcIso(group.date, m.time, APP_TIMEZONE) || undefined,
                                         }))
                                     ),
                                 }}

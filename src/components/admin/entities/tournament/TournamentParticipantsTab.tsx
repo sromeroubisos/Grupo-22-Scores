@@ -20,7 +20,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Users, Search, Plus, Download, FileUp, History,
-    Pencil, Trash2, IdCard, Hash,
+    Pencil, Trash2, IdCard, Hash, ChevronDown, ChevronUp,
     AlertCircle, CheckCircle2
 } from 'lucide-react';
 import './tournament-participants-flash.css';
@@ -62,6 +62,15 @@ interface Participant {
 interface TournamentGroup {
     id: string;
     name: string;
+    phase_id: string | null;
+    order_index?: number | null;
+}
+
+interface TournamentPhase {
+    id: string;
+    name: string;
+    phase_type: string;
+    order_index: number;
 }
 
 interface ClubCatalogItem {
@@ -92,15 +101,19 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     // State
     const [participants, setParticipants] = useState<Participant[]>([]);
     const [groups, setGroups] = useState<TournamentGroup[]>([]);
+    const [phases, setPhases] = useState<TournamentPhase[]>([]);
     const [clubCatalog, setClubCatalog] = useState<ClubCatalogItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [clubsLoading, setClubsLoading] = useState(false);
+    const [groupAssignmentLoading, setGroupAssignmentLoading] = useState(false);
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [groupFilter, setGroupFilter] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('recent');
+    const [assignmentPhaseId, setAssignmentPhaseId] = useState('');
+    const [isPhaseAssignmentOpen, setIsPhaseAssignmentOpen] = useState(true);
 
     // Selection
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -125,6 +138,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         if (tournamentId) {
             loadParticipants();
             loadGroups();
+            loadPhases();
             loadClubs();
         }
     }, [tournamentId]);
@@ -153,6 +167,17 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             }
         } catch (err) {
             console.error('Error loading groups:', err);
+        }
+    };
+
+    const loadPhases = async () => {
+        try {
+            const response = await fetch(`/api/tournaments/${tournamentId}/phases`, { cache: 'no-store' });
+            if (!response.ok) throw new Error('Error al cargar fases');
+            const payload = await response.json();
+            setPhases(Array.isArray(payload?.data) ? payload.data : []);
+        } catch (err) {
+            console.error('Error loading phases:', err);
         }
     };
 
@@ -227,6 +252,51 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         return result;
     }, [participants, searchQuery, typeFilter, statusFilter, groupFilter, sortBy]);
 
+    const phaseNameById = useMemo(
+        () => new Map(phases.map((phase) => [phase.id, phase.name])),
+        [phases]
+    );
+
+    const groupById = useMemo(
+        () => new Map(groups.map((group) => [group.id, group])),
+        [groups]
+    );
+
+    const phasesWithGroups = useMemo(
+        () => phases.filter((phase) => groups.some((group) => group.phase_id === phase.id)),
+        [phases, groups]
+    );
+
+    const assignableGroups = useMemo(() => {
+        if (!assignmentPhaseId) return [];
+        return groups.filter((group) => group.phase_id === assignmentPhaseId);
+    }, [assignmentPhaseId, groups]);
+
+    const participantCountByGroup = useMemo(() => {
+        const counts = new Map<string, number>();
+        participants.forEach((participant) => {
+            if (!participant.group_id) return;
+            counts.set(participant.group_id, (counts.get(participant.group_id) ?? 0) + 1);
+        });
+        return counts;
+    }, [participants]);
+
+    useEffect(() => {
+        if (phasesWithGroups.length === 0) {
+            setAssignmentPhaseId('');
+            return;
+        }
+
+        setAssignmentPhaseId((current) =>
+            phasesWithGroups.some((phase) => phase.id === current) ? current : phasesWithGroups[0].id
+        );
+    }, [phasesWithGroups]);
+
+    const formatGroupLabel = (group: TournamentGroup) => {
+        const phaseName = group.phase_id ? phaseNameById.get(group.phase_id) : '';
+        return phaseName ? `${phaseName} - ${group.name}` : group.name;
+    };
+
     // ============================================
     // CRUD OPERATIONS
     // ============================================
@@ -282,6 +352,55 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             showToast('success', `${selectedIds.size} participantes eliminados correctamente`);
         } catch {
             showToast('error', 'Error al eliminar participantes');
+        }
+    };
+
+    const handleBulkAssignGroup = async (groupId: string | null) => {
+        if (selectedIds.size === 0) {
+            showToast('error', 'Selecciona al menos un participante para asignar grupo');
+            return;
+        }
+
+        try {
+            setGroupAssignmentLoading(true);
+
+            const updates = await Promise.all(
+                Array.from(selectedIds).map(async (participantId) => {
+                    const response = await fetch(`/api/tournaments/${tournamentId}/participants?id=${participantId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ group_id: groupId }),
+                    });
+
+                    const payload = await response.json().catch(() => null);
+                    if (!response.ok) {
+                        throw new Error(payload?.error || 'Error al actualizar el grupo del participante');
+                    }
+
+                    return payload as Participant;
+                })
+            );
+
+            const updatedById = new Map(updates.map((participant) => [participant.id, participant]));
+            setParticipants((prev) => prev.map((participant) => updatedById.get(participant.id) ?? participant));
+            setSelectedIds(new Set());
+
+            if (groupId) {
+                const group = groupById.get(groupId);
+                showToast(
+                    'success',
+                    `${updates.length} participante${updates.length !== 1 ? 's' : ''} asignado${updates.length !== 1 ? 's' : ''} a ${group?.name || 'su grupo'}`
+                );
+            } else {
+                showToast(
+                    'success',
+                    `${updates.length} participante${updates.length !== 1 ? 's' : ''} actualizado${updates.length !== 1 ? 's' : ''} sin grupo asignado`
+                );
+            }
+        } catch (err) {
+            showToast('error', getErrorMessage(err, 'Error al actualizar grupos'));
+        } finally {
+            setGroupAssignmentLoading(false);
         }
     };
 
@@ -471,7 +590,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     <select className="filter-select" value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)}>
                         <option value="all">Todos los Grupos</option>
                         {groups.map(g => (
-                            <option key={g.id} value={g.id}>{g.name}</option>
+                            <option key={g.id} value={g.id}>{formatGroupLabel(g)}</option>
                         ))}
                     </select>
                 )}
@@ -482,6 +601,103 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     <option value="seed">Seed / Ranking</option>
                 </select>
             </div>
+
+            {phasesWithGroups.length > 0 && (
+                <section className={`phase-assignment-panel ${isPhaseAssignmentOpen ? 'is-open' : 'is-collapsed'}`}>
+                    <button
+                        type="button"
+                        className="phase-assignment-toggle"
+                        onClick={() => setIsPhaseAssignmentOpen((current) => !current)}
+                        aria-expanded={isPhaseAssignmentOpen}
+                        aria-label={isPhaseAssignmentOpen ? 'Cerrar asignacion rapida' : 'Abrir asignacion rapida'}
+                    >
+                        {isPhaseAssignmentOpen ? <ChevronUp /> : <ChevronDown />}
+                    </button>
+
+                    <div className="phase-assignment-header">
+                        <div className="phase-assignment-copy-block">
+                            {isPhaseAssignmentOpen && <div className="phase-assignment-kicker">Asignacion rapida</div>}
+                            <h2 className="phase-assignment-title">Agregar a grupo por fase</h2>
+                            {isPhaseAssignmentOpen && (
+                                <p className="phase-assignment-copy">
+                                    Selecciona participantes en la tabla y envialos al grupo correcto sin entrar a editar cada club.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {isPhaseAssignmentOpen && (
+                        <div className="phase-assignment-body">
+                            <div className="phase-assignment-controls">
+                                <select
+                                    className="filter-select"
+                                    value={assignmentPhaseId}
+                                    onChange={(event) => setAssignmentPhaseId(event.target.value)}
+                                    disabled={groupAssignmentLoading}
+                                >
+                                    {phasesWithGroups.map((phase) => (
+                                        <option key={phase.id} value={phase.id}>
+                                            {phase.name}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <button
+                                    type="button"
+                                    className="btn-flash"
+                                    onClick={() => handleBulkAssignGroup(null)}
+                                    disabled={groupAssignmentLoading || selectedIds.size === 0}
+                                >
+                                    Quitar grupo
+                                </button>
+                            </div>
+
+                            {assignableGroups.length > 0 ? (
+                                <div className="phase-assignment-groups">
+                                    {assignableGroups.map((group) => {
+                                        const participantCount = participantCountByGroup.get(group.id) ?? 0;
+
+                                        return (
+                                            <button
+                                                key={group.id}
+                                                type="button"
+                                                className="phase-group-action"
+                                                onClick={() => handleBulkAssignGroup(group.id)}
+                                                disabled={groupAssignmentLoading || selectedIds.size === 0}
+                                            >
+                                                <div className="phase-group-action-header">
+                                                    <span className="phase-group-name">{group.name}</span>
+                                                    <span className="phase-group-count">
+                                                        {participantCount} equipo{participantCount === 1 ? '' : 's'}
+                                                    </span>
+                                                </div>
+                                                <span className="phase-group-phase">
+                                                    {group.phase_id ? phaseNameById.get(group.phase_id) || 'Fase actual' : 'Fase actual'}
+                                                </span>
+                                                <span className="phase-group-cta">
+                                                    {selectedIds.size > 0
+                                                        ? `Mover ${selectedIds.size} seleccionado${selectedIds.size === 1 ? '' : 's'}`
+                                                        : 'Selecciona equipos en la tabla'}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="phase-assignment-empty">
+                                    Esta fase todavia no tiene grupos disponibles para asignacion.
+                                </div>
+                            )}
+
+                            <div className="phase-assignment-hint">
+                                {selectedIds.size > 0
+                                    ? `${selectedIds.size} participante${selectedIds.size === 1 ? '' : 's'} listo${selectedIds.size === 1 ? '' : 's'} para asignar en ${phaseNameById.get(assignmentPhaseId) || 'la fase seleccionada'}.`
+                                    : 'Marca uno o mas participantes en la tabla para usar esta asignacion masiva.'}
+                            </div>
+                        </div>
+                    )}
+                </section>
+            )}
 
             {/* Table */}
             <div className="participants-table-container">
@@ -577,9 +793,18 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                                         </td>
                                         {groups.length > 0 && (
                                             <td>
-                                                <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>
-                                                    {groups.find(g => g.id === p.group_id)?.name || '-'}
-                                                </span>
+                                                {p.group_id && groupById.get(p.group_id) ? (
+                                                    <div className="participant-group-cell">
+                                                        <span>{groupById.get(p.group_id)?.name}</span>
+                                                        <small className="participant-group-phase-label">
+                                                            {groupById.get(p.group_id)?.phase_id
+                                                                ? phaseNameById.get(groupById.get(p.group_id)?.phase_id || '') || 'Fase'
+                                                                : 'Sin fase'}
+                                                        </small>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>-</span>
+                                                )}
                                             </td>
                                         )}
                                         <td>
@@ -639,6 +864,8 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 onClose={() => setIsAddDrawerOpen(false)}
                 onAdd={handleCreateFromClubCatalog}
                 clubs={clubCatalog}
+                phases={phasesWithGroups}
+                groups={groups}
                 existingParticipants={participants}
                 loadingClubs={clubsLoading}
             />
@@ -651,6 +878,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 onSave={(data) => handleUpdate(editingParticipant!.id, data)}
                 participant={editingParticipant}
                 clubs={clubCatalog}
+                phases={phasesWithGroups}
                 groups={groups}
                 existingParticipants={participants}
             />

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
 export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats';
+type ExportDateValue = string | number | Date;
+type MatchExportMode = 'schedule' | 'result';
 
 interface StandingsData {
     title: string;
@@ -37,6 +39,7 @@ interface DailyMatchesData {
         time: string;
         status: 'scheduled' | 'live' | 'finished';
         dateLabel?: string;
+        kickoffAt?: ExportDateValue | null;
     }>;
 }
 
@@ -54,6 +57,7 @@ interface MatchStatsData {
     date: string;
     time?: string;
     venue?: string;
+    kickoffAt?: ExportDateValue | null;
     stats: Array<{ label: string; home: number | string; away: number | string }>;
 }
 
@@ -94,6 +98,13 @@ type ExportPalette = {
     accent: string;
 };
 
+type ExportTimeZonePreset = {
+    id: string;
+    city: string;
+    country: string;
+    utcOffsetMinutes: number;
+};
+
 const FORMATS: Array<{ value: ExportFormat; label: string; width: number; height: number }> = [
     { value: '1080x1350', label: 'Post (1080x1350)', width: 1080, height: 1350 },
     { value: '1080x1920', label: 'Story (1080x1920)', width: 1080, height: 1920 },
@@ -112,13 +123,66 @@ const EXPORT_PALETTES: ExportPalette[] = [
     { id: 'silver-sky', name: 'Silver Sky', description: 'Blanco con azul limpio', bg: '#ffffff', accent: '#2563eb' },
 ];
 const DEFAULT_PALETTE = EXPORT_PALETTES[0];
+const DEFAULT_TIMEZONE_PRESET_ID = 'buenos-aires-ar';
+const DEFAULT_TIMEZONE_OFFSET_MINUTES = -180;
+const MATCH_EXPORT_MODE_OPTIONS: Array<{ value: MatchExportMode; label: string; description: string }> = [
+    { value: 'schedule', label: 'Horario', description: 'Muestra la programacion del partido' },
+    { value: 'result', label: 'Resultado', description: 'Muestra el marcador cargado' },
+];
+const EXPORT_TIMEZONE_PRESETS: ExportTimeZonePreset[] = [
+    { id: 'baker-island-us', city: 'Baker Island', country: 'Estados Unidos', utcOffsetMinutes: -720 },
+    { id: 'pago-pago-as', city: 'Pago Pago', country: 'Samoa Americana', utcOffsetMinutes: -660 },
+    { id: 'honolulu-us', city: 'Honolulu', country: 'Estados Unidos', utcOffsetMinutes: -600 },
+    { id: 'taiohae-pf', city: 'Taiohae', country: 'Polinesia Francesa', utcOffsetMinutes: -570 },
+    { id: 'gambier-pf', city: 'Gambier', country: 'Polinesia Francesa', utcOffsetMinutes: -540 },
+    { id: 'adamstown-pn', city: 'Adamstown', country: 'Islas Pitcairn', utcOffsetMinutes: -480 },
+    { id: 'hermosillo-mx', city: 'Hermosillo', country: 'Mexico', utcOffsetMinutes: -420 },
+    { id: 'san-jose-cr', city: 'San Jose', country: 'Costa Rica', utcOffsetMinutes: -360 },
+    { id: 'bogota-co', city: 'Bogota', country: 'Colombia', utcOffsetMinutes: -300 },
+    { id: 'san-juan-pr', city: 'San Juan', country: 'Puerto Rico', utcOffsetMinutes: -240 },
+    { id: 'st-johns-ca', city: "St. John's", country: 'Canada', utcOffsetMinutes: -210 },
+    { id: 'buenos-aires-ar', city: 'Buenos Aires', country: 'Argentina', utcOffsetMinutes: -180 },
+    { id: 'noronha-br', city: 'Fernando de Noronha', country: 'Brasil', utcOffsetMinutes: -120 },
+    { id: 'ponta-delgada-pt', city: 'Ponta Delgada', country: 'Portugal', utcOffsetMinutes: -60 },
+    { id: 'london-uk', city: 'Londres', country: 'Reino Unido', utcOffsetMinutes: 0 },
+    { id: 'madrid-es', city: 'Madrid', country: 'Espana', utcOffsetMinutes: 60 },
+    { id: 'johannesburg-za', city: 'Johannesburgo', country: 'Sudafrica', utcOffsetMinutes: 120 },
+    { id: 'nairobi-ke', city: 'Nairobi', country: 'Kenia', utcOffsetMinutes: 180 },
+    { id: 'tehran-ir', city: 'Teheran', country: 'Iran', utcOffsetMinutes: 210 },
+    { id: 'dubai-ae', city: 'Dubai', country: 'Emiratos Arabes Unidos', utcOffsetMinutes: 240 },
+    { id: 'kabul-af', city: 'Kabul', country: 'Afganistan', utcOffsetMinutes: 270 },
+    { id: 'karachi-pk', city: 'Karachi', country: 'Pakistan', utcOffsetMinutes: 300 },
+    { id: 'nueva-delhi-in', city: 'Nueva Delhi', country: 'India', utcOffsetMinutes: 330 },
+    { id: 'katmandu-np', city: 'Katmandu', country: 'Nepal', utcOffsetMinutes: 345 },
+    { id: 'daca-bd', city: 'Daca', country: 'Bangladesh', utcOffsetMinutes: 360 },
+    { id: 'yangon-mm', city: 'Yangon', country: 'Myanmar', utcOffsetMinutes: 390 },
+    { id: 'bangkok-th', city: 'Bangkok', country: 'Tailandia', utcOffsetMinutes: 420 },
+    { id: 'singapur-sg', city: 'Singapur', country: 'Singapur', utcOffsetMinutes: 480 },
+    { id: 'eucla-au', city: 'Eucla', country: 'Australia', utcOffsetMinutes: 525 },
+    { id: 'tokio-jp', city: 'Tokio', country: 'Japon', utcOffsetMinutes: 540 },
+    { id: 'darwin-au', city: 'Darwin', country: 'Australia', utcOffsetMinutes: 570 },
+    { id: 'port-moresby-pg', city: 'Port Moresby', country: 'Papua Nueva Guinea', utcOffsetMinutes: 600 },
+    { id: 'lord-howe-au', city: 'Lord Howe', country: 'Australia', utcOffsetMinutes: 630 },
+    { id: 'noumea-nc', city: 'Noumea', country: 'Nueva Caledonia', utcOffsetMinutes: 660 },
+    { id: 'tarawa-ki', city: 'Tarawa', country: 'Kiribati', utcOffsetMinutes: 720 },
+    { id: 'chatham-nz', city: 'Chatham', country: 'Nueva Zelanda', utcOffsetMinutes: 765 },
+    { id: 'apia-ws', city: 'Apia', country: 'Samoa', utcOffsetMinutes: 780 },
+    { id: 'kiritimati-ki', city: 'Kiritimati', country: 'Kiribati', utcOffsetMinutes: 840 },
+];
 
 export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
-    const [customTitle, setCustomTitle] = useState('');
+    const defaultTournamentName = getDefaultTournamentName(template, data);
+    const defaultMatchExportMode = getDefaultMatchExportMode(template, data);
+    const [customTournamentName, setCustomTournamentName] = useState(defaultTournamentName);
+    const [selectedTimeZoneId, setSelectedTimeZoneId] = useState(DEFAULT_TIMEZONE_PRESET_ID);
+    const [isTimeZoneDropdownOpen, setIsTimeZoneDropdownOpen] = useState(false);
+    const [matchExportMode, setMatchExportMode] = useState<MatchExportMode>(defaultMatchExportMode);
+    const [isMatchModeDropdownOpen, setIsMatchModeDropdownOpen] = useState(false);
+    const [detectedUserOffsetMinutes, setDetectedUserOffsetMinutes] = useState(DEFAULT_TIMEZONE_OFFSET_MINUTES);
     const [selectedPaletteId, setSelectedPaletteId] = useState(DEFAULT_PALETTE.id);
     const [accentColor, setAccentColor] = useState(DEFAULT_PALETTE.accent);
     const [bgColor, setBgColor] = useState(DEFAULT_PALETTE.bg);
@@ -127,6 +191,43 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const matches = (data as DailyMatchesData).matches ?? [];
         return new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, index) => index));
     });
+
+    useEffect(() => {
+        setCustomTournamentName(defaultTournamentName);
+    }, [defaultTournamentName]);
+
+    useEffect(() => {
+        setMatchExportMode(defaultMatchExportMode);
+    }, [defaultMatchExportMode]);
+
+    useEffect(() => {
+        if (!showModal) {
+            setIsTimeZoneDropdownOpen(false);
+            setIsMatchModeDropdownOpen(false);
+        }
+    }, [showModal]);
+
+    useEffect(() => {
+        const browserOffsetMinutes = getBrowserOffsetMinutes();
+        setDetectedUserOffsetMinutes(browserOffsetMinutes);
+        setSelectedTimeZoneId(findBestPresetByOffset(browserOffsetMinutes).id);
+    }, []);
+
+    const selectedTimeZonePreset = useMemo(
+        () => EXPORT_TIMEZONE_PRESETS.find((preset) => preset.id === selectedTimeZoneId) || findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES),
+        [selectedTimeZoneId]
+    );
+    const timeZoneOptions = useMemo(
+        () => EXPORT_TIMEZONE_PRESETS.map((preset) => ({
+            ...preset,
+            relativeLabel: formatRelativeOffset(preset.utcOffsetMinutes - detectedUserOffsetMinutes),
+        })),
+        [detectedUserOffsetMinutes]
+    );
+    const detectedTimeZoneLabel = useMemo(
+        () => buildDetectedTimeZoneLabel(detectedUserOffsetMinutes),
+        [detectedUserOffsetMinutes]
+    );
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -166,19 +267,19 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             canvas.height = config.height;
             const ctx = canvas.getContext('2d');
             if (!ctx) throw new Error('No se pudo inicializar el canvas');
+            const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset);
 
             if (template === 'matchStats') {
-                const matchData = data as MatchStatsData;
-                const statusTitle = matchData.status === 'live' ? 'En Vivo' : matchData.status === 'final' ? 'Finalizado' : 'Programado';
-                await drawMatchResult(ctx, canvas, { ...matchData, mainTitle: customTitle || matchData.mainTitle || statusTitle }, config, accentColor, bgColor, brandLogo);
+                const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);
+                await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'standings') {
-                await drawStandings(ctx, canvas, data as StandingsData, config, accentColor, bgColor, brandLogo);
+                await drawStandings(ctx, canvas, exportData as StandingsData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'dailyMatches') {
-                const matchesData = data as DailyMatchesData;
+                const matchesData = exportData as DailyMatchesData;
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
                 await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
             } else {
-                await drawPlayerStats(ctx, canvas, data as PlayerStatsData, config, accentColor, bgColor, brandLogo);
+                await drawPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
             }
 
             const dataUrl = canvas.toDataURL('image/png');
@@ -208,94 +309,207 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             {showModal && (
                 <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
                     <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
-                        <h3 className={styles.modalTitle}>Exportar imagen</h3>
-
-                        <div className={styles.modalSection}>
-                            <label className={styles.modalLabel}>Formato</label>
-                            <div className={styles.formatOptions}>
-                                {FORMATS.map((item) => (
-                                    <button
-                                        key={item.value}
-                                        className={`${styles.formatBtn} ${format === item.value ? styles.active : ''}`}
-                                        onClick={() => setFormat(item.value)}
-                                        type="button"
-                                    >
-                                        {item.label}
-                                    </button>
-                                ))}
-                            </div>
+                        <div className={styles.modalHeader}>
+                            <h3 className={styles.modalTitle}>Exportar imagen</h3>
+                            <p className={styles.modalHint}>El panel se adapta a tu pantalla y mantiene intacto el diseno de la imagen exportada.</p>
                         </div>
 
-                        {template === 'matchStats' && (
+                        <div className={styles.modalBody}>
                             <div className={styles.modalSection}>
-                                <label className={styles.modalLabel}>Titulo del encabezado</label>
-                                <input
-                                    className={styles.modalInput}
-                                    value={customTitle}
-                                    onChange={(event) => setCustomTitle(event.target.value)}
-                                    placeholder="Ej: Finalizado, En Vivo..."
-                                />
+                                <label className={styles.modalLabel}>Formato</label>
+                                <div className={styles.formatOptions}>
+                                    {FORMATS.map((item) => (
+                                        <button
+                                            key={item.value}
+                                            className={`${styles.formatBtn} ${format === item.value ? styles.active : ''}`}
+                                            onClick={() => setFormat(item.value)}
+                                            type="button"
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        )}
 
-                        {template === 'dailyMatches' && dailyMatches.length > 0 && (
+                            {template !== 'playerStats' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Nombre del torneo</label>
+                                    <input
+                                        className={styles.modalInput}
+                                        value={customTournamentName}
+                                        onChange={(event) => setCustomTournamentName(event.target.value)}
+                                        placeholder="Ej: Torneo Apertura 2026"
+                                    />
+                                </div>
+                            )}
+
+                            {template === 'matchStats' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Modo del encabezado</label>
+                                    <div className={styles.dropdown}>
+                                        <button
+                                            className={`${styles.dropdownTrigger} ${isMatchModeDropdownOpen ? styles.dropdownTriggerOpen : ''}`}
+                                            onClick={() => {
+                                                setIsMatchModeDropdownOpen((current) => !current);
+                                                setIsTimeZoneDropdownOpen(false);
+                                            }}
+                                            type="button"
+                                        >
+                                            <span className={styles.dropdownTriggerText}>
+                                                <strong>{getMatchExportModeLabel(matchExportMode)}</strong>
+                                                <span className={styles.dropdownTriggerMeta}>
+                                                    {matchExportMode === 'schedule'
+                                                        ? 'Muestra fecha y hora del partido'
+                                                        : 'Muestra el marcador cargado'}
+                                                </span>
+                                            </span>
+                                            <span className={`${styles.dropdownChevron} ${isMatchModeDropdownOpen ? styles.dropdownChevronOpen : ''}`} aria-hidden="true">
+                                                v
+                                            </span>
+                                        </button>
+
+                                        {isMatchModeDropdownOpen && (
+                                            <div className={styles.dropdownMenu}>
+                                                {MATCH_EXPORT_MODE_OPTIONS.map((option) => {
+                                                    const isActive = option.value === matchExportMode;
+                                                    return (
+                                                        <button
+                                                            key={option.value}
+                                                            className={`${styles.dropdownOption} ${isActive ? styles.dropdownOptionActive : ''}`}
+                                                            onClick={() => {
+                                                                setMatchExportMode(option.value);
+                                                                setIsMatchModeDropdownOpen(false);
+                                                            }}
+                                                            type="button"
+                                                        >
+                                                            <span className={styles.dropdownOptionTitle}>{option.label}</span>
+                                                            <span className={styles.dropdownOptionMeta}>{option.description}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {(template === 'dailyMatches' || template === 'matchStats') && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Uso horario</label>
+                                    <div className={styles.timeZoneSummary}>
+                                        <span className={styles.timeZoneSummaryLabel}>Tu hora actual</span>
+                                        <strong>{detectedTimeZoneLabel}</strong>
+                                    </div>
+                                    <div className={styles.dropdown}>
+                                        <button
+                                            className={`${styles.dropdownTrigger} ${isTimeZoneDropdownOpen ? styles.dropdownTriggerOpen : ''}`}
+                                            onClick={() => {
+                                                setIsTimeZoneDropdownOpen((current) => !current);
+                                                setIsMatchModeDropdownOpen(false);
+                                            }}
+                                            type="button"
+                                        >
+                                            <span className={styles.dropdownTriggerText}>
+                                                <strong>{selectedTimeZonePreset.city}, {selectedTimeZonePreset.country}</strong>
+                                                <span className={styles.dropdownTriggerMeta}>
+                                                    {formatUtcOffset(selectedTimeZonePreset.utcOffsetMinutes)} | {formatRelativeOffset(selectedTimeZonePreset.utcOffsetMinutes - detectedUserOffsetMinutes)}
+                                                </span>
+                                            </span>
+                                            <span className={`${styles.dropdownChevron} ${isTimeZoneDropdownOpen ? styles.dropdownChevronOpen : ''}`} aria-hidden="true">
+                                                ▾
+                                            </span>
+                                        </button>
+
+                                        {isTimeZoneDropdownOpen && (
+                                            <div className={styles.dropdownMenu}>
+                                                {timeZoneOptions.map((timeZone) => {
+                                                    const isActive = timeZone.id === selectedTimeZoneId;
+                                                    return (
+                                                        <button
+                                                            key={timeZone.id}
+                                                            className={`${styles.dropdownOption} ${isActive ? styles.dropdownOptionActive : ''}`}
+                                                            onClick={() => {
+                                                                setSelectedTimeZoneId(timeZone.id);
+                                                                setIsTimeZoneDropdownOpen(false);
+                                                            }}
+                                                            type="button"
+                                                        >
+                                                            <span className={styles.dropdownOptionTitle}>{timeZone.city}, {timeZone.country}</span>
+                                                            <span className={styles.dropdownOptionMeta}>
+                                                                {formatUtcOffset(timeZone.utcOffsetMinutes)} | {timeZone.relativeLabel}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        Exportar en {selectedTimeZonePreset.city}, {selectedTimeZonePreset.country} ({formatUtcOffset(selectedTimeZonePreset.utcOffsetMinutes)}).
+                                        {' '}La diferencia se calcula contra la hora detectada en tu navegador.
+                                    </p>
+                                </div>
+                            )}
+
+                            {template === 'dailyMatches' && dailyMatches.length > 0 && (
+                                <div className={styles.modalSection}>
+                                    <div className={styles.matchSelectHeader}>
+                                        <span className={styles.modalLabel}>Seleccionar partidos</span>
+                                        <span className={styles.matchCounter}>{selectedMatchIndices.size}/10</span>
+                                    </div>
+                                    <div className={styles.matchSelectList}>
+                                        {dailyMatches.map((match, index) => {
+                                            const isChecked = selectedMatchIndices.has(index);
+                                            const isDisabled = !isChecked && selectedMatchIndices.size >= 10;
+                                            return (
+                                                <label key={index} className={`${styles.matchSelectRow} ${isDisabled ? styles.matchSelectDisabled : ''}`}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isChecked}
+                                                        disabled={isDisabled}
+                                                        onChange={() => toggleMatch(index)}
+                                                    />
+                                                    <span className={styles.matchSelectTeams}>{match.homeTeam} vs {match.awayTeam}</span>
+                                                    {match.dateLabel && <span className={styles.matchSelectDate}>{match.dateLabel}</span>}
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className={styles.modalSection}>
-                                <div className={styles.matchSelectHeader}>
-                                    <span className={styles.modalLabel}>Seleccionar partidos</span>
-                                    <span className={styles.matchCounter}>{selectedMatchIndices.size}/10</span>
+                                <label className={styles.modalLabel}>Paleta de colores</label>
+                                <div className={styles.paletteGrid}>
+                                    {EXPORT_PALETTES.map((palette) => (
+                                        <button
+                                            key={palette.id}
+                                            className={`${styles.paletteBtn} ${selectedPaletteId === palette.id ? styles.paletteBtnActive : ''}`}
+                                            onClick={() => applyPalette(palette)}
+                                            title={palette.name}
+                                            type="button"
+                                        >
+                                            <div
+                                                className={styles.paletteSwatch}
+                                                style={{ background: `linear-gradient(135deg, ${palette.bg} 0%, ${palette.bg} 62%, ${palette.accent} 62%, ${palette.accent} 100%)` }}
+                                            />
+                                            <div className={styles.paletteMeta}>
+                                                <span className={styles.paletteName}>{palette.name}</span>
+                                                <span className={styles.paletteDesc}>{palette.description}</span>
+                                            </div>
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className={styles.matchSelectList}>
-                                    {dailyMatches.map((match, index) => {
-                                        const isChecked = selectedMatchIndices.has(index);
-                                        const isDisabled = !isChecked && selectedMatchIndices.size >= 10;
-                                        return (
-                                            <label key={index} className={`${styles.matchSelectRow} ${isDisabled ? styles.matchSelectDisabled : ''}`}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isChecked}
-                                                    disabled={isDisabled}
-                                                    onChange={() => toggleMatch(index)}
-                                                />
-                                                <span className={styles.matchSelectTeams}>{match.homeTeam} vs {match.awayTeam}</span>
-                                                {match.dateLabel && <span className={styles.matchSelectDate}>{match.dateLabel}</span>}
-                                            </label>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className={styles.modalSection}>
-                            <label className={styles.modalLabel}>Paleta de colores</label>
-                            <div className={styles.paletteGrid}>
-                                {EXPORT_PALETTES.map((palette) => (
-                                    <button
-                                        key={palette.id}
-                                        className={`${styles.paletteBtn} ${selectedPaletteId === palette.id ? styles.paletteBtnActive : ''}`}
-                                        onClick={() => applyPalette(palette)}
-                                        title={palette.name}
-                                        type="button"
-                                    >
-                                        <div
-                                            className={styles.paletteSwatch}
-                                            style={{ background: `linear-gradient(135deg, ${palette.bg} 0%, ${palette.bg} 62%, ${palette.accent} 62%, ${palette.accent} 100%)` }}
-                                        />
-                                        <div className={styles.paletteMeta}>
-                                            <span className={styles.paletteName}>{palette.name}</span>
-                                            <span className={styles.paletteDesc}>{palette.description}</span>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                            <p className={styles.modalHint}>La marca de agua G22 se mantiene en todas las exportaciones.</p>
-                            <div className={styles.customColors}>
-                                <div className={styles.colorInp}>
-                                    <span>Fondo</span>
-                                    <input type="color" value={bgColor} onChange={(event) => handleBgColorChange(event.target.value)} />
-                                </div>
-                                <div className={styles.colorInp}>
-                                    <span>Acento</span>
-                                    <input type="color" value={accentColor} onChange={(event) => handleAccentColorChange(event.target.value)} />
+                                <p className={styles.modalHint}>La marca de agua G22 se mantiene en todas las exportaciones.</p>
+                                <div className={styles.customColors}>
+                                    <div className={styles.colorInp}>
+                                        <span>Fondo</span>
+                                        <input type="color" value={bgColor} onChange={(event) => handleBgColorChange(event.target.value)} />
+                                    </div>
+                                    <div className={styles.colorInp}>
+                                        <span>Acento</span>
+                                        <input type="color" value={accentColor} onChange={(event) => handleAccentColorChange(event.target.value)} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -318,6 +532,199 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             )}
         </div>
     );
+}
+
+function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
+    if (template === 'standings') return (data as StandingsData).title || '';
+    if (template === 'dailyMatches' || template === 'matchStats') return (data as DailyMatchesData | MatchStatsData).tournament || '';
+    return '';
+}
+
+function getDefaultMatchExportMode(template: ExportTemplate, data: ExportData): MatchExportMode {
+    if (template !== 'matchStats') return 'schedule';
+    const matchData = data as MatchStatsData;
+    return matchData.status === 'scheduled' ? 'schedule' : 'result';
+}
+
+function getMatchExportModeLabel(mode: MatchExportMode): string {
+    return mode === 'schedule' ? 'Horario' : 'Resultado';
+}
+
+function applyMatchExportMode(data: MatchStatsData, mode: MatchExportMode): MatchStatsData {
+    if (mode === 'schedule') {
+        return {
+            ...data,
+            status: 'scheduled',
+            mainTitle: 'Horario',
+        };
+    }
+
+    return {
+        ...data,
+        status: 'final',
+        mainTitle: 'Resultado',
+    };
+}
+
+function getBrowserOffsetMinutes(): number {
+    if (typeof window === 'undefined') return DEFAULT_TIMEZONE_OFFSET_MINUTES;
+    return -new Date().getTimezoneOffset();
+}
+
+function findBestPresetByOffset(offsetMinutes: number): ExportTimeZonePreset {
+    return EXPORT_TIMEZONE_PRESETS.reduce((closest, current) => {
+        const currentDistance = Math.abs(current.utcOffsetMinutes - offsetMinutes);
+        const closestDistance = Math.abs(closest.utcOffsetMinutes - offsetMinutes);
+        return currentDistance < closestDistance ? current : closest;
+    }, EXPORT_TIMEZONE_PRESETS.find((preset) => preset.id === DEFAULT_TIMEZONE_PRESET_ID) || EXPORT_TIMEZONE_PRESETS[0]);
+}
+
+function buildDetectedTimeZoneLabel(offsetMinutes: number): string {
+    const closestPreset = findBestPresetByOffset(offsetMinutes);
+    const exactMatch = closestPreset.utcOffsetMinutes === offsetMinutes;
+    if (exactMatch) return `${closestPreset.city}, ${closestPreset.country} (${formatUtcOffset(offsetMinutes)})`;
+    return `UTC detectado ${formatUtcOffset(offsetMinutes)}`;
+}
+
+function formatUtcOffset(offsetMinutes: number): string {
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const absolute = Math.abs(offsetMinutes);
+    const hours = String(Math.floor(absolute / 60)).padStart(2, '0');
+    const minutes = String(absolute % 60).padStart(2, '0');
+    return `UTC${sign}${hours}:${minutes}`;
+}
+
+function formatRelativeOffset(deltaMinutes: number): string {
+    if (deltaMinutes === 0) return 'igual que tu hora';
+
+    const sign = deltaMinutes > 0 ? '+' : '-';
+    const absolute = Math.abs(deltaMinutes);
+    const hours = Math.floor(absolute / 60);
+    const minutes = absolute % 60;
+
+    if (hours > 0 && minutes > 0) return `${sign}${hours} h ${minutes} min vs tu hora`;
+    if (hours > 0) return `${sign}${hours} h vs tu hora`;
+    return `${sign}${minutes} min vs tu hora`;
+}
+
+function formatDateInFixedOffset(
+    value: Date,
+    offsetMinutes: number,
+    options: Intl.DateTimeFormatOptions
+): string {
+    const shiftedValue = new Date(value.getTime() + offsetMinutes * 60_000);
+    return new Intl.DateTimeFormat('es-AR', {
+        ...options,
+        timeZone: 'UTC',
+    }).format(shiftedValue);
+}
+
+function buildExportData(
+    template: ExportTemplate,
+    data: ExportData,
+    customTournamentName: string,
+    timeZonePreset: ExportTimeZonePreset
+): ExportData {
+    const tournamentName = customTournamentName.trim();
+
+    if (template === 'standings') {
+        const standingsData = data as StandingsData;
+        return {
+            ...standingsData,
+            title: tournamentName || standingsData.title,
+        };
+    }
+
+    if (template === 'matchStats') {
+        const matchData = data as MatchStatsData;
+        const nextData: MatchStatsData = {
+            ...matchData,
+            tournament: tournamentName || matchData.tournament,
+        };
+
+        const kickoffAt = toExportDate(matchData.kickoffAt);
+        if (!kickoffAt) return nextData;
+
+        return {
+            ...nextData,
+            date: formatDateInFixedOffset(kickoffAt, timeZonePreset.utcOffsetMinutes, {}),
+            time: formatDateInFixedOffset(kickoffAt, timeZonePreset.utcOffsetMinutes, {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            }),
+        };
+    }
+
+    if (template === 'dailyMatches') {
+        const matchesData = data as DailyMatchesData;
+        return {
+            ...matchesData,
+            tournament: tournamentName || matchesData.tournament,
+            matches: matchesData.matches.map((match) => applyTimeZoneToDailyMatch(match, timeZonePreset.utcOffsetMinutes)),
+        };
+    }
+
+    return data;
+}
+
+function toExportDate(value: ExportDateValue | null | undefined): Date | null {
+    if (value === null || value === undefined || value === '') return null;
+
+    if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
+    }
+
+    if (typeof value === 'number') {
+        const date = new Date(value > 1_000_000_000_000 ? value : value * 1000);
+        return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    if (/^\d+$/.test(trimmed)) {
+        const numericValue = Number(trimmed);
+        const date = new Date(numericValue > 1_000_000_000_000 ? numericValue : numericValue * 1000);
+        return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    const date = new Date(trimmed);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function applyTimeZoneToDailyMatch(
+    match: DailyMatchesData['matches'][number],
+    utcOffsetMinutes: number
+): DailyMatchesData['matches'][number] {
+    const kickoffAt = toExportDate(match.kickoffAt);
+    if (!kickoffAt) return match;
+
+    const timeOnly = formatDateInFixedOffset(kickoffAt, utcOffsetMinutes, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
+    const dayMonth = formatDateInFixedOffset(kickoffAt, utcOffsetMinutes, {
+        day: '2-digit',
+        month: '2-digit',
+    });
+
+    return {
+        ...match,
+        time: match.status === 'scheduled' ? (shouldAppendDateToMatchTime(match.time) ? `${timeOnly} ${dayMonth}` : timeOnly) : match.time,
+        dateLabel: match.dateLabel
+            ? formatDateInFixedOffset(kickoffAt, utcOffsetMinutes, {
+                weekday: 'short',
+                day: '2-digit',
+                month: '2-digit',
+            })
+            : match.dateLabel,
+    };
+}
+
+function shouldAppendDateToMatchTime(value: string): boolean {
+    return /\d{1,2}:\d{2}.*\d{1,2}[\/.-]\d{1,2}/.test(value);
 }
 
 async function ensureExportFonts(): Promise<void> {

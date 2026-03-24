@@ -1429,6 +1429,9 @@ export default function TournamentDetailPage({
                                         time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
                                         status: 'finished' as const,
                                         dateLabel: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { weekday: 'short', day: '2-digit', month: '2-digit' }),
+                                        kickoffAt: (m.timestamp || m.start_time || m.time)
+                                            ? new Date((m.timestamp || m.start_time || m.time) * 1000).toISOString()
+                                            : undefined,
                                     })),
                                 }}
                             />
@@ -1464,6 +1467,9 @@ export default function TournamentDetailPage({
                                             formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
                                         status: 'scheduled' as const,
                                         dateLabel: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { weekday: 'short', day: '2-digit', month: '2-digit' }),
+                                        kickoffAt: (m.timestamp || m.start_time || m.time)
+                                            ? new Date((m.timestamp || m.start_time || m.time) * 1000).toISOString()
+                                            : undefined,
                                     })),
                                 }}
                             />

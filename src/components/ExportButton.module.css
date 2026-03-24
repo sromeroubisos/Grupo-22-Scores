@@ -74,26 +74,42 @@
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(4px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     z-index: 1000;
-    padding: 20px;
+    padding: 16px;
+    overflow-y: auto;
 }
 
 .modal {
     width: 100%;
-    max-width: 480px;
+    max-width: min(820px, calc(100vw - 32px));
     background: linear-gradient(180deg, #18181f 0%, #0f0f14 100%);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    padding: 28px;
+    padding: 20px;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    max-height: calc(100dvh - 32px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modalHeader {
+    padding-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.modalBody {
+    overflow-y: auto;
+    padding-right: 6px;
+    padding-bottom: 4px;
 }
 
 .modalTitle {
     font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 24px;
+    margin-bottom: 10px;
     text-align: center;
     background: linear-gradient(135deg, #fff, #a1a1aa);
     -webkit-background-clip: text;
@@ -195,6 +211,7 @@
     margin-top: 28px;
     padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
 }
 
 .cancelBtn {
@@ -260,6 +277,173 @@
 
 .modalInput::placeholder {
     color: rgba(255, 255, 255, 0.2);
+}
+
+.modalSelect {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    outline: none;
+    transition: all 0.2s ease;
+    appearance: none;
+}
+
+.modalSelect:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #00a365;
+    box-shadow: 0 0 0 4px rgba(0, 163, 101, 0.1);
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdownTrigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, rgba(21, 24, 34, 0.96), rgba(13, 15, 22, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    color: var(--color-text-primary, #fff);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.dropdownTrigger:hover {
+    border-color: rgba(0, 163, 101, 0.45);
+    background: linear-gradient(180deg, rgba(24, 28, 40, 0.98), rgba(14, 17, 25, 1));
+}
+
+.dropdownTriggerOpen {
+    border-color: rgba(0, 163, 101, 0.75);
+    box-shadow: 0 0 0 4px rgba(0, 163, 101, 0.12);
+}
+
+.dropdownTriggerText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.dropdownTriggerText strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdownTriggerMeta {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.82);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdownChevron {
+    flex-shrink: 0;
+    font-size: 0;
+    color: #00a365;
+    transition: transform 0.2s ease;
+}
+
+.dropdownChevron::before {
+    content: "v";
+    font-size: 0.9rem;
+}
+
+.dropdownChevronOpen {
+    transform: rotate(180deg);
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 10px;
+    background: linear-gradient(180deg, rgba(14, 17, 24, 0.99), rgba(10, 12, 18, 0.99));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.dropdownOption {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.dropdownOption:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+.dropdownOptionActive {
+    background: linear-gradient(180deg, rgba(0, 163, 101, 0.18), rgba(0, 163, 101, 0.11));
+    border-color: rgba(0, 163, 101, 0.45);
+}
+
+.dropdownOptionTitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.dropdownOptionMeta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.8);
+}
+
+.timeZoneSummary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: var(--color-text-primary, #fff);
+}
+
+.timeZoneSummaryLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.55));
 }
 
 .paletteGrid {
@@ -501,4 +685,29 @@
     font-weight: 500;
     color: var(--color-text-secondary, rgba(255,255,255,0.45));
     white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .modalOverlay {
+        padding: 8px;
+    }
+
+    .modal {
+        max-width: calc(100vw - 16px);
+        max-height: calc(100dvh - 16px);
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .modalBody {
+        padding-right: 2px;
+    }
+
+    .paletteGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .modalActions {
+        flex-direction: column;
+    }
 }

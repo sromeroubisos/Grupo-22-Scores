@@ -712,6 +712,8 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 onClose={() => setIsAddDrawerOpen(false)}
                 onAdd={handleCreate}
                 clubs={clubs}
+                phases={[]}
+                groups={[]}
                 existingParticipants={participants}
             />
 

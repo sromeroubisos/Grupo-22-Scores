@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import ExportImage from '@/components/ExportImage';
 import DateStrip from '@/components/DateStrip';
+import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import styles from './page.module.css';
 
 // Mock data
@@ -106,13 +107,14 @@ export default function FixturesPage() {
                                             homeLogo: m.homeLogo,
                                             awayLogo: m.awayLogo,
                                             homeScore: m.homeScore,
-                                            awayScore: m.awayScore,
-                                            time: m.time,
-                                            status: m.status as 'scheduled' | 'live' | 'finished',
-                                            dateLabel: d.label,
-                                        }))
-                                    ),
-                                }}
+                                        awayScore: m.awayScore,
+                                        time: m.time,
+                                        status: m.status as 'scheduled' | 'live' | 'finished',
+                                        dateLabel: d.label,
+                                        kickoffAt: combineLocalDateTimeToUtcIso(d.date, m.time, APP_TIMEZONE) || undefined,
+                                    }))
+                                ),
+                            }}
                                 filename="fixtures"
                             />
                         </div>

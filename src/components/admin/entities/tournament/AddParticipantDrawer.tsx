@@ -36,6 +36,17 @@ interface Participant {
     name: string;
 }
 
+interface TournamentGroup {
+    id: string;
+    name: string;
+    phase_id: string | null;
+}
+
+interface TournamentPhase {
+    id: string;
+    name: string;
+}
+
 interface NewParticipantInput {
     club_id: string;
     name: string;
@@ -43,6 +54,7 @@ interface NewParticipantInput {
     short_code: string | null;
     seed: null;
     status: 'active' | 'pending';
+    group_id: string | null;
 }
 
 interface AddParticipantDrawerProps {
@@ -50,6 +62,8 @@ interface AddParticipantDrawerProps {
     onClose: () => void;
     onAdd: (participants: NewParticipantInput[]) => Promise<void>;
     clubs: Club[];
+    phases: TournamentPhase[];
+    groups: TournamentGroup[];
     existingParticipants?: Participant[];
     loadingClubs?: boolean;
 }
@@ -59,6 +73,8 @@ export function AddParticipantDrawer({
     onClose,
     onAdd,
     clubs,
+    phases,
+    groups,
     existingParticipants = [],
     loadingClubs = false,
 }: AddParticipantDrawerProps) {
@@ -66,6 +82,8 @@ export function AddParticipantDrawer({
     const [selectedClubIds, setSelectedClubIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [status, setStatus] = useState<'active' | 'pending'>('active');
+    const [selectedPhaseId, setSelectedPhaseId] = useState('');
+    const [selectedGroupId, setSelectedGroupId] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>('');
 
@@ -75,6 +93,8 @@ export function AddParticipantDrawer({
             setSelectedClubIds([]);
             setSearchQuery('');
             setStatus('active');
+            setSelectedPhaseId('');
+            setSelectedGroupId('');
             setError('');
         }
     }, [isOpen]);
@@ -96,6 +116,27 @@ export function AddParticipantDrawer({
         clubs.filter(c => selectedClubIds.includes(c.id)),
         [clubs, selectedClubIds]
     );
+
+    const phasesWithGroups = useMemo(
+        () => phases.filter((phase) => groups.some((group) => group.phase_id === phase.id)),
+        [groups, phases]
+    );
+
+    const availableGroups = useMemo(() => {
+        if (!selectedPhaseId) return [];
+        return groups.filter((group) => group.phase_id === selectedPhaseId);
+    }, [groups, selectedPhaseId]);
+
+    useEffect(() => {
+        if (!selectedPhaseId) {
+            setSelectedGroupId('');
+            return;
+        }
+
+        setSelectedGroupId((current) =>
+            availableGroups.some((group) => group.id === current) ? current : ''
+        );
+    }, [availableGroups, selectedPhaseId]);
 
     // Helper to check if club is already a participant
     const isAlreadyParticipant = (clubId: string) => {
@@ -128,13 +169,14 @@ export function AddParticipantDrawer({
         setError('');
 
         try {
-            const participantsToAdd = selectedClubs.map(club => ({
+            const participantsToAdd: NewParticipantInput[] = selectedClubs.map(club => ({
                 club_id: club.id,
                 name: club.name,
                 type: 'club',
                 short_code: club.short_name || null,
                 seed: null,
-                status
+                status,
+                group_id: selectedGroupId || null,
             }));
 
             await onAdd(participantsToAdd);
@@ -143,6 +185,8 @@ export function AddParticipantDrawer({
             setSelectedClubIds([]);
             setSearchQuery('');
             setStatus('active');
+            setSelectedPhaseId('');
+            setSelectedGroupId('');
             onClose();
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Error al crear participantes');
@@ -334,6 +378,58 @@ export function AddParticipantDrawer({
                                     >
                                         Pendiente
                                     </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {selectedClubIds.length > 0 && phasesWithGroups.length > 0 && (
+                            <div className="pp-drawer-section">
+                                <label className="pp-drawer-section-title">Agregar a grupo por fase</label>
+
+                                <div className="pp-form-grid-2">
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label">Fase</label>
+                                        <div className="pp-select-wrap">
+                                            <select
+                                                value={selectedPhaseId}
+                                                onChange={(event) => setSelectedPhaseId(event.target.value)}
+                                                className="pp-form-input pp-form-select"
+                                            >
+                                                <option value="">Sin fase</option>
+                                                {phasesWithGroups.map((phase) => (
+                                                    <option key={phase.id} value={phase.id}>
+                                                        {phase.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="pp-form-field">
+                                        <label className="pp-form-label">Grupo</label>
+                                        <div className="pp-select-wrap">
+                                            <select
+                                                value={selectedGroupId}
+                                                onChange={(event) => setSelectedGroupId(event.target.value)}
+                                                className="pp-form-input pp-form-select"
+                                                disabled={!selectedPhaseId}
+                                            >
+                                                <option value="">Sin grupo asignado</option>
+                                                {availableGroups.map((group) => (
+                                                    <option key={group.id} value={group.id}>
+                                                        {group.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pp-info-card">
+                                    <AlertCircle />
+                                    <p>
+                                        Si seleccionas fase y grupo, todos los clubes elegidos se crearan directamente en ese grupo.
+                                    </p>
                                 </div>
                             </div>
                         )}

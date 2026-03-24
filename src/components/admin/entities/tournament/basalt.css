@@ -4164,3 +4164,144 @@ select.basalt-input {
         margin-top: 28px;
     }
 }
+
+.basalt-tabs-desktop-head {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .basalt-shell-layout {
+        align-items: flex-start;
+    }
+
+    .basalt-tabs {
+        flex: 0 0 clamp(272px, 24vw, 308px);
+        width: clamp(272px, 24vw, 308px);
+        margin: 0;
+        padding: 18px;
+        border: 1px solid var(--border-basalt);
+        border-radius: 24px;
+        border-bottom: 1px solid var(--border-basalt);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 30%),
+            rgba(9, 15, 24, 0.88);
+        position: sticky;
+        top: calc(var(--basalt-header-offset) + 24px);
+        overflow: hidden;
+    }
+
+    .basalt-tabs-desktop-head {
+        display: grid;
+        gap: 6px;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .basalt-tabs-desktop-kicker {
+        color: rgba(177, 255, 218, 0.78);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .basalt-tabs-desktop-title {
+        color: var(--text-main);
+        font-size: 18px;
+        letter-spacing: -0.03em;
+    }
+
+    .basalt-tabs-desktop-meta {
+        color: var(--text-dim);
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .basalt-tabs-inner {
+        flex-direction: column;
+        gap: 10px;
+        max-height: calc(100vh - var(--basalt-header-offset) - 176px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0 4px 0 0;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 214, 136, 0.28) transparent;
+    }
+
+    .basalt-tabs-inner::-webkit-scrollbar {
+        display: block;
+        width: 6px;
+    }
+
+    .basalt-tabs-inner::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .basalt-tabs-inner::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    .basalt-tabs-inner::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 214, 136, 0.26);
+    }
+
+    .basalt-tab-item {
+        width: 100%;
+        min-width: 0;
+        min-height: 80px;
+        padding: 14px 16px;
+        align-items: flex-start;
+        border: 1px solid transparent;
+        border-radius: 18px;
+        border-bottom: 1px solid transparent;
+        background: rgba(255, 255, 255, 0.025);
+        white-space: normal;
+    }
+
+    .basalt-tab-item:hover {
+        border-color: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .basalt-tab-item.active {
+        border-color: rgba(0, 214, 136, 0.32);
+        background:
+            linear-gradient(135deg, rgba(0, 163, 101, 0.12), transparent 55%),
+            rgba(255, 255, 255, 0.05);
+        color: var(--text-main);
+    }
+
+    .basalt-tab-item.active::after {
+        left: 16px;
+        right: 16px;
+        bottom: 8px;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-primary-strong));
+        filter: blur(0);
+        opacity: 1;
+    }
+
+    .basalt-shell-main {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .basalt-sidebar {
+        top: calc(var(--basalt-header-offset) + 24px);
+        max-height: calc(100vh - var(--basalt-header-offset) - 32px);
+    }
+}
+
+@media (max-width: 1023px) {
+    .basalt-shell-layout {
+        flex-direction: column;
+    }
+
+    .basalt-tabs {
+        width: 100%;
+        margin: 0;
+    }
+}

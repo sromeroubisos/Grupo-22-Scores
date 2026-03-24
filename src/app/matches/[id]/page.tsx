@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ExportImage from '@/components/ExportImage';
+import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import styles from './page.module.css';
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { APP_TIMEZONE } from '@/lib/timezone';
@@ -720,6 +721,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                             tournamentLogo: matchData.tournamentLogo,
                                             date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                             time: matchData.time,
+                                            kickoffAt: matchData.date,
                                             venue: matchData.venue,
                                             stats: statsData || []
                                         }}
@@ -1259,6 +1261,23 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     </section>
 
                     <aside className={styles.sidebarColumn}>
+                        <section className={styles.panelBlock}>
+                            <MatchWinnerVoteCard
+                                matchId={matchData.id || id}
+                                status={matchData.status}
+                                homeTeam={{
+                                    name: matchData.home.name,
+                                    logo: matchData.home.logo,
+                                }}
+                                awayTeam={{
+                                    name: matchData.away.name,
+                                    logo: matchData.away.logo,
+                                }}
+                                homeScore={typeof matchData.home.score === 'number' ? matchData.home.score : null}
+                                awayScore={typeof matchData.away.score === 'number' ? matchData.away.score : null}
+                            />
+                        </section>
+
                         {matchData.form && Array.isArray(matchData.form) && matchData.form.length > 0 && (
                             <section className={styles.panelBlock}>
                                 <div className={styles.panelTitle}>Racha Reciente</div>
@@ -1314,6 +1333,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     tournamentLogo: matchData.tournamentLogo,
                                     date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                     time: matchData.time,
+                                    kickoffAt: matchData.date,
                                     stats: statsData
                                 }}
                                 filename={`reporte-${matchData.home.name}-${matchData.away.name}`}
