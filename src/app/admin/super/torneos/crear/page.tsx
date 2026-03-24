@@ -6,15 +6,16 @@ import {
     ChevronLeft, Trophy, Globe, Shield, Settings, CheckCircle,
     LayoutGrid, ListOrdered, GitMerge, Search, Loader2
 } from 'lucide-react';
-import PhaseCreator from '@/app/admin/components/PhaseCreator';
+import PhaseCreator, { type PhaseConfiguration, type Team as PhaseTeam } from '@/app/admin/components/PhaseCreator';
+import LogoUploader from '@/components/LogoUploader';
 import { createClient } from '@/lib/supabase/client';
 import { createEntity, updateEntity } from '@/app/admin/entities/actions';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
-import { getActiveSports } from '@/lib/data/sports';
+import { getAllSports } from '@/lib/data/sports';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 import '../../creation-forms.css';
 
-const activeSports = getActiveSports();
+const sportsCatalog = getAllSports();
 
 const sportDefaults: Record<string, { duration: number; win: number; draw: number; loss: number }> = {
     'football': { duration: 90, win: 3, draw: 1, loss: 0 },
@@ -74,6 +75,195 @@ function normalizeCountryId(value: string | null | undefined, options: Tournamen
     return matched?.id || normalized;
 }
 
+const AGE_GRADE_OPTIONS = [
+    'Mayores (Adults)',
+    'U23',
+    'U20',
+    'U18',
+    'U16',
+    'Femenino',
+    'Mixto',
+];
+
+const DEFAULT_PHASE_CRITERIA = [
+    { id: 'points', text: 'Puntos obtenidos', value: 'points_table' },
+    { id: 'diff_points', text: 'Diferencia de Tantos', value: 'points_diff' },
+];
+
+const DEFAULT_PHASE_TAGS = [
+    { id: '1', fromPosition: 1, toPosition: 2, label: 'Clasifica', color: '#00a365' },
+];
+
+type UnionOption = {
+    id: string;
+    name: string;
+};
+
+type ClubRecord = {
+    id: string;
+    name: string;
+    short_name?: string | null;
+    shortName?: string | null;
+    city?: string | null;
+    logo_url?: string | null;
+    primary_color?: string | null;
+};
+
+type TournamentRecord = {
+    name?: string | null;
+    sport_id?: string | null;
+    is_visible?: boolean | null;
+    season_id?: string | null;
+    category?: string | null;
+    age_grade?: string | null;
+    format?: string | null;
+    country_id?: string | null;
+    country?: string | null;
+    union_id?: string | null;
+    logo_url?: string | null;
+    ruleset?: {
+        pointsWin?: number;
+        pointsDraw?: number;
+        pointsLoss?: number;
+        pointsBonusTry?: number;
+        pointsBonusLoss?: number;
+    } | null;
+};
+
+type ParticipantRow = {
+    club_id: string;
+};
+
+function sameIdList(left: string[], right: string[]): boolean {
+    if (left.length !== right.length) return false;
+    return left.every((value, index) => value === right[index]);
+}
+
+function mapFormatToPhaseType(format: string): PhaseConfiguration['phaseType'] {
+    if (format === 'league') return 'league';
+    if (format === 'knockout') return 'playoff';
+    return 'groups';
+}
+
+function mapPhaseTypeToFormat(phaseType: string): string {
+    if (phaseType === 'league') return 'league';
+    if (phaseType === 'playoff') return 'knockout';
+    return 'groups';
+}
+
+function getPhaseTypeLabel(phaseType: string): string {
+    if (phaseType === 'league') return 'Liga';
+    if (phaseType === 'playoff') return 'Playoff';
+    return 'Fase de grupos';
+}
+
+function buildPhaseName(phaseType: string): string {
+    if (phaseType === 'league') return 'Regular Season';
+    if (phaseType === 'playoff') return 'Playoffs';
+    return 'Fase de grupos';
+}
+
+function buildGroupNames(count: number): string[] {
+    return Array.from({ length: Math.max(1, count) }, (_, index) => `Grupo ${String.fromCharCode(65 + index)}`);
+}
+
+function parsePointsValue(value: string | number | undefined, fallback: number): number {
+    const numericValue = Number(String(value ?? fallback).replace(/[^\d.-]/g, ''));
+    return Number.isFinite(numericValue) ? numericValue : fallback;
+}
+
+function getClubShortName(club: Pick<ClubRecord, 'name' | 'short_name' | 'shortName'>): string {
+    if (club.short_name) return String(club.short_name).trim().slice(0, 4).toUpperCase();
+    if (club.shortName) return String(club.shortName).trim().slice(0, 4).toUpperCase();
+
+    return String(club.name || '')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 3)
+        .map((chunk: string) => chunk[0])
+        .join('')
+        .slice(0, 4)
+        .toUpperCase();
+}
+
+function createDefaultPhaseConfig(
+    phaseType: PhaseConfiguration['phaseType'],
+    selectedTeamIds: string[],
+    rules: {
+        pointsWin: number;
+        pointsDraw: number;
+        pointsLoss: number;
+        pointsBonusTry: number;
+        pointsBonusLoss: number;
+    }
+): PhaseConfiguration {
+    return {
+        phaseType,
+        config: {
+            groupsCount: 4,
+            teamsPerGroup: 5,
+            qualifiersPerGroup: 2,
+            pointsWin: String(rules.pointsWin),
+            pointsDraw: String(rules.pointsDraw),
+            pointsBonusTry: String(rules.pointsBonusTry),
+            pointsBonusLoss: String(rules.pointsBonusLoss),
+            leagueRounds: 1,
+            playoffThirdPlace: false,
+        },
+        selectedTeamIds,
+        fixtureData: [],
+        isFixtureGenerated: false,
+        activeCriteria: DEFAULT_PHASE_CRITERIA,
+        tags: DEFAULT_PHASE_TAGS,
+        groupAssignments: {},
+    };
+}
+
+function buildQuickPhasePayload(config: PhaseConfiguration) {
+    const groupsCount = Math.max(1, Number(config.config?.groupsCount) || 1);
+    const qualifiersPerGroup = Math.max(0, Number(config.config?.qualifiersPerGroup) || 0);
+    const leagueRounds = Math.max(1, Number(config.config?.leagueRounds) || 1);
+    const normalizedPhaseType = config.phaseType === 'groups' ? 'group_stage' : config.phaseType;
+    const groupNames = normalizedPhaseType === 'group_stage' ? buildGroupNames(groupsCount) : [];
+
+    return {
+        name: buildPhaseName(config.phaseType),
+        phase_type: normalizedPhaseType,
+        order_index: 1,
+        is_active: true,
+        settings: {
+            quickCreator: {
+                ...config,
+                savedAt: new Date().toISOString(),
+            },
+            phaseMode: config.phaseType,
+            teamsCount: config.selectedTeamIds.length,
+            advanceCount: qualifiersPerGroup,
+            legs: normalizedPhaseType === 'league' ? leagueRounds : 1,
+            group_names: groupNames,
+            selectedTeamIds: config.selectedTeamIds,
+            groupAssignments: config.groupAssignments,
+            fixturePreview: config.fixtureData,
+            pointsSystem: {
+                win: parsePointsValue(config.config?.pointsWin, 4),
+                draw: parsePointsValue(config.config?.pointsDraw, 2),
+                loss: 0,
+                bonusTry: parsePointsValue(config.config?.pointsBonusTry, 1),
+                bonusLoss: parsePointsValue(config.config?.pointsBonusLoss, 1),
+            },
+            tiebreakers: config.activeCriteria.map((criterion, index) => ({
+                metric: criterion.value || criterion.id,
+                label: criterion.text,
+                enabled: true,
+                order: index + 1,
+                priority: index + 1,
+            })),
+            tableTags: config.tags,
+            playoffThirdPlace: Boolean(config.config?.playoffThirdPlace),
+        },
+    };
+}
+
 export default function SuperCreateTournament() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -82,12 +272,13 @@ export default function SuperCreateTournament() {
 
     const [currentStep, setCurrentStep] = useState(1);
     const [isEdit, setIsEdit] = useState(false);
-    const [unions, setUnions] = useState<any[]>([]);
-    const [clubs, setClubs] = useState<any[]>([]);
+    const [unions, setUnions] = useState<UnionOption[]>([]);
+    const [clubs, setClubs] = useState<ClubRecord[]>([]);
     const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [saving, setSaving] = useState(false);
     const [countryOptions, setCountryOptions] = useState<TournamentCountryOption[]>(() => getTournamentCountryOptions());
+    const [phaseConfig, setPhaseConfig] = useState<PhaseConfiguration | null>(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -96,8 +287,10 @@ export default function SuperCreateTournament() {
         season: '2026',
         format: 'league',
         category: 'Profesional',
+        ageGrade: 'Mayores (Adults)',
         country: '',
         unionId: '',
+        logoUrl: '',
         rules: {
             pointsWin: 4,
             pointsDraw: 2,
@@ -128,7 +321,7 @@ export default function SuperCreateTournament() {
             .select('*')
             .eq('id', tournamentId)
             .single()
-            .then(({ data }: { data: any }) => {
+            .then(({ data }: { data: TournamentRecord | null }) => {
                 if (!data) return;
                 setIsEdit(true);
 
@@ -142,9 +335,11 @@ export default function SuperCreateTournament() {
                     visibility: data.is_visible ? 'public' : 'private',
                     season: data.season_id || '2026',
                     category: data.category || prev.category,
+                    ageGrade: data.age_grade || prev.ageGrade,
                     format: data.format || prev.format,
                     country: normalizeCountryId(data.country_id || data.country || '', countryOptions),
                     unionId: data.union_id || '',
+                    logoUrl: data.logo_url || '',
                     rules: {
                         ...prev.rules,
                         pointsWin: data.ruleset?.pointsWin ?? defaults.win ?? prev.rules.pointsWin,
@@ -161,12 +356,32 @@ export default function SuperCreateTournament() {
             .select('club_id')
             .eq('tournament_id', tournamentId)
             .then(({ data }) => {
-                setSelectedClubs(data?.map((p: any) => p.club_id) || []);
+                setSelectedClubs((data as ParticipantRow[] | null)?.map((participant) => participant.club_id) || []);
+            });
+
+        fetch(`/api/tournaments/${tournamentId}/phases`)
+            .then(async (response) => {
+                if (!response.ok) return null;
+                return response.json();
+            })
+            .then((payload) => {
+                const firstPhase = payload?.data?.[0];
+                const savedQuickConfig = firstPhase?.settings?.quickCreator || firstPhase?.settings?.quick_creator;
+
+                if (savedQuickConfig) {
+                    setPhaseConfig(savedQuickConfig as PhaseConfiguration);
+                    if (Array.isArray(savedQuickConfig.selectedTeamIds) && savedQuickConfig.selectedTeamIds.length > 0) {
+                        setSelectedClubs(savedQuickConfig.selectedTeamIds);
+                    }
+                }
+            })
+            .catch((error) => {
+                console.error('Error loading phase config:', error);
             });
     }, [countryOptions, supabase, tournamentId]);
 
     const handleSportChange = (sportId: string) => {
-        const d = sportDefaults[sportId];
+        const d = sportDefaults[sportId] || { duration: 60, win: 1, draw: 0, loss: 0 };
         setFormData(prev => ({
             ...prev,
             sport: sportId,
@@ -175,6 +390,90 @@ export default function SuperCreateTournament() {
                 ...(d ? { pointsWin: d.win, pointsDraw: d.draw, pointsLoss: d.loss } : {})
             }
         }));
+    };
+
+    const phaseTeams: PhaseTeam[] = clubs.map((club) => ({
+        id: club.id,
+        name: club.name,
+        short: getClubShortName(club),
+        color: club.primary_color || '#00A365',
+    }));
+
+    const resolvedPhaseType = phaseConfig?.phaseType || mapFormatToPhaseType(formData.format);
+    const effectivePhaseConfig = phaseConfig || createDefaultPhaseConfig(resolvedPhaseType, selectedClubs, formData.rules);
+    const phaseConfigToPersist: PhaseConfiguration = {
+        ...effectivePhaseConfig,
+        selectedTeamIds: selectedClubs,
+    };
+    const selectedSport = sportsCatalog.find((sport) => sport.id === formData.sport);
+    const heroTitle = formData.name.trim() || 'Nuevo torneo';
+    const heroStatus = formData.visibility === 'public' ? 'READY' : 'DRAFT';
+
+    useEffect(() => {
+        setPhaseConfig((current) => {
+            if (!current || sameIdList(current.selectedTeamIds, selectedClubs)) {
+                return current;
+            }
+
+            return {
+                ...current,
+                selectedTeamIds: selectedClubs,
+            };
+        });
+    }, [selectedClubs]);
+
+    const applyPhaseConfig = (nextConfig: PhaseConfiguration) => {
+        setPhaseConfig(nextConfig);
+
+        const nextFormat = mapPhaseTypeToFormat(nextConfig.phaseType);
+        setFormData((prev) => (
+            prev.format === nextFormat
+                ? prev
+                : { ...prev, format: nextFormat }
+        ));
+
+        if (!sameIdList(selectedClubs, nextConfig.selectedTeamIds)) {
+            setSelectedClubs(nextConfig.selectedTeamIds);
+        }
+    };
+
+    const handleFormatChange = (format: string) => {
+        const nextPhaseType = mapFormatToPhaseType(format);
+
+        setFormData((prev) => ({ ...prev, format }));
+        setPhaseConfig((current) => {
+            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules);
+            return {
+                ...baseConfig,
+                phaseType: nextPhaseType,
+            };
+        });
+    };
+
+    const saveQuickPhase = async (savedId: string, config: PhaseConfiguration) => {
+        const existingPhasesResponse = await fetch(`/api/tournaments/${savedId}/phases`);
+        let existingPhaseId: string | null = null;
+
+        if (existingPhasesResponse.ok) {
+            const existingPhasesPayload = await existingPhasesResponse.json();
+            existingPhaseId = existingPhasesPayload?.data?.[0]?.id || null;
+        }
+
+        const phaseResponse = await fetch(
+            existingPhaseId
+                ? `/api/tournaments/${savedId}/phases/${existingPhaseId}`
+                : `/api/tournaments/${savedId}/phases`,
+            {
+                method: existingPhaseId ? 'PATCH' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(buildQuickPhasePayload(config)),
+            }
+        );
+
+        if (!phaseResponse.ok) {
+            const phaseError = await phaseResponse.json().catch(() => null);
+            throw new Error(phaseError?.error || 'No se pudo guardar la fase inicial.');
+        }
     };
 
     const handleNext = async () => {
@@ -196,18 +495,20 @@ export default function SuperCreateTournament() {
                 } : {})
             };
 
-            const payload: Record<string, any> = {
+            const payload: Record<string, unknown> = {
                 name: formData.name,
                 sport_id: formData.sport,
                 season_id: formData.season || '2026',
                 category: formData.category || null,
-                format: formData.format || null,
+                age_grade: formData.ageGrade || null,
+                format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType) || null,
                 country: formData.country
                     ? (countryOptions.find((option) => option.id === formData.country)?.label || formData.country)
                     : null,
                 country_id: formData.country || null,
                 union_id: formData.unionId || null,
-                status: 'published' as const,
+                logo_url: formData.logoUrl || null,
+                status: formData.visibility === 'public' ? 'published' : 'draft',
                 is_visible: formData.visibility === 'public',
                 ruleset,
             };
@@ -220,27 +521,26 @@ export default function SuperCreateTournament() {
                 savedId = tournamentId;
             } else {
                 // On create: generate a unique slug
-                payload.slug = formData.name
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')
-                    .replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+                payload.slug = `${slugify(formData.name)}-${Date.now()}`;
                 const result = await createEntity('tournament', payload);
                 savedId = result.id;
             }
 
             // Persist participants
+            if (isEdit) {
+                await supabase.from('tournament_participants').delete().eq('tournament_id', savedId);
+            }
             if (selectedClubs.length > 0) {
-                if (isEdit) {
-                    await supabase.from('tournament_participants').delete().eq('tournament_id', savedId);
-                }
                 await supabase.from('tournament_participants').insert(
                     selectedClubs.map(clubId => ({ tournament_id: savedId, club_id: clubId }))
                 );
             }
 
+            await saveQuickPhase(savedId, phaseConfigToPersist);
+
             router.push('/admin/super/torneos');
-        } catch (err: any) {
-            alert('Error al guardar el torneo: ' + err.message);
+        } catch (err: unknown) {
+            alert('Error al guardar el torneo: ' + (err instanceof Error ? err.message : String(err)));
         } finally {
             setSaving(false);
         }
@@ -261,6 +561,33 @@ export default function SuperCreateTournament() {
                     <h1>{isEdit ? 'Editar Torneo' : 'Inaugurar Torneo'}</h1>
                     <p>Define los parámetros globales y la estructura de tu competencia.</p>
                 </header>
+
+                <section className="creation-hero">
+                    <div className="creation-hero-card">
+                        <div className="creation-hero-logo">
+                            {formData.logoUrl ? (
+                                <img src={formData.logoUrl} alt={heroTitle} />
+                            ) : (
+                                <span className="creation-hero-logo-placeholder">Logo</span>
+                            )}
+                        </div>
+
+                        <div className="creation-hero-copy">
+                            <h2>{heroTitle}</h2>
+                            <p className="creation-hero-subline">
+                                El logo se actualiza en vivo aqui arriba y se guarda junto al torneo.
+                            </p>
+
+                            <div className="creation-hero-meta">
+                                <span className="creation-hero-pill is-accent">Status: <strong>{heroStatus}</strong></span>
+                                <span className="creation-hero-pill">Season: <strong>{formData.season || '2026'}</strong></span>
+                                <span className="creation-hero-pill">Sport: <strong>{selectedSport?.nameEs || formData.sport}</strong></span>
+                                <span className="creation-hero-pill">Fase base: <strong>{getPhaseTypeLabel(phaseConfigToPersist.phaseType)}</strong></span>
+                                <span className="creation-hero-pill">ID: <strong>{isEdit ? 'EDIT' : 'NEW'}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Stepper */}
                 <nav className="stepper-nav">
@@ -304,7 +631,7 @@ export default function SuperCreateTournament() {
                                     <div className="field-group">
                                         <label>DEPORTE</label>
                                         <div className="choice-grid">
-                                            {activeSports.map(sport => (
+                                            {sportsCatalog.map(sport => (
                                                 <button
                                                     key={sport.id}
                                                     type="button"
@@ -313,9 +640,11 @@ export default function SuperCreateTournament() {
                                                 >
                                                     <span className="choice-icon">{sport.icon}</span>
                                                     <span className="choice-label">{sport.nameEs}</span>
+                                                    <span className="choice-status">{sport.isActive ? 'Activo' : 'Catalogo web'}</span>
                                                 </button>
                                             ))}
                                         </div>
+                                        <p className="field-help">Se muestran todos los deportes soportados por la web, no solo los activos.</p>
                                     </div>
 
                                     <div className="grid-2">
@@ -341,6 +670,19 @@ export default function SuperCreateTournament() {
                                                 placeholder="Ej: Primera, Juveniles, etc."
                                             />
                                         </div>
+                                    </div>
+
+                                    <div className="field-group">
+                                        <label>CLASIFICACION DE EDAD</label>
+                                        <select
+                                            className="form-select"
+                                            value={formData.ageGrade}
+                                            onChange={e => setFormData({ ...formData, ageGrade: e.target.value })}
+                                        >
+                                            {AGE_GRADE_OPTIONS.map((option) => (
+                                                <option key={option} value={option}>{option}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -382,6 +724,49 @@ export default function SuperCreateTournament() {
                                 </div>
                             </div>
                         </article>
+
+                        <article className="partition">
+                            <div className="partition-header">
+                                <h2>Identidad Visual</h2>
+                                <p>Sube el logo y valida al instante como queda en el banner superior.</p>
+                            </div>
+                            <div className="partition-body">
+                                <div className="grid-2">
+                                    <div className="field-group">
+                                        <label>URL DEL LOGO</label>
+                                        <input
+                                            className="form-input"
+                                            type="text"
+                                            value={formData.logoUrl}
+                                            onChange={e => setFormData({ ...formData, logoUrl: e.target.value })}
+                                            placeholder="https://.../logo.png"
+                                        />
+                                        <p className="field-help">
+                                            Puedes pegar una URL o subir un archivo. El banner de arriba usa exactamente este mismo logo.
+                                        </p>
+                                        {formData.logoUrl && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline"
+                                                style={{ alignSelf: 'flex-start', padding: '10px 16px', height: 'auto', width: 'auto' }}
+                                                onClick={() => setFormData({ ...formData, logoUrl: '' })}
+                                            >
+                                                Limpiar Logo
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="logo-card">
+                                        <LogoUploader
+                                            onUpload={(logoData) => setFormData((prev) => ({ ...prev, logoUrl: logoData }))}
+                                            currentLogo={formData.logoUrl}
+                                            label="Logo del torneo"
+                                            accentColor="var(--accent)"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
                     </>
                 )}
 
@@ -399,7 +784,7 @@ export default function SuperCreateTournament() {
                                     <button
                                         type="button"
                                         className={`choice-btn ${formData.format === 'groups' ? 'selected' : ''}`}
-                                        onClick={() => setFormData({ ...formData, format: 'groups' })}
+                                        onClick={() => handleFormatChange('groups')}
                                     >
                                         <LayoutGrid className="choice-icon" />
                                         <span className="choice-label">Fase de Grupos + Playoffs</span>
@@ -407,7 +792,7 @@ export default function SuperCreateTournament() {
                                     <button
                                         type="button"
                                         className={`choice-btn ${formData.format === 'league' ? 'selected' : ''}`}
-                                        onClick={() => setFormData({ ...formData, format: 'league' })}
+                                        onClick={() => handleFormatChange('league')}
                                     >
                                         <ListOrdered className="choice-icon" />
                                         <span className="choice-label">Liga (Todos contra todos)</span>
@@ -415,7 +800,7 @@ export default function SuperCreateTournament() {
                                     <button
                                         type="button"
                                         className={`choice-btn ${formData.format === 'knockout' ? 'selected' : ''}`}
-                                        onClick={() => setFormData({ ...formData, format: 'knockout' })}
+                                        onClick={() => handleFormatChange('knockout')}
                                     >
                                         <GitMerge className="choice-icon" />
                                         <span className="choice-label">Eliminación Directa</span>
@@ -428,10 +813,18 @@ export default function SuperCreateTournament() {
                                     <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Configurador de Fases</h3>
                                 </div>
                                 <PhaseCreator
+                                    key={`quick-phase-${effectivePhaseConfig.phaseType}`}
                                     phaseIndex={1}
                                     totalPhases={1}
+                                    teams={phaseTeams}
+                                    initialConfig={effectivePhaseConfig}
                                     onPrev={() => setCurrentStep(1)}
-                                    onNext={() => setCurrentStep(3)}
+                                    onChange={applyPhaseConfig}
+                                    onSaveDraft={applyPhaseConfig}
+                                    onNext={(config) => {
+                                        applyPhaseConfig(config);
+                                        setCurrentStep(3);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -614,7 +1007,7 @@ export default function SuperCreateTournament() {
                                 </div>
                                 <div className="summary-item">
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Deporte</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.sport.toUpperCase()}</span>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{selectedSport?.nameEs || formData.sport.toUpperCase()}</span>
                                 </div>
                                 <div className="summary-item">
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Temporada</strong>
@@ -625,12 +1018,20 @@ export default function SuperCreateTournament() {
                                     <span style={{ fontSize: '16px', color: 'white' }}>{formData.category || 'N/A'}</span>
                                 </div>
                                 <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Edad</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.ageGrade || 'N/A'}</span>
+                                </div>
+                                <div className="summary-item">
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Participantes</strong>
                                     <span style={{ fontSize: '16px', color: 'white' }}>{selectedClubs.length} club{selectedClubs.length !== 1 ? 's' : ''}</span>
                                 </div>
                                 <div className="summary-item">
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Puntos (G/E/P)</strong>
                                     <span style={{ fontSize: '16px', color: 'white' }}>{formData.rules.pointsWin} / {formData.rules.pointsDraw} / {formData.rules.pointsLoss}</span>
+                                </div>
+                                <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Fase inicial</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{getPhaseTypeLabel(phaseConfigToPersist.phaseType)}</span>
                                 </div>
                             </div>
 

@@ -51,6 +51,103 @@
     margin: 8px 0 0;
 }
 
+.creation-hero {
+    margin-bottom: 32px;
+}
+
+.creation-hero-card {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding: 28px 32px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background:
+        radial-gradient(circle at top right, rgba(0, 163, 101, 0.18), transparent 34%),
+        linear-gradient(135deg, #111 0%, #171717 50%, #0f0f0f 100%);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.creation-hero-logo {
+    width: 92px;
+    height: 92px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.creation-hero-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.creation-hero-logo-placeholder {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.creation-hero-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.creation-hero-copy h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 950;
+    line-height: 1.02;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.creation-hero-subline {
+    margin-top: 8px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+.creation-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.creation-hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.creation-hero-pill strong {
+    color: var(--text-primary);
+}
+
+.creation-hero-pill.is-accent {
+    color: var(--accent);
+    border-color: rgba(0, 163, 101, 0.35);
+    background: rgba(0, 163, 101, 0.12);
+}
+
 /* 2. STEPPER */
 .stepper-nav {
     display: flex;
@@ -155,6 +252,13 @@
     letter-spacing: 0.08em;
 }
 
+.field-help {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
 .form-input,
 .form-select,
 textarea {
@@ -222,6 +326,25 @@ textarea:focus {
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
+}
+
+.choice-btn .choice-status {
+    margin-top: 2px;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.choice-btn.selected .choice-status {
+    color: rgba(0, 163, 101, 0.85);
+}
+
+.logo-card {
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 /* 6. ACTIONS BAR (Sticky Footer) */
@@ -340,6 +463,23 @@ textarea:focus {
 
     .creation-header h1 {
         font-size: 1.8rem;
+    }
+
+    .creation-hero-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 22px 20px;
+    }
+
+    .creation-hero-logo {
+        width: 72px;
+        height: 72px;
+        border-radius: 14px;
+    }
+
+    .creation-hero-copy h2 {
+        font-size: 1.5rem;
     }
 
     .partition-header {

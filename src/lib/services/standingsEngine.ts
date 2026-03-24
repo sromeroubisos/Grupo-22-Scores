@@ -22,13 +22,40 @@ export interface PhaseSettings {
 }
 
 export class StandingsEngine {
+  private static toFiniteNumber(value: unknown): number | null {
+    const normalized = typeof value === 'string' && value.trim() === '' ? Number.NaN : Number(value);
+    return Number.isFinite(normalized) ? normalized : null;
+  }
+
+  private static buildLegacyBonusRule(
+    enabled: boolean,
+    fallback: unknown,
+    kind: 'offensive' | 'defensive',
+  ) {
+    if (!enabled && fallback == null) return null;
+
+    const bonusPoints = this.toFiniteNumber(fallback) ?? 1;
+
+    if (kind === 'offensive') {
+      return {
+        tries: 4,
+        points: bonusPoints,
+      };
+    }
+
+    return {
+      margin: 7,
+      points: bonusPoints,
+    };
+  }
+
   /**
    * Normalize a tiebreaker entry to its string key.
    */
   static tiebreakerKey(tb: any): string {
     if (!tb) return '';
     if (typeof tb === 'string') return tb;
-    return tb?.key || tb?.id || '';
+    return tb?.key || tb?.metric || tb?.id || tb?.value || '';
   }
 
   /**
@@ -36,6 +63,50 @@ export class StandingsEngine {
    */
   static resolveRules(phaseSettings: any, tournamentRuleset: any) {
     const defaults = { win: 4, draw: 2, loss: 0 };
+    const phasePointsSystem = phaseSettings?.pointsSystem ?? null;
+    const tournamentPointsSystem = tournamentRuleset?.pointsSystem ?? null;
+    const phaseBonusEnabled = Boolean(
+      phasePointsSystem?.allowBonusPoints ||
+      phasePointsSystem?.bonusTry != null ||
+      phasePointsSystem?.bonusLoss != null,
+    );
+    const tournamentBonusEnabled = Boolean(
+      tournamentPointsSystem?.allowBonusPoints ||
+      tournamentRuleset?.pointsBonusTry != null ||
+      tournamentRuleset?.pointsBonusLoss != null,
+    );
+    const resolvedOffensiveBonusRule =
+      phaseSettings?.bonus?.offensive ??
+      tournamentRuleset?.bonus?.offensive ??
+      this.buildLegacyBonusRule(
+        phaseBonusEnabled,
+        phasePointsSystem?.bonusTry ??
+          phasePointsSystem?.behavior?.bonusTry ??
+          tournamentPointsSystem?.bonusTry ??
+          tournamentRuleset?.pointsBonusTry,
+        'offensive',
+      ) ??
+      this.buildLegacyBonusRule(
+        tournamentBonusEnabled,
+        tournamentPointsSystem?.bonusTry ?? tournamentRuleset?.pointsBonusTry,
+        'offensive',
+      );
+    const resolvedDefensiveBonusRule =
+      phaseSettings?.bonus?.defensive ??
+      tournamentRuleset?.bonus?.defensive ??
+      this.buildLegacyBonusRule(
+        phaseBonusEnabled,
+        phasePointsSystem?.bonusLoss ??
+          phasePointsSystem?.behavior?.bonusLoss ??
+          tournamentPointsSystem?.bonusLoss ??
+          tournamentRuleset?.pointsBonusLoss,
+        'defensive',
+      ) ??
+      this.buildLegacyBonusRule(
+        tournamentBonusEnabled,
+        tournamentPointsSystem?.bonusLoss ?? tournamentRuleset?.pointsBonusLoss,
+        'defensive',
+      );
     const rawTiebreakers =
       phaseSettings?.tiebreakers ?? tournamentRuleset?.tiebreakers ?? ['points_difference'];
 
@@ -49,15 +120,28 @@ export class StandingsEngine {
 
     return {
       points_for_win:
-        phaseSettings?.points?.win ?? tournamentRuleset?.points?.win ?? defaults.win,
+        phaseSettings?.points?.win ??
+        phasePointsSystem?.win ??
+        tournamentRuleset?.points?.win ??
+        tournamentPointsSystem?.win ??
+        tournamentRuleset?.pointsWin ??
+        defaults.win,
       points_for_draw:
-        phaseSettings?.points?.draw ?? tournamentRuleset?.points?.draw ?? defaults.draw,
+        phaseSettings?.points?.draw ??
+        phasePointsSystem?.draw ??
+        tournamentRuleset?.points?.draw ??
+        tournamentPointsSystem?.draw ??
+        tournamentRuleset?.pointsDraw ??
+        defaults.draw,
       points_for_loss:
-        phaseSettings?.points?.loss ?? tournamentRuleset?.points?.loss ?? defaults.loss,
-      offensive_bonus_rule:
-        phaseSettings?.bonus?.offensive ?? tournamentRuleset?.bonus?.offensive ?? null,
-      defensive_bonus_rule:
-        phaseSettings?.bonus?.defensive ?? tournamentRuleset?.bonus?.defensive ?? null,
+        phaseSettings?.points?.loss ??
+        phasePointsSystem?.loss ??
+        tournamentRuleset?.points?.loss ??
+        tournamentPointsSystem?.loss ??
+        tournamentRuleset?.pointsLoss ??
+        defaults.loss,
+      offensive_bonus_rule: resolvedOffensiveBonusRule,
+      defensive_bonus_rule: resolvedDefensiveBonusRule,
       tiebreakers,
       qualification_rules:
         phaseSettings?.qualification ?? tournamentRuleset?.qualification ?? null,
@@ -204,7 +288,8 @@ export class StandingsEngine {
           // Defensive bonus: lost by ≤ threshold (default 7 pts)
           if (!hasManualPoints && rules.defensive_bonus_rule && homeResult === 'L') {
             const margin = rules.defensive_bonus_rule?.margin ?? 7;
-            if (awayScore - homeScore <= margin) homeStats.bonus_defensive += 1;
+            const points = Number(rules.defensive_bonus_rule?.points ?? rules.defensive_bonus_rule?.value ?? 1);
+            if (awayScore - homeScore <= margin) homeStats.bonus_defensive += Number.isFinite(points) ? points : 1;
           }
         } else {
           homeStats.drawn += 1;
@@ -218,7 +303,8 @@ export class StandingsEngine {
         // Offensive bonus: scored ≥ threshold tries (default 4)
         if (!hasManualPoints && rules.offensive_bonus_rule) {
           const threshold = rules.offensive_bonus_rule?.tries ?? rules.offensive_bonus_rule?.threshold ?? 4;
-          if (homeTries >= threshold) homeStats.bonus_offensive += 1;
+          const points = Number(rules.offensive_bonus_rule?.points ?? rules.offensive_bonus_rule?.value ?? 1);
+          if (homeTries >= threshold) homeStats.bonus_offensive += Number.isFinite(points) ? points : 1;
         }
         if (hasManualPoints) {
           homeStats.adjustments += Number(m.home_bonus_points ?? 0);
@@ -238,7 +324,8 @@ export class StandingsEngine {
           awayStats.lost += 1;
           if (!hasManualPoints && rules.defensive_bonus_rule && awayResult === 'L') {
             const margin = rules.defensive_bonus_rule?.margin ?? 7;
-            if (homeScore - awayScore <= margin) awayStats.bonus_defensive += 1;
+            const points = Number(rules.defensive_bonus_rule?.points ?? rules.defensive_bonus_rule?.value ?? 1);
+            if (homeScore - awayScore <= margin) awayStats.bonus_defensive += Number.isFinite(points) ? points : 1;
           }
         } else {
           awayStats.drawn += 1;
@@ -251,7 +338,8 @@ export class StandingsEngine {
 
         if (!hasManualPoints && rules.offensive_bonus_rule) {
           const threshold = rules.offensive_bonus_rule?.tries ?? rules.offensive_bonus_rule?.threshold ?? 4;
-          if (awayTries >= threshold) awayStats.bonus_offensive += 1;
+          const points = Number(rules.offensive_bonus_rule?.points ?? rules.offensive_bonus_rule?.value ?? 1);
+          if (awayTries >= threshold) awayStats.bonus_offensive += Number.isFinite(points) ? points : 1;
         }
         if (hasManualPoints) {
           awayStats.adjustments += Number(m.away_bonus_points ?? 0);

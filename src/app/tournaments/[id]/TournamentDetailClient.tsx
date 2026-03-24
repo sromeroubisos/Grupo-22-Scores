@@ -50,23 +50,23 @@ function getTournamentLogo(detailsData: any, localData: any): string {
     return localData?.logoUrl || '';
 }
 
-function buildClubHref(team: { id?: string | number | null; name?: string | null; teamUrl?: string | null }) {
+function buildClubHref(
+    team: { id?: string | number | null; name?: string | null; teamUrl?: string | null },
+    preferredSport?: string | null,
+) {
     const rawId = String(team.id ?? '').trim();
     if (!rawId) return null;
-
-    if (UUID_RE.test(rawId)) {
-        return `/clubs/${rawId}`;
-    }
 
     const normalizedId = rawId.startsWith('fs-team-')
         ? rawId
         : rawId.startsWith('fs-')
             ? `fs-team-${rawId.slice(3)}`
-            : `fs-team-${rawId}`;
+            : rawId;
 
     const params = new URLSearchParams();
     if (team.name) params.set('name', team.name);
     if (team.teamUrl) params.set('team_url', team.teamUrl);
+    if (preferredSport) params.set('sport', preferredSport);
 
     const query = params.toString();
     return `/clubs/${normalizedId}${query ? `?${query}` : ''}`;
@@ -874,7 +874,7 @@ export default function TournamentDetailPage({
 
         const normalizedId = team.id != null ? String(team.id) : null;
         const key = normalizedId ? `id:${normalizedId}` : `name:${name.toLowerCase()}`;
-        const href = buildClubHref({ id: normalizedId, name, teamUrl: team.teamUrl });
+        const href = buildClubHref({ id: normalizedId, name, teamUrl: team.teamUrl }, tournamentData?.sportId);
         const previous = teamMap.get(key);
 
         teamMap.set(key, {
@@ -1049,7 +1049,7 @@ export default function TournamentDetailPage({
             id: teamId,
             name: teamName,
             teamUrl: row.team?.team_url || row.participant?.team_url || null,
-        });
+        }, tournamentData?.sportId);
         const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
         const accentColor = rowLabel?.color ?? null;
         const rowAccentStyle = buildRowAccentStyle(accentColor);
@@ -1630,7 +1630,7 @@ export default function TournamentDetailPage({
                                         id: participant.club_id || club?.id || null,
                                         name,
                                         logo: club?.logo_url ?? '',
-                                        href: buildClubHref({ id: participant.club_id || club?.id || null, name }),
+                                        href: buildClubHref({ id: participant.club_id || club?.id || null, name }, tournamentData?.sportId),
                                     };
                                 })
                                 .filter((t: any) => t.name);

@@ -6,12 +6,18 @@ import LogoUploader from '@/components/LogoUploader';
 import { getAllCountries } from '@/lib/data/countries';
 import { getActiveSports } from '@/lib/data/sports';
 import styles from './styles.module.css';
-import { createClub } from '@/lib/services/clubService';
+import { createClub, linkDerivedClub } from '@/lib/services/clubService';
 import { createUnion } from '@/lib/services/unionService';
 import type { ClubCreateInput } from '@/lib/types/clubs';
 import { slugifyUnion } from '@/lib/unions';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
+import {
+  CLUB_DERIVATIVE_LABELS,
+  type ClubDerivativeType,
+  getClubSportValue,
+  getSportDisplayName,
+} from '@/lib/clubDerivatives';
 
 const activeSports = getActiveSports();
 
@@ -65,9 +71,26 @@ interface FormState extends Omit<ClubCreateInput, 'slug'> {
 
 interface NewClubFormProps {
   unions?: { id: string; name: string; country?: string | null }[];
+  derivedPrefill?: {
+    baseClub: {
+      id: string;
+      name: string;
+      short_name?: string | null;
+      union_id?: string | null;
+      country?: string | null;
+      region?: string | null;
+      city?: string | null;
+      logo_url?: string | null;
+      primary_color?: string | null;
+      sport?: string | null;
+      sport_id?: string | null;
+    };
+    derivativeType: ClubDerivativeType;
+    derivedSport?: string | null;
+  } | null;
 }
 
-export default function NewClubForm({ unions = [] }: NewClubFormProps) {
+export default function NewClubForm({ unions = [], derivedPrefill = null }: NewClubFormProps) {
   const router = useRouter();
 
   const [form, setForm] = useState<FormState>({
@@ -117,13 +140,14 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
     notes_internal: ''
   });
 
-  const [initialForm] = useState(form);
+  const [initialForm, setInitialForm] = useState(form);
   const [saving, setSaving] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdClubId, setCreatedClubId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const derivedPrefillAppliedRef = useRef(false);
   const [availableUnions, setAvailableUnions] = useState<UnionOption[]>(() => sortUnionOptions(unions));
 
   // Estado para autocomplete de unión
@@ -160,6 +184,52 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
   useEffect(() => {
     setAvailableUnions(sortUnionOptions(unions));
   }, [unions]);
+
+  useEffect(() => {
+    if (!derivedPrefill || derivedPrefillAppliedRef.current) return;
+
+    const baseSport = getClubSportValue(derivedPrefill.baseClub);
+    const nextSport = derivedPrefill.derivativeType === 'other_sport'
+      ? (derivedPrefill.derivedSport || baseSport || 'rugby')
+      : (baseSport || form.sport || 'rugby');
+    const relationLabel = CLUB_DERIVATIVE_LABELS[derivedPrefill.derivativeType];
+    const sportLabel = derivedPrefill.derivativeType === 'other_sport'
+      ? getSportDisplayName(nextSport)
+      : '';
+    const noteTokens = [
+      `Derivado de ${derivedPrefill.baseClub.name}`,
+      relationLabel,
+      sportLabel || null,
+    ].filter(Boolean);
+
+    const nextForm: FormState = {
+      ...form,
+      name: derivedPrefill.baseClub.name || form.name,
+      short_name: derivedPrefill.baseClub.short_name || '',
+      slug: normalizeSlug(derivedPrefill.baseClub.name || form.name),
+      slugManuallyEdited: false,
+      logo_url: derivedPrefill.baseClub.logo_url || null,
+      primary_color: derivedPrefill.baseClub.primary_color || form.primary_color,
+      sport: nextSport,
+      gender: derivedPrefill.derivativeType === 'women' ? 'Femenino' : form.gender,
+      age_grade: derivedPrefill.derivativeType === 'youth' ? (form.age_grade || 'Juvenil') : form.age_grade,
+      country: derivedPrefill.baseClub.country || form.country,
+      region: derivedPrefill.baseClub.region || '',
+      city: derivedPrefill.baseClub.city || '',
+      union_id: derivedPrefill.baseClub.union_id || '',
+      notes_internal: noteTokens.join(' · '),
+    };
+
+    setForm(nextForm);
+    setInitialForm(nextForm);
+
+    const selectedUnion = unions.find((union) => union.id === derivedPrefill.baseClub.union_id);
+    if (selectedUnion) {
+      setUnionSearch(selectedUnion.name);
+    }
+
+    derivedPrefillAppliedRef.current = true;
+  }, [derivedPrefill, form, unions]);
 
   // Sincronizar nombre de unión cuando se selecciona un ID
   useEffect(() => {
@@ -449,9 +519,23 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
         return;
       }
 
+      const createdId = result.club?.id ?? null;
+
+      if (createdId && derivedPrefill) {
+        const relationResult = await linkDerivedClub({
+          baseClubId: derivedPrefill.baseClub.id,
+          derivedClubId: createdId,
+          derivativeType: derivedPrefill.derivativeType,
+        });
+
+        if (!relationResult.success) {
+          alert(`El club se creo, pero no se pudo vincular como derivado: ${relationResult.error}`);
+        }
+      }
+
       // Success
       invalidateCache('clubs_list');
-      setCreatedClubId(result.club?.id ?? null);
+      setCreatedClubId(createdId);
       setShowSuccessModal(true);
     } catch (err) {
       alert('Error inesperado: ' + (err instanceof Error ? err.message : 'Desconocido'));
@@ -477,7 +561,7 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
 
       <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
         <div className={styles.headerLeft}>
-          <h1 className={styles.title}>Nuevo Club</h1>
+          <h1 className={styles.title}>{derivedPrefill ? 'Nuevo Club Derivado' : 'Nuevo Club'}</h1>
           <div className={`${styles.dirtyIndicator} ${isDirty ? styles.dirtyIndicatorVisible : ''}`}>
             <div className={styles.pulseDot}></div>
             <span>Cambios sin guardar</span>
@@ -524,6 +608,27 @@ export default function NewClubForm({ unions = [] }: NewClubFormProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {derivedPrefill && (
+        <section className={styles.module} style={{ marginBottom: '1.5rem' }}>
+          <div className={styles.moduleHeader}>
+            <span className={styles.moduleNum}>00</span>
+            <h2 className={styles.moduleTitle}>Contexto del Derivado</h2>
+            <span className={styles.requiredBadge}>{CLUB_DERIVATIVE_LABELS[derivedPrefill.derivativeType]}</span>
+          </div>
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            <p className={styles.helper} style={{ margin: 0 }}>
+              Base: <strong>{derivedPrefill.baseClub.name}</strong>
+              {derivedPrefill.derivativeType === 'other_sport' && form.sport
+                ? ` · deporte objetivo: ${getSportDisplayName(form.sport)}`
+                : ''}
+            </p>
+            <p className={styles.helper} style={{ margin: 0 }}>
+              El formulario arranca con nombre, union, ubicacion y branding del club base. Ajusta nombre y slug para marcar la rama que vas a crear.
+            </p>
+          </div>
+        </section>
       )}
 
       <form className={styles.container} autoComplete="off">

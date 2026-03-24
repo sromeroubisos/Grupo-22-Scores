@@ -341,6 +341,7 @@ function OperationContent({
                     <TournamentOperationFixtureWorkspace
                         tournament={data}
                         selectedPhaseId={selectedPhaseId}
+                        onSelectPhase={onSelectPhase}
                     />
                 )}
                 {currentSubTab === 'tabla' && (

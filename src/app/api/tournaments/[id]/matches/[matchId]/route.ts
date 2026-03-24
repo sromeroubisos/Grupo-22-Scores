@@ -22,11 +22,12 @@ export async function PATCH(
         }
 
         // Auto-recalculate standings when a match result is finalized or score changes on a final match
-        const affectsStandings = match.status === 'final' && match.tournamentId && match.phaseId;
-        if (affectsStandings) {
+        const tournamentIdForStandings = match.tournamentId;
+        const phaseIdForStandings = match.phaseId;
+        if (match.status === 'final' && tournamentIdForStandings && phaseIdForStandings) {
             recalculateAndPersistStandings(
-                match.tournamentId,
-                match.phaseId,
+                tournamentIdForStandings,
+                phaseIdForStandings,
                 match.groupId ?? null,
             ).catch((err) =>
                 console.error('[PATCH match] Auto-recalculate standings failed:', err)

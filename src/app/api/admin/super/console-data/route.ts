@@ -78,6 +78,8 @@ type ClubConsoleRow = {
     slug?: string | null;
     is_visible?: boolean | null;
     union_id?: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
 };
 
 type UnionConsoleRow = {
@@ -114,10 +116,15 @@ export async function GET(request: NextRequest) {
                 selectWithFallback<ClubConsoleRow>(
                     readClient.from('clubs'),
                     [
-                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id',
-                        'id, name, short_name, city, country, logo_url, slug, is_visible, union_id',
-                        'id, name, city, country, logo_url, slug, is_visible, union_id',
-                        'id, name, city, country, logo_url, union_id',
+                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport, sport_id',
+                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport',
+                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport_id',
+                        'id, name, short_name, city, country, logo_url, slug, is_visible, union_id, sport',
+                        'id, name, short_name, city, country, logo_url, slug, is_visible, union_id, sport_id',
+                        'id, name, city, country, logo_url, slug, is_visible, union_id, sport',
+                        'id, name, city, country, logo_url, slug, is_visible, union_id, sport_id',
+                        'id, name, city, country, logo_url, union_id, sport',
+                        'id, name, city, country, logo_url, union_id, sport_id',
                         'id, name, union_id'
                     ],
                     { column: 'name', ascending: true }
@@ -136,6 +143,7 @@ export async function GET(request: NextRequest) {
             const unionMap = new Map((unions ?? []).map((union) => [union.id, union]));
             const data = (clubs ?? []).map((club) => ({
                 ...club,
+                sport: club.sport || club.sport_id || null,
                 union: club.union_id ? unionMap.get(club.union_id) ?? null : null,
             }));
 

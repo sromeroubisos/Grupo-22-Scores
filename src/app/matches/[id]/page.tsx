@@ -16,17 +16,18 @@ function isExternalEntityId(value?: string) {
     return Boolean(value) && /^[A-Za-z0-9]+$/.test(value || '');
 }
 
-function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }) {
+function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }, preferredSport?: string | number | null) {
     if (!team.id) return '/clubs';
 
     const params = new URLSearchParams();
     if (team.name) params.set('name', team.name);
     if (team.teamUrl) params.set('team_url', team.teamUrl);
+    if (preferredSport) params.set('sport', String(preferredSport));
     const qs = params.toString();
     const id = team.id.startsWith('fs-team-')
         ? team.id
-        : (team.teamUrl || isExternalEntityId(team.id))
-            ? `fs-team-${team.id}`
+        : team.id.startsWith('fs-')
+            ? `fs-team-${team.id.slice(3)}`
             : team.id;
 
     return `/clubs/${id}${qs ? `?${qs}` : ''}`;
@@ -674,7 +675,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     <div className={styles.scoreboardGrid}>
                         {/* Local */}
                         <div className={styles.teamCol}>
-                            <Link href={buildTeamHref(matchData.home)} style={{ textDecoration: 'none' }}>
+                            <Link href={buildTeamHref(matchData.home, matchData.sportId)} style={{ textDecoration: 'none' }}>
                                 <div className={styles.crestWrapper}>
                                     {matchData.home.logo ? (
                                         <img
@@ -692,7 +693,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             </Link>
                             <div className={styles.teamInfo}>
                                 <div className={styles.teamLabel}>Anfitrion</div>
-                                <Link href={buildTeamHref(matchData.home)} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link href={buildTeamHref(matchData.home, matchData.sportId)} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <div className={styles.teamName} title={matchData.home.name}>{matchData.home.name}</div>
                                 </Link>
                             </div>
@@ -748,7 +749,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                         {/* Visitor */}
                         <div className={`${styles.teamCol} ${styles.visitor}`}>
-                            <Link href={buildTeamHref(matchData.away)} style={{ textDecoration: 'none' }}>
+                            <Link href={buildTeamHref(matchData.away, matchData.sportId)} style={{ textDecoration: 'none' }}>
                                 <div className={styles.crestWrapper}>
                                     {matchData.away.logo ? (
                                         <img
@@ -766,7 +767,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             </Link>
                             <div className={styles.teamInfo}>
                                 <div className={styles.teamLabel}>Visitante</div>
-                                <Link href={buildTeamHref(matchData.away)} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link href={buildTeamHref(matchData.away, matchData.sportId)} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <div className={styles.teamName} title={matchData.away.name}>{matchData.away.name}</div>
                                 </Link>
                             </div>
@@ -1186,7 +1187,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                         <tr key={i} className={isCurrent ? styles.currentTeam : ''}>
                                                             <td><span className={styles.rankBadge}>{row.rank || i + 1}</span></td>
                                                             <td style={isCurrent ? { color: 'var(--accent)', fontWeight: '700' } : {}}>
-                                                                {row.team_id ? <Link href={`/clubs/fs-team-${row.team_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{rowName}</Link> : rowName}
+                                                                {row.team_id ? <Link href={`/clubs/fs-team-${row.team_id}${matchData.sportId ? `?sport=${encodeURIComponent(String(matchData.sportId))}` : ''}`} style={{ color: 'inherit', textDecoration: 'none' }}>{rowName}</Link> : rowName}
                                                             </td>
                                                             <td>{row.matches_played || row.PLAYED || row.played || 0}</td>
                                                             <td>{row.goal_difference || row.GOAL_DIFF || row.goal_diff || 0}</td>

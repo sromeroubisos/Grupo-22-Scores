@@ -172,6 +172,7 @@ export interface ClubRow {
     slug: string | null;
     is_visible: boolean | null;
     union_id: string | null;
+    sport: string | null;
 }
 
 export interface ClubWithUnion extends ClubRow {

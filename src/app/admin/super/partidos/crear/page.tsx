@@ -38,6 +38,25 @@ interface Squad {
   name: string;
 }
 
+interface TournamentPhaseOption {
+  id: string;
+  name: string;
+  phase_type: string;
+  is_active: boolean;
+}
+
+interface TournamentRoundOption {
+  id: string;
+  name: string;
+  phaseId: string;
+}
+
+interface TournamentGroupOption {
+  id: string;
+  name: string;
+  phaseId: string;
+}
+
 type MatchStatus = 'scheduled' | 'postponed' | 'suspended';
 
 // Helpers for date conversion
@@ -72,7 +91,9 @@ export default function CreateMatchPage() {
     season: new Date().getFullYear().toString(),
     tournamentId: tournamentIdParam || '',
     phase: '',
+    roundId: '',
     round: '',
+    groupId: '',
     category: '',
     homeClubId: '',
     awayClubId: '',
@@ -98,6 +119,9 @@ export default function CreateMatchPage() {
   const [tournamentParticipants, setTournamentParticipants] = useState<Club[]>([]);
   const [homeSquads, setHomeSquads] = useState<Squad[]>([]);
   const [awaySquads, setAwaySquads] = useState<Squad[]>([]);
+  const [tournamentPhases, setTournamentPhases] = useState<TournamentPhaseOption[]>([]);
+  const [tournamentRounds, setTournamentRounds] = useState<TournamentRoundOption[]>([]);
+  const [tournamentGroups, setTournamentGroups] = useState<TournamentGroupOption[]>([]);
   const [loading, setLoading] = useState(false);
 
   // 3. Functional Definitions
@@ -173,6 +197,87 @@ export default function CreateMatchPage() {
     }
   };
 
+  const loadTournamentStructure = async (id: string) => {
+    try {
+      const [phasesResponse, fixtureResponse, groupsResponse] = await Promise.all([
+        fetch(`/api/tournaments/${id}/phases`, { cache: 'no-store' }),
+        fetch(`/api/tournaments/${id}/fixture`, { cache: 'no-store' }),
+        fetch(`/api/tournaments/${id}/groups`, { cache: 'no-store' }),
+      ]);
+
+      const phasesJson = phasesResponse.ok ? await phasesResponse.json() : { data: [] };
+      const fixtureJson = fixtureResponse.ok ? await fixtureResponse.json() : null;
+      const groupsJson = groupsResponse.ok ? await groupsResponse.json() : [];
+
+      const nextPhases: TournamentPhaseOption[] = Array.isArray(phasesJson?.data)
+        ? phasesJson.data.map((phase: any) => ({
+            id: String(phase.id),
+            name: String(phase.name || 'Fase'),
+            phase_type: String(phase.phase_type || 'league'),
+            is_active: Boolean(phase.is_active),
+          }))
+        : [];
+
+      const nextRounds: TournamentRoundOption[] = Array.isArray(fixtureJson?.phases)
+        ? fixtureJson.phases.flatMap((phase: any) =>
+            Array.isArray(phase?.rounds)
+              ? phase.rounds
+                  .filter((round: any) => typeof round?.id === 'string' && !round.id.startsWith('orphaned-'))
+                  .map((round: any) => ({
+                    id: String(round.id),
+                    name: String(round.name || 'Jornada'),
+                    phaseId: String(phase.id),
+                  }))
+              : []
+          )
+        : [];
+
+      const nextGroups: TournamentGroupOption[] = Array.isArray(groupsJson)
+        ? groupsJson.map((group: any) => ({
+            id: String(group.id),
+            name: String(group.name || 'Grupo'),
+            phaseId: String(group.phase_id || ''),
+          }))
+        : [];
+
+      setTournamentPhases(nextPhases);
+      setTournamentRounds(nextRounds);
+      setTournamentGroups(nextGroups);
+
+      setFormData((prev) => {
+        const resolvedPhaseId = nextPhases.some((phase) => phase.id === prev.phase)
+          ? prev.phase
+          : (nextPhases.find((phase) => phase.is_active)?.id || nextPhases[0]?.id || '');
+        const nextRoundId = nextRounds.some((round) => round.phaseId === resolvedPhaseId && round.id === prev.roundId)
+          ? prev.roundId
+          : '';
+        const nextGroupId = nextGroups.some((group) => group.phaseId === resolvedPhaseId && group.id === prev.groupId)
+          ? prev.groupId
+          : '';
+
+        if (
+          prev.phase === resolvedPhaseId &&
+          prev.roundId === nextRoundId &&
+          prev.groupId === nextGroupId
+        ) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          phase: resolvedPhaseId,
+          roundId: nextRoundId,
+          groupId: nextGroupId,
+        };
+      });
+    } catch (error) {
+      console.error('Error loading tournament structure:', error);
+      setTournamentPhases([]);
+      setTournamentRounds([]);
+      setTournamentGroups([]);
+    }
+  };
+
   const loadSquadsForClub = async (clubId: string, type: 'home' | 'away') => {
     try {
       const response = await fetch(`/api/admin/clubs/${clubId}/squads`);
@@ -238,6 +343,28 @@ export default function CreateMatchPage() {
   }, [formData.tournamentId, isFriendly]);
 
   useEffect(() => {
+    if (formData.tournamentId && !isFriendly) {
+      void loadTournamentStructure(formData.tournamentId);
+    } else {
+      setTournamentPhases([]);
+      setTournamentRounds([]);
+      setTournamentGroups([]);
+      setFormData((prev) => {
+        if (!prev.phase && !prev.roundId && !prev.groupId) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          phase: '',
+          roundId: '',
+          groupId: '',
+        };
+      });
+    }
+  }, [formData.tournamentId, isFriendly]);
+
+  useEffect(() => {
     if (tournamentIdParam && tournaments.length > 0) {
       const tournament = tournaments.find(t => t.id === tournamentIdParam);
       if (tournament) {
@@ -257,6 +384,30 @@ export default function CreateMatchPage() {
       loadSquadsForClub(formData.awayClubId, 'away');
     }
   }, [formData.awayClubId]);
+
+  useEffect(() => {
+    setFormData((prev) => {
+      const nextRoundId = tournamentRounds.some((round) => round.phaseId === prev.phase && round.id === prev.roundId)
+        ? prev.roundId
+        : '';
+      const nextGroupId = tournamentGroups.some((group) => group.phaseId === prev.phase && group.id === prev.groupId)
+        ? prev.groupId
+        : '';
+
+      if (nextRoundId === prev.roundId && nextGroupId === prev.groupId) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        roundId: nextRoundId,
+        groupId: nextGroupId,
+      };
+    });
+  }, [formData.phase, tournamentGroups, tournamentRounds]);
+
+  const availableRounds = tournamentRounds.filter((round) => round.phaseId === formData.phase);
+  const availableGroups = tournamentGroups.filter((group) => group.phaseId === formData.phase);
 
   const handleSubmit = async () => {
     if (loading) return;
@@ -287,16 +438,25 @@ export default function CreateMatchPage() {
         return;
       }
 
+      if (!isFriendly && formData.tournamentId && !formData.phase) {
+        alert('Selecciona la fase destino del partido.');
+        setLoading(false);
+        return;
+      }
+
       const isoDate = formData.date;
       const dateTime = combineLocalDateTimeToUtcIso(isoDate, formData.time, APP_TIMEZONE);
       if (!dateTime) {
         throw new Error('La fecha u hora del partido no son validas.');
       }
 
+      const useTournamentFixtureRoute = !isFriendly && Boolean(formData.tournamentId && formData.phase);
       const matchData = {
         tournamentId: isFriendly ? null : formData.tournamentId,
         phaseId: isFriendly ? null : (formData.phase || null),
+        roundId: isFriendly ? null : (formData.roundId || null),
         roundLabel: isFriendly ? null : (formData.round.trim() || null),
+        groupId: isFriendly ? null : (formData.groupId || null),
         homeClubId: formData.homeClubId,
         awayClubId: formData.awayClubId,
         homeSquadId: formData.homeSquadId || null,
@@ -313,7 +473,11 @@ export default function CreateMatchPage() {
         isFeatured: formData.isFeatured,
       };
 
-      const response = await fetch('/api/matches', {
+      const endpoint = useTournamentFixtureRoute
+        ? `/api/tournaments/${formData.tournamentId}/matches`
+        : '/api/matches';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(matchData),
@@ -414,7 +578,7 @@ export default function CreateMatchPage() {
             <label>Torneo / Liga</label>
             <CustomSelect
               value={formData.tournamentId}
-              onChange={(val) => setFormData({ ...formData, tournamentId: val })}
+              onChange={(val) => setFormData({ ...formData, tournamentId: val, phase: '', roundId: '', groupId: '' })}
               disabled={isFriendly}
               placeholder="Seleccionar torneo..."
               options={tournaments.map(t => ({
@@ -430,21 +594,75 @@ export default function CreateMatchPage() {
                 <input
                   type="checkbox"
                   checked={isFriendly}
-                  onChange={(e) => setIsFriendly(e.target.checked)}
+                  onChange={(e) => {
+                    const nextFriendly = e.target.checked;
+                    setIsFriendly(nextFriendly);
+                    if (nextFriendly) {
+                      setFormData((prev) => ({ ...prev, phase: '', roundId: '', groupId: '' }));
+                    }
+                  }}
                 />
                 <div className="switch-box"></div>
               </label>
               <span style={{ fontFamily: 'Space Mono', fontSize: '10px' }}>OFF / ON</span>
             </div>
           </div>
-          <div className="cell col-6">
-            <label>Fase / Fecha</label>
+          <div className="cell col-4">
+            <label>Fase</label>
+            <CustomSelect
+              value={formData.phase}
+              onChange={(val) => setFormData({ ...formData, phase: val, roundId: '', groupId: '' })}
+              disabled={isFriendly || !formData.tournamentId}
+              placeholder={formData.tournamentId ? 'Seleccionar fase...' : 'Selecciona un torneo'}
+              options={[
+                { value: '', label: tournamentPhases.length > 0 ? 'Seleccionar fase...' : 'Sin fases disponibles' },
+                ...tournamentPhases.map((phase) => ({
+                  value: phase.id,
+                  label: `${phase.name} (${phase.phase_type})`,
+                })),
+              ]}
+            />
+          </div>
+          <div className="cell col-4">
+            <label>Jornada existente</label>
+            <CustomSelect
+              value={formData.roundId}
+              onChange={(val) => setFormData({ ...formData, roundId: val })}
+              disabled={isFriendly || !formData.phase}
+              placeholder={!formData.phase ? 'Selecciona una fase' : 'Crear o usar etiqueta libre'}
+              options={[
+                { value: '', label: availableRounds.length > 0 ? 'Crear o usar etiqueta libre' : 'Sin jornadas cargadas' },
+                ...availableRounds.map((round) => ({
+                  value: round.id,
+                  label: round.name,
+                })),
+              ]}
+            />
+          </div>
+          <div className="cell col-4">
+            <label>Jornada / Etiqueta</label>
             <input
               type="text"
               placeholder="Ej: Fecha 14"
               value={formData.round}
               onChange={(e) => setFormData({ ...formData, round: e.target.value })}
-              disabled={isFriendly}
+              disabled={isFriendly || !formData.phase}
+            />
+          </div>
+          <div className="cell col-6">
+            <label>Grupo / Zona</label>
+            <CustomSelect
+              value={formData.groupId}
+              onChange={(val) => setFormData({ ...formData, groupId: val })}
+              disabled={isFriendly || !formData.phase}
+              placeholder={!formData.phase ? 'Selecciona una fase' : 'Sin grupo'}
+              options={[
+                { value: '', label: 'Sin grupo' },
+                ...availableGroups.map((group) => ({
+                  value: group.id,
+                  label: group.name,
+                })),
+              ]}
             />
           </div>
           <div className="cell col-6">

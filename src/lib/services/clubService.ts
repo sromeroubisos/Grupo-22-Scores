@@ -20,6 +20,7 @@ import type {
   ClubCreateResponse,
   ClubUpdateResponse,
 } from '../types/clubs';
+import type { ClubDerivativeType } from '@/lib/clubDerivatives';
 import {
   normalizeText,
   normalizeSlug,
@@ -33,6 +34,19 @@ import {
 } from '../utils/normalize';
 import { validateClubCreate, validateClubCoreUpdate, validateClubProfileUpdate } from '../validation/clubValidation';
 import { isPatchEmpty } from '../utils/buildPatch';
+
+type ClubDerivativeUpsertClient = {
+  from(table: 'club_derivatives'): {
+    upsert(
+      values: {
+        base_club_id: string;
+        derived_club_id: string;
+        derivative_type: ClubDerivativeType;
+      },
+      options: { onConflict: string },
+    ): Promise<{ error: { message: string } | null }>;
+  };
+};
 
 // ============================================================
 // CREATE CLUB
@@ -61,6 +75,7 @@ export async function createClub(
     short_name: normalizeText(input.short_name),
     slug: normalizeSlug(input.slug),
     sport: normalizeText(input.sport) ?? 'rugby',
+    sport_id: normalizeText(input.sport) ?? 'rugby',
     country: normalizeText(input.country) ?? 'ARG',
     region: normalizeText(input.region),
     city: normalizeText(input.city),
@@ -107,21 +122,27 @@ export async function createClub(
     if (error && (
       error.message.includes('column "is_visible"') ||
       error.message.includes('column "sport"') ||
+      error.message.includes('column "sport_id"') ||
       error.message.includes("'is_visible' column") ||
       error.message.includes("'sport' column") ||
+      error.message.includes("'sport_id' column") ||
       error.message.includes("schema cache")
     )) {
       console.warn('⚠️ Detectada discrepancia de esquema en "clubs", reintentando operación reducida...');
-      const fallbackData = { ...normalizedData };
+      const fallbackData: Partial<typeof normalizedData> = { ...normalizedData };
       const isSchemaCacheError = error.message.includes("schema cache");
 
       if (isSchemaCacheError || error.message.includes('column "sport"') || error.message.includes("'sport' column")) {
-        delete (fallbackData as any).sport;
+        delete fallbackData.sport;
+      }
+
+      if (isSchemaCacheError || error.message.includes('column "sport_id"') || error.message.includes("'sport_id' column")) {
+        delete fallbackData.sport_id;
       }
       
       // Si la columna 'is_visible' realmente no existe aún (esquema muy viejo) o falla la caché
       if (isSchemaCacheError || error.message.includes('column "is_visible"') || error.message.includes("'is_visible' column")) {
-        delete (fallbackData as any).is_visible;
+        delete fallbackData.is_visible;
       }
 
       const retry = await supabase
@@ -286,6 +307,7 @@ export async function updateClub(
       }
       if (input.core.sport !== undefined) {
         normalizedCore.sport = normalizeText(input.core.sport);
+        normalizedCore.sport_id = normalizeText(input.core.sport);
       }
       if (input.core.country !== undefined) {
         normalizedCore.country = normalizeText(input.core.country);
@@ -341,12 +363,15 @@ export async function updateClub(
       // Si falla porque falta la columna 'is_visible' (o la caché está vieja), reintentamos sin ella
       if (coreError && (
         coreError.message.includes('column "is_visible"') ||
+        coreError.message.includes('column "sport_id"') ||
         coreError.message.includes("'is_visible' column") ||
+        coreError.message.includes("'sport_id' column") ||
         coreError.message.includes("schema cache")
       )) {
         console.warn('⚠️ Detectada discrepancia de esquema en "clubs" durante UPDATE, reintentando...');
-        const fallbackCore = { ...normalizedCore };
-        delete (fallbackCore as any).is_visible;
+        const fallbackCore: Partial<typeof normalizedCore> = { ...normalizedCore };
+        delete fallbackCore.is_visible;
+        delete fallbackCore.sport_id;
 
         const retry = await supabase
           .from('clubs')
@@ -623,4 +648,37 @@ export async function fetchClubFull(clubId: string): Promise<ClubFull | null> {
     aliases,
     secondary_unions,
   };
+}
+
+export async function linkDerivedClub(params: {
+  baseClubId: string;
+  derivedClubId: string;
+  derivativeType: ClubDerivativeType;
+}): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createServerClient();
+
+  if (!params.baseClubId || !params.derivedClubId) {
+    return { success: false, error: 'Faltan los identificadores del vinculo.' };
+  }
+
+  if (params.baseClubId === params.derivedClubId) {
+    return { success: false, error: 'El club base y el derivado deben ser distintos.' };
+  }
+
+  const relationClient = supabase as unknown as ClubDerivativeUpsertClient;
+  const { error } = await relationClient
+    .from('club_derivatives')
+    .upsert({
+      base_club_id: params.baseClubId,
+      derived_club_id: params.derivedClubId,
+      derivative_type: params.derivativeType,
+    }, {
+      onConflict: 'base_club_id,derived_club_id',
+    });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }

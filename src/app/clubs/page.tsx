@@ -144,7 +144,7 @@ export default function ClubesPage() {
                                                             </div>
                                                         </div>
                                                         <div className="g22-cardActions mt-4 pt-4 border-t border-neutral-800 flex justify-end gap-2">
-                                                            <Link href={`/clubs/${club.id}`} className="g22-actionBtn primary">
+                                                            <Link href={`/clubs/${club.id}${club.sport ? `?sport=${encodeURIComponent(club.sport)}` : ''}`} className="g22-actionBtn primary">
                                                                 Ver Ficha
                                                             </Link>
                                                         </div>

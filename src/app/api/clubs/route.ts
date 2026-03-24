@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { canonicalizeSportId } from '@/lib/clubDerivatives';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -27,17 +28,24 @@ type PublicClubRow = {
     country: string | null;
     is_visible: boolean | null;
     status: string | null;
+    sport: string | null;
     sport_id: string | null;
     legacy_sport: string | null;
     sport_ref: { name: string } | null;
 };
 
 function resolveSportFilter(rawSport: string | null) {
-    if (!rawSport || rawSport === 'rugby') {
+    const normalizedSport = canonicalizeSportId(rawSport);
+
+    if (!normalizedSport || normalizedSport === 'rugby') {
         return ['rugby', 'rugby-union', 'rugby-league'];
     }
 
-    return [rawSport];
+    if (normalizedSport === 'hockey') {
+        return ['hockey', 'field-hockey'];
+    }
+
+    return [normalizedSport];
 }
 
 async function getAuthenticatedUser(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -189,7 +197,7 @@ export async function GET(request: NextRequest) {
 
     const clubs = ((data || []) as PublicClubRow[]).filter((club) => {
         if (!sport) return true;
-        const normalizedSport = club.sport_id || club.legacy_sport || 'rugby';
+        const normalizedSport = club.sport || club.sport_id || club.legacy_sport || 'rugby';
         return sportFilter.includes(normalizedSport);
     });
 
@@ -202,7 +210,7 @@ export async function GET(request: NextRequest) {
             city: club.city,
             country: club.country,
             is_visible: club.is_visible !== false,
-            sport: club.sport_id || club.legacy_sport || 'rugby',
+            sport: club.sport || club.sport_id || club.legacy_sport || 'rugby',
             status: club.status ?? 'published',
         }))
     });

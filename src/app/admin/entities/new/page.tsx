@@ -3,8 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import { EntityType } from '@/lib/services/entityResolver';
 import { TournamentEditor } from '@/components/admin/entities/editors/TournamentEditor';
 import { MatchEditor } from '@/components/admin/entities/editors/MatchEditor';
-import { PlayerEditor } from '@/components/admin/entities/editors/PlayerEditor';
+import { PlayerEditor, type PlayerData } from '@/components/admin/entities/editors/PlayerEditor';
 import NewClubForm from '@/app/admin/super/clubes/crear/NewClubForm';
+import type { ClubDerivativeType } from '@/lib/clubDerivatives';
+import type { Database } from '@/lib/database.types';
 
 const ENTITY_TYPES: EntityType[] = ['tournament', 'club', 'match', 'player', 'union'];
 
@@ -17,16 +19,40 @@ const ENTITY_LABELS: Record<EntityType, { label: string; icon: string; desc: str
 };
 
 interface NewEntityPageProps {
-    searchParams: Promise<{ type?: string }>;
+    searchParams: Promise<{
+        type?: string;
+        derivedFrom?: string;
+        derivativeType?: string;
+        derivedSport?: string;
+    }>;
 }
 
+type DerivedBaseClubData = {
+    id: string;
+    name: string;
+    short_name?: string | null;
+    union_id?: string | null;
+    country?: string | null;
+    region?: string | null;
+    city?: string | null;
+    logo_url?: string | null;
+    primary_color?: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
+};
+
 export default async function NewEntityPage({ searchParams }: NewEntityPageProps) {
-    const { type } = await searchParams;
+    const { type, derivedFrom, derivativeType: rawDerivativeType, derivedSport } = await searchParams;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        const returnTo = `/admin/entities/new${type ? `?type=${type}` : ''}`;
+        const returnParams = new URLSearchParams();
+        if (type) returnParams.set('type', type);
+        if (derivedFrom) returnParams.set('derivedFrom', derivedFrom);
+        if (rawDerivativeType) returnParams.set('derivativeType', rawDerivativeType);
+        if (derivedSport) returnParams.set('derivedSport', derivedSport);
+        const returnTo = `/admin/entities/new${returnParams.toString() ? `?${returnParams.toString()}` : ''}`;
         redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
 
@@ -94,24 +120,75 @@ export default async function NewEntityPage({ searchParams }: NewEntityPageProps
         union: 'Nueva Unión',
     };
 
-    const emptyData: Record<EntityType, any> = {
-        tournament: { id: '', name: '', season_id: null, region: null, status: 'draft' },
+    const emptyData = {
+        tournament: { id: '', name: '', season_id: null, region: null, status: 'draft' } as Partial<Database['public']['Tables']['tournaments']['Row']>,
         club: { id: '', name: '', city: null, union_id: null, logo_url: null },
-        match: { id: '', date_time: '', home_club_id: null, away_club_id: null, venue: null, status: 'scheduled' },
-        player: { id: '', name: '', club_id: null, position: null, nationality: null },
+        match: { id: '', date_time: '', home_club_id: null, away_club_id: null, venue: null, status: 'scheduled' } as Database['public']['Tables']['matches']['Row'],
+        player: { id: '', name: '', club_id: null, position: null, nationality: null } as PlayerData,
         union: { id: '', name: '', country: null, branding: {} },
     };
 
     // New Club Form
     if (entityType === 'club') {
         const { data: unionsData } = await supabase.from('unions').select('id, name, country').order('name');
-        return <NewClubForm unions={unionsData ?? []} />;
+        const derivativeType = rawDerivativeType === 'youth' || rawDerivativeType === 'women' || rawDerivativeType === 'other_sport'
+            ? rawDerivativeType as ClubDerivativeType
+            : null;
+
+        let derivedPrefill: {
+            baseClub: {
+                id: string;
+                name: string;
+                short_name?: string | null;
+                union_id?: string | null;
+                country?: string | null;
+                region?: string | null;
+                city?: string | null;
+                logo_url?: string | null;
+                primary_color?: string | null;
+                sport?: string | null;
+                sport_id?: string | null;
+            };
+            derivativeType: ClubDerivativeType;
+            derivedSport?: string | null;
+        } | null = null;
+
+        if (derivedFrom && derivativeType) {
+            const { data: baseClubData } = await supabase
+                .from('clubs')
+                .select('*')
+                .eq('id', derivedFrom)
+                .maybeSingle();
+
+            if (baseClubData) {
+                const baseClub = baseClubData as DerivedBaseClubData;
+                derivedPrefill = {
+                    baseClub: {
+                        id: baseClub.id,
+                        name: baseClub.name,
+                        short_name: baseClub.short_name ?? null,
+                        union_id: baseClub.union_id ?? null,
+                        country: baseClub.country ?? null,
+                        region: baseClub.region ?? null,
+                        city: baseClub.city ?? null,
+                        logo_url: baseClub.logo_url ?? null,
+                        primary_color: baseClub.primary_color ?? null,
+                        sport: baseClub.sport ?? null,
+                        sport_id: baseClub.sport_id ?? null,
+                    },
+                    derivativeType,
+                    derivedSport: derivedSport || null,
+                };
+            }
+        }
+
+        return <NewClubForm unions={unionsData ?? []} derivedPrefill={derivedPrefill} />;
     }
 
     const isTournament = entityType === 'tournament';
 
     // Fetch unions for tournament if needed
-    let tUnions: any[] = [];
+    let tUnions: Array<{ id: string; name: string }> = [];
     let tCountries: Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> = [];
     if (isTournament) {
         const [{ data: unionsData }, { data: countriesData }] = await Promise.all([

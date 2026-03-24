@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
+import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
 
 export async function POST(
     request: NextRequest,
@@ -23,6 +24,18 @@ export async function POST(
             return NextResponse.json(
                 { error: 'Failed to create match' },
                 { status: 500 }
+            );
+        }
+
+        const tournamentIdForStandings = match.tournamentId;
+        const phaseIdForStandings = match.phaseId;
+        if (match.status === 'final' && tournamentIdForStandings && phaseIdForStandings) {
+            recalculateAndPersistStandings(
+                tournamentIdForStandings,
+                phaseIdForStandings,
+                match.groupId ?? null,
+            ).catch((err) =>
+                console.error('[POST match] Auto-recalculate standings failed:', err)
             );
         }
 

@@ -7,6 +7,7 @@ import styles from './page.module.css';
 import { ArrowLeft, ChevronRight, Star } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
 import { SPORTS_BY_ID } from '@/lib/sports';
+import { canonicalizeSportId } from '@/lib/clubDerivatives';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
@@ -137,6 +138,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     // Hints from URL search params (passed from match/tournament page links)
     const hintName = sp.get('name') || '';
     const hintTeamUrl = sp.get('team_url') || '';
+    const preferredSport = sp.get('sport') || '';
 
     useEffect(() => {
         async function fetchData() {
@@ -147,12 +149,24 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 query.set('team_id', rawId);
                 if (hintName) query.set('team_name', hintName);
                 if (hintTeamUrl) query.set('team_url', hintTeamUrl);
+                if (preferredSport) query.set('preferred_sport', preferredSport);
 
                 const res = await fetch(`/api/teams?${query.toString()}`, { cache: 'no-store' });
                 const payload = await res.json();
 
                 if (!res.ok || !payload?.ok) {
                     setError(payload?.error || 'No se pudo cargar los datos del equipo.');
+                    return;
+                }
+
+                if (payload?.resolvedClubId && payload.resolvedClubId !== id && !id.startsWith('fs-team-')) {
+                    const nextParams = new URLSearchParams();
+                    if (preferredSport) nextParams.set('sport', preferredSport);
+                    if (hintName) nextParams.set('name', hintName);
+                    if (hintTeamUrl) nextParams.set('team_url', hintTeamUrl);
+
+                    const queryString = nextParams.toString();
+                    router.replace(`/clubs/${payload.resolvedClubId}${queryString ? `?${queryString}` : ''}`);
                     return;
                 }
 
@@ -170,7 +184,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         }
 
         fetchData();
-    }, [rawId, hintName, hintTeamUrl]);
+    }, [id, rawId, hintName, hintTeamUrl, preferredSport, router]);
 
     // Derived: unique sports from matches
     const availableSports = useMemo(() => {
@@ -178,6 +192,14 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         [...results, ...fixtures].forEach(m => { if (m.sport_id) seen.add(String(m.sport_id)); });
         return Array.from(seen);
     }, [results, fixtures]);
+
+    useEffect(() => {
+        const normalizedPreferredSport = canonicalizeSportId(preferredSport);
+        if (!normalizedPreferredSport) return;
+        const matchingSport = availableSports.find((sportId) => canonicalizeSportId(sportId) === normalizedPreferredSport);
+        if (!matchingSport) return;
+        setSelectedSport((current) => current === matchingSport ? current : matchingSport);
+    }, [availableSports, preferredSport]);
 
     // Derived: squad tabs
     const squadTabs: string[] = useMemo(() => {

@@ -2,12 +2,21 @@
 
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateCache, type ClubWithUnion } from '@/lib/cache/superAdminCache';
 import { useState } from 'react';
+import { getActiveSports } from '@/lib/data/sports';
+import {
+    CLUB_DERIVATIVE_DESCRIPTIONS,
+    CLUB_DERIVATIVE_LABELS,
+    type ClubDerivativeType,
+    canonicalizeSportId,
+    getSportDisplayName,
+} from '@/lib/clubDerivatives';
 
 function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; color?: string | null }) {
     if (logo) {
@@ -35,8 +44,10 @@ function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; c
 }
 
 const CLUBS_PER_PAGE = 20;
+const ACTIVE_SPORTS = getActiveSports();
 
 export default function SuperadminClubesPage() {
+    const router = useRouter();
     // ─── Read from shared context (already prefetched by layout) ─────────────────
     const { filters, clubs, loading, errors, refresh, setFilters } = useSuperConsole();
     const isLoading = loading.clubs;
@@ -45,6 +56,9 @@ export default function SuperadminClubesPage() {
     const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
     const [togglingId, setTogglingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [derivedBaseClub, setDerivedBaseClub] = useState<ClubWithUnion | null>(null);
+    const [derivedType, setDerivedType] = useState<ClubDerivativeType>('youth');
+    const [derivedSport, setDerivedSport] = useState<string>(ACTIVE_SPORTS.find((sport) => sport.id !== 'rugby')?.id || ACTIVE_SPORTS[0]?.id || 'rugby');
 
     // Local filter state (club-specific dimensions)
     const [unionFilter, setUnionFilter] = useState('all');
@@ -57,6 +71,40 @@ export default function SuperadminClubesPage() {
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
 
     const supabase = createClient();
+
+    const getSuggestedOtherSport = (clubSport?: string | null) => {
+        const baseSport = canonicalizeSportId(clubSport);
+        return ACTIVE_SPORTS.find((sport) => canonicalizeSportId(sport.id) !== baseSport)?.id
+            || ACTIVE_SPORTS[0]?.id
+            || 'rugby';
+    };
+
+    const openCreateDerivedModal = (club: ClubWithUnion) => {
+        setActionMenuOpenId(null);
+        setDerivedBaseClub(club);
+        setDerivedType('youth');
+        setDerivedSport(getSuggestedOtherSport(club.sport));
+    };
+
+    const closeCreateDerivedModal = () => {
+        setDerivedBaseClub(null);
+    };
+
+    const handleCreateDerivedClub = () => {
+        if (!derivedBaseClub) return;
+
+        const search = new URLSearchParams({
+            type: 'club',
+            derivedFrom: derivedBaseClub.id,
+            derivativeType: derivedType,
+        });
+
+        if (derivedType === 'other_sport' && derivedSport) {
+            search.set('derivedSport', derivedSport);
+        }
+
+        router.push(`/admin/entities/new?${search.toString()}`);
+    };
 
     const handleToggleVisibility = async (club: ClubWithUnion) => {
         setTogglingId(club.id);
@@ -168,6 +216,9 @@ export default function SuperadminClubesPage() {
     const hiddenCount = filtered.filter(c => c.is_visible === false).length;
     const pageStart = filtered.length === 0 ? 0 : (currentPage - 1) * CLUBS_PER_PAGE + 1;
     const pageEnd = Math.min(currentPage * CLUBS_PER_PAGE, filtered.length);
+    const derivedSportMatchesBase = derivedBaseClub
+        ? canonicalizeSportId(derivedBaseClub.sport) === canonicalizeSportId(derivedSport)
+        : false;
 
     return (
         <div style={{ paddingBottom: 40 }} onClick={() => setActionMenuOpenId(null)}>
@@ -366,6 +417,10 @@ export default function SuperadminClubesPage() {
                                                     </button>
                                                     {actionMenuOpenId === club.id && (
                                                         <div className={styles.menuDropdown} style={{ right: 0, top: '100%', minWidth: 160 }}>
+                                                            <button className={styles.menuItem} onClick={() => openCreateDerivedModal(club)}>
+                                                                <Plus size={13} style={{ marginRight: 8 }} /> Crear derivado
+                                                            </button>
+                                                            <div className={styles.menuDivider} />
                                                             <button className={styles.menuItem} onClick={() => handleToggleVisibility(club)} disabled={togglingId === club.id}>
                                                                 {isVisible
                                                                     ? <><EyeOff size={13} style={{ marginRight: 8 }} />Ocultar</>
@@ -443,6 +498,129 @@ export default function SuperadminClubesPage() {
                     )}
                 </div>
                 </>
+            )}
+
+            {derivedBaseClub && (
+                <div
+                    onClick={closeCreateDerivedModal}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        background: 'rgba(4, 6, 10, 0.72)',
+                        backdropFilter: 'blur(10px)',
+                        zIndex: 120,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '24px',
+                    }}
+                >
+                    <div
+                        onClick={(event) => event.stopPropagation()}
+                        style={{
+                            width: 'min(640px, 100%)',
+                            background: 'linear-gradient(180deg, #181c23 0%, #101318 100%)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: 20,
+                            boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
+                            padding: 24,
+                            display: 'grid',
+                            gap: 18,
+                        }}
+                    >
+                        <div style={{ display: 'grid', gap: 6 }}>
+                            <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--basalt-400)' }}>
+                                Club derivado
+                            </span>
+                            <h3 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: '#fff' }}>
+                                {derivedBaseClub.name}
+                            </h3>
+                            <p style={{ margin: 0, color: 'var(--basalt-400)', lineHeight: 1.55 }}>
+                                Abrimos el formulario con la identidad del club base para que solo completes el diferencial de la nueva rama.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: 12 }}>
+                            {(Object.keys(CLUB_DERIVATIVE_LABELS) as ClubDerivativeType[]).map((option) => {
+                                const isActive = derivedType === option;
+                                return (
+                                    <button
+                                        key={option}
+                                        type="button"
+                                        onClick={() => setDerivedType(option)}
+                                        style={{
+                                            textAlign: 'left',
+                                            background: isActive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255,255,255,0.02)',
+                                            border: `1px solid ${isActive ? 'rgba(16, 185, 129, 0.55)' : 'rgba(255,255,255,0.08)'}`,
+                                            borderRadius: 14,
+                                            padding: '14px 16px',
+                                            color: '#fff',
+                                            cursor: 'pointer',
+                                            display: 'grid',
+                                            gap: 4,
+                                        }}
+                                    >
+                                        <strong style={{ fontSize: 15 }}>{CLUB_DERIVATIVE_LABELS[option]}</strong>
+                                        <span style={{ fontSize: 13, color: 'var(--basalt-400)', lineHeight: 1.45 }}>
+                                            {CLUB_DERIVATIVE_DESCRIPTIONS[option]}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {derivedType === 'other_sport' && (
+                            <div style={{ display: 'grid', gap: 8 }}>
+                                <label style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--basalt-400)' }}>
+                                    Deporte del derivado
+                                </label>
+                                <select
+                                    value={derivedSport}
+                                    onChange={(event) => setDerivedSport(event.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        background: '#0f1217',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: 12,
+                                        color: '#fff',
+                                        padding: '12px 14px',
+                                        fontSize: 14,
+                                    }}
+                                >
+                                    {ACTIVE_SPORTS.map((sport) => (
+                                        <option key={sport.id} value={sport.id}>
+                                            {sport.nameEs}
+                                        </option>
+                                    ))}
+                                </select>
+                                <span style={{ fontSize: 12, color: derivedSportMatchesBase ? '#f59e0b' : 'var(--basalt-400)' }}>
+                                    {derivedSportMatchesBase
+                                        ? 'Elegí un deporte distinto al del club base para que la vista publica pueda diferenciarlo.'
+                                        : `La vista publica priorizara esta rama cuando el usuario llegue desde ${getSportDisplayName(derivedSport) || 'ese deporte'}.`}
+                                </span>
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                            <div style={{ fontSize: 12, color: 'var(--basalt-400)', lineHeight: 1.5 }}>
+                                Se precargan nombre, union, ubicacion y branding.
+                            </div>
+                            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                <button type="button" className={styles.cardAction} onClick={closeCreateDerivedModal}>
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
+                                    onClick={handleCreateDerivedClub}
+                                    disabled={derivedType === 'other_sport' && derivedSportMatchesBase}
+                                >
+                                    <Plus size={13} style={{ marginRight: 6 }} /> Abrir formulario
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

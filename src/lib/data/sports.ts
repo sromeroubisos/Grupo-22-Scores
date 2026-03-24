@@ -331,9 +331,11 @@ export const SPORTS: Record<SportId, Sport> = {
 };
 
 export const getActiveSports = (): Sport[] => {
-    return Object.values(SPORTS)
-        .filter(sport => sport.isActive)
-        .sort((a, b) => a.priority - b.priority);
+    return getAllSports().filter(sport => sport.isActive);
+};
+
+export const getAllSports = (): Sport[] => {
+    return Object.values(SPORTS).sort((a, b) => a.priority - b.priority);
 };
 
 export const getComingSoonSports = (): Sport[] => {

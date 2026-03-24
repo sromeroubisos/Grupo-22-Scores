@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Calendar,
@@ -29,6 +29,7 @@ import { useRouter } from 'next/navigation';
 import type { Database } from '@/lib/database.types';
 import type { MatchStatus, MatchWithClubs, RoundWithMatches } from '@/lib/types/fixture';
 import type { FixtureImportPreviewResult } from '@/lib/types/fixture-import';
+import { StandingsEngine } from '@/lib/services/standingsEngine';
 import {
   APP_TIMEZONE,
   combineLocalDateTimeToUtcIso,
@@ -195,11 +196,17 @@ function getStatusLabel(status: MatchStatus) {
   return STATUS_OPTIONS.find((option) => option.value === status)?.label || status;
 }
 
+function formatGroupLabel(groupId: string | null | undefined, groupLabelById?: Map<string, string>) {
+  if (!groupId) return 'Sin grupo';
+  return groupLabelById?.get(groupId) || `Grupo ${groupId.slice(0, 8)}`;
+}
+
 function resolvePointsRules(phaseSettings: RulesConfig | null | undefined, tournamentRuleset: RulesConfig | null | undefined): PointsRules {
+  const resolved = StandingsEngine.resolveRules(phaseSettings, tournamentRuleset);
   return {
-    win: Number(phaseSettings?.points?.win ?? tournamentRuleset?.points?.win ?? 4),
-    draw: Number(phaseSettings?.points?.draw ?? tournamentRuleset?.points?.draw ?? 2),
-    loss: Number(phaseSettings?.points?.loss ?? tournamentRuleset?.points?.loss ?? 0),
+    win: Number(resolved.points_for_win ?? 4),
+    draw: Number(resolved.points_for_draw ?? 2),
+    loss: Number(resolved.points_for_loss ?? 0),
   };
 }
 
@@ -297,9 +304,11 @@ function buildSearchBlob(entry: ManageEntry) {
 export function TournamentOperationFixtureWorkspace({
   tournament,
   selectedPhaseId,
+  onSelectPhase,
 }: {
   tournament: TournamentRow;
   selectedPhaseId: string | null;
+  onSelectPhase?: (phaseId: string) => void;
 }) {
   const {
     fixture,
@@ -340,6 +349,7 @@ export function TournamentOperationFixtureWorkspace({
   const [mobileInsightsOpen, setMobileInsightsOpen] = useState(false);
   const [collapsedContainerIds, setCollapsedContainerIds] = useState<Set<string>>(new Set());
   const [roundDraft, setRoundDraft] = useState<RoundDraftState | null>(null);
+  const [availableGroups, setAvailableGroups] = useState<Array<{ id: string; name: string; phaseId: string | null; orderIndex: number | null }>>([]);
   const deferredManageSearch = useDeferredValue(manageSearch);
   const mobileInsightsSheet = useAnimatedDisclosure(mobileInsightsOpen, 180);
 
@@ -359,6 +369,52 @@ export function TournamentOperationFixtureWorkspace({
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(getStorageKey(tournament.id), activeSubtab);
   }, [activeSubtab, tournament.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadGroups = async () => {
+      if (!selectedPhaseId) {
+        setAvailableGroups([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/tournaments/${tournament.id}/groups?phaseId=${selectedPhaseId}`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const nextGroups = Array.isArray(payload)
+          ? payload.map((group: { id?: unknown; name?: unknown; phase_id?: unknown; order_index?: unknown }) => ({
+              id: String(group.id),
+              name: String(group.name || 'Grupo'),
+              phaseId: typeof group.phase_id === 'string' ? group.phase_id : null,
+              orderIndex: typeof group.order_index === 'number' ? group.order_index : null,
+            }))
+          : [];
+
+        if (!cancelled) {
+          setAvailableGroups(nextGroups);
+        }
+      } catch (error) {
+        console.error('Error loading phase groups for fixture workspace:', error);
+        if (!cancelled) {
+          setAvailableGroups([]);
+        }
+      }
+    };
+
+    void loadGroups();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPhaseId, tournament.id]);
 
   const selectedPhase = useMemo(
     () => fixture?.phases.find((phase) => phase.id === selectedPhaseId) || null,
@@ -396,13 +452,26 @@ export function TournamentOperationFixtureWorkspace({
 
   const groupOptions = useMemo(() => {
     const groups = new Map<string, string>();
+    availableGroups.forEach((group) => {
+      groups.set(group.id, group.name);
+    });
     phaseMatches.forEach((match) => {
       if (match.groupId && !groups.has(match.groupId)) {
         groups.set(match.groupId, `Grupo ${match.groupId.slice(0, 8)}`);
       }
     });
     return Array.from(groups, ([value, label]) => ({ value, label }));
-  }, [phaseMatches]);
+  }, [availableGroups, phaseMatches]);
+
+  const groupLabelById = useMemo(
+    () => new Map(groupOptions.map((group) => [group.value, group.label])),
+    [groupOptions],
+  );
+
+  const getGroupLabel = useCallback(
+    (groupId: string | null | undefined) => formatGroupLabel(groupId, groupLabelById),
+    [groupLabelById],
+  );
 
   const manageEntries = useMemo<ManageEntry[]>(
     () => selectedPhase?.rounds.flatMap((round) => round.matches.map((match) => ({ match, round }))) || [],
@@ -461,6 +530,15 @@ export function TournamentOperationFixtureWorkspace({
     });
   }, [realRounds, roundDateById]);
 
+  useEffect(() => {
+    setManualForm((current) => {
+      if (!current.groupId) return current;
+      return groupOptions.some((group) => group.value === current.groupId)
+        ? current
+        : { ...current, groupId: '' };
+    });
+  }, [groupOptions]);
+
   const filteredManageEntries = useMemo(() => {
     const normalizedQuery = deferredManageSearch.trim().toLowerCase();
     return manageEntries.filter((entry) => {
@@ -484,7 +562,7 @@ export function TournamentOperationFixtureWorkspace({
       filteredManageEntries.forEach((entry) => {
         const key = entry.match.groupId || 'none';
         const title = entry.match.groupId
-          ? groupOptions.find((option) => option.value === entry.match.groupId)?.label || `Grupo ${entry.match.groupId.slice(0, 8)}`
+          ? getGroupLabel(entry.match.groupId)
           : 'Sin grupo';
         const current = map.get(key);
         if (current) {
@@ -1443,6 +1521,30 @@ export function TournamentOperationFixtureWorkspace({
                     </div>
                   ))}
                 </div>
+                <div className="operation-form-grid" style={{ marginBottom: 16 }}>
+                  <label className="operation-form-field operation-form-field-span-2">
+                    <span>Fase destino de la importacion</span>
+                    <select
+                      className="basalt-input"
+                      value={selectedPhaseId || ''}
+                      onChange={(event) => {
+                        const nextPhaseId = event.target.value;
+                        setImportPreview(null);
+                        selectPhase(nextPhaseId);
+                        onSelectPhase?.(nextPhaseId);
+                      }}
+                    >
+                      {(fixture?.phases || []).map((phase) => (
+                        <option key={phase.id} value={phase.id}>
+                          {phase.name}
+                        </option>
+                      ))}
+                    </select>
+                    <small className="operation-field-hint">
+                      El preview y la confirmacion usaran esta fase como destino para los partidos importados.
+                    </small>
+                  </label>
+                </div>
                 <FixtureImportWizard
                   phaseId={selectedPhaseId || ''}
                   onBack={() => setSelectedMethod('manual_match')}
@@ -1627,6 +1729,7 @@ export function TournamentOperationFixtureWorkspace({
                                 <MatchCard
                                   key={entry.match.id}
                                   entry={entry}
+                                  groupLabel={entry.match.groupId ? getGroupLabel(entry.match.groupId) : null}
                                   busyAction={busyAction}
                                   quickResultForm={quickResultMatchId === entry.match.id ? quickResultForm : null}
                                   quickResultErrors={quickResultMatchId === entry.match.id ? quickResultErrors : {}}
@@ -1673,7 +1776,7 @@ export function TournamentOperationFixtureWorkspace({
                         <strong>{entry.match.homeClub?.name || 'Local'} vs {entry.match.awayClub?.name || 'Visitante'}</strong>
                         <small>
                           {entry.round.name}
-                          {entry.match.groupId ? ` · Grupo ${entry.match.groupId.slice(0, 8)}` : ''}
+                          {entry.match.groupId ? ` · ${getGroupLabel(entry.match.groupId)}` : ''}
                           {entry.match.venue ? ` · ${entry.match.venue}` : ''}
                         </small>
                       </div>
@@ -1775,6 +1878,7 @@ export function TournamentOperationFixtureWorkspace({
 
 function MatchCard({
   entry,
+  groupLabel,
   busyAction,
   quickResultForm,
   quickResultErrors,
@@ -1790,6 +1894,7 @@ function MatchCard({
   onDelete,
 }: {
   entry: ManageEntry;
+  groupLabel: string | null;
   busyAction: string | null;
   quickResultForm: QuickResultFormState | null;
   quickResultErrors: Record<string, string>;
@@ -1813,6 +1918,7 @@ function MatchCard({
   const scoreVisible = match.status === 'live' || match.status === 'final';
   const totalHomePoints = quickResultForm ? parseQuickNumber(quickResultForm.homeBasePoints) + parseQuickNumber(quickResultForm.homeBonusPoints) : 0;
   const totalAwayPoints = quickResultForm ? parseQuickNumber(quickResultForm.awayBasePoints) + parseQuickNumber(quickResultForm.awayBonusPoints) : 0;
+  const getGroupLabel = (groupId: string | null | undefined) => groupLabel ?? formatGroupLabel(groupId);
 
   return (
     <article
@@ -1825,7 +1931,7 @@ function MatchCard({
           <span className="fixture-match-headline">{formatDateLabel(match.dateTime)} · {formatTimeLabel(match.dateTime)}</span>
           <span className="fixture-match-subline">
             {round.name}
-            {match.groupId ? ` · Grupo ${match.groupId.slice(0, 8)}` : ''}
+            {match.groupId ? ` · ${getGroupLabel(match.groupId)}` : ''}
           </span>
         </div>
         <span className={`fixture-pill ${getMatchTone(match.status)}`}>{getStatusLabel(match.status)}</span>

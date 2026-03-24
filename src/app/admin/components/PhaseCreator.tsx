@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     ArrowLeft,
     ArrowRight,
@@ -73,9 +73,21 @@ export interface Team {
     color: string;
 }
 
+interface PhaseConfigValues {
+    groupsCount: number;
+    teamsPerGroup: number;
+    qualifiersPerGroup: number;
+    pointsWin: string;
+    pointsDraw: string;
+    pointsBonusTry: string;
+    pointsBonusLoss: string;
+    leagueRounds?: number;
+    playoffThirdPlace?: boolean;
+}
+
 export interface PhaseConfiguration {
     phaseType: string;
-    config: any;
+    config: PhaseConfigValues;
     selectedTeamIds: string[];
     fixtureData: FixtureMatch[];
     isFixtureGenerated: boolean;
@@ -92,6 +104,7 @@ interface PhaseCreatorProps {
     onNext?: (config: PhaseConfiguration) => void;
     onPrev?: () => void;
     onSaveDraft?: (config: PhaseConfiguration) => void;
+    onChange?: (config: PhaseConfiguration) => void;
 }
 
 const AVAILABLE_CRITERIA: Criterion[] = [
@@ -117,7 +130,8 @@ export default function PhaseCreator({
     initialConfig,
     onNext,
     onPrev,
-    onSaveDraft
+    onSaveDraft,
+    onChange
 }: PhaseCreatorProps) {
     const [activeTab, setActiveTab] = useState('config');
     const [phaseType, setPhaseType] = useState(initialConfig?.phaseType || 'groups');
@@ -166,17 +180,7 @@ export default function PhaseCreator({
     };
 
     // Config Configuration State
-    const [config, setConfig] = useState<{
-        groupsCount: number;
-        teamsPerGroup: number;
-        qualifiersPerGroup: number;
-        pointsWin: string;
-        pointsDraw: string;
-        pointsBonusTry: string;
-        pointsBonusLoss: string;
-        leagueRounds?: number;
-        playoffThirdPlace?: boolean;
-    }>(initialConfig?.config || {
+    const [config, setConfig] = useState<PhaseConfigValues>(initialConfig?.config || {
         groupsCount: 4,
         teamsPerGroup: 5,
         qualifiersPerGroup: 2,
@@ -253,7 +257,7 @@ export default function PhaseCreator({
             const workbook = XLSX.read(buffer, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as unknown[][];
 
             if (jsonData.length < 2) {
                 setFileError('El archivo Excel parece estar vacío.');
@@ -305,7 +309,7 @@ export default function PhaseCreator({
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                const pageText = textContent.items.map((item) => ('str' in item ? item.str : '')).join(' ');
                 fullText += pageText + '\n';
             }
 
@@ -415,7 +419,7 @@ export default function PhaseCreator({
         const groups: Team[][] = Array.from({ length: safeGroupsCount }, () => []);
 
         // Initial distribution only if assignments are empty or mismatch
-        let currentAssignments = { ...groupAssignments };
+        const currentAssignments = { ...groupAssignments };
         const hasAssignments = Object.keys(currentAssignments).length > 0;
 
         if (!hasAssignments) {
@@ -468,7 +472,7 @@ export default function PhaseCreator({
             const groupLeg1Matches: FixtureMatch[] = [];
 
             // --- Generate First Leg ---
-            let currentTeamsOrder = [...teamsList];
+            const currentTeamsOrder = [...teamsList];
 
             for (let round = 0; round < roundsPerLeg; round++) {
                 const roundNum = round + 1;
@@ -625,7 +629,7 @@ export default function PhaseCreator({
         setTags([...tags, newTag]);
     };
 
-    const updateTag = (id: string, field: keyof StandingsTag, value: any) => {
+    const updateTag = (id: string, field: keyof StandingsTag, value: string | number) => {
         setTags(tags.map(t => {
             if (t.id !== id) return t;
 
@@ -676,6 +680,29 @@ export default function PhaseCreator({
         t.name.toLowerCase().includes(teamSearch.toLowerCase()) ||
         t.short.toLowerCase().includes(teamSearch.toLowerCase())
     );
+
+    useEffect(() => {
+        onChange?.({
+            phaseType,
+            config,
+            selectedTeamIds,
+            fixtureData,
+            isFixtureGenerated,
+            activeCriteria,
+            tags,
+            groupAssignments
+        });
+    }, [
+        activeCriteria,
+        config,
+        fixtureData,
+        groupAssignments,
+        isFixtureGenerated,
+        onChange,
+        phaseType,
+        selectedTeamIds,
+        tags
+    ]);
 
     /* REMOVED handleCreateTeam logic */
 
@@ -839,8 +866,8 @@ export default function PhaseCreator({
                         <button
                             className="btn btn--primary"
                             onClick={() => onNext && onNext(getCurrentConfig())}
-                            disabled={!isFixtureGenerated}
-                            title={!isFixtureGenerated ? "Debes generar o cargar un fixture primero" : ""}
+                            disabled={selectedTeamIds.length < 2}
+                            title={selectedTeamIds.length < 2 ? "Debes seleccionar al menos 2 equipos" : ""}
                         >
                             <span className="btn__icon">
                                 <PlayCircle size={14} fill="currentColor" />
