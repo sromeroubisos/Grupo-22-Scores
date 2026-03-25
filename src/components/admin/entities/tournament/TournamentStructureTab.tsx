@@ -40,6 +40,23 @@ const PRESET_COLORS = [
     '#00a365', '#22c55e', '#eab308', '#ef4444', '#3b82f6', '#a855f7', '#f97316', '#14b8a6',
 ];
 
+const COLUMN_TIEBREAKER_CONFIG: Record<string, { label: string; description?: string }> = {
+    points:        { label: 'Puntos' },
+    won:           { label: 'Victorias' },
+    drawn:         { label: 'Empates' },
+    lost:          { label: 'Derrotas' },
+    percentage:    { label: 'Porcentaje' },
+    pointsFor:     { label: 'Puntos a Favor' },
+    pointsAgainst: { label: 'Puntos en Contra' },
+    pointsDiff:    { label: 'Diferencia de Puntos' },
+    tries:         { label: 'Tries' },
+    conversions:   { label: 'Conversiones' },
+    penalties:     { label: 'Penales' },
+    dropGoals:     { label: 'Drop Goals' },
+    tackles:       { label: 'Tackles' },
+    runs:          { label: 'Carreras' },
+};
+
 export function TournamentStructureTab({ data, id }: { data?: any; id?: string }) {
     const [phases, setPhases] = useState<Phase[]>([]);
     const [loading, setLoading] = useState(true);
@@ -74,22 +91,13 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         dropGoals: isRugby, tackles: isRugby, runs: isRugby,
     });
 
-    // Tiebreakers
-    const defaultTiebreakers: TiebreakerItem[] = [
-        { metric: 'points', label: 'Puntos', enabled: true, order: 'desc' as const, priority: 1 },
-        { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc' as const, priority: 2, requiresRoundRobin: true },
-        { metric: 'pointsDiff', label: 'Diferencia de Puntos', enabled: true, order: 'desc' as const, priority: 3 },
-        { metric: 'pointsFor', label: 'Puntos a Favor', enabled: true, order: 'desc' as const, priority: 4 },
-        { metric: 'won', label: 'Victorias', enabled: false, order: 'desc' as const, priority: 5 },
-        { metric: 'drawn', label: 'Empates', enabled: false, order: 'desc' as const, priority: 6 },
-        { metric: 'percentage', label: 'Porcentaje', enabled: false, order: 'desc' as const, priority: 7 },
-        ...(isRugby ? [
-            { metric: 'tries', label: 'Tries', enabled: false, order: 'desc' as const, priority: 8 },
-            { metric: 'conversions', label: 'Conversiones', enabled: false, order: 'desc' as const, priority: 9 },
-        ] : []),
-    ];
-
-    const [tiebreakers, setTiebreakers] = useState<TiebreakerItem[]>(defaultTiebreakers);
+    // Tiebreakers — only active ones (priority > 0) stored in state
+    const [tiebreakers, setTiebreakers] = useState<TiebreakerItem[]>([
+        { metric: 'points',     label: 'Puntos',                 enabled: true, order: 'desc', priority: 1 },
+        { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc', priority: 2, requiresRoundRobin: true },
+        { metric: 'pointsDiff', label: 'Diferencia de Puntos',   enabled: true, order: 'desc', priority: 3 },
+        { metric: 'pointsFor',  label: 'Puntos a Favor',         enabled: true, order: 'desc', priority: 4 },
+    ]);
     const [statsAssignment, setStatsAssignment] = useState<'played' | 'starters'>('played');
     const [currentStep, setCurrentStep] = useState(1);
     const [editingPhaseId, setEditingPhaseId] = useState<string | null>(null);
@@ -294,6 +302,42 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         return errors;
     }, [advanceCount, groupNames, phaseName, phaseType, teamsCount]);
 
+    const tiebreakerListItems = useMemo((): TiebreakerItem[] => {
+        const activeMetrics = new Set(tiebreakers.map(t => t.metric));
+        const fromColumns: TiebreakerItem[] = Object.entries(tableCols)
+            .filter(([col, enabled]) => enabled && COLUMN_TIEBREAKER_CONFIG[col] && !activeMetrics.has(col))
+            .map(([col]) => ({
+                metric: col,
+                label: COLUMN_TIEBREAKER_CONFIG[col].label,
+                description: COLUMN_TIEBREAKER_CONFIG[col].description,
+                enabled: true,
+                order: 'desc' as const,
+                priority: 0,
+            }));
+        const headToHead: TiebreakerItem[] = activeMetrics.has('headToHead') ? [] : [{
+            metric: 'headToHead',
+            label: 'Enfrentamiento Directo',
+            description: 'Resultado en el enfrentamiento directo entre equipos empatados',
+            enabled: true,
+            order: 'desc' as const,
+            priority: 0,
+            requiresRoundRobin: true,
+        }];
+        return [...tiebreakers, ...fromColumns, ...headToHead];
+    }, [tableCols, tiebreakers]);
+
+    const handleTableColsChange = (newCols: Record<string, boolean>) => {
+        const disabledCols = new Set(
+            Object.entries(newCols)
+                .filter(([col, on]) => !on && tableCols[col] && COLUMN_TIEBREAKER_CONFIG[col])
+                .map(([col]) => col)
+        );
+        if (disabledCols.size > 0) {
+            setTiebreakers(prev => prev.filter(t => !disabledCols.has(t.metric)));
+        }
+        setTableCols(newCols);
+    };
+
     const resetForm = () => {
         setCurrentStep(1);
         setPhaseName('');
@@ -310,7 +354,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setPointsDrawExtra(1);
         setPointsLossExtra(0);
         setStatsAssignment('played');
-        setTiebreakers(defaultTiebreakers);
+        setTiebreakers([
+            { metric: 'points',     label: 'Puntos',                 enabled: true, order: 'desc', priority: 1 },
+            { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc', priority: 2, requiresRoundRobin: true },
+            { metric: 'pointsDiff', label: 'Diferencia de Puntos',   enabled: true, order: 'desc', priority: 3 },
+            { metric: 'pointsFor',  label: 'Puntos a Favor',         enabled: true, order: 'desc', priority: 4 },
+        ]);
         setTableCols({
             posVariation: true, points: true, won: true, drawn: true, lost: true,
             played: true, percentage: false, classification: false,
@@ -357,11 +406,14 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
             if (s.tableColumns) setTableCols(prev => ({ ...prev, ...s.tableColumns }));
             if (s.tiebreakers) {
-                const saved = s.tiebreakers.map(t => {
-                    const d = defaultTiebreakers.find(dt => dt.metric === t.metric);
-                    return { ...d, ...t };
-                });
-                setTiebreakers(saved as TiebreakerItem[]);
+                const active = s.tiebreakers
+                    .filter(t => (t.priority ?? 0) > 0)
+                    .map(t => {
+                        const config = COLUMN_TIEBREAKER_CONFIG[t.metric]
+                            ?? (t.metric === 'headToHead' ? { label: 'Enfrentamiento Directo' } : { label: t.metric });
+                        return { ...config, metric: t.metric, order: t.order || 'desc' as const, enabled: t.enabled ?? true, priority: t.priority!, requiresRoundRobin: t.metric === 'headToHead' || undefined };
+                    });
+                setTiebreakers(active as TiebreakerItem[]);
             }
 
             setGroupLabels(normalizeGroupLabels(s.groupLabels || []));
@@ -1116,14 +1168,18 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
                                                 Reglas de desempate (arrastrar para priorizar)
                                             </label>
-                                            <TiebreakerList items={tiebreakers} onChange={setTiebreakers} phaseType={phaseType} />
+                                            <TiebreakerList
+                                                items={tiebreakerListItems}
+                                                onChange={(newItems) => setTiebreakers(newItems.filter(t => (t.priority ?? 0) > 0))}
+                                                phaseType={phaseType}
+                                            />
                                         </div>
 
                                         <div className="structure-field-panel pt-6 border-t border-[var(--border-basalt)]">
                                             <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
                                                 Columnas de la tabla
                                             </label>
-                                            <TableColumnSelector categories={columnCategories} selectedColumns={tableCols} onChange={setTableCols} />
+                                            <TableColumnSelector categories={columnCategories} selectedColumns={tableCols} onChange={handleTableColsChange} />
                                         </div>
                                     </div>
                                 )}

@@ -177,8 +177,8 @@ export function TiebreakerList({ items, onChange, phaseType }: TiebreakerListPro
   // Available items are those without a valid priority
   const availableItems = items.filter(item => !activeMetricsSet.has(item.metric));
 
-  const filteredAvailable = availableItems.filter(item => 
-    item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredAvailable = availableItems.filter(item =>
+    item.label?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
