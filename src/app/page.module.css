@@ -12,7 +12,7 @@
 .mobileTopControls {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
     position: relative;
     z-index: 110;
 }
@@ -23,7 +23,7 @@
     align-items: center;
     gap: 10px;
     overflow-x: auto;
-    padding: 0 4px 2px;
+    padding: 2px 4px 4px;
     margin: 0 -4px;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -36,12 +36,12 @@
 .mobileAudienceSwitch {
     display: none;
     gap: 8px;
-    padding: 0 4px;
+    padding: 2px 4px 0;
 }
 
 .mobileAudienceSwitchBtn {
     flex: 1;
-    height: 36px;
+    height: 40px;
     border-radius: 999px;
     border: 1px solid var(--color-border);
     background: var(--color-bg-secondary);
@@ -106,7 +106,7 @@
 /* Date Selector - Pill Style */
 .dateSelector {
     background: rgba(18, 18, 20, 0.92);
-    padding: 10px 0;
+    padding: 12px 0;
     border: 1px solid var(--color-border);
     border-radius: 18px;
     backdrop-filter: blur(16px);
@@ -1327,11 +1327,11 @@
         margin-top: 0;
         /* Sin separación extra: más pegado al header */
         padding-top: 0;
-        padding-bottom: 0;
+        padding-bottom: 4px;
     }
 
     .dateSelector {
-        margin-top: 0;
+        margin-top: 4px;
         /* mt-4 (~14-16px) separation from sports */
         margin-bottom: 0;
         /* mb-8 (32px) large separation */
@@ -1359,7 +1359,7 @@
     }
 
     .mobileTopControls {
-        gap: 12px;
+        gap: 16px;
     }
 
     .sportChip {

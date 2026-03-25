@@ -1,30 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+
+type QueryError = {
+    code?: string | null;
+    message?: string | null;
+    details?: string | null;
+} | null;
 
 function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
+}
+
+function getSelectedColumns(columns: string) {
+    return columns
+        .split(',')
+        .map((column) => {
+            const trimmed = column.trim();
+            if (!trimmed) return null;
+
+            const aliasTarget = trimmed.includes(':')
+                ? trimmed.split(':').slice(-1)[0]
+                : trimmed;
+
+            return aliasTarget.trim();
+        })
+        .filter((column): column is string => Boolean(column));
+}
+
+function isRetryableMissingColumnError(error: QueryError, columns: string) {
+    if (!error) return false;
+
+    const selectedColumns = getSelectedColumns(columns);
+    if (selectedColumns.some((column) => isMissingColumnError(error, column))) {
+        return true;
+    }
+
+    const haystack = `${error.message || ''} ${error.details || ''}`.toLowerCase();
+    return (error.code === 'PGRST204' || error.code === '42703') && haystack.includes('column');
 }
 
 async function selectWithFallback<T>(
     baseQuery: {
         select: (columns: string) => PromiseLike<{
             data: T[] | null;
-            error: { code?: string | null; message?: string | null; details?: string | null } | null;
+            error: QueryError;
         }> & {
             order: (
                 column: string,
                 options?: { ascending?: boolean }
             ) => PromiseLike<{
                 data: T[] | null;
-                error: { code?: string | null; message?: string | null; details?: string | null } | null;
+                error: QueryError;
             }>;
         };
     },
     variants: string[],
     orderBy?: { column: string; ascending?: boolean }
 ) {
-    let lastError: { code?: string | null; message?: string | null; details?: string | null } | null = null;
+    let lastError: QueryError = null;
 
     for (const columns of variants) {
         const query = baseQuery.select(columns);
@@ -38,7 +73,7 @@ async function selectWithFallback<T>(
 
         lastError = result.error;
 
-        if (result.error.code !== 'PGRST204') {
+        if (!isRetryableMissingColumnError(result.error, columns)) {
             return { data: null, error: result.error };
         }
     }

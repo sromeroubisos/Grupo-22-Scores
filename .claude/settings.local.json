@@ -38,7 +38,8 @@
       "Bash(ls /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/lib/data/tournaments/*.ts)",
       "Bash(for table in admin_audit_log club_aliases club_profile club_secondary_unions club_venues players provider_entities squad_members)",
       "Bash(do echo \"=== $table ===\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(wc -l /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/page.tsx /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/matches/[id]/page.tsx /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/clubs/[id]/page.tsx /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/api/matches/route.ts)"
     ]
   }
 }

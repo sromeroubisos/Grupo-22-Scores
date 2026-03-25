@@ -5,10 +5,19 @@ import Link from 'next/link';
 import styles from './page.module.css';
 import { useAuth } from '@/context/AuthContext';
 import { useSuperConsole } from './SuperConsoleContext';
+import { superNavGroups } from './navigation';
+
+function NavGlyph({ path }: { path: string }) {
+    return (
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={path} />
+        </svg>
+    );
+}
 
 export default function AdminPage() {
     const { user } = useAuth();
-    const { tournaments, matches, clubs, unions, news, loading, refresh } = useSuperConsole();
+    const { tournaments, matches, clubs, unions, news, refresh } = useSuperConsole();
     const [isSyncing, setIsSyncing] = useState(false);
 
     const handleSync = async () => {
@@ -182,6 +191,61 @@ export default function AdminPage() {
                         <Link href="/admin/super/clubes" className={styles.btn}>
                             Resolver
                         </Link>
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.tectonicGrid}>
+                <div className={`${styles.slab} ${styles.col12}`}>
+                    <div className={styles.slabHeader}>
+                        <div>
+                            <span className={styles.slabLabel}>Mapa de modulos</span>
+                            <h2 className={styles.slabTitle}>Paneles disponibles</h2>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gap: 24 }}>
+                        {superNavGroups.map((group) => (
+                            <section key={group.id} style={{ display: 'grid', gap: 14 }}>
+                                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                                    <div style={{ fontSize: 14, fontWeight: 700, color: '#ececec' }}>{group.label}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                        {group.items.length} modulos
+                                    </div>
+                                </div>
+
+                                <div className={styles.cardGrid} style={{ padding: 0 }}>
+                                    {group.items.map((item) => (
+                                        <Link
+                                            key={item.id}
+                                            href={item.href}
+                                            className={styles.cardItem}
+                                            style={{ minHeight: 0, padding: 18, textDecoration: 'none', color: 'inherit' }}
+                                        >
+                                            <div className={styles.cardHeader} style={{ marginBottom: 10 }}>
+                                                <div className={styles.cardLogo} style={{ width: 36, height: 36 }}>
+                                                    <NavGlyph path={item.iconPath} />
+                                                </div>
+                                                <div className={styles.cardContext}>
+                                                    <div className={styles.cardTitle} style={{ marginBottom: 0 }}>
+                                                        {item.label}
+                                                    </div>
+                                                    <div className={styles.contextLineSecondary}>{group.label}</div>
+                                                </div>
+                                            </div>
+
+                                            <p style={{ margin: 0, color: 'var(--basalt-400)', fontSize: 12, lineHeight: 1.5 }}>
+                                                {item.description}
+                                            </p>
+
+                                            <div className={styles.badgeRow} style={{ marginTop: 14, marginBottom: 0 }}>
+                                                <span className={styles.badgePill}>Abrir panel</span>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </section>
+                        ))}
                     </div>
                 </div>
             </div>

@@ -173,9 +173,10 @@ export function TournamentManageShell({ id, data, currentTab, children, seasonMe
                     }}
                 />
 
+                <TournamentTabs id={id} currentTab={currentTab} data={data} />
+
                 <div className="basalt-shell-stage">
                     <div className={`basalt-shell-layout ${currentTab === 'posiciones' ? 'basalt-shell-layout-wide' : ''}`}>
-                        <TournamentTabs id={id} currentTab={currentTab} data={data} />
 
                         <main className={`basalt-shell-main ${currentTab === 'posiciones' ? 'basalt-shell-main-wide' : ''}`}>
                             {children}

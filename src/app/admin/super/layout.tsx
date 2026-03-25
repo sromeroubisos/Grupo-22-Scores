@@ -1,32 +1,28 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link'; // Added Link import
+import Link from 'next/link';
 import SuperSidebar from './SuperSidebar';
 import styles from './layout.module.css';
 import { SuperConsoleProvider, useSuperConsole } from './SuperConsoleContext';
+import { findActiveSuperNavItem, superNavItems } from './navigation';
 
 function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
     const { filters, setFilters } = useSuperConsole();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const pathname = usePathname();
+    const activeNavItem = findActiveSuperNavItem(pathname);
+    const activeTabRef = useRef<HTMLAnchorElement | null>(null);
 
-    // Mobile Tabs Configuration
-    const mobileTabs = [
-        { id: 'dashboard', label: 'Dashboard', href: '/admin/super' },
-        { id: 'torneos', label: 'Torneos', href: '/admin/super/torneos' },
-        { id: 'partidos', label: 'Partidos', href: '/admin/super/partidos' },
-        { id: 'clubes', label: 'Clubes', href: '/admin/super/clubes' },
-        { id: 'jugadores', label: 'Jugadores', href: '/admin/super/jugadores' },
-        { id: 'noticias', label: 'Noticias', href: '/admin/super/noticias' },
-    ];
-
-    const isActive = (href: string) => {
-        if (href === '/admin/super') return pathname === href;
-        return pathname?.startsWith(href);
-    };
+    useEffect(() => {
+        activeTabRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center',
+        });
+    }, [pathname]);
 
     return (
         <>
@@ -40,10 +36,11 @@ function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 
                     <div className={styles.topbarLeft}>
                         <div className={styles.topbarTitle}>
-                            {/* Dynamic Title based on Path */}
-                            {mobileTabs.find(t => isActive(t.href))?.label || 'Consola Superadmin'}
+                            {activeNavItem?.label || 'Consola Superadmin'}
                         </div>
-                        <div className={styles.topbarSubtitle}>Catalogo maestro y operacion de datos</div>
+                        <div className={styles.topbarSubtitle}>
+                            {activeNavItem?.description || 'Catalogo maestro y operacion de datos'}
+                        </div>
                     </div>
 
                     <div className={styles.mobileControls}>
@@ -56,9 +53,14 @@ function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
                 </div>
 
                 {/* Mobile Tabs Embedded in Header */}
-                <div className={styles.mobileTabs}>
-                    {mobileTabs.map(tab => (
-                        <Link key={tab.id} href={tab.href} className={`${styles.mobileTab} ${isActive(tab.href) ? styles.mobileTabActive : ''}`}>
+                <div className={styles.mobileTabs} aria-label="Modulos del panel">
+                    {superNavItems.map((tab) => (
+                        <Link
+                            key={tab.id}
+                            href={tab.href}
+                            ref={activeNavItem?.id === tab.id ? activeTabRef : null}
+                            className={`${styles.mobileTab} ${activeNavItem?.id === tab.id ? styles.mobileTabActive : ''}`}
+                        >
                             {tab.label}
                         </Link>
                     ))}

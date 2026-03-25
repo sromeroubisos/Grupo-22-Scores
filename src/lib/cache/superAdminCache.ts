@@ -145,16 +145,32 @@ function getSupabase() {
 }
 
 async function fetchAdminConsoleResource<T>(resource: 'clubs' | 'matches', signal?: AbortSignal): Promise<T[]> {
+    type ConsolePayload = {
+        data?: T[];
+        error?: string;
+        details?: unknown;
+    };
+
     const response = await fetch(`/api/admin/super/console-data?resource=${resource}`, {
         credentials: 'include',
         cache: 'no-store',
         signal,
     });
 
-    const payload = await response.json();
+    let payload: ConsolePayload | null = null;
+
+    try {
+        payload = await response.json() as ConsolePayload;
+    } catch {
+        payload = null;
+    }
 
     if (!response.ok) {
-        throw new Error(payload?.error || `Failed to load ${resource}`);
+        const detail = typeof payload?.details === 'string'
+            ? payload.details
+            : (payload?.details ? JSON.stringify(payload.details) : null);
+        const message = payload?.error || `Failed to load ${resource}`;
+        throw new Error(detail ? `${message}: ${detail}` : message);
     }
 
     return (payload?.data || []) as T[];
