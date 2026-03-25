@@ -778,6 +778,32 @@
     object-fit: contain;
 }
 
+.logoImgRound {
+    width: 18px;
+    height: 18px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.teamLogoRound {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.logoFallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
 .teamName {
     font-size: 0.95rem;
     /* ~15px */

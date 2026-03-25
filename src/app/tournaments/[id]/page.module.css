@@ -836,6 +836,15 @@
     flex-shrink: 0;
 }
 
+.matchTeamLogoEmpty {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--fl-surface-alt);
+    border: 1px solid var(--fl-border-sub);
+    flex-shrink: 0;
+}
+
 /* Score box */
 .matchScoreBox {
     display: flex;
@@ -1418,16 +1427,17 @@
         margin-top: 2px;
     }
 
-    /* ── Match rows: drop date column, go 3-col ── */
+    /* ── Match rows: show time | home | score | away (4-col) ── */
     .matchRow {
-        /* Visible items: matchHomeTeam | matchScoreBox | matchAwayTeam */
-        grid-template-columns: 1fr minmax(110px, auto) 1fr;
-        padding: 10px 16px;
-        gap: 8px;
+        grid-template-columns: 38px 1fr minmax(84px, auto) 1fr;
+        padding: 10px 14px;
+        gap: 6px;
         min-height: 48px;
     }
-    /* Hide date and status columns — grid ignores display:none items */
-    .matchDate { display: none; }
+    /* Show date column but only the time — hide the day abbreviation */
+    .matchDate { display: flex; }
+    .matchDateDay { display: none; }
+    /* Still hide status column */
     .matchStatus { display: none; }
 
     /* Show schedule text, hide plain VS */
@@ -1438,6 +1448,7 @@
     .matchScore { font-size: 0.88rem; letter-spacing: 0.05em; }
     .matchScoreBox { padding: 5px 6px; border-radius: 6px; min-height: 30px; }
     .matchTeamLogo { width: 16px; height: 16px; }
+    .matchTeamLogoEmpty { width: 16px; height: 16px; }
 
     /* ── Section cards ── */
     .sectionHeader { padding: 12px 16px; }
@@ -1504,9 +1515,10 @@
     .featuredMobileDate { font-size: 0.68rem; }
 
     /* Match rows */
-    .matchRow { padding: 9px 12px; gap: 6px; }
+    .matchRow { grid-template-columns: 34px 1fr minmax(78px, auto) 1fr; padding: 9px 10px; gap: 5px; }
     .matchScore { font-size: 0.82rem; }
     .matchScoreBox { padding: 4px 5px; }
+    .matchDateTime { font-size: 0.6rem; }
 
     /* Teams */
     .teamsGrid { grid-template-columns: repeat(2, 1fr); }

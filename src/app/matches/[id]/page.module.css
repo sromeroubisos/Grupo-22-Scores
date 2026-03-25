@@ -1342,8 +1342,15 @@
 
     /* Info Bar / Chips */
     .infoBar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 0 16px 8px;
+        scrollbar-width: none;
+    }
+    .infoBar::-webkit-scrollbar {
         display: none;
-        /* Hide the chips below scoreboard, move important info elsewhere if needed */
     }
 
     /* Force transparency on light mode mobile */

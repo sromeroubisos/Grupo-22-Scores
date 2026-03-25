@@ -987,10 +987,17 @@ export default function TournamentDetailPage({
                 {/* Home Team (right-aligned) */}
                 <div className={`${styles.matchSideTeam} ${styles.matchHomeTeam} ${homeWon ? styles.matchWinner : ''}`}>
                     <span className={styles.matchTeamName}>{homeName}</span>
-                    {homeLogo && (
-                        <img src={homeLogo} alt={homeName} className={styles.matchTeamLogo}
-                            onError={(e) => (e.currentTarget.style.display = 'none')} />
-                    )}
+                    {homeLogo
+                        ? <>
+                            <img src={homeLogo} alt={homeName} className={styles.matchTeamLogo}
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                }} />
+                            <div className={styles.matchTeamLogoEmpty} style={{ display: 'none' }} />
+                          </>
+                        : <div className={styles.matchTeamLogoEmpty} />
+                    }
                 </div>
 
                 {/* Score / VS box */}
@@ -1010,10 +1017,17 @@ export default function TournamentDetailPage({
 
                 {/* Away Team (left-aligned) */}
                 <div className={`${styles.matchSideTeam} ${styles.matchAwayTeam} ${awayWon ? styles.matchWinner : ''}`}>
-                    {awayLogo && (
-                        <img src={awayLogo} alt={awayName} className={styles.matchTeamLogo}
-                            onError={(e) => (e.currentTarget.style.display = 'none')} />
-                    )}
+                    {awayLogo
+                        ? <>
+                            <img src={awayLogo} alt={awayName} className={styles.matchTeamLogo}
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                }} />
+                            <div className={styles.matchTeamLogoEmpty} style={{ display: 'none' }} />
+                          </>
+                        : <div className={styles.matchTeamLogoEmpty} />
+                    }
                     <span className={styles.matchTeamName}>{awayName}</span>
                 </div>
 
