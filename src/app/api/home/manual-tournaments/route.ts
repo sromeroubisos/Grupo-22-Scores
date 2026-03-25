@@ -155,7 +155,9 @@ export async function GET() {
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
         })));
 
-        return NextResponse.json({ data: visibleTournaments });
+        return NextResponse.json({ data: visibleTournaments }, {
+            headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=600' },
+        });
     } catch (error) {
         console.error('[GET /api/home/manual-tournaments] unexpected error:', error);
         return NextResponse.json(

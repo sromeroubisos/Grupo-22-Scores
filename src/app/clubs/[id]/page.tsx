@@ -121,12 +121,14 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
 
     const [activeTab, setActiveTab] = useState('summary');
     const [loading, setLoading] = useState(true);
+    const [squadLoading, setSquadLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const [details, setDetails] = useState<any>(null);
     const [results, setResults] = useState<any[]>([]);
     const [fixtures, setFixtures] = useState<any[]>([]);
     const [squad, setSquad] = useState<any>(null);
+    const [squadFetched, setSquadFetched] = useState(false);
     const [transfers, setTransfers] = useState<any[]>([]);
 
     const [selectedSport, setSelectedSport] = useState<string>('all');
@@ -150,6 +152,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 if (hintName) query.set('team_name', hintName);
                 if (hintTeamUrl) query.set('team_url', hintTeamUrl);
                 if (preferredSport) query.set('preferred_sport', preferredSport);
+                query.set('skip_squad', 'true');
 
                 const res = await fetch(`/api/teams?${query.toString()}`, { cache: 'no-store' });
                 const payload = await res.json();
@@ -173,7 +176,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 setDetails(payload.details || null);
                 setResults(payload.results || []);
                 setFixtures(payload.fixtures || []);
-                setSquad(payload.squad || null);
+                setSquad(null);
+                setSquadFetched(false);
                 setTransfers(payload.transfers || []);
             } catch (err) {
                 console.error('Error fetching team data:', err);
@@ -211,6 +215,35 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         return [];
     }, [squad]);
 
+    // Lazy-load squad when the squad tab is first selected
+    useEffect(() => {
+        if (activeTab !== 'squad' || squadFetched || loading) return;
+
+        async function fetchSquad() {
+            setSquadLoading(true);
+            try {
+                const query = new URLSearchParams();
+                query.set('team_id', rawId);
+                if (hintName) query.set('team_name', hintName);
+                if (hintTeamUrl) query.set('team_url', hintTeamUrl);
+                if (preferredSport) query.set('preferred_sport', preferredSport);
+
+                const res = await fetch(`/api/teams?${query.toString()}`, { cache: 'no-store' });
+                const payload = await res.json();
+                if (res.ok && payload?.ok) {
+                    setSquad(payload.squad || null);
+                }
+            } catch {
+                // Silently ignore — squad just won't show
+            } finally {
+                setSquadLoading(false);
+                setSquadFetched(true);
+            }
+        }
+
+        fetchSquad();
+    }, [activeTab, squadFetched, loading, rawId, hintName, hintTeamUrl, preferredSport]);
+
     // Auto-select first squad tab when squad loads
     useEffect(() => {
         if (squadTabs.length > 0 && !selectedSquadTab) {
@@ -224,9 +257,31 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
 
     if (loading) {
         return (
-            <div className={styles.loadingContainer}>
-                <div className={styles.spinner}></div>
-                <p>Cargando equipo...</p>
+            <div style={{ minHeight: '100vh', background: 'var(--bg-primary, #0f1117)', color: '#fff' }}>
+                <div style={{ background: 'linear-gradient(135deg, #1a1f2e 0%, #16213e 100%)', padding: '24px 16px 28px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ width: 80, height: 16, borderRadius: 4, background: 'rgba(255,255,255,0.08)', marginBottom: 20, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <div style={{ width: 72, height: 72, borderRadius: 12, background: 'rgba(255,255,255,0.08)', flexShrink: 0, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                        <div style={{ flex: 1 }}>
+                            <div style={{ width: '55%', height: 24, borderRadius: 4, background: 'rgba(255,255,255,0.12)', marginBottom: 10, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                            <div style={{ display: 'flex', gap: 8 }}>
+                                <div style={{ width: 60, height: 22, borderRadius: 11, background: 'rgba(255,255,255,0.06)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                                <div style={{ width: 48, height: 22, borderRadius: 11, background: 'rgba(255,255,255,0.06)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: 4, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    {[80, 96, 72, 80, 104].map((w, i) => (
+                        <div key={i} style={{ width: w, height: 32, borderRadius: 6, flexShrink: 0, background: i === 0 ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.06)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    ))}
+                </div>
+                <div style={{ padding: '16px', maxWidth: 900, margin: '0 auto' }}>
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} style={{ height: 56, borderRadius: 8, background: 'rgba(255,255,255,0.04)', marginBottom: 8, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    ))}
+                </div>
+                <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
             </div>
         );
     }
@@ -476,7 +531,14 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                         {activeTab === 'squad' && (
                             <div className={styles.section}>
                                 <h2 className={styles.pageTitle} style={{ marginBottom: '16px' }}>Plantilla</h2>
-                                {sortedPositionKeys.length > 0 ? (
+                                {squadLoading ? (
+                                    <div>
+                                        {[1, 2, 3, 4, 5, 6].map(i => (
+                                            <div key={i} style={{ height: 52, borderRadius: 8, background: 'rgba(255,255,255,0.04)', marginBottom: 6, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                                        ))}
+                                        <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
+                                    </div>
+                                ) : sortedPositionKeys.length > 0 ? (
                                     sortedPositionKeys.map(posIdx => (
                                         <div key={posIdx} className={styles.positionGroup}>
                                             <div className={styles.positionTitle}>

@@ -215,6 +215,7 @@ export async function GET(request: Request) {
     const teamName = searchParams.get('team_name') || '';
     const teamUrlParam = searchParams.get('team_url') || '';
     const preferredSport = searchParams.get('preferred_sport') || searchParams.get('sport') || '';
+    const skipSquad = searchParams.get('skip_squad') === 'true';
 
     if (!rawTeamId) {
         return Response.json({ ok: false, error: 'team_id is required' }, { status: 400 });
@@ -326,7 +327,7 @@ export async function GET(request: Request) {
         if (teamUrl && effectiveExternalId) {
             const [detailsRes, squadRes] = await Promise.allSettled([
                 getTeamDetails(teamUrl),
-                getTeamSquad(teamUrl)
+                skipSquad ? Promise.resolve(null) : getTeamSquad(teamUrl),
             ]);
 
             const remoteDetails = normalize(detailsRes);

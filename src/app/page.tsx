@@ -539,7 +539,7 @@ export default function HomePage() {
     // Fetch manual tournaments
     async function fetchManualTournaments() {
       try {
-        const response = await fetch('/api/home/manual-tournaments', { cache: 'no-store' });
+        const response = await fetch('/api/home/manual-tournaments', { cache: 'default' });
         const payload = await response.json().catch(() => ({}));
 
         if (!response.ok) {
