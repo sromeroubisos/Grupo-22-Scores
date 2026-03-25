@@ -23,6 +23,7 @@ import styles from './TournamentStandingsTab.module.css';
 import type { AuditEntry, ResolvedTiebreaker, StandingsRules } from './types';
 
 const TIEBREAKER_LABELS: Record<string, string> = {
+  // snake_case (legacy)
   head_to_head_result: 'Head to Head',
   head_to_head: 'Head to Head',
   points_difference: 'Diferencia de puntos',
@@ -32,37 +33,62 @@ const TIEBREAKER_LABELS: Record<string, string> = {
   fair_play_cards: 'Fair play',
   fair_play: 'Fair play',
   points_for: 'Puntos a favor',
+  points_against: 'Puntos en contra',
   scored: 'Puntaje total',
   fewest_red_cards: 'Menor rojas',
   fewest_yellow_cards: 'Menor amarillas',
   random_draw: 'Sorteo',
   wins: 'Partidos ganados',
+  losses: 'Partidos perdidos',
+  draws: 'Empates',
   away_goals: 'Goles visitante',
   away_points: 'Puntos visitante',
   goal_difference: 'Diferencia de goles',
   goals_for: 'Goles a favor',
+  bonus_offensive: 'Bonus ofensivo',
+  bonus_defensive: 'Bonus defensivo',
+  // camelCase (from TiebreakerMetricItem)
+  headToHead: 'Head to Head',
+  pointsDiff: 'Diferencia de puntos',
+  pointsDifference: 'Diferencia de puntos',
+  pointsFor: 'Puntos a favor',
+  pointsAgainst: 'Puntos en contra',
+  points: 'Puntos',
+  won: 'Partidos ganados',
+  lost: 'Partidos perdidos',
+  drawn: 'Empates',
+  bonusOffensive: 'Bonus ofensivo',
+  bonusDefensive: 'Bonus defensivo',
+  tries: 'Tries',
+  conversions: 'Conversiones',
+  penalties: 'Penales',
+  dropGoals: 'Drop goals',
+  tackles: 'Tackles',
+  runs: 'Corridas',
 };
 
 function resolveKey(tiebreaker: ResolvedTiebreaker): string {
   if (typeof tiebreaker === 'string') return tiebreaker;
-  return tiebreaker?.key || tiebreaker?.id || '';
+  return (tiebreaker as any)?.metric || tiebreaker?.key || tiebreaker?.id || '';
 }
 
 function resolveLabel(tiebreaker: ResolvedTiebreaker): string {
   if (!tiebreaker) return '—';
-  if (typeof tiebreaker === 'object' && tiebreaker?.label) return tiebreaker.label;
+  if (typeof tiebreaker === 'object' && (tiebreaker as any)?.label) return (tiebreaker as any).label;
   const key = resolveKey(tiebreaker);
   return TIEBREAKER_LABELS[key] || key.replace(/_/g, ' ');
 }
 
-function buildItems(rules: StandingsRules | null | undefined): { id: string; key: string; label: string }[] {
+function buildItems(rules: StandingsRules | null | undefined): { id: string; key: string; label: string; enabled: boolean }[] {
   if (!rules?.tiebreakers || !Array.isArray(rules.tiebreakers)) return [];
   return rules.tiebreakers
     .filter((item): item is ResolvedTiebreaker => item != null)
+    .sort((a, b) => ((a as any).priority ?? 0) - ((b as any).priority ?? 0))
     .map((item, index) => ({
       id: `tb-${index}-${resolveKey(item) || index}`,
       key: resolveKey(item),
       label: resolveLabel(item),
+      enabled: typeof item === 'object' ? ((item as any).enabled !== false) : true,
     }));
 }
 
@@ -108,20 +134,21 @@ function PanelSummary({
   );
 }
 
-function TiebreakerItem({ id, index, label }: { id: string; index: number; label: string }) {
+function TiebreakerItem({ id, index, label, enabled }: { id: string; index: number; label: string; enabled: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`${styles.tiebreakerItem} ${isDragging ? styles.tiebreakerDragging : ''}`}
+      className={`${styles.tiebreakerItem} ${isDragging ? styles.tiebreakerDragging : ''} ${!enabled ? styles.tiebreakerDisabled : ''}`}
     >
       <button {...attributes} {...listeners} className={styles.dragHandle} title="Arrastrar para reordenar">
         <GripVertical size={13} />
       </button>
       <span className={styles.orderIndex}>{index + 1}.</span>
       <span className={styles.tiebreakerLabel}>{label || '—'}</span>
+      {!enabled && <span className={styles.tiebreakerDisabledBadge}>off</span>}
     </div>
   );
 }
@@ -145,7 +172,7 @@ export function StandingsSidebar({
   lastCalculatedLabel,
   compactMobile = false,
 }: StandingsSidebarProps) {
-  const [items, setItems] = useState<{ id: string; key: string; label: string }[]>([]);
+  const [items, setItems] = useState<{ id: string; key: string; label: string; enabled: boolean }[]>([]);
   const [savingOrder, setSavingOrder] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
   const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([]);
@@ -282,7 +309,7 @@ export function StandingsSidebar({
                 <SortableContext items={items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
                   <div className={styles.tiebreakerList}>
                     {items.map((item, index) => (
-                      <TiebreakerItem key={item.id} id={item.id} index={index} label={item.label} />
+                      <TiebreakerItem key={item.id} id={item.id} index={index} label={item.label} enabled={item.enabled} />
                     ))}
                   </div>
                 </SortableContext>

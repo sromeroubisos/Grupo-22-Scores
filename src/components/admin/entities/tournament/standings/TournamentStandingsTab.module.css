@@ -821,6 +821,29 @@
   text-align: right;
 }
 
+.thLabel {
+  vertical-align: middle;
+}
+
+.tiebreakerBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--accent, #22c55e);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  opacity: 0.85;
+  cursor: help;
+}
+
 .stickyPosHeader,
 .stickyTeamHeader {
   background: var(--bg-deep) !important;
@@ -1273,6 +1296,21 @@
 .tiebreakerDragging {
   background: rgba(0, 163, 101, 0.1);
   border-color: rgba(0, 163, 101, 0.35);
+}
+
+.tiebreakerDisabled {
+  opacity: 0.45;
+}
+
+.tiebreakerDisabledBadge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 1px 5px;
 }
 
 .dragHandle {

@@ -110,12 +110,21 @@ export class StandingsEngine {
     const rawTiebreakers =
       phaseSettings?.tiebreakers ?? tournamentRuleset?.tiebreakers ?? ['points_difference'];
 
-    // Normalise tiebreakers – only keep non-null entries with a valid key
+    // Normalise tiebreakers – only keep non-null entries with a valid key,
+    // filter disabled ones, and sort by priority (ascending).
     const tiebreakers = Array.isArray(rawTiebreakers)
-      ? rawTiebreakers.filter((t) => {
-          const k = this.tiebreakerKey(t);
-          return k && k.length > 0;
-        })
+      ? rawTiebreakers
+          .filter((t) => {
+            const k = this.tiebreakerKey(t);
+            if (!k || k.length === 0) return false;
+            if (typeof t === 'object' && t !== null && 'enabled' in t && (t as any).enabled === false) return false;
+            return true;
+          })
+          .sort((a, b) => {
+            const pa = (typeof a === 'object' && a !== null ? (a as any).priority : 0) ?? 0;
+            const pb = (typeof b === 'object' && b !== null ? (b as any).priority : 0) ?? 0;
+            return pa - pb;
+          })
       : ['points_difference'];
 
     return {
@@ -370,14 +379,35 @@ export class StandingsEngine {
 
       for (const tb of rules.tiebreakers) {
         const key = this.tiebreakerKey(tb);
-        if (key === 'points_difference' || key === 'points_diff') {
-          if (b.difference !== a.difference) return b.difference - a.difference;
-        } else if (key === 'points_for' || key === 'scored') {
-          if (b.points_for !== a.points_for) return b.points_for - a.points_for;
-        } else if (key === 'wins') {
-          if (b.won !== a.won) return b.won - a.won;
+        // direction: -1 = desc (default, higher wins), 1 = asc (lower wins)
+        const dir = (typeof tb === 'object' && tb !== null && (tb as any).order === 'asc') ? 1 : -1;
+
+        let aVal: number | undefined;
+        let bVal: number | undefined;
+
+        if (['pointsDiff', 'pointsDifference', 'points_difference', 'points_diff'].includes(key)) {
+          aVal = a.difference; bVal = b.difference;
+        } else if (['pointsFor', 'scored', 'points_for'].includes(key)) {
+          aVal = a.points_for; bVal = b.points_for;
+        } else if (['pointsAgainst', 'points_against'].includes(key)) {
+          aVal = a.points_against; bVal = b.points_against;
+        } else if (['won', 'wins'].includes(key)) {
+          aVal = a.won; bVal = b.won;
+        } else if (['lost', 'losses'].includes(key)) {
+          aVal = a.lost; bVal = b.lost;
+        } else if (['drawn', 'draws'].includes(key)) {
+          aVal = a.drawn; bVal = b.drawn;
+        } else if (['bonusOffensive', 'bonus_offensive'].includes(key)) {
+          aVal = a.bonus_offensive; bVal = b.bonus_offensive;
+        } else if (['bonusDefensive', 'bonus_defensive'].includes(key)) {
+          aVal = a.bonus_defensive; bVal = b.bonus_defensive;
         }
-        // head_to_head_result – requires match data; deferred
+        // 'points' / 'total_points' already handled above as primary sort
+        // 'headToHead' deferred – requires match-level filtering
+
+        if (aVal !== undefined && bVal !== undefined && bVal !== aVal) {
+          return dir === -1 ? bVal - aVal : aVal - bVal;
+        }
       }
       return 0;
     });

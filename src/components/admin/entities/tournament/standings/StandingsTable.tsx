@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, type ReactNode } from 'react';
+import { type CSSProperties, type ReactNode, useMemo } from 'react';
 import { normalizeStandingsRules } from './rules';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsRow, StandingsRules, UiLabel } from './types';
@@ -19,6 +19,30 @@ type ColumnId =
   | 'total_points'
   | 'form'
   | 'status';
+
+const TIEBREAKER_METRIC_TO_COLUMN: Record<string, ColumnId> = {
+  pointsDiff: 'difference',
+  pointsDifference: 'difference',
+  points_difference: 'difference',
+  points_diff: 'difference',
+  pointsFor: 'points_for',
+  scored: 'points_for',
+  points_for: 'points_for',
+  pointsAgainst: 'points_against',
+  points_against: 'points_against',
+  won: 'won',
+  wins: 'won',
+  lost: 'lost',
+  losses: 'lost',
+  drawn: 'drawn',
+  draws: 'drawn',
+  bonusOffensive: 'bonus_offensive',
+  bonus_offensive: 'bonus_offensive',
+  bonusDefensive: 'bonus_defensive',
+  bonus_defensive: 'bonus_defensive',
+  points: 'total_points',
+  total_points: 'total_points',
+};
 
 type ActiveColumn = {
   id: ColumnId;
@@ -504,6 +528,22 @@ export function StandingsTable({
   }
 
   const activeColumns = getActiveColumns({ data, tableColumns, rules });
+
+  // Build columnId → priority map from active (enabled) tiebreakers
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const tiebreakerColumnMap = useMemo(() => {
+    const map: Partial<Record<ColumnId, number>> = {};
+    const tbs = rules?.tiebreakers ?? [];
+    const sorted = [...tbs]
+      .filter((tb) => typeof tb !== 'object' || (tb as any).enabled !== false)
+      .sort((a, b) => ((a as any).priority ?? 0) - ((b as any).priority ?? 0));
+    sorted.forEach((tb, idx) => {
+      const key = typeof tb === 'string' ? tb : ((tb as any).key || (tb as any).metric || '');
+      const colId = TIEBREAKER_METRIC_TO_COLUMN[key];
+      if (colId && !(colId in map)) map[colId] = idx + 1;
+    });
+    return map;
+  }, [rules?.tiebreakers]);
   const tableMinWidth = 240 + 64 + activeColumns.length * 86;
   const hasLabelControls = !!allLabels?.length && !!onCycleLabel;
 
@@ -542,7 +582,15 @@ export function StandingsTable({
                     className={`${styles.thCenter} ${column.headerClassName || ''}`}
                     style={{ zIndex: 30 }}
                   >
-                    {column.label}
+                    <span className={styles.thLabel}>{column.label}</span>
+                    {tiebreakerColumnMap[column.id] !== undefined && (
+                      <span
+                        className={styles.tiebreakerBadge}
+                        title={`Criterio de desempate #${tiebreakerColumnMap[column.id]}`}
+                      >
+                        {tiebreakerColumnMap[column.id]}
+                      </span>
+                    )}
                   </th>
                 ))}
                 <th className={styles.thRight} style={{ zIndex: 30 }}>
