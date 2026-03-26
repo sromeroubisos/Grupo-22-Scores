@@ -6,12 +6,31 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
 
-export async function proxy(request: NextRequest) {
-    console.log('[Proxy] Request to:', request.nextUrl.pathname);
-    const { pathname, searchParams } = request.nextUrl;
-    const host = request.headers.get('host') || ''
-    const isProd = process.env.NODE_ENV === 'production'
+// Public API routes that do NOT need session refresh in the proxy.
+// Checking auth on these adds 30-40s latency per request for no benefit.
+const PUBLIC_API_PREFIXES = [
+    '/api/matches',
+    '/api/news',
+    '/api/home/',
+    '/api/tournaments',
+    '/api/search',
+    '/api/clubs',
+    '/api/players',
+    '/manifest.json',
+]
 
+function isPublicRoute(pathname: string): boolean {
+    return PUBLIC_API_PREFIXES.some(prefix => pathname.startsWith(prefix))
+}
+
+export async function proxy(request: NextRequest) {
+    const { pathname, searchParams } = request.nextUrl;
+
+    // 1. Skip auth session check for public API routes and static assets.
+    //    This prevents 30-40s latency on every public data fetch.
+    if (isPublicRoute(pathname)) {
+        return NextResponse.next()
+    }
 
     // 2. Auth Code Redirect Handler
     // Supabase redirects to site URL. If root and code present, forward to API handler.

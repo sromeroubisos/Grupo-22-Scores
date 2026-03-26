@@ -12,7 +12,7 @@ type RawAssignment = {
   id?: string;
   label_id?: string;
   club_id?: string | null;
-  position?: number;
+  position?: number | string;
   tournament_id?: string | null;
   phase_id?: string | null;
   group_id?: string | null;

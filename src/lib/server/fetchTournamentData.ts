@@ -6,8 +6,8 @@ const SLUG_LOOKUP_TIMEOUT_MS = 5000;
 const PREFETCH_TIMEOUT_MS = 5000;
 const MATCHES_TIMEOUT_MS = 12000;
 const STANDINGS_TIMEOUT_MS = 12000;
-const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, status, is_visible, slug, ruleset, url, external_id';
-const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, status, is_visible, slug, ruleset, url, external_id';
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, ruleset, url, external_id';
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, ruleset, url, external_id';
 
 export type TournamentQueryErrors = {
     tournament: string | null;
@@ -73,6 +73,7 @@ type TournamentRow = {
     country_id: string | null;
     country_ref: { name?: string } | null;
     logo_url: string | null;
+    banner_url?: string | null;
     status: string | null;
     is_visible: boolean | null;
     slug: string | null;
@@ -263,6 +264,55 @@ async function getTournamentByIdWithSportFallback(
     return result;
 }
 
+/** Same columns as `GET /api/db/tournaments/[id]` — proven to work without joins. */
+const TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY =
+    'id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status';
+const TOURNAMENT_SELECT_MINIMAL_NO_LEGACY =
+    'id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status';
+
+async function getTournamentByIdMinimalFallback(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    tournamentId: string,
+): Promise<SupabaseQueryResult<TournamentRow | null>> {
+    let result: SupabaseQueryResult<TournamentRow | null> = await supabase
+        .from('tournaments')
+        .select(TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY)
+        .eq('id', tournamentId)
+        .maybeSingle();
+
+    if (isMissingColumnError(result.error, 'sport')) {
+        result = await supabase
+            .from('tournaments')
+            .select(TOURNAMENT_SELECT_MINIMAL_NO_LEGACY)
+            .eq('id', tournamentId)
+            .maybeSingle();
+    }
+
+    return result;
+}
+
+/** Last resort: core columns only (avoids failures from optional columns on older DBs). */
+async function getTournamentByIdBareFallback(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    tournamentId: string,
+): Promise<SupabaseQueryResult<TournamentRow | null>> {
+    let result: SupabaseQueryResult<TournamentRow | null> = await supabase
+        .from('tournaments')
+        .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, url')
+        .eq('id', tournamentId)
+        .maybeSingle();
+
+    if (isMissingColumnError(result.error, 'banner_url')) {
+        result = await supabase
+            .from('tournaments')
+            .select('id, name, display_name, logo_url, sport_id, country_id, slug, url')
+            .eq('id', tournamentId)
+            .maybeSingle();
+    }
+
+    return result;
+}
+
 export async function fetchTournamentData(id: string): Promise<TournamentInitialData | null> {
     try {
         const supabase = await getReadClient();
@@ -374,8 +424,36 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             ),
         ]);
 
+        let tournamentRow = tournamentRes.data;
+        let tournamentError = tournamentRes.error;
+
+        // Full select joins `country_ref:countries(name)`; if that fails, we still need name/logo for the UI.
+        if (!tournamentRow && tournamentId) {
+            const minimalRes = await settleSupabaseQuery(
+                'tournament-minimal',
+                getTournamentByIdMinimalFallback(supabase, tournamentId),
+                null as TournamentRow | null,
+            );
+            if (minimalRes.data) {
+                tournamentRow = minimalRes.data;
+                tournamentError = null;
+            }
+        }
+
+        if (!tournamentRow && tournamentId) {
+            const bareRes = await settleSupabaseQuery(
+                'tournament-bare',
+                getTournamentByIdBareFallback(supabase, tournamentId),
+                null as TournamentRow | null,
+            );
+            if (bareRes.data) {
+                tournamentRow = bareRes.data;
+                tournamentError = null;
+            }
+        }
+
         const queryErrors: TournamentQueryErrors = {
-            tournament: tournamentRes.error,
+            tournament: tournamentError,
             participants: participantsRes.error,
             matches: matchesRes.error,
             standings: standingsRes.error,
@@ -385,7 +463,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
         };
 
         const hasAnyData = Boolean(
-            tournamentRes.data ||
+            tournamentRow ||
             participantsRes.data.length ||
             matchesRes.data.length ||
             standingsRes.data.length ||
@@ -405,10 +483,10 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
         return {
             ok: true,
             partial: Object.values(queryErrors).some(Boolean),
-            tournament: tournamentRes.data ? {
-                ...tournamentRes.data,
-                sport_id: tournamentRes.data.sport_id || tournamentRes.data.legacy_sport || 'rugby',
-                country_name: tournamentRes.data.country || (tournamentRes.data.country_ref as { name?: string } | null)?.name || null,
+            tournament: tournamentRow ? {
+                ...tournamentRow,
+                sport_id: tournamentRow.sport_id || tournamentRow.legacy_sport || 'rugby',
+                country_name: tournamentRow.country || (tournamentRow.country_ref as { name?: string } | null)?.name || null,
             } : null,
             participants: participantsRes.data,
             matches: hydratedMatches,

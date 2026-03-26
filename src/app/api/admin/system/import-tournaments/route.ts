@@ -100,7 +100,7 @@ export async function POST(request: Request) {
                 url: t.url,
                 is_api_managed: true, // Force mark as API managed
                 data_source: 'external_static_import',
-                priority: t.priority,
+                priority: t.priority ?? undefined,
                 country_id: t.countryId,
                 sport_id: (t.sportId as string | null | undefined) ?? null,
                 slug: existingTournament?.slug || t.id, // Fallback to id

@@ -124,7 +124,7 @@ export default async function NewEntityPage({ searchParams }: NewEntityPageProps
         tournament: { id: '', name: '', season_id: null, region: null, status: 'draft' } as Partial<Database['public']['Tables']['tournaments']['Row']>,
         club: { id: '', name: '', city: null, union_id: null, logo_url: null },
         match: { id: '', date_time: '', home_club_id: null, away_club_id: null, venue: null, status: 'scheduled' } as Database['public']['Tables']['matches']['Row'],
-        player: { id: '', name: '', club_id: null, position: null, nationality: null } as PlayerData,
+        player: { id: '', name: '', club_id: undefined, position: undefined, nationality: undefined } as PlayerData,
         union: { id: '', name: '', country: null, branding: {} },
     };
 

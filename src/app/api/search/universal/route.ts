@@ -88,14 +88,14 @@ export async function GET(request: Request) {
         const rawResults: SearchResult[] = [];
 
         if (tournamentsRes.data) {
-            rawResults.push(...(tournamentsRes.data as TournamentSearchRow[]).map((t) => {
+            rawResults.push(...(tournamentsRes.data as any[]).map((t) => {
                 const title = t.display_name || t.name;
                 const sportLabel = t.sport?.name || t.sport_id || 'Torneo';
                 const countryLabel = t.country?.name || t.country_id || 'Internacional';
 
                 return {
                     id: t.id,
-                    type: 'tournament',
+                    type: 'tournament' as const,
                     title,
                     subtitle: `${sportLabel} · ${countryLabel}`,
                     url: `/tournaments/${t.slug || t.id}`,
@@ -106,9 +106,9 @@ export async function GET(request: Request) {
         }
 
         if (clubsRes.data) {
-            rawResults.push(...(clubsRes.data as ClubSearchRow[]).map((c) => ({
+            rawResults.push(...(clubsRes.data as any[]).map((c) => ({
                 id: c.id,
-                type: 'club',
+                type: 'club' as const,
                 title: c.name,
                 subtitle: `Club · ${c.city || c.country || ''}`,
                 url: `/clubs/${c.slug || c.id}`,
@@ -138,7 +138,7 @@ export async function GET(request: Request) {
 
                 rawResults.push({
                     id: `fs-${teamId}`,
-                    type: 'club',
+                    type: 'club' as const,
                     title: name,
                     subtitle: `Club · FlashScore`,
                     url: clubUrl,

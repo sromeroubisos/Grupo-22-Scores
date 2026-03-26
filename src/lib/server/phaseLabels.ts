@@ -5,7 +5,7 @@ import type { GroupLabel } from '@/types/phase-settings';
 const DEFAULT_LABEL_COLOR = '#00a365';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-type LabelRow = Database['public']['Tables']['ui_labels']['Row'];
+type LabelRow = { id: string; name: string; color: string; scope: string };
 type PhaseSettingsRecord = Record<string, unknown>;
 
 function isUuid(value: string | undefined): value is string {
@@ -37,9 +37,9 @@ export function normalizePhaseLabels(input: unknown): GroupLabel[] {
           ? candidate.color.trim()
           : DEFAULT_LABEL_COLOR,
         autoColorIndex: typeof candidate.autoColorIndex === 'number' ? candidate.autoColorIndex : index,
-      } satisfies GroupLabel;
+      } as GroupLabel;
     })
-    .filter((label): label is GroupLabel => Boolean(label));
+    .filter(Boolean) as GroupLabel[];
 }
 
 export async function syncPhaseLabels(
@@ -56,10 +56,10 @@ export async function syncPhaseLabels(
   const existingById = new Map<string, LabelRow>();
 
   if (existingIds.length > 0) {
-    const { data, error } = await supabase
-      .from('ui_labels')
+    const { data, error } = (await supabase
+      .from('ui_labels' as any)
       .select('*')
-      .in('id', existingIds);
+      .in('id', existingIds)) as { data: LabelRow[] | null; error: any };
 
     if (error) throw error;
     (data || []).forEach((label) => existingById.set(label.id, label));
@@ -71,12 +71,12 @@ export async function syncPhaseLabels(
     if (isUuid(label.id) && existingById.has(label.id)) {
       const existing = existingById.get(label.id)!;
       if (existing.name !== label.name || existing.color !== label.color || existing.scope !== 'standings') {
-        const { data, error } = await supabase
-          .from('ui_labels')
+        const { data, error } = (await supabase
+          .from('ui_labels' as any)
           .update({ name: label.name, color: label.color, scope: 'standings' })
           .eq('id', label.id)
           .select('*')
-          .single();
+          .single()) as { data: LabelRow; error: any };
 
         if (error) throw error;
         synced.push({ ...label, id: data.id, color: data.color, name: data.name });
@@ -86,11 +86,11 @@ export async function syncPhaseLabels(
       continue;
     }
 
-    const { data, error } = await supabase
-      .from('ui_labels')
+    const { data, error } = (await supabase
+      .from('ui_labels' as any)
       .insert({ name: label.name, color: label.color, scope: 'standings' })
       .select('*')
-      .single();
+      .single()) as { data: LabelRow; error: any };
 
     if (error) throw error;
     synced.push({ ...label, id: data.id, color: data.color, name: data.name });

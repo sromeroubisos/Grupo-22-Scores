@@ -7,6 +7,7 @@ type TournamentLookupRow = {
     name: string | null;
     display_name: string | null;
     logo_url: string | null;
+    banner_url?: string | null;
     sport_id: string | null;
     legacy_sport?: string | null;
     country_id: string | null;
@@ -15,8 +16,8 @@ type TournamentLookupRow = {
     status: string | null;
 };
 
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, is_visible, status';
 
 export async function GET(
     _req: NextRequest,
@@ -42,6 +43,23 @@ export async function GET(
             .select(SELECT_WITHOUT_LEGACY_SPORT)
             .or(`id.eq.${id},slug.eq.${id}`)
             .maybeSingle();
+    }
+
+    if (isMissingColumnError(queryResult.error, 'banner_url')) {
+        const SELECT_LEGACY_NO_BANNER = SELECT_WITH_LEGACY_SPORT.replace(', banner_url', '');
+        const SELECT_NO_LEGACY_NO_BANNER = SELECT_WITHOUT_LEGACY_SPORT.replace(', banner_url', '');
+        queryResult = await supabase
+            .from('tournaments')
+            .select(SELECT_LEGACY_NO_BANNER)
+            .or(`id.eq.${id},slug.eq.${id}`)
+            .maybeSingle();
+        if (isMissingColumnError(queryResult.error, 'sport')) {
+            queryResult = await supabase
+                .from('tournaments')
+                .select(SELECT_NO_LEGACY_NO_BANNER)
+                .or(`id.eq.${id},slug.eq.${id}`)
+                .maybeSingle();
+        }
     }
 
     const { data, error } = queryResult;

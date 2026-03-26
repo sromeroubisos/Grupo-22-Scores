@@ -214,8 +214,8 @@ export async function GET(request: NextRequest) {
       (columns) => {
         let query = readClient
           .from('matches')
-          .select(columns, { count: 'exact' })
-          .order('date_time', { ascending: false });
+          .select(columns, { count: 'exact' }) as any;
+        query = query.order('date_time', { ascending: false });
 
         if (status !== 'all') {
           query = query.eq('status', status);
@@ -255,7 +255,7 @@ export async function GET(request: NextRequest) {
           (columns) => readClient
             .from('tournaments')
             .select(columns)
-            .in('id', tournamentIds),
+            .in('id', tournamentIds) as any,
           [
             'id, name, sport_id, sport, season_id',
             'id, name, sport_id, season_id',
@@ -272,7 +272,7 @@ export async function GET(request: NextRequest) {
           (columns) => readClient
             .from('clubs')
             .select(columns)
-            .in('id', clubIds),
+            .in('id', clubIds) as any,
           [
             'id, name, logo_url, primary_color, sport, sport_id',
             'id, name, logo_url, primary_color, sport_id',

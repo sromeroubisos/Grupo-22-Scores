@@ -272,7 +272,7 @@ export default function PhaseCreator({
 
                 // Adjust index based on your expected column layout
                 // 0: Round, 1: Date, 2: Time, 3: Home, 4: Away, 5: Venue
-                const round = parseInt(row[0]) || 1;
+                const round = parseInt(String(row[0])) || 1;
                 const date = row[1] ? String(row[1]) : '';
                 const time = row[2] ? String(row[2]) : '';
                 const homeName = row[3] ? String(row[3]) : '';
@@ -635,7 +635,7 @@ export default function PhaseCreator({
 
             // Handle number fields specially to avoid NaN
             if (field === 'fromPosition' || field === 'toPosition') {
-                const numValue = parseInt(value);
+                const numValue = parseInt(String(value));
                 return { ...t, [field]: isNaN(numValue) ? 1 : numValue };
             }
 

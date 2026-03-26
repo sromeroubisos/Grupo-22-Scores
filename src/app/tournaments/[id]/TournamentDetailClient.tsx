@@ -545,13 +545,13 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             name: tournament.display_name || tournament.name || 'Torneo',
             sportId: tournament.sport_id || 'rugby',
             countryId: tournament.country_id || 'international',
-            logoUrl: tournament.logo_url || '',
+            logoUrl: tournament.logo_url || tournament.banner_url || '',
             ruleset: tournament.ruleset ?? null,
             url: tournament.url || '',
             type: 'league',
             categories: [],
             priority: 0,
-            __isDbOnly: true,
+            __isDbOnly: !tournament.url,
         } : null,
         results: allMatches.filter((match: any) => match.status === 'finished'),
         fixtures: allMatches.filter((match: any) => match.status !== 'finished'),
@@ -648,10 +648,15 @@ export default function TournamentDetailPage({
         const shouldPreferDbSource = !!initialData?.ok;
 
         async function fetchData() {
-            // Full server prefetch: no need for an immediate client round-trip.
+            // Skip refetch when SSR already has a real name; still run when logo is missing so `/api/db/tournaments/[id]` can fill `banner_url`.
             if (preloaded && !shouldRetryDbSnapshot) {
-                setLoading(false);
-                return;
+                const meta = preloaded.tournamentMeta;
+                const hasName = Boolean(meta?.name) && meta?.name !== 'Cargando...';
+                const hasLogo = Boolean(String(meta?.logoUrl || '').trim());
+                if (hasName && hasLogo) {
+                    setLoading(false);
+                    return;
+                }
             }
             setLoading(!preloaded);
             let localTournament: any = null;
@@ -745,8 +750,50 @@ export default function TournamentDetailPage({
 
                     if (dbData.ok) {
                         const snapshot = buildDbTournamentSnapshot(dbData, id);
+                        let tournamentMeta = snapshot.tournamentMeta;
+
+                        // Fallback: join-heavy prefetch can miss the row; this route matches the admin list API.
+                        const needsHeaderFix =
+                            !tournamentMeta ||
+                            tournamentMeta.name === 'Cargando...' ||
+                            !String(tournamentMeta.logoUrl || '').trim();
+                        if (needsHeaderFix && !controller.signal.aborted) {
+                            try {
+                                const metaRes = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}`, {
+                                    cache: 'no-store',
+                                    signal: controller.signal,
+                                });
+                                if (metaRes.ok) {
+                                    const metaJson = await metaRes.json();
+                                    const t = metaJson?.tournament;
+                                    if (t) {
+                                        const dbStoredUrl = (t as any).url || (dbData.tournament as any)?.url || '';
+                                        const resolvedName = (t as any).display_name || (t as any).name || tournamentMeta?.name || 'Torneo';
+                                        const resolvedLogo =
+                                            (t as any).logo_url || (t as any).banner_url || tournamentMeta?.logoUrl || '';
+                                        tournamentMeta = {
+                                            id: t.id || id,
+                                            name: resolvedName,
+                                            sportId: (t as any).sport_id || tournamentMeta?.sportId || 'rugby',
+                                            countryId: (t as any).country_id || tournamentMeta?.countryId || 'international',
+                                            logoUrl: resolvedLogo,
+                                            ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
+                                            url: dbStoredUrl,
+                                            type: 'league',
+                                            categories: [],
+                                            priority: 0,
+                                            __isDbOnly: !dbStoredUrl,
+                                        };
+                                        if (resolvedLogo) setCachedLogo(String(t.id || id), resolvedLogo);
+                                    }
+                                }
+                            } catch {
+                                /* ignore */
+                            }
+                        }
+
                         if (!controller.signal.aborted) {
-                            setTournamentData(snapshot.tournamentMeta ?? localTournament);
+                            setTournamentData(tournamentMeta ?? localTournament);
                             setDbParticipants(snapshot.dbParticipants);
                             setDbTeamLabels(snapshot.dbTeamLabels);
                             setResults(snapshot.results);
@@ -760,6 +807,35 @@ export default function TournamentDetailPage({
 
                     }
                     return; // Skip FlashScore for DB-only tournaments
+                }
+
+                // Local DB metadata for UUID/slug routes that also use a FlashScore URL (fixture from API, nombre/logo desde Supabase).
+                if (!id.toLowerCase().startsWith('fs-')) {
+                    try {
+                        const metaRes = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}`, {
+                            cache: 'no-store',
+                            signal: controller.signal,
+                        });
+                        if (metaRes.ok) {
+                            const metaJson = await metaRes.json();
+                            const t = metaJson?.tournament;
+                            if (t) {
+                                const nextName = (t as any).display_name || (t as any).name;
+                                const nextLogo = (t as any).logo_url || (t as any).banner_url || '';
+                                if (nextLogo) setCachedLogo(String((t as any).id || id), nextLogo);
+                                setTournamentData((prev: any) => ({
+                                    ...(prev || {}),
+                                    id: (t as any).id || id,
+                                    name: nextName || prev?.name,
+                                    logoUrl: nextLogo || prev?.logoUrl || '',
+                                    sportId: (t as any).sport_id || prev?.sportId || 'rugby',
+                                    countryId: (t as any).country_id || prev?.countryId || 'international',
+                                }));
+                            }
+                        }
+                    } catch {
+                        /* ignore */
+                    }
                 }
 
                 const finalUrl = localTournament?.url || urlParam;
