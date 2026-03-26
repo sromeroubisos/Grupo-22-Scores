@@ -985,6 +985,23 @@
     color: var(--fl-text);
     min-width: 0;
 }
+.colTeamMeta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+.colTeamName {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .colVal {
     width: 30px;
     text-align: center;
@@ -1169,6 +1186,61 @@
 }
 
 .standingsContainer { margin-top: 4px; }
+
+.standingsLegend {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: var(--fl-radius-sm);
+    border: 1px solid var(--fl-border);
+    background: rgba(255, 255, 255, 0.025);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.standingsLegendTitle {
+    flex-shrink: 0;
+    padding-top: 2px;
+    font-size: 0.63rem;
+    font-weight: 700;
+    color: var(--fl-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--fl-mono);
+}
+
+.standingsLegendItems {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    min-width: 0;
+}
+
+.standingsLegendItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.standingsLegendSwatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    border: 1px solid var(--standings-legend-border, rgba(255, 255, 255, 0.2));
+    background: var(--standings-legend-bg, rgba(255, 255, 255, 0.08));
+    box-shadow: inset 0 0 0 4px var(--standings-legend-accent, rgba(255, 255, 255, 0.9));
+}
+
+.standingsLegendText {
+    min-width: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--fl-text-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
 
 /* Group standings */
 .groupsStack {
@@ -1463,7 +1535,16 @@
     .colValDG { width: 28px; }
     .colPts { width: 34px; font-size: 0.82rem; }
     .colTeam { font-size: 0.8rem; gap: 8px; }
+    .colTeamMeta { gap: 3px; }
     .teamLogo { width: 18px; height: 18px; }
+    .standingsLegend {
+        padding: 10px 12px;
+        gap: 10px;
+        flex-direction: column;
+    }
+    .standingsLegendTitle { padding-top: 0; }
+    .standingsLegendItems { gap: 8px 12px; }
+    .standingsLegendText { font-size: 0.66rem; }
 
     /* ── Info card ── */
     .infoCardHeader { padding: 11px 16px; }

@@ -552,8 +552,23 @@ export default function SuperCreateTournament() {
                 await supabase.from('tournament_participants').delete().eq('tournament_id', savedId);
             }
             if (selectedClubs.length > 0) {
-                await supabase.from('tournament_participants').insert(
-                    selectedClubs.map(clubId => ({ tournament_id: savedId, club_id: clubId }))
+                await Promise.all(
+                    selectedClubs.map(async (clubId) => {
+                        const response = await fetch(`/api/tournaments/${savedId}/participants`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                club_id: clubId,
+                                type: 'club',
+                                status: 'active',
+                            }),
+                        });
+
+                        const payload = await response.json().catch(() => null);
+                        if (!response.ok) {
+                            throw new Error(payload?.error || 'No se pudo agregar un participante al torneo.');
+                        }
+                    })
                 );
             }
 

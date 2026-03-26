@@ -7,22 +7,44 @@ export type ExportFormat = '1080x1350' | '1080x1920';
 export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats';
 type ExportDateValue = string | number | Date;
 type MatchExportMode = 'schedule' | 'result';
+type StandingsExportMode = 'table' | 'groups';
+
+interface StandingsRowData {
+    pos: number;
+    team: string;
+    teamLogo?: string;
+    labelName?: string;
+    zoneColor?: string;
+    played: number;
+    won: number;
+    lost: number;
+    diff: string;
+    points: number;
+}
+
+interface StandingsGroupData {
+    name: string;
+    rows: StandingsRowData[];
+}
+
+interface StandingsSlideGroupData extends StandingsGroupData {
+    continuedFromPrevious?: boolean;
+    continuesOnNext?: boolean;
+}
+
+interface StandingsSlideData {
+    groups: StandingsSlideGroupData[];
+    pageNumber: number;
+    totalPages: number;
+    totalRows: number;
+}
 
 interface StandingsData {
     title: string;
     subtitle: string;
     tournamentLogo?: string;
-    rows: Array<{
-        pos: number;
-        team: string;
-        teamLogo?: string;
-        zoneColor?: string;
-        played: number;
-        won: number;
-        lost: number;
-        diff: string;
-        points: number;
-    }>;
+    rows: StandingsRowData[];
+    groups?: StandingsGroupData[];
 }
 
 interface DailyMatchesData {
@@ -125,6 +147,7 @@ const EXPORT_PALETTES: ExportPalette[] = [
 const DEFAULT_PALETTE = EXPORT_PALETTES[0];
 const DEFAULT_TIMEZONE_PRESET_ID = 'buenos-aires-ar';
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = -180;
+const MAX_STANDINGS_ROWS_PER_SLIDE = 16;
 const MATCH_EXPORT_MODE_OPTIONS: Array<{ value: MatchExportMode; label: string; description: string }> = [
     { value: 'schedule', label: 'Horario', description: 'Muestra la programacion del partido' },
     { value: 'result', label: 'Resultado', description: 'Muestra el marcador cargado' },
@@ -182,6 +205,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const [isTimeZoneDropdownOpen, setIsTimeZoneDropdownOpen] = useState(false);
     const [matchExportMode, setMatchExportMode] = useState<MatchExportMode>(defaultMatchExportMode);
     const [isMatchModeDropdownOpen, setIsMatchModeDropdownOpen] = useState(false);
+    const groupedStandings = useMemo(
+        () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
+        [data, template]
+    );
+    const preferredStandingsExportMode: StandingsExportMode = groupedStandings.length > 0 ? 'groups' : 'table';
+    const [standingsExportMode, setStandingsExportMode] = useState<StandingsExportMode>(preferredStandingsExportMode);
     const [detectedUserOffsetMinutes, setDetectedUserOffsetMinutes] = useState(DEFAULT_TIMEZONE_OFFSET_MINUTES);
     const [selectedPaletteId, setSelectedPaletteId] = useState(DEFAULT_PALETTE.id);
     const [accentColor, setAccentColor] = useState(DEFAULT_PALETTE.accent);
@@ -199,6 +228,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     useEffect(() => {
         setMatchExportMode(defaultMatchExportMode);
     }, [defaultMatchExportMode]);
+
+    useEffect(() => {
+        setStandingsExportMode(preferredStandingsExportMode);
+    }, [preferredStandingsExportMode]);
 
     useEffect(() => {
         if (!showModal) {
@@ -228,6 +261,19 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         () => buildDetectedTimeZoneLabel(detectedUserOffsetMinutes),
         [detectedUserOffsetMinutes]
     );
+    const standingsExportData = useMemo(
+        () => template === 'standings'
+            ? buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as StandingsData
+            : null,
+        [customTournamentName, data, selectedTimeZonePreset, template]
+    );
+    const standingsSlides = useMemo(
+        () => standingsExportData ? buildStandingsSlides(standingsExportData, standingsExportMode) : [],
+        [standingsExportData, standingsExportMode]
+    );
+    const exportActionLabel = template === 'standings' && standingsSlides.length > 1
+        ? `Exportar ${standingsSlides.length} imagenes`
+        : 'Exportar imagen';
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -273,7 +319,22 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);
                 await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'standings') {
-                await drawStandings(ctx, canvas, exportData as StandingsData, config, accentColor, bgColor, brandLogo);
+                const standingsData = exportData as StandingsData;
+                const slides = buildStandingsSlides(standingsData, standingsExportMode);
+                if (slides.length === 0) throw new Error('No hay filas para exportar');
+
+                for (const [index, slide] of slides.entries()) {
+                    setStatus(slides.length > 1 ? `Generando ${index + 1}/${slides.length}...` : 'Generando...');
+                    await drawStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                    await downloadCanvas(canvas, buildExportFilename(filename, template, format, index + 1, slides.length));
+                    if (index < slides.length - 1) {
+                        await wait(140);
+                    }
+                }
+
+                setStatus(slides.length > 1 ? `Listo (${slides.length} imagenes)` : 'Listo');
+                window.setTimeout(() => setStatus(''), 2600);
+                return;
             } else if (template === 'dailyMatches') {
                 const matchesData = exportData as DailyMatchesData;
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
@@ -282,11 +343,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 await drawPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
             }
 
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = `${filename}-${template}-${format}.png`;
-            link.href = dataUrl;
-            link.click();
+            await downloadCanvas(canvas, buildExportFilename(filename, template, format));
             setStatus('Listo');
             window.setTimeout(() => setStatus(''), 2000);
         } catch (error) {
@@ -478,6 +535,40 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                 </div>
                             )}
 
+                            {template === 'standings' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Modo de tabla</label>
+                                    <div className={styles.formatOptions}>
+                                        <button
+                                            className={`${styles.formatBtn} ${standingsExportMode === 'table' ? styles.active : ''}`}
+                                            onClick={() => setStandingsExportMode('table')}
+                                            type="button"
+                                        >
+                                            Tabla corrida
+                                        </button>
+                                        {groupedStandings.length > 0 && (
+                                            <button
+                                                className={`${styles.formatBtn} ${standingsExportMode === 'groups' ? styles.active : ''}`}
+                                                onClick={() => setStandingsExportMode('groups')}
+                                                type="button"
+                                            >
+                                                Dividir por grupos
+                                            </button>
+                                        )}
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        Maximo 16 equipos por imagen.
+                                        {standingsExportMode === 'groups' && groupedStandings.length > 0
+                                            ? ' Los grupos se mantienen separados y continuan en otra imagen cuando hace falta.'
+                                            : ' Si la tabla supera el limite, se reparte automaticamente en varias imagenes.'}
+                                    </p>
+                                    <div className={styles.timeZoneSummary}>
+                                        <span className={styles.timeZoneSummaryLabel}>Descarga estimada</span>
+                                        <strong>{standingsSlides.length || 1} imagen{(standingsSlides.length || 1) === 1 ? '' : 'es'}</strong>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className={styles.modalSection}>
                                 <label className={styles.modalLabel}>Paleta de colores</label>
                                 <div className={styles.paletteGrid}>
@@ -524,7 +615,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                 disabled={template === 'dailyMatches' && selectedMatchIndices.size === 0}
                                 type="button"
                             >
-                                Exportar imagen
+                                {exportActionLabel}
                             </button>
                         </div>
                     </div>
@@ -564,6 +655,153 @@ function applyMatchExportMode(data: MatchStatsData, mode: MatchExportMode): Matc
         status: 'final',
         mainTitle: 'Resultado',
     };
+}
+
+function getExportableStandingsRows(data: StandingsData): StandingsRowData[] {
+    if (Array.isArray(data.rows) && data.rows.length > 0) {
+        return data.rows.filter(Boolean);
+    }
+
+    return getExportableStandingsGroups(data).flatMap((group) => group.rows);
+}
+
+function getExportableStandingsGroups(data: StandingsData): StandingsGroupData[] {
+    if (!Array.isArray(data.groups)) return [];
+
+    return data.groups
+        .map((group) => ({
+            name: typeof group?.name === 'string' ? group.name.trim() : '',
+            rows: Array.isArray(group?.rows) ? group.rows.filter(Boolean) : [],
+        }))
+        .filter((group) => group.rows.length > 0);
+}
+
+function buildStandingsSlides(data: StandingsData, mode: StandingsExportMode): StandingsSlideData[] {
+    if (mode === 'groups') {
+        const groups = getExportableStandingsGroups(data);
+        if (groups.length > 0) {
+            const draftSlides: Array<{ groups: StandingsSlideGroupData[]; totalRows: number }> = [];
+            let currentGroups: StandingsSlideGroupData[] = [];
+            let currentRowCount = 0;
+
+            const pushCurrentSlide = () => {
+                if (currentGroups.length === 0) return;
+                draftSlides.push({ groups: currentGroups, totalRows: currentRowCount });
+                currentGroups = [];
+                currentRowCount = 0;
+            };
+
+            groups.forEach((group) => {
+                let offset = 0;
+
+                while (offset < group.rows.length) {
+                    if (currentRowCount >= MAX_STANDINGS_ROWS_PER_SLIDE) {
+                        pushCurrentSlide();
+                    }
+
+                    let availableRows = MAX_STANDINGS_ROWS_PER_SLIDE - currentRowCount;
+                    const remainingRows = group.rows.length - offset;
+
+                    if (currentRowCount > 0 && remainingRows <= MAX_STANDINGS_ROWS_PER_SLIDE && remainingRows > availableRows) {
+                        pushCurrentSlide();
+                        availableRows = MAX_STANDINGS_ROWS_PER_SLIDE;
+                    }
+
+                    const take = Math.min(remainingRows, availableRows);
+                    currentGroups.push({
+                        name: group.name,
+                        rows: group.rows.slice(offset, offset + take),
+                        continuedFromPrevious: offset > 0,
+                        continuesOnNext: offset + take < group.rows.length,
+                    });
+                    currentRowCount += take;
+                    offset += take;
+                }
+            });
+
+            pushCurrentSlide();
+
+            return draftSlides.map((slide, index, allSlides) => ({
+                ...slide,
+                pageNumber: index + 1,
+                totalPages: allSlides.length,
+            }));
+        }
+    }
+
+    const rows = getExportableStandingsRows(data);
+    if (rows.length === 0) return [];
+
+    const slides: StandingsSlideData[] = [];
+    for (let index = 0; index < rows.length; index += MAX_STANDINGS_ROWS_PER_SLIDE) {
+        const chunk = rows.slice(index, index + MAX_STANDINGS_ROWS_PER_SLIDE);
+        slides.push({
+            groups: [{ name: '', rows: chunk }],
+            pageNumber: slides.length + 1,
+            totalPages: 0,
+            totalRows: chunk.length,
+        });
+    }
+
+    return slides.map((slide, index, allSlides) => ({
+        ...slide,
+        pageNumber: index + 1,
+        totalPages: allSlides.length,
+    }));
+}
+
+function buildStandingsSlideSubtitle(subtitle: string, slide: StandingsSlideData): string {
+    const baseSubtitle = subtitle?.trim() || '';
+    if (slide.totalPages <= 1) return baseSubtitle;
+    if (!baseSubtitle) return `Pagina ${slide.pageNumber}/${slide.totalPages}`;
+    return `${baseSubtitle} | ${slide.pageNumber}/${slide.totalPages}`;
+}
+
+function formatStandingsGroupLabel(group: StandingsSlideGroupData): string {
+    const name = group.name.trim();
+    if (!name) return '';
+    return group.continuedFromPrevious ? `${name.toUpperCase()} (CONT.)` : name.toUpperCase();
+}
+
+async function downloadCanvas(canvas: HTMLCanvasElement, downloadName: string) {
+    const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((value) => {
+            if (value) {
+                resolve(value);
+                return;
+            }
+
+            reject(new Error('No se pudo generar la imagen'));
+        }, 'image/png');
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = downloadName;
+    link.href = url;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function buildExportFilename(
+    filename: string,
+    template: ExportTemplate,
+    format: ExportFormat,
+    pageNumber?: number,
+    totalPages?: number
+) {
+    const base = `${filename}-${template}-${format}`;
+    if (!pageNumber || !totalPages || totalPages <= 1) {
+        return `${base}.png`;
+    }
+
+    return `${base}-${String(pageNumber).padStart(2, '0')}.png`;
+}
+
+function wait(ms: number) {
+    return new Promise<void>((resolve) => {
+        window.setTimeout(resolve, ms);
+    });
 }
 
 function getBrowserOffsetMinutes(): number {
@@ -837,6 +1075,17 @@ function setFittedFont(ctx: CanvasRenderingContext2D, text: string, maxWidth: nu
     return currentSize;
 }
 
+function truncateTextToWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+
+    let current = text.trim();
+    while (current.length > 1 && ctx.measureText(`${current}...`).width > maxWidth) {
+        current = current.slice(0, -1).trimEnd();
+    }
+
+    return current.length > 1 ? `${current}...` : text;
+}
+
 function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean) {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -933,6 +1182,44 @@ function drawCenteredPill(
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, centerX, y + height / 2 + 1);
+    ctx.restore();
+}
+
+function drawStandingsLabelPill(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    centerY: number,
+    text: string,
+    color: string,
+    isDark: boolean,
+    rowHeight: number,
+    maxWidth: number,
+) {
+    const label = text.trim().toUpperCase();
+    if (!label || maxWidth <= 42) return;
+
+    const fontSize = Math.max(10, Math.min(14, Math.round(rowHeight * 0.24)));
+    const pillHeight = Math.max(18, Math.min(24, Math.round(rowHeight * 0.44)));
+    const horizontalPadding = Math.max(10, Math.round(rowHeight * 0.24));
+
+    ctx.save();
+    ctx.font = `800 ${fontSize}px ${FONT_BODY}`;
+    const safeText = truncateTextToWidth(ctx, label, Math.max(24, maxWidth - horizontalPadding * 2));
+    const pillWidth = Math.min(maxWidth, ctx.measureText(safeText).width + horizontalPadding * 2);
+    const pillY = centerY - pillHeight / 2;
+
+    ctx.fillStyle = hexToRGBA(color, isDark ? 0.2 : 0.12);
+    ctx.strokeStyle = hexToRGBA(color, isDark ? 0.36 : 0.22);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x, pillY, pillWidth, pillHeight, pillHeight / 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    ctx.fillText(safeText, x + pillWidth / 2, centerY + 1);
     ctx.restore();
 }
 
@@ -1196,6 +1483,7 @@ async function drawStandings(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: StandingsData,
+    slide: StandingsSlideData,
     format: CanvasFormat,
     accentColor: string,
     bgColor: string,
@@ -1207,11 +1495,12 @@ async function drawStandings(
     const softColor = getMutedColor(isDark, 0.1);
     const safe = getSafeArea(canvas);
     const isStory = format.height > format.width;
-    const visibleRows = data.rows.slice(0, isStory ? 14 : 11);
+    const slideRows = slide.groups.flatMap((group) => group.rows);
     const [tournamentLogo, ...teamLogos] = await Promise.all([
         loadImage(data.tournamentLogo || ''),
-        ...visibleRows.map((row) => loadImage(row.teamLogo || '')),
+        ...slideRows.map((row) => loadImage(row.teamLogo || '')),
     ]);
+    const subtitleText = buildStandingsSlideSubtitle(data.subtitle, slide);
 
     drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
     drawCenteredPill(
@@ -1231,7 +1520,7 @@ async function drawStandings(
     ctx.textAlign = 'center';
     ctx.fillStyle = mutedColor;
     ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
-    ctx.fillText(data.subtitle, safe.centerX, isStory ? 208 : 178);
+    ctx.fillText(subtitleText, safe.centerX, isStory ? 208 : 178);
     ctx.restore();
 
     const panelX = isStory ? 46 : 54;
@@ -1267,63 +1556,129 @@ async function drawStandings(
 
     const bodyTop = headerY + 46;
     const bodyBottom = panelY + panelHeight - 24;
-    const rowHeight = Math.min(isStory ? 82 : 74, (bodyBottom - bodyTop) / Math.max(visibleRows.length, 1));
+    const hasGroupHeaders = slide.groups.some((group) => group.name);
+    const groupTitleHeight = hasGroupHeaders ? (isStory ? 34 : 30) : 0;
+    const groupTitleGap = hasGroupHeaders ? (isStory ? 10 : 8) : 0;
+    const interGroupGap = hasGroupHeaders ? (isStory ? 12 : 10) : 0;
+    const reservedGroupSpace = slide.groups.reduce((total, group, index) => {
+        if (!group.name) return total;
+        return total + groupTitleHeight + groupTitleGap + (index > 0 ? interGroupGap : 0);
+    }, 0);
+    const rawRowHeight = (bodyBottom - bodyTop - reservedGroupSpace) / Math.max(slide.totalRows, 1);
+    const rowHeight = Math.max(isStory ? 32 : 28, Math.min(isStory ? 68 : 60, rawRowHeight));
+    const logoSize = Math.max(24, Math.min(isStory ? 42 : 38, rowHeight - (isStory ? 22 : 18)));
+    const posFontSize = Math.max(18, Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.42)));
+    const statFontSize = Math.max(14, Math.min(isStory ? 24 : 20, Math.round(rowHeight * 0.34)));
+    const pointsFontSize = Math.max(18, Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.4)));
+    const colPosX = panelX + 58;
+    const colTeamX = panelX + 118;
+    const colPlayedX = panelX + panelWidth - 292;
+    const colWonX = panelX + panelWidth - 226;
+    const colLostX = panelX + panelWidth - 160;
+    const colDiffX = panelX + panelWidth - 94;
+    const colPointsX = panelX + panelWidth - 38;
+    const teamTextX = colTeamX + logoSize + 24;
+    const teamMaxWidth = colPlayedX - teamTextX - 26;
+    let logoIndex = 0;
+    let rowIndex = 0;
+    let cursorY = bodyTop;
 
-    visibleRows.forEach((row, index) => {
-        const y = bodyTop + index * rowHeight;
-        const centerY = y + rowHeight / 2;
-        const rowBg = index % 2 === 0 ? hexToRGBA(accentColor, isDark ? 0.05 : 0.035) : 'transparent';
+    slide.groups.forEach((group, groupIndex) => {
+        const groupLabel = formatStandingsGroupLabel(group);
+        if (groupLabel) {
+            if (groupIndex > 0) cursorY += interGroupGap;
 
-        ctx.save();
-        if (rowBg !== 'transparent') {
-            ctx.fillStyle = rowBg;
+            ctx.save();
+            ctx.font = `800 ${isStory ? 18 : 16}px ${FONT_BODY}`;
+            const pillWidth = Math.min(panelWidth - 48, ctx.measureText(groupLabel).width + 28);
+            ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.16 : 0.12);
             ctx.beginPath();
-            ctx.roundRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4, 20);
+            ctx.roundRect(panelX + 24, cursorY, pillWidth, groupTitleHeight, 999);
             ctx.fill();
-        }
-        if (row.zoneColor) {
-            ctx.fillStyle = row.zoneColor;
-            ctx.beginPath();
-            ctx.roundRect(panelX + 20, y + 8, 6, rowHeight - 16, 999);
-            ctx.fill();
+            ctx.fillStyle = accentColor;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(groupLabel, panelX + 38, cursorY + groupTitleHeight / 2 + 1);
+            ctx.restore();
+
+            cursorY += groupTitleHeight + groupTitleGap;
         }
 
-        ctx.fillStyle = accentColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = `800 ${isStory ? 28 : 24}px ${FONT_MONO}`;
-        ctx.fillText(String(row.pos), panelX + 58, centerY + 1);
+        group.rows.forEach((row) => {
+            const y = cursorY;
+            const centerY = y + rowHeight / 2;
+            const rowBg = rowIndex % 2 === 0 ? hexToRGBA(accentColor, isDark ? 0.05 : 0.035) : 'transparent';
+            const rowLabel = row.labelName?.trim() || '';
+            const rowLabelColor = row.zoneColor || accentColor;
 
-        drawLogoBadge(ctx, {
-            x: panelX + 118 + (isStory ? 26 : 24),
-            y: centerY,
-            size: isStory ? 42 : 38,
-            img: teamLogos[index] || null,
-            label: row.team,
-            rawLogo: row.teamLogo,
-            isDark,
+            ctx.save();
+            if (rowBg !== 'transparent') {
+                ctx.fillStyle = rowBg;
+                ctx.beginPath();
+                ctx.roundRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4, 20);
+                ctx.fill();
+            }
+            if (row.zoneColor) {
+                ctx.fillStyle = row.zoneColor;
+                ctx.beginPath();
+                ctx.roundRect(panelX + 20, y + Math.max(6, rowHeight * 0.14), 6, Math.max(14, rowHeight - 16), 999);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = accentColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `800 ${posFontSize}px ${FONT_MONO}`;
+            ctx.fillText(String(row.pos), colPosX, centerY + 1);
+
+            drawLogoBadge(ctx, {
+                x: colTeamX + logoSize / 2,
+                y: centerY,
+                size: logoSize,
+                img: teamLogos[logoIndex] || null,
+                label: row.team,
+                rawLogo: row.teamLogo,
+                isDark,
+            });
+            logoIndex += 1;
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = textColor;
+            ctx.textBaseline = 'middle';
+            const labelFontSize = Math.max(10, Math.min(14, Math.round(rowHeight * 0.24)));
+            let labelWidth = 0;
+            if (rowLabel) {
+                ctx.font = `800 ${labelFontSize}px ${FONT_BODY}`;
+                labelWidth = Math.min(Math.max(56, ctx.measureText(rowLabel.toUpperCase()).width + 22), Math.max(72, teamMaxWidth * 0.42));
+            }
+            const teamTextWidth = Math.max(64, teamMaxWidth - (rowLabel ? labelWidth + 12 : 0));
+            setFittedFont(ctx, row.team.toUpperCase(), teamTextWidth, '800', Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.38)), FONT_DISPLAY, 14);
+            ctx.fillText(row.team.toUpperCase(), teamTextX, centerY + 1);
+            if (rowLabel) {
+                const renderedTeamWidth = ctx.measureText(row.team.toUpperCase()).width;
+                const labelX = Math.min(teamTextX + renderedTeamWidth + 12, colPlayedX - labelWidth - 12);
+                drawStandingsLabelPill(ctx, labelX, centerY, rowLabel, rowLabelColor, isDark, rowHeight, labelWidth);
+            }
+
+            ctx.textAlign = 'center';
+            ctx.font = `700 ${statFontSize}px ${FONT_BODY}`;
+            ctx.fillText(String(row.played), colPlayedX, centerY + 1);
+            ctx.fillText(String(row.won), colWonX, centerY + 1);
+            ctx.fillText(String(row.lost), colLostX, centerY + 1);
+
+            const diffText = formatDiff(row.diff);
+            ctx.fillStyle = diffText.startsWith('-') ? '#ef4444' : accentColor;
+            ctx.font = `800 ${statFontSize}px ${FONT_MONO}`;
+            ctx.fillText(diffText, colDiffX, centerY + 1);
+
+            ctx.fillStyle = textColor;
+            ctx.font = `800 ${pointsFontSize}px ${FONT_MONO}`;
+            ctx.fillText(String(row.points), colPointsX, centerY + 1);
+            ctx.restore();
+
+            rowIndex += 1;
+            cursorY += rowHeight;
         });
-
-        ctx.textAlign = 'left';
-        ctx.fillStyle = textColor;
-        setFittedFont(ctx, row.team.toUpperCase(), panelWidth - 520, '800', isStory ? 28 : 24, FONT_DISPLAY, 16);
-        ctx.fillText(row.team.toUpperCase(), panelX + 168, centerY + 1);
-
-        ctx.textAlign = 'center';
-        ctx.font = `700 ${isStory ? 24 : 20}px ${FONT_BODY}`;
-        ctx.fillText(String(row.played), panelX + panelWidth - 292, centerY + 1);
-        ctx.fillText(String(row.won), panelX + panelWidth - 226, centerY + 1);
-        ctx.fillText(String(row.lost), panelX + panelWidth - 160, centerY + 1);
-
-        const diffText = formatDiff(row.diff);
-        ctx.fillStyle = diffText.startsWith('-') ? '#ef4444' : accentColor;
-        ctx.font = `800 ${isStory ? 24 : 20}px ${FONT_MONO}`;
-        ctx.fillText(diffText, panelX + panelWidth - 94, centerY + 1);
-
-        ctx.fillStyle = textColor;
-        ctx.font = `800 ${isStory ? 28 : 24}px ${FONT_MONO}`;
-        ctx.fillText(String(row.points), panelX + panelWidth - 38, centerY + 1);
-        ctx.restore();
     });
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);

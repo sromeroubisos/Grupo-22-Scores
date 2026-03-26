@@ -9,7 +9,7 @@ import {
     getCachedStale, isCacheEntryStale,
     type ClubWithUnion, type MatchRow, type TournamentRow, type UnionRow, type NewsRow
 } from '@/lib/cache/superAdminCache';
-import { normalizeError } from '@/lib/utils/errorUtils';
+import { normalizeError, serializeUnknownError } from '@/lib/utils/errorUtils';
 
 // ─── Cache keys ───────────────────────────────────────────────────────────────
 
@@ -70,6 +70,18 @@ type ContextValue = {
 const SuperConsoleContext = createContext<ContextValue | undefined>(undefined);
 
 const STORAGE_KEY = 'super_console_filters';
+
+function toErrorLog(err: unknown) {
+    const normalized = normalizeError(err);
+
+    return {
+        message: normalized.message,
+        details: normalized.details,
+        code: normalized.code,
+        hint: normalized.hint,
+        raw: serializeUnknownError(normalized.raw),
+    };
+}
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
@@ -156,18 +168,13 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setClubs(data);
             setErrors(prev => ({ ...prev, clubs: null }));
         } catch (err: unknown) {
-            const normalized = normalizeError(err);
-            console.error(`[SuperConsoleContext] Failed to load clubs:`, {
-                message: normalized.message,
-                details: normalized.details,
-                code: normalized.code,
-                raw: normalized.raw
-            });
-            setErrors(prev => ({ ...prev, clubs: normalized.message }));
+            const errorLog = toErrorLog(err);
+            console.error(`[SuperConsoleContext] Failed to load clubs:`, errorLog);
+            setErrors(prev => ({ ...prev, clubs: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, clubs: false }));
         }
-    }, [fetchClubs]);
+    }, []);
 
     const loadMatches = useCallback(async (force = false) => {
         const stale = getCachedStale<MatchRow[]>(KEYS.matches);
@@ -186,18 +193,13 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setMatches(data);
             setErrors(prev => ({ ...prev, matches: null }));
         } catch (err: unknown) {
-            const normalized = normalizeError(err);
-            console.error(`[SuperConsoleContext] Failed to load matches:`, {
-                message: normalized.message,
-                details: normalized.details,
-                code: normalized.code,
-                raw: normalized.raw
-            });
-            setErrors(prev => ({ ...prev, matches: normalized.message }));
+            const errorLog = toErrorLog(err);
+            console.error(`[SuperConsoleContext] Failed to load matches:`, errorLog);
+            setErrors(prev => ({ ...prev, matches: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, matches: false }));
         }
-    }, [fetchMatches]);
+    }, []);
 
     const loadTournaments = useCallback(async (force = false) => {
         const stale = getCachedStale<TournamentRow[]>(KEYS.tournaments);
@@ -216,18 +218,13 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setTournaments(data);
             setErrors(prev => ({ ...prev, tournaments: null }));
         } catch (err: unknown) {
-            const normalized = normalizeError(err);
-            console.error(`[SuperConsoleContext] Failed to load tournaments:`, {
-                message: normalized.message,
-                details: normalized.details,
-                code: normalized.code,
-                raw: normalized.raw
-            });
-            setErrors(prev => ({ ...prev, tournaments: normalized.message }));
+            const errorLog = toErrorLog(err);
+            console.error(`[SuperConsoleContext] Failed to load tournaments:`, errorLog);
+            setErrors(prev => ({ ...prev, tournaments: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, tournaments: false }));
         }
-    }, [fetchTournaments]);
+    }, []);
 
     const loadUnions = useCallback(async (force = false) => {
         const stale = getCachedStale<UnionRow[]>(KEYS.unions);
@@ -246,18 +243,13 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setUnions(data);
             setErrors(prev => ({ ...prev, unions: null }));
         } catch (err: unknown) {
-            const normalized = normalizeError(err);
-            console.error(`[SuperConsoleContext] Failed to load unions:`, {
-                message: normalized.message,
-                details: normalized.details,
-                code: normalized.code,
-                raw: normalized.raw
-            });
-            setErrors(prev => ({ ...prev, unions: normalized.message }));
+            const errorLog = toErrorLog(err);
+            console.error(`[SuperConsoleContext] Failed to load unions:`, errorLog);
+            setErrors(prev => ({ ...prev, unions: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, unions: false }));
         }
-    }, [fetchUnions]);
+    }, []);
 
     const loadNews = useCallback(async (force = false) => {
         const stale = getCachedStale<NewsRow[]>(KEYS.news);
@@ -276,18 +268,13 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setNews(data);
             setErrors(prev => ({ ...prev, news: null }));
         } catch (err: unknown) {
-            const normalized = normalizeError(err);
-            console.error(`[SuperConsoleContext] Failed to load news:`, {
-                message: normalized.message,
-                details: normalized.details,
-                code: normalized.code,
-                raw: normalized.raw
-            });
-            setErrors(prev => ({ ...prev, news: normalized.message }));
+            const errorLog = toErrorLog(err);
+            console.error(`[SuperConsoleContext] Failed to load news:`, errorLog);
+            setErrors(prev => ({ ...prev, news: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, news: false }));
         }
-    }, [fetchNews]);
+    }, []);
 
     // ── Prefetch on mount ────────────────────────────────────────────────────────
     // If cache is warm, loaders return instantly (no network).

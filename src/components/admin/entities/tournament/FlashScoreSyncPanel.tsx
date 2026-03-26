@@ -381,7 +381,16 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
                                 {standings.map(row => (
                                     <tr key={row.position} className="border-b border-border-basalt/30 hover:bg-surface-elevated transition-colors">
                                         <td className="py-2 px-3 text-dim">{row.position}</td>
-                                        <td className="py-2 px-3 font-semibold text-white">{row.team_name}</td>
+                                        <td className="py-2 px-3 font-semibold text-white">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                {row.team_logo ? (
+                                                    <img src={row.team_logo} alt="" className="w-5 h-5 object-contain shrink-0" />
+                                                ) : (
+                                                    <div className="w-5 h-5 rounded bg-white/5 shrink-0" />
+                                                )}
+                                                <span className="truncate">{row.team_name}</span>
+                                            </div>
+                                        </td>
                                         <td className="py-2 px-2 text-center text-dim">{row.played}</td>
                                         <td className="py-2 px-2 text-center">{row.won}</td>
                                         <td className="py-2 px-2 text-center">{row.drawn}</td>

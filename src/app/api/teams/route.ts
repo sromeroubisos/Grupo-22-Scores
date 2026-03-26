@@ -239,6 +239,14 @@ async function resolveInternalClubBySport(
     const currentSport = canonicalizeSportId(getClubSportValue(club));
     if (currentSport === preferredSport) return club;
 
+    const baseClubCategory = Array.isArray(club.categories)
+        ? club.categories.find((category) => category.trim().toLowerCase().startsWith('base_club:'))
+        : null;
+    let baseClubId = baseClubCategory
+        ? baseClubCategory.slice(baseClubCategory.indexOf(':') + 1).trim()
+        : club.id;
+    const relatedIds = new Set<string>([club.id]);
+
     try {
         const relationClient = readClient as unknown as ClubDerivativesReadClient;
         const { data: incomingRelation } = await relationClient
@@ -247,20 +255,41 @@ async function resolveInternalClubBySport(
             .eq('derived_club_id', club.id)
             .maybeSingle();
 
-        const baseClubId = incomingRelation?.base_club_id || club.id;
+        baseClubId = incomingRelation?.base_club_id || baseClubId;
         const { data: outgoingRelations } = await relationClient
             .from('club_derivatives')
             .select('derived_club_id, derivative_type')
             .eq('base_club_id', baseClubId);
 
         const siblingRows = Array.isArray(outgoingRelations) ? outgoingRelations : [];
-        const relatedIds = siblingRows
+        siblingRows
             .filter((row) => row.derivative_type === 'other_sport')
-            .map((row) => row.derived_club_id);
-        const candidateIds = Array.from(new Set([baseClubId, ...relatedIds]));
+            .forEach((row) => relatedIds.add(row.derived_club_id));
+    } catch {
+        // Fall through to the categories-based family lookup.
+    }
 
-        if (candidateIds.length === 0) return club;
+    relatedIds.add(baseClubId);
 
+    try {
+        const { data: categoryCandidates } = await readClient
+            .from('clubs')
+            .select('*')
+            .contains('categories', [`base_club:${baseClubId}`]);
+
+        (categoryCandidates ?? []).forEach((candidate: any) => {
+            if (candidate?.id) {
+                relatedIds.add(String(candidate.id));
+            }
+        });
+    } catch {
+        // Ignore and keep the current club.
+    }
+
+    const candidateIds = Array.from(relatedIds);
+    if (candidateIds.length === 0) return club;
+
+    try {
         const { data: candidateClubs } = await readClient
             .from('clubs')
             .select('*')

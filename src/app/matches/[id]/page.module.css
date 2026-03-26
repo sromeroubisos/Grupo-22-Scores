@@ -583,6 +583,34 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 }
 
+.standingsTeamCell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.standingsTeamLogo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.standingsTeamLogoPlaceholder {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.standingsTeamLink {
+    color: inherit;
+    text-decoration: none;
+    min-width: 0;
+}
+
 .rankBadge {
     display: inline-block;
     width: 24px;

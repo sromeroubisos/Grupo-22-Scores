@@ -56,7 +56,8 @@ type ClubDerivativeUpsertClient = {
  * Crea un nuevo club (solo campos core esenciales)
  */
 export async function createClub(
-  input: ClubCreateInput
+  input: ClubCreateInput,
+  options?: { supabaseClient?: any }
 ): Promise<ClubCreateResponse> {
   // 1. Validar input
   const validation = validateClubCreate(input);
@@ -82,12 +83,15 @@ export async function createClub(
     union_id: normalizeText(input.union_id),
     logo_url: normalizeUrl(input.logo_url),
     primary_color: normalizeText(input.primary_color),
+    categories: Array.isArray(input.categories)
+      ? input.categories.map(normalizeText).filter((category): category is string => Boolean(category))
+      : null,
     is_visible: input.visibility !== 'hidden',
   };
 
   // 3. Insertar en Supabase
   try {
-    const supabase = await createServerClient();
+    const supabase = options?.supabaseClient ?? await createServerClient();
 
     if (normalizedData.union_id) {
       // Unifica uniones: Buscar primero si existe con nombre similar (case-insensitive)
@@ -123,9 +127,12 @@ export async function createClub(
       error.message.includes('column "is_visible"') ||
       error.message.includes('column "sport"') ||
       error.message.includes('column "sport_id"') ||
+      error.message.includes('column "categories"') ||
+      (error.message.includes('categories') && error.message.includes('does not exist')) ||
       error.message.includes("'is_visible' column") ||
       error.message.includes("'sport' column") ||
       error.message.includes("'sport_id' column") ||
+      error.message.includes("'categories' column") ||
       error.message.includes("schema cache")
     )) {
       console.warn('⚠️ Detectada discrepancia de esquema en "clubs", reintentando operación reducida...');
@@ -136,9 +143,17 @@ export async function createClub(
         delete fallbackData.sport;
       }
 
-      if (isSchemaCacheError || error.message.includes('column "sport_id"') || error.message.includes("'sport_id' column")) {
-        delete fallbackData.sport_id;
-      }
+        if (isSchemaCacheError || error.message.includes('column "sport_id"') || error.message.includes("'sport_id' column")) {
+          delete fallbackData.sport_id;
+        }
+        if (
+          isSchemaCacheError ||
+          error.message.includes('column "categories"') ||
+          error.message.includes("'categories' column") ||
+          (error.message.includes('categories') && error.message.includes('does not exist'))
+        ) {
+          delete fallbackData.categories;
+        }
       
       // Si la columna 'is_visible' realmente no existe aún (esquema muy viejo) o falla la caché
       if (isSchemaCacheError || error.message.includes('column "is_visible"') || error.message.includes("'is_visible' column")) {
@@ -654,8 +669,8 @@ export async function linkDerivedClub(params: {
   baseClubId: string;
   derivedClubId: string;
   derivativeType: ClubDerivativeType;
-}): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createServerClient();
+}, options?: { supabaseClient?: any }): Promise<{ success: boolean; error?: string }> {
+  const supabase = options?.supabaseClient ?? await createServerClient();
 
   if (!params.baseClubId || !params.derivedClubId) {
     return { success: false, error: 'Faltan los identificadores del vinculo.' };
@@ -663,6 +678,40 @@ export async function linkDerivedClub(params: {
 
   if (params.baseClubId === params.derivedClubId) {
     return { success: false, error: 'El club base y el derivado deben ser distintos.' };
+  }
+
+  const { data: derivedClub, error: derivedClubError } = await supabase
+    .from('clubs')
+    .select('categories')
+    .eq('id', params.derivedClubId)
+    .maybeSingle();
+
+  if (derivedClubError && !(
+    derivedClubError.message.includes('column "categories"') ||
+    derivedClubError.message.includes("'categories' column") ||
+    (derivedClubError.message.includes('categories') && derivedClubError.message.includes('does not exist')) ||
+    derivedClubError.message.includes('schema cache')
+  )) {
+    return { success: false, error: derivedClubError.message };
+  }
+
+  const relationCategories = new Set<string>(Array.isArray(derivedClub?.categories) ? derivedClub.categories : []);
+  relationCategories.add(`base_club:${params.baseClubId}`);
+
+  const { error: categoryUpdateError } = derivedClubError
+    ? { error: null as { message: string } | null }
+    : await supabase
+      .from('clubs')
+      .update({ categories: Array.from(relationCategories) })
+      .eq('id', params.derivedClubId);
+
+  if (categoryUpdateError && !(
+    categoryUpdateError.message.includes('column "categories"') ||
+    categoryUpdateError.message.includes("'categories' column") ||
+    (categoryUpdateError.message.includes('categories') && categoryUpdateError.message.includes('does not exist')) ||
+    categoryUpdateError.message.includes('schema cache')
+  )) {
+    return { success: false, error: categoryUpdateError.message };
   }
 
   const relationClient = supabase as unknown as ClubDerivativeUpsertClient;
@@ -677,6 +726,13 @@ export async function linkDerivedClub(params: {
     });
 
   if (error) {
+    if (
+      error.message.includes('club_derivatives') &&
+      (error.message.includes('schema cache') || error.message.includes('does not exist'))
+    ) {
+      return { success: true };
+    }
+
     return { success: false, error: error.message };
   }
 

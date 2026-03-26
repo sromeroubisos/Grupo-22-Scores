@@ -164,6 +164,7 @@ export interface ClubCreateInput {
   lifecycle?: 'draft' | 'published' | 'active' | 'archived'; // Default: 'draft'
 
   notes_internal?: string | null;
+  categories?: string[] | null;
 
   // Extended Profile & Relations
   aliases?: string[];

@@ -71,7 +71,7 @@ function normalizeStandings(raw: any): ExternalStandingsRow[] {
         // Grouped: item has a `rows` or `standings` array
         const subRows = item.rows ?? item.standings ?? item.DATA;
         if (Array.isArray(subRows)) {
-            subRows.forEach((r: any, i: number) => {
+            subRows.forEach((r: any) => {
                 rows.push(normalizeRow(r, rows.length + 1));
             });
         }
@@ -81,9 +81,21 @@ function normalizeStandings(raw: any): ExternalStandingsRow[] {
 }
 
 function normalizeRow(item: any, fallbackPosition: number): ExternalStandingsRow {
+    const teamLogo =
+        item.team?.image_path ??
+        item.team?.small_image_path ??
+        item.team?.smaill_image_path ??
+        item.team?.logo ??
+        item.team_logo ??
+        item.logo ??
+        null;
+
     return {
         position: item.pos ?? item.position ?? fallbackPosition,
         team_name: item.team?.name ?? item.team_name ?? 'Unknown',
+        team_id: item.team?.team_id ?? item.team?.id ?? item.team_id ?? null,
+        team_logo: teamLogo,
+        team_url: item.team?.team_url ?? item.team_url ?? null,
         played: item.played ?? item.gp ?? 0,
         won: item.wins ?? item.won ?? 0,
         drawn: item.draws ?? item.drawn ?? 0,

@@ -12,6 +12,7 @@ import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getCountryById } from '@/lib/data/countries';
+import { normalizeTeamLabelAssignments, resolveStandingsRowLabel } from '@/lib/teamLabels';
 import { addDaysToIsoDate, APP_TIMEZONE, formatDateInTimeZone, formatDateKey } from '@/lib/timezone';
 import type { TournamentInitialData } from '@/lib/server/fetchTournamentData';
 import { useAuth } from '@/context/AuthContext';
@@ -33,7 +34,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 function getTeamLogo(team: any): string {
     if (!team) return '';
-    return team.small_image_path || team.smaill_image_path || team.image_path || team.logo || team.logo_path || '';
+    return team.small_image_path || team.smaill_image_path || team.image_path || team.logo || team.logo_url || team.logo_path || '';
 }
 
 function getTournamentLogo(detailsData: any, localData: any): string {
@@ -197,24 +198,41 @@ function buildRowAccentStyle(color?: string | null): CSSProperties | undefined {
     } as CSSProperties;
 }
 
-function resolveStandingsRowLabel(row: any, assignments: any[]) {
-    const position = typeof row?.position === 'number' ? row.position : Number(row?.position);
-    if (!Number.isInteger(position)) return null;
+function buildLegendSwatchStyle(color?: string | null): CSSProperties | undefined {
+    if (!color) return undefined;
+    return {
+        '--standings-legend-accent': color,
+        '--standings-legend-bg': hexToRgba(color, 0.18),
+        '--standings-legend-border': hexToRgba(color, 0.3),
+    } as CSSProperties;
+}
 
-    const phaseId = row.phase_id ?? null;
-    const groupId = row.group_id ?? null;
+type StandingsLegendItem = {
+    key: string;
+    name: string;
+    color: string;
+};
 
-    const priority = (assignment: any) => {
-        if (assignment.phase_id === phaseId && assignment.group_id === groupId) return 4;
-        if (assignment.phase_id === phaseId && !assignment.group_id) return 3;
-        if (!assignment.phase_id && !assignment.group_id) return 2;
-        if (assignment.phase_id === phaseId) return 1;
-        return 0;
-    };
+function collectStandingsLegendItems(rows: any[], assignments: any[]): StandingsLegendItem[] {
+    const seen = new Set<string>();
+    const items: StandingsLegendItem[] = [];
 
-    return assignments
-        .filter((assignment) => Number(assignment.position) === position && assignment.label?.color)
-        .sort((left, right) => priority(right) - priority(left))[0]?.label || null;
+    rows.forEach((row: any) => {
+        const label = resolveStandingsRowLabel(row, assignments);
+        if (!label?.name || !label?.color) return;
+
+        const key = `${label.id}|${label.name}|${label.color}`;
+        if (seen.has(key)) return;
+
+        seen.add(key);
+        items.push({
+            key,
+            name: label.name,
+            color: label.color,
+        });
+    });
+
+    return items;
 }
 
 function isGroupedStandingsData(rows: any[]): boolean {
@@ -235,6 +253,23 @@ function flattenStandingsRows(raw: any[]): any[] {
         return normalized.flatMap((group: any) => Array.isArray(group.rows) ? group.rows : []);
     }
     return normalized;
+}
+
+function getStandingsTeamName(row: any) {
+    return row.team?.name || row.participant?.name || row.team_name || row.name || '';
+}
+
+function getStandingsTeamId(row: any) {
+    return row.team?.id || row.team?.team_id || row.participant?.id || row.team_id || null;
+}
+
+function getStandingsTeamLogo(row: any) {
+    return row.team?.logo || row.team?.logo_url || row.team?.image_path || row.team?.small_image_path ||
+        row.participant?.logo_url || row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo || '';
+}
+
+function getStandingsTeamUrl(row: any) {
+    return row.team?.team_url || row.participant?.team_url || row.team_url || null;
 }
 
 function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants: any[]) {
@@ -274,13 +309,24 @@ function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants
         .map((group: any) => {
             const groupId = String(group.id);
             const rows = dbStandings
-                .filter((row: any) => {
+                .map((row: any) => {
                     const effectiveGroupId = resolveGroupId(row);
-                    if (effectiveGroupId !== groupId) return false;
+                    const effectivePhaseId = row.phase_id
+                        ? String(row.phase_id)
+                        : (groupPhaseById.get(groupId) || null);
+
+                    return {
+                        ...row,
+                        group_id: effectiveGroupId ?? row.group_id ?? null,
+                        phase_id: effectivePhaseId,
+                    };
+                })
+                .filter((row: any) => {
+                    if (row.group_id !== groupId) return false;
 
                     const rowPhaseId = row.phase_id ? String(row.phase_id) : null;
-                    const groupPhaseId = groupPhaseById.get(groupId) || null;
-                    if (rowPhaseId && groupPhaseId && rowPhaseId !== groupPhaseId) return false;
+                    const activeGroupPhaseId = groupPhaseById.get(groupId) || null;
+                    if (rowPhaseId && activeGroupPhaseId && rowPhaseId !== activeGroupPhaseId) return false;
 
                     return true;
                 })
@@ -559,7 +605,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
         dbParticipants: Array.isArray(dbData.participants) ? (dbData.participants as any[]) : [],
         dbPhases: Array.isArray(dbData.phases) ? (dbData.phases as any[]) : [],
         dbGroups: Array.isArray(dbData.groups) ? (dbData.groups as any[]) : [],
-        dbTeamLabels: Array.isArray(dbData.teamLabels) ? (dbData.teamLabels as any[]) : [],
+        dbTeamLabels: normalizeTeamLabelAssignments(Array.isArray(dbData.teamLabels) ? dbData.teamLabels : []),
     };
 }
 
@@ -644,7 +690,8 @@ export default function TournamentDetailPage({
             !!initialData?.queryErrors?.matches ||
             !!initialData?.queryErrors?.standings ||
             !!initialData?.queryErrors?.phases ||
-            !!initialData?.queryErrors?.groups;
+            !!initialData?.queryErrors?.groups ||
+            !!initialData?.queryErrors?.teamLabels;
         const shouldPreferDbSource = !!initialData?.ok;
 
         async function fetchData() {
@@ -982,16 +1029,29 @@ export default function TournamentDetailPage({
     };
     overallRows.forEach((row: any) => {
         registerTeam({
-            id: row.team?.id || row.team?.team_id || row.participant?.id || row.team_id || null,
-            name: row.team?.name || row.participant?.name || row.name,
-            logo: row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
-                row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo || '',
-            teamUrl: row.team?.team_url || row.participant?.team_url || null,
+            id: getStandingsTeamId(row),
+            name: getStandingsTeamName(row),
+            logo: getStandingsTeamLogo(row),
+            teamUrl: getStandingsTeamUrl(row),
         });
     });
     if (results.length > 0) addFromMatches(results);
     if (fixtures.length > 0) addFromMatches(fixtures);
     const teamsList = Array.from(teamMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+    const resolveTeamFallback = (row: any) => {
+        const teamId = getStandingsTeamId(row);
+        if (teamId) {
+            const byId = teamMap.get(`id:${String(teamId)}`);
+            if (byId) return byId;
+        }
+
+        const teamName = getStandingsTeamName(row);
+        if (teamName) {
+            return teamMap.get(`name:${teamName.toLowerCase()}`) || null;
+        }
+
+        return null;
+    };
 
     const yearDisplay = details?.is_current
         ? (details?.season || 'Temporada Actual')
@@ -1020,6 +1080,42 @@ export default function TournamentDetailPage({
 
     // Standings preview (top 8 flat rows only)
     const standingsPreviewRows: any[] = overallRows.slice(0, 8);
+    const standingsLegendItems = collectStandingsLegendItems(activeFlatRows, dbTeamLabels);
+    const standingsPreviewLegendItems = collectStandingsLegendItems(standingsPreviewRows, dbTeamLabels);
+    const mapStandingsRowForExport = (row: any, idx: number) => {
+        const fallbackTeam = resolveTeamFallback(row);
+        const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
+        const goalDifference =
+            typeof row.goal_difference === 'number'
+                ? row.goal_difference
+                : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
+                    ? row.goals_for - row.goals_against
+                    : 0;
+
+        return {
+            pos: row.position || (idx + 1),
+            team: row.team?.short_name || getStandingsTeamName(row) || 'Equipo',
+            teamLogo: getStandingsTeamLogo(row) || fallbackTeam?.logo || '',
+            labelName: rowLabel?.name ?? undefined,
+            zoneColor: rowLabel?.color ?? undefined,
+            played: row.matches_total || row.matches_played || 0,
+            won: row.wins_total || row.wins || 0,
+            lost: row.losses_total || row.losses || 0,
+            diff: String(goalDifference),
+            points: row.points_total || row.points || 0,
+        };
+    };
+    const standingsExportRows = activeFlatRows.map((row: any, idx: number) => mapStandingsRowForExport(row, idx));
+    const standingsExportGroups = Array.isArray(activeRows[0]?.rows)
+        ? activeRows
+            .map((group: any, groupIndex: number) => ({
+                name: String(group?.group_name || `Grupo ${groupIndex + 1}`),
+                rows: Array.isArray(group?.rows)
+                    ? group.rows.map((row: any, idx: number) => mapStandingsRowForExport(row, idx))
+                    : [],
+            }))
+            .filter((group: any) => group.rows.length > 0)
+        : undefined;
 
     // ── Render helpers ────────────────────────────────────────────────────
 
@@ -1135,14 +1231,14 @@ export default function TournamentDetailPage({
 
     const renderStandingsRow = (row: any, idx: number) => {
         const pos = row.position || (idx + 1);
-        const logo = row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
-            row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo;
-        const teamName = row.team?.name || row.participant?.name || row.name;
-        const teamId = row.team?.id || row.team?.team_id || row.participant?.id || row.team_id;
-        const teamHref = buildClubHref({
+        const fallbackTeam = resolveTeamFallback(row);
+        const logo = getStandingsTeamLogo(row) || fallbackTeam?.logo || '';
+        const teamName = getStandingsTeamName(row);
+        const teamId = getStandingsTeamId(row);
+        const teamHref = fallbackTeam?.href || buildClubHref({
             id: teamId,
             name: teamName,
-            teamUrl: row.team?.team_url || row.participant?.team_url || null,
+            teamUrl: getStandingsTeamUrl(row),
         }, tournamentData?.sportId);
         const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
         const accentColor = rowLabel?.color ?? null;
@@ -1165,9 +1261,11 @@ export default function TournamentDetailPage({
                     {logo
                         ? <img src={logo} alt={teamName} className={styles.teamLogo} />
                         : <div className={styles.teamLogoPlaceholder} />}
-                    {teamHref
-                        ? <Link href={teamHref} style={{ color: 'inherit', textDecoration: 'none' }}>{teamName}</Link>
-                        : <span>{teamName}</span>}
+                    <div className={styles.colTeamMeta}>
+                        {teamHref
+                            ? <Link href={teamHref} className={styles.colTeamName}>{teamName}</Link>
+                            : <span className={styles.colTeamName}>{teamName}</span>}
+                    </div>
                 </div>
                 <div className={`${styles.colVal} ${styles.colValPJ}`}>{row.matches_total || row.matches_played}</div>
                 <div className={styles.colVal}>{row.wins_total || row.wins}</div>
@@ -1181,6 +1279,28 @@ export default function TournamentDetailPage({
     };
 
     // ── Featured match renderer ───────────────────────────────────────────
+
+    const renderStandingsLegend = (items: StandingsLegendItem[]) => {
+        if (items.length === 0) return null;
+
+        return (
+            <div className={styles.standingsLegend} aria-label="Leyenda de posiciones">
+                <span className={styles.standingsLegendTitle}>Leyenda</span>
+                <div className={styles.standingsLegendItems}>
+                    {items.map((item) => (
+                        <div key={item.key} className={styles.standingsLegendItem}>
+                            <span
+                                className={styles.standingsLegendSwatch}
+                                style={buildLegendSwatchStyle(item.color)}
+                                aria-hidden="true"
+                            />
+                            <span className={styles.standingsLegendText}>{item.name}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
 
     const renderFeaturedMatch = () => {
         if (!featured) return null;
@@ -1342,7 +1462,10 @@ export default function TournamentDetailPage({
                                 )}
                                 <button
                                     className={`${styles.followBtn} ${isLeagueFavorite(id) ? styles.followBtnActive : ''}`}
-                                    onClick={() => toggleLeagueFavorite(id, tournamentName)}
+                                    onClick={() => toggleLeagueFavorite(id, {
+                                        name: tournamentName,
+                                        followerTournamentId: adminTournamentId,
+                                    })}
                                     type="button"
                                 >
                                     {isLeagueFavorite(id) ? '★ Siguiendo' : '☆ Seguir'}
@@ -1455,6 +1578,7 @@ export default function TournamentDetailPage({
                                         {renderStandingsHeader()}
                                         {standingsPreviewRows.map((row: any, idx: number) => renderStandingsRow(row, idx))}
                                     </div>
+                                    {renderStandingsLegend(standingsPreviewLegendItems)}
                                 </div>
                             )}
 
@@ -1595,28 +1719,8 @@ export default function TournamentDetailPage({
                                     title: tournamentData?.name || 'Tabla de Posiciones',
                                     subtitle: details?.season || 'Clasificación',
                                     tournamentLogo,
-                                    rows: activeFlatRows.map((row: any, idx: number) => {
-                                        const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
-                                        const goalDifference =
-                                            typeof row.goal_difference === 'number'
-                                                ? row.goal_difference
-                                                : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
-                                                    ? row.goals_for - row.goals_against
-                                                    : 0;
-
-                                        return {
-                                            pos: row.position || (idx + 1),
-                                            team: row.team?.short_name || row.team?.name || row.participant?.name || row.name || 'Equipo',
-                                            teamLogo: row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
-                                                row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo,
-                                            zoneColor: rowLabel?.color ?? undefined,
-                                            played: row.matches_total || row.matches_played || 0,
-                                            won: row.wins_total || row.wins || 0,
-                                            lost: row.losses_total || row.losses || 0,
-                                            diff: String(goalDifference),
-                                            points: row.points_total || row.points || 0,
-                                        };
-                                    }),
+                                    rows: standingsExportRows,
+                                    groups: standingsExportGroups,
                                 }}
                             />
                         </div>
@@ -1638,13 +1742,14 @@ export default function TournamentDetailPage({
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className={styles.sectionCard}>
-                                        <div className={styles.tableCard}>
-                                            {renderStandingsHeader()}
-                                            {activeRows.map((row: any, idx: number) => renderStandingsRow(row, idx))}
+                                        <div className={styles.sectionCard}>
+                                            <div className={styles.tableCard}>
+                                                {renderStandingsHeader()}
+                                                {activeRows.map((row: any, idx: number) => renderStandingsRow(row, idx))}
+                                            </div>
                                         </div>
-                                    </div>
                                 )}
+                                {renderStandingsLegend(standingsLegendItems)}
                             </div>
                         )}
 
@@ -1663,7 +1768,7 @@ export default function TournamentDetailPage({
                                         {activeRows.map((row: any, idx: number) => (
                                             <div key={idx} className={styles.tableRow} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 60px 60px 90px 90px' }}>
                                                 <div className={styles.tdPos}>{idx + 1}</div>
-                                                <div className={styles.tdTeam}><span>{row.team?.name || row.participant?.name || row.name}</span></div>
+                                                <div className={styles.tdTeam}><span>{getStandingsTeamName(row)}</span></div>
                                                 <div className={styles.tdVal}>{row.over ?? '-'}</div>
                                                 <div className={styles.tdVal}>{row.under ?? '-'}</div>
                                                 <div className={styles.tdVal}>{row.goals ?? '-'}</div>
@@ -1690,7 +1795,7 @@ export default function TournamentDetailPage({
                                         {activeRows.map((row: any, idx: number) => (
                                             <div key={idx} className={styles.tableRow} style={{ display: 'grid', gridTemplateColumns: '40px 1fr repeat(9, 50px) 60px' }}>
                                                 <div className={styles.tdPos}>{idx + 1}</div>
-                                                <div className={styles.tdTeam}><span>{row.team?.name || row.participant?.name || row.name}</span></div>
+                                                <div className={styles.tdTeam}><span>{getStandingsTeamName(row)}</span></div>
                                                 <div className={styles.tdVal}>{row.win_win ?? '-'}</div>
                                                 <div className={styles.tdVal}>{row.win_draw ?? '-'}</div>
                                                 <div className={styles.tdVal}>{row.win_loss ?? '-'}</div>

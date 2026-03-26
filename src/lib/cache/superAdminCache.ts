@@ -9,7 +9,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
-import { normalizeError } from '@/lib/utils/errorUtils';
+import { normalizeError, serializeUnknownError, type NormalizedError } from '@/lib/utils/errorUtils';
 
 const DEFAULT_TTL_MS = 5 * 60_000; // 5 minutes
 const FETCH_TIMEOUT_MS = 15_000; // 15 seconds
@@ -66,6 +66,33 @@ function createCacheTimeoutError(ms: number, label: string) {
     return new Error(`[Cache] Timeout after ${ms}ms fetching '${label}'`);
 }
 
+function isTimeoutLikeError(err: unknown) {
+    if (!err) return false;
+
+    const message = typeof err === 'object' && err && 'message' in err
+        ? String((err as { message?: unknown }).message ?? '')
+        : String(err);
+
+    const name = typeof err === 'object' && err && 'name' in err
+        ? String((err as { name?: unknown }).name ?? '')
+        : '';
+
+    const normalizedMessage = message.toLowerCase();
+    return name === 'AbortError'
+        || normalizedMessage.includes('timeout after')
+        || normalizedMessage.includes('aborted')
+        || normalizedMessage.includes('aborterror');
+}
+
+function toSerializableNormalizedError(err: unknown): NormalizedError {
+    const normalized = normalizeError(err);
+
+    return {
+        ...normalized,
+        raw: serializeUnknownError(normalized.raw),
+    };
+}
+
 function withTimeout<T>(fetcher: CachedFetcher<T>, ms: number, label: string): Promise<T> {
     const controller = new AbortController();
 
@@ -104,27 +131,34 @@ export async function cachedFetch<T>(
             const data = await withTimeout(fetcher, timeoutMs, key);
             cache.set(key, { data, fetchedAt: Date.now(), ttl });
             return data;
-        } catch (err: any) {
-            const msg = err.message || 'Unknown error';
+        } catch (err: unknown) {
+            if (isTimeoutLikeError(err)) {
+                const normalized = toSerializableNormalizedError(err);
+                console.error(`[Cache] FETCH FAILED for '${key}':`, {
+                    message: normalized.message,
+                    details: normalized.details,
+                    code: normalized.code,
+                    hint: normalized.hint,
+                    raw: normalized.raw,
+                });
+                throw normalized;
+            }
+
+            const msg = err instanceof Error ? err.message : 'Unknown error';
             console.warn(`[Cache] Primary fetch failed for '${key}'. Retrying once with timeout. Error: ${msg}`);
             try {
                 const fallbackData = await withTimeout(fetcher, timeoutMs, `${key}:retry`);
                 cache.set(key, { data: fallbackData, fetchedAt: Date.now(), ttl });
                 return fallbackData;
-            } catch (retryErr: any) {
-                // If it's a Supabase error, it might not stringify well
-                const errorData = {
-                    message: retryErr?.message,
-                    code: retryErr?.code,
-                    details: retryErr?.details,
-                    hint: retryErr?.hint,
-                    status: retryErr?.status,
-                    name: retryErr?.name
-                };
-                console.error(`[Cache] RE-FETCH FAILED for '${key}':`, errorData);
-                
-                const normalized = normalizeError(retryErr);
-                console.error(`[Cache] RE-FETCH FAILED NORMALIZED for '${key}':`, normalized);
+            } catch (retryErr: unknown) {
+                const normalized = toSerializableNormalizedError(retryErr);
+                console.error(`[Cache] RE-FETCH FAILED for '${key}':`, {
+                    message: normalized.message,
+                    details: normalized.details,
+                    code: normalized.code,
+                    hint: normalized.hint,
+                    raw: normalized.raw,
+                });
                 throw normalized;
             }
         } finally {

@@ -1208,7 +1208,7 @@ export default function HomePage() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            toggleLeagueFavorite(league.leagueId);
+                            toggleLeagueFavorite(league.leagueId, { name: league.league });
                           }}
                           aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
                         >

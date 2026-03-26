@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createPortal } from 'react-dom';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield, Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateCache, type ClubWithUnion } from '@/lib/cache/superAdminCache';
-import { useState } from 'react';
 import { getActiveSports } from '@/lib/data/sports';
 import {
     CLUB_DERIVATIVE_DESCRIPTIONS,
@@ -47,6 +47,7 @@ const CLUBS_PER_PAGE = 20;
 const ACTIVE_SPORTS = getActiveSports();
 
 type SortKey = 'name' | 'location' | 'followers_count' | 'union' | 'color' | 'visibility';
+type ActionMenuPosition = { top: number; left: number; transformOrigin: string };
 
 export default function SuperadminClubesPage() {
     const router = useRouter();
@@ -61,6 +62,8 @@ export default function SuperadminClubesPage() {
     const [derivedBaseClub, setDerivedBaseClub] = useState<ClubWithUnion | null>(null);
     const [derivedType, setDerivedType] = useState<ClubDerivativeType>('youth');
     const [derivedSport, setDerivedSport] = useState<string>(ACTIVE_SPORTS.find((sport) => sport.id !== 'rugby')?.id || ACTIVE_SPORTS[0]?.id || 'rugby');
+    const [actionMenuPosition, setActionMenuPosition] = useState<ActionMenuPosition | null>(null);
+    const actionMenuButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
     // Local filter state (club-specific dimensions)
     const [unionFilter, setUnionFilter] = useState('all');
@@ -94,6 +97,37 @@ export default function SuperadminClubesPage() {
             || ACTIVE_SPORTS[0]?.id
             || 'rugby';
     };
+
+    const updateActionMenuPosition = useCallback((clubId: string) => {
+        if (typeof window === 'undefined') return;
+
+        const button = actionMenuButtonRefs.current[clubId];
+        if (!button) {
+            setActionMenuOpenId(null);
+            setActionMenuPosition(null);
+            return;
+        }
+
+        const rect = button.getBoundingClientRect();
+        const menuWidth = 200;
+        const estimatedMenuHeight = 176;
+        const offset = 8;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const openUpwards = spaceBelow < estimatedMenuHeight && rect.top > estimatedMenuHeight;
+        const unclampedLeft = rect.right - menuWidth;
+        const left = Math.max(12, Math.min(unclampedLeft, viewportWidth - menuWidth - 12));
+        const top = openUpwards
+            ? Math.max(12, rect.top - estimatedMenuHeight - offset)
+            : Math.min(rect.bottom + offset, viewportHeight - estimatedMenuHeight - 12);
+
+        setActionMenuPosition({
+            top,
+            left,
+            transformOrigin: `${rect.right - left}px ${openUpwards ? estimatedMenuHeight : 0}px`,
+        });
+    }, []);
 
     const openCreateDerivedModal = (club: ClubWithUnion) => {
         setActionMenuOpenId(null);
@@ -269,6 +303,34 @@ export default function SuperadminClubesPage() {
     const derivedSportMatchesBase = derivedBaseClub
         ? canonicalizeSportId(derivedBaseClub.sport) === canonicalizeSportId(derivedSport)
         : false;
+    const actionMenuClub = useMemo(
+        () => displayClubs.find((club) => club.id === actionMenuOpenId) ?? null,
+        [actionMenuOpenId, displayClubs],
+    );
+
+    useEffect(() => {
+        if (!actionMenuOpenId) {
+            setActionMenuPosition(null);
+            return;
+        }
+
+        updateActionMenuPosition(actionMenuOpenId);
+
+        const handleViewportChange = () => updateActionMenuPosition(actionMenuOpenId);
+        window.addEventListener('resize', handleViewportChange);
+        window.addEventListener('scroll', handleViewportChange, true);
+
+        return () => {
+            window.removeEventListener('resize', handleViewportChange);
+            window.removeEventListener('scroll', handleViewportChange, true);
+        };
+    }, [actionMenuOpenId, updateActionMenuPosition]);
+
+    useEffect(() => {
+        if (!actionMenuOpenId || actionMenuClub) return;
+        setActionMenuOpenId(null);
+        setActionMenuPosition(null);
+    }, [actionMenuClub, actionMenuOpenId]);
 
     return (
         <div style={{ paddingBottom: 40 }} onClick={() => setActionMenuOpenId(null)}>
@@ -489,26 +551,18 @@ export default function SuperadminClubesPage() {
                                                     <Pencil size={11} /> Gestionar
                                                 </Link>
                                                 <div style={{ position: 'relative' }}>
-                                                    <button className={styles.moreMenuBtn} onClick={() => setActionMenuOpenId(prev => prev === club.id ? null : club.id)}>
+                                                    <button
+                                                        ref={(node) => {
+                                                            actionMenuButtonRefs.current[club.id] = node;
+                                                        }}
+                                                        className={styles.moreMenuBtn}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            setActionMenuOpenId((prev) => prev === club.id ? null : club.id);
+                                                        }}
+                                                    >
                                                         <MoreVertical size={14} />
                                                     </button>
-                                                    {actionMenuOpenId === club.id && (
-                                                        <div className={styles.menuDropdown} style={{ right: 0, top: '100%', minWidth: 160 }}>
-                                                            <button className={styles.menuItem} onClick={() => openCreateDerivedModal(club)}>
-                                                                <Plus size={13} style={{ marginRight: 8 }} /> Crear derivado
-                                                            </button>
-                                                            <div className={styles.menuDivider} />
-                                                            <button className={styles.menuItem} onClick={() => handleToggleVisibility(club)} disabled={togglingId === club.id}>
-                                                                {isVisible
-                                                                    ? <><EyeOff size={13} style={{ marginRight: 8 }} />Ocultar</>
-                                                                    : <><Eye size={13} style={{ marginRight: 8 }} />Mostrar</>}
-                                                            </button>
-                                                            <div className={styles.menuDivider} />
-                                                            <button className={`${styles.menuItem} ${styles.danger}`} onClick={() => handleDelete(club.id, club.name)}>
-                                                                <Trash2 size={13} style={{ marginRight: 8 }} /> Eliminar
-                                                            </button>
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </div>
                                         </td>
@@ -575,6 +629,49 @@ export default function SuperadminClubesPage() {
                     )}
                 </div>
                 </>
+            )}
+
+            {actionMenuOpenId && actionMenuClub && actionMenuPosition && typeof document !== 'undefined' && createPortal(
+                <div
+                    onClick={(event) => event.stopPropagation()}
+                    style={{ position: 'fixed', inset: 0, zIndex: 140, pointerEvents: 'none' }}
+                >
+                    <div
+                        className={styles.menuDropdown}
+                        data-club-action-menu="true"
+                        style={{
+                            position: 'fixed',
+                            top: actionMenuPosition.top,
+                            left: actionMenuPosition.left,
+                            right: 'auto',
+                            width: 200,
+                            minWidth: 160,
+                            transform: 'none',
+                            transformOrigin: actionMenuPosition.transformOrigin,
+                            zIndex: 141,
+                            pointerEvents: 'auto',
+                        }}
+                    >
+                        <button className={styles.menuItem} onClick={() => openCreateDerivedModal(actionMenuClub)}>
+                            <Plus size={13} style={{ marginRight: 8 }} /> Crear derivado
+                        </button>
+                        <div className={styles.menuDivider} />
+                        <button
+                            className={styles.menuItem}
+                            onClick={() => handleToggleVisibility(actionMenuClub)}
+                            disabled={togglingId === actionMenuClub.id}
+                        >
+                            {actionMenuClub.is_visible !== false
+                                ? <><EyeOff size={13} style={{ marginRight: 8 }} />Ocultar</>
+                                : <><Eye size={13} style={{ marginRight: 8 }} />Mostrar</>}
+                        </button>
+                        <div className={styles.menuDivider} />
+                        <button className={`${styles.menuItem} ${styles.danger}`} onClick={() => handleDelete(actionMenuClub.id, actionMenuClub.name)}>
+                            <Trash2 size={13} style={{ marginRight: 8 }} /> Eliminar
+                        </button>
+                    </div>
+                </div>,
+                document.body,
             )}
 
             {derivedBaseClub && (

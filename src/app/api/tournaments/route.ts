@@ -142,6 +142,166 @@ function normalizeDetails(raw: any) {
     return data;
 }
 
+function getStandingTeamName(row: any) {
+    return (
+        row?.team?.name ||
+        row?.participant?.name ||
+        row?.team_name ||
+        row?.name ||
+        ''
+    );
+}
+
+function getStandingTeamId(row: any) {
+    return normalizeId(
+        row?.team?.id ||
+        row?.team?.team_id ||
+        row?.participant?.id ||
+        row?.team_id,
+    );
+}
+
+function getStandingTeamLogo(row: any) {
+    return (
+        row?.team?.logo ||
+        row?.team?.logo_url ||
+        row?.team?.image_path ||
+        row?.team?.small_image_path ||
+        row?.participant?.logo_url ||
+        row?.participant?.image_path ||
+        row?.participant?.small_image_path ||
+        row?.logo ||
+        row?.team_logo ||
+        ''
+    );
+}
+
+function getStandingTeamUrl(row: any) {
+    return (
+        row?.team?.team_url ||
+        row?.participant?.team_url ||
+        row?.team_url ||
+        ''
+    );
+}
+
+function getMatchTeamId(team: any, fallbackId?: any) {
+    return normalizeId(team?.id || team?.team_id || fallbackId);
+}
+
+function getMatchTeamName(team: any, fallbackName?: any) {
+    return String(team?.name || fallbackName || '').trim();
+}
+
+function getMatchTeamLogo(team: any, fallbackLogo?: any) {
+    return (
+        team?.image_path ||
+        team?.small_image_path ||
+        team?.smaill_image_path ||
+        team?.logo ||
+        fallbackLogo ||
+        ''
+    );
+}
+
+function getMatchTeamUrl(team: any) {
+    return team?.team_url || '';
+}
+
+function buildStandingsTeamAssetMap(...matchGroups: any[][]) {
+    const teamAssets = new Map<string, { id?: string; name?: string; logo?: string; teamUrl?: string }>();
+
+    const register = (team: { id?: string; name?: string; logo?: string; teamUrl?: string }) => {
+        const name = String(team.name || '').trim();
+        const id = normalizeId(team.id);
+        const logo = String(team.logo || '').trim();
+        const teamUrl = String(team.teamUrl || '').trim();
+
+        const keys = [
+            id ? `id:${id}` : null,
+            name ? `name:${name.toLowerCase()}` : null,
+        ].filter(Boolean) as string[];
+
+        if (keys.length === 0) return;
+
+        for (const key of keys) {
+            const previous = teamAssets.get(key);
+            teamAssets.set(key, {
+                id: previous?.id || id,
+                name: previous?.name || name,
+                logo: previous?.logo || logo,
+                teamUrl: previous?.teamUrl || teamUrl,
+            });
+        }
+    };
+
+    matchGroups
+        .filter(Array.isArray)
+        .flat()
+        .forEach((match: any) => {
+            register({
+                id: getMatchTeamId(match?.home_team, match?.home_team_id || match?.home_club_id),
+                name: getMatchTeamName(match?.home_team, match?.event_home_team || match?.home_team_name),
+                logo: getMatchTeamLogo(match?.home_team, match?.home_team_logo),
+                teamUrl: getMatchTeamUrl(match?.home_team),
+            });
+            register({
+                id: getMatchTeamId(match?.away_team, match?.away_team_id || match?.away_club_id),
+                name: getMatchTeamName(match?.away_team, match?.event_away_team || match?.away_team_name),
+                logo: getMatchTeamLogo(match?.away_team, match?.away_team_logo),
+                teamUrl: getMatchTeamUrl(match?.away_team),
+            });
+        });
+
+    return teamAssets;
+}
+
+function enrichStandingsRowsWithTeamAssets(rows: any, teamAssets: Map<string, { id?: string; name?: string; logo?: string; teamUrl?: string }>) {
+    if (!Array.isArray(rows) || teamAssets.size === 0) return rows;
+
+    return rows.map((row: any) => {
+        if (Array.isArray(row?.rows)) {
+            return {
+                ...row,
+                rows: enrichStandingsRowsWithTeamAssets(row.rows, teamAssets),
+            };
+        }
+
+        const existingId = getStandingTeamId(row);
+        const existingName = String(getStandingTeamName(row) || '').trim();
+        const existingLogo = String(getStandingTeamLogo(row) || '').trim();
+        const existingTeamUrl = String(getStandingTeamUrl(row) || '').trim();
+
+        const fallback =
+            (existingId ? teamAssets.get(`id:${existingId}`) : undefined) ||
+            (existingName ? teamAssets.get(`name:${existingName.toLowerCase()}`) : undefined);
+
+        if (!fallback) return row;
+
+        const logo = existingLogo || fallback.logo || '';
+        const teamUrl = existingTeamUrl || fallback.teamUrl || '';
+        const team = row?.team && typeof row.team === 'object' ? row.team : {};
+
+        return {
+            ...row,
+            team: {
+                ...team,
+                id: team.id || team.team_id || existingId || fallback.id,
+                name: team.name || existingName || fallback.name,
+                team_url: team.team_url || teamUrl || undefined,
+                logo: team.logo || logo || undefined,
+                image_path: team.image_path || logo || undefined,
+                small_image_path: team.small_image_path || logo || undefined,
+            },
+            team_id: row?.team_id || existingId || fallback.id,
+            team_name: row?.team_name || existingName || fallback.name,
+            team_url: row?.team_url || teamUrl || undefined,
+            team_logo: row?.team_logo || logo || undefined,
+            logo: row?.logo || logo || undefined,
+        };
+    });
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -552,6 +712,10 @@ export async function GET(request: Request) {
         const topScorersPayload = resolveTab('topScorers', topScorersRes?.DATA || topScorersRes || [], topScorersFetchOk);
         const drawPayload = resolveTab('draw', drawRes?.DATA || drawRes || [], drawFetchOk);
         const archivesPayload = resolveTab('archives', archivesRes?.DATA || archivesRes || [], archivesFetchOk);
+        const teamAssets = buildStandingsTeamAssetMap(
+            Array.isArray(resultsPayload) ? resultsPayload : [],
+            Array.isArray(fixturesPayload) ? fixturesPayload : [],
+        );
 
         const standingsSnapshot = getTabSnapshot({ ...snapshotKey, tab: 'standings' });
         const rawStandings = standingsFetchOk ? (standingsRes?.DATA || standingsRes || []) : null;
@@ -564,6 +728,10 @@ export async function GET(request: Request) {
         }
 
         let finalStandings = standingsSource === 'snapshot' ? (standingsSnapshot?.payload || []) : (rawStandings || []);
+        finalStandings = enrichStandingsRowsWithTeamAssets(finalStandings, teamAssets);
+        const finalStandingsForm = enrichStandingsRowsWithTeamAssets(standingsFormPayload, teamAssets);
+        const finalStandingsHtFt = enrichStandingsRowsWithTeamAssets(standingsHtFtPayload, teamAssets);
+        const finalStandingsOverUnder = enrichStandingsRowsWithTeamAssets(standingsOverUnderPayload, teamAssets);
 
         console.log('FINAL RESOLVED:', {
             tournamentId, stageId, templateId, seasonId,
@@ -618,6 +786,16 @@ export async function GET(request: Request) {
             tabSources.standings = 'empty';
         }
 
+        if (standingsFormFetchOk && hasMeaningfulPayload(finalStandingsForm)) {
+            upsertTabSnapshot({ ...snapshotKey, tab: 'standingsForm', payload: finalStandingsForm, fetchStatus: 'ok' });
+        }
+        if (standingsHtFtFetchOk && hasMeaningfulPayload(finalStandingsHtFt)) {
+            upsertTabSnapshot({ ...snapshotKey, tab: 'standingsHtFt', payload: finalStandingsHtFt, fetchStatus: 'ok' });
+        }
+        if (standingsOverUnderFetchOk && hasMeaningfulPayload(finalStandingsOverUnder)) {
+            upsertTabSnapshot({ ...snapshotKey, tab: 'standingsOverUnder', payload: finalStandingsOverUnder, fetchStatus: 'ok' });
+        }
+
         try {
             persistFromTournamentPayload({
                 ids: { tournamentId, seasonId },
@@ -653,9 +831,9 @@ export async function GET(request: Request) {
             results: resultsPayload,
             fixtures: fixturesPayload,
             standings: finalStandings,
-            standingsForm: standingsFormPayload,
-            standingsHtFt: standingsHtFtPayload,
-            standingsOverUnder: standingsOverUnderPayload,
+            standingsForm: finalStandingsForm,
+            standingsHtFt: finalStandingsHtFt,
+            standingsOverUnder: finalStandingsOverUnder,
             topScorers: topScorersPayload,
             draw: drawPayload,
             archives: archivesPayload

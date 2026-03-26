@@ -14,6 +14,22 @@ function getAssignmentKey(assignment: TeamLabelAssignment): string | null {
   return null;
 }
 
+function filterVisibleAssignments(
+  items: TeamLabelAssignment[],
+  shareAcrossPhaseGroups: boolean,
+  selectedGroupId: string | null,
+) {
+  if (shareAcrossPhaseGroups) {
+    return items.filter((assignment) => !assignment.group_id);
+  }
+
+  if (selectedGroupId) {
+    return items.filter((assignment) => (assignment.group_id ?? null) === selectedGroupId);
+  }
+
+  return items.filter((assignment) => !assignment.group_id);
+}
+
 function formatRelativeTime(iso: string | null): string {
   if (!iso) return 'Nunca calculada';
   const diff = Date.now() - new Date(iso).getTime();
@@ -48,7 +64,15 @@ function MetricCard({ label, value, foot }: { label: string; value: number | str
   );
 }
 
-export default function TournamentStandingsTab({ tournamentId }: { tournamentId: string }) {
+export default function TournamentStandingsTab({
+  tournamentId,
+  preferredPhaseId = null,
+  onPhaseChange,
+}: {
+  tournamentId: string;
+  preferredPhaseId?: string | null;
+  onPhaseChange?: (phaseId: string) => void;
+}) {
   const [context, setContext] = useState<TournamentContextData | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
   const [isCompactMobile, setIsCompactMobile] = useState(false);
@@ -75,7 +99,17 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
       if (contextData.ok) {
         setContext(contextData);
         if (contextData.phases?.length > 0) {
-          const firstActive = contextData.phases.find((p: StandingsPhase) => p.is_active) || contextData.phases[0];
+          const currentPhase = selectedPhase
+            ? contextData.phases.find((phase: StandingsPhase) => phase.id === selectedPhase)
+            : null;
+          const preferredPhase = preferredPhaseId
+            ? contextData.phases.find((phase: StandingsPhase) => phase.id === preferredPhaseId)
+            : null;
+          const firstActive =
+            preferredPhase ||
+            currentPhase ||
+            contextData.phases.find((p: StandingsPhase) => p.is_active) ||
+            contextData.phases[0];
           setSelectedPhase(firstActive.id);
         }
       } else {
@@ -87,7 +121,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     } finally {
       setLoadingContext(false);
     }
-  }, [tournamentId]);
+  }, [preferredPhaseId, selectedPhase, tournamentId]);
 
   const loadStandings = useCallback(async () => {
     if (!selectedPhase) return;
@@ -112,10 +146,10 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     }
   }, [selectedGroup, selectedPhase, selectedTableType, tournamentId]);
 
-  const loadAssignments = useCallback(async (phaseId: string | null, groupId: string | null) => {
+  const loadAssignments = useCallback(async (phaseId: string | null) => {
     if (!phaseId) return;
     try {
-      const url = `/api/admin/team-labels?tournament_id=${tournamentId}&phase_id=${phaseId}${groupId ? `&group_id=${groupId}` : ''}`;
+      const url = `/api/admin/team-labels?tournament_id=${tournamentId}&phase_id=${phaseId}`;
       const res = await fetch(url);
       const json = await res.json();
       if (json.ok) setAssignments(json.data ?? []);
@@ -136,21 +170,17 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     return () => media.removeEventListener('change', sync);
   }, []);
 
-  useEffect(() => {
-    if (selectedPhase && !loadingContext) {
-      loadStandings();
-    }
-  }, [loadStandings, selectedPhase, loadingContext]);
-
-  // Load assignments only when phase/group changes
-  useEffect(() => {
-    loadAssignments(selectedPhase, selectedGroup);
-  }, [loadAssignments, selectedPhase, selectedGroup]);
-
   const activePhase = useMemo(
     () => context?.phases.find((phase: StandingsPhase) => phase.id === selectedPhase) || null,
     [context?.phases, selectedPhase],
   );
+
+  useEffect(() => {
+    if (!preferredPhaseId || !context?.phases?.length) return;
+    if (!context.phases.some((phase: StandingsPhase) => phase.id === preferredPhaseId)) return;
+    if (selectedPhase === preferredPhaseId) return;
+    setSelectedPhase(preferredPhaseId);
+  }, [context?.phases, preferredPhaseId, selectedPhase]);
 
   useEffect(() => {
     if (!activePhase) return;
@@ -169,6 +199,29 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     });
   }, [selectedPhase, activePhase]);
 
+  const phaseRequiresGroup = (activePhase?.groups?.length || 0) > 0;
+  const canLoadGroupScopedData = !!selectedPhase && !loadingContext && (!phaseRequiresGroup || !!selectedGroup);
+
+  useEffect(() => {
+    if (phaseRequiresGroup && !selectedGroup) {
+      setStandingsData(null);
+    }
+  }, [phaseRequiresGroup, selectedGroup]);
+
+  useEffect(() => {
+    if (canLoadGroupScopedData) {
+      loadStandings();
+    }
+  }, [canLoadGroupScopedData, loadStandings]);
+
+  useEffect(() => {
+    if (canLoadGroupScopedData) {
+      loadAssignments(selectedPhase);
+      return;
+    }
+    setAssignments([]);
+  }, [canLoadGroupScopedData, loadAssignments, selectedPhase]);
+
   const allLabels = useMemo<UiLabel[]>(() => {
     const phaseLabels = activePhase?.settings?.groupLabels || [];
     return phaseLabels
@@ -180,6 +233,12 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
         scope: 'standings',
       }));
   }, [activePhase?.settings?.groupLabels]);
+
+  const shareAcrossPhaseGroups = phaseRequiresGroup;
+  const visibleAssignments = useMemo(
+    () => filterVisibleAssignments(assignments, shareAcrossPhaseGroups, selectedGroup),
+    [assignments, selectedGroup, shareAcrossPhaseGroups],
+  );
 
 
   const handleRecalculate = async () => {
@@ -224,7 +283,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     const map: Record<string, UiLabel[]> = {};
     const allowedLabelIds = new Set(allLabels.map((label) => label.id));
     const labelOrder = new Map(allLabels.map((label, index) => [label.id, index]));
-    for (const a of assignments) {
+    for (const a of visibleAssignments) {
       if (!a.label || !allowedLabelIds.has(a.label.id)) continue;
       const key = getAssignmentKey(a);
       if (!key) continue;
@@ -239,33 +298,43 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
       );
     });
     return map;
-  }, [allLabels, assignments]);
+  }, [allLabels, visibleAssignments]);
 
-  const handleCycleLabel = useCallback(async (positionKey: string) => {
+  const handleCycleLabel = useCallback(async ({
+    position,
+  }: {
+    position: string;
+  }) => {
     if (!selectedPhase || allLabels.length === 0 || pendingLabelPosition) return;
+    if (phaseRequiresGroup && !selectedGroup) return;
 
-    const normalizedPosition = Number(positionKey);
+    const normalizedPosition = Number(position);
     if (!Number.isInteger(normalizedPosition)) return;
 
     const labelOrder = new Map(allLabels.map((label, index) => [label.id, index]));
-    const activeAssignments = assignments
+    const displayAssignments = visibleAssignments
       .filter((assignment) => assignment.position === normalizedPosition && labelOrder.has(assignment.label_id))
       .sort(
         (a, b) =>
           (labelOrder.get(a.label_id) ?? Number.MAX_SAFE_INTEGER) -
           (labelOrder.get(b.label_id) ?? Number.MAX_SAFE_INTEGER),
       );
+    const assignmentsToRemove = assignments.filter((assignment) => {
+      if (assignment.position !== normalizedPosition || !labelOrder.has(assignment.label_id)) return false;
+      if (shareAcrossPhaseGroups) return true;
+      return (assignment.group_id ?? null) === (selectedGroup ?? null);
+    });
 
-    const currentLabelId = activeAssignments[0]?.label_id ?? null;
+    const currentLabelId = displayAssignments[0]?.label_id ?? null;
     const currentIndex = currentLabelId ? allLabels.findIndex((label) => label.id === currentLabelId) + 1 : 0;
     const nextIndex = (currentIndex + 1) % (allLabels.length + 1);
     const nextLabel = nextIndex === 0 ? null : allLabels[nextIndex - 1];
 
-    setPendingLabelPosition(positionKey);
+    setPendingLabelPosition(position);
     setRecalcFeedback(null);
 
     try {
-      for (const assignment of activeAssignments) {
+      for (const assignment of assignmentsToRemove) {
         const deleteRes = await fetch(`/api/admin/team-labels/${assignment.id}`, { method: 'DELETE' });
         const deleteJson = await deleteRes.json();
         if (!deleteRes.ok || !deleteJson.ok) {
@@ -284,7 +353,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
             position: normalizedPosition,
             tournament_id: tournamentId,
             phase_id: selectedPhase,
-            group_id: selectedGroup,
+            group_id: null,
           }),
         });
         const createJson = await createRes.json();
@@ -294,7 +363,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
         nextAssignment = createJson.data;
       }
 
-      const removableIds = new Set(activeAssignments.map((assignment) => assignment.id));
+      const removableIds = new Set(assignmentsToRemove.map((assignment) => assignment.id));
       setAssignments((prev) => {
         const base = prev.filter((assignment) => !removableIds.has(assignment.id));
         return nextAssignment ? [...base, nextAssignment] : base;
@@ -308,7 +377,17 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
     } finally {
       setPendingLabelPosition(null);
     }
-  }, [allLabels, assignments, pendingLabelPosition, selectedGroup, selectedPhase, tournamentId]);
+  }, [
+    allLabels,
+    assignments,
+    pendingLabelPosition,
+    phaseRequiresGroup,
+    selectedGroup,
+    selectedPhase,
+    shareAcrossPhaseGroups,
+    tournamentId,
+    visibleAssignments,
+  ]);
 
   if (loadingContext) {
     return <div className={styles.loadingState}>Loading standings context...</div>;
@@ -462,6 +541,7 @@ export default function TournamentStandingsTab({ tournamentId }: { tournamentId:
               onPhaseChange={(value) => {
                 setSelectedPhase(value);
                 setSelectedGroup(null);
+                onPhaseChange?.(value);
               }}
               onGroupChange={setSelectedGroup}
               onTableTypeChange={setSelectedTableType}

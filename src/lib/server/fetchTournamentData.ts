@@ -1,4 +1,5 @@
 import { getReadClient } from '@/lib/supabase/read';
+import { normalizeTeamLabelAssignments } from '@/lib/teamLabels';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -452,6 +453,8 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             }
         }
 
+        const normalizedTeamLabels = normalizeTeamLabelAssignments(teamLabelsRes.data);
+
         const queryErrors: TournamentQueryErrors = {
             tournament: tournamentError,
             participants: participantsRes.error,
@@ -469,7 +472,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             standingsRes.data.length ||
             phasesRes.data.length ||
             groupsRes.data.length ||
-            teamLabelsRes.data.length,
+            normalizedTeamLabels.length,
         );
 
         if (!hasAnyData) {
@@ -501,7 +504,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
                     order_index: normalizedGroup.order_index,
                 };
             }),
-            teamLabels: teamLabelsRes.data,
+            teamLabels: normalizedTeamLabels,
             queryErrors,
         };
     } catch (error) {

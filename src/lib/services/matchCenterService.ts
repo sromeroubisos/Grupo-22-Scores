@@ -134,7 +134,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
       *,
       homeClub:home_club_id (id, name, short_name, logo_url, primary_color),
       awayClub:away_club_id (id, name, short_name, logo_url, primary_color),
-      tournament:tournament_id (id, name)
+      tournament:tournament_id (id, name, logo_url, sport_id)
     `)
     .eq('id', matchId)
     .single();
@@ -164,6 +164,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
 
   const homeClubRaw = (data as any).homeClub;
   const awayClubRaw = (data as any).awayClub;
+  const tournamentRaw = (data as any).tournament;
 
   return {
     data: {
@@ -171,12 +172,20 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
       // Normalize snake_case DB columns to camelCase for the frontend
       dateTime: (data as any).date_time ?? null,
       tournamentId: (data as any).tournament_id ?? null,
+      sportId: (data as any).sport_id ?? (data as any).sport ?? tournamentRaw?.sport_id ?? null,
       homeClubId: (data as any).home_club_id ?? null,
       awayClubId: (data as any).away_club_id ?? null,
       roundLabel: (data as any).round_label ?? null,
       roundId: (data as any).round_id ?? null,
       homeClub: homeClubRaw ? { ...homeClubRaw, logo: homeClubRaw.logo_url ?? null } : null,
       awayClub: awayClubRaw ? { ...awayClubRaw, logo: awayClubRaw.logo_url ?? null } : null,
+      tournament: tournamentRaw
+        ? {
+            ...tournamentRaw,
+            logo: tournamentRaw.logo_url ?? null,
+            sportId: tournamentRaw.sport_id ?? null,
+          }
+        : null,
       events: Array.isArray(events) ? events : [],
       lineups: normalizeLineups((data as any).lineups),
       replay_url: (data as any).replay_url ?? null,

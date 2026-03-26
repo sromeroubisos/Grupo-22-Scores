@@ -52,6 +52,13 @@ type ActiveColumn = {
   render: (row: StandingsRow) => ReactNode;
 };
 
+type TiebreakerDescriptor = {
+  key?: string;
+  metric?: string;
+  priority?: number;
+  enabled?: boolean;
+};
+
 function hasEnabledColumn(
   tableColumns: Record<string, boolean> | null | undefined,
   key: string,
@@ -343,7 +350,7 @@ function MobileStandingsCards({
   compactMobile?: boolean;
   labelsMap?: Record<string, UiLabel[]>;
   allLabels?: UiLabel[];
-  onCycleLabel?: (position: string) => Promise<void> | void;
+  onCycleLabel?: (target: { position: string }) => Promise<void> | void;
   pendingLabelPosition?: string | null;
 }) {
   const hasForm = activeColumns.some((column) => column.id === 'form');
@@ -382,7 +389,7 @@ function MobileStandingsCards({
                             label={currentLabel}
                             isBusy={pendingLabelPosition === cycleTargetKey}
                             disabled={!cycleTargetKey || !!pendingLabelPosition}
-                            onClick={cycleTargetKey ? () => onCycleLabel?.(cycleTargetKey) : undefined}
+                            onClick={cycleTargetKey ? () => onCycleLabel?.({ position: cycleTargetKey }) : undefined}
                           />
                         ) : null}
                       </div>
@@ -485,7 +492,7 @@ export function StandingsTable({
   compactMobile?: boolean;
   labelsMap?: Record<string, UiLabel[]>;
   allLabels?: UiLabel[];
-  onCycleLabel?: (position: string) => Promise<void> | void;
+  onCycleLabel?: (target: { position: string }) => Promise<void> | void;
   pendingLabelPosition?: string | null;
 }) {
   if (isLoading) {
@@ -535,10 +542,15 @@ export function StandingsTable({
     const map: Partial<Record<ColumnId, number>> = {};
     const tbs = rules?.tiebreakers ?? [];
     const sorted = [...tbs]
-      .filter((tb) => typeof tb !== 'object' || (tb as any).enabled !== false)
-      .sort((a, b) => ((a as any).priority ?? 0) - ((b as any).priority ?? 0));
+      .filter((tb) => typeof tb === 'string' || (tb as TiebreakerDescriptor).enabled !== false)
+      .sort((a, b) => {
+        const leftPriority = typeof a === 'string' ? 0 : ((a as TiebreakerDescriptor).priority ?? 0);
+        const rightPriority = typeof b === 'string' ? 0 : ((b as TiebreakerDescriptor).priority ?? 0);
+        return leftPriority - rightPriority;
+      });
     sorted.forEach((tb, idx) => {
-      const key = typeof tb === 'string' ? tb : ((tb as any).key || (tb as any).metric || '');
+      const descriptor = typeof tb === 'string' ? null : (tb as TiebreakerDescriptor);
+      const key = typeof tb === 'string' ? tb : (descriptor?.key || descriptor?.metric || '');
       const colId = TIEBREAKER_METRIC_TO_COLUMN[key];
       if (colId && !(colId in map)) map[colId] = idx + 1;
     });
@@ -632,7 +644,7 @@ export function StandingsTable({
                                 label={currentLabel}
                                 isBusy={pendingLabelPosition === cycleTargetKey}
                                 disabled={!cycleTargetKey || !!pendingLabelPosition}
-                                onClick={cycleTargetKey ? () => onCycleLabel?.(cycleTargetKey) : undefined}
+                                onClick={cycleTargetKey ? () => onCycleLabel?.({ position: cycleTargetKey }) : undefined}
                               />
                             ) : null}
                           </div>

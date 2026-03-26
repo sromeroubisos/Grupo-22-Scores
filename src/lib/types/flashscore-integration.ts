@@ -75,6 +75,9 @@ export interface SyncResponse {
 export interface ExternalStandingsRow {
     position: number;
     team_name: string;
+    team_id?: string | null;
+    team_logo?: string | null;
+    team_url?: string | null;
     played: number;
     won: number;
     drawn: number;

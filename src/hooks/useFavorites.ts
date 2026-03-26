@@ -8,6 +8,12 @@ import { fetchResolvedFavorites, type ResolvedFavorite } from '@/lib/favorites/f
 export type FavoriteItem = ResolvedFavorite;
 
 const LS_KEY = 'g22_favorites_v4_fix';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+type ToggleLeagueFavoriteOptions = {
+    name?: string;
+    followerTournamentId?: string | null;
+};
 
 function readLS(): FavoriteItem[] {
     try {
@@ -38,6 +44,22 @@ function isAbortError(err: unknown): boolean {
             typeof err.message === 'string' &&
             err.message.toLowerCase().includes('abort'))
     );
+}
+
+function resolveTournamentFollowerId(entityId: string, followerTournamentId?: string | null): string | null {
+    const preferredId = String(followerTournamentId ?? '').trim();
+    if (preferredId && UUID_RE.test(preferredId)) {
+        return preferredId;
+    }
+
+    const normalizedEntityId = String(entityId).trim();
+    return UUID_RE.test(normalizedEntityId) ? normalizedEntityId : null;
+}
+
+function redirectToLogin(): void {
+    if (typeof window === 'undefined') return;
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.href = `/login?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
 export function useFavorites() {
@@ -149,14 +171,85 @@ export function useFavorites() {
         [favorites],
     );
 
-    const toggleLeagueFavorite = useCallback((entityId: string, name?: string) => {
-        toggleFavorite({
-            id: entityId,
-            entity_type: 'league',
-            name: name ?? 'Liga',
-            type_label: 'Torneo',
-        });
-    }, [toggleFavorite]);
+    const ensureTournamentFollowState = useCallback(async (
+        userId: string,
+        entityId: string,
+        shouldFollow: boolean,
+        followerTournamentId?: string | null,
+    ) => {
+        const tournamentId = resolveTournamentFollowerId(entityId, followerTournamentId);
+        if (!tournamentId) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('tournament_followers')
+                .select('tournament_id')
+                .eq('user_id', userId)
+                .eq('tournament_id', tournamentId)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Error checking tournament follow state:', error);
+                return;
+            }
+
+            const isFollowing = Boolean(data?.tournament_id);
+            if (isFollowing === shouldFollow) return;
+
+            const { error: toggleError } = await supabase.rpc('toggle_tournament_follow', {
+                p_tournament_id: tournamentId,
+            });
+
+            if (toggleError) {
+                console.error('Error syncing tournament follow state:', toggleError);
+            }
+        } catch (err) {
+            console.error('Unexpected error syncing tournament follow state:', err);
+        }
+    }, [supabase]);
+
+    const toggleLeagueFavorite = useCallback(async (
+        entityId: string,
+        nameOrOptions?: string | ToggleLeagueFavoriteOptions,
+    ) => {
+        const options = typeof nameOrOptions === 'string'
+            ? { name: nameOrOptions }
+            : nameOrOptions;
+
+        try {
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+            if (sessionError) {
+                console.error('Error checking session before toggling tournament follow:', sessionError);
+            }
+
+            if (!session) {
+                redirectToLogin();
+                return;
+            }
+
+            const shouldFollow = !favorites.some((favorite) => (
+                String(favorite.id) === String(entityId) &&
+                ['league', 'tournament'].includes(favorite.entity_type)
+            ));
+
+            await toggleFavorite({
+                id: entityId,
+                entity_type: 'league',
+                name: options?.name ?? 'Liga',
+                type_label: 'Torneo',
+            });
+
+            await ensureTournamentFollowState(
+                session.user.id,
+                entityId,
+                shouldFollow,
+                options?.followerTournamentId,
+            );
+        } catch (err) {
+            console.error('Error toggling league favorite:', err);
+        }
+    }, [ensureTournamentFollowState, favorites, supabase, toggleFavorite]);
 
     const loadMore = useCallback(() => {
         // No-op for now. The API remains for compatibility with the page component.

@@ -90,6 +90,40 @@ interface NewClubFormProps {
   } | null;
 }
 
+function buildManualVariantCategories(
+  form: Pick<FormState, 'gender' | 'age_grade' | 'sport'>,
+  isDerived: boolean,
+  baseClubId?: string | null,
+): string[] | undefined {
+  const categories = new Set<string>();
+  const normalizedGender = normalizeSlug(form.gender || 'Masculino');
+  const normalizedAgeGrade = normalizeSlug(form.age_grade || '');
+  const normalizedSport = normalizeSlug(form.sport || '');
+
+  if (isDerived) {
+    categories.add('variant:manual');
+  }
+
+  if (baseClubId) {
+    categories.add(`base_club:${baseClubId}`);
+  }
+
+  if (normalizedSport) {
+    categories.add(`sport:${normalizedSport}`);
+  }
+
+  if (normalizedAgeGrade) {
+    categories.add(`age_grade:${normalizedAgeGrade}`);
+    categories.add('audience:juveniles');
+  }
+
+  if (isDerived || normalizedGender !== 'masculino') {
+    categories.add(`gender:${normalizedGender}`);
+  }
+
+  return categories.size > 0 ? Array.from(categories) : undefined;
+}
+
 export default function NewClubForm({ unions = [], derivedPrefill = null }: NewClubFormProps) {
   const router = useRouter();
 
@@ -211,7 +245,7 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
       logo_url: derivedPrefill.baseClub.logo_url || null,
       primary_color: derivedPrefill.baseClub.primary_color || form.primary_color,
       sport: nextSport,
-      gender: derivedPrefill.derivativeType === 'women' ? 'Femenino' : form.gender,
+      gender: form.gender || 'Masculino',
       age_grade: derivedPrefill.derivativeType === 'youth' ? (form.age_grade || 'Juvenil') : form.age_grade,
       country: derivedPrefill.baseClub.country || form.country,
       region: derivedPrefill.baseClub.region || '',
@@ -509,6 +543,7 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
       visibility: form.visibility as any,
       lifecycle: form.lifecycle as any,
       notes_internal: form.notes_internal || null,
+      categories: buildManualVariantCategories(form, Boolean(derivedPrefill), derivedPrefill?.baseClub.id),
     };
 
     setSaving(true);

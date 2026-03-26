@@ -345,7 +345,11 @@ function OperationContent({
                     />
                 )}
                 {currentSubTab === 'tabla' && (
-                    <TournamentStandingsTab tournamentId={id} />
+                    <TournamentStandingsTab
+                        tournamentId={id}
+                        preferredPhaseId={selectedPhaseId}
+                        onPhaseChange={onSelectPhase}
+                    />
                 )}
                 {currentSubTab === 'estadisticas' && (
                     <TournamentStatsTab id={id} data={data} phaseId={selectedPhaseId || undefined} />

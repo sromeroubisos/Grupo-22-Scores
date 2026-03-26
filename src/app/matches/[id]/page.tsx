@@ -89,6 +89,10 @@ function mapMatchStatus(matchStatusObj: any, simpleStatus?: string) {
     return 'scheduled';
 }
 
+function getTeamLogo(team: any) {
+    return team?.image_path || team?.small_image_path || team?.logo || team?.logo_url || '';
+}
+
 function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamName?: string }) {
     const date = m.timestamp ? new Date(m.timestamp * 1000).toLocaleDateString('es-AR', { timeZone: USER_TZ }) : (m.date || '');
 
@@ -115,16 +119,16 @@ function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamN
             </div>
             <div className={styles.h2hTeams}>
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                    {m.home_team?.image_path ? (
-                        <img src={m.home_team.image_path} alt="" style={{ width: '22px', height: '22px' }} />
+                    {getTeamLogo(m.home_team) ? (
+                        <img src={getTeamLogo(m.home_team)} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
                     ) : (
                         <div style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
                     )}
                 </div>
                 <span className={styles.h2hScore}>{m.scores?.home} - {m.scores?.away}</span>
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-                    {m.away_team?.image_path ? (
-                        <img src={m.away_team.image_path} alt="" style={{ width: '22px', height: '22px' }} />
+                    {getTeamLogo(m.away_team) ? (
+                        <img src={getTeamLogo(m.away_team)} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
                     ) : (
                         <div style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
                     )}
@@ -437,7 +441,13 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         if (res.ok) {
                             const matchData = await res.json();
 
-                            const sportId = matchData.sportId || 2;
+                            const sportId =
+                                matchData.sportId ||
+                                matchData.sport_id ||
+                                matchData.sport ||
+                                matchData.tournament?.sportId ||
+                                matchData.tournament?.sport_id ||
+                                null;
                             const score = matchData.score || { home: 0, away: 0 };
                             const homeClubId = matchData.homeClub?.id || matchData.homeClubId || '';
                             const awayClubId = matchData.awayClub?.id || matchData.awayClubId || '';
@@ -495,7 +505,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     ? fetch(`/api/db/standings?tournament=${tournamentId}`, { signal: controller.signal }).then(r => r.ok ? r.json() : null)
                                     : Promise.resolve(null),
                                 homeClubId && awayClubId
-                                    ? fetch(`/api/db/h2h?home=${homeClubId}&away=${awayClubId}`, { signal: controller.signal }).then(r => r.ok ? r.json() : null)
+                                    ? fetch(
+                                        `/api/db/h2h?home=${homeClubId}&away=${awayClubId}${sportId ? `&sport=${encodeURIComponent(String(sportId))}` : ''}`,
+                                        { signal: controller.signal }
+                                    ).then(r => r.ok ? r.json() : null)
                                     : Promise.resolve(null),
                             ]);
 
@@ -507,8 +520,11 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 : [];
                             const standings = rawStandings.map((row: any) => ({
                                 rank: row.position,
-                                name: row.team?.name ?? '',
-                                played: row.matches_total ?? 0,
+                                name: row.team?.name ?? row.team_name ?? '',
+                                team_id: row.team?.id ?? row.team_id ?? null,
+                                logo: row.team?.logo ?? row.team_logo ?? '',
+                                team: row.team ?? null,
+                                matches_played: row.matches_total ?? 0,
                                 goal_difference: row.goal_difference ?? 0,
                                 points: row.points_total ?? 0,
                             }));
@@ -1208,15 +1224,27 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                             </thead>
                                             <tbody>
                                                 {matchData.standings.slice(0, 20).map((row: any, i: number) => {
-                                                    const rowName = row.name || row.TEAM_NAME || row.team_name;
+                                                    const rowName = row.name || row.team?.name || row.TEAM_NAME || row.team_name;
+                                                    const rowId = row.team_id || row.team?.id || row.team?.team_id || null;
+                                                    const rowLogo = row.logo || row.team?.logo || row.team_logo || '';
+                                                    const teamHref = rowId
+                                                        ? buildTeamHref({ id: rowId, name: rowName }, matchData.sportId)
+                                                        : null;
                                                     const isCurrent = rowName === matchData.home.name || rowName === matchData.away.name ||
-                                                        row.team_id === matchData.home.id || row.team_id === matchData.away.id;
+                                                        rowId === matchData.home.id || rowId === matchData.away.id;
 
                                                     return (
                                                         <tr key={i} className={isCurrent ? styles.currentTeam : ''}>
                                                             <td><span className={styles.rankBadge}>{row.rank || i + 1}</span></td>
                                                             <td style={isCurrent ? { color: 'var(--accent)', fontWeight: '700' } : {}}>
-                                                                {row.team_id ? <Link href={`/clubs/fs-team-${row.team_id}${matchData.sportId ? `?sport=${encodeURIComponent(String(matchData.sportId))}` : ''}`} style={{ color: 'inherit', textDecoration: 'none' }}>{rowName}</Link> : rowName}
+                                                                <div className={styles.standingsTeamCell}>
+                                                                    {rowLogo
+                                                                        ? <img src={rowLogo} alt="" className={styles.standingsTeamLogo} />
+                                                                        : <div className={styles.standingsTeamLogoPlaceholder} />}
+                                                                    {teamHref
+                                                                        ? <Link href={teamHref} className={styles.standingsTeamLink}>{rowName}</Link>
+                                                                        : <span>{rowName}</span>}
+                                                                </div>
                                                             </td>
                                                             <td>{row.matches_played || row.PLAYED || row.played || 0}</td>
                                                             <td>{row.goal_difference || row.GOAL_DIFF || row.goal_diff || 0}</td>

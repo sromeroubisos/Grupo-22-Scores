@@ -9,6 +9,8 @@ type QueryError = {
     details?: string | null;
 } | null;
 
+const AUXILIARY_QUERY_TIMEOUT_MS = 8_000;
+
 function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
 }
@@ -39,6 +41,38 @@ function isRetryableMissingColumnError(error: QueryError, columns: string) {
 
     const haystack = `${error.message || ''} ${error.details || ''}`.toLowerCase();
     return (error.code === 'PGRST204' || error.code === '42703') && haystack.includes('column');
+}
+
+async function withSoftTimeout<T>(
+    promise: PromiseLike<T>,
+    ms: number,
+    fallback: T,
+    label: string,
+) {
+    let settled = false;
+
+    return new Promise<T>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            console.warn(`[ConsoleData] ${label} timed out after ${ms}ms, using fallback.`);
+            resolve(fallback);
+        }, ms);
+
+        Promise.resolve(promise)
+            .then((value) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timeoutId);
+                resolve(value);
+            })
+            .catch((error) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timeoutId);
+                reject(error);
+            });
+    });
 }
 
 async function selectWithFallback<T>(
@@ -148,7 +182,11 @@ export async function GET(request: NextRequest) {
         const readClient = await getReadClient();
 
         if (resource === 'clubs') {
-            const [{ data: clubs, error: clubsError }, { data: unions, error: unionsError }, { data: clubFavs }] = await Promise.all([
+            const [
+                { data: clubs, error: clubsError },
+                { data: unions, error: unionsError },
+                { data: clubFavs, error: clubFavsError },
+            ] = await Promise.all([
                 selectWithFallback<ClubConsoleRow>(
                     readClient.from('clubs'),
                     [
@@ -165,27 +203,44 @@ export async function GET(request: NextRequest) {
                     ],
                     { column: 'name', ascending: true }
                 ),
-                readClient
-                    .from('unions')
-                    .select('id, name') as PromiseLike<{
-                    data: UnionConsoleRow[] | null;
-                    error: { code?: string | null; message?: string | null; details?: string | null } | null;
-                }>,
-                readClient
-                    .from('favorites')
-                    .select('entity_id')
-                    .eq('entity_type', 'club') as PromiseLike<{
-                    data: { entity_id: string }[] | null;
-                    error: unknown;
-                }>,
+                withSoftTimeout(
+                    readClient
+                        .from('unions')
+                        .select('id, name') as PromiseLike<{
+                            data: UnionConsoleRow[] | null;
+                            error: { code?: string | null; message?: string | null; details?: string | null } | null;
+                        }>,
+                    AUXILIARY_QUERY_TIMEOUT_MS,
+                    { data: [] as UnionConsoleRow[], error: null },
+                    'clubs unions lookup'
+                ),
+                withSoftTimeout(
+                    readClient
+                        .from('favorites')
+                        .select('entity_id')
+                        .eq('entity_type', 'club') as PromiseLike<{
+                            data: { entity_id: string }[] | null;
+                            error: { code?: string | null; message?: string | null; details?: string | null } | null;
+                        }>,
+                    AUXILIARY_QUERY_TIMEOUT_MS,
+                    { data: [] as { entity_id: string }[], error: null },
+                    'clubs favorites lookup'
+                ),
             ]);
 
             if (clubsError) return jsonError('Failed to load clubs', 500, clubsError.message);
-            if (unionsError) return jsonError('Failed to load unions for clubs', 500, unionsError.message);
 
-            const unionMap = new Map((unions ?? []).map((union) => [union.id, union]));
+            if (unionsError) {
+                console.warn('[ConsoleData] Failed to load unions for clubs, continuing without union labels:', unionsError.message);
+            }
+
+            if (clubFavsError) {
+                console.warn('[ConsoleData] Failed to load club favorites, continuing with zero follower counts:', clubFavsError.message);
+            }
+
+            const unionMap = new Map(((unionsError ? [] : unions) ?? []).map((union) => [union.id, union]));
             const clubFavMap = new Map<string, number>();
-            for (const row of clubFavs ?? []) {
+            for (const row of (clubFavsError ? [] : clubFavs) ?? []) {
                 clubFavMap.set(row.entity_id, (clubFavMap.get(row.entity_id) ?? 0) + 1);
             }
             const data = (clubs ?? []).map((club) => ({

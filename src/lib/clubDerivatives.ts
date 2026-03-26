@@ -6,13 +6,13 @@ export type ClubDerivativeType = 'youth' | 'women' | 'other_sport';
 
 export const CLUB_DERIVATIVE_LABELS: Record<ClubDerivativeType, string> = {
   youth: 'Plantel juvenil',
-  women: 'Rama femenina',
+  women: 'Rama',
   other_sport: 'Otro deporte',
 };
 
 export const CLUB_DERIVATIVE_DESCRIPTIONS: Record<ClubDerivativeType, string> = {
   youth: 'Mantiene la identidad del club base, pero queda listo para una categoria formativa.',
-  women: 'Arranca con la identidad del club base y deja preseleccionada la rama femenina.',
+  women: 'Arranca con la identidad del club base para que luego definas si la rama sera femenina o masculina.',
   other_sport: 'Crea una variante deportiva del mismo club para que la vista publica pueda resolverla por deporte.',
 };
 
@@ -53,6 +53,20 @@ export function getSportDisplayName(raw: string | null | undefined): string {
   return raw ?? '';
 }
 
-export function getClubSportValue(club: { sport?: string | null; sport_id?: string | null } | null | undefined): string | null {
-  return club?.sport_id || club?.sport || null;
+export function getClubSportValue(
+  club: { sport?: string | null; sport_id?: string | null; categories?: string[] | null } | null | undefined,
+): string | null {
+  const directSport = club?.sport_id || club?.sport;
+  if (directSport) {
+    return directSport;
+  }
+
+  const categories = Array.isArray(club?.categories) ? club.categories : [];
+  const sportCategory = categories.find((category) => category.trim().toLowerCase().startsWith('sport:'));
+
+  if (!sportCategory) {
+    return null;
+  }
+
+  return sportCategory.slice(sportCategory.indexOf(':') + 1).trim() || null;
 }

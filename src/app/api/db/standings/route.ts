@@ -33,13 +33,19 @@ export async function GET(req: NextRequest) {
             logo: row.club?.logo_url ?? '',
             id: row.club_id,
         },
+        team_id: row.club_id,
+        team_name: row.club?.name ?? '',
+        team_logo: row.club?.logo_url ?? '',
         matches_total: row.played,
         wins_total: row.won,
         draws_total: row.drawn,
         losses_total: row.lost,
         goals_for: row.scored,
         goals_against: row.conceded,
-        goal_difference: row.scored - row.conceded,
+        goal_difference:
+            typeof row.scored === 'number' && typeof row.conceded === 'number'
+                ? row.scored - row.conceded
+                : 0,
         points_total: row.points,
         bonus_points: row.bonus_points,
         form: row.form,
