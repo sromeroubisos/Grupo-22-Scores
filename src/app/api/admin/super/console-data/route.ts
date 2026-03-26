@@ -110,6 +110,7 @@ type ClubConsoleRow = {
     union_id?: string | null;
     sport?: string | null;
     sport_id?: string | null;
+    followers_count?: number;
 };
 
 type UnionConsoleRow = {
@@ -147,7 +148,7 @@ export async function GET(request: NextRequest) {
         const readClient = await getReadClient();
 
         if (resource === 'clubs') {
-            const [{ data: clubs, error: clubsError }, { data: unions, error: unionsError }] = await Promise.all([
+            const [{ data: clubs, error: clubsError }, { data: unions, error: unionsError }, { data: clubFavs }] = await Promise.all([
                 selectWithFallback<ClubConsoleRow>(
                     readClient.from('clubs'),
                     [
@@ -170,16 +171,28 @@ export async function GET(request: NextRequest) {
                     data: UnionConsoleRow[] | null;
                     error: { code?: string | null; message?: string | null; details?: string | null } | null;
                 }>,
+                readClient
+                    .from('favorites')
+                    .select('entity_id')
+                    .eq('entity_type', 'club') as PromiseLike<{
+                    data: { entity_id: string }[] | null;
+                    error: unknown;
+                }>,
             ]);
 
             if (clubsError) return jsonError('Failed to load clubs', 500, clubsError.message);
             if (unionsError) return jsonError('Failed to load unions for clubs', 500, unionsError.message);
 
             const unionMap = new Map((unions ?? []).map((union) => [union.id, union]));
+            const clubFavMap = new Map<string, number>();
+            for (const row of clubFavs ?? []) {
+                clubFavMap.set(row.entity_id, (clubFavMap.get(row.entity_id) ?? 0) + 1);
+            }
             const data = (clubs ?? []).map((club) => ({
                 ...club,
                 sport: club.sport || club.sport_id || null,
                 union: club.union_id ? unionMap.get(club.union_id) ?? null : null,
+                followers_count: clubFavMap.get(club.id) ?? 0,
             }));
 
             return NextResponse.json({ data });

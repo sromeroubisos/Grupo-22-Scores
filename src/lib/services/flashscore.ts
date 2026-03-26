@@ -838,7 +838,7 @@ export async function getTeamDetails(teamUrl: string) {
 export async function getTeamResults(teamId: string, page: number = 1) {
     const cacheKey = `team-results-${teamId}-${page}`;
     const cached = memoryCache.get<any>(cacheKey);
-    if (cached) return cached;
+    if (cached !== undefined && cached !== null && !(Array.isArray(cached) && cached.length === 0)) return cached;
 
     const url = `https://${API_HOST}/api/flashscore/v2/teams/results?team_id=${teamId}&page=${page}`;
     const { data } = await apiFetch<any>(url, {
@@ -848,14 +848,14 @@ export async function getTeamResults(teamId: string, page: number = 1) {
         cacheTtl: CACHE_TTL_TEAMS
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TEAMS);
+    if (data && !(Array.isArray(data) && data.length === 0)) memoryCache.set(cacheKey, data, CACHE_TTL_TEAMS);
     return data;
 }
 
 export async function getTeamFixtures(teamId: string, page: number = 1) {
     const cacheKey = `team-fixtures-${teamId}-${page}`;
     const cached = memoryCache.get<any>(cacheKey);
-    if (cached) return cached;
+    if (cached !== undefined && cached !== null && !(Array.isArray(cached) && cached.length === 0)) return cached;
 
     const url = `https://${API_HOST}/api/flashscore/v2/teams/fixtures?team_id=${teamId}&page=${page}`;
     const { data } = await apiFetch<any>(url, {
@@ -865,7 +865,7 @@ export async function getTeamFixtures(teamId: string, page: number = 1) {
         cacheTtl: CACHE_TTL_TEAMS
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TEAMS);
+    if (data && !(Array.isArray(data) && data.length === 0)) memoryCache.set(cacheKey, data, CACHE_TTL_TEAMS);
     return data;
 }
 
@@ -1016,4 +1016,21 @@ export async function getSeasonsByTournament(tournamentStageId: string) {
  */
 export async function getFixturesByTournamentOrSeason(tournamentTemplateId: string, seasonId: string, page: number = 1) {
     return getTournamentFixtures(tournamentTemplateId, seasonId, page);
+}
+
+export async function searchFlashScore(query: string) {
+    const cacheKey = `search-${query.toLowerCase()}`;
+    const cached = memoryCache.get<any>(cacheKey);
+    if (cached) return cached;
+
+    const url = `https://${API_HOST}/api/flashscore/v2/search?query=${encodeURIComponent(query)}`;
+    const { data } = await apiFetch<any>(url, {
+        headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
+        debugTag: 'Search',
+        silent: true,
+        cacheTtl: 60
+    });
+
+    if (data) memoryCache.set(cacheKey, data, 60);
+    return data;
 }

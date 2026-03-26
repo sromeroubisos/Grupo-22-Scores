@@ -1,8 +1,12 @@
 import { getReadClient } from '@/lib/supabase/read';
+import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/database.types';
 import {
     getTeamDetails,
     getTeamSquad,
+    getTeamResults,
+    getTeamFixtures,
+    getTeamTransfers,
 } from '@/lib/services/flashscore';
 import { canonicalizeSportId, getClubSportValue } from '@/lib/clubDerivatives';
 
@@ -135,6 +139,70 @@ const normalize = (res: PromiseSettledResult<unknown>) => {
     return value.DATA ?? value.data ?? value;
 };
 
+function parseScoreParts(result: string): { home: number | null; away: number | null } {
+    if (!result) return { home: null, away: null };
+    const parts = result.split(/\s*[-–]\s*/);
+    if (parts.length < 2) return { home: null, away: null };
+    const home = parseInt(parts[0].trim(), 10);
+    const away = parseInt(parts[parts.length - 1].trim(), 10);
+    return {
+        home: isNaN(home) ? null : home,
+        away: isNaN(away) ? null : away,
+    };
+}
+
+function normalizeFsTeamMatch(m: Record<string, unknown>): NormalizedInternalMatch {
+    const homeTeam = isRecord(m.home_team) ? m.home_team : {};
+    const awayTeam = isRecord(m.away_team) ? m.away_team : {};
+    const scores = parseScoreParts(
+        String(m.event_final_result || m.score || m.result || ''),
+    );
+    return {
+        match_id: String(m.match_id || m.event_key || m.id || ''),
+        home_team: {
+            name: String(homeTeam.name || m.event_home_team || ''),
+            small_image_path: String(
+                homeTeam.small_image_path ?? homeTeam.image_path ?? homeTeam.logo ?? ''
+            ),
+            team_id: String(homeTeam.team_id || homeTeam.id || ''),
+        },
+        away_team: {
+            name: String(awayTeam.name || m.event_away_team || ''),
+            small_image_path: String(
+                awayTeam.small_image_path ?? awayTeam.image_path ?? awayTeam.logo ?? ''
+            ),
+            team_id: String(awayTeam.team_id || awayTeam.id || ''),
+        },
+        scores,
+        match_status: String(m.event_status || m.match_status || m.status || 'FT'),
+        timestamp: Number(m.timestamp || m.start_time || 0),
+        tournament_name: String(
+            (isRecord(m.tournament) ? m.tournament.name : null) ||
+            m.tournament_name || m.league_name || ''
+        ),
+        sport_id: m.sport_id ? String(m.sport_id) : null,
+    };
+}
+
+function flattenFsMatches(raw: unknown): NormalizedInternalMatch[] {
+    if (!raw) return [];
+    const data = isRecord(raw) ? (raw.DATA ?? raw.data ?? raw) : raw;
+    const items = Array.isArray(data) ? data : [];
+    return items
+        .map((item: unknown) => {
+            if (!isRecord(item)) return null;
+            // Flatten grouped format (tournament → matches)
+            if (Array.isArray(item.matches)) {
+                return (item.matches as unknown[]).map((m) =>
+                    isRecord(m) ? normalizeFsTeamMatch(m) : null,
+                );
+            }
+            return normalizeFsTeamMatch(item);
+        })
+        .flat()
+        .filter((m): m is NormalizedInternalMatch => m !== null);
+}
+
 function normalizeInternalMatch(m: InternalMatchSource): NormalizedInternalMatch {
     const dt = m.date_time ? new Date(m.date_time) : null;
     const timestamp = dt ? dt.getTime() / 1000 : 0;
@@ -216,6 +284,7 @@ export async function GET(request: Request) {
     const teamUrlParam = searchParams.get('team_url') || '';
     const preferredSport = searchParams.get('preferred_sport') || searchParams.get('sport') || '';
     const skipSquad = searchParams.get('skip_squad') === 'true';
+    const debugMode = searchParams.get('_debug') === '1';
 
     if (!rawTeamId) {
         return Response.json({ ok: false, error: 'team_id is required' }, { status: 400 });
@@ -312,40 +381,135 @@ export async function GET(request: Request) {
     // Also treat internal clubs with external_id as having external data
     const effectiveExternalId = isExternalId ? teamId : (internalExternalId ? stripFsTeamPrefix(internalExternalId) : null);
 
+    // Look up cached team_url from external_teams table to avoid slug mismatches
+    let cachedTeamUrl: string | null = null;
+    if (effectiveExternalId) {
+        try {
+            const readClient = await getReadClient();
+            const { data: extTeam } = await (readClient as any)
+                .from('external_teams')
+                .select('team_url')
+                .eq('id', effectiveExternalId)
+                .maybeSingle();
+            if (extTeam?.team_url) cachedTeamUrl = extTeam.team_url as string;
+        } catch {
+            // Ignore — external_teams table may not have team_url column yet
+        }
+    }
+
     try {
         // Matches come exclusively from local Supabase DB (internalResults/internalFixtures)
         // FlashScore is only used for team details and squad if external_id is available
 
-        let teamUrl = teamUrlParam;
+        // Prefer: query param > cached from DB > constructed from slugify
+        let teamUrl = teamUrlParam || cachedTeamUrl || '';
         const extractedName = teamName || internalClubName;
 
         if (!teamUrl && extractedName && effectiveExternalId) {
             teamUrl = `/team/${slugify(extractedName)}/${effectiveExternalId}/`;
         }
 
+        // Extract the FlashScore team_id from the URL when not already known.
+        // This covers clubs stored in the DB (UUID id) without external_id set but
+        // navigated to from a match page that included the team_url query param.
+        // Format: /team/slug/ID/ → last non-empty segment is the ID.
+        let resolvedExternalId = effectiveExternalId;
+        if (!resolvedExternalId && teamUrl) {
+            const segments = teamUrl.split('/').filter(Boolean);
+            if (segments.length >= 3 && segments[0] === 'team') {
+                const maybeId = segments[segments.length - 1];
+                if (/^[a-zA-Z0-9]+$/.test(maybeId)) {
+                    resolvedExternalId = maybeId;
+                }
+            }
+        }
+
         let squad: unknown = null;
-        if (teamUrl && effectiveExternalId) {
-            const [detailsRes, squadRes] = await Promise.allSettled([
-                getTeamDetails(teamUrl),
-                skipSquad ? Promise.resolve(null) : getTeamSquad(teamUrl),
-            ]);
+        let fsResults: NormalizedInternalMatch[] = [];
+        let fsFixtures: NormalizedInternalMatch[] = [];
+        let transfers: unknown[] = [];
+
+        if (resolvedExternalId) {
+            const needFsResults = internalResults.length === 0;
+            const needFsFixtures = internalFixtures.length === 0;
+
+            const [detailsRes, squadRes, transfersRes, fsResultsRes, fsFixturesRes] =
+                await Promise.allSettled([
+                    teamUrl ? getTeamDetails(teamUrl) : Promise.resolve(null),
+                    teamUrl && !skipSquad ? getTeamSquad(teamUrl) : Promise.resolve(null),
+                    getTeamTransfers(resolvedExternalId),
+                    needFsResults ? getTeamResults(resolvedExternalId) : Promise.resolve(null),
+                    needFsFixtures ? getTeamFixtures(resolvedExternalId) : Promise.resolve(null),
+                ]);
+
+            if (debugMode) {
+                return Response.json({
+                    _debug: true,
+                    resolvedExternalId,
+                    teamUrl,
+                    needFsResults,
+                    needFsFixtures,
+                    internalResultsCount: internalResults.length,
+                    internalFixturesCount: internalFixtures.length,
+                    detailsRes: detailsRes.status === 'fulfilled' ? detailsRes.value : { error: (detailsRes as PromiseRejectedResult).reason },
+                    transfersRes: transfersRes.status === 'fulfilled' ? transfersRes.value : { error: (transfersRes as PromiseRejectedResult).reason },
+                    fsResultsRaw: fsResultsRes.status === 'fulfilled' ? fsResultsRes.value : { error: (fsResultsRes as PromiseRejectedResult).reason },
+                    fsFixturesRaw: fsFixturesRes.status === 'fulfilled' ? fsFixturesRes.value : { error: (fsFixturesRes as PromiseRejectedResult).reason },
+                    fsResultsParsed: fsResultsRes.status === 'fulfilled' && fsResultsRes.value ? flattenFsMatches(fsResultsRes.value) : [],
+                    fsFixturesParsed: fsFixturesRes.status === 'fulfilled' && fsFixturesRes.value ? flattenFsMatches(fsFixturesRes.value) : [],
+                });
+            }
 
             const remoteDetails = normalize(detailsRes);
             squad = normalize(squadRes);
 
+            // Persist the working team_url to external_teams cache if not already stored
+            if (teamUrl && !cachedTeamUrl && remoteDetails && isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
+                try {
+                    const writeClient = await createClient();
+                    await writeClient
+                        .from('external_teams' as any)
+                        .upsert({ id: resolvedExternalId, team_url: teamUrl, source: 'flashscore', name: String((remoteDetails as any).name || extractedName || resolvedExternalId) }, { onConflict: 'id' });
+                } catch {
+                    // Non-critical — ignore write failures
+                }
+            }
+            const rawTransfers = normalize(transfersRes);
+            transfers = Array.isArray(rawTransfers) ? rawTransfers : [];
+
+            if (isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
+                details = { ...(details ?? {}), ...remoteDetails };
+            }
+
+            if (needFsResults && fsResultsRes.status === 'fulfilled' && fsResultsRes.value) {
+                fsResults = flattenFsMatches(fsResultsRes.value);
+            }
+            if (needFsFixtures && fsFixturesRes.status === 'fulfilled' && fsFixturesRes.value) {
+                fsFixtures = flattenFsMatches(fsFixturesRes.value);
+            }
+        } else if (teamUrl) {
+            const [detailsRes, squadRes] = await Promise.allSettled([
+                getTeamDetails(teamUrl),
+                skipSquad ? Promise.resolve(null) : getTeamSquad(teamUrl),
+            ]);
+            const remoteDetails = normalize(detailsRes);
+            squad = normalize(squadRes);
             if (isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
                 details = { ...(details ?? {}), ...remoteDetails };
             }
         }
 
+        const finalResults = internalResults.length > 0 ? internalResults : fsResults;
+        const finalFixtures = internalFixtures.length > 0 ? internalFixtures : fsFixtures;
+
         return Response.json({
             ok: true,
             resolvedClubId,
             details,
-            results: internalResults,
-            fixtures: internalFixtures,
+            results: finalResults,
+            fixtures: finalFixtures,
             squad: squad || [],
-            transfers: []
+            transfers,
         });
     } catch (e: unknown) {
         const message = e instanceof Error ? e.message : String(e);

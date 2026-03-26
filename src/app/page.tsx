@@ -76,6 +76,8 @@ interface Match {
   awayScore?: number;
   status: 'live' | 'scheduled' | 'finished';
   minute?: string;
+  homeClubId?: string;
+  awayClubId?: string;
 }
 
 interface LeagueMatches {
@@ -258,7 +260,7 @@ export default function HomePage() {
   const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
 
   // Favorites hook
-  const { toggleLeagueFavorite, isLeagueFavorite } = useFavorites();
+  const { toggleLeagueFavorite, isLeagueFavorite, isFavorite } = useFavorites();
 
   // Sports list handled by context (to respect global configuration)
 
@@ -454,7 +456,9 @@ export default function HomePage() {
         status: status,
         // minutes will be calculated by the MatchRow component using the original dateTime
         minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,
-        _dateTime: match.dateTime // Preserve for real-time calculation
+        _dateTime: match.dateTime, // Preserve for real-time calculation
+        homeClubId: match.homeClubId,
+        awayClubId: match.awayClubId,
       } as any);
     });
 
@@ -481,6 +485,25 @@ export default function HomePage() {
       }))
       .filter((league) => league.matches.length > 0);
   }, [matchesByLeague, showLiveOnly]);
+
+  const favoriteClubMatches = useMemo(() => {
+    const result: (Match & { leagueName: string })[] = [];
+    for (const leagueGroup of matchesByLeague) {
+      for (const m of leagueGroup.matches) {
+        const hId = (m as any).homeClubId;
+        const aId = (m as any).awayClubId;
+        if ((hId && isFavorite(hId)) || (aId && isFavorite(aId))) {
+          result.push({ ...m, leagueName: leagueGroup.league });
+        }
+      }
+    }
+    return result;
+  }, [matchesByLeague, isFavorite]);
+
+  const displayedFavoriteClubMatches = useMemo(() =>
+    showLiveOnly ? favoriteClubMatches.filter(m => m.status === 'live') : favoriteClubMatches,
+    [favoriteClubMatches, showLiveOnly]
+  );
 
   const liveMatchesCount = useMemo(() => (
     matchesByLeague.reduce((total, league) => (
@@ -1127,6 +1150,31 @@ export default function HomePage() {
                   <h3>No se pudieron cargar los partidos</h3>
                   {sourceError.message ? <p>{sourceError.message}</p> : null}
                   <p>Hay un problema de conexión con una o más fuentes de datos.</p>
+                </div>
+              )}
+
+              {!loading && displayedFavoriteClubMatches.length > 0 && (
+                <div className={styles.leagueSection}>
+                  <div className={styles.leagueSectionHeader}>
+                    <div className={styles.leagueInfo}>
+                      <Star size={16} fill="currentColor" style={{ color: 'var(--accent, #f59e0b)' }} />
+                      <div className={styles.leagueMeta}>
+                        <span className={styles.leagueSectionName} style={{ marginLeft: 8 }}>Mis Equipos</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.matchesListWrapper}>
+                    <div className={styles.matchesList}>
+                      {displayedFavoriteClubMatches.map((match) => (
+                        <div key={match.id}>
+                          <MatchRow match={match as any} selectedSport={selectedSport} styles={styles} isIndividualSport={isIndividualSport} />
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary, #888)', padding: '0 12px 6px', marginTop: '-4px' }}>
+                            {match.leagueName}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 

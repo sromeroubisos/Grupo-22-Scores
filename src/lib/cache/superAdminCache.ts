@@ -189,6 +189,7 @@ export interface ClubRow {
     is_visible: boolean | null;
     union_id: string | null;
     sport: string | null;
+    followers_count?: number;
 }
 
 export interface ClubWithUnion extends ClubRow {
@@ -272,11 +273,17 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
 
     return cachedFetch(KEY, async () => {
         try {
-            const { data, error } = await getSupabase()
-                .rpc('get_all_tournaments', {
+            const supabase = getSupabase();
+            const [{ data, error }, { data: favRows }] = await Promise.all([
+                supabase.rpc('get_all_tournaments', {
                     p_include_hidden: true,
                     p_viewer_user_id: null
-                });
+                }),
+                supabase
+                    .from('favorites')
+                    .select('entity_id')
+                    .in('entity_type', ['tournament', 'league']),
+            ]);
 
             if (error) {
                 // Fall back on any RPC error — function may reference removed columns
@@ -284,10 +291,16 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
                 return fetchTournamentsFallback();
             }
 
+            const favMap = new Map<string, number>();
+            for (const row of favRows ?? []) {
+                favMap.set(row.entity_id, (favMap.get(row.entity_id) ?? 0) + 1);
+            }
+
             return (data || []).map(t => ({
                 ...t,
                 sport: t.sport_id, // For backward compatibility with existing filters
-                country: t.country_name || t.country_id // For grouping by country
+                country: t.country_name || t.country_id, // For grouping by country
+                followers_count: ((t as any).followers_count || 0) + (favMap.get(t.id) ?? 0),
             })) as unknown as TournamentRow[];
         } catch (err: any) {
             console.warn('[Cache] get_all_tournaments exception, falling back to direct query:', err?.message);
@@ -300,18 +313,30 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
  * Direct table query fallback for super admin cache
  */
 async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
-    const { data, error } = await getSupabase()
-        .from('tournaments')
-        .select(`
-            *,
-            sport:sports(name),
-            country:countries(name),
-            union:unions(name)
-        `);
+    const supabase = getSupabase();
+    const [{ data, error }, { data: favRows }] = await Promise.all([
+        supabase
+            .from('tournaments')
+            .select(`
+                *,
+                sport:sports(name),
+                country:countries(name),
+                union:unions(name)
+            `),
+        supabase
+            .from('favorites')
+            .select('entity_id')
+            .in('entity_type', ['tournament', 'league']),
+    ]);
 
     if (error) {
         console.error('[Cache] Fallback query failed:', error);
         throw error;
+    }
+
+    const favMap = new Map<string, number>();
+    for (const row of favRows ?? []) {
+        favMap.set(row.entity_id, (favMap.get(row.entity_id) ?? 0) + 1);
     }
 
     return (data || []).map(t => {
@@ -323,7 +348,7 @@ async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
             organization_name: (row.union as any)?.name || null,
             sport: row.sport_id,
             country: (row.country as any)?.name || row.country_id,
-            followers_count: 0,
+            followers_count: favMap.get(row.id) ?? 0,
             is_followed_by_user: false,
             priority: typeof row.priority === 'number' ? row.priority : 0,
             display_name: row.display_name || row.name,

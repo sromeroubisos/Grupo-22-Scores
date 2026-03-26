@@ -23,14 +23,7 @@
     }
 }
 
-body {
-    background-color: var(--color-bg-primary);
-    font-family: var(--font-primary);
-    color: var(--color-text-primary);
-    background-image: radial-gradient(circle at 50% 0%, var(--grid-glow) 0%, transparent 70%);
-    min-height: 100vh;
-    background-attachment: fixed;
-}
+/* body background: see src/app/globals.css (layered dark + emerald glow) */
 
 /* HEADER ROOT */
 .g22-header {

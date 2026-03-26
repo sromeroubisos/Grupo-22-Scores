@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { searchFlashScore } from '@/lib/services/flashscore';
 
 type SearchResult = {
     id: string;
@@ -57,17 +58,16 @@ export async function GET(request: Request) {
     };
 
     try {
-        const [tournamentsRes, clubsRes] = await Promise.all([
+        const [tournamentsRes, clubsRes, fsSearchRaw] = await Promise.all([
             supabase.from('tournaments')
                 .select('id, name, display_name, slug, logo_url, sport_id, country_id, is_visible, sport:sports(name), country:countries(name)')
                 .or(`name.ilike.%${search}%,display_name.ilike.%${search}%,slug.ilike.%${search}%`)
-                .eq('is_visible', true)
                 .limit(limit),
             supabase.from('clubs')
                 .select('id, name, short_name, slug, city, country, logo_url, is_visible')
-                .or(`name.ilike.%${search}%,short_name.ilike.%${search}%,slug.ilike.%${search}%,city.ilike.%${search}%,country.ilike.%${search}%`)
-                .eq('is_visible', true)
-                .limit(limit)
+                .or(`name.ilike.%${search}%,short_name.ilike.%${search}%,slug.ilike.%${search}%`)
+                .limit(limit),
+            searchFlashScore(search).catch(() => null)
         ]);
 
         debugInfo = {
@@ -115,6 +115,37 @@ export async function GET(request: Request) {
                 logo_url: c.logo_url,
                 searchWeight: calculateWeight(c.name, c.short_name, c.slug, lSearch, 1)
             })));
+        }
+
+        // Merge FlashScore API results (teams only), avoiding duplicates with DB results
+        const dbClubNames = new Set(rawResults.filter(r => r.type === 'club').map(r => r.title.toLowerCase()));
+        if (fsSearchRaw) {
+            const fsItems: any[] = Array.isArray(fsSearchRaw)
+                ? fsSearchRaw
+                : (fsSearchRaw?.teams || fsSearchRaw?.data || []);
+
+            for (const item of fsItems) {
+                const name: string = item.name || item.team_name || '';
+                if (!name) continue;
+                if (dbClubNames.has(name.toLowerCase())) continue; // skip if already in DB results
+
+                const teamUrl: string = item.team_url || '';
+                const teamId: string = item.team_id || item.id || '';
+                const clubUrl = teamId
+                    ? `/clubs/${teamId}?name=${encodeURIComponent(name)}&team_url=${encodeURIComponent(teamUrl)}`
+                    : '';
+                if (!clubUrl) continue;
+
+                rawResults.push({
+                    id: `fs-${teamId}`,
+                    type: 'club',
+                    title: name,
+                    subtitle: `Club · FlashScore`,
+                    url: clubUrl,
+                    logo_url: item.image_path || item.logo || null,
+                    searchWeight: calculateWeight(name, null, null, lSearch, 2)
+                });
+            }
         }
 
         const finalResults = rawResults

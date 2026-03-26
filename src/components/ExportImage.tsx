@@ -1410,17 +1410,6 @@ async function drawDailyMatches(
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        drawCenteredPill(
-            ctx,
-            cardX + 96,
-            y + 18,
-            getStatusLabel(match.status),
-            hexToRGBA(getStatusColor(match.status, accentColor, isDark), isDark ? 0.18 : 0.12),
-            getStatusColor(match.status, accentColor, isDark),
-            `800 ${isStory ? 14 : 13}px ${FONT_BODY}`,
-            14,
-            30
-        );
 
         if (match.dateLabel) {
             ctx.textAlign = 'right';

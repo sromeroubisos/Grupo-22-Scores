@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
-import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield } from 'lucide-react';
+import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield, Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateCache, type ClubWithUnion } from '@/lib/cache/superAdminCache';
 import { useState } from 'react';
@@ -46,6 +46,8 @@ function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; c
 const CLUBS_PER_PAGE = 20;
 const ACTIVE_SPORTS = getActiveSports();
 
+type SortKey = 'name' | 'location' | 'followers_count' | 'union' | 'color' | 'visibility';
+
 export default function SuperadminClubesPage() {
     const router = useRouter();
     // ─── Read from shared context (already prefetched by layout) ─────────────────
@@ -65,6 +67,20 @@ export default function SuperadminClubesPage() {
     const [visibilityFilter, setVisibilityFilter] = useState('all');
     const [logoFilter, setLogoFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
+
+    // Sort state
+    const [sortBy, setSortBy] = useState<SortKey>('name');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+    const handleSort = (key: SortKey) => {
+        if (sortBy === key) {
+            setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(key);
+            setSortDir(key === 'followers_count' ? 'desc' : 'asc');
+        }
+        setCurrentPage(1);
+    };
 
     // Local state for optimistic mutations (avoid full context refresh unless needed)
     const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<ClubWithUnion>>>({});
@@ -186,7 +202,41 @@ export default function SuperadminClubesPage() {
         setCurrentPage(1);
     }, [filters.search, filters.country, unionFilter, visibilityFilter, logoFilter]);
 
-    const totalPages = Math.max(1, Math.ceil(filtered.length / CLUBS_PER_PAGE));
+    const sortedFiltered = useMemo(() => {
+        const mult = sortDir === 'asc' ? 1 : -1;
+        return [...filtered].sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    return mult * a.name.localeCompare(b.name);
+                case 'location': {
+                    const la = [a.country, a.city].filter(Boolean).join('') || '';
+                    const lb = [b.country, b.city].filter(Boolean).join('') || '';
+                    return mult * la.localeCompare(lb);
+                }
+                case 'followers_count':
+                    return mult * ((a.followers_count ?? 0) - (b.followers_count ?? 0));
+                case 'union': {
+                    const ua = a.union?.name || '';
+                    const ub = b.union?.name || '';
+                    return mult * ua.localeCompare(ub);
+                }
+                case 'color': {
+                    const ca = a.primary_color ? 1 : 0;
+                    const cb = b.primary_color ? 1 : 0;
+                    return mult * (ca - cb);
+                }
+                case 'visibility': {
+                    const va = a.is_visible === false ? 0 : 1;
+                    const vb = b.is_visible === false ? 0 : 1;
+                    return mult * (va - vb);
+                }
+                default:
+                    return 0;
+            }
+        });
+    }, [filtered, sortBy, sortDir]);
+
+    const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / CLUBS_PER_PAGE));
 
     useEffect(() => {
         setCurrentPage(prev => Math.min(prev, totalPages));
@@ -194,8 +244,8 @@ export default function SuperadminClubesPage() {
 
     const paginatedClubs = useMemo(() => {
         const startIndex = (currentPage - 1) * CLUBS_PER_PAGE;
-        return filtered.slice(startIndex, startIndex + CLUBS_PER_PAGE);
-    }, [filtered, currentPage]);
+        return sortedFiltered.slice(startIndex, startIndex + CLUBS_PER_PAGE);
+    }, [sortedFiltered, currentPage]);
 
     const paginationPages = useMemo(
         () => Array.from({ length: totalPages }, (_, index) => index + 1),
@@ -214,8 +264,8 @@ export default function SuperadminClubesPage() {
 
     const visibleCount = filtered.filter(c => c.is_visible !== false).length;
     const hiddenCount = filtered.filter(c => c.is_visible === false).length;
-    const pageStart = filtered.length === 0 ? 0 : (currentPage - 1) * CLUBS_PER_PAGE + 1;
-    const pageEnd = Math.min(currentPage * CLUBS_PER_PAGE, filtered.length);
+    const pageStart = sortedFiltered.length === 0 ? 0 : (currentPage - 1) * CLUBS_PER_PAGE + 1;
+    const pageEnd = Math.min(currentPage * CLUBS_PER_PAGE, sortedFiltered.length);
     const derivedSportMatchesBase = derivedBaseClub
         ? canonicalizeSportId(derivedBaseClub.sport) === canonicalizeSportId(derivedSport)
         : false;
@@ -341,12 +391,33 @@ export default function SuperadminClubesPage() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--surface-edge)' }}>
-                                {['Club', 'Ciudad / País', 'Unión', 'Color', 'Visibilidad', 'Acciones'].map(h => (
-                                    <th key={h} style={{
-                                        padding: '12px 16px', textAlign: 'left',
-                                        fontFamily: 'var(--font-mono)', fontSize: 10,
-                                        color: 'var(--basalt-400)', textTransform: 'uppercase', letterSpacing: '0.07em',
-                                    }}>{h}</th>
+                                {([
+                                    ['Club', 'name'],
+                                    ['Ciudad / País', 'location'],
+                                    ['Seguidores', 'followers_count'],
+                                    ['Unión', 'union'],
+                                    ['Color', 'color'],
+                                    ['Visibilidad', 'visibility'],
+                                    ['Acciones', null],
+                                ] as [string, SortKey | null][]).map(([h, key]) => (
+                                    <th
+                                        key={h}
+                                        onClick={key ? () => handleSort(key) : undefined}
+                                        style={{
+                                            padding: '12px 16px', textAlign: 'left',
+                                            fontFamily: 'var(--font-mono)', fontSize: 10,
+                                            color: key && sortBy === key ? '#e4e4e7' : 'var(--basalt-400)',
+                                            textTransform: 'uppercase', letterSpacing: '0.07em',
+                                            cursor: key ? 'pointer' : 'default',
+                                            userSelect: 'none',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {h}
+                                        {key && sortBy === key && (
+                                            <span style={{ marginLeft: 4, opacity: 0.8 }}>{sortDir === 'asc' ? '▲' : '▼'}</span>
+                                        )}
+                                    </th>
                                 ))}
                             </tr>
                         </thead>
@@ -380,6 +451,12 @@ export default function SuperadminClubesPage() {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
                                                 <MapPin size={11} />
                                                 {[club.city, club.region, club.country].filter(Boolean).join(', ') || '—'}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '12px 16px', color: 'var(--basalt-400)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                                                <Users size={13} />
+                                                <span>{club.followers_count ?? 0}</span>
                                             </div>
                                         </td>
                                         <td style={{ padding: '12px 16px' }}>

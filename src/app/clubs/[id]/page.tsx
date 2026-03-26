@@ -8,6 +8,8 @@ import { ArrowLeft, ChevronRight, Star } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
 import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
+import ExportImage from '@/components/ExportImage';
+import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
@@ -111,6 +113,10 @@ function groupSquadByPosition(squad: any): Record<number, any[]> {
     });
 
     return groups;
+}
+
+function formatClubDate(timestamp: number, options: Intl.DateTimeFormatOptions) {
+    return formatDateInTimeZone(new Date(timestamp * 1000), 'es-AR', options, APP_TIMEZONE) || '';
 }
 
 function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
@@ -339,8 +345,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         return (
             <Link href={`/matches/${match.event_key || match.match_id}`} key={match.event_key || match.match_id} className={styles.matchItem}>
                 <div className={styles.matchTime}>
-                    <span className={styles.matchDateStr}>{date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', weekday: 'short' })}</span>
-                    <span>{date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className={styles.matchDateStr}>{date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', weekday: 'short', timeZone: APP_TIMEZONE })}</span>
+                    <span>{date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: APP_TIMEZONE })}</span>
                 </div>
                 <div className={styles.matchTeams}>
                     <div className={styles.teamRow}>
@@ -504,7 +510,32 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                         {/* Results Tab */}
                         {activeTab === 'results' && (
                             <div className={styles.section}>
-                                <h2 className={styles.pageTitle} style={{ marginBottom: '16px' }}>Resultados</h2>
+                                <div className={styles.sectionHeader} style={{ marginBottom: '16px' }}>
+                                    <h2 className={styles.pageTitle}>Resultados</h2>
+                                    <ExportImage
+                                        template="dailyMatches"
+                                        filename={`resultados-${teamName}`}
+                                        data={{
+                                            date: 'Resultados',
+                                            tournament: teamName,
+                                            tournamentLogo: teamLogoUrl,
+                                            matches: filteredResults.map(m => ({
+                                                homeTeam: m.home_team?.name || m.event_home_team || m.home_team_name || 'Local',
+                                                awayTeam: m.away_team?.name || m.event_away_team || m.away_team_name || 'Visitante',
+                                                homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
+                                                awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
+                                                homeScore: m.scores?.home ?? m.scores?.home_score ?? m.home_score,
+                                                awayScore: m.scores?.away ?? m.scores?.away_score ?? m.away_score,
+                                                time: formatClubDate(m.timestamp || m.start_time || m.time, { day: '2-digit', month: '2-digit' }),
+                                                status: 'finished' as const,
+                                                dateLabel: formatClubDate(m.timestamp || m.start_time || m.time, { weekday: 'short', day: '2-digit', month: '2-digit' }),
+                                                kickoffAt: (m.timestamp || m.start_time || m.time)
+                                                    ? new Date((m.timestamp || m.start_time || m.time) * 1000).toISOString()
+                                                    : undefined,
+                                            })),
+                                        }}
+                                    />
+                                </div>
                                 <div className={styles.matchList}>
                                     {filteredResults.length > 0
                                         ? filteredResults.map(m => renderMatchItem(m))
@@ -517,7 +548,31 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                         {/* Fixtures Tab */}
                         {activeTab === 'fixtures' && (
                             <div className={styles.section}>
-                                <h2 className={styles.pageTitle} style={{ marginBottom: '16px' }}>Fixture</h2>
+                                <div className={styles.sectionHeader} style={{ marginBottom: '16px' }}>
+                                    <h2 className={styles.pageTitle}>Fixture</h2>
+                                    <ExportImage
+                                        template="dailyMatches"
+                                        filename={`fixture-${teamName}`}
+                                        data={{
+                                            date: 'Próximos Partidos',
+                                            tournament: teamName,
+                                            tournamentLogo: teamLogoUrl,
+                                            matches: filteredFixtures.map(m => ({
+                                                homeTeam: m.home_team?.name || m.event_home_team || m.home_team_name || 'Local',
+                                                awayTeam: m.away_team?.name || m.event_away_team || m.away_team_name || 'Visitante',
+                                                homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
+                                                awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
+                                                time: formatClubDate(m.timestamp || m.start_time || m.time, { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
+                                                    formatClubDate(m.timestamp || m.start_time || m.time, { day: '2-digit', month: '2-digit' }),
+                                                status: 'scheduled' as const,
+                                                dateLabel: formatClubDate(m.timestamp || m.start_time || m.time, { weekday: 'short', day: '2-digit', month: '2-digit' }),
+                                                kickoffAt: (m.timestamp || m.start_time || m.time)
+                                                    ? new Date((m.timestamp || m.start_time || m.time) * 1000).toISOString()
+                                                    : undefined,
+                                            })),
+                                        }}
+                                    />
+                                </div>
                                 <div className={styles.matchList}>
                                     {filteredFixtures.length > 0
                                         ? filteredFixtures.map(m => renderMatchItem(m))

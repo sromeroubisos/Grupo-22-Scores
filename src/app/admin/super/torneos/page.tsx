@@ -36,7 +36,7 @@ const countryFlags: Record<string, string> = {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SuperadminTorneosPage() {
-    const { filters, setFilters, tournaments: rawTournaments, unions, loading, errors, refresh } = useSuperConsole();
+    const { filters, setFilters, tournaments: rawTournaments, clubs, unions, loading, errors, refresh } = useSuperConsole();
     const isLoading = loading.tournaments;
     const error = errors.tournaments;
     const supabase = createClient();
@@ -238,6 +238,14 @@ export default function SuperadminTorneosPage() {
             return next;
         });
     };
+
+    // ── Top clubs by followers ────────────────────────────────────────────────
+    const topClubsByFollowers = useMemo(() =>
+        [...clubs]
+            .filter(c => (c.followers_count ?? 0) > 0)
+            .sort((a, b) => (b.followers_count ?? 0) - (a.followers_count ?? 0))
+            .slice(0, 10)
+    , [clubs]);
 
     // ── Render ────────────────────────────────────────────────────────────────
 
@@ -541,6 +549,48 @@ export default function SuperadminTorneosPage() {
                     </div>
                 </div>
             )}
+
+            {/* Top clubs by followers */}
+            <div className={styles.slab} style={{ marginTop: 32, padding: '20px 24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                    <Users size={15} style={{ color: '#a1a1aa' }} />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                        Clubes por seguidores
+                    </span>
+                </div>
+                {topClubsByFollowers.length === 0 ? (
+                    <div style={{ color: 'var(--basalt-400)', fontSize: 13 }}>Sin datos de seguidores aún.</div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {topClubsByFollowers.map((club, idx) => (
+                            <div key={club.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0', borderBottom: '1px solid var(--surface-edge)' }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--basalt-500)', minWidth: 20, textAlign: 'right' }}>
+                                    {idx + 1}
+                                </span>
+                                {club.logo_url ? (
+                                    <img
+                                        src={club.logo_url.trimStart().startsWith('<svg')
+                                            ? `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(club.logo_url)))}`
+                                            : club.logo_url}
+                                        alt={club.name}
+                                        style={{ width: 24, height: 24, objectFit: 'contain', flexShrink: 0 }}
+                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                    />
+                                ) : (
+                                    <div style={{ width: 24, height: 24, borderRadius: 4, background: club.primary_color || '#3f3f46', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>
+                                        {club.name.substring(0, 2).toUpperCase()}
+                                    </div>
+                                )}
+                                <span style={{ flex: 1, fontSize: 13, color: '#e4e4e7', fontWeight: 500 }}>{club.name}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#a1a1aa' }}>
+                                    <Users size={12} />
+                                    {club.followers_count}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

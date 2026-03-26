@@ -383,8 +383,8 @@ function mapDbMatchToFrontend(match: any) {
         timestamp: match?.date_time ? Math.floor(new Date(match.date_time as string).getTime() / 1000) : null,
         status: normalizedStatus,
         scores,
-        home_team: { id: match.home?.id ?? match.home_club_id ?? null, name: match.home?.name ?? '', logo: match.home?.logo_url ?? '' },
-        away_team: { id: match.away?.id ?? match.away_club_id ?? null, name: match.away?.name ?? '', logo: match.away?.logo_url ?? '' },
+        home_team: { id: match.home?.id ?? match.home_club_id ?? null, name: match.home?.name ?? '', short_name: match.home?.short_name ?? null, logo: match.home?.logo_url ?? '' },
+        away_team: { id: match.away?.id ?? match.away_club_id ?? null, name: match.away?.name ?? '', short_name: match.away?.short_name ?? null, logo: match.away?.logo_url ?? '' },
         home_club_id: match.home_club_id,
         away_club_id: match.away_club_id,
         phase_id: match.phase_id,
@@ -399,6 +399,7 @@ function mapPersistedDbStanding(row: any) {
         position: row.position,
         team: {
             name: row.club?.name ?? row.stats?.team_name ?? '',
+            short_name: row.club?.short_name ?? null,
             logo: row.club?.logo_url ?? row.stats?.team_logo ?? '',
             id: row.club_id,
         },
@@ -546,7 +547,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             countryId: tournament.country_id || 'international',
             logoUrl: tournament.logo_url || '',
             ruleset: tournament.ruleset ?? null,
-            url: '',
+            url: tournament.url || '',
             type: 'league',
             categories: [],
             priority: 0,
@@ -664,6 +665,7 @@ export default function TournamentDetailPage({
                 localTournament = getTournamentById(id);
 
                 if (shouldPreferDbSource) {
+                    const dbStoredUrl = (initialData?.tournament as any)?.url || '';
                     localTournament = {
                         ...(localTournament ?? {}),
                         ...(preloaded?.tournamentMeta ?? {}),
@@ -671,11 +673,12 @@ export default function TournamentDetailPage({
                         sportId: preloaded?.tournamentMeta?.sportId || localTournament?.sportId || (overrideSport || 'rugby'),
                         countryId: preloaded?.tournamentMeta?.countryId || localTournament?.countryId || 'international',
                         name: preloaded?.tournamentMeta?.name || localTournament?.name || 'Cargando...',
-                        url: '',
+                        url: dbStoredUrl,
                         type: preloaded?.tournamentMeta?.type || localTournament?.type || 'league',
                         categories: localTournament?.categories || [],
                         priority: localTournament?.priority || 0,
-                        __isDbOnly: true,
+                        // A DB tournament with a stored FlashScore URL can also fetch live data
+                        __isDbOnly: !dbStoredUrl,
                     } as any;
                 }
 
@@ -694,16 +697,17 @@ export default function TournamentDetailPage({
                     } else {
                         // UUID → DB-only tournament. Skip metadata round-trip;
                         // metadata will be included in the /data response below.
+                        const dbStoredUrl = (initialData?.tournament as any)?.url || '';
                         localTournament = {
                             id,
                             name: 'Cargando...',
-                            url: '',
+                            url: dbStoredUrl,
                             type: 'league' as any,
                             sportId: (overrideSport || 'rugby') as any,
                             countryId: 'international',
                             categories: [],
                             priority: 0,
-                            __isDbOnly: true,
+                            __isDbOnly: !dbStoredUrl,
                             __dbLookupCandidate: !UUID_RE.test(id),
                         } as any;
                     }
@@ -1434,8 +1438,8 @@ export default function TournamentDetailPage({
                                     tournament: tournamentData?.name || 'Torneo',
                                     tournamentLogo,
                                     matches: results.map(m => ({
-                                        homeTeam: m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
-                                        awayTeam: m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
+                                        homeTeam: m.home_team?.short_name || m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
+                                        awayTeam: m.away_team?.short_name || m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         homeScore: m.scores?.home ?? m.scores?.home_score ?? m.home_score,
@@ -1473,8 +1477,8 @@ export default function TournamentDetailPage({
                                     tournament: tournamentData?.name || 'Torneo',
                                     tournamentLogo,
                                     matches: fixtures.map(m => ({
-                                        homeTeam: m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
-                                        awayTeam: m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
+                                        homeTeam: m.home_team?.short_name || m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
+                                        awayTeam: m.away_team?.short_name || m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
@@ -1526,7 +1530,7 @@ export default function TournamentDetailPage({
 
                                         return {
                                             pos: row.position || (idx + 1),
-                                            team: row.team?.name || row.participant?.name || row.name || 'Equipo',
+                                            team: row.team?.short_name || row.team?.name || row.participant?.name || row.name || 'Equipo',
                                             teamLogo: row.team?.logo || row.team?.image_path || row.team?.small_image_path ||
                                                 row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo,
                                             zoneColor: rowLabel?.color ?? undefined,

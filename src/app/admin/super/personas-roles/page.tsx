@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Download, Filter, MoreVertical, Search, Shield, User as UserIcon } from 'lucide-react';
+import { Download, Filter, Pencil, Search, Shield, User as UserIcon, X } from 'lucide-react';
 import styles from '../page.module.css';
-import { getRoleLabel } from '@/lib/auth/roles';
+import { APP_ROLES, getRoleLabel, ROLE_LABELS } from '@/lib/auth/roles';
 import { normalizeError, serializeUnknownError } from '@/lib/utils/errorUtils';
 
 type AppUserRow = {
@@ -132,6 +132,50 @@ export default function PersonasRolesPage() {
     const [entityNames, setEntityNames] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Edit role modal state
+    const [editingUser, setEditingUser] = useState<AppUserRow | null>(null);
+    const [editingRole, setEditingRole] = useState<string>('');
+    const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+
+    const openEdit = useCallback((user: AppUserRow) => {
+        setEditingUser(user);
+        setEditingRole(user.role);
+        setSaveError(null);
+    }, []);
+
+    const closeEdit = useCallback(() => {
+        setEditingUser(null);
+        setSaveError(null);
+    }, []);
+
+    const handleSaveRole = useCallback(async () => {
+        if (!editingUser) return;
+        setSaving(true);
+        setSaveError(null);
+        try {
+            const response = await fetch(`/api/admin/super/personas-roles/${editingUser.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ role: editingRole }),
+            });
+            const payload = await response.json() as { data?: { id: string; role: string }; error?: string };
+            if (!response.ok) {
+                setSaveError(payload.error || 'Error al guardar');
+                return;
+            }
+            setUsers((prev) =>
+                prev.map((u) => (u.id === editingUser.id ? { ...u, role: editingRole } : u))
+            );
+            closeEdit();
+        } catch (err) {
+            setSaveError(err instanceof Error ? err.message : 'Error desconocido');
+        } finally {
+            setSaving(false);
+        }
+    }, [editingUser, editingRole, closeEdit]);
 
     useEffect(() => {
         void fetchUsers();
@@ -347,6 +391,7 @@ export default function PersonasRolesPage() {
     }, [derivedRoleAssignments, searchQuery]);
 
     return (
+        <>
         <div style={{ paddingBottom: 40 }}>
             <header className={styles.tectonicHeader}>
                 <div className={styles.headerInfo}>
@@ -537,12 +582,12 @@ export default function PersonasRolesPage() {
                                                     <td style={{ textAlign: 'right' }}>
                                                         <button
                                                             className={styles.btn}
-                                                            style={{ padding: 8, opacity: 0.65 }}
+                                                            style={{ padding: 8 }}
                                                             type="button"
-                                                            disabled
-                                                            title="Vista de lectura. La edición programática está disponible en /api/admin/users/:id/access"
+                                                            onClick={() => openEdit(user)}
+                                                            title="Editar rol del usuario"
                                                         >
-                                                            <MoreVertical size={16} />
+                                                            <Pencil size={15} />
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -604,13 +649,12 @@ export default function PersonasRolesPage() {
 
                                                 <div className={styles.personasCardActions}>
                                                     <button
-                                                        className={styles.btn}
-                                                        style={{ width: '100%', justifyContent: 'center', opacity: 0.65 }}
+                                                        className={`${styles.btn} ${styles.btnPrimary}`}
+                                                        style={{ width: '100%', justifyContent: 'center' }}
                                                         type="button"
-                                                        disabled
-                                                        title="Vista de lectura. La ediciÃ³n programÃ¡tica estÃ¡ disponible en /api/admin/users/:id/access"
+                                                        onClick={() => openEdit(user)}
                                                     >
-                                                        <MoreVertical size={16} /> Solo lectura
+                                                        <Pencil size={14} /> Editar Rol
                                                     </button>
                                                 </div>
                                             </article>
@@ -769,5 +813,123 @@ export default function PersonasRolesPage() {
                 )}
             </div>
         </div>
+
+        {/* Edit Role Modal */}
+        {editingUser && (
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Editar rol de usuario"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0,0,0,0.75)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 16,
+                }}
+                onClick={(e) => { if (e.target === e.currentTarget) closeEdit(); }}
+            >
+                <div style={{
+                    background: 'var(--color-bg-secondary, #0d1117)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 18,
+                    padding: 28,
+                    width: '100%',
+                    maxWidth: 440,
+                    boxShadow: '0 24px 48px rgba(0,0,0,0.6)',
+                }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                background: 'var(--basalt-800)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 14,
+                                fontWeight: 700,
+                                overflow: 'hidden',
+                                flexShrink: 0,
+                            }}>
+                                {editingUser.avatar_url
+                                    ? <img src={editingUser.avatar_url} alt={editingUser.name || 'User'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    : (editingUser.name || editingUser.email || '?').substring(0, 2).toUpperCase()
+                                }
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: 15 }}>{editingUser.name || editingUser.email || 'Sin nombre'}</div>
+                                <div style={{ color: 'var(--basalt-400)', fontSize: 12 }}>{editingUser.email}</div>
+                            </div>
+                        </div>
+                        <button
+                            className={styles.btn}
+                            style={{ padding: 6 }}
+                            type="button"
+                            onClick={closeEdit}
+                            aria-label="Cerrar"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+
+                    {/* Role selector */}
+                    <div style={{ marginBottom: 24 }}>
+                        <label style={{ display: 'block', fontSize: 12, color: 'var(--basalt-400)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Rol base
+                        </label>
+                        <select
+                            value={editingRole}
+                            onChange={(e) => setEditingRole(e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'var(--basalt-900, #0a0d10)',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: 10,
+                                color: '#fff',
+                                padding: '10px 14px',
+                                fontSize: 14,
+                                cursor: 'pointer',
+                                outline: 'none',
+                            }}
+                        >
+                            {APP_ROLES.map((role) => (
+                                <option key={role} value={role}>
+                                    {ROLE_LABELS[role]}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Error */}
+                    {saveError && (
+                        <div style={{ color: '#f87171', fontSize: 13, marginBottom: 16, padding: '8px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: 8 }}>
+                            {saveError}
+                        </div>
+                    )}
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                        <button className={styles.btn} type="button" onClick={closeEdit} disabled={saving}>
+                            Cancelar
+                        </button>
+                        <button
+                            className={`${styles.btn} ${styles.btnPrimary}`}
+                            type="button"
+                            onClick={() => void handleSaveRole()}
+                            disabled={saving || editingRole === editingUser.role}
+                        >
+                            {saving ? 'Guardando...' : 'Guardar cambios'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }

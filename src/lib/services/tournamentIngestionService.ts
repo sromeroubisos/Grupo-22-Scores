@@ -23,6 +23,7 @@ export interface ExternalTournament {
     country_id: string;
     sport_id: string;
     logo_url?: string;
+    url?: string;
     status: 'api_only' | 'available_for_import' | 'linked' | 'stale';
     internal_id?: string;
 }
@@ -119,6 +120,7 @@ export class TournamentIngestionService {
                 country_id: entityId.toString(),
                 sport_id: sportId.toString(),
                 logo_url: et.image,
+                url: et.url || et.link || null,
                 status: matched ? 'linked' : 'available_for_import',
                 internal_id: matched?.id
             };
@@ -174,6 +176,8 @@ export class TournamentIngestionService {
             sport_id: externalTournament.sport_id,
             country_id: externalTournament.country_id,
             logo_url: externalTournament.logo_url,
+            url: externalTournament.url || null,
+            external_id: externalTournament.id || null,
             is_visible: true,
             priority: internalParams.priority ?? 0
         };
@@ -200,14 +204,20 @@ export class TournamentIngestionService {
     /**
      * Link external tournament to existing internal one
      */
-    static async linkTournament(externalId: string, internalId: string) {
+    static async linkTournament(externalId: string, internalId: string, externalUrl?: string) {
         const supabase = await createClient();
-        
+
+        const updatePayload: Record<string, unknown> = {
+            external_id: externalId,
+            updated_at: new Date().toISOString(),
+        };
+        if (externalUrl) {
+            updatePayload.url = externalUrl;
+        }
+
         const { error } = await supabase
             .from('tournaments')
-            .update({
-                updated_at: new Date().toISOString()
-            })
+            .update(updatePayload)
             .eq('id', internalId);
 
         if (error) throw error;

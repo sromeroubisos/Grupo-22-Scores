@@ -187,20 +187,47 @@ html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    min-height: 100%;
+    background-color: #0a0a0b;
+}
+
+/*
+  Gradiente en `html`, no en `body`: Tailwind Preflight suele asignar un fondo sólido al `body`
+  después en la cascada y tapa el gradiente (muy visible en `next dev` / Simple Browser).
+*/
+html[data-theme="dark"],
+html.dark {
+    background-color: #0a0a0b;
+    background-image:
+        radial-gradient(ellipse 120% 65% at 50% -8%, rgba(0, 163, 101, 0.16) 0%, transparent 52%),
+        radial-gradient(circle at 12% 32%, rgba(0, 163, 101, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 88% 28%, rgba(0, 194, 123, 0.07) 0%, transparent 36%),
+        radial-gradient(ellipse 90% 55% at 50% 105%, rgba(0, 163, 101, 0.06) 0%, transparent 48%),
+        linear-gradient(180deg, #070807 0%, #0a0a0b 42%, #080a08 100%);
 }
 
 body {
     font-family: var(--font-primary);
-    background-color: var(--color-bg-primary);
     color: var(--color-text-primary);
     line-height: 1.6;
     min-height: 100vh;
     width: 100%;
     overflow-x: hidden;
     transition: background-color var(--transition-base), color var(--transition-base);
-    background-image: radial-gradient(circle at 50% 0%, var(--grid-glow) 0%, transparent 70%);
-    background-attachment: fixed;
 }
+
+html[data-theme="dark"] body,
+html.dark body {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+html[data-theme="light"] {
+    background-color: var(--color-bg-primary);
+    background-image: none;
+}
+
+/* Tema claro: fondo y rejilla en ./admin/styles/obsidian-header.css ([data-theme="light"] body) */
 
 /* ===== TYPOGRAPHY ===== */
 h1,
@@ -1292,10 +1319,6 @@ a {
 
 /* ===== GLOBAL MOBILE ADAPTATION ===== */
 @media (max-width: 900px) {
-    body {
-        background-attachment: scroll;
-    }
-
     :root {
         --g22-global-h: 56px;
     }

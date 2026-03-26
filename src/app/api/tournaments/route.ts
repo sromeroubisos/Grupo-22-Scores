@@ -403,13 +403,46 @@ export async function GET(request: Request) {
             if ((!idsData || (Array.isArray(idsData) && idsData.length === 0)) && urlSegments.length <= 2) {
                 const slug = urlSegments[urlSegments.length - 1];
                 if (slug) {
-                    const attempts = [];
-                    if (sport === 'rugby') {
+                    const attempts: string[] = [];
+                    if (sport === 'rugby' || sport === 'rugby-union') {
                         attempts.push(`/rugby-union/south-america/${slug}/`);
                         attempts.push(`/rugby-union/world/${slug}/`);
+                        attempts.push(`/rugby-union/europe/${slug}/`);
+                    } else if (sport === 'rugby-league') {
+                        attempts.push(`/rugby-league/world/${slug}/`);
+                        attempts.push(`/rugby-league/europe/${slug}/`);
                     } else if (sport === 'football') {
                         attempts.push(`/football/europe/${slug}/`);
+                        attempts.push(`/football/south-america/${slug}/`);
                         attempts.push(`/football/world/${slug}/`);
+                    } else if (sport === 'basketball') {
+                        attempts.push(`/basketball/south-america/${slug}/`);
+                        attempts.push(`/basketball/world/${slug}/`);
+                        attempts.push(`/basketball/europe/${slug}/`);
+                    } else if (sport === 'hockey' || sport === 'field-hockey') {
+                        attempts.push(`/hockey/south-america/${slug}/`);
+                        attempts.push(`/hockey/world/${slug}/`);
+                        attempts.push(`/hockey/europe/${slug}/`);
+                    } else if (sport === 'volleyball') {
+                        attempts.push(`/volleyball/south-america/${slug}/`);
+                        attempts.push(`/volleyball/world/${slug}/`);
+                        attempts.push(`/volleyball/europe/${slug}/`);
+                    } else if (sport === 'handball') {
+                        attempts.push(`/handball/europe/${slug}/`);
+                        attempts.push(`/handball/world/${slug}/`);
+                    } else if (sport === 'tennis') {
+                        attempts.push(`/tennis/atp-singles/${slug}/`);
+                        attempts.push(`/tennis/wta-singles/${slug}/`);
+                    } else if (sport === 'american-football') {
+                        attempts.push(`/american-football/usa/${slug}/`);
+                        attempts.push(`/american-football/world/${slug}/`);
+                    } else if (sport === 'baseball') {
+                        attempts.push(`/baseball/usa/${slug}/`);
+                        attempts.push(`/baseball/world/${slug}/`);
+                    } else {
+                        // Generic fallback for unknown sports
+                        attempts.push(`/${sport}/world/${slug}/`);
+                        attempts.push(`/${sport}/south-america/${slug}/`);
                     }
 
                     for (const altUrl of attempts) {

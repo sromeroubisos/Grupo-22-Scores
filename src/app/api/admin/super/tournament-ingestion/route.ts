@@ -64,9 +64,9 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json(result);
             }
             case 'link-tournament': {
-                const { externalId, internalId } = params;
+                const { externalId, internalId, externalUrl } = params;
                 if (!externalId || !internalId) return NextResponse.json({ error: 'externalId and internalId are required' }, { status: 400 });
-                const result = await TournamentIngestionService.linkTournament(externalId, internalId);
+                const result = await TournamentIngestionService.linkTournament(externalId, internalId, externalUrl);
                 return NextResponse.json({ success: result });
             }
             default:
