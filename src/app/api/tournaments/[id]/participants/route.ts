@@ -605,39 +605,58 @@ export async function POST(
     }
 
     let resolvedClub: ClubContextRow | null = null;
+    const shouldResolveClubVariant =
+      body.resolve_club_variant === true || body.resolveClubVariant === true;
 
     if (body.club_id) {
-      const { data: tournamentRow, error: tournamentError } = await supabase
-        .from('tournaments')
-        .select('*')
-        .eq('id', tournamentId)
-        .single();
+      if (shouldResolveClubVariant) {
+        const { data: tournamentRow, error: tournamentError } = await supabase
+          .from('tournaments')
+          .select('*')
+          .eq('id', tournamentId)
+          .single();
 
-      if (tournamentError || !tournamentRow) {
-        return NextResponse.json(
-          { error: 'No se pudo resolver el contexto del torneo para vincular el club.' },
-          { status: 400 }
-        );
+        if (tournamentError || !tournamentRow) {
+          return NextResponse.json(
+            { error: 'No se pudo resolver el contexto del torneo para vincular el club.' },
+            { status: 400 }
+          );
+        }
+
+        resolvedClub = (await resolveParticipantClubForTournamentViaService(
+          supabase,
+          tournamentRow as TournamentContextRow,
+          String(body.club_id),
+        )).club;
+      } else {
+        const { data: clubRow, error: clubError } = await supabase
+          .from('clubs')
+          .select('*')
+          .eq('id', String(body.club_id))
+          .single();
+
+        if (clubError || !clubRow) {
+          return NextResponse.json(
+            { error: 'El club seleccionado no existe en la base de datos' },
+            { status: 400 }
+          );
+        }
+
+        resolvedClub = clubRow as ClubContextRow;
       }
-
-      resolvedClub = (await resolveParticipantClubForTournamentViaService(
-        supabase,
-        tournamentRow as TournamentContextRow,
-        String(body.club_id),
-      )).club;
     }
 
     // Log the data being inserted for debugging
     const insertData = {
       tournament_id: tournamentId,
-      club_id: resolvedClub?.id || body.club_id || null,
-      name: resolvedClub?.name || body.name,
-      type: body.type || 'club',
-      status: body.status || 'active',
-      seed: body.seed || null,
-      group_id: body.group_id || null,
-      short_code: resolvedClub?.short_name || body.short_code || null,
-      notes: body.notes || null,
+      club_id: resolvedClub?.id ?? body.club_id ?? null,
+      name: resolvedClub?.name ?? body.name ?? null,
+      type: body.type ?? 'club',
+      status: body.status ?? 'active',
+      seed: body.seed ?? null,
+      group_id: body.group_id ?? null,
+      short_code: resolvedClub?.short_name ?? body.short_code ?? null,
+      notes: body.notes ?? null,
     };
     console.log('[Participants API] Inserting participant:', insertData);
 
