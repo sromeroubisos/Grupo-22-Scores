@@ -5,6 +5,7 @@ import { useRouter, useParams, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/mock-db';
 import Link from 'next/link';
+import { getTournamentFormatLabel } from '@/lib/utils/tournamentFormat';
 import '@/app/admin/styles/admin-custom.css';
 
 export default function TournamentLayout({ children }: { children: React.ReactNode }) {
@@ -168,7 +169,7 @@ export default function TournamentLayout({ children }: { children: React.ReactNo
                                     {tournament.status === 'published' ? 'Publicado' : 'Borrador'}
                                 </span>
                                 <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
-                                    {tournament.sport || 'Rugby'} • {tournament.category || 'Profesional'} • {tournament.format || 'Liga'}
+                                    {tournament.sport || 'Rugby'} • {tournament.category || 'Profesional'} • {getTournamentFormatLabel(tournament.format)}
                                 </span>
                             </div>
                         </div>

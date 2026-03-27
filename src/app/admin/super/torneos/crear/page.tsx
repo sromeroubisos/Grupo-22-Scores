@@ -13,6 +13,14 @@ import { createEntity, updateEntity } from '@/app/admin/entities/actions';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports } from '@/lib/data/sports';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
+import {
+    buildTournamentCompetitionConfig,
+    getTournamentFormatFromPhaseType,
+    getTournamentFormatLabel,
+    getTournamentFormatPhaseType,
+    normalizeTournamentFormat,
+    type CircuitChampionMode,
+} from '@/lib/utils/tournamentFormat';
 import { resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import '../../creation-forms.css';
 
@@ -142,15 +150,11 @@ function sameIdList(left: string[], right: string[]): boolean {
 }
 
 function mapFormatToPhaseType(format: string): PhaseConfiguration['phaseType'] {
-    if (format === 'league') return 'league';
-    if (format === 'knockout') return 'playoff';
-    return 'groups';
+    return getTournamentFormatPhaseType(format) as PhaseConfiguration['phaseType'];
 }
 
-function mapPhaseTypeToFormat(phaseType: string): string {
-    if (phaseType === 'league') return 'league';
-    if (phaseType === 'playoff') return 'knockout';
-    return 'groups';
+function mapPhaseTypeToFormat(phaseType: string, preferredFormat?: string): string {
+    return getTournamentFormatFromPhaseType(phaseType, preferredFormat);
 }
 
 function getPhaseTypeLabel(phaseType: string): string {
@@ -288,6 +292,7 @@ export default function SuperCreateTournament() {
         visibility: 'public',
         season: '2026',
         format: 'league',
+        circuitChampionMode: 'accumulation' as CircuitChampionMode,
         category: 'Profesional',
         publicAudience: 'mayores' as TournamentAudience,
         ageGrade: 'Mayores (Adults)',
@@ -331,6 +336,7 @@ export default function SuperCreateTournament() {
                 const sportVal = data.sport_id ? mapExternalSportToInternalSport(data.sport_id) : 'rugby';
                 const defaults = sportDefaults[sportVal as string] || {};
                 const inferredAudience = resolveTournamentAudience({ ageGrade: data.age_grade, category: data.category });
+                const competitionConfig = (data.ruleset as { competition?: { parameters?: { champion_mode?: CircuitChampionMode } } } | null)?.competition;
 
                 setFormData(prev => ({
                     ...prev,
@@ -341,7 +347,8 @@ export default function SuperCreateTournament() {
                     category: data.category || prev.category,
                     publicAudience: inferredAudience,
                     ageGrade: data.age_grade || syncAgeGradeWithAudience(prev.ageGrade, inferredAudience),
-                    format: data.format || prev.format,
+                    format: normalizeTournamentFormat(data.format || prev.format),
+                    circuitChampionMode: competitionConfig?.parameters?.champion_mode === 'final' ? 'final' : prev.circuitChampionMode,
                     country: normalizeCountryId(data.country_id || data.country || '', countryOptions),
                     unionId: data.union_id || '',
                     logoUrl: data.logo_url || '',
@@ -446,7 +453,7 @@ export default function SuperCreateTournament() {
     const applyPhaseConfig = (nextConfig: PhaseConfiguration) => {
         setPhaseConfig(nextConfig);
 
-        const nextFormat = mapPhaseTypeToFormat(nextConfig.phaseType);
+        const nextFormat = mapPhaseTypeToFormat(nextConfig.phaseType, formData.format);
         setFormData((prev) => (
             prev.format === nextFormat
                 ? prev
@@ -459,9 +466,10 @@ export default function SuperCreateTournament() {
     };
 
     const handleFormatChange = (format: string) => {
-        const nextPhaseType = mapFormatToPhaseType(format);
+        const normalizedFormat = normalizeTournamentFormat(format);
+        const nextPhaseType = mapFormatToPhaseType(normalizedFormat);
 
-        setFormData((prev) => ({ ...prev, format }));
+        setFormData((prev) => ({ ...prev, format: normalizedFormat }));
         setPhaseConfig((current) => {
             const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules);
             return {
@@ -522,7 +530,7 @@ export default function SuperCreateTournament() {
                 season_id: formData.season || '2026',
                 category: formData.category || null,
                 age_grade: formData.ageGrade || null,
-                format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType) || null,
+                format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || null,
                 country: formData.country
                     ? (countryOptions.find((option) => option.id === formData.country)?.label || formData.country)
                     : null,
@@ -531,7 +539,12 @@ export default function SuperCreateTournament() {
                 logo_url: formData.logoUrl || null,
                 status: formData.visibility === 'public' ? 'published' : 'draft',
                 is_visible: formData.visibility === 'public',
-                ruleset,
+                ruleset: {
+                    ...ruleset,
+                    competition: buildTournamentCompetitionConfig(formData.format, {
+                        champion_mode: formData.circuitChampionMode,
+                    }),
+                },
             };
 
             let savedId: string;
@@ -864,15 +877,49 @@ export default function SuperCreateTournament() {
                                         <GitMerge className="choice-icon" />
                                         <span className="choice-label">Eliminación Directa</span>
                                     </button>
+                                    <button
+                                        type="button"
+                                        className={`choice-btn ${formData.format === 'circuit' ? 'selected' : ''}`}
+                                        onClick={() => handleFormatChange('circuit')}
+                                    >
+                                        <Trophy className="choice-icon" />
+                                        <span className="choice-label">Circuito por eventos</span>
+                                    </button>
                                 </div>
                             </div>
+                            {formData.format === 'circuit' && (
+                                <div className="sub-partition" style={{ border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '12px', padding: '20px', background: 'rgba(245, 158, 11, 0.08)', marginTop: '24px' }}>
+                                    <div style={{ display: 'grid', gap: '16px' }}>
+                                        <div>
+                                            <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent)' }}>Modo Circuito</h3>
+                                            <p style={{ margin: '10px 0 0', color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>
+                                                El circuito usa varias paradas durante la temporada y una tabla acumulada por puntos obtenidos en cada evento.
+                                            </p>
+                                        </div>
+                                        <div className="field-group" style={{ marginBottom: 0 }}>
+                                            <label>DEFINICION DEL CAMPEON</label>
+                                            <select
+                                                className="form-select"
+                                                value={formData.circuitChampionMode}
+                                                onChange={(e) => setFormData((prev) => ({
+                                                    ...prev,
+                                                    circuitChampionMode: e.target.value as CircuitChampionMode,
+                                                }))}
+                                            >
+                                                <option value="accumulation">Por acumulacion de puntos</option>
+                                                <option value="final">Con final / playoff decisivo</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <div className="sub-partition" style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', marginTop: '30px' }}>
                                 <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <Trophy size={18} color="var(--accent)" />
                                     <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Configurador de Fases</h3>
                                 </div>
                                 <PhaseCreator
-                                    key={`quick-phase-${effectivePhaseConfig.phaseType}`}
+                                    key={`quick-phase-${formData.format}-${effectivePhaseConfig.phaseType}`}
                                     phaseIndex={1}
                                     totalPhases={1}
                                     teams={phaseTeams}
@@ -1085,6 +1132,10 @@ export default function SuperCreateTournament() {
                                     <span style={{ fontSize: '16px', color: 'white' }}>{selectedClubs.length} club{selectedClubs.length !== 1 ? 's' : ''}</span>
                                 </div>
                                 <div className="summary-item">
+                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Formato</strong>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{getTournamentFormatLabel(formData.format)}</span>
+                                </div>
+                                <div className="summary-item">
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Puntos (G/E/P)</strong>
                                     <span style={{ fontSize: '16px', color: 'white' }}>{formData.rules.pointsWin} / {formData.rules.pointsDraw} / {formData.rules.pointsLoss}</span>
                                 </div>
@@ -1092,6 +1143,14 @@ export default function SuperCreateTournament() {
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Fase inicial</strong>
                                     <span style={{ fontSize: '16px', color: 'white' }}>{getPhaseTypeLabel(phaseConfigToPersist.phaseType)}</span>
                                 </div>
+                                {formData.format === 'circuit' && (
+                                    <div className="summary-item">
+                                        <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Campeon del circuito</strong>
+                                        <span style={{ fontSize: '16px', color: 'white' }}>
+                                            {formData.circuitChampionMode === 'final' ? 'Final / playoff' : 'Tabla acumulada'}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
 
                             <article className="partition" style={{ marginTop: '30px', border: '1px dashed var(--border)' }}>

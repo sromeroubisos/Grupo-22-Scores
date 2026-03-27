@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { db } from '@/lib/mock-db';
+import { getTournamentFormatLabel } from '@/lib/utils/tournamentFormat';
 
 export default function UnionTournaments() {
     const params = useParams();
@@ -91,7 +92,7 @@ export default function UnionTournaments() {
                                     <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{t.name}</div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{t.seasonId}</div>
                                 </td>
-                                <td style={{ padding: '16px 24px', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{t.format || 'Standard'}</td>
+                                <td style={{ padding: '16px 24px', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{getTournamentFormatLabel(t.format, 'Standard')}</td>
                                 <td style={{ padding: '16px 24px' }}>
                                     <span style={{
                                         fontSize: '0.75rem',

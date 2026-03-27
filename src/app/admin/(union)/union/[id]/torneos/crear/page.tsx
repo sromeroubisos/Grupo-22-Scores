@@ -6,6 +6,12 @@ import { ArrowLeft } from 'lucide-react';
 import PhaseCreator from '@/app/admin/components/PhaseCreator';
 import { db } from '@/lib/mock-db';
 import { createClient } from '@/lib/supabase/client';
+import {
+    buildTournamentCompetitionConfig,
+    getTournamentFormatLabel,
+    normalizeTournamentFormat,
+    type CircuitChampionMode,
+} from '@/lib/utils/tournamentFormat';
 import { resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 
 export default function CreateTournament() {
@@ -30,6 +36,7 @@ export default function CreateTournament() {
         startDate: '',
         endDate: '',
         format: 'league',
+        circuitChampionMode: 'accumulation' as CircuitChampionMode,
         pointsWin: 3,
         pointsDraw: 1,
         pointsLoss: 0,
@@ -69,7 +76,7 @@ export default function CreateTournament() {
             category: tournament.category || prev.category,
             publicAudience: inferredAudience,
             ageGrade: (tournament as { age_grade?: string | null }).age_grade || syncAgeGradeWithAudience(prev.ageGrade, inferredAudience),
-            format: tournament.format?.toLowerCase().includes('league') ? 'league' : prev.format,
+            format: normalizeTournamentFormat(tournament.format, prev.format as any),
             location: db.unions.find(u => u.id === unionId)?.name || prev.location,
         }));
     }, [tournamentId, unionId]);
@@ -435,8 +442,13 @@ export default function CreateTournament() {
             sport: formData.sport.toLowerCase().includes('rugby') ? 'rugby' : 'football',
             category: formData.category,
             age_grade: formData.ageGrade,
-            format: formData.format,
+            format: normalizeTournamentFormat(formData.format),
             is_visible: formData.visibility === 'public',
+            ruleset: {
+                competition: buildTournamentCompetitionConfig(formData.format, {
+                    champion_mode: formData.circuitChampionMode,
+                }),
+            },
         };
 
         if (isEdit && tournamentId) {
@@ -1464,8 +1476,9 @@ export default function CreateTournament() {
                                 {[
                                     { id: 'league', name: 'Liga', desc: 'Todos contra todos' },
                                     { id: 'knockout', name: 'Eliminación', desc: 'Playoffs directos' },
-                                    { id: 'group-playoff', name: 'Grupos + Playoffs', desc: 'Mundial / Champions' },
-                                    { id: 'swiss', name: 'Suizo', desc: 'Chess / Esports style' }
+                                    { id: 'groups', name: 'Grupos + Playoffs', desc: 'Mundial / Champions' },
+                                    { id: 'swiss', name: 'Suizo', desc: 'Chess / Esports style' },
+                                    { id: 'circuit', name: 'Circuito', desc: 'Paradas con ranking acumulado' }
                                 ].map((fmt) => (
                                     <div
                                         key={fmt.id}
@@ -1477,6 +1490,29 @@ export default function CreateTournament() {
                                     </div>
                                 ))}
                             </div>
+
+                            {formData.format === 'circuit' && (
+                                <div style={{ marginTop: '24px', padding: '18px', borderRadius: '12px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                                    <div style={{ display: 'grid', gap: '14px' }}>
+                                        <div>
+                                            <h4 style={{ margin: 0, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--accent-green)' }}>Configuracion de circuito</h4>
+                                            <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                                                Este formato asume varias fechas o eventos durante la temporada y una tabla general por puntos acumulados.
+                                            </p>
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label>DEFINICION DEL CAMPEON</label>
+                                            <select
+                                                value={formData.circuitChampionMode}
+                                                onChange={(e) => updateFormData('circuitChampionMode', e.target.value as CircuitChampionMode)}
+                                            >
+                                                <option value="accumulation">Por acumulacion</option>
+                                                <option value="final">Con final / playoff</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <div style={{ marginTop: '40px' }}>
                                 <h3 className="section-title">Configuración de Puntos</h3>
@@ -1922,7 +1958,7 @@ export default function CreateTournament() {
                                         <div>
                                             <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>Formato Definido</p>
                                             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                                                {formData.format === 'league' ? 'Liga' : formData.format} • Victoria: {formData.pointsWin}pts
+                                                {getTournamentFormatLabel(formData.format)} • Victoria: {formData.pointsWin}pts
                                             </p>
                                         </div>
                                     </div>
@@ -1944,6 +1980,17 @@ export default function CreateTournament() {
                                             </p>
                                         </div>
                                     </div>
+                                    {formData.format === 'circuit' && (
+                                        <div className="checklist-item">
+                                            <div className="check-circle">✓</div>
+                                            <div>
+                                                <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>Definicion del campeon</p>
+                                                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                                                    {formData.circuitChampionMode === 'final' ? 'Final / playoff entre los mejores' : 'Tabla acumulada durante toda la temporada'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="checklist-item" style={{ opacity: 0.5 }}>
                                         <div className="check-circle" style={{ background: 'var(--text-muted)' }}>!</div>
                                         <div>
@@ -1983,7 +2030,7 @@ export default function CreateTournament() {
                                         <div>
                                             <p style={{ fontSize: '10px', color: 'var(--text-muted)' }}>FORMATO</p>
                                             <p style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>
-                                                {formData.format === 'league' ? 'Liga' : formData.format}
+                                                {getTournamentFormatLabel(formData.format)}
                                             </p>
                                         </div>
                                     </div>

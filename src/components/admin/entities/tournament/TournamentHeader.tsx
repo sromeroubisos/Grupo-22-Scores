@@ -2,6 +2,7 @@
 
 import { ArchiveRestore, ChevronDown, MoreHorizontal } from 'lucide-react';
 import { Database } from '@/lib/database.types';
+import { getTournamentFormatLabel } from '@/lib/utils/tournamentFormat';
 import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 
@@ -190,7 +191,7 @@ export function TournamentHeader({
                 <div className="basalt-header-meta">
                     <span>{tournament.sport || 'Disciplina pendiente'}</span>
                     <span>{tournament.category || 'Categoria no definida'}</span>
-                    <span>{tournament.format || 'Formato en configuracion'}</span>
+                    <span>{tournament.format ? getTournamentFormatLabel(tournament.format) : 'Formato en configuracion'}</span>
                 </div>
 
                 <div className="basalt-header-badges">
