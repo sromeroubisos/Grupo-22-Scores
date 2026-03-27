@@ -4,6 +4,10 @@ type SupabaseSchemaError = {
   details?: string | null;
 } | null | undefined;
 
+export function getMissingTournamentPriorityMessage(): string {
+  return "La columna 'priority' no existe en `public.tournaments` o PostgREST todavia no recargo ese cambio. Aplica la migracion de Supabase `20260327220000_repair_tournament_priority_schema.sql` y recarga el esquema.";
+}
+
 export function isMissingColumnError(error: SupabaseSchemaError, column: string): boolean {
   if (!error) return false;
 

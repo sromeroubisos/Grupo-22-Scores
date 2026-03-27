@@ -10,6 +10,8 @@ import { TiebreakerList, TiebreakerItem } from './TiebreakerList';
 import { TableColumnSelector, ColumnCategory } from './TableColumnSelector';
 import { LabelChip } from './standings/LabelChip';
 import { PhaseSettings, GroupLabel } from '@/types/phase-settings';
+import { updateEntity } from '@/app/admin/entities/actions';
+import { buildTournamentCompetitionConfig } from '@/lib/utils/tournamentFormat';
 
 interface Phase {
     id: string;
@@ -39,6 +41,9 @@ const PHASE_TYPE_BADGE: Record<string, string> = {
 const PRESET_COLORS = [
     '#00a365', '#22c55e', '#eab308', '#ef4444', '#3b82f6', '#a855f7', '#f97316', '#14b8a6',
 ];
+
+const DEFAULT_PLACEMENT_PTS = [25, 18, 15, 12, 10, 8, 6, 4];
+const DEFAULT_PLACEMENT_POINTS = DEFAULT_PLACEMENT_PTS.map((pts, i) => ({ position: i + 1, points: pts }));
 
 const COLUMN_TIEBREAKER_CONFIG: Record<string, { label: string; description?: string }> = {
     points:        { label: 'Puntos' },
@@ -70,6 +75,23 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [legs, setLegs] = useState<1 | 2>(1);
 
     const isRugby = data?.sport?.toLowerCase() === 'rugby';
+
+    // Tournament model (circuit vs normal)
+    const [tournamentFormat, setTournamentFormat] = useState<'circuit' | 'league'>(() => {
+        const f = (data as any)?.format;
+        const r = (data as any)?.ruleset?.competition?.season_model;
+        return f === 'circuit' || r === 'circuit' ? 'circuit' : 'league';
+    });
+    const [circuitChampionMode, setCircuitChampionMode] = useState<'accumulation' | 'final'>(() => {
+        return (data as any)?.ruleset?.competition?.parameters?.champion_mode === 'final' ? 'final' : 'accumulation';
+    });
+    const [savingFormat, setSavingFormat] = useState(false);
+    const [formatSaved, setFormatSaved] = useState(false);
+
+    const isCircuit = tournamentFormat === 'circuit';
+
+    // Circuit placement points (used when isCircuit)
+    const [placementPoints, setPlacementPoints] = useState<{ position: number; points: number }[]>(DEFAULT_PLACEMENT_POINTS);
 
     // Points system
     const [pointsWin, setPointsWin] = useState(isRugby ? 4 : 3);
@@ -338,6 +360,27 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setTableCols(newCols);
     };
 
+    const handleSaveTournamentFormat = async () => {
+        if (!id) return;
+        setSavingFormat(true);
+        setFormatSaved(false);
+        try {
+            const competition = buildTournamentCompetitionConfig(
+                tournamentFormat,
+                tournamentFormat === 'circuit' ? { champion_mode: circuitChampionMode } : undefined,
+            );
+            const currentRuleset = (data as any)?.ruleset ?? {};
+            await updateEntity('tournament', id, {
+                format: tournamentFormat,
+                ruleset: { ...currentRuleset, competition },
+            });
+            setFormatSaved(true);
+            setTimeout(() => setFormatSaved(false), 3000);
+        } finally {
+            setSavingFormat(false);
+        }
+    };
+
     const resetForm = () => {
         setCurrentStep(1);
         setPhaseName('');
@@ -370,6 +413,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         });
         setGroupLabels([]);
         setGroupNames([]);
+        setPlacementPoints(DEFAULT_PLACEMENT_POINTS);
         resetLabelForm();
         setShowPhaseForm(false);
         setEditingPhaseId(null);
@@ -419,6 +463,9 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             setGroupLabels(normalizeGroupLabels(s.groupLabels || []));
             setGroupNames((s as any).group_names || []);
             setStatsAssignment(s.statsAssignment || (s.playerStats?.assignOnlyToStarters ? 'starters' : 'played'));
+
+            const pts = (s as any).circuit?.pointsByPlacement;
+            setPlacementPoints(Array.isArray(pts) && pts.length > 0 ? pts : DEFAULT_PLACEMENT_POINTS);
         }
 
         resetLabelForm();
@@ -477,6 +524,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     order_index: editingPhaseId ? undefined : phases.length + 1,
                     is_active: true,
                     settings: {
+                        ...(isCircuit ? { circuit: { pointsByPlacement: placementPoints } } : {}),
                         teamsCount: teamsCount === '' ? 0 : Number(teamsCount),
                         advanceCount: advanceCount === '' ? 0 : Number(advanceCount),
                         legs,
@@ -618,6 +666,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         { step: 3, title: 'Desempate', desc: 'Criterios y tabla', show: phaseType === 'league' || phaseType === 'group_stage' },
         { step: 4, title: 'Etiquetas', desc: 'Zonas de clasificación', show: true },
         { step: 5, title: 'Estadísticas', desc: 'Atribución a jugadores', show: true },
+        { step: 6, title: 'Circuito', desc: 'Puntos por posición', show: isCircuit },
     ];
 
     // ─── RENDER ───────────────────────────────────────────────────────────────
@@ -667,6 +716,84 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
     return (
         <div className="tournament-structure-shell flex flex-col gap-8 animate-in fade-in duration-500 pb-24">
+
+            {/* ── Tournament model selector ── */}
+            {!showPhaseForm && (
+                <section className="basalt-card structure-module p-6">
+                    <div className="structure-module-header mb-5">
+                        <p className="basalt-section-kicker mb-1">Modelo competitivo</p>
+                        <h2 className="basalt-h1 structure-module-title">Rol del torneo</h2>
+                        <p className="structure-module-copy text-dim text-sm mt-1">
+                            Define si este torneo es una competencia estándar o un circuito por eventos acumulados.
+                        </p>
+                    </div>
+
+                    <div className="structure-option-grid grid grid-cols-2 gap-3 mb-5">
+                        {([
+                            { value: 'league' as const, label: 'Torneo estándar', desc: 'Liga, grupos, playoffs o eliminación directa' },
+                            { value: 'circuit' as const, label: 'Circuito por eventos', desc: 'Múltiples etapas con ranking acumulado por puntos' },
+                        ]).map(opt => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => setTournamentFormat(opt.value)}
+                                className={`structure-option-card flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${tournamentFormat === opt.value
+                                    ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                    : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
+                                }`}
+                            >
+                                <span className="text-sm font-bold">{opt.label}</span>
+                                <span className="text-[11px] mt-0.5 opacity-70">{opt.desc}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {isCircuit && (
+                        <div className="mb-5">
+                            <label className="block text-xs font-bold text-dim uppercase tracking-widest mb-2">
+                                Definición del campeón
+                            </label>
+                            <div className="structure-option-grid grid grid-cols-2 gap-3">
+                                {([
+                                    { value: 'accumulation' as const, label: 'Por acumulación de puntos', desc: 'Gana quien más puntos acumule en todas las etapas' },
+                                    { value: 'final' as const, label: 'Con final / playoff decisivo', desc: 'Las etapas clasifican a una instancia final' },
+                                ]).map(opt => (
+                                    <button
+                                        key={opt.value}
+                                        type="button"
+                                        onClick={() => setCircuitChampionMode(opt.value)}
+                                        className={`structure-option-card flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${circuitChampionMode === opt.value
+                                            ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                            : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
+                                        }`}
+                                    >
+                                        <span className="text-sm font-bold">{opt.label}</span>
+                                        <span className="text-[11px] mt-0.5 opacity-70">{opt.desc}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            className="basalt-btn basalt-btn-primary"
+                            onClick={handleSaveTournamentFormat}
+                            disabled={savingFormat}
+                        >
+                            {savingFormat ? 'Guardando...' : 'Guardar modelo'}
+                        </button>
+                        {formatSaved && (
+                            <span className="flex items-center gap-1.5 text-sm text-[var(--status-active)] font-semibold">
+                                <CheckCircle size={15} />
+                                Guardado
+                            </span>
+                        )}
+                    </div>
+                </section>
+            )}
+
             {!showPhaseForm && (
                 <section className="basalt-card basalt-hero structure-hero-panel">
                     <div className="structure-hero-copy">
@@ -772,6 +899,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     {(phase.settings as any).group_names.length} grupos
                                                 </span>
                                             )}
+                                            {isCircuit && (() => {
+                                                const pts: { position: number; points: number }[] = (phase.settings as any)?.circuit?.pointsByPlacement || DEFAULT_PLACEMENT_POINTS;
+                                                const shown = pts.slice(0, 4);
+                                                return (
+                                                    <span className="structure-phase-meta-info text-[var(--accent-primary)] font-semibold">
+                                                        {shown.map(p => `${p.position}°→${p.points}`).join(' · ')}{pts.length > 4 ? ' …' : ''}
+                                                    </span>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 </div>
@@ -1468,6 +1604,65 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     <p className="text-xs text-dim mt-1">Si está inactivo, se asignará a todos los jugadores que hayan jugado.</p>
                                                 </div>
                                             </label>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* STEP 6: Circuito */}
+                                {currentStep === 6 && (
+                                    <div className="phase-wizard-step-panel structure-step-panel flex flex-col gap-6">
+                                        <div className="structure-step-head">
+                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 6</p>
+                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Puntos de circuito</h3>
+                                            <p className="text-dim text-sm">Asigna cuántos puntos acumula cada posición al terminar esta etapa</p>
+                                        </div>
+
+                                        <div className="structure-field-panel rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] overflow-hidden">
+                                            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-basalt)]">
+                                                <span className="text-xs font-bold text-dim uppercase tracking-widest">Tabla de puntos por posición</span>
+                                                <button
+                                                    type="button"
+                                                    className="basalt-btn text-xs py-1 px-3"
+                                                    onClick={() => setPlacementPoints(DEFAULT_PLACEMENT_POINTS)}
+                                                >
+                                                    Restablecer
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-col divide-y divide-[var(--border-basalt)]">
+                                                {placementPoints.map((row, i) => (
+                                                    <div key={i} className="flex items-center gap-4 px-5 py-2.5">
+                                                        <span className="w-8 text-center text-sm font-bold text-dim">{row.position}°</span>
+                                                        <input
+                                                            type="number"
+                                                            min={0}
+                                                            className="basalt-input flex-1 text-center py-1.5"
+                                                            value={row.points}
+                                                            onChange={e => setPlacementPoints(prev =>
+                                                                prev.map((r, idx) => idx === i ? { ...r, points: Number(e.target.value) } : r)
+                                                            )}
+                                                        />
+                                                        <span className="text-xs text-dim w-8">pts</span>
+                                                        <button
+                                                            type="button"
+                                                            className="p-1.5 rounded-lg text-dim hover:text-red-400 hover:bg-red-500/10 transition-all"
+                                                            onClick={() => setPlacementPoints(prev => prev.filter((_, idx) => idx !== i).map((r, idx) => ({ ...r, position: idx + 1 })))}
+                                                            title="Eliminar posición"
+                                                        >
+                                                            <Trash2 size={13} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="px-5 py-3 border-t border-[var(--border-basalt)]">
+                                                <button
+                                                    type="button"
+                                                    className="basalt-btn w-full"
+                                                    onClick={() => setPlacementPoints(prev => [...prev, { position: prev.length + 1, points: 0 }])}
+                                                >
+                                                    <Plus size={14} />
+                                                    Agregar posición
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 )}

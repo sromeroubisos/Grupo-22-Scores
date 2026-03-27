@@ -1134,6 +1134,25 @@
     font-size: 0.875rem;
 }
 
+.standingsScopeBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 0 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.standingsScopeBar::-webkit-scrollbar { display: none; }
+
+.standingsScopeLabel {
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: var(--fl-text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 /* Standings toolbar */
 .standingsToolbar {
     display: flex;
@@ -1567,6 +1586,8 @@
     /* ── Pill filters ── */
     .pillBtn { padding: 6px 11px; font-size: 0.72rem; }
     .pillsGroup { padding: 3px; border-radius: 7px; }
+    .standingsScopeBar { gap: 8px; padding-bottom: 10px; }
+    .standingsScopeLabel { font-size: 0.62rem; }
 
     /* ── Page/section titles ── */
     .pageTitle { font-size: 1rem; margin-bottom: 12px; }

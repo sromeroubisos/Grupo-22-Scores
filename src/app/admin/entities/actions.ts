@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { EntityType } from '@/lib/services/entityResolver';
-import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { getMissingTournamentPriorityMessage, isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { z } from 'zod';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -98,7 +98,7 @@ async function runTournamentWriteWithPriorityFallback(
         return {
             data: null,
             error: {
-                message: "La columna 'priority' no existe en este esquema. No se puede guardar la prioridad.",
+                message: getMissingTournamentPriorityMessage(),
             },
         };
     }

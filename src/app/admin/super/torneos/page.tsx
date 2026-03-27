@@ -7,10 +7,10 @@ import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
-import { tournamentService } from '@/lib/services/tournamentService';
 import type { TournamentUpdate } from '@/lib/services/tournamentService';
 import { normalizeError } from '@/lib/utils/errorUtils';
 import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
+import { deleteSuperTournament, updateSuperTournamentMeta } from './actions';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -148,7 +148,7 @@ export default function SuperadminTorneosPage() {
         }));
 
         try {
-            const result = await tournamentService.updateTournamentMeta(id, updates);
+            const result = await updateSuperTournamentMeta(id, updates);
             if (!result && Object.keys(updates).length > 0) {
                 console.warn('[SuperadminTorneosPage] Update discarded (all fields were invalid/filtered)', Object.keys(updates));
             } else {
@@ -176,10 +176,12 @@ export default function SuperadminTorneosPage() {
     const handleDelete = async (id: string) => {
         if (!confirm('¿Seguro que deseas eliminar este torneo?')) return;
         setDeletedIds(prev => new Set([...prev, id]));
-        const { error } = await supabase.from('tournaments').delete().eq('id', id);
-        if (error) {
+        try {
+            await deleteSuperTournament(id);
+        } catch (err: unknown) {
             setDeletedIds(prev => { const s = new Set(prev); s.delete(id); return s; });
-            alert('Error al eliminar: ' + error.message);
+            const normalized = normalizeError(err);
+            alert('Error al eliminar: ' + (normalized.message || 'Error inesperado'));
             return;
         }
         invalidateCache('tournaments_list');
@@ -191,23 +193,43 @@ export default function SuperadminTorneosPage() {
         if (!file) return;
 
         try {
-            await tournamentService.uploadLogo(id, file);
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${id}-${Math.random()}.${fileExt}`;
+            const filePath = `logos/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('tournaments')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('tournaments')
+                .getPublicUrl(filePath);
+
+            await updateSuperTournamentMeta(id, { logo_url: publicUrl });
+            invalidateCache('tournaments_list');
             alert('Logo actualizado con éxito');
             refresh('tournaments');
-        } catch (err: any) {
-            alert('Error al subir logo: ' + err.message);
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            alert('Error al subir logo: ' + (normalized.message || 'Error inesperado'));
         }
     };
 
     const confirmLink = async () => {
         if (!linkingTournamentId || !selectedUnionId) return;
         try {
-            await tournamentService.updateTournamentMeta(linkingTournamentId, { union_id: selectedUnionId });
+            await updateSuperTournamentMeta(linkingTournamentId, { union_id: selectedUnionId });
             invalidateCache('tournaments_list');
             refresh('tournaments');
             setLinkingTournamentId(null);
-        } catch (err: any) {
-            alert('Error: ' + err.message);
+            setSelectedUnionId('');
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            alert('Error: ' + (normalized.message || 'Error inesperado'));
         }
     };
 
@@ -325,7 +347,7 @@ export default function SuperadminTorneosPage() {
                     <select
                         className={styles.filterControl}
                         value={filters.source}
-                        onChange={e => setFilters(prev => ({ ...prev, source: e.target.value as any }))}
+                        onChange={e => setFilters(prev => ({ ...prev, source: e.target.value }))}
                     >
                         <option value="all">Todos</option>
                         <option value="API">API (Gestor Externo)</option>

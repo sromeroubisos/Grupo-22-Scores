@@ -1,7 +1,7 @@
 import { supabase } from '../supabase';
 import { Database } from '../database.types';
 import { normalizeError } from '../utils/errorUtils';
-import { isMissingColumnError } from '../utils/supabaseSchema';
+import { getMissingTournamentPriorityMessage, isMissingColumnError } from '../utils/supabaseSchema';
 
 export interface TournamentGlobal {
   id: string;
@@ -224,7 +224,7 @@ export const tournamentService = {
       const { priority: _ignoredPriority, ...retryUpdates } = filteredUpdates;
 
       if (Object.keys(retryUpdates).length === 0) {
-        throw new Error("La columna 'priority' no existe en este esquema. No se puede guardar la prioridad.");
+        throw new Error(getMissingTournamentPriorityMessage());
       }
 
       console.warn('[tournamentService] priority column missing. Retrying update without priority.');

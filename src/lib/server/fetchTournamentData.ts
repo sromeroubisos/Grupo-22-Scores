@@ -7,8 +7,8 @@ const SLUG_LOOKUP_TIMEOUT_MS = 5000;
 const PREFETCH_TIMEOUT_MS = 5000;
 const MATCHES_TIMEOUT_MS = 12000;
 const STANDINGS_TIMEOUT_MS = 12000;
-const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, ruleset, url, external_id';
-const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, ruleset, url, external_id';
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id';
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id';
 
 export type TournamentQueryErrors = {
     tournament: string | null;
@@ -75,6 +75,7 @@ type TournamentRow = {
     country_ref: { name?: string } | null;
     logo_url: string | null;
     banner_url?: string | null;
+    format?: string | null;
     status: string | null;
     is_visible: boolean | null;
     slug: string | null;
@@ -267,9 +268,9 @@ async function getTournamentByIdWithSportFallback(
 
 /** Same columns as `GET /api/db/tournaments/[id]` — proven to work without joins. */
 const TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY =
-    'id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status';
+    'id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status, format, ruleset';
 const TOURNAMENT_SELECT_MINIMAL_NO_LEGACY =
-    'id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status';
+    'id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status, format, ruleset';
 
 async function getTournamentByIdMinimalFallback(
     supabase: Awaited<ReturnType<typeof getReadClient>>,

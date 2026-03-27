@@ -12,12 +12,14 @@ type TournamentLookupRow = {
     legacy_sport?: string | null;
     country_id: string | null;
     slug: string | null;
+    format?: string | null;
+    ruleset?: Record<string, unknown> | null;
     is_visible: boolean | null;
     status: string | null;
 };
 
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, is_visible, status';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, format, ruleset, is_visible, status';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, format, ruleset, is_visible, status';
 
 export async function GET(
     _req: NextRequest,

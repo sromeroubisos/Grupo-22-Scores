@@ -10,6 +10,7 @@ import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import ExportImage from '@/components/ExportImage';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
+import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
@@ -180,8 +181,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 }
 
                 setDetails(payload.details || null);
-                setResults(payload.results || []);
-                setFixtures(payload.fixtures || []);
+                setResults(sortMatchesByDate(payload.results || [], 'desc'));
+                setFixtures(sortMatchesByDate(payload.fixtures || [], 'asc'));
                 setSquad(null);
                 setSquadFetched(false);
                 setTransfers(payload.transfers || []);

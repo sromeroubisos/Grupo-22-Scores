@@ -16,6 +16,7 @@ import {
 import { db } from '@/lib/mock-db';
 import { persistFromTournamentPayload } from '@/lib/sync/catalog';
 import { getTabSnapshot, hasMeaningfulPayload, upsertTabSnapshot } from '@/lib/sync/tabSnapshots';
+import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 
 const TAB_TIMEOUT_MS = 5000;
 
@@ -704,8 +705,14 @@ export async function GET(request: Request) {
         const archivesFetchOk = canFetchArchives && settled[9].status === 'fulfilled';
 
         const detailsPayload = resolveTab('details', normalizeDetails(detailsRes) || details, detailsFetchOk);
-        const resultsPayload = resolveTab('results', resultsRes?.DATA || resultsRes || [], resultsFetchOk);
-        const fixturesPayload = resolveTab('fixtures', fixturesRes?.DATA || fixturesRes || [], fixturesFetchOk);
+        const resultsPayload = sortMatchesByDate(
+            resolveTab('results', resultsRes?.DATA || resultsRes || [], resultsFetchOk) || [],
+            'desc',
+        );
+        const fixturesPayload = sortMatchesByDate(
+            resolveTab('fixtures', fixturesRes?.DATA || fixturesRes || [], fixturesFetchOk) || [],
+            'asc',
+        );
         const standingsFormPayload = resolveTab('standingsForm', standingsFormRes?.DATA || standingsFormRes || [], standingsFormFetchOk);
         const standingsHtFtPayload = resolveTab('standingsHtFt', standingsHtFtRes?.DATA || standingsHtFtRes || [], standingsHtFtFetchOk);
         const standingsOverUnderPayload = resolveTab('standingsOverUnder', standingsOverUnderRes?.DATA || standingsOverUnderRes || [], standingsOverUnderFetchOk);
@@ -868,8 +875,8 @@ export async function GET(request: Request) {
             };
 
             const fallbackDetails = readFallback('details', null);
-            const fallbackResults = readFallback('results', []);
-            const fallbackFixtures = readFallback('fixtures', []);
+            const fallbackResults = sortMatchesByDate(readFallback('results', []), 'desc');
+            const fallbackFixtures = sortMatchesByDate(readFallback('fixtures', []), 'asc');
             const fallbackStandings = readFallback('standings', []);
             const fallbackStandingsForm = readFallback('standingsForm', []);
             const fallbackStandingsHtFt = readFallback('standingsHtFt', []);

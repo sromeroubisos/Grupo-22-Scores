@@ -9,6 +9,7 @@ import {
     getTeamTransfers,
 } from '@/lib/services/flashscore';
 import { canonicalizeSportId, getClubSportValue } from '@/lib/clubDerivatives';
+import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
@@ -528,8 +529,8 @@ export async function GET(request: Request) {
             }
         }
 
-        const finalResults = internalResults.length > 0 ? internalResults : fsResults;
-        const finalFixtures = internalFixtures.length > 0 ? internalFixtures : fsFixtures;
+        const finalResults = sortMatchesByDate(internalResults.length > 0 ? internalResults : fsResults, 'desc');
+        const finalFixtures = sortMatchesByDate(internalFixtures.length > 0 ? internalFixtures : fsFixtures, 'asc');
 
         return Response.json({
             ok: true,

@@ -15,6 +15,8 @@ import { getCountryById } from '@/lib/data/countries';
 import { normalizeTeamLabelAssignments, resolveStandingsRowLabel } from '@/lib/teamLabels';
 import { addDaysToIsoDate, APP_TIMEZONE, formatDateInTimeZone, formatDateKey } from '@/lib/timezone';
 import type { TournamentInitialData } from '@/lib/server/fetchTournamentData';
+import { normalizeTournamentFormat } from '@/lib/utils/tournamentFormat';
+import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { useAuth } from '@/context/AuthContext';
 
 // Tabs
@@ -31,6 +33,18 @@ const TABS = [
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DEFAULT_CIRCUIT_PLACEMENT_POINTS = [25, 18, 15, 12, 10, 8, 6, 4];
+const CIRCUIT_GLOBAL_SCOPE = '__circuit_global__';
+
+type CircuitStandingsView = {
+    id: string;
+    kind: 'global' | 'phase';
+    label: string;
+    subtitle: string;
+    standings: any[];
+};
+
+type StandingsColumnMode = 'standard' | 'circuit-global';
 
 function getTeamLogo(team: any): string {
     if (!team) return '';
@@ -198,6 +212,80 @@ function buildRowAccentStyle(color?: string | null): CSSProperties | undefined {
     } as CSSProperties;
 }
 
+function sortTournamentPhases(phases: any[]) {
+    return [...phases].sort((left: any, right: any) => {
+        const leftOrder = typeof left?.order_index === 'number' ? left.order_index : Number.MAX_SAFE_INTEGER;
+        const rightOrder = typeof right?.order_index === 'number' ? right.order_index : Number.MAX_SAFE_INTEGER;
+        if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+        return String(left?.name || '').localeCompare(String(right?.name || ''));
+    });
+}
+
+function getPhaseDisplayName(phase: any, index: number) {
+    const name = String(phase?.name || '').trim();
+    return name || `Etapa ${index + 1}`;
+}
+
+function getTournamentCompetitionFormat(ruleset: any, fallback?: string | null) {
+    return normalizeTournamentFormat(
+        ruleset?.competition?.format_type ??
+        (ruleset?.circuit?.enabled ? 'circuit' : fallback) ??
+        'league',
+        'league',
+    );
+}
+
+function isCircuitTournamentRuleset(ruleset: any, fallback?: string | null) {
+    return getTournamentCompetitionFormat(ruleset, fallback) === 'circuit';
+}
+
+function parseCircuitPlacementPoints(input: unknown) {
+    if (!Array.isArray(input)) return [];
+
+    return input
+        .map((item: any) => {
+            const position = Number(item?.position);
+            const points = Number(item?.points);
+            if (!Number.isFinite(position) || position <= 0) return null;
+
+            return {
+                position,
+                points: Number.isFinite(points) ? points : 0,
+            };
+        })
+        .filter((item): item is { position: number; points: number } => Boolean(item))
+        .sort((left, right) => left.position - right.position);
+}
+
+function getDefaultCircuitPlacementPoints() {
+    return DEFAULT_CIRCUIT_PLACEMENT_POINTS.map((points, index) => ({
+        position: index + 1,
+        points,
+    }));
+}
+
+function resolveCircuitPlacementPoints(phase: any, tournamentRuleset: any) {
+    const fromPhase = parseCircuitPlacementPoints(
+        phase?.settings?.circuit?.pointsByPlacement ?? phase?.settings?.placementPoints,
+    );
+    if (fromPhase.length > 0) return fromPhase;
+
+    const rulesetStages = Array.isArray(tournamentRuleset?.circuit?.stages)
+        ? tournamentRuleset.circuit.stages
+        : [];
+    const phaseOrder = typeof phase?.order_index === 'number' ? phase.order_index : null;
+    const stageMatch = rulesetStages.find((stage: any, index: number) =>
+        String(stage?.id || '') === String(phase?.id || '') ||
+        String(stage?.name || '').trim() === String(phase?.name || '').trim() ||
+        Number(stage?.order) === Number(phaseOrder ?? (index + 1)) ||
+        Number(stage?.order) === Number((phaseOrder ?? index) + 1),
+    );
+    const fromRuleset = parseCircuitPlacementPoints(stageMatch?.circuit_points);
+    if (fromRuleset.length > 0) return fromRuleset;
+
+    return getDefaultCircuitPlacementPoints();
+}
+
 function buildLegendSwatchStyle(color?: string | null): CSSProperties | undefined {
     if (!color) return undefined;
     return {
@@ -354,12 +442,7 @@ function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants
 function getPreferredDbPhase(phases: any[], matches: any[] = [], standings: any[] = []) {
     if (!Array.isArray(phases) || phases.length === 0) return null;
 
-    const ordered = [...phases].sort((left: any, right: any) => {
-        const leftOrder = typeof left?.order_index === 'number' ? left.order_index : Number.MAX_SAFE_INTEGER;
-        const rightOrder = typeof right?.order_index === 'number' ? right.order_index : Number.MAX_SAFE_INTEGER;
-        if (leftOrder !== rightOrder) return leftOrder - rightOrder;
-        return String(left?.name || '').localeCompare(String(right?.name || ''));
-    });
+    const ordered = sortTournamentPhases(phases);
 
     const explicitActivePhase = ordered.find((phase: any) => phase?.is_active);
     if (explicitActivePhase) return explicitActivePhase;
@@ -376,13 +459,16 @@ function getPreferredDbPhase(phases: any[], matches: any[] = [], standings: any[
     return latestPhaseWithData ?? ordered[0] ?? null;
 }
 
-function getDbStandingsContext(dbData: TournamentInitialData) {
+function getDbStandingsContext(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
     const participants = Array.isArray(dbData.participants) ? (dbData.participants as any[]) : [];
     const matches = Array.isArray(dbData.matches) ? (dbData.matches as any[]) : [];
-    const phases = Array.isArray(dbData.phases) ? (dbData.phases as any[]) : [];
+    const phases = sortTournamentPhases(Array.isArray(dbData.phases) ? (dbData.phases as any[]) : []);
     const groups = Array.isArray(dbData.groups) ? (dbData.groups as any[]) : [];
     const rawStandings = Array.isArray(dbData.standings) ? (dbData.standings as any[]) : [];
-    const activePhase = getPreferredDbPhase(phases, matches, rawStandings);
+    const requestedPhase = preferredPhaseId
+        ? phases.find((phase: any) => String(phase?.id ?? '') === String(preferredPhaseId))
+        : null;
+    const activePhase = requestedPhase ?? getPreferredDbPhase(phases, matches, rawStandings);
     const activePhaseId = activePhase?.id ?? null;
     const activeGroups = groups.filter(
         (group: any) => !activePhaseId || String(group?.phase_id ?? '') === String(activePhaseId),
@@ -394,20 +480,28 @@ function getDbStandingsContext(dbData: TournamentInitialData) {
         participants,
         matches,
         rawStandings,
+        phases,
         activePhase,
         activePhaseId,
         activeGroups,
         resolvedRules,
+        tournamentRuleset,
     };
 }
 
-function filterStandingsToActivePhase(rows: any[], activePhaseId: string | null) {
+function filterStandingsToActivePhase(
+    rows: any[],
+    activePhaseId: string | null,
+    options?: { strict?: boolean },
+) {
     if (!activePhaseId) return rows;
 
     const phaseScopedRows = rows.filter(
         (row: any) => row?.phase_id && String(row.phase_id) === String(activePhaseId),
     );
     if (phaseScopedRows.length > 0) return phaseScopedRows;
+
+    if (options?.strict) return [];
 
     return rows.filter((row: any) => !row?.phase_id);
 }
@@ -491,14 +585,14 @@ function mapCalculatedDbStanding(row: any, participants: any[], phaseId: string 
     };
 }
 
-function buildCalculatedStandings(dbData: TournamentInitialData) {
+function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
     const {
         participants,
         matches,
         activePhaseId,
         activeGroups,
         resolvedRules,
-    } = getDbStandingsContext(dbData);
+    } = getDbStandingsContext(dbData, preferredPhaseId);
 
     if (participants.length === 0) return [];
 
@@ -557,11 +651,12 @@ function buildCalculatedStandings(dbData: TournamentInitialData) {
     );
 }
 
-function buildStandingsSnapshot(dbData: TournamentInitialData) {
-    const { participants, activeGroups, activePhaseId, resolvedRules } = getDbStandingsContext(dbData);
+function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
+    const { participants, activeGroups, activePhaseId, resolvedRules } = getDbStandingsContext(dbData, preferredPhaseId);
     const persistedStandings = filterStandingsToActivePhase(
         (Array.isArray(dbData.standings) ? dbData.standings : []).map(mapPersistedDbStanding),
         activePhaseId,
+        { strict: Boolean(preferredPhaseId) },
     );
     const canSafelyCalculate =
         !dbData.queryErrors?.matches &&
@@ -569,8 +664,10 @@ function buildStandingsSnapshot(dbData: TournamentInitialData) {
     const shouldUsePersistedStandings = resolvedRules?.calculation_mode === 'fully_manual';
 
     if (!shouldUsePersistedStandings && canSafelyCalculate) {
-        const calculatedStandings = buildCalculatedStandings(dbData);
-        if (calculatedStandings.length > 0) return calculatedStandings;
+        const calculatedStandings = buildCalculatedStandings(dbData, preferredPhaseId);
+        const hasActualMatchData = flattenStandingsRows(calculatedStandings)
+            .some((row: any) => (row.matches_total || 0) > 0);
+        if (calculatedStandings.length > 0 && hasActualMatchData) return calculatedStandings;
     }
 
     if (persistedStandings.length === 0) return [];
@@ -581,9 +678,196 @@ function buildStandingsSnapshot(dbData: TournamentInitialData) {
     return grouped.length > 0 ? grouped : persistedStandings;
 }
 
+function buildPhaseFlatStandingsRows(dbData: TournamentInitialData, phaseId: string) {
+    const persistedRows = (Array.isArray(dbData.standings) ? dbData.standings : [])
+        .filter((row: any) =>
+            String(row?.phase_id ?? '') === String(phaseId) &&
+            !row?.group_id,
+        )
+        .map(mapPersistedDbStanding)
+        .sort((left: any, right: any) => (left.position || 0) - (right.position || 0));
+
+    if (persistedRows.length > 0) return persistedRows;
+
+    return flattenStandingsRows(buildStandingsSnapshot(dbData, phaseId))
+        .map((row: any, index: number) => ({
+            ...row,
+            position: row.position || (index + 1),
+        }))
+        .sort((left: any, right: any) => (left.position || 0) - (right.position || 0));
+}
+
+function buildCircuitGlobalStandings(dbData: TournamentInitialData) {
+    const {
+        participants,
+        phases,
+        tournamentRuleset,
+    } = getDbStandingsContext(dbData);
+
+    const rowsByClub = new Map<string, any>();
+
+    participants.forEach((participant: any) => {
+        const club = getParticipantClub(participant);
+        const teamId = String(participant?.club_id || club?.id || participant?.id || '').trim();
+        const teamName = String(club?.name || participant?.name || '').trim();
+        if (!teamId || !teamName) return;
+
+        rowsByClub.set(teamId, {
+            position: 0,
+            team: {
+                id: teamId,
+                name: teamName,
+                logo: club?.logo_url || '',
+            },
+            points_total: 0,
+            circuit: {
+                stages_played: 0,
+                stage_titles: 0,
+                podiums: 0,
+                best_finish: null as number | null,
+                stage_breakdown: [] as Array<{ phase_id: string; phase_name: string; position: number; points: number }>,
+            },
+        });
+    });
+
+    phases.forEach((phase: any, index: number) => {
+        const phaseId = String(phase?.id || '').trim();
+        if (!phaseId) return;
+
+        const phaseRows = buildPhaseFlatStandingsRows(dbData, phaseId);
+        if (phaseRows.length === 0) return;
+
+        // Skip phases not yet started (no matches played or recorded)
+        const hasMatchesPlayed =
+            phaseRows.some((row: any) => (row.matches_total || row.matches_played || 0) > 0) ||
+            (Array.isArray(dbData.matches) ? dbData.matches : []).some(
+                (m: any) => String(m?.phase_id || '') === String(phaseId) && isDbFinalStatus(m?.status),
+            );
+        if (!hasMatchesPlayed) return;
+
+        const placementPoints = new Map(
+            resolveCircuitPlacementPoints(phase, tournamentRuleset).map((rule) => [rule.position, rule.points]),
+        );
+        const phaseName = getPhaseDisplayName(phase, index);
+
+        phaseRows.forEach((row: any, rowIndex: number) => {
+            const teamId = String(getStandingsTeamId(row) || '').trim();
+            const teamName = getStandingsTeamName(row);
+            if (!teamId || !teamName) return;
+
+            const position = Number(row.position || (rowIndex + 1));
+            const points = placementPoints.get(position) ?? 0;
+            const previous = rowsByClub.get(teamId) ?? {
+                position: 0,
+                team: {
+                    id: teamId,
+                    name: teamName,
+                    logo: getStandingsTeamLogo(row) || '',
+                },
+                points_total: 0,
+                circuit: {
+                    stages_played: 0,
+                    stage_titles: 0,
+                    podiums: 0,
+                    best_finish: null as number | null,
+                    stage_breakdown: [] as Array<{ phase_id: string; phase_name: string; position: number; points: number }>,
+                },
+            };
+
+            previous.team = {
+                ...previous.team,
+                id: teamId,
+                name: previous.team?.name || teamName,
+                logo: previous.team?.logo || getStandingsTeamLogo(row) || '',
+            };
+            previous.points_total += points;
+            previous.circuit.stages_played += 1;
+            previous.circuit.stage_titles += position === 1 ? 1 : 0;
+            previous.circuit.podiums += position <= 3 ? 1 : 0;
+            previous.circuit.best_finish =
+                previous.circuit.best_finish == null
+                    ? position
+                    : Math.min(previous.circuit.best_finish, position);
+            previous.circuit.stage_breakdown.push({
+                phase_id: phaseId,
+                phase_name: phaseName,
+                position,
+                points,
+            });
+
+            rowsByClub.set(teamId, previous);
+        });
+    });
+
+    return Array.from(rowsByClub.values())
+        .filter((row: any) => String(row?.team?.name || '').trim())
+        .sort((left: any, right: any) => {
+            const pointsDiff = (right.points_total ?? 0) - (left.points_total ?? 0);
+            if (pointsDiff !== 0) return pointsDiff;
+
+            const titleDiff = (right.circuit?.stage_titles ?? 0) - (left.circuit?.stage_titles ?? 0);
+            if (titleDiff !== 0) return titleDiff;
+
+            const podiumDiff = (right.circuit?.podiums ?? 0) - (left.circuit?.podiums ?? 0);
+            if (podiumDiff !== 0) return podiumDiff;
+
+            const leftBest = typeof left.circuit?.best_finish === 'number' ? left.circuit.best_finish : Number.MAX_SAFE_INTEGER;
+            const rightBest = typeof right.circuit?.best_finish === 'number' ? right.circuit.best_finish : Number.MAX_SAFE_INTEGER;
+            if (leftBest !== rightBest) return leftBest - rightBest;
+
+            return String(left.team?.name || '').localeCompare(String(right.team?.name || ''));
+        })
+        .map((row: any, index: number) => ({
+            ...row,
+            position: index + 1,
+        }));
+}
+
+function buildCircuitStandingsViews(dbData: TournamentInitialData): CircuitStandingsView[] {
+    const { phases } = getDbStandingsContext(dbData);
+    const views: CircuitStandingsView[] = [];
+    const globalStandings = buildCircuitGlobalStandings(dbData);
+
+    if (globalStandings.length > 0) {
+        views.push({
+            id: CIRCUIT_GLOBAL_SCOPE,
+            kind: 'global',
+            label: 'Tabla global',
+            subtitle: 'Ranking acumulado del circuito',
+            standings: globalStandings,
+        });
+    }
+
+    phases.forEach((phase: any, index: number) => {
+        const phaseId = String(phase?.id || '').trim();
+        if (!phaseId) return;
+
+        const snapshot = buildStandingsSnapshot(dbData, phaseId);
+        if (flattenStandingsRows(snapshot).length === 0) return;
+
+        const phaseName = getPhaseDisplayName(phase, index);
+        views.push({
+            id: phaseId,
+            kind: 'phase',
+            label: phaseName,
+            subtitle: `Tabla final de ${phaseName}`,
+            standings: snapshot,
+        });
+    });
+
+    return views;
+}
+
 function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     const allMatches = (Array.isArray(dbData.matches) ? dbData.matches : []).map(mapDbMatchToFrontend);
     const tournament = dbData.tournament as any;
+    const tournamentRuleset = tournament?.ruleset ?? null;
+    const isCircuitCompetition = isCircuitTournamentRuleset(tournamentRuleset, tournament?.format ?? null);
+    const circuitStandingsViews = isCircuitCompetition ? buildCircuitStandingsViews(dbData) : [];
+    const defaultStandingsScope = circuitStandingsViews[0]?.id ?? null;
+    const defaultStandings =
+        circuitStandingsViews[0]?.standings ??
+        buildStandingsSnapshot(dbData);
 
     return {
         tournamentMeta: tournament ? {
@@ -592,20 +876,23 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             sportId: tournament.sport_id || 'rugby',
             countryId: tournament.country_id || 'international',
             logoUrl: tournament.logo_url || tournament.banner_url || '',
-            ruleset: tournament.ruleset ?? null,
+            ruleset: tournamentRuleset,
             url: tournament.url || '',
-            type: 'league',
+            type: isCircuitCompetition ? 'circuit' : 'league',
             categories: [],
             priority: 0,
             __isDbOnly: !tournament.url,
         } : null,
-        results: allMatches.filter((match: any) => match.status === 'finished'),
-        fixtures: allMatches.filter((match: any) => match.status !== 'finished'),
-        standings: buildStandingsSnapshot(dbData),
+        results: sortMatchesByDate(allMatches.filter((match: any) => match.status === 'finished'), 'desc'),
+        fixtures: sortMatchesByDate(allMatches.filter((match: any) => match.status !== 'finished'), 'asc'),
+        standings: defaultStandings,
         dbParticipants: Array.isArray(dbData.participants) ? (dbData.participants as any[]) : [],
         dbPhases: Array.isArray(dbData.phases) ? (dbData.phases as any[]) : [],
         dbGroups: Array.isArray(dbData.groups) ? (dbData.groups as any[]) : [],
         dbTeamLabels: normalizeTeamLabelAssignments(Array.isArray(dbData.teamLabels) ? dbData.teamLabels : []),
+        circuitStandingsViews,
+        defaultStandingsScope,
+        isCircuitCompetition,
     };
 }
 
@@ -679,6 +966,8 @@ export default function TournamentDetailPage({
     const [standingsView, setStandingsView] = useState<'overall' | 'form' | 'htft' | 'overunder'>('overall');
     const [dbParticipants, setDbParticipants] = useState<any[]>(preloaded?.dbParticipants ?? []);
     const [dbTeamLabels, setDbTeamLabels] = useState<any[]>(preloaded?.dbTeamLabels ?? []);
+    const [circuitStandingsViews, setCircuitStandingsViews] = useState<CircuitStandingsView[]>(preloaded?.circuitStandingsViews ?? []);
+    const [activeStandingsScope, setActiveStandingsScope] = useState<string>(preloaded?.defaultStandingsScope ?? CIRCUIT_GLOBAL_SCOPE);
 
     // ── Data fetch ────────────────────────────────────────────────────────
 
@@ -693,6 +982,11 @@ export default function TournamentDetailPage({
             !!initialData?.queryErrors?.groups ||
             !!initialData?.queryErrors?.teamLabels;
         const shouldPreferDbSource = !!initialData?.ok;
+        const shouldKeepDbCircuitStandings = Boolean(
+            preloaded?.isCircuitCompetition ||
+            isCircuitTournamentRuleset(preloaded?.tournamentMeta?.ruleset) ||
+            isCircuitTournamentRuleset((initialData?.tournament as any)?.ruleset),
+        );
 
         async function fetchData() {
             // Skip refetch when SSR already has a real name; still run when logo is missing so `/api/db/tournaments/[id]` can fill `banner_url`.
@@ -826,7 +1120,9 @@ export default function TournamentDetailPage({
                                             logoUrl: resolvedLogo,
                                             ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
                                             url: dbStoredUrl,
-                                            type: 'league',
+                                            type: isCircuitTournamentRuleset((t as any).ruleset ?? tournamentMeta?.ruleset ?? null)
+                                                ? 'circuit'
+                                                : (tournamentMeta?.type || 'league'),
                                             categories: [],
                                             priority: 0,
                                             __isDbOnly: !dbStoredUrl,
@@ -843,8 +1139,10 @@ export default function TournamentDetailPage({
                             setTournamentData(tournamentMeta ?? localTournament);
                             setDbParticipants(snapshot.dbParticipants);
                             setDbTeamLabels(snapshot.dbTeamLabels);
-                            setResults(snapshot.results);
-                            setFixtures(snapshot.fixtures);
+                            setCircuitStandingsViews(snapshot.circuitStandingsViews ?? []);
+                            setActiveStandingsScope(snapshot.defaultStandingsScope ?? CIRCUIT_GLOBAL_SCOPE);
+                            setResults(sortMatchesByDate(snapshot.results || [], 'desc'));
+                            setFixtures(sortMatchesByDate(snapshot.fixtures || [], 'asc'));
                             setStandings(snapshot.standings);
                         }
 
@@ -936,13 +1234,15 @@ export default function TournamentDetailPage({
                     }
                 }
 
-                setResults(payload.results || []);
-                setFixtures(payload.fixtures || []);
-                setStandings(payload.standings || []);
+                setResults(sortMatchesByDate(payload.results || [], 'desc'));
+                setFixtures(sortMatchesByDate(payload.fixtures || [], 'asc'));
+                if (!shouldKeepDbCircuitStandings) {
+                    setStandings(payload.standings || []);
+                    setStandingsForm(payload.standingsForm || []);
+                    setStandingsHtFt(payload.standingsHtFt || []);
+                    setStandingsOverUnder(payload.standingsOverUnder || []);
+                }
                 setTopScorers(payload.topScorers || []);
-                setStandingsForm(payload.standingsForm || []);
-                setStandingsHtFt(payload.standingsHtFt || []);
-                setStandingsOverUnder(payload.standingsOverUnder || []);
                 setDraw(payload.draw || []);
                 setArchives(payload.archives || []);
             } catch (err: any) {
@@ -985,15 +1285,119 @@ export default function TournamentDetailPage({
 
     // ── Derived data ──────────────────────────────────────────────────────
 
+    const isCircuitTournament = Boolean(
+        circuitStandingsViews.length > 0 ||
+        tournamentData?.type === 'circuit' ||
+        isCircuitTournamentRuleset(tournamentData?.ruleset),
+    );
+    const selectedCircuitStandingsView = isCircuitTournament
+        ? (circuitStandingsViews.find((view) => view.id === activeStandingsScope) || circuitStandingsViews[0] || null)
+        : null;
+    const isCircuitGlobalTable = selectedCircuitStandingsView?.kind === 'global';
+    const baseStandingsSource = selectedCircuitStandingsView?.standings ?? standings;
     const overallRows = flattenStandingsRows(standings);
-    const standingsSource =
-        standingsView === 'form' ? standingsForm :
-            standingsView === 'htft' ? standingsHtFt :
-                standingsView === 'overunder' ? standingsOverUnder :
-                    standings;
+    const standingsSource = isCircuitTournament
+        ? baseStandingsSource
+        : standingsView === 'form'
+            ? standingsForm
+            : standingsView === 'htft'
+                ? standingsHtFt
+                : standingsView === 'overunder'
+                    ? standingsOverUnder
+                    : standings;
     const activeRows = normalizeStandingsRows(standingsSource);
     const activeFlatRows = flattenStandingsRows(standingsSource);
     const hasBonus = activeFlatRows.some((r: any) => (r.bonus_points ?? 0) > 0);
+    const buildStandingsColumns = (mode: StandingsColumnMode, bonusEnabled: boolean) => (
+        mode === 'circuit-global'
+            ? [
+                {
+                    key: 'stages',
+                    label: 'ET',
+                    className: `${styles.colVal} ${styles.colValPJ}`,
+                    value: (row: any) => row.circuit?.stages_played ?? 0,
+                },
+                {
+                    key: 'titles',
+                    label: '1',
+                    className: styles.colVal,
+                    value: (row: any) => row.circuit?.stage_titles ?? 0,
+                },
+                {
+                    key: 'best',
+                    label: 'MEJ',
+                    className: styles.colVal,
+                    value: (row: any) => row.circuit?.best_finish ?? '-',
+                },
+                {
+                    key: 'podiums',
+                    label: 'POD',
+                    className: `${styles.colVal} ${styles.colValDG}`,
+                    value: (row: any) => row.circuit?.podiums ?? 0,
+                },
+                {
+                    key: 'points',
+                    label: 'PTS',
+                    className: styles.colPts,
+                    value: (row: any) => row.points_total ?? row.points ?? 0,
+                },
+            ]
+            : [
+                {
+                    key: 'played',
+                    label: 'J',
+                    className: `${styles.colVal} ${styles.colValPJ}`,
+                    value: (row: any) => row.matches_total || row.matches_played || 0,
+                },
+                {
+                    key: 'wins',
+                    label: 'G',
+                    className: styles.colVal,
+                    value: (row: any) => row.wins_total || row.wins || 0,
+                },
+                {
+                    key: 'draws',
+                    label: 'E',
+                    className: styles.colVal,
+                    value: (row: any) => row.draws_total || row.draws || 0,
+                },
+                {
+                    key: 'losses',
+                    label: 'P',
+                    className: styles.colVal,
+                    value: (row: any) => row.losses_total || row.losses || 0,
+                },
+                {
+                    key: 'diff',
+                    label: 'DG',
+                    className: `${styles.colVal} ${styles.colValDG}`,
+                    value: (row: any) =>
+                        typeof row.goal_difference === 'number'
+                            ? row.goal_difference
+                            : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
+                                ? row.goals_for - row.goals_against
+                                : 0,
+                },
+                ...(bonusEnabled ? [{
+                    key: 'bonus',
+                    label: 'B',
+                    className: styles.colVal,
+                    value: (row: any) => row.bonus_points ?? 0,
+                }] : []),
+                {
+                    key: 'points',
+                    label: 'PTS',
+                    className: styles.colPts,
+                    value: (row: any) => row.points_total ?? row.points ?? 0,
+                },
+            ]
+    );
+    const standingsColumnMode: StandingsColumnMode = isCircuitGlobalTable ? 'circuit-global' : 'standard';
+    const standingsColumns = buildStandingsColumns(standingsColumnMode, hasBonus);
+    const previewStandingsColumns = buildStandingsColumns(
+        isCircuitTournament ? 'circuit-global' : 'standard',
+        overallRows.some((row: any) => (row.bonus_points ?? 0) > 0),
+    );
     const teamMap = new Map<string, { id: string | null; name: string; logo: string; href: string | null }>();
     const registerTeam = (team: { id?: string | number | null; name?: string | null; logo?: string | null; teamUrl?: string | null }) => {
         const name = String(team.name ?? '').trim();
@@ -1082,6 +1486,15 @@ export default function TournamentDetailPage({
     const standingsPreviewRows: any[] = overallRows.slice(0, 8);
     const standingsLegendItems = collectStandingsLegendItems(activeFlatRows, dbTeamLabels);
     const standingsPreviewLegendItems = collectStandingsLegendItems(standingsPreviewRows, dbTeamLabels);
+    const standingsExportColumnLabels = standingsColumnMode === 'circuit-global'
+        ? {
+            played: 'ET',
+            won: '1',
+            lost: 'MEJ',
+            diff: 'POD',
+            points: 'PTS',
+        }
+        : undefined;
     const mapStandingsRowForExport = (row: any, idx: number) => {
         const fallbackTeam = resolveTeamFallback(row);
         const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
@@ -1091,6 +1504,21 @@ export default function TournamentDetailPage({
                 : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
                     ? row.goals_for - row.goals_against
                     : 0;
+
+        if (standingsColumnMode === 'circuit-global') {
+            return {
+                pos: row.position || (idx + 1),
+                team: row.team?.short_name || getStandingsTeamName(row) || 'Equipo',
+                teamLogo: getStandingsTeamLogo(row) || fallbackTeam?.logo || '',
+                labelName: rowLabel?.name ?? undefined,
+                zoneColor: rowLabel?.color ?? undefined,
+                played: row.circuit?.stages_played ?? 0,
+                won: row.circuit?.stage_titles ?? 0,
+                lost: row.circuit?.best_finish ?? '-',
+                diff: String(row.circuit?.podiums ?? 0),
+                points: row.points_total ?? row.points ?? 0,
+            };
+        }
 
         return {
             pos: row.position || (idx + 1),
@@ -1106,7 +1534,7 @@ export default function TournamentDetailPage({
         };
     };
     const standingsExportRows = activeFlatRows.map((row: any, idx: number) => mapStandingsRowForExport(row, idx));
-    const standingsExportGroups = Array.isArray(activeRows[0]?.rows)
+    const standingsExportGroups = standingsColumnMode !== 'circuit-global' && Array.isArray(activeRows[0]?.rows)
         ? activeRows
             .map((group: any, groupIndex: number) => ({
                 name: String(group?.group_name || `Grupo ${groupIndex + 1}`),
@@ -1215,21 +1643,17 @@ export default function TournamentDetailPage({
         );
     };
 
-    const renderStandingsHeader = () => (
+    const renderStandingsHeader = (columns = standingsColumns) => (
         <div className={styles.tableHeader}>
             <div className={styles.colPos}>#</div>
             <div className={styles.colTeam}>Equipo</div>
-            <div className={`${styles.colVal} ${styles.colValPJ}`}>J</div>
-            <div className={styles.colVal}>G</div>
-            <div className={styles.colVal}>E</div>
-            <div className={styles.colVal}>P</div>
-            <div className={`${styles.colVal} ${styles.colValDG}`}>DG</div>
-            {hasBonus && <div className={styles.colVal}>B</div>}
-            <div className={styles.colPts}>PTS</div>
+            {columns.map((column) => (
+                <div key={column.key} className={column.className}>{column.label}</div>
+            ))}
         </div>
     );
 
-    const renderStandingsRow = (row: any, idx: number) => {
+    const renderStandingsRow = (row: any, idx: number, columns = standingsColumns) => {
         const pos = row.position || (idx + 1);
         const fallbackTeam = resolveTeamFallback(row);
         const logo = getStandingsTeamLogo(row) || fallbackTeam?.logo || '';
@@ -1267,13 +1691,17 @@ export default function TournamentDetailPage({
                             : <span className={styles.colTeamName}>{teamName}</span>}
                     </div>
                 </div>
-                <div className={`${styles.colVal} ${styles.colValPJ}`}>{row.matches_total || row.matches_played}</div>
-                <div className={styles.colVal}>{row.wins_total || row.wins}</div>
-                <div className={styles.colVal}>{row.draws_total || row.draws}</div>
-                <div className={styles.colVal}>{row.losses_total || row.losses}</div>
-                <div className={`${styles.colVal} ${styles.colValDG}`}>{goalDifference}</div>
-                {hasBonus && <div className={styles.colVal}>{row.bonus_points ?? 0}</div>}
-                <div className={styles.colPts}>{row.points_total ?? row.points ?? 0}</div>
+                {columns.map((column) => {
+                    const value = column.key === 'diff'
+                        ? goalDifference
+                        : column.value(row);
+
+                    return (
+                        <div key={`${column.key}-${idx}`} className={column.className}>
+                            {value}
+                        </div>
+                    );
+                })}
             </div>
         );
     };
@@ -1575,8 +2003,8 @@ export default function TournamentDetailPage({
                                         <button className={styles.linkButton} onClick={() => setActiveTab('standings')}>Ver tabla</button>
                                     </div>
                                     <div className={styles.tableCard}>
-                                        {renderStandingsHeader()}
-                                        {standingsPreviewRows.map((row: any, idx: number) => renderStandingsRow(row, idx))}
+                                        {renderStandingsHeader(previewStandingsColumns)}
+                                        {standingsPreviewRows.map((row: any, idx: number) => renderStandingsRow(row, idx, previewStandingsColumns))}
                                     </div>
                                     {renderStandingsLegend(standingsPreviewLegendItems)}
                                 </div>
@@ -1705,29 +2133,50 @@ export default function TournamentDetailPage({
                 {/* ── STANDINGS TAB ─────────────────────────────────────── */}
                 {activeTab === 'standings' && (
                     <div className={styles.section}>
-                        <div className={styles.standingsToolbar}>
-                            <div className={styles.pillsGroup}>
-                                <button className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overall')}>General</button>
-                                <button className={`${styles.pillBtn} ${standingsView === 'form' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('form')}>Forma</button>
-                                <button className={`${styles.pillBtn} ${standingsView === 'overunder' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overunder')}>Over/Under</button>
-                                <button className={`${styles.pillBtn} ${standingsView === 'htft' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('htft')}>HT/FT</button>
+                        {isCircuitTournament && circuitStandingsViews.length > 0 && (
+                            <div className={styles.standingsScopeBar}>
+                                <span className={styles.standingsScopeLabel}>Tabla</span>
+                                <div className={styles.pillsGroup}>
+                                    {circuitStandingsViews.map((view) => (
+                                        <button
+                                            key={view.id}
+                                            className={`${styles.pillBtn} ${activeStandingsScope === view.id ? styles.pillBtnActive : ''}`}
+                                            onClick={() => setActiveStandingsScope(view.id)}
+                                            type="button"
+                                        >
+                                            {view.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
+                        )}
+                        <div className={styles.standingsToolbar}>
+                            {!isCircuitTournament && (
+                                <div className={styles.pillsGroup}>
+                                    <button className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overall')}>General</button>
+                                    <button className={`${styles.pillBtn} ${standingsView === 'form' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('form')}>Forma</button>
+                                    <button className={`${styles.pillBtn} ${standingsView === 'overunder' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overunder')}>Over/Under</button>
+                                    <button className={`${styles.pillBtn} ${standingsView === 'htft' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('htft')}>HT/FT</button>
+                                </div>
+                            )}
                             <ExportImage
                                 template="standings"
                                 filename={`tabla-${tournamentData?.name}`}
                                 data={{
                                     title: tournamentData?.name || 'Tabla de Posiciones',
-                                    subtitle: details?.season || 'Clasificación',
+                                    subtitle: selectedCircuitStandingsView?.subtitle || details?.season || 'Clasificación',
                                     tournamentLogo,
                                     rows: standingsExportRows,
                                     groups: standingsExportGroups,
+                                    columnLabels: standingsExportColumnLabels,
+                                    plainDiff: standingsColumnMode === 'circuit-global',
                                 }}
                             />
                         </div>
 
                         {activeRows.length === 0 && <p className={styles.emptyState}>Tabla no disponible.</p>}
 
-                        {activeRows.length > 0 && (standingsView === 'overall' || standingsView === 'form') && (
+                        {activeRows.length > 0 && (isCircuitTournament || standingsView === 'overall' || standingsView === 'form') && (
                             <div className={styles.standingsContainer}>
                                 {activeRows[0]?.rows ? (
                                     <div className={styles.groupsStack}>
@@ -1753,7 +2202,7 @@ export default function TournamentDetailPage({
                             </div>
                         )}
 
-                        {activeRows.length > 0 && standingsView === 'overunder' && (
+                        {!isCircuitTournament && activeRows.length > 0 && standingsView === 'overunder' && (
                             <div className={styles.sectionCard}>
                                 <div className={styles.tableScroll}>
                                     <div className={styles.tableCard} style={{ minWidth: 600 }}>
@@ -1780,7 +2229,7 @@ export default function TournamentDetailPage({
                             </div>
                         )}
 
-                        {activeRows.length > 0 && standingsView === 'htft' && (
+                        {!isCircuitTournament && activeRows.length > 0 && standingsView === 'htft' && (
                             <div className={styles.sectionCard}>
                                 <div className={styles.tableScroll}>
                                     <div className={styles.tableCard} style={{ minWidth: 980 }}>

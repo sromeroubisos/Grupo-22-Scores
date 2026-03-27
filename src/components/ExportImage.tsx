@@ -15,11 +15,11 @@ interface StandingsRowData {
     teamLogo?: string;
     labelName?: string;
     zoneColor?: string;
-    played: number;
-    won: number;
-    lost: number;
+    played: number | string;
+    won: number | string;
+    lost: number | string;
     diff: string;
-    points: number;
+    points: number | string;
 }
 
 interface StandingsGroupData {
@@ -45,6 +45,14 @@ interface StandingsData {
     tournamentLogo?: string;
     rows: StandingsRowData[];
     groups?: StandingsGroupData[];
+    columnLabels?: Partial<{
+        played: string;
+        won: string;
+        lost: string;
+        diff: string;
+        points: string;
+    }>;
+    plainDiff?: boolean;
 }
 
 interface DailyMatchesData {
@@ -1501,6 +1509,11 @@ async function drawStandings(
         ...slideRows.map((row) => loadImage(row.teamLogo || '')),
     ]);
     const subtitleText = buildStandingsSlideSubtitle(data.subtitle, slide);
+    const playedLabel = data.columnLabels?.played?.trim() || 'PJ';
+    const wonLabel = data.columnLabels?.won?.trim() || 'G';
+    const lostLabel = data.columnLabels?.lost?.trim() || 'P';
+    const diffLabel = data.columnLabels?.diff?.trim() || 'DIF';
+    const pointsLabel = data.columnLabels?.points?.trim() || 'PTS';
 
     drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
     drawCenteredPill(
@@ -1538,11 +1551,11 @@ async function drawStandings(
     ctx.textAlign = 'left';
     ctx.fillText('EQUIPO', panelX + 118, headerY);
     ctx.textAlign = 'center';
-    ctx.fillText('PJ', panelX + panelWidth - 292, headerY);
-    ctx.fillText('G', panelX + panelWidth - 226, headerY);
-    ctx.fillText('P', panelX + panelWidth - 160, headerY);
-    ctx.fillText('DIF', panelX + panelWidth - 94, headerY);
-    ctx.fillText('PTS', panelX + panelWidth - 38, headerY);
+    ctx.fillText(playedLabel.toUpperCase(), panelX + panelWidth - 292, headerY);
+    ctx.fillText(wonLabel.toUpperCase(), panelX + panelWidth - 226, headerY);
+    ctx.fillText(lostLabel.toUpperCase(), panelX + panelWidth - 160, headerY);
+    ctx.fillText(diffLabel.toUpperCase(), panelX + panelWidth - 94, headerY);
+    ctx.fillText(pointsLabel.toUpperCase(), panelX + panelWidth - 38, headerY);
     ctx.restore();
 
     ctx.save();
@@ -1666,8 +1679,8 @@ async function drawStandings(
             ctx.fillText(String(row.won), colWonX, centerY + 1);
             ctx.fillText(String(row.lost), colLostX, centerY + 1);
 
-            const diffText = formatDiff(row.diff);
-            ctx.fillStyle = diffText.startsWith('-') ? '#ef4444' : accentColor;
+            const diffText = data.plainDiff ? String(row.diff).trim() : formatDiff(row.diff);
+            ctx.fillStyle = !data.plainDiff && diffText.startsWith('-') ? '#ef4444' : accentColor;
             ctx.font = `800 ${statFontSize}px ${FONT_MONO}`;
             ctx.fillText(diffText, colDiffX, centerY + 1);
 
