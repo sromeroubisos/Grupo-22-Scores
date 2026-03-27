@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createEntity, updateEntity } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
+import { getAllSports } from '@/lib/data/sports';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { useAdminConsole } from '@/app/admin/AdminContext';
 
@@ -140,13 +141,7 @@ const S = {
 } as const;
 
 /* ─── constants ─────────────────────────────────────────────────────── */
-const SPORTS = [
-    { id: 'rugby', label: 'Rugby', emoji: '🏉' },
-    { id: 'football', label: 'Football', emoji: '⚽' },
-    { id: 'hockey', label: 'Hockey', emoji: '🏑' },
-    { id: 'basketball', label: 'Basketball', emoji: '🏀' },
-    { id: 'volleyball', label: 'Volleyball', emoji: '🏐' },
-] as const;
+const SPORTS = getAllSports();
 
 const FORMAT_OPTIONS = [
     { id: 'league', label: 'League / Round Robin' },
@@ -164,18 +159,56 @@ const TIEBREAKER_LABELS: Record<string, string> = {
     for: 'Points For',
 };
 
-const SPORT_PRESETS: Record<string, { points_base: Record<string, number>; bonus_rules: any[] }> = {
+type StandingsPreset = {
+    points_base: Record<string, number>;
+    bonus_rules: Array<{ id: string; label: string; points_awarded: number }>;
+};
+
+const DEFAULT_STANDINGS_PRESET: StandingsPreset = {
+    points_base: { win: 1, draw: 0, loss: 0 },
+    bonus_rules: [],
+};
+
+const SPORT_PRESETS: Record<string, StandingsPreset> = {
     rugby: {
         points_base: { win: 4, draw: 2, loss: 0 }, bonus_rules: [
             { id: 'try_bonus', label: '4+ Tries', points_awarded: 1 },
             { id: 'close_loss', label: 'Loss < 7 pts', points_awarded: 1 },
         ]
     },
+    'rugby-union': {
+        points_base: { win: 4, draw: 2, loss: 0 }, bonus_rules: [
+            { id: 'try_bonus', label: '4+ Tries', points_awarded: 1 },
+            { id: 'close_loss', label: 'Loss < 7 pts', points_awarded: 1 },
+        ]
+    },
+    'rugby-league': { points_base: { win: 2, draw: 1, loss: 0 }, bonus_rules: [] },
     football: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
+    futsal: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
+    'beach-soccer': { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
     hockey: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
+    'field-hockey': { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
+    floorball: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
+    bandy: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
     basketball: { points_base: { win: 2, draw: 0, loss: 1 }, bonus_rules: [] },
+    netball: { points_base: { win: 2, draw: 0, loss: 1 }, bonus_rules: [] },
     volleyball: { points_base: { win: 3, draw: 0, loss: 0 }, bonus_rules: [] },
+    'beach-volleyball': { points_base: { win: 3, draw: 0, loss: 0 }, bonus_rules: [] },
+    handball: { points_base: { win: 2, draw: 1, loss: 0 }, bonus_rules: [] },
+    'american-football': { points_base: { win: 1, draw: 0, loss: 0 }, bonus_rules: [] },
+    baseball: { points_base: { win: 1, draw: 0, loss: 0 }, bonus_rules: [] },
+    cricket: { points_base: { win: 1, draw: 0, loss: 0 }, bonus_rules: [] },
+    tennis: { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
+    'table-tennis': { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
+    badminton: { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
+    'water-polo': { points_base: { win: 2, draw: 1, loss: 0 }, bonus_rules: [] },
+    kabaddi: { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
 };
+
+function getSportPreset(sportId: string | null | undefined): StandingsPreset {
+    const preset = SPORT_PRESETS[sportId || ''] ?? DEFAULT_STANDINGS_PRESET;
+    return JSON.parse(JSON.stringify(preset));
+}
 
 function slugify(s: string) {
     return s.toLowerCase().normalize('NFD')
@@ -204,6 +237,7 @@ export function TournamentEditor({
     countries?: CountryRow[];
 }) {
     const isCreate = id === 'new';
+    const initialSportId = data.sport_id ?? 'rugby';
     const router = useRouter();
     const { refresh } = useAdminConsole();
 
@@ -232,7 +266,7 @@ export function TournamentEditor({
         slug: data.slug ?? '',
         season_id: data.season_id ?? new Date().getFullYear().toString(),
         union_id: data.union_id ?? '',
-        sport_id: data.sport_id ?? 'rugby',
+        sport_id: initialSportId,
         category: data.category ?? '',
         age_grade: data.age_grade ?? 'Mayores',
         status: data.status ?? 'draft',
@@ -264,7 +298,7 @@ export function TournamentEditor({
 
     const [ruleset, setRuleset] = useState(() => {
         const r = (data.ruleset && typeof data.ruleset === 'object') ? { ...data.ruleset as any } : {};
-        const baseStandings = r.standings ?? SPORT_PRESETS.rugby;
+        const baseStandings = r.standings ?? getSportPreset(initialSportId);
         const baseTiebreakers = r.tiebreakers ?? { order: ['points', 'diff', 'head_to_head', 'tries', 'fair_play'] };
 
         if (!r.phases || !Array.isArray(r.phases)) {
@@ -290,11 +324,11 @@ export function TournamentEditor({
             const next = { ...prev, [key]: value };
             if (key === 'name' && isCreate && !slugEdited) next.slug = slugify(value);
             if (key === 'sport_id' && isCreate) {
-                const preset = SPORT_PRESETS[value] ?? SPORT_PRESETS.rugby;
+                const preset = getSportPreset(value);
                 setRuleset((r: any) => ({
                     ...r,
                     standings: preset,
-                    phases: r.phases.map((p: any) => ({ ...p, standings: JSON.parse(JSON.stringify(preset)) }))
+                    phases: r.phases.map((p: any) => ({ ...p, standings: getSportPreset(value) }))
                 }));
             }
             return next;
@@ -783,9 +817,9 @@ export function TournamentEditor({
                                         fontFamily: T.sans,
                                     }}
                                 >
-                                    <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem', display: 'block' }}>{s.emoji}</span>
+                                    <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem', display: 'block' }}>{s.icon}</span>
                                     <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        {s.label}
+                                        {s.name}
                                     </span>
                                 </button>
                             ))}
