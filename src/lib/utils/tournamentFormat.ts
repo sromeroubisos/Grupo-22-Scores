@@ -169,6 +169,17 @@ export function getDefaultTournamentCompetitionParameters(
   };
 }
 
+export function isCircuitRuleset(ruleset: unknown): boolean {
+  if (!ruleset || typeof ruleset !== 'object') return false;
+  const r = ruleset as Record<string, unknown>;
+  const comp = r.competition as Record<string, unknown> | undefined;
+  if (typeof comp?.format_type === 'string') {
+    return normalizeTournamentFormat(comp.format_type) === 'circuit';
+  }
+  const circuit = r.circuit as Record<string, unknown> | undefined;
+  return Boolean(circuit?.enabled);
+}
+
 export function buildTournamentCompetitionConfig(
   format: string | null | undefined,
   parameters?: TournamentCompetitionParameters | null,

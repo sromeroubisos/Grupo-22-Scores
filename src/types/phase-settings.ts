@@ -128,6 +128,13 @@ export interface PhaseSettings {
   statsAssignment?: 'played' | 'starters';
 }
 
+export interface CircuitRuleset {
+  enabled?: boolean;
+  stages?: unknown[];
+  globalLabels?: GroupLabel[];
+  [key: string]: unknown;
+}
+
 /**
  * Migration helper to convert new TiebreakerMetricItem format back to legacy Record if needed
  */

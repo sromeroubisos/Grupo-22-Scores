@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import { FixtureProvider, useFixture } from './FixtureContext';
+import { CIRCUIT_GLOBAL_SENTINEL } from './standings/types';
+import { isCircuitRuleset } from '@/lib/utils/tournamentFormat';
 import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 
@@ -156,6 +158,19 @@ export function TournamentOperationTab({ id, data }: TournamentOperationTabProps
     );
 }
 
+function GlobalOnlyPlaceholder({ label }: { label: string }) {
+    return (
+        <div className="basalt-card flex flex-col items-center text-center p-12 gap-4 opacity-60">
+            <Trophy className="text-dim" size={28} />
+            <p className="text-dim text-sm">
+                <strong>{label}</strong> no está disponible en la vista de Tabla Global (Circuito).
+                <br />
+                Selecciona una fase específica para acceder a este módulo.
+            </p>
+        </div>
+    );
+}
+
 function NoStructureMessage({ id }: { id: string }) {
     const router = useRouter();
 
@@ -213,8 +228,11 @@ function OperationContent({
         }
     }, [fixture, refreshFixture]);
 
+    const isCircuit = useMemo(() => isCircuitRuleset(data.ruleset), [data.ruleset]);
+    const isGlobalSelected = selectedPhaseId === CIRCUIT_GLOBAL_SENTINEL;
+
     const selectedPhase = useMemo(() => {
-        return phases.find((phase) => phase.id === selectedPhaseId) || phases[0] || null;
+        return phases.find((phase) => phase.id === selectedPhaseId) || null;
     }, [phases, selectedPhaseId]);
 
     const activeSubTab = useMemo(
@@ -228,6 +246,14 @@ function OperationContent({
         params.set('subtab', subTabId);
         router.replace(`/admin/entities/${id}/manage?${params.toString()}`);
     };
+
+    // When global circuit is selected, only the standings tab is meaningful
+    useEffect(() => {
+        if (isGlobalSelected && currentSubTab !== 'tabla') {
+            switchSubTab('tabla');
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isGlobalSelected, currentSubTab]);
 
     const selectPhaseAndClose = (phaseId: string) => {
         setMobilePhasePickerOpen(false);
@@ -258,6 +284,11 @@ function OperationContent({
                             value={selectedPhaseId || ''}
                             onChange={(event) => onSelectPhase(event.target.value)}
                         >
+                            {isCircuit && (
+                                <option value={CIRCUIT_GLOBAL_SENTINEL}>
+                                    Tabla Global (Circuito)
+                                </option>
+                            )}
                             {phases.map((phase) => (
                                 <option key={phase.id} value={phase.id}>
                                     {phase.name} ({phase.phase_type})
@@ -269,8 +300,8 @@ function OperationContent({
                     <div className="flex items-center gap-2 sm:self-end">
                         <div className="flex flex-col items-start sm:items-end">
                             <span className="text-[10px] font-semibold text-dim uppercase">Estado</span>
-                            <span className={`basalt-badge ${selectedPhase?.is_active ? 'badge-ok' : 'badge-warning'}`}>
-                                {selectedPhase?.is_active ? 'ACTIVA' : 'PENDIENTE'}
+                            <span className={`basalt-badge ${isGlobalSelected ? 'badge-ok' : selectedPhase?.is_active ? 'badge-ok' : 'badge-warning'}`}>
+                                {isGlobalSelected ? 'GLOBAL' : selectedPhase?.is_active ? 'ACTIVA' : 'PENDIENTE'}
                             </span>
                         </div>
                     </div>
@@ -281,7 +312,7 @@ function OperationContent({
                 <div className="operation-mobile-pickers-head">
                     <span className="basalt-tabs-mobile-label">Navegacion rapida</span>
                     <span className="operation-mobile-pickers-status">
-                        {selectedPhase?.is_active ? 'Fase activa' : 'Fase pendiente'}
+                        {isGlobalSelected ? 'Tabla global' : selectedPhase?.is_active ? 'Fase activa' : 'Fase pendiente'}
                     </span>
                 </div>
 
@@ -310,8 +341,10 @@ function OperationContent({
                     >
                         <span className="operation-mobile-trigger-copy">
                             <span className="operation-mobile-trigger-label">Fase</span>
-                            <span className="operation-mobile-trigger-value">{selectedPhase?.name || 'Sin fase'}</span>
-                            <small>{selectedPhase?.phase_type || 'manual'}</small>
+                            <span className="operation-mobile-trigger-value">
+                                {isGlobalSelected ? 'Tabla Global' : selectedPhase?.name || 'Sin fase'}
+                            </span>
+                            <small>{isGlobalSelected ? 'circuito' : selectedPhase?.phase_type || 'manual'}</small>
                         </span>
                         <ChevronDown size={16} className="operation-mobile-trigger-icon" />
                     </button>
@@ -338,11 +371,15 @@ function OperationContent({
 
             <div className="min-h-[500px]">
                 {currentSubTab === 'fixture' && (
-                    <TournamentOperationFixtureWorkspace
-                        tournament={data}
-                        selectedPhaseId={selectedPhaseId}
-                        onSelectPhase={onSelectPhase}
-                    />
+                    isGlobalSelected ? (
+                        <GlobalOnlyPlaceholder label="Fixture" />
+                    ) : (
+                        <TournamentOperationFixtureWorkspace
+                            tournament={data}
+                            selectedPhaseId={selectedPhaseId}
+                            onSelectPhase={onSelectPhase}
+                        />
+                    )
                 )}
                 {currentSubTab === 'tabla' && (
                     <TournamentStandingsTab
@@ -352,15 +389,23 @@ function OperationContent({
                     />
                 )}
                 {currentSubTab === 'estadisticas' && (
-                    <TournamentStatsTab id={id} data={data} phaseId={selectedPhaseId || undefined} />
+                    isGlobalSelected ? (
+                        <GlobalOnlyPlaceholder label="Estadísticas" />
+                    ) : (
+                        <TournamentStatsTab id={id} data={data} phaseId={selectedPhaseId || undefined} />
+                    )
                 )}
                 {currentSubTab === 'sincronizacion' && (
-                    <FlashScoreSyncPanel
-                        tournamentId={id}
-                        data={data}
-                        phaseId={selectedPhaseId}
-                        phases={phases.map((phase) => ({ id: phase.id, name: phase.name }))}
-                    />
+                    isGlobalSelected ? (
+                        <GlobalOnlyPlaceholder label="Sincronización" />
+                    ) : (
+                        <FlashScoreSyncPanel
+                            tournamentId={id}
+                            data={data}
+                            phaseId={selectedPhaseId}
+                            phases={phases.map((phase) => ({ id: phase.id, name: phase.name }))}
+                        />
+                    )
                 )}
             </div>
 
@@ -455,6 +500,24 @@ function OperationContent({
                         </div>
 
                         <div className="basalt-tabs-sheet-list">
+                            {isCircuit && (
+                                <button
+                                    type="button"
+                                    className={`basalt-tabs-sheet-item ${isGlobalSelected ? 'active' : ''}`}
+                                    onClick={() => selectPhaseAndClose(CIRCUIT_GLOBAL_SENTINEL)}
+                                >
+                                    <span className="basalt-tabs-sheet-item-copy">
+                                        <span className="basalt-tabs-sheet-item-glyph">
+                                            <Check size={16} className={isGlobalSelected ? '' : 'opacity-0'} />
+                                        </span>
+                                        <span className="basalt-tabs-sheet-item-text">
+                                            <span>Tabla Global (Circuito)</span>
+                                            <small>Posiciones acumuladas del circuito</small>
+                                        </span>
+                                    </span>
+                                    {isGlobalSelected ? <span className="basalt-tabs-sheet-badge">Actual</span> : null}
+                                </button>
+                            )}
                             {phases.map((phase) => {
                                 const isActive = selectedPhaseId === phase.id;
 

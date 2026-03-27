@@ -6,8 +6,10 @@ import { StandingsFiltersBar } from './StandingsFiltersBar';
 import { StandingsSidebar } from './StandingsSidebar';
 import { StandingsTable } from './StandingsTable';
 import { PhaseLabelsPanel } from './PhaseLabelsPanel';
+import { ManageLabelsPanel } from './ManageLabelsPanel';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsDataPayload, StandingsPhase, StandingsRow, TeamLabelAssignment, TournamentContextData, UiLabel } from './types';
+import { CIRCUIT_GLOBAL_SENTINEL } from './types';
 
 function getAssignmentKey(assignment: TeamLabelAssignment): string | null {
   if (typeof assignment.position === 'number') return String(assignment.position);
@@ -87,6 +89,8 @@ export default function TournamentStandingsTab({
   const [assignments, setAssignments] = useState<TeamLabelAssignment[]>([]);
   const [pendingLabelPosition, setPendingLabelPosition] = useState<string | null>(null);
   const [showLabelsPanel, setShowLabelsPanel] = useState(false);
+  const isGlobalCircuitMode = preferredPhaseId === CIRCUIT_GLOBAL_SENTINEL;
+  const [globalCircuitLabels, setGlobalCircuitLabels] = useState<UiLabel[]>([]);
 
   const loadContextAndLite = useCallback(async () => {
     setLoadingContext(true);
@@ -98,7 +102,9 @@ export default function TournamentStandingsTab({
 
       if (contextData.ok) {
         setContext(contextData);
-        if (contextData.phases?.length > 0) {
+        if (preferredPhaseId === CIRCUIT_GLOBAL_SENTINEL) {
+          setSelectedPhase(CIRCUIT_GLOBAL_SENTINEL);
+        } else if (contextData.phases?.length > 0) {
           const currentPhase = selectedPhase
             ? contextData.phases.find((phase: StandingsPhase) => phase.id === selectedPhase)
             : null;
@@ -149,7 +155,8 @@ export default function TournamentStandingsTab({
   const loadAssignments = useCallback(async (phaseId: string | null) => {
     if (!phaseId) return;
     try {
-      const url = `/api/admin/team-labels?tournament_id=${tournamentId}&phase_id=${phaseId}`;
+      const phaseParam = phaseId === CIRCUIT_GLOBAL_SENTINEL ? 'null' : phaseId;
+      const url = `/api/admin/team-labels?tournament_id=${tournamentId}&phase_id=${phaseParam}`;
       const res = await fetch(url);
       const json = await res.json();
       if (json.ok) setAssignments(json.data ?? []);
@@ -158,9 +165,45 @@ export default function TournamentStandingsTab({
     }
   }, [tournamentId]);
 
+  const loadGlobalLabels = useCallback(async () => {
+    if (!isGlobalCircuitMode) return;
+    try {
+      const res = await fetch(`/api/admin/tournaments/${tournamentId}/circuit-labels`);
+      const json = await res.json();
+      if (json.ok) {
+        setGlobalCircuitLabels(
+          (json.data ?? []).map((l: { id: string; name: string; color: string }) => ({
+            id: l.id,
+            name: l.name,
+            color: l.color,
+            scope: 'standings',
+          })),
+        );
+      }
+    } catch {
+      // non-blocking
+    }
+  }, [isGlobalCircuitMode, tournamentId]);
+
+  const persistGlobalLabels = useCallback(async (labels: UiLabel[]) => {
+    try {
+      await fetch(`/api/admin/tournaments/${tournamentId}/circuit-labels`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ labels }),
+      });
+    } catch {
+      // non-blocking
+    }
+  }, [tournamentId]);
+
   useEffect(() => {
     loadContextAndLite();
   }, [loadContextAndLite]);
+
+  useEffect(() => {
+    loadGlobalLabels();
+  }, [loadGlobalLabels]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 900px)');
@@ -176,7 +219,12 @@ export default function TournamentStandingsTab({
   );
 
   useEffect(() => {
-    if (!preferredPhaseId || !context?.phases?.length) return;
+    if (!preferredPhaseId) return;
+    if (preferredPhaseId === CIRCUIT_GLOBAL_SENTINEL) {
+      if (selectedPhase !== CIRCUIT_GLOBAL_SENTINEL) setSelectedPhase(CIRCUIT_GLOBAL_SENTINEL);
+      return;
+    }
+    if (!context?.phases?.length) return;
     if (!context.phases.some((phase: StandingsPhase) => phase.id === preferredPhaseId)) return;
     if (selectedPhase === preferredPhaseId) return;
     setSelectedPhase(preferredPhaseId);
@@ -223,6 +271,9 @@ export default function TournamentStandingsTab({
   }, [canLoadGroupScopedData, loadAssignments, selectedPhase]);
 
   const allLabels = useMemo<UiLabel[]>(() => {
+    if (isGlobalCircuitMode) {
+      return globalCircuitLabels.filter((label) => !!label.id && !!label.name);
+    }
     const phaseLabels = activePhase?.settings?.groupLabels || [];
     return phaseLabels
       .filter((label) => !!label.id && !!label.name)
@@ -232,7 +283,7 @@ export default function TournamentStandingsTab({
         color: label.color,
         scope: 'standings',
       }));
-  }, [activePhase?.settings?.groupLabels]);
+  }, [isGlobalCircuitMode, globalCircuitLabels, activePhase?.settings?.groupLabels]);
 
   const shareAcrossPhaseGroups = phaseRequiresGroup;
   const visibleAssignments = useMemo(
@@ -306,7 +357,7 @@ export default function TournamentStandingsTab({
     position: string;
   }) => {
     if (!selectedPhase || allLabels.length === 0 || pendingLabelPosition) return;
-    if (phaseRequiresGroup && !selectedGroup) return;
+    if (!isGlobalCircuitMode && phaseRequiresGroup && !selectedGroup) return;
 
     const normalizedPosition = Number(position);
     if (!Number.isInteger(normalizedPosition)) return;
@@ -352,7 +403,7 @@ export default function TournamentStandingsTab({
             label_id: nextLabel.id,
             position: normalizedPosition,
             tournament_id: tournamentId,
-            phase_id: selectedPhase,
+            phase_id: isGlobalCircuitMode ? null : selectedPhase,
             group_id: null,
           }),
         });
@@ -380,6 +431,7 @@ export default function TournamentStandingsTab({
   }, [
     allLabels,
     assignments,
+    isGlobalCircuitMode,
     pendingLabelPosition,
     phaseRequiresGroup,
     selectedGroup,
@@ -393,7 +445,7 @@ export default function TournamentStandingsTab({
     return <div className={styles.loadingState}>Loading standings context...</div>;
   }
 
-  if (!context?.phases || context.phases.length === 0) {
+  if (!isGlobalCircuitMode && (!context?.phases || context.phases.length === 0)) {
     return <div className={styles.emptyState}>No se encontraron fases para este torneo.</div>;
   }
 
@@ -408,7 +460,7 @@ export default function TournamentStandingsTab({
     ? activeGroups.find((group) => group.id === selectedGroup)?.name
     : 'Todos los grupos';
   const tableViewLabel = TABLE_VIEWS.find((tab) => tab.id === selectedTableType)?.label ?? selectedTableType;
-  const tournamentStatus = context.tournament?.status || 'draft';
+  const tournamentStatus = context?.tournament?.status || 'draft';
   const hasOwnPhaseSettings = !!activePhase?.settings;
 
   const handleLogicUpdated = async () => {
@@ -449,14 +501,14 @@ export default function TournamentStandingsTab({
                   <span className={styles.metaLabel}>Fase actual</span>
                   <div className={styles.metaValue}>
                     <Activity size={14} />
-                    {loadingContext ? <div className={`${styles.skeleton} ${styles.metaSkeleton}`} /> : <span>{activePhase?.name || 'Sin fase'}</span>}
+                    {loadingContext ? <div className={`${styles.skeleton} ${styles.metaSkeleton}`} /> : <span>{isGlobalCircuitMode ? 'Tabla Global (Circuito)' : (activePhase?.name || 'Sin fase')}</span>}
                   </div>
                 </div>
               <div className={styles.metaCard}>
                 <span className={styles.metaLabel}>Estado</span>
                 <div className={styles.metaValue}>
-                  <span className={activePhase?.is_active ? styles.statusActive : styles.statusInactive}>
-                    {activePhase?.is_active ? 'Activa' : tournamentStatus}
+                  <span className={isGlobalCircuitMode ? styles.statusActive : (activePhase?.is_active ? styles.statusActive : styles.statusInactive)}>
+                    {isGlobalCircuitMode ? 'Global' : (activePhase?.is_active ? 'Activa' : tournamentStatus)}
                   </span>
                   <span className={styles.metaMono}>{tableViewLabel}</span>
                 </div>
@@ -511,11 +563,33 @@ export default function TournamentStandingsTab({
         </header>
 
         {showLabelsPanel && (
-          <PhaseLabelsPanel
-            labels={allLabels}
-            phaseName={activePhase?.name || 'Fase activa'}
-            onClose={() => setShowLabelsPanel(false)}
-          />
+          isGlobalCircuitMode ? (
+            <ManageLabelsPanel
+              labels={allLabels}
+              onClose={() => setShowLabelsPanel(false)}
+              onCreated={(label) => {
+                const updated = [...globalCircuitLabels, label];
+                setGlobalCircuitLabels(updated);
+                persistGlobalLabels(updated);
+              }}
+              onUpdated={(label) => {
+                const updated = globalCircuitLabels.map((l) => l.id === label.id ? label : l);
+                setGlobalCircuitLabels(updated);
+                persistGlobalLabels(updated);
+              }}
+              onDeleted={(id) => {
+                const updated = globalCircuitLabels.filter((l) => l.id !== id);
+                setGlobalCircuitLabels(updated);
+                persistGlobalLabels(updated);
+              }}
+            />
+          ) : (
+            <PhaseLabelsPanel
+              labels={allLabels}
+              phaseName={activePhase?.name || 'Fase activa'}
+              onClose={() => setShowLabelsPanel(false)}
+            />
+          )
         )}
 
         {recalcFeedback && (
@@ -533,10 +607,10 @@ export default function TournamentStandingsTab({
           <aside className={styles.leftRail}>
             <StandingsFiltersBar
               tournamentId={tournamentId}
-              phases={context.phases}
-              groups={activeGroups}
-              selectedPhase={selectedPhase}
-              selectedGroup={selectedGroup}
+              phases={isGlobalCircuitMode ? [] : (context?.phases ?? [])}
+              groups={isGlobalCircuitMode ? [] : activeGroups}
+              selectedPhase={isGlobalCircuitMode ? null : selectedPhase}
+              selectedGroup={isGlobalCircuitMode ? null : selectedGroup}
               selectedTableType={selectedTableType}
               onPhaseChange={(value) => {
                 setSelectedPhase(value);
@@ -546,8 +620,8 @@ export default function TournamentStandingsTab({
               onGroupChange={setSelectedGroup}
               onTableTypeChange={setSelectedTableType}
               rules={resolvedRules}
-              phaseName={activePhase?.name || 'Sin fase'}
-              hasOwnPhaseSettings={hasOwnPhaseSettings}
+              phaseName={isGlobalCircuitMode ? 'Tabla Global (Circuito)' : (activePhase?.name || 'Sin fase')}
+              hasOwnPhaseSettings={isGlobalCircuitMode ? false : hasOwnPhaseSettings}
               errorMessage={logicPanelError}
               onRulesUpdated={handleLogicUpdated}
               compactMobile={isCompactMobile}
@@ -595,7 +669,7 @@ export default function TournamentStandingsTab({
             <StandingsTable
               data={tableData}
               isLoading={loadingStandings}
-              phaseName={activePhase?.name || 'Fase sin nombre'}
+              phaseName={isGlobalCircuitMode ? 'Tabla Global (Circuito)' : (activePhase?.name || 'Fase sin nombre')}
               groupLabel={groupLabel || 'Todos los grupos'}
               tableTypeLabel={tableViewLabel}
               tableColumns={phaseTableColumns}
@@ -612,7 +686,7 @@ export default function TournamentStandingsTab({
             <StandingsSidebar
               rules={resolvedRules}
               tournamentId={tournamentId}
-              phaseId={selectedPhase}
+              phaseId={isGlobalCircuitMode ? null : selectedPhase}
               onRecalculate={handleRecalculate}
               isRecalculating={isRecalculating}
               lastCalculatedLabel={lastCalcAt ? formatRelativeTime(lastCalcAt) : 'Pendiente de calculo persistido'}

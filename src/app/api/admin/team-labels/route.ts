@@ -72,7 +72,12 @@ export async function GET(request: NextRequest) {
       .order('position', { ascending: true });
 
     if (tournament_id) query = query.eq('tournament_id', tournament_id);
-    if (phase_id) query = query.eq('phase_id', phase_id);
+    if (phase_id === 'null' || phase_id === '__circuit_global__') {
+      // Global circuit scope: assignments where phase_id IS NULL
+      query = (query as any).is('phase_id', null);
+    } else if (phase_id) {
+      query = query.eq('phase_id', phase_id);
+    }
     if (group_id) query = query.eq('group_id', group_id);
 
     const { data, error } = await query;

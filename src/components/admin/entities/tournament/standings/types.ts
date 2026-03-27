@@ -1,5 +1,7 @@
 import type { GroupLabel } from '@/types/phase-settings';
 
+export const CIRCUIT_GLOBAL_SENTINEL = '__circuit_global__';
+
 export type ResolvedTiebreaker = string | { key?: string; id?: string; label?: string };
 
 export interface StandingsRules {

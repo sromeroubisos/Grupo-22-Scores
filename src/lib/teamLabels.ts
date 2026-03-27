@@ -142,7 +142,13 @@ export function resolveStandingsRowLabel(
   const groupId = normalizeNullableString(row?.group_id) ?? null;
 
   const matches = assignments
-    .filter((assignment) => assignment.position === position && assignment.label?.color)
+    .filter((assignment) => {
+      if (assignment.position !== position || !assignment.label?.color) return false;
+      const aPhasId = assignment.phase_id ?? null;
+      // Global circuit labels (phase_id = null) must not appear in phase-specific views
+      if (phaseId !== null && aPhasId === null) return false;
+      return true;
+    })
     .sort((left, right) => {
       return getAssignmentPriority(right, phaseId, groupId) - getAssignmentPriority(left, phaseId, groupId);
     });
