@@ -547,13 +547,15 @@ export default function SuperCreateTournament() {
                 savedId = result.id;
             }
 
+            const participantClubIds = Array.from(new Set(selectedClubs.filter(Boolean)));
+
             // Persist participants
             if (isEdit) {
                 await supabase.from('tournament_participants').delete().eq('tournament_id', savedId);
             }
-            if (selectedClubs.length > 0) {
+            if (participantClubIds.length > 0) {
                 await Promise.all(
-                    selectedClubs.map(async (clubId) => {
+                    participantClubIds.map(async (clubId) => {
                         const response = await fetch(`/api/tournaments/${savedId}/participants`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
