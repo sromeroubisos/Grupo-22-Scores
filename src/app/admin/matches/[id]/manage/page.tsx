@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import MatchCenterClient from '@/app/admin/super/partidos/[id]/MatchCenterClient';
 import type { MatchRow } from '@/app/admin/super/partidos/[id]/MatchCenterClient';
+import { fetchMatchCenterMatch } from '@/lib/services/matchCenterService';
 
 // Use a plain Supabase client (no cookie management) for the public SELECT.
 // This avoids the server-side session refresh that can corrupt browser cookies
@@ -21,16 +22,7 @@ export default async function MatchManagementPage({ params }: PageProps) {
     const { id: matchId } = await params;
     const supabase = getReadOnlyClient();
 
-    const { data, error } = await supabase
-        .from('matches')
-        .select(`
-            *,
-            homeClub:home_club_id (id, name, short_name, logo_url, primary_color),
-            awayClub:away_club_id (id, name, short_name, logo_url, primary_color),
-            tournament:tournament_id (id, name)
-        `)
-        .eq('id', matchId)
-        .single();
+    const { data, error } = await fetchMatchCenterMatch(supabase, matchId);
 
     if (error || !data) {
         notFound();

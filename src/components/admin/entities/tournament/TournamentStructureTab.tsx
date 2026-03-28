@@ -65,6 +65,7 @@ const COLUMN_TIEBREAKER_CONFIG: Record<string, { label: string; description?: st
 export function TournamentStructureTab({ data, id }: { data?: any; id?: string }) {
     const [phases, setPhases] = useState<Phase[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activatingPhaseId, setActivatingPhaseId] = useState<string | null>(null);
 
     // Form state
     const [showPhaseForm, setShowPhaseForm] = useState(false);
@@ -510,6 +511,9 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             ? `/api/tournaments/${id}/phases/${editingPhaseId}`
             : `/api/tournaments/${id}/phases`;
         const method = editingPhaseId ? 'PATCH' : 'POST';
+        const editingPhase = editingPhaseId
+            ? phases.find(phase => phase.id === editingPhaseId) ?? null
+            : null;
         const sanitizedGroupNames = phaseType === 'group_stage'
             ? groupNames.map(name => name.trim()).filter(Boolean)
             : [];
@@ -522,7 +526,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     name: phaseName,
                     phase_type: phaseType,
                     order_index: editingPhaseId ? undefined : phases.length + 1,
-                    is_active: true,
+                    is_active: editingPhase ? editingPhase.is_active : phases.length === 0,
                     settings: {
                         ...(isCircuit ? { circuit: { pointsByPlacement: placementPoints } } : {}),
                         teamsCount: teamsCount === '' ? 0 : Number(teamsCount),
@@ -625,6 +629,44 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             alert(`Error al crear fase: ${error.message || 'Unknown error'}`);
         } finally {
             setCreating(false);
+        }
+    };
+
+    const handleSetActivePhase = async (phaseId: string) => {
+        if (!id) return;
+        const targetPhase = phases.find(phase => phase.id === phaseId);
+        if (!targetPhase || targetPhase.is_active) return;
+
+        setActivatingPhaseId(phaseId);
+        try {
+            const response = await fetch(`/api/tournaments/${id}/phases/${phaseId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_active: true }),
+            });
+
+            if (response.ok) {
+                await loadPhases();
+            } else {
+                const contentType = response.headers.get('content-type');
+                let errorMessage = `Error ${response.status}`;
+                try {
+                    if (contentType?.includes('application/json')) {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorData.error || errorMessage;
+                    } else {
+                        errorMessage = (await response.text()) || errorMessage;
+                    }
+                } catch {
+                    // ignore parse errors
+                }
+                alert(`Error al activar fase: ${errorMessage.length > 200 ? errorMessage.slice(0, 197) + '...' : errorMessage}`);
+            }
+        } catch (error: any) {
+            console.error('Error activating phase:', error);
+            alert(`Error al activar fase: ${error.message || 'Unknown error'}`);
+        } finally {
+            setActivatingPhaseId(null);
         }
     };
 
@@ -913,8 +955,23 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 </div>
 
                                 <div className="structure-phase-actions flex items-center gap-2 flex-shrink-0">
+                                    {!phase.is_active && (
+                                        <button
+                                            type="button"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                handleSetActivePhase(phase.id);
+                                            }}
+                                            disabled={activatingPhaseId === phase.id}
+                                            className="px-3 py-1.5 rounded-full border border-[var(--status-active)]/40 bg-[var(--status-active)]/8 text-[10px] font-bold uppercase tracking-widest text-[var(--status-active)] hover:bg-[var(--status-active)]/14 transition-colors disabled:opacity-60 disabled:cursor-wait"
+                                            title="Marcar como fase activa"
+                                        >
+                                            {activatingPhaseId === phase.id ? 'Activando...' : 'Activar'}
+                                        </button>
+                                    )}
                                     <ChevronRight size={16} className="structure-phase-chevron text-dim group-hover:text-white transition-colors" />
                                     <button
+                                        type="button"
                                         onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
                                         className="structure-phase-delete opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-all duration-200"
                                         title="Eliminar fase"

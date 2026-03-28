@@ -613,6 +613,7 @@
 }
 
 .fixture-match-card {
+    position: relative;
     display: grid;
     gap: 18px;
     padding: 20px;
@@ -620,6 +621,18 @@
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
+}
+
+.fixture-match-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+.fixture-match-link:focus-visible {
+    outline: 2px solid rgba(0, 242, 255, 0.85);
+    outline-offset: -3px;
 }
 
 .fixture-match-card:hover {
@@ -746,6 +759,8 @@
 .fixture-match-actions,
 .fixture-table-actions,
 .fixture-panel-actions {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -910,6 +925,8 @@
 }
 
 .fixture-quick-editor {
+    position: relative;
+    z-index: 2;
     display: grid;
     gap: 14px;
     padding-top: 16px;

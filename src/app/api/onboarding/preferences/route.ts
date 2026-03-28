@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { getActiveSports } from '@/lib/data/sports'
+import { buildOnboardingMetadata, getOnboardingMetadataStatus } from '@/lib/onboardingStatus'
 import {
     completeOnboarding,
     getFavoriteLeagues,
@@ -51,10 +52,10 @@ async function getCurrentUserId() {
     const { data: { session }, error } = await supabase.auth.getSession()
 
     if (error || !session?.user) {
-        return { supabase, userId: null as string | null }
+        return { supabase, session: null, userId: null as string | null }
     }
 
-    return { supabase, userId: session.user.id }
+    return { supabase, session, userId: session.user.id }
 }
 
 async function getSports(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -113,7 +114,7 @@ function normalizeLeagues(value: unknown) {
 export async function GET(request: NextRequest) {
     try {
         const mode = request.nextUrl.searchParams.get('mode')
-        const { supabase, userId } = await getCurrentUserId()
+        const { supabase, session, userId } = await getCurrentUserId()
 
         if (mode === 'status') {
             if (!userId) {
@@ -121,7 +122,12 @@ export async function GET(request: NextRequest) {
             }
 
             const status = await getOnboardingStatus(supabase, userId)
-            const onboardingCompleted = !!(status?.preferences_onboarding_completed || status?.skipped)
+            const metadataStatus = getOnboardingMetadataStatus(session?.user?.user_metadata)
+            const onboardingCompleted = !!(
+                status?.preferences_onboarding_completed ||
+                status?.skipped ||
+                metadataStatus.completed
+            )
 
             return NextResponse.json({ onboardingCompleted })
         }
@@ -149,14 +155,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const payload = await request.json() as SavePreferencesPayload
-        const { supabase, userId } = await getCurrentUserId()
+        const { supabase, session, userId } = await getCurrentUserId()
 
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
+        const persistMetadataFallback = async (skipped: boolean) => {
+            const { error } = await supabase.auth.updateUser({
+                data: buildOnboardingMetadata(session?.user?.user_metadata, { skipped }),
+            })
+
+            if (error) {
+                console.warn('[api/onboarding/preferences] auth metadata update failed:', error.message)
+            }
+        }
+
         if (payload.skipped) {
             await completeOnboarding(supabase, userId, { skipped: true })
+            await persistMetadataFallback(true)
             return NextResponse.json({ ok: true, onboardingCompleted: true })
         }
 
@@ -170,6 +187,7 @@ export async function POST(request: NextRequest) {
             sportsCompleted: sportIds.length > 0,
             leaguesCompleted: leagues.length > 0,
         })
+        await persistMetadataFallback(false)
 
         return NextResponse.json({ ok: true, onboardingCompleted: true })
     } catch (error) {

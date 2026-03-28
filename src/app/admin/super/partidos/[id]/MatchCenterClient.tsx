@@ -4,9 +4,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Save, Share2, ChevronLeft, Layout, Users, Clock,
-    BarChart2, Shield, Settings, ImageIcon, Plus, RefreshCw, X, Edit3, Video, FileText, Search, AlertTriangle, CheckCircle
+    BarChart2, Shield, Settings, ImageIcon, Plus, RefreshCw, X, Video, Search, AlertTriangle, CheckCircle
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import {
+    buildMatchEventDefinitionMap,
+    getDefaultMatchEventDefinitions,
+    resolveMatchEventDefinitions,
+    type MatchEventDefinition,
+} from '@/lib/matchEventCatalog';
+import { StandingsEngine } from '@/lib/services/standingsEngine';
 import {
     APP_TIMEZONE,
     combineLocalDateTimeToUtcIso,
@@ -24,7 +31,12 @@ interface ClubInfo {
     logo_url: string | null;
     primary_color: string | null;
 }
-interface TournamentInfo { id: string; name: string; }
+interface TournamentInfo {
+    id: string;
+    name: string;
+    sport_id?: string | null;
+    sportId?: string | null;
+}
 
 interface MatchEvent {
     id: string;
@@ -71,6 +83,7 @@ interface MatchClock {
 export interface MatchRow {
     id: string;
     tournament_id: string | null;
+    phase_id: string | null;
     round_id: string | null;
     date_time: string | null;
     venue: string | null;
@@ -145,12 +158,15 @@ function statusColor(s: string): string {
     }
 }
 
-function teamTag(evTeam: string | null, match: MatchRow): string {
+function teamTag(evTeam: string | null): string {
     if (!evTeam) return '';
     return evTeam === 'home' ? '[L]' : '[V]';
 }
 
-function eventTypeLabel(t: string): string {
+function eventTypeLabel(t: string, definitions: MatchEventDefinition[]): string {
+    const configured = definitions.find((definition) => definition.type === t);
+    if (configured?.label) return configured.label;
+
     const map: Record<string, string> = {
         try: 'TRY', conversion: 'CONV', penalty_goal: 'PENAL', drop_goal: 'DROP',
         yellow_card: 'AMARILLA', red_card: 'ROJA', substitution: 'CAMBIO',
@@ -159,7 +175,12 @@ function eventTypeLabel(t: string): string {
     return map[t] || t.toUpperCase();
 }
 
-function eventTypeColor(t: string): string {
+function eventTypeColor(t: string, definitions: MatchEventDefinition[]): string {
+    const configured = definitions.find((definition) => definition.type === t);
+    if (configured?.category === 'score') return 'var(--accent)';
+    if (configured?.category === 'card' && t === 'yellow_card') return '#eab308';
+    if (configured?.category === 'card' && t === 'red_card') return '#ef4444';
+
     if (t === 'try') return 'var(--accent)';
     if (t === 'yellow_card') return '#eab308';
     if (t === 'red_card') return '#ef4444';
@@ -170,80 +191,251 @@ function countTries(events: MatchEvent[], team: 'home' | 'away'): number {
     return events.filter(e => e.type === 'try' && e.team === team).length;
 }
 
+function getConfiguredEventPoints(
+    eventType: string,
+    definitionMap: Record<string, MatchEventDefinition>,
+): number {
+    const definition = definitionMap[eventType];
+    if (!definition || definition.category !== 'score') {
+        return 0;
+    }
+    return Number(definition.points) || 0;
+}
+
 /* ─── POINTS HELPERS ─── */
 interface PointsRules {
     win: number;
     draw: number;
     loss: number;
-    offensiveThreshold: number | null;
-    defensiveMargin: number | null;
+    offensive: {
+        threshold: number;
+        points: number;
+    } | null;
+    defensive: {
+        margin: number;
+        points: number;
+    } | null;
 }
 
-async function fetchPhaseRules(matchId: string, roundId: string | null): Promise<PointsRules> {
-    const defaults: PointsRules = { win: 4, draw: 2, loss: 0, offensiveThreshold: 4, defensiveMargin: 7 };
-    if (!roundId) return defaults;
-    try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const supabase = createClient();
-        const { data: round } = await supabase
-            .from('tournament_rounds')
-            .select('phase_id')
-            .eq('id', roundId)
-            .single();
-        if (!round?.phase_id) return defaults;
-        const { data: phase } = await supabase
-            .from('tournament_phases')
-            .select('settings')
-            .eq('id', round.phase_id)
-            .single();
-        const settings = phase?.settings as {
-            points?: { win?: number; draw?: number; loss?: number };
-            bonus?: {
-                offensive?: { tries?: number; threshold?: number };
-                defensive?: { margin?: number };
-            };
-        } | undefined;
-        return {
-            win:  settings?.points?.win  ?? defaults.win,
-            draw: settings?.points?.draw ?? defaults.draw,
-            loss: settings?.points?.loss ?? defaults.loss,
-            offensiveThreshold: settings?.bonus?.offensive?.tries ?? settings?.bonus?.offensive?.threshold ?? defaults.offensiveThreshold,
-            defensiveMargin:    settings?.bonus?.defensive?.margin ?? defaults.defensiveMargin,
-        };
-    } catch {
-        return defaults;
+const DEFAULT_LINEUP_SIZE = 23;
+const DEFAULT_POINTS_RULES: PointsRules = {
+    win: 4,
+    draw: 2,
+    loss: 0,
+    offensive: null,
+    defensive: null,
+};
+
+function getPositiveInteger(value: string, fallback: number) {
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+        return fallback;
     }
+    return parsed;
 }
 
-function calcPointsFromResult(
-    score: { home: number; away: number },
+function normalizePointsRules(rawRules: ReturnType<typeof StandingsEngine.resolveRules> | null | undefined): PointsRules {
+    const offensiveRule = rawRules?.offensive_bonus_rule;
+    const defensiveRule = rawRules?.defensive_bonus_rule;
+
+    const offensive =
+        offensiveRule === true
+            ? { threshold: 4, points: 1 }
+            : offensiveRule && typeof offensiveRule === 'object'
+                ? {
+                    threshold: Number(offensiveRule.tries ?? offensiveRule.threshold ?? 4),
+                    points: Number(offensiveRule.points ?? offensiveRule.value ?? 1),
+                }
+                : null;
+
+    const defensive =
+        defensiveRule === true
+            ? { margin: 7, points: 1 }
+            : defensiveRule && typeof defensiveRule === 'object'
+                ? {
+                    margin: Number(defensiveRule.margin ?? 7),
+                    points: Number(defensiveRule.points ?? defensiveRule.value ?? 1),
+                }
+                : null;
+
+    return {
+        win: Number(rawRules?.points_for_win ?? DEFAULT_POINTS_RULES.win),
+        draw: Number(rawRules?.points_for_draw ?? DEFAULT_POINTS_RULES.draw),
+        loss: Number(rawRules?.points_for_loss ?? DEFAULT_POINTS_RULES.loss),
+        offensive: offensive && Number.isFinite(offensive.threshold) && Number.isFinite(offensive.points)
+            ? offensive
+            : null,
+        defensive: defensive && Number.isFinite(defensive.margin) && Number.isFinite(defensive.points)
+            ? defensive
+            : null,
+    };
+}
+
+function getLineupSize(lineups: MatchLineups | null | undefined) {
+    const maxCount = Math.max(lineups?.home?.length ?? 0, lineups?.away?.length ?? 0);
+    return maxCount > 0 ? maxCount : DEFAULT_LINEUP_SIZE;
+}
+
+function buildLineupTemplate(count: number, existing: LineupPlayer[] = []): LineupPlayer[] {
+    return Array.from({ length: count }, (_, index) => {
+        const number = index + 1;
+        const current = existing.find((player) => player.number === number);
+        return {
+            id: current?.id,
+            number,
+            name: current?.name ?? '',
+            position: current?.position ?? '',
+            role: current?.role ?? (number <= 15 ? 'starter' : 'substitute'),
+            isCaptain: current?.isCaptain ?? false,
+        };
+    });
+}
+
+function countTeamTries(score: MatchScore, events: MatchEvent[], team: 'home' | 'away') {
+    const scoreValue = team === 'home' ? score.homeTries : score.awayTries;
+    if (typeof scoreValue === 'number' && Number.isFinite(scoreValue)) {
+        return scoreValue;
+    }
+    return countTries(events, team);
+}
+
+function calculateAutocalculatedPoints(
+    matchStatus: string,
+    score: MatchScore,
     events: MatchEvent[],
     rules: PointsRules,
-): { homeBase: number; awayBase: number; homeBonus: number; awayBonus: number } {
-    let homeBase = 0, awayBase = 0, homeBonus = 0, awayBonus = 0;
+): MatchPoints {
+    if (matchStatus !== 'final') {
+        return {
+            home_base_points: 0,
+            away_base_points: 0,
+            home_bonus_points: 0,
+            away_bonus_points: 0,
+            points_autocalculated: true,
+            points_override_reason: '',
+        };
+    }
+
+    let homeBase = rules.draw;
+    let awayBase = rules.draw;
+    let homeBonus = 0;
+    let awayBonus = 0;
+
     if (score.home > score.away) {
         homeBase = rules.win;
         awayBase = rules.loss;
     } else if (score.home < score.away) {
         homeBase = rules.loss;
         awayBase = rules.win;
-    } else {
-        homeBase = rules.draw;
-        awayBase = rules.draw;
     }
-    // Offensive bonus
-    if (rules.offensiveThreshold !== null) {
-        const homeTries = countTries(events, 'home');
-        const awayTries = countTries(events, 'away');
-        if (homeTries >= rules.offensiveThreshold) homeBonus += 1;
-        if (awayTries >= rules.offensiveThreshold) awayBonus += 1;
+
+    const homeTries = countTeamTries(score, events, 'home');
+    const awayTries = countTeamTries(score, events, 'away');
+
+    if (rules.offensive) {
+        if (homeTries >= rules.offensive.threshold) homeBonus += rules.offensive.points;
+        if (awayTries >= rules.offensive.threshold) awayBonus += rules.offensive.points;
     }
-    // Defensive bonus (only for the losing team)
-    if (rules.defensiveMargin !== null) {
-        if (score.home < score.away && (score.away - score.home) <= rules.defensiveMargin) homeBonus += 1;
-        if (score.away < score.home && (score.home - score.away) <= rules.defensiveMargin) awayBonus += 1;
+
+    if (rules.defensive) {
+        if (score.home < score.away && (score.away - score.home) <= rules.defensive.margin) {
+            homeBonus += rules.defensive.points;
+        }
+        if (score.away < score.home && (score.home - score.away) <= rules.defensive.margin) {
+            awayBonus += rules.defensive.points;
+        }
     }
-    return { homeBase, awayBase, homeBonus, awayBonus };
+
+    return {
+        home_base_points: homeBase,
+        away_base_points: awayBase,
+        home_bonus_points: homeBonus,
+        away_bonus_points: awayBonus,
+        points_autocalculated: true,
+        points_override_reason: '',
+    };
+}
+
+async function fetchMatchConfiguration(
+    match: Pick<MatchRow, 'phase_id' | 'round_id' | 'tournament_id'>,
+): Promise<{ pointsRules: PointsRules; eventDefinitions: MatchEventDefinition[]; sportId: string | null }> {
+    try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        let phaseId = match.phase_id;
+        if (!phaseId && match.round_id) {
+            const { data: round } = await supabase
+                .from('tournament_rounds')
+                .select('phase_id')
+                .eq('id', match.round_id)
+                .single();
+            phaseId = round?.phase_id ?? null;
+        }
+
+        let phaseSettings: Record<string, unknown> | null = null;
+        let tournamentId = match.tournament_id;
+
+        if (phaseId) {
+            const { data: phase } = await supabase
+                .from('tournament_phases')
+                .select('settings, tournament_id')
+                .eq('id', phaseId)
+                .single();
+
+            phaseSettings = (phase?.settings as Record<string, unknown> | null) ?? null;
+            tournamentId = phase?.tournament_id ?? tournamentId;
+        }
+
+        let tournamentRuleset: Record<string, unknown> | null = null;
+        let tournamentSportId: string | null = null;
+        if (tournamentId) {
+            const { data: tournament } = await supabase
+                .from('tournaments')
+                .select('ruleset, sport_id')
+                .eq('id', tournamentId)
+                .single();
+            tournamentRuleset = (tournament?.ruleset as Record<string, unknown> | null) ?? null;
+            tournamentSportId = tournament?.sport_id ?? null;
+        }
+
+        return {
+            pointsRules: normalizePointsRules(StandingsEngine.resolveRules(phaseSettings, tournamentRuleset)),
+            eventDefinitions: resolveMatchEventDefinitions({
+                sportId: tournamentSportId,
+                phaseSettings,
+                tournamentRuleset,
+            }),
+            sportId: tournamentSportId,
+        };
+    } catch {
+        return {
+            pointsRules: DEFAULT_POINTS_RULES,
+            eventDefinitions: getDefaultMatchEventDefinitions(null),
+            sportId: null,
+        };
+    }
+}
+
+function toPointPatchPayload(points: MatchPoints) {
+    return {
+        homeBasePoints: points.home_base_points ?? 0,
+        awayBasePoints: points.away_base_points ?? 0,
+        homeBonusPoints: points.home_bonus_points ?? 0,
+        awayBonusPoints: points.away_bonus_points ?? 0,
+        pointsAutocalculated: points.points_autocalculated ?? true,
+        pointsOverrideReason: points.points_override_reason || null,
+    };
+}
+
+function toLocalPoints(match: MatchRow): MatchPoints {
+    return {
+        home_base_points: match.home_base_points ?? 0,
+        away_base_points: match.away_base_points ?? 0,
+        home_bonus_points: match.home_bonus_points ?? 0,
+        away_bonus_points: match.away_bonus_points ?? 0,
+        points_autocalculated: match.points_autocalculated ?? true,
+        points_override_reason: match.points_override_reason ?? '',
+    };
 }
 
 /* ─────────────────── CLIENT COMPONENT ─────────────────── */
@@ -261,17 +453,112 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const [localLineups, setLocalLineups] = useState<MatchLineups>(initialMatch.lineups || { home: [], away: [] });
 
     // Editable state for per-match points
-    const [localPoints, setLocalPoints] = useState<MatchPoints>({
-        home_base_points:       initialMatch.home_base_points      ?? null,
-        away_base_points:       initialMatch.away_base_points      ?? null,
-        home_bonus_points:      initialMatch.home_bonus_points      ?? 0,
-        away_bonus_points:      initialMatch.away_bonus_points      ?? 0,
-        points_autocalculated:  initialMatch.points_autocalculated  ?? true,
-        points_override_reason: initialMatch.points_override_reason ?? '',
-    });
+    const [localPoints, setLocalPoints] = useState<MatchPoints>(() => toLocalPoints(initialMatch));
     const [savingPoints, setSavingPoints] = useState(false);
+    const [pointsRules, setPointsRules] = useState<PointsRules>(DEFAULT_POINTS_RULES);
+    const [eventDefinitions, setEventDefinitions] = useState<MatchEventDefinition[]>(
+        () => getDefaultMatchEventDefinitions(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
+    );
+    const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(initialMatch.lineups)));
+    const [dateTimeDraft, setDateTimeDraft] = useState(() => toDateTimeLocalInput(initialMatch.date_time));
+
+    const applyMatchResponse = useCallback((nextMatch: MatchRow, preserveLineupsIfIncomingEmpty = false) => {
+        setMatch(nextMatch);
+        setLocalEvents(Array.isArray(nextMatch.events) ? nextMatch.events : []);
+        setLocalLineups((prev) => {
+            const next = nextMatch.lineups || { home: [], away: [] };
+            const hasNext = next.home.length > 0 || next.away.length > 0;
+            const hasPrev = prev.home.length > 0 || prev.away.length > 0;
+            return preserveLineupsIfIncomingEmpty && !hasNext && hasPrev ? prev : next;
+        });
+        setLocalPoints(toLocalPoints(nextMatch));
+        setLineupSizeInput(String(getLineupSize(nextMatch.lineups)));
+        setDateTimeDraft(toDateTimeLocalInput(nextMatch.date_time));
+    }, []);
+
+    const getAutoPointsSnapshot = useCallback((
+        nextScore: MatchScore = match.score || { home: 0, away: 0 },
+        nextEvents: MatchEvent[] = localEvents,
+        nextStatus: string = match.status,
+    ) => calculateAutocalculatedPoints(nextStatus, nextScore, nextEvents, pointsRules), [localEvents, match.score, match.status, pointsRules]);
+
+    const buildPointsPatchPayload = useCallback((overrides?: {
+        score?: MatchScore;
+        events?: MatchEvent[];
+        status?: string;
+    }) => {
+        if (localPoints.points_autocalculated === false) {
+            return toPointPatchPayload({
+                ...localPoints,
+                points_autocalculated: false,
+            });
+        }
+
+        return toPointPatchPayload(getAutoPointsSnapshot(
+            overrides?.score,
+            overrides?.events,
+            overrides?.status,
+        ));
+    }, [getAutoPointsSnapshot, localPoints]);
+
+    const persistMatchPatch = useCallback(async (
+        payload: Record<string, unknown>,
+        options?: { includePoints?: boolean; preserveLineupsIfIncomingEmpty?: boolean },
+    ) => {
+        let pointsPayload: Record<string, unknown> = {};
+        if (options?.includePoints !== false) {
+            if (localPoints.points_autocalculated === false) {
+                pointsPayload = buildPointsPatchPayload({
+                    score: payload.score as MatchScore | undefined,
+                    events: payload.events as MatchEvent[] | undefined,
+                    status: typeof payload.status === 'string' ? payload.status : undefined,
+                });
+            } else {
+                const configuration = await fetchMatchConfiguration(match);
+                pointsPayload = toPointPatchPayload(calculateAutocalculatedPoints(
+                    typeof payload.status === 'string' ? payload.status : match.status,
+                    (payload.score as MatchScore | undefined) ?? (match.score || { home: 0, away: 0 }),
+                    (payload.events as MatchEvent[] | undefined) ?? localEvents,
+                    configuration.pointsRules,
+                ));
+            }
+        }
+
+        const finalPayload = options?.includePoints === false
+            ? payload
+            : {
+                ...payload,
+                ...pointsPayload,
+            };
+
+        const res = await fetch(`/api/matches/${matchId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(finalPayload),
+        });
+
+        const result = await res.json();
+        if (!res.ok) {
+            throw new Error(result?.error || `HTTP ${res.status}`);
+        }
+
+        const updatedMatch = result as MatchRow;
+        applyMatchResponse(updatedMatch, options?.preserveLineupsIfIncomingEmpty ?? false);
+        return updatedMatch;
+    }, [applyMatchResponse, buildPointsPatchPayload, localEvents, localPoints.points_autocalculated, match, matchId]);
 
     /* ─── REFRESH (for after saves / config changes) ─── */
+    const refreshMatchConfiguration = useCallback(async () => {
+        const configuration = await fetchMatchConfiguration({
+            phase_id: match.phase_id,
+            round_id: match.round_id,
+            tournament_id: match.tournament_id,
+        });
+
+        setPointsRules(configuration.pointsRules);
+        setEventDefinitions(configuration.eventDefinitions);
+    }, [match.phase_id, match.round_id, match.tournament_id]);
+
     const fetchMatch = useCallback(async () => {
         try {
             const res = await fetch(`/api/matches/${matchId}`, { cache: 'no-store' });
@@ -281,67 +568,57 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 throw new Error(payload?.error || `HTTP ${res.status}`);
             }
 
-            const m = payload as MatchRow;
-            setMatch(m);
-            setLocalEvents(Array.isArray(m.events) ? m.events : []);
-            setLocalLineups((prev) => {
-                const next = m.lineups || { home: [], away: [] };
-                const hasNext = next.home.length > 0 || next.away.length > 0;
-                const hasPrev = prev.home.length > 0 || prev.away.length > 0;
-                return hasNext || !hasPrev ? next : prev;
-            });
+            applyMatchResponse(payload as MatchRow, true);
         } catch (err: unknown) {
             console.error('Error refreshing match:', err);
         }
-    }, [matchId]);
+    }, [applyMatchResponse, matchId]);
 
     /* ─── POINTS: RECALCULATE & SAVE ─── */
-    const handleRecalculate = useCallback(async () => {
-        const currentScore = match.score || { home: 0, away: 0 };
-        const rules = await fetchPhaseRules(matchId, match.round_id);
-        const pts = calcPointsFromResult(currentScore, localEvents, rules);
-        setLocalPoints(prev => ({
-            ...prev,
-            home_base_points:      pts.homeBase,
-            away_base_points:      pts.awayBase,
-            home_bonus_points:     pts.homeBonus,
-            away_bonus_points:     pts.awayBonus,
-            points_autocalculated: true,
-        }));
-    }, [match, matchId, localEvents]);
+    useEffect(() => {
+        void refreshMatchConfiguration();
+    }, [refreshMatchConfiguration]);
+
+    useEffect(() => {
+        const handleConfigurationUpdate = (rawEvent: Event) => {
+            const event = rawEvent as CustomEvent<{ tournamentId?: string }>;
+            const nextTournamentId = event.detail?.tournamentId;
+            if (nextTournamentId && nextTournamentId !== match.tournament_id) {
+                return;
+            }
+
+            void refreshMatchConfiguration();
+        };
+
+        window.addEventListener('tournament:match-events-updated', handleConfigurationUpdate);
+        return () => window.removeEventListener('tournament:match-events-updated', handleConfigurationUpdate);
+    }, [match.tournament_id, refreshMatchConfiguration]);
+
+    const handleRecalculate = useCallback(() => {
+        setLocalPoints(getAutoPointsSnapshot());
+    }, [getAutoPointsSnapshot]);
 
     const handleSavePoints = useCallback(async () => {
         setSavingPoints(true);
         try {
-            await supabase.from('matches').update({
-                home_base_points:       localPoints.home_base_points ?? 0,
-                away_base_points:       localPoints.away_base_points ?? 0,
-                home_bonus_points:      localPoints.home_bonus_points ?? 0,
-                away_bonus_points:      localPoints.away_bonus_points ?? 0,
-                points_autocalculated:  localPoints.points_autocalculated ?? true,
-                points_override_reason: localPoints.points_override_reason || null,
-            }).eq('id', matchId);
-            await fetchMatch();
+            if (localPoints.points_autocalculated === false) {
+                await persistMatchPatch(
+                    toPointPatchPayload(localPoints),
+                    { includePoints: false },
+                );
+            } else {
+                await persistMatchPatch({});
+            }
         } finally {
             setSavingPoints(false);
         }
-    }, [supabase, matchId, localPoints, fetchMatch]);
-
-    // On mount: if no saved points and match is already final, auto-fill
-    useEffect(() => {
-        if (initialMatch.home_base_points === null && initialMatch.status === 'final') {
-            handleRecalculate();
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [localPoints, persistMatchPatch]);
 
     // Reactive: recalculate whenever score/status/events change, only while in auto mode
     useEffect(() => {
-        // Read auto flag at effect-run time (intentionally not in deps to avoid loops)
-        if (!localPoints.points_autocalculated) return;
-        handleRecalculate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [match.score, match.status, localEvents]);
+        if (localPoints.points_autocalculated === false) return;
+        setLocalPoints(getAutoPointsSnapshot());
+    }, [getAutoPointsSnapshot, localPoints.points_autocalculated]);
 
     /* ─── REALTIME (live matches) ─── */
     useEffect(() => {
@@ -358,6 +635,23 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 setMatch(prev => ({ ...prev, ...updated } as unknown as MatchRow));
                 if (Array.isArray(updated.events)) setLocalEvents(updated.events as MatchEvent[]);
                 if (updated.lineups) setLocalLineups(updated.lineups as MatchLineups);
+                if (
+                    updated.home_base_points !== undefined ||
+                    updated.away_base_points !== undefined ||
+                    updated.home_bonus_points !== undefined ||
+                    updated.away_bonus_points !== undefined ||
+                    updated.points_autocalculated !== undefined ||
+                    updated.points_override_reason !== undefined
+                ) {
+                    setLocalPoints((prev) => ({
+                        home_base_points: Number(updated.home_base_points ?? prev.home_base_points ?? 0),
+                        away_base_points: Number(updated.away_base_points ?? prev.away_base_points ?? 0),
+                        home_bonus_points: Number(updated.home_bonus_points ?? prev.home_bonus_points ?? 0),
+                        away_bonus_points: Number(updated.away_bonus_points ?? prev.away_bonus_points ?? 0),
+                        points_autocalculated: Boolean(updated.points_autocalculated ?? prev.points_autocalculated ?? true),
+                        points_override_reason: String(updated.points_override_reason ?? prev.points_override_reason ?? ''),
+                    }));
+                }
             })
             .subscribe();
 
@@ -372,27 +666,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         try {
             console.log('[MatchCenter] Saving via API — events:', localEvents.length, 'lineups home:', localLineups.home.length, 'away:', localLineups.away.length);
 
-            const res = await fetch(`/api/matches/${matchId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    events: localEvents,
-                    lineups: localLineups,
-                }),
+            await persistMatchPatch({
+                events: localEvents,
+                lineups: localLineups,
             });
-
-            const result = await res.json();
-            console.log('[MatchCenter] Save result:', res.status, result);
-
-            if (!res.ok) {
-                setSaveMsg({ type: 'err', text: `Error ${res.status}: ${result.error || 'Error desconocido'}` });
-                return;
-            }
-
-            const updatedMatch = result as MatchRow;
-            setMatch(updatedMatch);
-            setLocalEvents(Array.isArray(updatedMatch.events) ? updatedMatch.events : []);
-            setLocalLineups(updatedMatch.lineups || { home: [], away: [] });
             setSaveMsg({ type: 'ok', text: '✓ Guardado correctamente' });
             setTimeout(() => setSaveMsg(null), 3000);
         } catch (err: unknown) {
@@ -404,9 +681,81 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     };
 
     /* ─── DERIVED DATA (all computed, zero hardcode) ─── */
+    const commitConfigPatch = useCallback(async (payload: Record<string, unknown>) => {
+        try {
+            await persistMatchPatch(payload);
+        } catch (err: unknown) {
+            console.error('[MatchCenter] Config save error:', err);
+            setSaveMsg({ type: 'err', text: `Error de red: ${err instanceof Error ? err.message : String(err)}` });
+            await fetchMatch();
+        }
+    }, [fetchMatch, persistMatchPatch]);
+
+    const handleScoreInputChange = useCallback((team: 'home' | 'away', value: string) => {
+        const parsedValue = Math.max(0, Number.parseInt(value || '0', 10) || 0);
+        setMatch((prev) => ({
+            ...prev,
+            score: {
+                ...(prev.score || { home: 0, away: 0 }),
+                [team]: parsedValue,
+            },
+        }));
+    }, []);
+
+    const updateLocalEvent = useCallback((eventId: string, patch: Partial<MatchEvent>) => {
+        setLocalEvents((prev) =>
+            prev.map((event) => (event.id === eventId ? { ...event, ...patch } : event)),
+        );
+    }, []);
+
+    const removeLocalEvent = useCallback((eventId: string) => {
+        setLocalEvents((prev) => prev.filter((event) => event.id !== eventId));
+    }, []);
+
+    const applyLineupSize = useCallback((requestedSize?: number) => {
+        const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups));
+        setLineupSizeInput(String(nextSize));
+        setLocalLineups((prev) => ({
+            home: buildLineupTemplate(nextSize, prev.home),
+            away: buildLineupTemplate(nextSize, prev.away),
+        }));
+    }, [lineupSizeInput, localLineups]);
+
     const score = match.score || { home: 0, away: 0 };
     const events = localEvents;
     const lineups = localLineups;
+    const eventDefinitionMap = buildMatchEventDefinitionMap(eventDefinitions);
+
+    useEffect(() => {
+        const definitionMap = buildMatchEventDefinitionMap(eventDefinitions);
+
+        setLocalEvents((prev) => {
+            let changed = false;
+            const nextEvents = prev.map((event) => {
+                const definition = definitionMap[event.type];
+                if (!definition) return event;
+
+                const nextTeam =
+                    definition.team === 'none'
+                        ? null
+                        : event.team ?? (definition.team === 'required' ? 'home' : null);
+                const nextPlayerName = definition.player === 'none' ? '' : event.playerName;
+
+                if (nextTeam === event.team && nextPlayerName === event.playerName) {
+                    return event;
+                }
+
+                changed = true;
+                return {
+                    ...event,
+                    team: nextTeam,
+                    playerName: nextPlayerName,
+                };
+            });
+
+            return changed ? nextEvents : prev;
+        });
+    }, [eventDefinitions]);
 
     const homeName = match.homeClub?.short_name || match.homeClub?.name || 'Local';
     const awayName = match.awayClub?.short_name || match.awayClub?.name || 'Visitante';
@@ -419,17 +768,16 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         : 'Sin fecha';
 
     // Parcials: derive from events by minute
-    const ptEvents = events.filter(e => (e.type === 'try' || e.type === 'conversion' || e.type === 'penalty_goal' || e.type === 'drop_goal') && e.minute <= 40);
-    const stEvents = events.filter(e => (e.type === 'try' || e.type === 'conversion' || e.type === 'penalty_goal' || e.type === 'drop_goal') && e.minute > 40);
+    const scoringEventTypes = eventDefinitions
+        .filter((definition) => definition.category === 'score' && definition.points > 0)
+        .map((definition) => definition.type);
+    const ptEvents = events.filter((event) => scoringEventTypes.includes(event.type) && event.minute <= 40);
+    const stEvents = events.filter((event) => scoringEventTypes.includes(event.type) && event.minute > 40);
 
     function calcPeriodScore(periodEvents: MatchEvent[]): { home: number; away: number } {
         let h = 0, a = 0;
         periodEvents.forEach(e => {
-            let pts = 0;
-            if (e.type === 'try') pts = 5;
-            else if (e.type === 'conversion') pts = 2;
-            else if (e.type === 'penalty_goal' || e.type === 'penalty') pts = 3;
-            else if (e.type === 'drop_goal') pts = 3;
+            const pts = getConfiguredEventPoints(e.type, eventDefinitionMap);
             if (e.team === 'home') h += pts;
             else if (e.team === 'away') a += pts;
         });
@@ -437,25 +785,51 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     }
     const ptScore = calcPeriodScore(ptEvents);
     const stScore = calcPeriodScore(stEvents);
+    const teamComparableStats = eventDefinitions
+        .filter((definition) => definition.team !== 'none')
+        .map((definition) => ({
+            type: definition.type,
+            label: definition.label,
+            h: events.filter((event) => event.type === definition.type && event.team === 'home').length,
+            a: events.filter((event) => event.type === definition.type && event.team === 'away').length,
+        }))
+        .filter((stat) => stat.h > 0 || stat.a > 0);
+    const scoringBreakdown = eventDefinitions
+        .filter((definition) => definition.category === 'score' && definition.points > 0)
+        .map((definition) => ({
+            ...definition,
+            homeCount: events.filter((event) => event.type === definition.type && event.team === 'home').length,
+            awayCount: events.filter((event) => event.type === definition.type && event.team === 'away').length,
+        }))
+        .filter((definition) => definition.homeCount > 0 || definition.awayCount > 0);
 
     // Winner
     const winner = score.home > score.away ? 'LOCAL' : score.away > score.home ? 'VISITANTE' : score.home === score.away && score.home === 0 ? '—' : 'EMPATE';
 
     // Bonus ofensivo (4+ tries)
-    const homeTriesCount = countTries(events, 'home');
-    const awayTriesCount = countTries(events, 'away');
-    const homeBonusOff = homeTriesCount >= 4;
-    const awayBonusOff = awayTriesCount >= 4;
-    const bonusOffText = homeBonusOff && awayBonusOff
-        ? `${homeName} & ${awayName}`
-        : homeBonusOff ? `${homeName} (${homeTriesCount} tries)` : awayBonusOff ? `${awayName} (${awayTriesCount} tries)` : 'No';
+    const homeTriesCount = countTeamTries(score, events, 'home');
+    const awayTriesCount = countTeamTries(score, events, 'away');
+    const homeBonusOff = pointsRules.offensive ? homeTriesCount >= pointsRules.offensive.threshold : false;
+    const awayBonusOff = pointsRules.offensive ? awayTriesCount >= pointsRules.offensive.threshold : false;
+    const offensiveThresholdLabel = pointsRules.offensive?.threshold ?? 0;
+    const bonusOffText = !pointsRules.offensive
+        ? 'No aplica'
+        : homeBonusOff && awayBonusOff
+            ? `${homeName} y ${awayName} (${offensiveThresholdLabel}+ tries)`
+            : homeBonusOff
+                ? `${homeName} (${homeTriesCount} tries)`
+                : awayBonusOff
+                    ? `${awayName} (${awayTriesCount} tries)`
+                    : 'No';
 
     // Bonus defensivo (lose by ≤7)
     const diff = Math.abs(score.home - score.away);
     const loser = score.home < score.away ? 'home' : score.home > score.away ? 'away' : null;
-    const bonusDefText = loser && diff <= 7
-        ? `${loser === 'home' ? homeName : awayName} (pierde por ${diff})`
-        : 'No';
+    const bonusDefText = !pointsRules.defensive
+        ? 'No aplica'
+        : loser && diff <= pointsRules.defensive.margin && match.status === 'final'
+            ? `${loser === 'home' ? homeName : awayName} (pierde por ${diff})`
+            : 'No';
 
     // Metrics from events
     const totalEvents = events.length;
@@ -593,16 +967,8 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                         <p className="empty-msg">No hay eventos registrados aún. Carga eventos en la pestaña &quot;Eventos&quot;.</p>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                            {(() => {
-                                                const metrics = [
-                                                    { label: 'Tries', h: homeTriesCount, a: awayTriesCount },
-                                                    { label: 'Conversiones', h: events.filter(e => e.type === 'conversion' && e.team === 'home').length, a: events.filter(e => e.type === 'conversion' && e.team === 'away').length },
-                                                    { label: 'Penales', h: events.filter(e => (e.type === 'penalty_goal' || e.type === 'penalty') && e.team === 'home').length, a: events.filter(e => (e.type === 'penalty_goal' || e.type === 'penalty') && e.team === 'away').length },
-                                                    { label: 'Tarjetas Amarillas', h: events.filter(e => e.type === 'yellow_card' && e.team === 'home').length, a: events.filter(e => e.type === 'yellow_card' && e.team === 'away').length },
-                                                    { label: 'Tarjetas Rojas', h: events.filter(e => e.type === 'red_card' && e.team === 'home').length, a: events.filter(e => e.type === 'red_card' && e.team === 'away').length },
-                                                    { label: 'Cambios', h: events.filter(e => e.type === 'substitution' && e.team === 'home').length, a: events.filter(e => e.type === 'substitution' && e.team === 'away').length },
-                                                ];
-                                                return metrics.filter(m => m.h > 0 || m.a > 0).map(stat => {
+                                                            {(() => {
+                                                return teamComparableStats.map(stat => {
                                                     const total = stat.h + stat.a || 1;
                                                     const hPct = (stat.h / total) * 100;
                                                     return (
@@ -642,11 +1008,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                         <div className="event-timeline" style={{ paddingLeft: 16 }}>
                                             {recentEvents.map((ev, i) => (
                                                 <div key={ev.id || i} className="event-entry" style={{ padding: '8px 12px', marginBottom: 8, background: 'transparent', border: 'none' }}>
-                                                    <div style={{ fontSize: '0.8rem', fontWeight: 900, color: eventTypeColor(ev.type), width: 40 }}>{ev.minute}&apos;</div>
+                                                    <div style={{ fontSize: '0.8rem', fontWeight: 900, color: eventTypeColor(ev.type, eventDefinitions), width: 40 }}>{ev.minute}&apos;</div>
                                                     <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                                                        {eventTypeLabel(ev.type)}{' '}
+                                                                {eventTypeLabel(ev.type, eventDefinitions)}{' '}
                                                         <span style={{ opacity: 0.5, fontWeight: 400, marginLeft: 8 }}>
-                                                            {teamTag(ev.team, match)} {ev.playerName}
+                                                            {teamTag(ev.team)} {ev.playerName || ev.detail}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -685,18 +1051,35 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 {/* ── TAB: ALINEACIONES ── */}
                 {activeTab === 'alineaciones' && (
                     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+                        <article className="mc-partition" style={{ marginBottom: 24 }}>
+                            <div className="mc-card-body" style={{ display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+                                <div className="form-group" style={{ margin: 0, flex: '1 1 240px' }}>
+                                    <label>Cantidad de jugadores por equipo</label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        max={60}
+                                        value={lineupSizeInput}
+                                        style={{ borderRadius: 4 }}
+                                        onChange={(e) => setLineupSizeInput(e.target.value)}
+                                    />
+                                </div>
+                                <button
+                                    className="mc-btn mc-btn-primary"
+                                    type="button"
+                                    onClick={() => applyLineupSize()}
+                                >
+                                    <Plus size={14} /> Aplicar plantilla
+                                </button>
+                            </div>
+                        </article>
                         {lineups.home.length === 0 && lineups.away.length === 0 ? (
                             <article className="mc-partition">
                                 <div className="mc-card-body">
                                     <p className="empty-msg">No hay alineaciones cargadas. Agrega jugadores para cada equipo.</p>
                                     <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 16 }}>
-                                        <button className="mc-btn mc-btn-primary" onClick={() => {
-                                            const defaultLineup: LineupPlayer[] = Array(23).fill(null).map((_, i) => ({
-                                                number: i + 1, name: '', position: '', role: i < 15 ? 'starter' : 'substitute'
-                                            }));
-                                            setLocalLineups({ home: [...defaultLineup], away: [...defaultLineup] });
-                                        }}>
-                                            <Plus size={14} /> Generar plantilla 23 jugadores
+                                        <button className="mc-btn mc-btn-primary" onClick={() => applyLineupSize()}>
+                                            <Plus size={14} /> Generar plantilla
                                         </button>
                                     </div>
                                 </div>
@@ -777,15 +1160,23 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                         <div className="mc-card-header">
                             <h4>Timeline de Eventos ({events.length})</h4>
                             <button className="mc-btn mc-btn-primary" onClick={() => {
+                                const defaultEvent = eventDefinitions[0] || {
+                                    type: 'score',
+                                    label: 'Punto',
+                                    category: 'score',
+                                    points: 1,
+                                    team: 'required',
+                                    player: 'optional',
+                                };
                                 const newEvent: MatchEvent = {
                                     id: crypto.randomUUID(),
                                     minute: 0,
-                                    type: 'try',
-                                    team: 'home',
+                                    type: defaultEvent.type,
+                                    team: defaultEvent.team === 'none' ? null : 'home',
                                     playerName: '',
                                     detail: '',
                                 };
-                                setLocalEvents([...localEvents, newEvent]);
+                                setLocalEvents((prev) => [...prev, newEvent]);
                             }}>
                                 <Plus size={14} /> Evento
                             </button>
@@ -798,17 +1189,23 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <div style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
                                         <div>MIN</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCIÓN</div>
                                     </div>
-                                    {[...events].sort((a, b) => a.minute - b.minute).map((ev, i) => (
-                                        <div key={ev.id || i} style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
+                                    {[...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)).map((ev) => {
+                                        const selectedDefinition = eventDefinitionMap[ev.type] || {
+                                            type: ev.type,
+                                            label: eventTypeLabel(ev.type, eventDefinitions),
+                                            category: 'other' as const,
+                                            points: 0,
+                                            team: 'optional' as const,
+                                            player: 'optional' as const,
+                                        };
+
+                                        return (
+                                        <div key={ev.id} style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
                                             <div>
                                                 <input
                                                     type="number" value={ev.minute} min={0} max={100}
                                                     style={{ width: 50, background: '#222', border: 'none', color: 'var(--accent)', fontWeight: 900, padding: 4, borderRadius: 4 }}
-                                                    onChange={(e) => {
-                                                        const updated = [...localEvents];
-                                                        updated[i] = { ...updated[i], minute: parseInt(e.target.value) || 0 };
-                                                        setLocalEvents(updated);
-                                                    }}
+                                                    onChange={(e) => updateLocalEvent(ev.id, { minute: parseInt(e.target.value, 10) || 0 })}
                                                 />
                                             </div>
                                             <div>
@@ -816,57 +1213,62 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                     value={ev.type}
                                                     style={{ background: '#222', border: 'none', color: '#fff', fontSize: '0.8rem', padding: 4, borderRadius: 4 }}
                                                     onChange={(e) => {
-                                                        const updated = [...localEvents];
-                                                        updated[i] = { ...updated[i], type: e.target.value };
-                                                        setLocalEvents(updated);
+                                                        const nextType = e.target.value;
+                                                        const nextDefinition = eventDefinitionMap[nextType];
+                                                        updateLocalEvent(ev.id, {
+                                                            type: nextType,
+                                                            team: nextDefinition?.team === 'none' ? null : ev.team ?? (nextDefinition?.team === 'required' ? 'home' : null),
+                                                            playerName: nextDefinition?.player === 'none' ? '' : ev.playerName,
+                                                        });
                                                     }}
                                                 >
-                                                    <option value="try">Try</option>
-                                                    <option value="conversion">Conversión</option>
-                                                    <option value="penalty_goal">Penal</option>
-                                                    <option value="drop_goal">Drop Goal</option>
-                                                    <option value="yellow_card">Amarilla</option>
-                                                    <option value="red_card">Roja</option>
-                                                    <option value="substitution">Cambio</option>
-                                                    <option value="start_period">Inicio Periodo</option>
-                                                    <option value="end_period">Fin Periodo</option>
+                                                    {!eventDefinitionMap[ev.type] && (
+                                                        <option value={ev.type}>{eventTypeLabel(ev.type, eventDefinitions)}</option>
+                                                    )}
+                                                    {eventDefinitions.map((definition) => (
+                                                        <option key={definition.type} value={definition.type}>
+                                                            {definition.label}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
                                             <div>
                                                 <select
-                                                    value={ev.team || ''}
+                                                    value={ev.team || (selectedDefinition.team === 'required' ? 'home' : '')}
+                                                    disabled={selectedDefinition.team === 'none'}
                                                     style={{ background: '#222', border: 'none', color: '#fff', fontSize: '0.8rem', padding: 4, borderRadius: 4 }}
-                                                    onChange={(e) => {
-                                                        const updated = [...localEvents];
-                                                        updated[i] = { ...updated[i], team: (e.target.value || null) as 'home' | 'away' | null };
-                                                        setLocalEvents(updated);
-                                                    }}
+                                                    onChange={(e) => updateLocalEvent(ev.id, { team: (e.target.value || null) as 'home' | 'away' | null })}
                                                 >
                                                     <option value="">—</option>
                                                     <option value="home">{homeName}</option>
                                                     <option value="away">{awayName}</option>
                                                 </select>
                                             </div>
-                                            <div>
+                                            <div style={{ display: 'grid', gap: 6 }}>
                                                 <input
-                                                    type="text" value={ev.playerName} placeholder="Nombre del jugador"
+                                                    type="text" value={selectedDefinition.player === 'none' ? ev.detail : ev.playerName} placeholder={selectedDefinition.player === 'none' ? 'Detalle del evento' : selectedDefinition.player === 'required' ? 'Nombre del jugador' : 'Jugador (opcional)'}
                                                     className="inline-input" style={{ fontSize: '0.85rem' }}
-                                                    onChange={(e) => {
-                                                        const updated = [...localEvents];
-                                                        updated[i] = { ...updated[i], playerName: e.target.value };
-                                                        setLocalEvents(updated);
-                                                    }}
+                                                    onChange={(e) => updateLocalEvent(ev.id, selectedDefinition.player === 'none' ? { detail: e.target.value } : { playerName: e.target.value })}
                                                 />
+                                                {selectedDefinition.player !== 'none' && (
+                                                    <input
+                                                        type="text"
+                                                        value={ev.detail}
+                                                        placeholder="Detalle adicional (opcional)"
+                                                        className="inline-input"
+                                                        style={{ fontSize: '0.8rem', opacity: 0.85 }}
+                                                        onChange={(e) => updateLocalEvent(ev.id, { detail: e.target.value })}
+                                                    />
+                                                )}
                                             </div>
                                             <div style={{ textAlign: 'right', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                                                <button className="mc-btn mc-btn-outline" style={{ padding: 6, color: '#ef4444', border: '1px solid #333' }} onClick={() => {
-                                                    setLocalEvents(localEvents.filter((_, idx) => idx !== i));
-                                                }}>
+                                                <button className="mc-btn mc-btn-outline" style={{ padding: 6, color: '#ef4444', border: '1px solid #333' }} onClick={() => removeLocalEvent(ev.id)}>
                                                     <X size={12} />
                                                 </button>
                                             </div>
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </>
                             )}
                         </div>
@@ -886,15 +1288,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             <article className="mc-partition" style={{ background: '#111' }}>
                                 <div className="mc-card-header"><h4>Comparativo por Equipo</h4></div>
                                 <div className="mc-card-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                    {[
-                                        { label: 'Tries', h: homeTriesCount, a: awayTriesCount },
-                                        { label: 'Conversiones', h: events.filter(e => e.type === 'conversion' && e.team === 'home').length, a: events.filter(e => e.type === 'conversion' && e.team === 'away').length },
-                                        { label: 'Penales (gol)', h: events.filter(e => (e.type === 'penalty_goal' || e.type === 'penalty') && e.team === 'home').length, a: events.filter(e => (e.type === 'penalty_goal' || e.type === 'penalty') && e.team === 'away').length },
-                                        { label: 'Drop Goals', h: events.filter(e => e.type === 'drop_goal' && e.team === 'home').length, a: events.filter(e => e.type === 'drop_goal' && e.team === 'away').length },
-                                        { label: 'Tarjetas Amarillas', h: events.filter(e => e.type === 'yellow_card' && e.team === 'home').length, a: events.filter(e => e.type === 'yellow_card' && e.team === 'away').length },
-                                        { label: 'Tarjetas Rojas', h: events.filter(e => e.type === 'red_card' && e.team === 'home').length, a: events.filter(e => e.type === 'red_card' && e.team === 'away').length },
-                                        { label: 'Cambios', h: events.filter(e => e.type === 'substitution' && e.team === 'home').length, a: events.filter(e => e.type === 'substitution' && e.team === 'away').length },
-                                    ].filter(s => s.h > 0 || s.a > 0).map(stat => {
+                                    {teamComparableStats.map(stat => {
                                         const total = stat.h + stat.a || 1;
                                         const hPct = (stat.h / total) * 100;
                                         return (
@@ -918,11 +1312,23 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <h4 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', color: '#888', marginBottom: 16 }}>Desglose de Puntos</h4>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         {(['home', 'away'] as const).map(team => {
-                                            const tries = countTries(events, team) * 5;
-                                            const convs = events.filter(e => e.type === 'conversion' && e.team === team).length * 2;
-                                            const pens = events.filter(e => (e.type === 'penalty_goal' || e.type === 'penalty') && e.team === team).length * 3;
-                                            const drops = events.filter(e => e.type === 'drop_goal' && e.team === team).length * 3;
-                                            const total = tries + convs + pens + drops;
+                                            const rows = scoringBreakdown
+                                                .map((definition) => {
+                                                    const count = team === 'home' ? definition.homeCount : definition.awayCount;
+                                                    return {
+                                                        key: definition.type,
+                                                        label: definition.label,
+                                                        count,
+                                                        points: definition.points,
+                                                        subtotal: count * definition.points,
+                                                    };
+                                                })
+                                                .filter((row) => row.count > 0);
+                                            const total = rows.reduce((sum, row) => sum + row.subtotal, 0);
+                                            const tries = rows[0]?.subtotal ?? 0;
+                                            const convs = rows[1]?.subtotal ?? 0;
+                                            const pens = rows[2]?.subtotal ?? 0;
+                                            const drops = rows[3]?.subtotal ?? 0;
                                             const clubName = team === 'home' ? homeName : awayName;
                                             return (
                                                 <div key={team} style={{ padding: 16, background: '#1a1a1a', borderRadius: 8 }}>
@@ -1012,11 +1418,12 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             <div className="form-group">
                                 <label>Estado Actual</label>
                                 <select
-                                    defaultValue={match.status}
+                                    value={match.status}
                                     style={{ borderRadius: 4 }}
                                     onChange={async (e) => {
-                                        await supabase.from('matches').update({ status: e.target.value }).eq('id', matchId);
-                                        fetchMatch();
+                                        const nextStatus = e.target.value;
+                                        setMatch((prev) => ({ ...prev, status: nextStatus }));
+                                        await commitConfigPatch({ status: nextStatus });
                                     }}
                                 >
                                     <option value="scheduled">Programado</option>
@@ -1030,13 +1437,13 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <label>Marcador Local</label>
                                 <input
                                     type="number"
-                                    defaultValue={score.home}
+                                    value={score.home}
                                     min={0}
                                     style={{ borderRadius: 4 }}
+                                    onChange={(e) => handleScoreInputChange('home', e.target.value)}
                                     onBlur={async (e) => {
                                         const newScore = { ...score, home: parseInt(e.target.value) || 0 };
-                                        await supabase.from('matches').update({ score: newScore as unknown as Record<string, number> }).eq('id', matchId);
-                                        fetchMatch();
+                                        await commitConfigPatch({ score: newScore });
                                     }}
                                 />
                             </div>
@@ -1044,13 +1451,13 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <label>Marcador Visitante</label>
                                 <input
                                     type="number"
-                                    defaultValue={score.away}
+                                    value={score.away}
                                     min={0}
                                     style={{ borderRadius: 4 }}
+                                    onChange={(e) => handleScoreInputChange('away', e.target.value)}
                                     onBlur={async (e) => {
                                         const newScore = { ...score, away: parseInt(e.target.value) || 0 };
-                                        await supabase.from('matches').update({ score: newScore as unknown as Record<string, number> }).eq('id', matchId);
-                                        fetchMatch();
+                                        await commitConfigPatch({ score: newScore });
                                     }}
                                 />
                             </div>
@@ -1058,11 +1465,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <label>Estadio / Venue</label>
                                 <input
                                     type="text"
-                                    defaultValue={match.venue || ''}
+                                    value={match.venue || ''}
                                     style={{ borderRadius: 4 }}
+                                    onChange={(e) => setMatch((prev) => ({ ...prev, venue: e.target.value }))}
                                     onBlur={async (e) => {
-                                        await supabase.from('matches').update({ venue: e.target.value }).eq('id', matchId);
-                                        fetchMatch();
+                                        await commitConfigPatch({ venue: e.target.value });
                                     }}
                                 />
                             </div>
@@ -1070,15 +1477,15 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <label>Fecha y Hora</label>
                                 <input
                                     type="datetime-local"
-                                    defaultValue={toDateTimeLocalInput(match.date_time)}
+                                    value={dateTimeDraft}
                                     style={{ borderRadius: 4 }}
+                                    onChange={(e) => setDateTimeDraft(e.target.value)}
                                     onBlur={async (e) => {
                                         if (e.target.value) {
                                             const [date, time] = e.target.value.split('T');
                                             const nextDateTime = combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
                                             if (!nextDateTime) return;
-                                            await supabase.from('matches').update({ date_time: nextDateTime }).eq('id', matchId);
-                                            fetchMatch();
+                                            await commitConfigPatch({ dateTime: nextDateTime });
                                         }
                                     }}
                                 />
@@ -1217,3 +1624,4 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         </main>
     );
 }
+

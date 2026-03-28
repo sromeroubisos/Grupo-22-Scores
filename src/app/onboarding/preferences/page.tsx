@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useAuth } from '@/context/AuthContext'
+import { setOnboardingStorageStatus } from '@/lib/onboardingStatus'
 import { type LeagueItem } from '@/lib/services/preferencesService'
 
 import styles from './onboarding.module.css'
@@ -241,6 +242,7 @@ function OnboardingPreferencesContent() {
             })
 
             await readJson<{ ok: boolean }>(response)
+            setOnboardingStorageStatus(user.id, { skipped: true })
             await refreshOnboardingStatus()
             router.push('/')
         } catch (err) {
@@ -289,6 +291,7 @@ function OnboardingPreferencesContent() {
             })
 
             await readJson<{ ok: boolean }>(response)
+            setOnboardingStorageStatus(user.id, { skipped: false })
             await refreshOnboardingStatus()
 
             if (isEditMode) {

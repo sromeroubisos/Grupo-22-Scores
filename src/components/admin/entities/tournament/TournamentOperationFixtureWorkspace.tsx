@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   AlertTriangle,
   Calendar,
@@ -25,7 +26,6 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import type { Database } from '@/lib/database.types';
 import type { MatchStatus, MatchWithClubs, RoundWithMatches } from '@/lib/types/fixture';
 import type { FixtureImportPreviewResult } from '@/lib/types/fixture-import';
@@ -1912,20 +1912,26 @@ function MatchCard({
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
-  const router = useRouter();
   const { match, round } = entry;
   const quickBusy = busyAction === `quick-save-${match.id}`;
   const scoreVisible = match.status === 'live' || match.status === 'final';
   const totalHomePoints = quickResultForm ? parseQuickNumber(quickResultForm.homeBasePoints) + parseQuickNumber(quickResultForm.homeBonusPoints) : 0;
   const totalAwayPoints = quickResultForm ? parseQuickNumber(quickResultForm.awayBasePoints) + parseQuickNumber(quickResultForm.awayBonusPoints) : 0;
   const getGroupLabel = (groupId: string | null | undefined) => groupLabel ?? formatGroupLabel(groupId);
+  const manageHref = `/admin/matches/${match.id}/manage`;
+  const matchLabel = `${match.homeClub?.name || 'Local'} vs ${match.awayClub?.name || 'Visitante'}`;
 
   return (
     <article
       className={`fixture-match-card fixture-glass ${getMatchTone(match.status)}`}
       style={{ cursor: 'pointer' }}
-      onClick={() => router.push(`/admin/matches/${match.id}/manage`)}
     >
+      <Link
+        href={manageHref}
+        className="fixture-match-link"
+        aria-label={`Abrir control de partido de ${matchLabel}`}
+        title="Abrir control de partido. También puedes hacer click derecho para abrirlo en otro panel."
+      />
       <div className="fixture-match-top">
         <div>
           <span className="fixture-match-headline">{formatDateLabel(match.dateTime)} · {formatTimeLabel(match.dateTime)}</span>

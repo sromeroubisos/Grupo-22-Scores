@@ -9,7 +9,7 @@ export async function PATCH(
 ) {
   try {
     const supabase = await createClient();
-    const { phaseId } = await params;
+    const { id: tournamentId, phaseId } = await params;
     const body = await request.json();
     const nextPhaseType = body.phase_type;
     const sanitizedGroupNames: string[] = (body.settings?.group_names || [])
@@ -35,12 +35,26 @@ export async function PATCH(
       .from('tournament_phases')
       .update(updateData)
       .eq('id', phaseId)
+      .eq('tournament_id', tournamentId)
       .select()
       .single();
 
     if (error) {
       console.error('Error updating phase:', error);
       return NextResponse.json({ error: 'Error updating phase' }, { status: 500 });
+    }
+
+    if (body.is_active === true) {
+      const { error: deactivateError } = await supabase
+        .from('tournament_phases')
+        .update({ is_active: false })
+        .eq('tournament_id', tournamentId)
+        .neq('id', phaseId);
+
+      if (deactivateError) {
+        console.error('Error clearing active phase:', deactivateError);
+        return NextResponse.json({ error: 'Error updating active phase' }, { status: 500 });
+      }
     }
 
     // Sync tournament_groups when updating a group_stage phase
@@ -83,13 +97,57 @@ export async function DELETE(
 ) {
   try {
     const supabase = await createClient();
-    const { phaseId } = await params;
+    const { id: tournamentId, phaseId } = await params;
 
-    const { error } = await supabase.from('tournament_phases').delete().eq('id', phaseId);
+    const { data: phaseToDelete, error: phaseLookupError } = await supabase
+      .from('tournament_phases')
+      .select('id, is_active')
+      .eq('id', phaseId)
+      .eq('tournament_id', tournamentId)
+      .single();
+
+    if (phaseLookupError) {
+      console.error('Error fetching phase before delete:', phaseLookupError);
+      return NextResponse.json({ error: 'Error deleting phase' }, { status: 500 });
+    }
+
+    const { error } = await supabase
+      .from('tournament_phases')
+      .delete()
+      .eq('id', phaseId)
+      .eq('tournament_id', tournamentId);
 
     if (error) {
       console.error('Error deleting phase:', error);
       return NextResponse.json({ error: 'Error deleting phase' }, { status: 500 });
+    }
+
+    if (phaseToDelete?.is_active) {
+      const { data: replacementPhase, error: replacementError } = await supabase
+        .from('tournament_phases')
+        .select('id')
+        .eq('tournament_id', tournamentId)
+        .order('order_index', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (replacementError) {
+        console.error('Error finding replacement active phase:', replacementError);
+        return NextResponse.json({ error: 'Error deleting phase' }, { status: 500 });
+      }
+
+      if (replacementPhase?.id) {
+        const { error: activateReplacementError } = await supabase
+          .from('tournament_phases')
+          .update({ is_active: true })
+          .eq('id', replacementPhase.id)
+          .eq('tournament_id', tournamentId);
+
+        if (activateReplacementError) {
+          console.error('Error activating replacement phase:', activateReplacementError);
+          return NextResponse.json({ error: 'Error deleting phase' }, { status: 500 });
+        }
+      }
     }
 
     return NextResponse.json({ success: true });

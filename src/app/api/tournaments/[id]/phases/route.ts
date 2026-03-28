@@ -51,6 +51,18 @@ export async function POST(
       return NextResponse.json({ error: 'El nombre de la fase es obligatorio.' }, { status: 400 });
     }
 
+    const { count: existingPhaseCount, error: countError } = await supabase
+      .from('tournament_phases')
+      .select('id', { count: 'exact', head: true })
+      .eq('tournament_id', tournamentId);
+
+    if (countError) {
+      console.error('Error counting phases:', countError);
+      return NextResponse.json({ error: 'Error creating phase' }, { status: 500 });
+    }
+
+    const shouldActivate = body.is_active === true || (existingPhaseCount ?? 0) === 0;
+
     const { data: phase, error } = await supabase
       .from('tournament_phases')
       .insert({
@@ -58,7 +70,7 @@ export async function POST(
         name: phaseName,
         phase_type: phaseType,
         order_index: body.order_index ?? 0,
-        is_active: body.is_active ?? true,
+        is_active: shouldActivate,
         settings: {
           ...syncedSettings,
           group_names: groupNames,
@@ -74,6 +86,18 @@ export async function POST(
         code: error.code || 'UNKNOWN',
         hint: error.hint || 'No hint'
       }, { status: 500 });
+    }
+
+    if (phase && shouldActivate) {
+      const { error: deactivateError } = await supabase
+        .from('tournament_phases')
+        .update({ is_active: false })
+        .eq('tournament_id', tournamentId)
+        .neq('id', phase.id);
+
+      if (deactivateError) {
+        console.error('Error clearing previous active phases:', deactivateError);
+      }
     }
 
     // Auto-create tournament_groups for group_stage phases

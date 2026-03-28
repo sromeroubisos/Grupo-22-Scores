@@ -1,10 +1,19 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supabase/supabase-js';
 import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
+import {
+    getOnboardingMetadataStatus,
+    getOnboardingStorageStatus,
+    setOnboardingStorageStatus,
+} from '@/lib/onboardingStatus';
+import {
+    completeOnboarding,
+    getOnboardingStatus,
+} from '@/lib/services/preferencesService';
+import { createClient } from '@/lib/supabase/client';
 
 interface User {
     id: string;
@@ -16,7 +25,7 @@ interface User {
     tournamentId?: string;
     clubId?: string;
     memberships?: MembershipLike[];
-    onboardingCompleted: boolean | null; // null = not yet checked
+    onboardingCompleted: boolean | null;
 }
 
 interface AuthContextType {
@@ -28,13 +37,23 @@ interface AuthContextType {
     refreshOnboardingStatus: () => Promise<void>;
 }
 
+type MembershipRow = {
+    scope_type: MembershipLike['scopeType'];
+    scope_id: MembershipLike['scopeId'];
+    role: MembershipLike['role'];
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const isAbortError = (err: any) => {
+const isAbortError = (err: unknown) => {
+    if (!(err instanceof Error)) {
+        return false;
+    }
+
     return (
-        err?.name === 'AbortError' ||
-        err?.message?.includes('abort') ||
-        err?.message?.includes('signal is aborted')
+        err.name === 'AbortError' ||
+        err.message.includes('abort') ||
+        err.message.includes('signal is aborted')
     );
 };
 
@@ -44,8 +63,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
     const isMounted = useRef(true);
 
-    const fetchAndSetUser = async (sbUser: SupabaseUser) => {
+    const resolveFallbackOnboarding = useCallback((sbUser: SupabaseUser) => {
+        const metadataStatus = getOnboardingMetadataStatus(sbUser.user_metadata);
+        const storageStatus = getOnboardingStorageStatus(sbUser.id);
+
+        return {
+            completed: metadataStatus.completed || storageStatus.completed,
+            skipped: metadataStatus.skipped || storageStatus.skipped,
+        };
+    }, []);
+
+    const rehydrateMissingOnboardingStatus = useCallback((userId: string) => {
+        completeOnboarding(supabase, userId, { skipped: true }).catch(() => { });
+    }, [supabase]);
+
+    const fetchAndSetUser = useCallback(async (sbUser: SupabaseUser) => {
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
+        const fallbackOnboarding = resolveFallbackOnboarding(sbUser);
+
         try {
             const { data: profile, error: profileError } = await supabase
                 .from('users')
@@ -61,17 +96,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (profile) {
                 console.log('[AuthContext] Profile found in DB');
-                const supabaseAny = supabase as any;
-                const [membershipsResult, onboardingResult] = await Promise.all([
+                const [membershipsResult, onboarding] = await Promise.all([
                     supabase
                         .from('memberships')
                         .select('scope_type, scope_id, role')
                         .eq('user_id', sbUser.id),
-                    supabaseAny
-                        .from('user_onboarding_status')
-                        .select('preferences_onboarding_completed, skipped')
-                        .eq('user_id', sbUser.id)
-                        .single(),
+                    getOnboardingStatus(supabase, sbUser.id),
                 ]);
 
                 if (membershipsResult.error) {
@@ -80,25 +110,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (!isMounted.current) return;
 
-                const memberships: MembershipLike[] = (membershipsResult.data || []).map((m: any) => ({
-                    scopeType: m.scope_type,
-                    scopeId: m.scope_id,
-                    role: m.role,
+                const membershipRows = (membershipsResult.data || []) as MembershipRow[];
+                const memberships: MembershipLike[] = membershipRows.map((membership) => ({
+                    scopeType: membership.scope_type,
+                    scopeId: membership.scope_id,
+                    role: membership.role,
                 }));
 
-                const onboarding = onboardingResult.data as { preferences_onboarding_completed: boolean; skipped: boolean } | null;
                 let onboardingCompleted = false;
+                let onboardingSkipped = false;
 
                 if (onboarding) {
                     onboardingCompleted = onboarding.preferences_onboarding_completed || onboarding.skipped;
+                    onboardingSkipped = !!onboarding.skipped;
+                } else if (fallbackOnboarding.completed) {
+                    onboardingCompleted = true;
+                    onboardingSkipped = fallbackOnboarding.skipped;
+                    rehydrateMissingOnboardingStatus(sbUser.id);
                 } else {
-                    // Si no tiene registro, es su primer inicio de sesión.
-                    // Lo marcamos como "skip" en background para que NO se le vuelva a pedir en futuros logins.
-                    // En esta sesión se le pedirá porque localmente onboardingCompleted es false.
+                    // First session: keep showing the onboarding once, but leave a DB row behind.
                     onboardingCompleted = false;
-                    import('@/lib/services/preferencesService').then(({ completeOnboarding }) => {
-                        completeOnboarding(supabase, sbUser.id, { skipped: true }).catch(() => { });
-                    });
+                    rehydrateMissingOnboardingStatus(sbUser.id);
+                }
+
+                if (onboardingCompleted) {
+                    setOnboardingStorageStatus(sbUser.id, { skipped: onboardingSkipped });
                 }
 
                 const finalUser = {
@@ -110,41 +146,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     memberships,
                     onboardingCompleted,
                 };
+
                 console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role, 'onboardingCompleted:', onboardingCompleted);
                 setUser(finalUser);
             } else {
                 const { isSuperAdminEmail } = await import('@/lib/types/user');
                 const fallbackRole = isSuperAdminEmail(sbUser.email) ? 'super_admin' : 'fan';
 
+                if (fallbackOnboarding.completed) {
+                    setOnboardingStorageStatus(sbUser.id, { skipped: fallbackOnboarding.skipped });
+                }
+
+                fetch('/api/auth/sync-user', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                }).catch((syncError: unknown) => {
+                    console.warn('[AuthContext] sync-user failed after missing profile:', syncError);
+                });
+
                 console.log('[AuthContext] No profile in DB, using fallback metadata with role:', fallbackRole);
-                // Fallback to auth metadata si el perfil no existe todavía
                 setUser({
                     id: sbUser.id,
                     name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: sbUser.email || '',
                     role: fallbackRole,
                     avatarUrl: sbUser.user_metadata?.avatar_url,
-                    onboardingCompleted: false,
+                    onboardingCompleted: fallbackOnboarding.completed,
                 });
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             if (isAbortError(err)) return;
             console.error('[AuthContext] Error fetching user profile:', err);
-            // On error, still set fallback user so they are "authenticated"
             setUser({
                 id: sbUser.id,
                 name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                 email: sbUser.email || '',
                 role: 'fan',
                 avatarUrl: sbUser.user_metadata?.avatar_url,
-                onboardingCompleted: true, // Don't block on error
+                onboardingCompleted: true,
             });
         } finally {
             if (isMounted.current) {
                 setIsLoading(false);
             }
         }
-    };
+    }, [rehydrateMissingOnboardingStatus, resolveFallbackOnboarding, supabase]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -164,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         setIsLoading(false);
                     }
                 }
-            } catch (err: any) {
+            } catch (err: unknown) {
                 if (isAbortError(err)) return;
                 console.error('[AuthContext] initAuth error:', err);
                 if (isMounted.current) setIsLoading(false);
@@ -179,12 +225,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || (event as string) === 'INITIAL_SESSION') {
                     if (session?.user) {
                         console.log('[AuthContext] Event result: fetching user for event:', event);
-                        // Do NOT await here, to prevent deadlocks in the Supabase client internal lock
-                        fetchAndSetUser(session.user).catch(err => {
-                            console.error('[AuthContext] Background fetchAndSetUser failed:', err);
+                        fetchAndSetUser(session.user).catch((backgroundError: unknown) => {
+                            console.error('[AuthContext] Background fetchAndSetUser failed:', backgroundError);
                         });
                     } else if (event !== 'INITIAL_SESSION') {
-                        // If we get SIGNED_IN but no session/user, that's an error state
                         console.warn('[AuthContext] SIGNED_IN event received but no user present in session');
                         setUser(null);
                         setIsLoading(false);
@@ -196,7 +240,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     localStorage.removeItem('g22_user');
                 }
 
-                // Defensively clear favorites cache on sign out/in/update
                 if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                     clearFavoritesCache(`Auth event: ${event}`);
                 }
@@ -205,25 +248,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         });
 
-        // Initialize last to ensure listener is ready
         initAuth();
 
         return () => {
             isMounted.current = false;
             subscription.unsubscribe();
         };
-    }, []);
+    }, [fetchAndSetUser, supabase]);
 
-    const login = (role: AppUserRole = 'fan', returnTo?: string) => {
-        // Redirect to the real login page, preserving returnTo so EmailLoginForm
-        // can router.replace() back after authentication.
+    const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
+        void _role;
         if (typeof window !== 'undefined') {
             const url = new URL('/login', window.location.origin);
             if (returnTo) {
-                // Encode so ?type=... inside returnTo survives as a single param
                 url.searchParams.set('returnTo', returnTo);
             }
-            // Use location.replace (not href) to avoid adding to back-stack
             window.location.replace(url.toString());
         }
     };
@@ -253,7 +292,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             const data = await response.json() as { onboardingCompleted?: boolean };
-            const onboardingCompleted = !!data.onboardingCompleted;
+            const storageStatus = getOnboardingStorageStatus(user.id);
+            const onboardingCompleted = !!data.onboardingCompleted || storageStatus.completed;
+
+            if (onboardingCompleted) {
+                setOnboardingStorageStatus(user.id, { skipped: storageStatus.skipped });
+            }
 
             if (isMounted.current) {
                 setUser(prev => prev ? { ...prev, onboardingCompleted } : null);

@@ -461,6 +461,7 @@ function FixtureManagementCenter({
             const matchRow: MatchRow = {
                 id: matchData.id,
                 tournament_id: matchData.tournamentId,
+                phase_id: matchData.phaseId,
                 round_id: matchData.roundId,
                 date_time: matchData.dateTime,
                 venue: matchData.venue,
@@ -477,7 +478,7 @@ function FixtureManagementCenter({
                 updated_at: matchData.updatedAt,
                 homeClub: matchData.homeClub ? { id: matchData.homeClub.id, name: matchData.homeClub.name, short_name: matchData.homeClub.shortName, logo_url: matchData.homeClub.logo, primary_color: null } : null,
                 awayClub: matchData.awayClub ? { id: matchData.awayClub.id, name: matchData.awayClub.name, short_name: matchData.awayClub.shortName, logo_url: matchData.awayClub.logo, primary_color: null } : null,
-                tournament: tournamentData ? { id: tournamentData.id, name: tournamentData.name } : null,
+                tournament: tournamentData ? { id: tournamentData.id, name: tournamentData.name, sport_id: (tournamentData as TournamentRow & { sport_id?: string | null }).sport_id ?? null } : null,
                 // Points
                 home_base_points: matchData.homeBasePoints ?? null,
                 away_base_points: matchData.awayBasePoints ?? null,

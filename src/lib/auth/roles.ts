@@ -213,6 +213,14 @@ export function resolveAdminPanel(
     return null;
 }
 
+export function hasFederationAdminAccess(
+    role?: string | null,
+    memberships?: MembershipLike[] | null
+): boolean {
+    const adminPanel = resolveAdminPanel(role, memberships);
+    return Boolean(adminPanel && adminPanel.href.startsWith('/admin'));
+}
+
 export function isAdminUser(role?: string | null, memberships?: MembershipLike[] | null): boolean {
     return Boolean(resolveAdminPanel(role, memberships));
 }

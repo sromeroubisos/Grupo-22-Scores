@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canManageMatchContext, getMatchManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
-import { EDIT_MEMBERSHIP_ROLES, MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { EDIT_MEMBERSHIP_ROLES, MANAGEMENT_MEMBERSHIP_ROLES, hasFederationAdminAccess } from '@/lib/auth/roles';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
@@ -104,6 +104,10 @@ async function ensureMatchAccess(
   const context = await requireUserAccessContext(supabase).catch(() => null);
   if (!context) {
     throw new Error('Unauthorized');
+  }
+
+  if (hasFederationAdminAccess(context.rawRole, context.memberships)) {
+    return;
   }
 
   const target = await getMatchManagementTarget(supabase, matchId);
