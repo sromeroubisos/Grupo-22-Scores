@@ -719,12 +719,14 @@ export class FixtureImportService {
             venue: parsed.venue,
             round: parsed.round,
             status: parsed.status,
+            score_home: parsed.scoreHome ?? null,
+            score_away: parsed.scoreAway ?? null,
           };
         });
 
       return {
         sourceType: 'pasted_text',
-        headers: ['home_team', 'away_team', 'match_date', 'match_time', 'venue', 'round', 'status'],
+        headers: ['home_team', 'away_team', 'match_date', 'match_time', 'venue', 'round', 'status', 'score_home', 'score_away'],
         rows,
         extractedText: pastedText,
         issues: rows.length ? [] : [this.issue('error', 'empty_text', 'No se detectaron líneas con partidos.', 'document')],
@@ -736,6 +738,8 @@ export class FixtureImportService {
           venue: 'venue',
           round: 'round',
           status: 'status',
+          score_home: 'score_home',
+          score_away: 'score_away',
         },
         suggestions: [],
         needsManualMapping: false,
@@ -1026,6 +1030,8 @@ export class FixtureImportService {
     let matchDate: string | null = null;
     let matchTime: string | null = null;
     let venue: string | null = null;
+    let scoreHome: number | null = null;
+    let scoreAway: number | null = null;
 
     metadataSegments.forEach((segment) => {
       const dateMatch = segment.match(/\b(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\b/);
@@ -1053,6 +1059,16 @@ export class FixtureImportService {
     }
 
     trailingSegments.forEach((segment) => {
+      // Detect optional score at end of line (e.g. "2:1" or "2-1")
+      if (scoreHome === null && /^\d+\s*[-:]\s*\d+$/.test(segment)) {
+        const parsed = this.parseScore(segment);
+        if (parsed) {
+          scoreHome = parsed.home;
+          scoreAway = parsed.away;
+          return;
+        }
+      }
+
       if (!matchTime) {
         const timeMatch = segment.match(/\b(\d{1,2}:\d{2})\b/);
         if (timeMatch) {
@@ -1087,7 +1103,9 @@ export class FixtureImportService {
         matchTime,
         venue,
         round,
-        status: 'scheduled',
+        scoreHome,
+        scoreAway,
+        status: scoreHome !== null || scoreAway !== null ? 'final' : 'scheduled',
       };
     }
 
@@ -1099,7 +1117,9 @@ export class FixtureImportService {
       matchTime,
       venue: venue || fallbackSegments.slice(2).join(' | ') || null,
       round,
-      status: 'scheduled',
+      scoreHome,
+      scoreAway,
+      status: scoreHome !== null || scoreAway !== null ? 'final' : 'scheduled',
     };
   }
 

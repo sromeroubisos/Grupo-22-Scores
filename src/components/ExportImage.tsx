@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
-export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats';
+export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket';
 type ExportDateValue = string | number | Date;
 type MatchExportMode = 'schedule' | 'result';
 type StandingsExportMode = 'table' | 'groups';
@@ -99,7 +99,50 @@ interface PlayerStatsData {
     stats: Array<{ label: string; value: number | string; highlight?: boolean }>;
 }
 
-type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData;
+interface PlayoffBracketMatchData {
+    match_id?: string | number;
+    home_team?: {
+        id?: string | number;
+        name?: string;
+        logo?: string;
+    } | null;
+    away_team?: {
+        id?: string | number;
+        name?: string;
+        logo?: string;
+    } | null;
+    home_participant?: {
+        participant_id?: string | number;
+        participant_name?: string;
+        image_path?: string;
+    } | null;
+    away_participant?: {
+        participant_id?: string | number;
+        participant_name?: string;
+        image_path?: string;
+    } | null;
+    score_home?: number | string | null;
+    score_away?: number | string | null;
+    winner_id?: string | number | null;
+    match_start_iso?: string | null;
+    status?: string;
+    result?: string;
+}
+
+interface PlayoffBracketRoundData {
+    round_id?: string | number;
+    name: string;
+    matches: PlayoffBracketMatchData[];
+}
+
+interface PlayoffBracketData {
+    title: string;
+    subtitle?: string;
+    tournamentLogo?: string;
+    rounds: PlayoffBracketRoundData[];
+}
+
+type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData;
 type CanvasFormat = { width: number; height: number };
 type SafeArea = { top: number; bottom: number; centerX: number; width: number; height: number };
 
@@ -347,6 +390,8 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 const matchesData = exportData as DailyMatchesData;
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
                 await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+            } else if (template === 'playoffBracket') {
+                await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
             } else {
                 await drawPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
             }
@@ -635,6 +680,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
     if (template === 'standings') return (data as StandingsData).title || '';
+    if (template === 'playoffBracket') return (data as PlayoffBracketData).title || '';
     if (template === 'dailyMatches' || template === 'matchStats') return (data as DailyMatchesData | MatchStatsData).tournament || '';
     return '';
 }
@@ -878,6 +924,14 @@ function buildExportData(
         return {
             ...standingsData,
             title: tournamentName || standingsData.title,
+        };
+    }
+
+    if (template === 'playoffBracket') {
+        const bracketData = data as PlayoffBracketData;
+        return {
+            ...bracketData,
+            title: tournamentName || bracketData.title,
         };
     }
 
@@ -1812,6 +1866,229 @@ async function drawDailyMatches(
             y + rowHeight / 2 + (isStory ? 38 : 32)
         );
         ctx.restore();
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, isDark);
+}
+
+function getBracketParticipantName(side: PlayoffBracketMatchData['home_team'], participant: PlayoffBracketMatchData['home_participant']) {
+    return participant?.participant_name || side?.name || 'TBD';
+}
+
+function getBracketParticipantLogo(side: PlayoffBracketMatchData['home_team'], participant: PlayoffBracketMatchData['home_participant']) {
+    return participant?.image_path || side?.logo || '';
+}
+
+function getBracketMatchWinner(match: PlayoffBracketMatchData, side: 'home' | 'away') {
+    const winnerId = match.winner_id;
+    if (winnerId != null) {
+        const homeId = match.home_participant?.participant_id ?? match.home_team?.id ?? null;
+        const awayId = match.away_participant?.participant_id ?? match.away_team?.id ?? null;
+        return side === 'home' ? String(winnerId) === String(homeId) : String(winnerId) === String(awayId);
+    }
+
+    const homeScore = Number(match.score_home);
+    const awayScore = Number(match.score_away);
+    const isFinished = match.status === 'finished' || match.status === 'final' || match.result === 'finished' || match.result === 'Final';
+
+    if (!isFinished || !Number.isFinite(homeScore) || !Number.isFinite(awayScore) || homeScore === awayScore) {
+        return false;
+    }
+
+    return side === 'home' ? homeScore > awayScore : awayScore > homeScore;
+}
+
+async function drawPlayoffBracket(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: PlayoffBracketData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => Array.isArray(round?.matches) && round.matches.length > 0) : [];
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const textColor = getTextColor(isDark);
+    const mutedColor = getMutedColor(isDark, 0.7);
+    const safe = getSafeArea(canvas);
+    const isStory = format.height > format.width;
+    const logoLoads = await Promise.all([
+        loadImage(data.tournamentLogo || ''),
+        ...rounds.flatMap((round) =>
+            round.matches.flatMap((match) => [
+                loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
+                loadImage(getBracketParticipantLogo(match.away_team || null, match.away_participant || null)),
+            ]),
+        ),
+    ]);
+    const tournamentLogo = logoLoads[0];
+
+    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
+    drawCenteredPill(
+        ctx,
+        safe.centerX,
+        isStory ? 74 : 56,
+        'CUADRO PLAYOFF',
+        accentColor,
+        getContrastColor(accentColor),
+        `800 ${isStory ? 24 : 20}px ${FONT_BODY}`,
+        26,
+        isStory ? 48 : 42,
+    );
+    drawTournamentRibbon(ctx, canvas, data.title, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 26 : 22);
+
+    if (data.subtitle) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = mutedColor;
+        ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
+        ctx.fillText(data.subtitle, safe.centerX, isStory ? 208 : 178);
+        ctx.restore();
+    }
+
+    const panelX = isStory ? 38 : 42;
+    const panelY = isStory ? 248 : 220;
+    const panelWidth = canvas.width - panelX * 2;
+    const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
+    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
+
+    if (rounds.length === 0) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = mutedColor;
+        ctx.font = `600 ${isStory ? 24 : 20}px ${FONT_BODY}`;
+        ctx.fillText('No hay cruces cargados para exportar.', safe.centerX, panelY + panelHeight / 2);
+        ctx.restore();
+        drawBrandFooter(ctx, canvas, brandLogo, isDark);
+        return;
+    }
+
+    const contentTop = panelY + 30;
+    const contentBottom = panelY + panelHeight - 24;
+    const columnGap = isStory ? 14 : 12;
+    const columnWidth = (panelWidth - 32 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
+    const innerHeight = contentBottom - contentTop;
+    let logoIndex = 1;
+
+    rounds.forEach((round, roundIndex) => {
+        const columnX = panelX + 16 + roundIndex * (columnWidth + columnGap);
+        const roundMatches = round.matches;
+        const titleHeight = isStory ? 34 : 30;
+        const listTop = contentTop + titleHeight + 18;
+        const listHeight = innerHeight - titleHeight - 18;
+        const rowGap = isStory ? 16 : 12;
+        const matchHeight = Math.min(
+            isStory ? 124 : 112,
+            (listHeight - rowGap * Math.max(roundMatches.length - 1, 0)) / Math.max(roundMatches.length, 1),
+        );
+
+        ctx.save();
+        ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.14 : 0.09);
+        ctx.beginPath();
+        ctx.roundRect(columnX, contentTop, columnWidth, titleHeight, 999);
+        ctx.fill();
+        ctx.fillStyle = accentColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `800 ${isStory ? 16 : 14}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, round.name.toUpperCase(), columnWidth - 26), columnX + columnWidth / 2, contentTop + titleHeight / 2 + 1);
+        ctx.restore();
+
+        roundMatches.forEach((match, matchIndex) => {
+            const cardY = listTop + matchIndex * (matchHeight + rowGap);
+            const cardHeight = matchHeight;
+            const cardRadius = 24;
+            const homeName = getBracketParticipantName(match.home_team || null, match.home_participant || null);
+            const awayName = getBracketParticipantName(match.away_team || null, match.away_participant || null);
+            const homeWon = getBracketMatchWinner(match, 'home');
+            const awayWon = getBracketMatchWinner(match, 'away');
+            const homeLogo = logoLoads[logoIndex] || null;
+            const awayLogo = logoLoads[logoIndex + 1] || null;
+            logoIndex += 2;
+            const matchDate = toExportDate(match.match_start_iso);
+            const headerLabel = matchDate
+                ? formatDateInFixedOffset(matchDate, DEFAULT_TIMEZONE_OFFSET_MINUTES, { day: '2-digit', month: '2-digit' })
+                : 'TBD';
+            const statusLabel = getStatusLabel(match.status || match.result || 'scheduled');
+            const teamRowHeight = (cardHeight - 30) / 2;
+            const scoreWidth = Math.max(32, Math.min(44, columnWidth * 0.18));
+            const nameWidth = columnWidth - 36 - scoreWidth - 40;
+
+            ctx.save();
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)';
+            ctx.beginPath();
+            ctx.roundRect(columnX, cardY, columnWidth, cardHeight, cardRadius);
+            ctx.fill();
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.07)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = mutedColor;
+            ctx.font = `700 ${isStory ? 12 : 11}px ${FONT_BODY}`;
+            ctx.fillText(headerLabel, columnX + 14, cardY + 15);
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = getStatusColor(match.status || match.result, accentColor, isDark);
+            ctx.fillText(statusLabel, columnX + columnWidth - 14, cardY + 15);
+
+            const drawTeamRow = (
+                y: number,
+                name: string,
+                logo: HTMLImageElement | null,
+                rawLogo: string,
+                score: string | number | null | undefined,
+                winner: boolean,
+            ) => {
+                ctx.save();
+                if (winner) {
+                    ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.14 : 0.1);
+                    ctx.beginPath();
+                    ctx.roundRect(columnX + 8, y, columnWidth - 16, teamRowHeight - 4, 18);
+                    ctx.fill();
+                }
+                drawLogoBadge(ctx, {
+                    x: columnX + 24,
+                    y: y + (teamRowHeight - 4) / 2,
+                    size: Math.max(22, Math.min(28, teamRowHeight - 10)),
+                    img: logo,
+                    label: name,
+                    rawLogo,
+                    isDark,
+                });
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = winner ? accentColor : textColor;
+                ctx.font = `800 ${isStory ? 14 : 12}px ${FONT_BODY}`;
+                const clippedName = truncateTextToWidth(ctx, name.toUpperCase(), nameWidth);
+                ctx.fillText(clippedName, columnX + 42, y + (teamRowHeight - 4) / 2 + 1);
+
+                ctx.textAlign = 'right';
+                ctx.font = `800 ${isStory ? 20 : 18}px ${FONT_MONO}`;
+                ctx.fillText(score == null || score === '' ? '-' : String(score), columnX + columnWidth - 14, y + (teamRowHeight - 4) / 2 + 1);
+                ctx.restore();
+            };
+
+            drawTeamRow(
+                cardY + 26,
+                homeName,
+                homeLogo,
+                getBracketParticipantLogo(match.home_team || null, match.home_participant || null),
+                match.score_home,
+                homeWon,
+            );
+            drawTeamRow(
+                cardY + 26 + teamRowHeight,
+                awayName,
+                awayLogo,
+                getBracketParticipantLogo(match.away_team || null, match.away_participant || null),
+                match.score_away,
+                awayWon,
+            );
+            ctx.restore();
+        });
     });
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);

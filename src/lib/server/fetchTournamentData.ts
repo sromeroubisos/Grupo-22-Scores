@@ -16,6 +16,7 @@ export type TournamentQueryErrors = {
     matches: string | null;
     standings: string | null;
     phases: string | null;
+    rounds: string | null;
     groups: string | null;
     teamLabels: string | null;
 };
@@ -29,6 +30,7 @@ export type TournamentInitialData = {
     matches: unknown[];
     standings: unknown[];
     phases: unknown[];
+    rounds: unknown[];
     groups: unknown[];
     teamLabels: unknown[];
     queryErrors?: TournamentQueryErrors;
@@ -45,6 +47,14 @@ type SettledQuery<T> = {
 };
 
 type TournamentGroupWithPhaseFilter = {
+    id: string;
+    name: string;
+    phase_id: string;
+    order_index: number | null;
+    tournament_phases: Array<{ tournament_id: string | null }>;
+};
+
+type TournamentRoundWithPhaseFilter = {
     id: string;
     name: string;
     phase_id: string;
@@ -151,6 +161,7 @@ function emptyTournamentData(error?: string): TournamentInitialData {
         matches: [],
         standings: [],
         phases: [],
+        rounds: [],
         groups: [],
         teamLabels: [],
         queryErrors: {
@@ -159,6 +170,7 @@ function emptyTournamentData(error?: string): TournamentInitialData {
             matches: null,
             standings: null,
             phases: null,
+            rounds: null,
             groups: null,
             teamLabels: null,
         },
@@ -345,6 +357,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             matchesRes,
             standingsRes,
             phasesRes,
+            roundsRes,
             groupsRes,
             teamLabelsRes,
         ] = await Promise.all([
@@ -408,6 +421,15 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
                 [] as unknown[],
             ),
             settleSupabaseQuery(
+                'rounds',
+                supabase
+                    .from('tournament_rounds')
+                    .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
+                    .eq('tournament_phases.tournament_id', tournamentId)
+                    .order('order_index', { ascending: true }),
+                [] as TournamentRoundWithPhaseFilter[],
+            ),
+            settleSupabaseQuery(
                 'groups',
                 supabase
                     .from('tournament_groups')
@@ -462,6 +484,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             matches: matchesRes.error,
             standings: standingsRes.error,
             phases: phasesRes.error,
+            rounds: roundsRes.error,
             groups: groupsRes.error,
             teamLabels: teamLabelsRes.error,
         };
@@ -472,6 +495,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             matchesRes.data.length ||
             standingsRes.data.length ||
             phasesRes.data.length ||
+            roundsRes.data.length ||
             groupsRes.data.length ||
             normalizedTeamLabels.length,
         );
@@ -496,6 +520,15 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             matches: hydratedMatches,
             standings: hydratedStandings,
             phases: phasesRes.data,
+            rounds: roundsRes.data.map((round) => {
+                const normalizedRound = round as TournamentRoundWithPhaseFilter;
+                return {
+                    id: normalizedRound.id,
+                    name: normalizedRound.name,
+                    phase_id: normalizedRound.phase_id,
+                    order_index: normalizedRound.order_index,
+                };
+            }),
             groups: groupsRes.data.map((group) => {
                 const normalizedGroup = group as TournamentGroupWithPhaseFilter;
                 return {

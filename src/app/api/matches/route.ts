@@ -14,6 +14,11 @@ import {
     mapCachedToEnrichedMatch
 } from '@/lib/services/externalMatchCache';
 
+// Tournament IDs to hide from API responses (FlashScore or internal)
+const BLOCKED_TOURNAMENT_IDS = new Set([
+    'fs-ofv2oc3e',
+]);
+
 function isUuidLike(value: unknown): value is string {
     return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
@@ -611,9 +616,12 @@ export async function GET(request: Request) {
                     };
                 });
 
-                enrichedMatches = [...enrichedMatches, ...enrichedExternalMatches];
+                const filteredExternalMatches = enrichedExternalMatches.filter(
+                    m => !BLOCKED_TOURNAMENT_IDS.has(m.tournamentId)
+                );
+                enrichedMatches = [...enrichedMatches, ...filteredExternalMatches];
                 fsOk = true;
-                fsCount = enrichedExternalMatches.length;
+                fsCount = filteredExternalMatches.length;
                 fsReason = fsCount === 0 ? 'empty_result' : null;
                 fsMessage = fsCount === 0 ? 'No hay partidos de FlashScore para este filtro.' : null;
                 console.log(`[matches] FlashScore: ${fsCount} matches for date=${date}`);
