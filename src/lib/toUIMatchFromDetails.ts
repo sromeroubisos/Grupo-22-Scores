@@ -1,5 +1,6 @@
 // src/lib/toUIMatchFromDetails.ts
 import type { MatchDetails } from "./flashscoreDetails";
+import { resolveTeamLogo } from "./utils/teamLogoOverrides";
 
 export type DetailsUIMatch = {
     id: string;
@@ -49,6 +50,9 @@ export function toUIMatchFromDetails(d: MatchDetails): DetailsUIMatch {
         }
     }
 
+    const homeLogo = resolveTeamLogo(d.home_team);
+    const awayLogo = resolveTeamLogo(d.away_team);
+
     return {
         id: d.match_id,
         status,
@@ -58,15 +62,15 @@ export function toUIMatchFromDetails(d: MatchDetails): DetailsUIMatch {
             id: d.home_team.team_id,
             name: d.home_team.name,
             shortName: d.home_team.short_name ?? null,
-            logo: d.home_team.image_path || d.home_team.small_image_path || d.home_team.logo || null,
-            logoSmall: d.home_team.small_image_path || null,
+            logo: homeLogo || null,
+            logoSmall: homeLogo || d.home_team.small_image_path || d.home_team.image_path || d.home_team.logo || null,
         },
         away: {
             id: d.away_team.team_id,
             name: d.away_team.name,
             shortName: d.away_team.short_name ?? null,
-            logo: d.away_team.image_path || d.away_team.small_image_path || d.away_team.logo || null,
-            logoSmall: d.away_team.small_image_path || null,
+            logo: awayLogo || null,
+            logoSmall: awayLogo || d.away_team.small_image_path || d.away_team.image_path || d.away_team.logo || null,
         },
         scoreHome,
         scoreAway,

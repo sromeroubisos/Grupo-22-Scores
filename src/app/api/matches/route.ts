@@ -10,6 +10,7 @@ import { getCountryById } from '@/lib/data/countries';
 import { isFlashScoreEnabledForSport, isRugbySport } from '@/lib/externalProviderPolicy';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import {
     getMatchesForDate,
     getLiveMatches,
@@ -79,6 +80,42 @@ function resolveTournamentCountry(tournament: any): string {
     }
 
     return 'Internacional';
+}
+
+function buildResolvedMatchTeam(
+    team: {
+        id?: string | null;
+        name?: string | null;
+        shortName?: string | null;
+        logo?: string | null;
+        logo_url?: string | null;
+        image_path?: string | null;
+        small_image_path?: string | null;
+    } | null | undefined,
+    fallbackName: string,
+    fallbackShortName: string
+) {
+    const id = team?.id ? String(team.id) : null;
+    const name = typeof team?.name === 'string' && team.name.trim() ? team.name : fallbackName;
+    const shortName = typeof team?.shortName === 'string' && team.shortName.trim()
+        ? team.shortName
+        : (name.substring(0, 3).toUpperCase() || fallbackShortName);
+
+    return {
+        id,
+        name,
+        logo: resolveTeamLogo({
+            id,
+            team_id: id,
+            name,
+            short_name: shortName,
+            logo: team?.logo || '',
+            logo_url: team?.logo_url || '',
+            image_path: team?.image_path || '',
+            small_image_path: team?.small_image_path || '',
+        }),
+        shortName,
+    };
 }
 
 async function selectManyWithFallback<T>(
@@ -291,18 +328,18 @@ function mapRugbyGameToEnrichedMatch(game: RugbyApiSportsGame, sport: string, ti
         venue: '',
         homeClubId: game.teams?.home?.id ? toRugbyApiSportsTeamId(game.teams.home.id) : null,
         awayClubId: game.teams?.away?.id ? toRugbyApiSportsTeamId(game.teams.away.id) : null,
-        homeTeam: {
+        homeTeam: buildResolvedMatchTeam({
             id: game.teams?.home?.id ? toRugbyApiSportsTeamId(game.teams.home.id) : null,
             name: game.teams?.home?.name || 'Local',
             logo: game.teams?.home?.logo || '',
             shortName: (game.teams?.home?.name || 'LOC').slice(0, 3).toUpperCase(),
-        },
-        awayTeam: {
+        }, 'Local', 'LOC'),
+        awayTeam: buildResolvedMatchTeam({
             id: game.teams?.away?.id ? toRugbyApiSportsTeamId(game.teams.away.id) : null,
             name: game.teams?.away?.name || 'Visitante',
             logo: game.teams?.away?.logo || '',
             shortName: (game.teams?.away?.name || 'VIS').slice(0, 3).toUpperCase(),
-        },
+        }, 'Visitante', 'VIS'),
         tournament: {
             id: toRugbyApiSportsTournamentId(game.league?.id || 'unknown'),
             name: game.league?.name || 'Liga',
@@ -322,18 +359,18 @@ function mapRugbyGameToCachedMatch(game: RugbyApiSportsGame, sport: string) {
         tournamentId: toRugbyApiSportsTournamentId(game.league?.id || 'unknown'),
         tournamentName: game.league?.name || 'Liga',
         countryName: game.country?.name || 'Internacional',
-        homeTeam: {
+        homeTeam: buildResolvedMatchTeam({
             id: game.teams?.home?.id ? toRugbyApiSportsTeamId(game.teams.home.id) : 'ras-team-home',
             name: game.teams?.home?.name || 'Local',
             logo: game.teams?.home?.logo || '',
             shortName: (game.teams?.home?.name || 'LOC').slice(0, 3).toUpperCase(),
-        },
-        awayTeam: {
+        }, 'Local', 'LOC'),
+        awayTeam: buildResolvedMatchTeam({
             id: game.teams?.away?.id ? toRugbyApiSportsTeamId(game.teams.away.id) : 'ras-team-away',
             name: game.teams?.away?.name || 'Visitante',
             logo: game.teams?.away?.logo || '',
             shortName: (game.teams?.away?.name || 'VIS').slice(0, 3).toUpperCase(),
-        },
+        }, 'Visitante', 'VIS'),
         score: {
             home: game.scores?.home ?? null,
             away: game.scores?.away ?? null,
@@ -433,18 +470,18 @@ export async function GET(request: Request) {
                         venue: m.venueName || 'Estadio',
                         homeClubId: m.homeTeamId,
                         awayClubId: m.awayTeamId,
-                        homeTeam: {
+                        homeTeam: buildResolvedMatchTeam({
                             id: m.homeTeamId,
                             name: m.homeTeamName,
                             logo: m.homeTeamLogo || '',
                             shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC'
-                        },
-                        awayTeam: {
+                        }, 'Local', 'LOC'),
+                        awayTeam: buildResolvedMatchTeam({
                             id: m.awayTeamId,
                             name: m.awayTeamName,
                             logo: m.awayTeamLogo || '',
                             shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS'
-                        },
+                        }, 'Visitante', 'VIS'),
                         tournament: {
                             id: m.tournamentId,
                             name: (m as any).leagueName || 'Liga',
@@ -499,18 +536,18 @@ export async function GET(request: Request) {
                                 venue: m.venue || 'Sede',
                                 homeClubId: m.home_club_id,
                                 awayClubId: m.away_club_id,
-                                homeTeam: homeTeam ? {
+                                homeTeam: buildResolvedMatchTeam(homeTeam ? {
                                     id: homeTeam.id,
                                     name: homeTeam.name,
-                                    logo: homeTeam.logo_url || '',
+                                    logo_url: homeTeam.logo_url || '',
                                     shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC'
-                                } : { id: m.home_club_id, name: 'Local', logo: '', shortName: 'LOC' },
-                                awayTeam: awayTeam ? {
+                                } : { id: m.home_club_id, name: 'Local', logo: '', shortName: 'LOC' }, 'Local', 'LOC'),
+                                awayTeam: buildResolvedMatchTeam(awayTeam ? {
                                     id: awayTeam.id,
                                     name: awayTeam.name,
-                                    logo: awayTeam.logo_url || '',
+                                    logo_url: awayTeam.logo_url || '',
                                     shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS'
-                                } : { id: m.away_club_id, name: 'Visitante', logo: '', shortName: 'VIS' },
+                                } : { id: m.away_club_id, name: 'Visitante', logo: '', shortName: 'VIS' }, 'Visitante', 'VIS'),
                                 tournament: tournament ? {
                                     id: tournament.id,
                                     name: tournament.name,
@@ -580,18 +617,18 @@ export async function GET(request: Request) {
 
                 return {
                     ...m,
-                    homeTeam: {
+                    homeTeam: buildResolvedMatchTeam({
                         id: home?.id,
                         name: home?.name,
-                        logo: home?.logoUrl,
+                        logo_url: home?.logoUrl,
                         shortName: home?.shortName
-                    },
-                    awayTeam: {
+                    }, 'Local', 'LOC'),
+                    awayTeam: buildResolvedMatchTeam({
                         id: away?.id,
                         name: away?.name,
-                        logo: away?.logoUrl,
+                        logo_url: away?.logoUrl,
                         shortName: away?.shortName
-                    },
+                    }, 'Visitante', 'VIS'),
                     tournament: {
                         id: tournament?.id,
                         name: tournament?.name,
@@ -780,18 +817,18 @@ export async function GET(request: Request) {
                         venue: m.venueName || 'Estadio',
                         homeClubId: m.homeTeamId,
                         awayClubId: m.awayTeamId,
-                        homeTeam: {
+                        homeTeam: buildResolvedMatchTeam({
                             id: m.homeTeamId,
                             name: m.homeTeamName,
                             logo: m.homeTeamLogo || '',
                             shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC'
-                        },
-                        awayTeam: {
+                        }, 'Local', 'LOC'),
+                        awayTeam: buildResolvedMatchTeam({
                             id: m.awayTeamId,
                             name: m.awayTeamName,
                             logo: m.awayTeamLogo || '',
                             shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS'
-                        },
+                        }, 'Visitante', 'VIS'),
                         tournament: {
                             id: m.tournamentId,
                             name: (m as any).leagueName || 'Liga (EXT)',
@@ -894,28 +931,28 @@ export async function GET(request: Request) {
                             venue: m.venue || 'Sede',
                             homeClubId: m.home_club_id,
                             awayClubId: m.away_club_id,
-                            homeTeam: homeTeam ? {
+                            homeTeam: buildResolvedMatchTeam(homeTeam ? {
                                 id: homeTeam.id,
                                 name: homeTeam.name,
-                                logo: homeTeam.logo_url || '',
+                                logo_url: homeTeam.logo_url || '',
                                 shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC'
                             } : {
                                 id: m.home_club_id,
                                 name: 'Local',
                                 logo: '',
                                 shortName: 'LOC'
-                            },
-                            awayTeam: awayTeam ? {
+                            }, 'Local', 'LOC'),
+                            awayTeam: buildResolvedMatchTeam(awayTeam ? {
                                 id: awayTeam.id,
                                 name: awayTeam.name,
-                                logo: awayTeam.logo_url || '',
+                                logo_url: awayTeam.logo_url || '',
                                 shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS'
                             } : {
                                 id: m.away_club_id,
                                 name: 'Visitante',
                                 logo: '',
                                 shortName: 'VIS'
-                            },
+                            }, 'Visitante', 'VIS'),
                             tournament: tournament ? {
                                 id: tournament.id,
                                 name: tournament.name,

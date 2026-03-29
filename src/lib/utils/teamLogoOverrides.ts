@@ -23,6 +23,8 @@ const LOGO_FIELDS = [
     'logo_path',
     'team_logo',
 ] as const;
+const EXTERNAL_CONTEXT_FIELDS = ['team_url', 'teamUrl'] as const;
+const EXTERNAL_PROVIDER_FIELDS = ['provider', 'source', 'dataSource', 'data_source'] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -97,15 +99,51 @@ function getSourceLogo(source: TeamLogoSource): string {
     return '';
 }
 
-function isLikelyExternalKey(value: string): boolean {
+function hasExternalKeyPrefix(value: string): boolean {
     const normalized = value.trim().toLowerCase();
     if (!normalized) return false;
-    if (normalized.startsWith('fs-team-') || normalized.startsWith('fs-') || normalized.startsWith('ras-team-')) {
-        return true;
+    return normalized.startsWith('fs-team-') || normalized.startsWith('fs-') || normalized.startsWith('ras-team-');
+}
+
+function hasExternalContext(...sources: TeamLogoSource[]): boolean {
+    for (const source of sources) {
+        if (!isRecord(source)) continue;
+
+        for (const field of EXTERNAL_CONTEXT_FIELDS) {
+            const value = source[field];
+            if (typeof value === 'string' && value.trim()) {
+                return true;
+            }
+        }
+
+        for (const field of EXTERNAL_PROVIDER_FIELDS) {
+            const value = source[field];
+            if (typeof value !== 'string') continue;
+
+            const normalized = value.trim().toLowerCase();
+            if (!normalized) continue;
+
+            if (
+                normalized === 'api' ||
+                normalized === 'external' ||
+                normalized.includes('flashscore') ||
+                normalized.includes('rugby-api-sports')
+            ) {
+                return true;
+            }
+        }
+
+        for (const field of ID_FIELDS) {
+            const value = source[field];
+            if (value === null || value === undefined) continue;
+
+            if (hasExternalKeyPrefix(String(value))) {
+                return true;
+            }
+        }
     }
 
-    // Most internal IDs in this repo are UUIDs; raw alphanumeric IDs are typically external provider IDs.
-    return !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalized);
+    return false;
 }
 
 function buildProxyLogoUrl(key: string, fallbackLogo: string): string {
@@ -142,7 +180,7 @@ export function resolveTeamLogo(...sources: TeamLogoSource[]): string {
     if (fallbackLogo.startsWith(`${TEAM_LOGO_PROXY_PATH}?`)) return fallbackLogo;
 
     const candidateKey = getFirstCandidateKey(...sources);
-    if (candidateKey && isLikelyExternalKey(candidateKey)) {
+    if (candidateKey && (hasExternalContext(...sources) || hasExternalKeyPrefix(candidateKey))) {
         return buildProxyLogoUrl(candidateKey, fallbackLogo);
     }
 

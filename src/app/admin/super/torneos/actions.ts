@@ -19,6 +19,7 @@ const ALLOWED_COLUMNS = [
 ] as const;
 
 type AllowedTournamentColumn = typeof ALLOWED_COLUMNS[number];
+type TournamentAuditAction = 'update' | 'delete';
 
 function sanitizeTournamentUpdates(updates: Partial<TournamentUpdate>) {
     const filteredUpdates: Partial<Pick<TournamentUpdate, AllowedTournamentColumn>> = {};
@@ -32,22 +33,50 @@ function sanitizeTournamentUpdates(updates: Partial<TournamentUpdate>) {
     return filteredUpdates;
 }
 
-async function writeTournamentAuditLog(
+function sanitizeTournamentIds(ids: string[]) {
+    const uniqueIds = Array.from(new Set(ids.map((id) => String(id).trim())));
+    const validIds = uniqueIds.filter((id) => UUID_REGEX.test(id));
+
+    if (validIds.length === 0) {
+        throw new Error('No se enviaron IDs validos de torneos.');
+    }
+
+    return validIds;
+}
+
+function revalidateTournamentPaths(ids: string[]) {
+    const paths = new Set<string>(['/admin/super/torneos', '/admin/entities']);
+
+    ids.forEach((id) => {
+        paths.add(`/admin/entities/${id}/manage`);
+        paths.add(`/tournaments/${id}`);
+    });
+
+    paths.forEach((path) => revalidatePath(path));
+}
+
+async function writeTournamentAuditLogs(
     actorUserId: string,
-    tournamentId: string,
-    action: 'update' | 'delete',
-    changes: Record<string, unknown>
+    entries: Array<{
+        tournamentId: string;
+        action: TournamentAuditAction;
+        changes: Record<string, unknown>;
+    }>
 ) {
+    if (entries.length === 0) return;
+
     try {
         const admin = createAdminClient();
-        await admin.from('admin_audit_log').insert({
-            actor_user_id: actorUserId,
-            entity_type: 'tournament',
-            entity_id: tournamentId,
-            action,
-            changes,
-            source: 'super-admin-tournaments',
-        });
+        await admin.from('admin_audit_log').insert(
+            entries.map(({ tournamentId, action, changes }) => ({
+                actor_user_id: actorUserId,
+                entity_type: 'tournament',
+                entity_id: tournamentId,
+                action,
+                changes,
+                source: 'super-admin-tournaments',
+            }))
+        );
     } catch (error) {
         console.error('[super/torneos/actions] audit log failed:', error);
     }
@@ -127,13 +156,64 @@ export async function updateSuperTournamentMeta(
         throw new Error(error.message || 'No se pudo actualizar el torneo.');
     }
 
-    await writeTournamentAuditLog(context.userId, id, 'update', filteredUpdates as Record<string, unknown>);
+    await writeTournamentAuditLogs(context.userId, [
+        { tournamentId: id, action: 'update', changes: filteredUpdates as Record<string, unknown> },
+    ]);
 
-    revalidatePath('/admin/super/torneos');
-    revalidatePath(`/admin/entities/${id}/manage`);
-    revalidatePath(`/tournaments/${id}`);
+    revalidateTournamentPaths([id]);
 
     return { success: true, id };
+}
+
+export async function updateManySuperTournamentsMeta(
+    ids: string[],
+    updates: Partial<TournamentUpdate>
+): Promise<{ success: true; ids: string[]; count: number }> {
+    const tournamentIds = sanitizeTournamentIds(ids);
+    const filteredUpdates = sanitizeTournamentUpdates(updates);
+
+    if (Object.keys(filteredUpdates).length === 0) {
+        throw new Error('No se enviaron campos validos para actualizar los torneos.');
+    }
+
+    const supabase = await createClient();
+    const context = await requireGlobalAdminContext(supabase);
+    const admin = createAdminClient();
+
+    const { data, error } = await runTournamentWriteWithPriorityFallback(
+        filteredUpdates as Record<string, unknown>,
+        (nextPayload) =>
+            admin
+                .from('tournaments')
+                .update(nextPayload)
+                .in('id', tournamentIds)
+                .select('id')
+    );
+
+    if (error) {
+        throw new Error(error.message || 'No se pudieron actualizar los torneos.');
+    }
+
+    const updatedIds = (Array.isArray(data) ? data : [])
+        .map((row) => (row && typeof row === 'object' && 'id' in row ? String(row.id) : null))
+        .filter((id): id is string => Boolean(id));
+
+    if (updatedIds.length === 0) {
+        throw new Error('No se encontraron torneos para actualizar.');
+    }
+
+    await writeTournamentAuditLogs(
+        context.userId,
+        updatedIds.map((tournamentId) => ({
+            tournamentId,
+            action: 'update',
+            changes: filteredUpdates as Record<string, unknown>,
+        }))
+    );
+
+    revalidateTournamentPaths(updatedIds);
+
+    return { success: true, ids: updatedIds, count: updatedIds.length };
 }
 
 export async function deleteSuperTournament(id: string): Promise<{ success: true }> {
@@ -150,10 +230,48 @@ export async function deleteSuperTournament(id: string): Promise<{ success: true
         throw new Error(error.message);
     }
 
-    await writeTournamentAuditLog(context.userId, id, 'delete', { deleted: true });
+    await writeTournamentAuditLogs(context.userId, [
+        { tournamentId: id, action: 'delete', changes: { deleted: true } },
+    ]);
 
-    revalidatePath('/admin/super/torneos');
-    revalidatePath('/admin/entities');
+    revalidateTournamentPaths([id]);
 
     return { success: true };
+}
+
+export async function deleteManySuperTournaments(ids: string[]): Promise<{ success: true; ids: string[]; count: number }> {
+    const tournamentIds = sanitizeTournamentIds(ids);
+
+    const supabase = await createClient();
+    const context = await requireGlobalAdminContext(supabase);
+    const admin = createAdminClient();
+
+    const { data, error } = await admin
+        .from('tournaments')
+        .delete()
+        .in('id', tournamentIds)
+        .select('id');
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    const deletedIds = (data || []).map(({ id }) => String(id));
+
+    if (deletedIds.length === 0) {
+        throw new Error('No se encontraron torneos para eliminar.');
+    }
+
+    await writeTournamentAuditLogs(
+        context.userId,
+        deletedIds.map((tournamentId) => ({
+            tournamentId,
+            action: 'delete',
+            changes: { deleted: true },
+        }))
+    );
+
+    revalidateTournamentPaths(deletedIds);
+
+    return { success: true, ids: deletedIds, count: deletedIds.length };
 }

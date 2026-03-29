@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Trash2, Eye, EyeOff, MoreVertical, Plus, RefreshCw, Star, StarOff, Users, Hash, Upload } from 'lucide-react';
+import { Trash2, Eye, EyeOff, Link2, MoreVertical, Plus, RefreshCw, Star, StarOff, Users, Hash, Upload } from 'lucide-react';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { createClient } from '@/lib/supabase/client';
@@ -10,7 +10,7 @@ import { invalidateCache } from '@/lib/cache/superAdminCache';
 import type { TournamentUpdate } from '@/lib/services/tournamentService';
 import { normalizeError } from '@/lib/utils/errorUtils';
 import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
-import { deleteSuperTournament, updateSuperTournamentMeta } from './actions';
+import { deleteManySuperTournaments, deleteSuperTournament, updateManySuperTournamentsMeta, updateSuperTournamentMeta } from './actions';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -43,8 +43,10 @@ export default function SuperadminTorneosPage() {
 
     const [seasonFilter, setSeasonFilter] = useState('all');
     const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
-    const [linkingTournamentId, setLinkingTournamentId] = useState<string | null>(null);
+    const [linkingTournamentIds, setLinkingTournamentIds] = useState<string[]>([]);
     const [selectedUnionId, setSelectedUnionId] = useState('');
+    const [bulkActionLabel, setBulkActionLabel] = useState<string | null>(null);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
     
@@ -101,6 +103,12 @@ export default function SuperadminTorneosPage() {
         return true;
     }), [tournaments, filters, seasonFilter]);
 
+    const filteredIds = useMemo(() => filtered.map((t) => t.id), [filtered]);
+    const selectedCount = selectedIds.size;
+    const allVisibleSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedIds.has(id));
+    const isBulkBusy = bulkActionLabel !== null;
+    const linkingTournamentCount = linkingTournamentIds.length;
+
     const grouped = useMemo(() => {
         const groups = filtered.reduce<Record<string, typeof filtered>>((acc, t) => {
             const key = t.groupKey;
@@ -130,7 +138,121 @@ export default function SuperadminTorneosPage() {
         });
     }, [tournaments]);
 
+    useEffect(() => {
+        const filteredIdSet = new Set(filteredIds);
+
+        setSelectedIds((prev) => {
+            if (prev.size === 0) return prev;
+
+            const next = new Set(Array.from(prev).filter((id) => filteredIdSet.has(id)));
+            if (next.size === prev.size && Array.from(next).every((id) => prev.has(id))) {
+                return prev;
+            }
+
+            return next;
+        });
+    }, [filteredIds]);
+
     // ── Actions ───────────────────────────────────────────────────────────────
+
+    const toggleTournamentSelection = (id: string) => {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+            return next;
+        });
+    };
+
+    const toggleSelectAllVisible = () => {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (allVisibleSelected) {
+                filteredIds.forEach((id) => next.delete(id));
+            } else {
+                filteredIds.forEach((id) => next.add(id));
+            }
+            return next;
+        });
+    };
+
+    const clearSelection = () => setSelectedIds(new Set());
+
+    const removeIdsFromSelection = (ids: string[]) => {
+        setSelectedIds((prev) => {
+            if (prev.size === 0) return prev;
+
+            const next = new Set(prev);
+            let changed = false;
+
+            ids.forEach((id) => {
+                if (next.delete(id)) changed = true;
+            });
+
+            return changed ? next : prev;
+        });
+    };
+
+    const openLinkModalForIds = (ids: string[]) => {
+        if (ids.length === 0) return;
+        setLinkingTournamentIds(Array.from(new Set(ids)));
+        setSelectedUnionId('');
+    };
+
+    const closeLinkModal = () => {
+        setLinkingTournamentIds([]);
+        setSelectedUnionId('');
+    };
+
+    const applyLocalBulkMetadata = (ids: string[], updates: Partial<TournamentUpdate>) => {
+        const localOnlyUpdates = {
+            status: updates.status,
+            is_visible: updates.is_visible,
+            is_popular: updates.is_popular,
+            priority: typeof updates.priority === 'number' ? updates.priority : undefined,
+        };
+
+        if (Object.values(localOnlyUpdates).every((value) => value === undefined)) {
+            return;
+        }
+
+        setLocalMetadata((prev) => {
+            const next = { ...prev };
+            ids.forEach((id) => {
+                next[id] = { ...(next[id] || {}), ...localOnlyUpdates };
+            });
+            return next;
+        });
+    };
+
+    const handleBulkUpdate = async (
+        updates: Partial<TournamentUpdate>,
+        actionLabel: string,
+        successMessage: string
+    ) => {
+        const ids = Array.from(selectedIds);
+        if (ids.length === 0) return;
+
+        setBulkActionLabel(actionLabel);
+
+        try {
+            await updateManySuperTournamentsMeta(ids, updates);
+            applyLocalBulkMetadata(ids, updates);
+            invalidateCache('tournaments_list');
+            removeIdsFromSelection(ids);
+            refresh('tournaments');
+            alert(successMessage);
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            alert('Error en la accion masiva: ' + (normalized.message || 'Error inesperado'));
+            refresh('tournaments');
+        } finally {
+            setBulkActionLabel(null);
+        }
+    };
 
     const handleUpdateMeta = async (id: string, updates: Partial<TournamentUpdate>) => {
         // Find the full tournament object for logging
@@ -184,8 +306,37 @@ export default function SuperadminTorneosPage() {
             alert('Error al eliminar: ' + (normalized.message || 'Error inesperado'));
             return;
         }
+        removeIdsFromSelection([id]);
         invalidateCache('tournaments_list');
         refresh('tournaments');
+    };
+
+    const handleBulkDelete = async () => {
+        const ids = Array.from(selectedIds);
+        if (ids.length === 0) return;
+        if (!confirm(`Â¿Seguro que deseas eliminar ${ids.length} torneo${ids.length !== 1 ? 's' : ''}?`)) return;
+
+        setBulkActionLabel('Eliminando');
+        setDeletedIds((prev) => new Set([...prev, ...ids]));
+
+        try {
+            await deleteManySuperTournaments(ids);
+            invalidateCache('tournaments_list');
+            removeIdsFromSelection(ids);
+            refresh('tournaments');
+            alert(`Se eliminaron ${ids.length} torneo${ids.length !== 1 ? 's' : ''}.`);
+        } catch (err: unknown) {
+            setDeletedIds((prev) => {
+                const next = new Set(prev);
+                ids.forEach((targetId) => next.delete(targetId));
+                return next;
+            });
+
+            const normalized = normalizeError(err);
+            alert('Error al eliminar en lote: ' + (normalized.message || 'Error inesperado'));
+        } finally {
+            setBulkActionLabel(null);
+        }
     };
 
     const handleLogoUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,16 +371,24 @@ export default function SuperadminTorneosPage() {
     };
 
     const confirmLink = async () => {
-        if (!linkingTournamentId || !selectedUnionId) return;
+        if (linkingTournamentIds.length === 0 || !selectedUnionId) return;
+
+        setBulkActionLabel(linkingTournamentIds.length > 1 ? 'Vinculando' : 'Vinculando torneo');
+
         try {
-            await updateSuperTournamentMeta(linkingTournamentId, { union_id: selectedUnionId });
+            await updateManySuperTournamentsMeta(linkingTournamentIds, { union_id: selectedUnionId });
             invalidateCache('tournaments_list');
             refresh('tournaments');
-            setLinkingTournamentId(null);
-            setSelectedUnionId('');
+            removeIdsFromSelection(linkingTournamentIds);
+            alert(linkingTournamentIds.length === 1
+                ? 'Organizacion vinculada correctamente.'
+                : `Se vincularon ${linkingTournamentIds.length} torneos correctamente.`);
+            closeLinkModal();
         } catch (err: unknown) {
             const normalized = normalizeError(err);
             alert('Error: ' + (normalized.message || 'Error inesperado'));
+        } finally {
+            setBulkActionLabel(null);
         }
     };
 
@@ -356,6 +515,74 @@ export default function SuperadminTorneosPage() {
                 </div>
             </div>
 
+            {!isLoading && !error && filtered.length > 0 && (
+                <div className={styles.slab} style={{ marginBottom: 20, padding: '16px 20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
+                        <div>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>Seleccion masiva</div>
+                            <div style={{ fontSize: 12, color: '#a1a1aa' }}>
+                                {selectedCount} seleccionado{selectedCount !== 1 ? 's' : ''} de {filtered.length} torneo{filtered.length !== 1 ? 's' : ''} filtrado{filtered.length !== 1 ? 's' : ''}
+                                {bulkActionLabel ? ` · ${bulkActionLabel}...` : ''}
+                            </div>
+                        </div>
+
+                        <div className={styles.consoleActions}>
+                            <button className={styles.cardAction} onClick={toggleSelectAllVisible} disabled={isBulkBusy || filtered.length === 0}>
+                                {allVisibleSelected ? 'Quitar visibles' : 'Seleccionar visibles'}
+                            </button>
+                            <button className={styles.cardAction} onClick={clearSelection} disabled={isBulkBusy || selectedCount === 0}>
+                                Limpiar seleccion
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className={styles.consoleActions}>
+                        <button
+                            className={styles.cardAction}
+                            onClick={() => handleBulkUpdate({ status: 'published' }, 'Activando torneos', 'Torneos activados correctamente.')}
+                            disabled={isBulkBusy || selectedCount === 0}
+                        >
+                            <Eye size={14} /> Activar
+                        </button>
+                        <button
+                            className={styles.cardAction}
+                            onClick={() => handleBulkUpdate({ status: 'draft' }, 'Desactivando torneos', 'Torneos desactivados correctamente.')}
+                            disabled={isBulkBusy || selectedCount === 0}
+                        >
+                            <EyeOff size={14} /> Desactivar
+                        </button>
+                        <button
+                            className={styles.cardAction}
+                            onClick={() => handleBulkUpdate({ is_popular: true }, 'Marcando populares', 'Torneos marcados como populares.')}
+                            disabled={isBulkBusy || selectedCount === 0}
+                        >
+                            <Star size={14} /> Popular
+                        </button>
+                        <button
+                            className={styles.cardAction}
+                            onClick={() => handleBulkUpdate({ is_popular: false }, 'Quitando populares', 'Se quitaron los torneos de populares.')}
+                            disabled={isBulkBusy || selectedCount === 0}
+                        >
+                            <StarOff size={14} /> Quitar popular
+                        </button>
+                        <button
+                            className={styles.cardAction}
+                            onClick={() => openLinkModalForIds(Array.from(selectedIds))}
+                            disabled={isBulkBusy || selectedCount === 0}
+                        >
+                            <Link2 size={14} /> Vincular org
+                        </button>
+                        <button
+                            className={styles.cardAction}
+                            onClick={handleBulkDelete}
+                            disabled={isBulkBusy || selectedCount === 0}
+                        >
+                            <Trash2 size={14} /> Eliminar
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* States */}
             {isLoading && <div style={{ padding: 20 }}>Cargando torneos...</div>}
             {!isLoading && error && (
@@ -382,6 +609,19 @@ export default function SuperadminTorneosPage() {
                         {items.map(t => (
                             <div key={t.id} className={styles.cardItem} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                                 <div className={styles.cardHeader}>
+                                    <label
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 2, cursor: 'pointer' }}
+                                        title="Seleccionar torneo"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.has(t.id)}
+                                            onChange={() => toggleTournamentSelection(t.id)}
+                                            disabled={isBulkBusy}
+                                            aria-label={`Seleccionar ${(t.display_name || t.name).trim()}`}
+                                            style={{ width: 16, height: 16, accentColor: 'var(--color-accent)', cursor: 'pointer' }}
+                                        />
+                                    </label>
                                     <div className={styles.cardLogo} style={{ position: 'relative' }}>
                                         {t.logo_url ? (
                                             <img src={t.logo_url} alt={t.name} style={{ width: 40, height: 40, objectFit: 'contain' }} />
@@ -447,7 +687,7 @@ export default function SuperadminTorneosPage() {
 
                                                     <button
                                                         className={styles.menuItem}
-                                                        onClick={() => { setLinkingTournamentId(t.id); setActionMenuOpenId(null); }}
+                                                        onClick={() => { openLinkModalForIds([t.id]); setActionMenuOpenId(null); }}
                                                     >
                                                         🔗 Vincular Org/Unión
                                                     </button>
@@ -523,7 +763,7 @@ export default function SuperadminTorneosPage() {
             ))}
 
             {/* Link Union Modal */}
-            {linkingTournamentId && (
+            {linkingTournamentCount > 0 && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)',
@@ -535,7 +775,7 @@ export default function SuperadminTorneosPage() {
                     }}>
                         <h3 style={{ margin: '0 0 8px', color: 'white' }}>Vincular Organización</h3>
                         <p style={{ color: '#aaa', fontSize: 13, marginBottom: 16 }}>
-                            Selecciona una unión o entidad para vincular este torneo.
+                            Selecciona una unión o entidad para vincular {linkingTournamentCount === 1 ? 'este torneo' : `estos ${linkingTournamentCount} torneos`}.
                         </p>
                         <select
                             value={selectedUnionId}
@@ -549,23 +789,23 @@ export default function SuperadminTorneosPage() {
                         </select>
                         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                             <button
-                                onClick={() => setLinkingTournamentId(null)}
+                                onClick={closeLinkModal}
                                 style={{ background: 'transparent', border: '1px solid #333', color: '#ccc', padding: '8px 16px', borderRadius: 6, cursor: 'pointer' }}
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={confirmLink}
-                                disabled={!selectedUnionId}
+                                disabled={!selectedUnionId || isBulkBusy}
                                 style={{
-                                    background: selectedUnionId ? '#22c55e' : '#333',
-                                    border: 'none', color: selectedUnionId ? 'black' : '#666',
+                                    background: selectedUnionId && !isBulkBusy ? '#22c55e' : '#333',
+                                    border: 'none', color: selectedUnionId && !isBulkBusy ? 'black' : '#666',
                                     padding: '8px 16px', borderRadius: 6,
-                                    cursor: selectedUnionId ? 'pointer' : 'not-allowed',
+                                    cursor: selectedUnionId && !isBulkBusy ? 'pointer' : 'not-allowed',
                                     fontWeight: 600
                                 }}
                             >
-                                Vincular
+                                {isBulkBusy ? 'Vinculando...' : 'Vincular'}
                             </button>
                         </div>
                     </div>

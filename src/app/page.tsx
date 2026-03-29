@@ -15,6 +15,7 @@ import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -110,8 +111,6 @@ interface PublicTournamentListItem {
     current?: boolean | null;
   }> | null;
 }
-
-type RugbySourceFilter = 'all' | 'local-db' | 'api';
 
 function isInternationalTournament(tournament: Tournament): boolean {
   return tournament.type === 'international' || tournament.countryId === 'international';
@@ -309,7 +308,6 @@ export default function HomePage() {
   const [manualTournamentsList, setManualTournamentsList] = useState<Tournament[]>([]);
   const [rugbyPublicTournaments, setRugbyPublicTournaments] = useState<Tournament[]>([]);
   const [rugbyPublicTournamentsLoaded, setRugbyPublicTournamentsLoaded] = useState(false);
-  const [rugbySourceFilter, setRugbySourceFilter] = useState<RugbySourceFilter>('local-db');
   const [showLiveOnly, setShowLiveOnly] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
 
@@ -348,24 +346,12 @@ export default function HomePage() {
   const allTournaments = useMemo(() => getTournamentsBySport(selectedSport.id), [selectedSport.id]);
   const internationalTournaments = useMemo(() => getInternationalTournamentsBySport(selectedSport.id), [selectedSport.id]);
   const shouldUseRugbyPublicCatalog = selectedSport.id === 'rugby' && rugbyPublicTournamentsLoaded;
-  const isRugbySourceFilterActive = shouldUseRugbyPublicCatalog && selectedSport.id === 'rugby';
-
-  const matchesRugbySourceFilter = useCallback((tournament: Tournament) => {
-    if (!isRugbySourceFilterActive) return true;
-    if (rugbySourceFilter === 'all') return true;
-    if (rugbySourceFilter === 'local-db') return tournament.dataSource !== 'rugby-api-sports';
-    return tournament.dataSource === 'rugby-api-sports';
-  }, [isRugbySourceFilterActive, rugbySourceFilter]);
 
   // Group local tournaments by country
   const localTournaments = useMemo(() => {
     if (shouldUseRugbyPublicCatalog) {
       return rugbyPublicTournaments.filter((tournament) => {
         if (isInternationalTournament(tournament)) {
-          return false;
-        }
-
-        if (!matchesRugbySourceFilter(tournament)) {
           return false;
         }
 
@@ -387,17 +373,13 @@ export default function HomePage() {
         return false;
       }
 
-      if (!matchesRugbySourceFilter(tournament)) {
-        return false;
-      }
-
       return resolveTournamentAudience({
         ageGroup: tournament.ageGroup,
         categories: tournament.categories,
         isYouth: tournament.isYouth,
       }) === selectedAudience;
     });
-  }, [allTournaments, manualTournamentsList, matchesRugbySourceFilter, rugbyPublicTournaments, selectedAudience, selectedSport.id, shouldUseRugbyPublicCatalog]);
+  }, [allTournaments, manualTournamentsList, rugbyPublicTournaments, selectedAudience, selectedSport.id, shouldUseRugbyPublicCatalog]);
 
   const groupedTournaments = useMemo(() => groupTournamentsByCountry(localTournaments), [localTournaments]);
 
@@ -483,7 +465,6 @@ export default function HomePage() {
       : internationalTournaments;
 
     const audienceFiltered = baseInternationalTournaments.filter((tournament) => (
-      matchesRugbySourceFilter(tournament) &&
       resolveTournamentAudience({
         ageGroup: tournament.ageGroup,
         categories: tournament.categories,
@@ -498,7 +479,7 @@ export default function HomePage() {
     return audienceFiltered.filter(t =>
       t.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [internationalTournaments, matchesRugbySourceFilter, rugbyPublicTournaments, searchQuery, selectedAudience, shouldUseRugbyPublicCatalog]);
+  }, [internationalTournaments, rugbyPublicTournaments, searchQuery, selectedAudience, shouldUseRugbyPublicCatalog]);
 
   const filteredGroups = useMemo(() => {
     if (!searchQuery) return groupedTournaments;
@@ -570,10 +551,10 @@ export default function HomePage() {
         id: match.id,
         time: timeStr,
         home: match.homeTeam?.name || 'Local',
-        homeLogo: match.homeTeam?.logo,
+        homeLogo: resolveTeamLogo(match.homeTeam),
         homeScore: match.score?.home,
         away: match.awayTeam?.name || 'Visita',
-        awayLogo: match.awayTeam?.logo,
+        awayLogo: resolveTeamLogo(match.awayTeam),
         awayScore: match.score?.away,
         status: status,
         // minutes will be calculated by the MatchRow component using the original dateTime
@@ -640,7 +621,7 @@ export default function HomePage() {
     if (leftFavorite && !rightFavorite) return -1;
     if (!leftFavorite && rightFavorite) return 1;
 
-    if (isRugbySourceFilterActive && rugbySourceFilter === 'all') {
+    if (shouldUseRugbyPublicCatalog) {
       const leftIsLocal = left.dataSource !== 'rugby-api-sports';
       const rightIsLocal = right.dataSource !== 'rugby-api-sports';
 
@@ -649,7 +630,7 @@ export default function HomePage() {
     }
 
     return compareTournamentsByPriority(left, right);
-  }, [favoriteLeagueIds, isRugbySourceFilterActive, rugbySourceFilter]);
+  }, [favoriteLeagueIds, shouldUseRugbyPublicCatalog]);
 
   const toggleCountry = (countryId: string) => {
     setExpandedCountries(prev => {
@@ -732,10 +713,6 @@ export default function HomePage() {
 
     return () => controller.abort();
   }, [selectedAudience, selectedSport.id]);
-
-  useEffect(() => {
-    setRugbySourceFilter(selectedSport.id === 'rugby' ? 'local-db' : 'all');
-  }, [selectedSport.id]);
 
   useEffect(() => {
     const generatedDates = generateDates(userTimeZone);
@@ -915,37 +892,6 @@ export default function HomePage() {
                 </button>
               ))}
             </div>
-
-            {isRugbySourceFilterActive && (
-              <div
-                role="tablist"
-                aria-label="Origen de torneos de rugby"
-                style={{ display: 'flex', gap: '8px', marginTop: '12px', marginBottom: '4px', flexWrap: 'wrap' }}
-              >
-                {([
-                  { id: 'local-db', label: 'DB local' },
-                  { id: 'api', label: 'API' },
-                  { id: 'all', label: 'Todas' },
-                ] as Array<{ id: RugbySourceFilter; label: string }>).map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setRugbySourceFilter(option.id)}
-                    className={styles.audienceSwitchBtn}
-                    style={{
-                      padding: '6px 10px',
-                      fontSize: '0.72rem',
-                      opacity: rugbySourceFilter === option.id ? 1 : 0.72,
-                      borderColor: rugbySourceFilter === option.id ? 'var(--color-accent)' : undefined,
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-
 
             {/* Search */}
             <div className={styles.sidebarSearchArea}>

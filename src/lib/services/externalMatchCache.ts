@@ -10,6 +10,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Match } from '@/types/match';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,22 @@ export interface CachedExternalMatch {
     updated_at?: string;
 }
 
+function normalizeCachedTeam(team: CachedTeam): CachedTeam {
+    return {
+        ...team,
+        logo: resolveTeamLogo({
+            id: team.id,
+            team_id: team.id,
+            name: team.name,
+            short_name: team.shortName,
+            logo: team.logo,
+            image_path: team.logo,
+            small_image_path: team.logo,
+            logo_url: team.logo,
+        }),
+    };
+}
+
 // ── Mapper: Match → CachedExternalMatch ──────────────────────────────────────
 
 export function mapFlashScoreMatchToCached(m: Match, sport: string): CachedExternalMatch {
@@ -56,18 +73,18 @@ export function mapFlashScoreMatchToCached(m: Match, sport: string): CachedExter
         tournament_id: m.tournamentId || null,
         tournament_name: anyM.leagueName || null,
         country_name: anyM.countryName || null,
-        home_team: {
+        home_team: normalizeCachedTeam({
             id: m.homeTeamId,
             name: m.homeTeamName,
             logo: m.homeTeamLogo || '',
             shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC'
-        },
-        away_team: {
+        }),
+        away_team: normalizeCachedTeam({
             id: m.awayTeamId,
             name: m.awayTeamName,
             logo: m.awayTeamLogo || '',
             shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS'
-        },
+        }),
         score: {
             home: m.score?.home ?? null,
             away: m.score?.away ?? null
@@ -97,8 +114,8 @@ export function mapExternalMatchToCached(match: {
         tournament_id: match.tournamentId ?? null,
         tournament_name: match.tournamentName ?? null,
         country_name: match.countryName ?? null,
-        home_team: match.homeTeam,
-        away_team: match.awayTeam,
+        home_team: normalizeCachedTeam(match.homeTeam),
+        away_team: normalizeCachedTeam(match.awayTeam),
         score: {
             home: match.score?.home ?? null,
             away: match.score?.away ?? null,
@@ -127,8 +144,8 @@ export function mapCachedToEnrichedMatch(m: CachedExternalMatch, sport: string) 
         venue: 'Estadio',
         homeClubId: m.home_team.id,
         awayClubId: m.away_team.id,
-        homeTeam: m.home_team,
-        awayTeam: m.away_team,
+        homeTeam: normalizeCachedTeam(m.home_team),
+        awayTeam: normalizeCachedTeam(m.away_team),
         tournament: {
             id: m.tournament_id || 'ext-cache',
             name: m.tournament_name || 'Liga (caché)',
