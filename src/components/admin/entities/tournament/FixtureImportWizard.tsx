@@ -194,7 +194,7 @@ export function FixtureImportWizard({
             rows={6}
             value={pastedText}
             onChange={(event) => setPastedText(event.target.value)}
-            placeholder={'Jornada 1 - 19/03/2026 - Jockey Club vs Tala RC - 16:30 - Cancha 1\nJornada 1 - 19/03/2026 - CRAI vs Estudiantes - 18:00 - Cancha 2\n\nSi el partido ya fue jugado, podés agregar el resultado al final:\nJornada 1 - 19/03/2026 - Jockey Club vs Tala RC - 16:30 - Cancha 1 - 2:1'}
+            placeholder={'Jornada 1 - 19/03/2026 - Jockey Club vs Tala RC - 16:30 - Cancha 1\nJornada 1 - 19/03/2026 - CRAI vs Estudiantes - 18:00 - Cancha 2'}
             style={{ minHeight: 140 }}
           />
         </div>
@@ -372,28 +372,6 @@ export function FixtureImportWizard({
                       className="glass-input"
                       value={String(row.overrides.venue || row.normalized.venue || '')}
                       onChange={(event) => updateRow(row.previewId, { overrides: { venue: event.target.value || null } })}
-                    />
-                  </div>
-                  <div className="editor-field">
-                    <label>Goles local</label>
-                    <input
-                      type="number"
-                      min={0}
-                      className="glass-input"
-                      placeholder="—"
-                      value={((row.overrides.scoreHome as number | null | undefined) ?? row.normalized.scoreHome) ?? ''}
-                      onChange={(event) => updateRow(row.previewId, { overrides: { scoreHome: event.target.value !== '' ? Number(event.target.value) : null } })}
-                    />
-                  </div>
-                  <div className="editor-field">
-                    <label>Goles visita</label>
-                    <input
-                      type="number"
-                      min={0}
-                      className="glass-input"
-                      placeholder="—"
-                      value={((row.overrides.scoreAway as number | null | undefined) ?? row.normalized.scoreAway) ?? ''}
-                      onChange={(event) => updateRow(row.previewId, { overrides: { scoreAway: event.target.value !== '' ? Number(event.target.value) : null } })}
                     />
                   </div>
                   <div className="editor-field">
