@@ -138,6 +138,36 @@
     object-fit: cover;
 }
 
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.adminActionBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg-tertiary));
+    color: var(--color-accent);
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.adminActionBtn:hover {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 20%, var(--color-bg-tertiary));
+    color: var(--color-text-primary);
+}
+
 /* Follow Button */
 .followBtn {
     display: inline-flex;
@@ -153,7 +183,6 @@
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
-    margin-left: auto;
     flex-shrink: 0;
 }
 
@@ -620,5 +649,19 @@
 
     .playerRow> :nth-child(4) {
         display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .headerContent {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .headerActions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+        flex-wrap: wrap;
     }
 }

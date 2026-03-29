@@ -37,6 +37,7 @@ import {
     normalizeRugbyGameForTournamentViews,
     normalizeRugbyStandingsRows,
 } from '@/lib/services/rugbyApiSportsTransforms';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 const TAB_TIMEOUT_MS = 5000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -185,18 +186,7 @@ function getStandingTeamId(row: any) {
 }
 
 function getStandingTeamLogo(row: any) {
-    return (
-        row?.team?.logo ||
-        row?.team?.logo_url ||
-        row?.team?.image_path ||
-        row?.team?.small_image_path ||
-        row?.participant?.logo_url ||
-        row?.participant?.image_path ||
-        row?.participant?.small_image_path ||
-        row?.logo ||
-        row?.team_logo ||
-        ''
-    );
+    return resolveTeamLogo(row?.team, row?.participant, row);
 }
 
 function getStandingTeamUrl(row: any) {
@@ -217,14 +207,7 @@ function getMatchTeamName(team: any, fallbackName?: any) {
 }
 
 function getMatchTeamLogo(team: any, fallbackLogo?: any) {
-    return (
-        team?.image_path ||
-        team?.small_image_path ||
-        team?.smaill_image_path ||
-        team?.logo ||
-        fallbackLogo ||
-        ''
-    );
+    return resolveTeamLogo(team, { logo: fallbackLogo });
 }
 
 function getMatchTeamUrl(team: any) {

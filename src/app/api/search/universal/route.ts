@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { searchFlashScore } from '@/lib/services/flashscore';
 import { getRugbyApiSportsLeagues, getRugbyApiSportsTeams } from '@/lib/services/rugbyApiSports';
+import { isBlockedRugbyApiSportsLeagueId } from '@/lib/utils/blockedTournaments';
 
 type SearchResult = {
     id: string;
@@ -170,6 +171,8 @@ export async function GET(request: Request) {
 
         if (Array.isArray(rugbyLeagues)) {
             for (const league of rugbyLeagues) {
+                if (isBlockedRugbyApiSportsLeagueId(league?.id)) continue;
+
                 const name = String(league?.name || '').trim();
                 if (!name) continue;
 

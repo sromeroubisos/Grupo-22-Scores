@@ -17,6 +17,7 @@ import { addDaysToIsoDate, APP_TIMEZONE, formatDateInTimeZone, formatDateKey } f
 import type { TournamentInitialData } from '@/lib/server/fetchTournamentData';
 import { normalizeTournamentFormat } from '@/lib/utils/tournamentFormat';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 
@@ -52,8 +53,7 @@ type CircuitStandingsView = {
 type StandingsColumnMode = 'standard' | 'circuit-global';
 
 function getTeamLogo(team: any): string {
-    if (!team) return '';
-    return team.small_image_path || team.smaill_image_path || team.image_path || team.logo || team.logo_url || team.logo_path || '';
+    return resolveTeamLogo(team);
 }
 
 function getTournamentLogo(detailsData: any, localData: any): string {
@@ -367,8 +367,7 @@ function getStandingsTeamId(row: any) {
 }
 
 function getStandingsTeamLogo(row: any) {
-    return row.team?.logo || row.team?.logo_url || row.team?.image_path || row.team?.small_image_path ||
-        row.participant?.logo_url || row.participant?.image_path || row.participant?.small_image_path || row.logo || row.team_logo || '';
+    return resolveTeamLogo(row?.team, row?.participant, row);
 }
 
 function getStandingsTeamUrl(row: any) {

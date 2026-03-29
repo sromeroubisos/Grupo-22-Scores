@@ -24,6 +24,7 @@ import {
     normalizeRugbyStandingsRows,
 } from '@/lib/services/rugbyApiSportsTransforms';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
+import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
@@ -697,11 +698,12 @@ export async function GET(request: Request) {
 
         const finalResults = sortMatchesByDate(internalResults.length > 0 ? internalResults : fsResults, 'desc');
         const finalFixtures = sortMatchesByDate(internalFixtures.length > 0 ? internalFixtures : fsFixtures, 'asc');
+        const detailsWithOverride = applyExternalTeamLogoOverride(details);
 
         return Response.json({
             ok: true,
             resolvedClubId,
-            details,
+            details: detailsWithOverride,
             results: finalResults,
             fixtures: finalFixtures,
             squad: squad || [],

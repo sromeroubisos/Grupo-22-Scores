@@ -9,6 +9,7 @@ import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getCountryById } from '@/lib/data/countries';
 import { isFlashScoreEnabledForSport, isRugbySport } from '@/lib/externalProviderPolicy';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import {
     getMatchesForDate,
     getLiveMatches,
@@ -23,12 +24,6 @@ import {
     toRugbyApiSportsTournamentId,
     type RugbyApiSportsGame,
 } from '@/lib/services/rugbyApiSports';
-
-// Tournament IDs to hide from API responses (FlashScore or internal)
-const BLOCKED_TOURNAMENT_IDS = new Set([
-    'fs-ofv2oc3e',
-    'ras-league-1',
-]);
 
 function isUuidLike(value: unknown): value is string {
     return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -626,7 +621,7 @@ export async function GET(request: Request) {
 
                 const enrichedExternalMatches = games.map((game) => mapRugbyGameToEnrichedMatch(game, sport, timeZone));
                 const filteredRugbyMatches = enrichedExternalMatches.filter(
-                    m => !BLOCKED_TOURNAMENT_IDS.has(m.tournamentId)
+                    m => !isBlockedTournamentId(m.tournamentId)
                 );
                 enrichedMatches = [...enrichedMatches, ...filteredRugbyMatches];
                 fsOk = true;
@@ -809,7 +804,7 @@ export async function GET(request: Request) {
                 });
 
                 const filteredExternalMatches = enrichedExternalMatches.filter(
-                    m => !BLOCKED_TOURNAMENT_IDS.has(m.tournamentId)
+                    m => !isBlockedTournamentId(m.tournamentId)
                 );
                 enrichedMatches = [...enrichedMatches, ...filteredExternalMatches];
                 fsOk = true;

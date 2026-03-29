@@ -8,6 +8,7 @@ import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import styles from './page.module.css';
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { APP_TIMEZONE } from '@/lib/timezone';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
 
 const USER_TZ = APP_TIMEZONE;
@@ -103,7 +104,11 @@ function mapMatchStatus(matchStatusObj: any, simpleStatus?: string) {
 }
 
 function getTeamLogo(team: any) {
-    return team?.image_path || team?.small_image_path || team?.logo || team?.logo_url || '';
+    return resolveTeamLogo(team);
+}
+
+function resolveMatchTeamLogo(primaryTeam: any, fallbackTeam?: any, fallbackLogo?: string | null) {
+    return resolveTeamLogo(primaryTeam, fallbackTeam, { logo: fallbackLogo || '' });
 }
 
 function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamName?: string }) {
@@ -231,9 +236,20 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                     if (payload?.source === 'rugby-api-sports' && payload?.match) {
                         statusRef.current = payload.match.status || 'scheduled';
+                        const rugbyMatch = {
+                            ...payload.match,
+                            home: {
+                                ...payload.match.home,
+                                logo: resolveMatchTeamLogo(payload.match.home, null, payload.match.home?.logo),
+                            },
+                            away: {
+                                ...payload.match.away,
+                                logo: resolveMatchTeamLogo(payload.match.away, null, payload.match.away?.logo),
+                            },
+                        };
                         setState({
                             kind: 'ok',
-                            matchData: payload.match,
+                            matchData: rugbyMatch,
                             eventsData: [],
                             statsData: [],
                             playerStats: null,
@@ -292,6 +308,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     const initialAwayScore = evt.scores?.away ?? evt.AWAY_SCORE_CURRENT ?? baseMatch.scoreAway;
 
                     statusRef.current = fsStatus;
+                    const resolvedHomeLogo = resolveMatchTeamLogo(evt.home_team, baseMatch.home, baseMatch.home?.logo);
+                    const resolvedAwayLogo = resolveMatchTeamLogo(evt.away_team, baseMatch.away, baseMatch.away?.logo);
                     setState(prev => ({
                         ...prev,
                         kind: 'ok',
@@ -302,8 +320,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             round: evt.tournament?.stage_id || evt.ROUND_NAME || 'General',
                             category: evt.country?.name || evt.COUNTRY_NAME || baseMatch.category || 'Internacional',
                             tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
-                            home: { ...baseMatch.home, score: initialHomeScore, teamUrl: evt.home_team?.team_url || '' },
-                            away: { ...baseMatch.away, score: initialAwayScore, teamUrl: evt.away_team?.team_url || '' },
+                            home: { ...baseMatch.home, logo: resolvedHomeLogo, score: initialHomeScore, teamUrl: evt.home_team?.team_url || '' },
+                            away: { ...baseMatch.away, logo: resolvedAwayLogo, score: initialAwayScore, teamUrl: evt.away_team?.team_url || '' },
                             lineups: null,
                             standings: [],
                             h2h: [],
@@ -466,8 +484,18 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             matchData: {
                                 ...prev.matchData,
                                 status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
-                                home: { ...prev.matchData.home, score: hScoreFinal, teamUrl: evt.home_team?.team_url || '' },
-                                away: { ...prev.matchData.away, score: aScoreFinal, teamUrl: evt.away_team?.team_url || '' },
+                                home: {
+                                    ...prev.matchData.home,
+                                    logo: resolveMatchTeamLogo(evt.home_team, prev.matchData.home, prev.matchData.home?.logo),
+                                    score: hScoreFinal,
+                                    teamUrl: evt.home_team?.team_url || '',
+                                },
+                                away: {
+                                    ...prev.matchData.away,
+                                    logo: resolveMatchTeamLogo(evt.away_team, prev.matchData.away, prev.matchData.away?.logo),
+                                    score: aScoreFinal,
+                                    teamUrl: evt.away_team?.team_url || '',
+                                },
                                 lineups: lineupsRes?.DATA || lineupsRes || null,
                                 standings: resolvedStandings,
                                 h2h: Array.isArray(h2hRes) ? h2hRes : (h2hRes?.DATA || h2hRes?.data || h2hRes?.matches || []),
@@ -501,6 +529,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             const homeClubId = matchData.homeClub?.id || matchData.homeClubId || '';
                             const awayClubId = matchData.awayClub?.id || matchData.awayClubId || '';
                             const tournamentId = matchData.tournamentId || '';
+                            const resolvedDbHomeLogo = resolveMatchTeamLogo(matchData.homeClub, null, matchData.homeClub?.logo || null);
+                            const resolvedDbAwayLogo = resolveMatchTeamLogo(matchData.awayClub, null, matchData.awayClub?.logo || null);
 
                             const baseProcessedMatch = {
                                 id: matchData.id,
@@ -520,13 +550,13 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 home: {
                                     id: homeClubId || 'home',
                                     name: matchData.homeClub?.name || 'Local',
-                                    logo: matchData.homeClub?.logo || null,
+                                    logo: resolvedDbHomeLogo || null,
                                     score: matchData.status === 'scheduled' ? null : (score.home ?? 0)
                                 },
                                 away: {
                                     id: awayClubId || 'away',
                                     name: matchData.awayClub?.name || 'Visitante',
-                                    logo: matchData.awayClub?.logo || null,
+                                    logo: resolvedDbAwayLogo || null,
                                     score: matchData.status === 'scheduled' ? null : (score.away ?? 0)
                                 },
                                 events: matchData.events || [],
@@ -599,13 +629,13 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 home: {
                                     id: homeClubId || 'home',
                                     name: matchData.homeClub?.name || 'Local',
-                                    logo: matchData.homeClub?.logo || null,
+                                    logo: resolvedDbHomeLogo || null,
                                     score: matchData.status === 'scheduled' ? null : (score.home ?? 0)
                                 },
                                 away: {
                                     id: awayClubId || 'away',
                                     name: matchData.awayClub?.name || 'Visitante',
-                                    logo: matchData.awayClub?.logo || null,
+                                    logo: resolvedDbAwayLogo || null,
                                     score: matchData.status === 'scheduled' ? null : (score.away ?? 0)
                                 },
                                 events: matchData.events || [],
@@ -1229,8 +1259,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                                     const awayName = m.away_team?.name || m.AWAY_NAME || m.away_name || m.away?.name || 'TBD';
                                                                     const homeScore = m.scores?.home ?? m.HOME_SCORE ?? m.home_score ?? m.home_team?.score ?? null;
                                                                     const awayScore = m.scores?.away ?? m.AWAY_SCORE ?? m.away_score ?? m.away_team?.score ?? null;
-                                                                    const homeLogo = m.home_team?.image_path || m.home_team?.small_image_path || m.home_team?.logo || '';
-                                                                    const awayLogo = m.away_team?.image_path || m.away_team?.small_image_path || m.away_team?.logo || '';
+                                                                    const homeLogo = getTeamLogo(m.home_team);
+                                                                    const awayLogo = getTeamLogo(m.away_team);
                                                                     const isFinished = m.match_status?.is_finished || m.is_finished || m.status === 'finished';
                                                                     const isCurrentMatch = m.match_id === id;
                                                                     const homeWon = isFinished && homeScore !== null && awayScore !== null && Number(homeScore) > Number(awayScore);

@@ -11,6 +11,8 @@ import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import ExportImage from '@/components/ExportImage';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { useAuth } from '@/context/AuthContext';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
@@ -28,16 +30,18 @@ function isRugbyApiSportsTeamId(value: string) {
     return /^ras-team-\d+$/i.test(value);
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function getExternalTeamId(value: string, teamUrl?: string) {
+    if (value.startsWith('fs-team-')) return value.slice(8);
+    const rugbyMatch = /^ras-team-(\d+)$/i.exec(value);
+    if (rugbyMatch?.[1]) return rugbyMatch[1];
+    if (teamUrl && !UUID_RE.test(value)) return value;
+    return null;
+}
+
 const getTeamLogo = (team: any) => {
-    if (!team) return '';
-    return (
-        team.small_image_path ||
-        team.smaill_image_path ||
-        team.image_path ||
-        team.logo ||
-        team.logo_path ||
-        ''
-    );
+    return resolveTeamLogo(team);
 };
 
 const POSITION_ORDER: Record<string, number> = {
@@ -128,6 +132,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
     const sp = useSearchParams();
+    const { user } = useAuth();
     const { isFavorited, toggle: toggleFavorite } = useFavorite('club', id);
 
     const [activeTab, setActiveTab] = useState('summary');
@@ -141,6 +146,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const [squad, setSquad] = useState<any>(null);
     const [squadFetched, setSquadFetched] = useState(false);
     const [transfers, setTransfers] = useState<any[]>([]);
+    const [resolvedClubId, setResolvedClubId] = useState<string | null>(null);
 
     const [selectedSport, setSelectedSport] = useState<string>('all');
     const [selectedSquadTab, setSelectedSquadTab] = useState<string>('');
@@ -157,6 +163,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         async function fetchData() {
             setLoading(true);
             setError(null);
+            setResolvedClubId(null);
             try {
                 const query = new URLSearchParams();
                 query.set('team_id', rawId);
@@ -184,6 +191,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                     return;
                 }
 
+                setResolvedClubId(payload.resolvedClubId || null);
                 setDetails(payload.details || null);
                 setResults(sortMatchesByDate(payload.results || [], 'desc'));
                 setFixtures(sortMatchesByDate(payload.fixtures || [], 'asc'));
@@ -265,6 +273,13 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     // Filtered matches by sport
     const filteredResults = selectedSport === 'all' ? results : results.filter(m => String(m.sport_id) === selectedSport);
     const filteredFixtures = selectedSport === 'all' ? fixtures : fixtures.filter(m => String(m.sport_id) === selectedSport);
+    const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const externalTeamId = getExternalTeamId(rawId, hintTeamUrl);
+    const adminClubId = useMemo(() => {
+        if (resolvedClubId) return resolvedClubId;
+        if (!externalTeamId && !rawId.startsWith('fs-team-') && !isRugbyApiSportsTeamId(rawId)) return rawId;
+        return null;
+    }, [externalTeamId, rawId, resolvedClubId]);
     const visibleTabs = useMemo(() => {
         const supportedTabs = Array.isArray(details?.supported_tabs) ? details.supported_tabs : null;
         if (!supportedTabs) return TABS;
@@ -321,12 +336,33 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     // Extract team info from details, fallback to hintName from URL
     const teamName = details?.name || details?.team?.name || details?.team_name || hintName || rawId;
     const teamLogoUrl =
-        details?.image_path ||
-        details?.logo ||
-        details?.team?.image_path ||
-        details?.team?.logo ||
-        details?.small_image_path ||
+        resolveTeamLogo(details, details?.team) ||
         '';
+    const returnTo = `/clubs/${rawId}${sp.toString() ? `?${sp.toString()}` : ''}`;
+    const adminEditHref = adminClubId
+        ? `/admin/super/clubes/${adminClubId}/editar`
+        : externalTeamId
+            ? (() => {
+                const params = new URLSearchParams();
+                params.set('name', teamName);
+                params.set('returnTo', returnTo);
+                if (preferredSport) params.set('sport', preferredSport);
+                if (hintTeamUrl) params.set('team_url', hintTeamUrl);
+                if (rawId.startsWith('fs-team-')) params.set('source', 'flashscore');
+                if (isRugbyApiSportsTeamId(rawId)) params.set('source', 'rugby-api-sports');
+
+                const originalLogo =
+                    details?.image_path ||
+                    details?.logo ||
+                    details?.small_image_path ||
+                    details?.team?.image_path ||
+                    details?.team?.logo ||
+                    '';
+
+                if (originalLogo) params.set('logo_url', originalLogo);
+                return `/admin/super/clubes/externos/${externalTeamId}/logo?${params.toString()}`;
+            })()
+            : null;
     const countryName = details?.country?.name || details?.country || '';
     const countryFlag = details?.country?.image_path || details?.country?.small_image_path || '';
     const venue = details?.venue?.name || details?.venue || details?.stadium || '';
@@ -461,14 +497,21 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                 </div>
                             )}
                         </div>
-                        <button
-                            className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
-                            onClick={() => toggleFavorite()}
-                            type="button"
-                        >
-                            <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />
-                            {isFavorited ? 'Siguiendo' : 'Seguir'}
-                        </button>
+                        <div className={styles.headerActions}>
+                            {isSuperAdminUser && adminEditHref ? (
+                                <Link href={adminEditHref} className={styles.adminActionBtn}>
+                                    Editar logo
+                                </Link>
+                            ) : null}
+                            <button
+                                className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
+                                onClick={() => toggleFavorite()}
+                                type="button"
+                            >
+                                <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                                {isFavorited ? 'Siguiendo' : 'Seguir'}
+                            </button>
+                        </div>
                     </div>
 
                     <nav className={styles.navTabs}>

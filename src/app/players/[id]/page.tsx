@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { ArrowLeft, Star } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 const TABS = [
     { id: 'summary', label: 'Resumen' },
@@ -13,8 +14,7 @@ const TABS = [
 ];
 
 const getTeamLogo = (team: any) => {
-    if (!team) return '';
-    return team.small_image_path || team.smaill_image_path || team.image_path || team.logo || '';
+    return resolveTeamLogo(team);
 };
 
 export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
