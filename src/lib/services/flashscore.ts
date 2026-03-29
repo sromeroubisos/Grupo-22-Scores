@@ -120,7 +120,7 @@ export async function getFlashScoreMatchesRaw(
             // User requirement: Cache duration 30s if match is within 120m of start in Rugby.
             // Simplified: If fetching for Rugby (8) and day is effectively today (-1 to 1 range), use 30s.
             let dynamicTtl = CACHE_TTL_MATCHES;
-            const isRugby = flashScoreSportId === 8;
+            const isRugby = flashScoreSportId === 8 || flashScoreSportId === 19;
             const isApproximatelyToday = Math.abs(dayOffset) <= 1;
 
             if (isRugby && isApproximatelyToday) {
@@ -175,14 +175,23 @@ export async function getFlashScoreMatches(
     const adj = dayOffset + adjacentOffset;
     if (adj >= -7 && adj <= 7) offsets.push(adj);
 
+    // When the caller requests generic 'rugby', fetch both Rugby Union (8) and
+    // Rugby League (19) in parallel so that both appear on the same page.
+    const rawFetches: Array<[number, string]> =
+        sportId === 'rugby'
+            ? offsets.flatMap(o => ([[o, 'rugby-union'], [o, 'rugby-league']] as [number, string][]))
+            : offsets.map(o => [o, sportId] as [number, string]);
+
     const results = await Promise.all(
-        offsets.map(o => getFlashScoreMatchesRaw(o, sportId, timeZone))
+        rawFetches.map(([o, sid]) => getFlashScoreMatchesRaw(o, sid, timeZone))
     );
 
     let allMatches: Match[] = [];
     const seenMatchIds = new Set<string>();
 
-    results.filter(d => d != null).forEach(data => {
+    results.forEach((data, idx) => {
+        if (data == null) return;
+        const effectiveSportId = rawFetches[idx][1];
         const tournaments = Array.isArray(data) ? data : (data.DATA || data.data || []);
 
         tournaments.forEach((tournament: any) => {
@@ -192,7 +201,7 @@ export async function getFlashScoreMatches(
 
             if (tournament.matches && Array.isArray(tournament.matches)) {
                 const tournamentMatches = tournament.matches
-                    .map((evt: any) => mapEventToMatch(evt, sportId, { leagueName, countryName, leagueId }))
+                    .map((evt: any) => mapEventToMatch(evt, effectiveSportId, { leagueName, countryName, leagueId }))
                     .filter((match: Match) => {
                         // Skip duplicates
                         if (seenMatchIds.has(match.id.toString())) return false;
@@ -238,6 +247,28 @@ function getAdjacentDayOffset(timeZone?: string): number {
 }
 
 export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]> {
+    // For generic 'rugby', fetch both union (8) and league (19) live endpoints.
+    if (sportId === 'rugby') {
+        const combinedCacheKey = 'matches-live-rugby-combined';
+        const cached = memoryCache.get<Match[]>(combinedCacheKey);
+        if (cached) return cached;
+
+        const [unionMatches, leagueMatches] = await Promise.all([
+            getFlashScoreLiveMatches('rugby-union'),
+            getFlashScoreLiveMatches('rugby-league'),
+        ]);
+
+        const seenIds = new Set<string>();
+        const merged: Match[] = [];
+        for (const m of [...unionMatches, ...leagueMatches]) {
+            const key = m.id.toString();
+            if (!seenIds.has(key)) { seenIds.add(key); merged.push(m); }
+        }
+
+        memoryCache.set(combinedCacheKey, merged, CACHE_TTL_LIVE);
+        return merged;
+    }
+
     const flashScoreSportId = SPORT_MAPPING[sportId] || 1;
 
     // Check cache first
@@ -347,7 +378,8 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
 
     // New Request: If Rugby match > 100 minutes since start, force finalize as 'pending result'
     const flashScoreSportId = SPORT_MAPPING[sportId] || parseInt(sportId) || 1;
-    if (flashScoreSportId === 8 && finalMatch.status !== 'final' && finalMatch.status !== 'postponed' && finalMatch.status !== 'cancelled') {
+    const isRugbyVariant = flashScoreSportId === 8 || flashScoreSportId === 19;
+    if (isRugbyVariant && finalMatch.status !== 'final' && finalMatch.status !== 'postponed' && finalMatch.status !== 'cancelled') {
         const now = Date.now();
         const matchTime = scheduledAt.getTime();
         const minutesSinceStart = (now - matchTime) / (1000 * 60);
