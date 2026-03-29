@@ -27,6 +27,7 @@ import {
 // Tournament IDs to hide from API responses (FlashScore or internal)
 const BLOCKED_TOURNAMENT_IDS = new Set([
     'fs-ofv2oc3e',
+    'ras-league-1',
 ]);
 
 function isUuidLike(value: unknown): value is string {
@@ -624,9 +625,12 @@ export async function GET(request: Request) {
                 });
 
                 const enrichedExternalMatches = games.map((game) => mapRugbyGameToEnrichedMatch(game, sport, timeZone));
-                enrichedMatches = [...enrichedMatches, ...enrichedExternalMatches];
+                const filteredRugbyMatches = enrichedExternalMatches.filter(
+                    m => !BLOCKED_TOURNAMENT_IDS.has(m.tournamentId)
+                );
+                enrichedMatches = [...enrichedMatches, ...filteredRugbyMatches];
                 fsOk = true;
-                fsCount = enrichedExternalMatches.length;
+                fsCount = filteredRugbyMatches.length;
                 fsReason = fsCount === 0 ? 'empty_result' : null;
                 fsMessage = fsCount === 0 ? 'No hay partidos externos para este filtro.' : null;
 
