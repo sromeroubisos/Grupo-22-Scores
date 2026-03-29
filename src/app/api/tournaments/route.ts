@@ -37,6 +37,10 @@ import {
     normalizeRugbyGameForTournamentViews,
     normalizeRugbyStandingsRows,
 } from '@/lib/services/rugbyApiSportsTransforms';
+import {
+    isBlockedRugbyApiSportsLeagueId,
+    isBlockedTournamentId,
+} from '@/lib/utils/blockedTournaments';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 const TAB_TIMEOUT_MS = 5000;
@@ -724,6 +728,25 @@ export async function GET(request: Request) {
         (dbTournamentMeta?.external_id && /^\d+$/.test(String(dbTournamentMeta.external_id))
             ? String(dbTournamentMeta.external_id)
             : undefined);
+
+    const isBlockedTournament =
+        isBlockedTournamentId(id) ||
+        isBlockedTournamentId(tournamentId) ||
+        isBlockedTournamentId(stageId) ||
+        isBlockedTournamentId(dbTournamentMeta?.id) ||
+        isBlockedTournamentId(dbTournamentMeta?.slug) ||
+        isBlockedRugbyApiSportsLeagueId(id) ||
+        isBlockedRugbyApiSportsLeagueId(tournamentId) ||
+        isBlockedRugbyApiSportsLeagueId(stageId) ||
+        isBlockedRugbyApiSportsLeagueId(linkedRugbyLeagueId) ||
+        isBlockedRugbyApiSportsLeagueId(dbTournamentMeta?.external_id);
+
+    if (isBlockedTournament) {
+        return Response.json(
+            { ok: false, error: 'Tournament not found' },
+            { status: 404 }
+        );
+    }
 
     if (
         isRugbySport(sport) &&

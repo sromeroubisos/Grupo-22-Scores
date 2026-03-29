@@ -1,5 +1,7 @@
+import { notFound } from 'next/navigation';
 import { fetchTournamentData } from '@/lib/server/fetchTournamentData';
 import { APP_TIMEZONE, getTodayKey } from '@/lib/timezone';
+import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import TournamentDetailPage from './TournamentDetailClient';
 
 export default async function TournamentPage({
@@ -9,6 +11,11 @@ export default async function TournamentPage({
 }) {
     const resolvedParams = await params;
     const { id } = resolvedParams;
+
+    if (isBlockedTournamentId(id)) {
+        notFound();
+    }
+
     const renderTodayKey = getTodayKey(APP_TIMEZONE);
     const renderYear = Number(renderTodayKey.slice(0, 4));
 

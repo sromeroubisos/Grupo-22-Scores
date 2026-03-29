@@ -1,6 +1,7 @@
 const BLOCKED_TOURNAMENT_IDS = [
     'fs-ofv2oc3e',
     'ras-league-1',
+    'ras-league-41',
 ] as const;
 
 const BLOCKED_TOURNAMENT_ID_SET = new Set(
