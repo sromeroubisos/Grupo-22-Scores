@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getTournamentIds } from '@/lib/services/flashscore';
 import type { FlashScoreConfig } from '@/lib/types/flashscore-integration';
+import {
+    getTournamentFlashScoreConfig,
+    isFlashScoreEnabledForSport,
+    RUGBY_FLASHSCORE_DISABLED_MESSAGE,
+    withFlashScoreRuleset,
+} from '@/lib/externalProviderPolicy';
 
 export async function POST(
     request: NextRequest,
@@ -23,16 +29,31 @@ export async function POST(
             );
         }
 
+        const supabase = await createClient();
+
+        const { data: existing, error: readError } = await supabase
+            .from('tournaments')
+            .select('ruleset, sport_id, sport')
+            .eq('id', tournamentId)
+            .single();
+
+        if (readError || !existing) {
+            return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+        }
+
+        if (!isFlashScoreEnabledForSport((existing as any).sport_id ?? (existing as any).sport ?? null)) {
+            return NextResponse.json({ error: RUGBY_FLASHSCORE_DISABLED_MESSAGE }, { status: 409 });
+        }
+
         const raw = await getTournamentIds(tournament_url);
 
         if (!raw) {
             return NextResponse.json(
-                { error: 'No se pudo obtener IDs de FlashScore. Verificá que la URL sea correcta.' },
+                { error: 'No se pudo obtener IDs de FlashScore. Verifica que la URL sea correcta.' },
                 { status: 502 }
             );
         }
 
-        // Map FlashScore API response fields
         const resolvedConfig: FlashScoreConfig = {
             tournament_url,
             tournament_id: raw.tournament_id ?? raw.tournamentId ?? undefined,
@@ -42,27 +63,7 @@ export async function POST(
             linked_at: new Date().toISOString(),
         };
 
-        // Persist to DB immediately
-        const supabase = await createClient();
-
-        const { data: existing, error: readError } = await supabase
-            .from('tournaments')
-            .select('ruleset')
-            .eq('id', tournamentId)
-            .single();
-
-        if (readError || !existing) {
-            return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
-        }
-
-        const currentRuleset = (existing as any).ruleset ?? {};
-        const mergedRuleset = {
-            ...currentRuleset,
-            flashscore: {
-                ...(currentRuleset.flashscore ?? {}),
-                ...resolvedConfig,
-            },
-        };
+        const mergedRuleset = withFlashScoreRuleset((existing as any).ruleset, resolvedConfig);
 
         const { error: updateError } = await supabase
             .from('tournaments')
@@ -73,7 +74,8 @@ export async function POST(
             return NextResponse.json({ error: updateError.message }, { status: 500 });
         }
 
-        return NextResponse.json({ config: mergedRuleset.flashscore });
+        const config = getTournamentFlashScoreConfig({ ...existing, ruleset: mergedRuleset });
+        return NextResponse.json({ config });
     } catch (err: any) {
         return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
     }

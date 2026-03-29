@@ -13,12 +13,34 @@ import {
     getTournamentDraw,
     getTournamentArchives
 } from '@/lib/services/flashscore';
+import { getReadClient } from '@/lib/supabase/read';
 import { db } from '@/lib/mock-db';
-import { persistFromTournamentPayload } from '@/lib/sync/catalog';
+import {
+    persistFromTournamentPayload,
+    persistFromTournamentPayloadWithProvider,
+} from '@/lib/sync/catalog';
 import { getTabSnapshot, hasMeaningfulPayload, upsertTabSnapshot } from '@/lib/sync/tabSnapshots';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
+import {
+    getTournamentRugbyApiSportsConfig,
+    isFlashScoreEnabledForSport,
+    isRugbySport,
+} from '@/lib/externalProviderPolicy';
+import {
+    getRugbyApiSportsGames,
+    getRugbyApiSportsLeagues,
+    getRugbyApiSportsStandings,
+    parseRugbyApiSportsTournamentId,
+    toRugbyApiSportsTournamentId,
+} from '@/lib/services/rugbyApiSports';
+import {
+    normalizeRugbyGameForTournamentViews,
+    normalizeRugbyStandingsRows,
+} from '@/lib/services/rugbyApiSportsTransforms';
 
 const TAB_TIMEOUT_MS = 5000;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const RUGBY_TIMEZONE = 'America/Argentina/Buenos_Aires';
 
 function normalizeId(val: any): string | undefined {
     if (val === null || val === undefined) return undefined;
@@ -257,7 +279,10 @@ function buildStandingsTeamAssetMap(...matchGroups: any[][]) {
     return teamAssets;
 }
 
-function enrichStandingsRowsWithTeamAssets(rows: any, teamAssets: Map<string, { id?: string; name?: string; logo?: string; teamUrl?: string }>) {
+function enrichStandingsRowsWithTeamAssets(
+    rows: any,
+    teamAssets: Map<string, { id?: string; name?: string; logo?: string; teamUrl?: string }>
+): any {
     if (!Array.isArray(rows) || teamAssets.size === 0) return rows;
 
     return rows.map((row: any) => {
@@ -322,6 +347,211 @@ function timedTab<T>(label: string, promise: Promise<T>, ms: number = TAB_TIMEOU
         console.warn(`[Tournament API] ${label} failed:`, error);
         throw error;
     });
+}
+
+function stripRugbyTournamentPrefix(val?: string): string | undefined {
+    if (!val) return val;
+    return parseRugbyApiSportsTournamentId(val) ?? val;
+}
+
+function pickLatestRugbySeason(league: any, preferredSeason?: string | number | null) {
+    if (preferredSeason !== undefined && preferredSeason !== null && preferredSeason !== '') {
+        const parsed = Number(preferredSeason);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+
+    const seasons = Array.isArray(league?.seasons)
+        ? [...league.seasons].sort((left: any, right: any) => Number(right?.season || 0) - Number(left?.season || 0))
+        : [];
+    const currentSeason = seasons.find((season: any) => season?.current === true);
+    const selected = currentSeason ?? seasons[0];
+    const parsed = Number(selected?.season);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+async function findDbTournamentMeta(id: string) {
+    if (!id || id.toLowerCase().startsWith('fs-') || id.toLowerCase().startsWith('ras-league-')) {
+        return null;
+    }
+
+    try {
+        const readClient = await getReadClient();
+        const baseQuery = readClient
+            .from('tournaments')
+            .select('id, name, display_name, sport_id, country_id, logo_url, banner_url, url, ruleset, external_id');
+
+        const response = UUID_RE.test(id)
+            ? await baseQuery.eq('id', id).maybeSingle()
+            : await baseQuery.eq('slug', id).maybeSingle();
+
+        return response.data || null;
+    } catch (error) {
+        console.warn('[Tournament API] Could not load DB tournament metadata:', error);
+        return null;
+    }
+}
+
+async function buildRugbyTournamentPayload(args: {
+    sport: string;
+    localTournament?: any;
+    dbTournament?: any;
+    leagueId: string | number;
+    season?: string | number | null;
+    stage?: string | null;
+    group?: string | null;
+}) {
+    const leagueId = Number(args.leagueId);
+    if (!Number.isFinite(leagueId)) {
+        throw new Error('Invalid Rugby API-Sports league id');
+    }
+
+    const [league] = await getRugbyApiSportsLeagues({ id: leagueId });
+    const resolvedSeason = pickLatestRugbySeason(league, args.season);
+    if (!resolvedSeason) {
+        throw new Error('No season could be resolved for this rugby tournament');
+    }
+
+    const [games, standingsRaw] = await Promise.all([
+        getRugbyApiSportsGames({
+            league: leagueId,
+            season: resolvedSeason,
+            timezone: RUGBY_TIMEZONE,
+        }),
+        getRugbyApiSportsStandings({
+            league: leagueId,
+            season: resolvedSeason,
+            stage: args.stage || undefined,
+            group: args.group || undefined,
+        }).catch(() => []),
+    ]);
+
+    const normalizedMatches = games.map((game) => ({
+        ...normalizeRugbyGameForTournamentViews(game),
+        sport_id: 'rugby',
+    }));
+
+    const results = sortMatchesByDate(
+        normalizedMatches.filter((match) => match.status === 'final'),
+        'desc',
+    );
+    const fixtures = sortMatchesByDate(
+        normalizedMatches.filter((match) => match.status !== 'final'),
+        'asc',
+    );
+    const standings = normalizeRugbyStandingsRows(standingsRaw);
+
+    const leagueName =
+        args.dbTournament?.display_name ||
+        args.dbTournament?.name ||
+        args.localTournament?.display_name ||
+        args.localTournament?.name ||
+        league?.name ||
+        'Liga';
+    const leagueLogo =
+        args.dbTournament?.logo_url ||
+        args.dbTournament?.banner_url ||
+        args.localTournament?.logo_url ||
+        args.localTournament?.logoUrl ||
+        league?.logo ||
+        '';
+    const countryName = league?.country?.name || args.dbTournament?.country_id || args.localTournament?.countryId || 'Internacional';
+    const currentSeason = Array.isArray(league?.seasons)
+        ? league.seasons.find((season: any) => Number(season?.season) === resolvedSeason && season?.current === true)
+        : null;
+    const archives = Array.isArray(league?.seasons)
+        ? [...league.seasons]
+            .sort((left: any, right: any) => Number(right?.season || 0) - Number(left?.season || 0))
+            .map((season: any) => ({
+                id: season.season,
+                season_id: season.season,
+                season_name: String(season.season),
+                name: String(season.season),
+                current: season.current === true,
+                start: season.start || null,
+                end: season.end || null,
+            }))
+        : [];
+
+    const details = {
+        provider: 'rugby-api-sports',
+        externalProvider: 'rugby-api-sports',
+        name: leagueName,
+        image_path: leagueLogo,
+        logo: leagueLogo,
+        logo_path: leagueLogo,
+        tournament_logo: leagueLogo,
+        tournament_image_path: leagueLogo,
+        tournament_name: leagueName,
+        league_name: leagueName,
+        country: countryName,
+        country_name: countryName,
+        season: resolvedSeason,
+        start_year: resolvedSeason,
+        end_year: resolvedSeason + 1,
+        is_current: Boolean(currentSeason),
+        current_stage_has_cup_trees: false,
+        type: league?.type || args.localTournament?.type || 'league',
+        supported_tabs: ['summary', 'results', 'fixtures', 'standings', 'teams'],
+    };
+
+    persistFromTournamentPayloadWithProvider({
+        ids: {
+            tournamentId: toRugbyApiSportsTournamentId(leagueId),
+            seasonId: String(resolvedSeason),
+        },
+        sport: args.sport || 'rugby',
+        details,
+        standings,
+        fixtures,
+        results,
+        topScorers: [],
+    }, {
+        provider: 'rugby-api-sports',
+        tournamentPrefix: 'ras-league-',
+        teamPrefix: 'ras-team-',
+        playerPrefix: 'ras-player-',
+    });
+
+    return {
+        ok: true,
+        provider: 'rugby-api-sports',
+        _debug: {
+            query: {
+                sport: args.sport,
+                leagueId,
+                requestedSeason: args.season ?? null,
+                stage: args.stage ?? null,
+                group: args.group ?? null,
+            },
+            resolvedIds: {
+                tournamentId: toRugbyApiSportsTournamentId(leagueId),
+                seasonId: String(resolvedSeason),
+            },
+            counts: {
+                results: results.length,
+                fixtures: fixtures.length,
+                standings: standings.length,
+                topScorers: 0,
+            },
+        },
+        ids: {
+            tournamentId: toRugbyApiSportsTournamentId(leagueId),
+            stageId: args.stage || null,
+            templateId: null,
+            seasonId: String(resolvedSeason),
+            drawStageId: null,
+        },
+        details,
+        results,
+        fixtures,
+        standings,
+        standingsForm: standings,
+        standingsHtFt: [],
+        standingsOverUnder: [],
+        topScorers: [],
+        draw: [],
+        archives,
+    };
 }
 
 async function fetchAndExtractFromOffset(
@@ -420,12 +650,18 @@ export async function GET(request: Request) {
     const id = searchParams.get('id') || '';
     let url = searchParams.get('url') || searchParams.get('tournament_url') || searchParams.get('tournamentUrl') || '';
     const sport = searchParams.get('sport') || searchParams.get('sportId') || 'rugby'; // Default to rugby
+    const requestedSeason =
+        searchParams.get('season') ||
+        searchParams.get('season_id') ||
+        searchParams.get('seasonId') ||
+        undefined;
 
     let tournamentId = searchParams.get('tournament_id') || searchParams.get('tournamentId') || undefined;
     let stageId = searchParams.get('tournament_stage_id') || searchParams.get('tournamentStageId') || searchParams.get('stageId') || undefined;
     let templateId = searchParams.get('tournament_template_id') || searchParams.get('templateId') || undefined;
     let seasonId = searchParams.get('season_id') || searchParams.get('seasonId') || undefined;
     let drawStageId = searchParams.get('draw_stage_id') || searchParams.get('drawStageId') || undefined;
+    const flashScoreEnabledForSport = isFlashScoreEnabledForSport(sport);
 
     // Try to get tournament from local data to check for flashScoreIds
     let localTournament: any = null;
@@ -468,24 +704,83 @@ export async function GET(request: Request) {
         }
     }
 
+    const dbTournamentMeta = await findDbTournamentMeta(id);
+
     tournamentId = stripFsPrefix(tournamentId);
     stageId = stripFsPrefix(stageId);
     drawStageId = stripFsPrefix(drawStageId);
 
-    console.log('TOURNAMENT API GET:', { id, url, sport, tournamentId, stageId, templateId, seasonId, drawStageId, hasLocalTournament: !!localTournament });
+    console.log('TOURNAMENT API GET:', {
+        id,
+        url,
+        sport,
+        tournamentId,
+        stageId,
+        templateId,
+        seasonId,
+        requestedSeason,
+        drawStageId,
+        hasLocalTournament: !!localTournament,
+        hasDbTournament: !!dbTournamentMeta,
+    });
 
     const hasFsPrefix = id.toLowerCase().startsWith('fs-');
+    const hasRugbyPrefix = id.toLowerCase().startsWith('ras-league-');
     const rawId = hasFsPrefix ? id.slice(3) : id;
-    console.log('ID Parsing:', { hasFsPrefix, rawId });
+    console.log('ID Parsing:', { hasFsPrefix, hasRugbyPrefix, rawId });
 
     if (hasFsPrefix && rawId) {
         tournamentId = tournamentId || rawId;
     }
 
+    const rugbyConfig = getTournamentRugbyApiSportsConfig(dbTournamentMeta);
+    const linkedRugbyLeagueId =
+        parseRugbyApiSportsTournamentId(id) ||
+        stripRugbyTournamentPrefix(tournamentId) ||
+        (rugbyConfig?.league_id != null ? String(rugbyConfig.league_id) : undefined) ||
+        (dbTournamentMeta?.external_id && /^\d+$/.test(String(dbTournamentMeta.external_id))
+            ? String(dbTournamentMeta.external_id)
+            : undefined);
+
+    if (
+        isRugbySport(sport) &&
+        linkedRugbyLeagueId &&
+        (
+            hasRugbyPrefix ||
+            rugbyConfig?.league_id != null ||
+            (dbTournamentMeta?.external_id && /^\d+$/.test(String(dbTournamentMeta.external_id)))
+        )
+    ) {
+        try {
+            const payload = await buildRugbyTournamentPayload({
+                sport,
+                localTournament,
+                dbTournament: dbTournamentMeta,
+                leagueId: linkedRugbyLeagueId,
+                season: requestedSeason ?? seasonId ?? rugbyConfig?.season ?? null,
+                stage: rugbyConfig?.stage ?? null,
+                group: rugbyConfig?.group ?? null,
+            });
+            return Response.json(payload);
+        } catch (error: any) {
+            return Response.json(
+                { ok: false, error: error.message || 'Failed to load rugby tournament data' },
+                { status: 500 }
+            );
+        }
+    }
+
+    if (isRugbySport(sport) && (dbTournamentMeta || hasRugbyPrefix)) {
+        return Response.json(
+            { ok: false, error: 'This rugby tournament is not linked to Rugby API-Sports yet.' },
+            { status: 400 }
+        );
+    }
+
     let details: any = null;
 
     try {
-        if (hasFsPrefix && rawId && !stageId) {
+        if (flashScoreEnabledForSport && hasFsPrefix && rawId && !stageId) {
             console.log('Attempting details with rawId as stageId:', rawId);
             const detailsAttemptRes = await getTournamentDetails(rawId);
             const detailsAttempt = normalizeDetails(detailsAttemptRes);
@@ -507,7 +802,7 @@ export async function GET(request: Request) {
             }
         }
 
-        if (stageId && !details) {
+        if (flashScoreEnabledForSport && stageId && !details) {
             const detailsRes = await getTournamentDetails(stageId);
             details = normalizeDetails(detailsRes);
 
@@ -541,7 +836,7 @@ export async function GET(request: Request) {
             }
         }
 
-        if (tournamentId && (!stageId || !templateId || !seasonId || !url)) {
+        if (flashScoreEnabledForSport && tournamentId && (!stageId || !templateId || !seasonId || !url)) {
             const resolved = await resolveIdsFromTournamentId(tournamentId, sport);
             tournamentId = resolved.tournamentId || tournamentId;
             seasonId = resolved.seasonId || seasonId;
@@ -553,7 +848,7 @@ export async function GET(request: Request) {
             }
         }
 
-        if (url && (!templateId || !seasonId || !stageId || !tournamentId)) {
+        if (flashScoreEnabledForSport && url && (!templateId || !seasonId || !stageId || !tournamentId)) {
             let idsRes = await getTournamentIds(url);
             let idsData = idsRes?.DATA || idsRes;
 
@@ -640,11 +935,13 @@ export async function GET(request: Request) {
         tournamentId = stripFsPrefix(tournamentId);
         stageId = stripFsPrefix(stageId);
 
-        const canFetchMatches = !!(templateId && seasonId);
-        const canFetchStandings = !!(tournamentId && stageId);
-        const canFetchDraw = !!(tournamentId && stageId); // Use stageId instead of drawStageId
-        const canFetchArchives = !!stageId;
-        const detailsPromise = stageId && !details ? getTournamentDetails(stageId) : Promise.resolve(details);
+        const canFetchMatches = flashScoreEnabledForSport && !!(templateId && seasonId);
+        const canFetchStandings = flashScoreEnabledForSport && !!(tournamentId && stageId);
+        const canFetchDraw = flashScoreEnabledForSport && !!(tournamentId && stageId); // Use stageId instead of drawStageId
+        const canFetchArchives = flashScoreEnabledForSport && !!stageId;
+        const detailsPromise = flashScoreEnabledForSport && stageId && !details
+            ? getTournamentDetails(stageId)
+            : Promise.resolve(details);
 
         const snapshotEntityId = tournamentId || stageId || id || url || 'unknown';
         const snapshotKey = { entityType: 'tournament' as const, entityId: snapshotEntityId };
@@ -746,6 +1043,13 @@ export async function GET(request: Request) {
             results: resultsPayload?.length || 0,
             standings: Array.isArray(finalStandings) ? finalStandings.length : 0
         });
+
+        if (!flashScoreEnabledForSport) {
+            tabSources.details = tabSources.details || 'empty';
+            tabSources.results = tabSources.results || 'empty';
+            tabSources.fixtures = tabSources.fixtures || 'empty';
+            tabSources.standings = tabSources.standings || 'empty';
+        }
 
         // --- Custom Re-grouping Logic ---
         const customConfigs = db.phaseConfigurations[id];

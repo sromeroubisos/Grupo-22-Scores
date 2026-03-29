@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
-    getTournamentFlashScoreConfig,
-    isFlashScoreEnabledForSport,
-    RUGBY_FLASHSCORE_DISABLED_MESSAGE,
-    withFlashScoreRuleset,
+    getTournamentRugbyApiSportsConfig,
+    isRugbySport,
+    withRugbyApiSportsRuleset,
 } from '@/lib/externalProviderPolicy';
 
 export async function GET(
@@ -25,20 +24,16 @@ export async function GET(
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
         }
 
-        if (!isFlashScoreEnabledForSport((data as any).sport_id ?? (data as any).sport ?? null)) {
-            return NextResponse.json({
-                config: null,
-                provider: 'disabled',
-                reason: 'disabled_for_sport',
-                message: RUGBY_FLASHSCORE_DISABLED_MESSAGE,
-            });
+        if (!isRugbySport((data as any).sport_id ?? (data as any).sport ?? null)) {
+            return NextResponse.json({ error: 'This provider is only available for rugby tournaments.' }, { status: 409 });
         }
 
-        const config = getTournamentFlashScoreConfig(data as any);
-
-        return NextResponse.json({ config });
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({
+            provider: 'rugby-api-sports',
+            config: getTournamentRugbyApiSportsConfig(data as any),
+        });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
     }
 }
 
@@ -49,15 +44,13 @@ export async function PUT(
     try {
         const tournamentId = (await params).id;
         const body = await request.json();
-        const { config } = body;
+        const config = body?.config;
 
         if (!config || typeof config !== 'object') {
             return NextResponse.json({ error: 'config object is required' }, { status: 400 });
         }
 
         const supabase = await createClient();
-
-        // Read current ruleset to merge
         const { data: existing, error: readError } = await supabase
             .from('tournaments')
             .select('ruleset, sport_id, sport')
@@ -68,11 +61,11 @@ export async function PUT(
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
         }
 
-        if (!isFlashScoreEnabledForSport((existing as any).sport_id ?? (existing as any).sport ?? null)) {
-            return NextResponse.json({ error: RUGBY_FLASHSCORE_DISABLED_MESSAGE }, { status: 409 });
+        if (!isRugbySport((existing as any).sport_id ?? (existing as any).sport ?? null)) {
+            return NextResponse.json({ error: 'This provider is only available for rugby tournaments.' }, { status: 409 });
         }
 
-        const mergedRuleset = withFlashScoreRuleset((existing as any).ruleset, config);
+        const mergedRuleset = withRugbyApiSportsRuleset((existing as any).ruleset, config);
 
         const { error: updateError } = await supabase
             .from('tournaments')
@@ -83,9 +76,11 @@ export async function PUT(
             return NextResponse.json({ error: updateError.message }, { status: 500 });
         }
 
-        const mergedConfig = getTournamentFlashScoreConfig({ ...existing, ruleset: mergedRuleset });
-        return NextResponse.json({ config: mergedConfig });
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({
+            provider: 'rugby-api-sports',
+            config: getTournamentRugbyApiSportsConfig({ ...existing, ruleset: mergedRuleset }),
+        });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
     }
 }

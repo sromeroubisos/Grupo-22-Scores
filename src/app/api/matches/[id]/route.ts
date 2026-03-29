@@ -23,6 +23,18 @@ import {
   getFlashScoreStandingsForm,
   getFlashScoreTopScorers,
 } from '@/lib/services/flashscore';
+import { isRugbySport } from '@/lib/externalProviderPolicy';
+import {
+  getRugbyApiSportsGame,
+  getRugbyApiSportsGamesH2H,
+  getRugbyApiSportsStandings,
+  parseRugbyApiSportsMatchId,
+} from '@/lib/services/rugbyApiSports';
+import {
+  normalizeRugbyGameForMatchDetail,
+  normalizeRugbyGameForTournamentViews,
+  normalizeRugbyStandingsRows,
+} from '@/lib/services/rugbyApiSportsTransforms';
 
 function isFlashScoreMatchId(matchId: string) {
   return /^[A-Za-z0-9]{8}$/.test(matchId);
@@ -96,6 +108,71 @@ async function getFlashScoreMatchBundle(matchId: string) {
   };
 }
 
+async function getCachedExternalMatchSport(matchId: string) {
+  const readClient = await getReadClient();
+  const { data } = await readClient
+    .from('external_match_cache')
+    .select('sport')
+    .eq('id', matchId)
+    .maybeSingle();
+
+  return data?.sport ?? null;
+}
+
+async function getRugbyApiSportsMatchBundle(matchId: string) {
+  const game = await getRugbyApiSportsGame(matchId, 'America/Argentina/Buenos_Aires');
+  if (!game) {
+    return null;
+  }
+
+  const homeId = game.teams?.home?.id;
+  const awayId = game.teams?.away?.id;
+
+  const [h2hResult, standingsResult] = await Promise.allSettled([
+    homeId && awayId
+      ? getRugbyApiSportsGamesH2H({
+        homeTeamId: homeId,
+        awayTeamId: awayId,
+        timezone: 'America/Argentina/Buenos_Aires',
+      })
+      : Promise.resolve([]),
+    game.league?.id && game.league?.season
+      ? getRugbyApiSportsStandings({
+        league: game.league.id,
+        season: game.league.season,
+      })
+      : Promise.resolve([]),
+  ]);
+
+  const match = normalizeRugbyGameForMatchDetail(game);
+  const h2h = h2hResult.status === 'fulfilled'
+    ? h2hResult.value.map((item) => normalizeRugbyGameForTournamentViews(item))
+    : [];
+  const standingsRows = standingsResult.status === 'fulfilled'
+    ? normalizeRugbyStandingsRows(standingsResult.value)
+    : [];
+
+  match.h2h = h2h;
+  match.standings = standingsRows.map((row) => ({
+    rank: row.position,
+    name: row.team_name,
+    team_id: row.team_id,
+    logo: row.team_logo || '',
+    team: row.team_id ? { id: row.team_id, name: row.team_name, logo: row.team_logo || '' } : null,
+    matches_played: row.played,
+    goal_difference: (row.scored ?? 0) - (row.conceded ?? 0),
+    points: row.points,
+    played: row.played,
+  }));
+
+  return {
+    source: 'rugby-api-sports' as const,
+    match,
+    h2h,
+    standings: match.standings,
+  };
+}
+
 async function ensureMatchAccess(
   matchId: string,
   allowedRoles: ReadonlySet<string>
@@ -123,14 +200,42 @@ export async function GET(
 ) {
   try {
     const matchId = (await params).id;
+    const rugbyMatchId = parseRugbyApiSportsMatchId(matchId);
+
+    if (rugbyMatchId) {
+      const bundle = await getRugbyApiSportsMatchBundle(rugbyMatchId);
+      if (!bundle) {
+        return NextResponse.json(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(bundle);
+    }
 
     if (isFlashScoreMatchId(matchId)) {
+      const cachedSport = await getCachedExternalMatchSport(matchId).catch(() => null);
       const bundle = await getFlashScoreMatchBundle(matchId);
 
       if (!bundle) {
         return NextResponse.json(
           { error: 'Match not found' },
           { status: 404 }
+        );
+      }
+
+      const detailsSportId =
+        bundle.details?.DATA?.EVENT?.sport?.sport_id ??
+        bundle.details?.DATA?.EVENT?.SPORT_ID ??
+        bundle.details?.sport?.sport_id ??
+        bundle.details?.SPORT_ID ??
+        null;
+
+      if (isRugbySport(detailsSportId) || isRugbySport(cachedSport)) {
+        return NextResponse.json(
+          { error: 'This match now uses Rugby API-Sports. Refresh the page from the rugby external listing.' },
+          { status: 409 }
         );
       }
 

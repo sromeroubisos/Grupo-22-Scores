@@ -29,7 +29,7 @@ export interface CachedExternalMatch {
     home_team: CachedTeam;
     away_team: CachedTeam;
     score: { home: number | null; away: number | null };
-    status: 'scheduled' | 'live' | 'final' | 'postponed';
+    status: 'scheduled' | 'live' | 'final' | 'postponed' | 'cancelled';
     date_time: string;        // ISO string
     round_label: string | null;
     updated_at?: string;
@@ -46,6 +46,7 @@ export function mapFlashScoreMatchToCached(m: Match, sport: string): CachedExter
     const status: CachedExternalMatch['status'] =
         m.status === 'live'      ? 'live'      :
         m.status === 'final'     ? 'final'     :
+        m.status === 'cancelled' ? 'cancelled' :
         m.status === 'postponed' ? 'postponed' :
         'scheduled';
 
@@ -74,6 +75,37 @@ export function mapFlashScoreMatchToCached(m: Match, sport: string): CachedExter
         status,
         date_time: dateTime,
         round_label: m.round != null ? `F${m.round}` : null
+    };
+}
+
+export function mapExternalMatchToCached(match: {
+    id: string;
+    sport: string;
+    tournamentId?: string | null;
+    tournamentName?: string | null;
+    countryName?: string | null;
+    homeTeam: CachedTeam;
+    awayTeam: CachedTeam;
+    score?: { home: number | null; away: number | null } | null;
+    status: CachedExternalMatch['status'];
+    dateTime: string;
+    roundLabel?: string | null;
+}): CachedExternalMatch {
+    return {
+        id: match.id,
+        sport: match.sport,
+        tournament_id: match.tournamentId ?? null,
+        tournament_name: match.tournamentName ?? null,
+        country_name: match.countryName ?? null,
+        home_team: match.homeTeam,
+        away_team: match.awayTeam,
+        score: {
+            home: match.score?.home ?? null,
+            away: match.score?.away ?? null,
+        },
+        status: match.status,
+        date_time: match.dateTime,
+        round_label: match.roundLabel ?? null,
     };
 }
 

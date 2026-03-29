@@ -10,6 +10,19 @@ export interface FlashScoreConfig {
     linked_at?: string;   // ISO string
 }
 
+export interface RugbyApiSportsConfig {
+    league_id?: number;
+    season?: number;
+    stage?: string;
+    group?: string;
+    country_id?: number;
+    league_name?: string;
+    country_name?: string;
+    league_logo?: string;
+    resolved_at?: string;
+    last_sync_at?: string;
+}
+
 export type FlashScoreLinkStatus =
     | 'unlinked'      // no config at all
     | 'url_only'      // has tournament_url but no resolved IDs
@@ -23,6 +36,13 @@ export function getLinkStatus(config: FlashScoreConfig | null | undefined): Flas
     return 'ids_resolved';
 }
 
+export function getRugbyApiSportsLinkStatus(config: RugbyApiSportsConfig | null | undefined): FlashScoreLinkStatus {
+    if (!config?.league_id) return 'unlinked';
+    if (!config.season) return 'url_only';
+    if (config.last_sync_at) return 'synced';
+    return 'ids_resolved';
+}
+
 // Response from /resolve
 export interface ResolveIdsResponse {
     config: FlashScoreConfig;
@@ -30,7 +50,8 @@ export interface ResolveIdsResponse {
 
 // One external match normalized from FlashScore API
 export interface ExternalMatch {
-    flashscore_match_id: string;
+    external_match_id?: string;
+    flashscore_match_id?: string;
     home_team_name: string;
     away_team_name: string;
     timestamp: number;       // Unix seconds
@@ -55,7 +76,8 @@ export interface SyncRequest {
     phase_id: string;
     round_id?: string | null;
     matches: Array<{
-        flashscore_match_id: string;
+        external_match_id?: string;
+        flashscore_match_id?: string;
         home_club_id: string;
         away_club_id: string;
         date_time: string;

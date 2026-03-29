@@ -12,8 +12,11 @@ export default async function TournamentPage({
     const renderTodayKey = getTodayKey(APP_TIMEZONE);
     const renderYear = Number(renderTodayKey.slice(0, 4));
 
-    // Only prefetch for DB tournaments (UUID or slug, not FlashScore fs- prefix)
-    const isDbTournament = !id.toLowerCase().startsWith('fs-');
+    // Only prefetch for DB tournaments (UUID or slug, not external provider ids)
+    const isExternalTournament =
+        id.toLowerCase().startsWith('fs-') ||
+        id.toLowerCase().startsWith('ras-league-');
+    const isDbTournament = !isExternalTournament;
     let initialData = undefined;
 
     if (isDbTournament) {

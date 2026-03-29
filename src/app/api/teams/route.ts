@@ -9,6 +9,20 @@ import {
     getTeamTransfers,
 } from '@/lib/services/flashscore';
 import { canonicalizeSportId, getClubSportValue } from '@/lib/clubDerivatives';
+import {
+    getRugbyApiSportsGames,
+    getRugbyApiSportsLeagues,
+    getRugbyApiSportsSeasons,
+    getRugbyApiSportsStandings,
+    getRugbyApiSportsTeamStatistics,
+    getRugbyApiSportsTeams,
+    mapRugbyApiSportsStatus,
+} from '@/lib/services/rugbyApiSports';
+import {
+    buildRugbyTeamDetailsPayload,
+    normalizeRugbyGameForTournamentViews,
+    normalizeRugbyStandingsRows,
+} from '@/lib/services/rugbyApiSportsTransforms';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
@@ -120,6 +134,11 @@ function stripFsTeamPrefix(val: string): string {
     return val;
 }
 
+function parseRugbyApiSportsTeamId(val: string): string | null {
+    const match = /^ras-team-(\d+)$/i.exec(val.trim());
+    return match?.[1] || null;
+}
+
 function slugify(name: string): string {
     return name
         .toLowerCase()
@@ -127,6 +146,84 @@ function slugify(name: string): string {
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
+}
+
+function normalizeRugbyTeamMatch(match: any) {
+    return {
+        ...normalizeRugbyGameForTournamentViews(match),
+        sport_id: 'rugby',
+        status: mapRugbyApiSportsStatus(match.status),
+    };
+}
+
+async function resolveRugbyTeamSeasonContext(teamId: string) {
+    const seasons = await getRugbyApiSportsSeasons().catch(() => []);
+    const candidateSeasons = Array.from(new Set(
+        seasons
+            .map((season) => Number(season))
+            .filter((season) => Number.isFinite(season))
+            .sort((left, right) => right - left)
+            .slice(0, 6)
+    ));
+
+    if (candidateSeasons.length === 0) {
+        return {
+            season: null as number | null,
+            games: [] as any[],
+            primaryLeagueId: null as number | null,
+            league: null as any,
+            standingRow: null as any,
+        };
+    }
+
+    const seasonResults = await Promise.all(candidateSeasons.map(async (season) => ({
+        season,
+        games: await getRugbyApiSportsGames({
+            team: teamId,
+            season,
+            timezone: 'America/Argentina/Buenos_Aires',
+        }).catch(() => []),
+    })));
+
+    const resolvedSeasonResult = seasonResults.find((entry) => entry.games.length > 0) || seasonResults[0];
+    const season = resolvedSeasonResult?.season ?? null;
+    const games = resolvedSeasonResult?.games ?? [];
+
+    const leagueUsage = new Map<number, { count: number; latestTimestamp: number }>();
+    for (const game of games) {
+        const leagueId = Number(game?.league?.id);
+        if (!Number.isFinite(leagueId)) continue;
+        const current = leagueUsage.get(leagueId) || { count: 0, latestTimestamp: 0 };
+        leagueUsage.set(leagueId, {
+            count: current.count + 1,
+            latestTimestamp: Math.max(current.latestTimestamp, Number(game?.timestamp || 0)),
+        });
+    }
+
+    const primaryLeagueId = Array.from(leagueUsage.entries())
+        .sort((left, right) => {
+            if (right[1].count !== left[1].count) return right[1].count - left[1].count;
+            return right[1].latestTimestamp - left[1].latestTimestamp;
+        })[0]?.[0] ?? null;
+
+    const [league, standingsRaw] = await Promise.all([
+        primaryLeagueId && season
+            ? getRugbyApiSportsLeagues({ id: primaryLeagueId, season }).then((response) => response[0] || null).catch(() => null)
+            : Promise.resolve(null),
+        primaryLeagueId && season
+            ? getRugbyApiSportsStandings({ league: primaryLeagueId, season }).catch(() => [])
+            : Promise.resolve([]),
+    ]);
+
+    const standingRow = normalizeRugbyStandingsRows(standingsRaw).find((row) => row.team_id === `ras-team-${teamId}`) || null;
+
+    return {
+        season,
+        games,
+        primaryLeagueId,
+        league,
+        standingRow,
+    };
 }
 
 
@@ -318,6 +415,75 @@ export async function GET(request: Request) {
 
     if (!rawTeamId) {
         return Response.json({ ok: false, error: 'team_id is required' }, { status: 400 });
+    }
+
+    const rugbyTeamId =
+        parseRugbyApiSportsTeamId(rawTeamId) ||
+        (canonicalizeSportId(preferredSport) === 'rugby' && /^\d+$/.test(rawTeamId) ? rawTeamId : null);
+    if (rugbyTeamId) {
+        try {
+            const [teamsResult, context] = await Promise.all([
+                getRugbyApiSportsTeams({ id: rugbyTeamId }).catch(() => []),
+                resolveRugbyTeamSeasonContext(rugbyTeamId),
+            ]);
+            const games = context.games;
+            const derivedTeamFromGames = games
+                .flatMap((game: any) => [game?.teams?.home, game?.teams?.away])
+                .find((team: any) => String(team?.id || '') === String(rugbyTeamId));
+            const team = teamsResult[0] || derivedTeamFromGames || null;
+            if (!team) {
+                return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
+            }
+
+            const normalizedGames = games.map(normalizeRugbyTeamMatch);
+            const statistics = context.primaryLeagueId && context.season
+                ? await getRugbyApiSportsTeamStatistics({
+                    league: context.primaryLeagueId,
+                    season: context.season,
+                    team: rugbyTeamId,
+                }).catch(() => null)
+                : null;
+
+            const details = {
+                ...buildRugbyTeamDetailsPayload(team, statistics),
+                current_league: context.league?.name || games[0]?.league?.name || '',
+                current_league_logo: context.league?.logo || games[0]?.league?.logo || '',
+                current_season: context.season,
+                standing: context.standingRow ? {
+                    position: context.standingRow.position,
+                    points: context.standingRow.points,
+                    played: context.standingRow.played,
+                    won: context.standingRow.won,
+                    drawn: context.standingRow.drawn,
+                    lost: context.standingRow.lost,
+                } : null,
+            };
+            const results = sortMatchesByDate(
+                normalizedGames.filter((match) => match.status === 'final'),
+                'desc',
+            );
+            const fixtures = sortMatchesByDate(
+                normalizedGames.filter((match) => match.status !== 'final'),
+                'asc',
+            );
+
+            return Response.json({
+                ok: true,
+                resolvedClubId: null,
+                details,
+                results,
+                fixtures,
+                squad: [],
+                transfers: [],
+            });
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error('Teams API rugby error', e);
+            return Response.json(
+                { ok: false, error: 'Failed to load rugby team data', details: message },
+                { status: 500 }
+            );
+        }
     }
 
     // 1. Check Supabase for internal club info first

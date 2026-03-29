@@ -2,6 +2,7 @@ import { Match, MatchStatus } from '@/types/match';
 import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
+import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 
 const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
 const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
@@ -87,6 +88,10 @@ export async function getFlashScoreMatchesRaw(
     sportId: string | number,
     timeZone?: string
 ): Promise<any> {
+    if (!isFlashScoreEnabledForSport(sportId)) {
+        return [];
+    }
+
     // Determine the numeric sport ID
     let flashScoreSportId = 1;
     if (typeof sportId === 'string') {
@@ -247,6 +252,10 @@ function getAdjacentDayOffset(timeZone?: string): number {
 }
 
 export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]> {
+    if (!isFlashScoreEnabledForSport(sportId)) {
+        return [];
+    }
+
     // For generic 'rugby', fetch both union (8) and league (19) live endpoints.
     if (sportId === 'rugby') {
         const combinedCacheKey = 'matches-live-rugby-combined';

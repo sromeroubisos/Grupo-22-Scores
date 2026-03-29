@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFlashScoreLiveMatches } from '@/lib/services/flashscore';
 import { getActiveSports } from '@/lib/data/sports';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 import {
     mapFlashScoreMatchToCached,
     upsertMatches,
@@ -44,6 +45,10 @@ export async function GET(request: NextRequest) {
 
     const results = await Promise.allSettled(
         activeSports.map(async (sport) => {
+            if (!isFlashScoreEnabledForSport(sport.id)) {
+                return { sport: sport.id, synced: 0, skipped: true };
+            }
+
             let apiFailed = false;
             let liveMatches: Awaited<ReturnType<typeof getFlashScoreLiveMatches>> = [];
 

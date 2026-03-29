@@ -13,6 +13,7 @@ import { getFlashScoreMatches } from '@/lib/services/flashscore';
 import { getActiveSports } from '@/lib/data/sports';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { formatDateKey } from '@/lib/timezone';
+import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 import {
     mapFlashScoreMatchToCached,
     upsertMatches
@@ -66,6 +67,11 @@ export async function GET(request: NextRequest) {
         activeSports.map(async (sport) => {
             let synced = 0;
             let errors = 0;
+
+            if (!isFlashScoreEnabledForSport(sport.id)) {
+                sportResults[sport.id] = { synced: 0, errors: 0 };
+                return;
+            }
 
             for (const { date, dateKey } of targetDates) {
                 try {

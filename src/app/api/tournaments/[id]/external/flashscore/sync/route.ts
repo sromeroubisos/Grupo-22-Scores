@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { FixtureService } from '@/lib/services/fixtureService';
+import {
+    isFlashScoreEnabledForSport,
+    RUGBY_FLASHSCORE_DISABLED_MESSAGE,
+    withFlashScoreRuleset,
+} from '@/lib/externalProviderPolicy';
 import type { SyncRequest } from '@/lib/types/flashscore-integration';
 
 export async function POST(
@@ -34,6 +39,16 @@ export async function POST(
         }
 
         const supabase = await createClient();
+
+        const { data: tournamentMeta } = await supabase
+            .from('tournaments')
+            .select('sport_id, sport')
+            .eq('id', tournamentId)
+            .single();
+
+        if (!isFlashScoreEnabledForSport((tournamentMeta as any)?.sport_id ?? (tournamentMeta as any)?.sport ?? null)) {
+            return NextResponse.json({ error: RUGBY_FLASHSCORE_DISABLED_MESSAGE }, { status: 409 });
+        }
 
         // Validate phase belongs to this tournament
         const { data: phase, error: phaseError } = await supabase
@@ -70,18 +85,9 @@ export async function POST(
             .single();
 
         if (existing) {
-            const currentRuleset = typeof existing.ruleset === 'object' && existing.ruleset
-                ? existing.ruleset as Record<string, unknown>
-                : {};
-            const updatedRuleset = {
-                ...currentRuleset,
-                flashscore: {
-                    ...((typeof currentRuleset.flashscore === 'object' && currentRuleset.flashscore)
-                        ? currentRuleset.flashscore as Record<string, unknown>
-                        : {}),
-                    last_sync: new Date().toISOString(),
-                },
-            };
+            const updatedRuleset = withFlashScoreRuleset(existing.ruleset, {
+                last_sync: new Date().toISOString(),
+            });
             await supabase
                 .from('tournaments')
                 .update({ ruleset: updatedRuleset })

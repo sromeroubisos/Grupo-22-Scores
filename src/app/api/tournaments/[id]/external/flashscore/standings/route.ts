@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getTournamentStandings } from '@/lib/services/flashscore';
+import {
+    getTournamentFlashScoreConfig,
+    isFlashScoreEnabledForSport,
+    RUGBY_FLASHSCORE_DISABLED_MESSAGE,
+} from '@/lib/externalProviderPolicy';
 import type { ExternalStandingsRow } from '@/lib/types/flashscore-integration';
 
 export async function GET(
@@ -13,7 +18,7 @@ export async function GET(
 
         const { data: tournament, error } = await supabase
             .from('tournaments')
-            .select('ruleset')
+            .select('ruleset, sport_id, sport')
             .eq('id', tournamentId)
             .single();
 
@@ -21,7 +26,11 @@ export async function GET(
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
         }
 
-        const fsConfig = (tournament as any).ruleset?.flashscore;
+        if (!isFlashScoreEnabledForSport((tournament as any).sport_id ?? (tournament as any).sport ?? null)) {
+            return NextResponse.json({ error: RUGBY_FLASHSCORE_DISABLED_MESSAGE }, { status: 409 });
+        }
+
+        const fsConfig = getTournamentFlashScoreConfig(tournament as any);
         if (!fsConfig?.tournament_id || !fsConfig?.tournament_stage_id) {
             return NextResponse.json(
                 { error: 'Este torneo no tiene IDs de FlashScore resueltos. Ve a Detalles y usá "Resolver IDs" primero.' },

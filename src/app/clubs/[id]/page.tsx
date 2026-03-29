@@ -24,6 +24,10 @@ const TABS = [
     { id: 'transfers', label: 'Transferencias' },
 ];
 
+function isRugbyApiSportsTeamId(value: string) {
+    return /^ras-team-\d+$/i.test(value);
+}
+
 const getTeamLogo = (team: any) => {
     if (!team) return '';
     return (
@@ -141,13 +145,13 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const [selectedSport, setSelectedSport] = useState<string>('all');
     const [selectedSquadTab, setSelectedSquadTab] = useState<string>('');
 
-    // Strip fs-team- prefix for the raw FlashScore ID
-    const rawId = id.startsWith('fs-team-') ? id.slice(8) : id;
+    // Keep provider-prefixed IDs so the API route can detect the correct external source.
+    const rawId = id;
 
     // Hints from URL search params (passed from match/tournament page links)
     const hintName = sp.get('name') || '';
     const hintTeamUrl = sp.get('team_url') || '';
-    const preferredSport = sp.get('sport') || '';
+    const preferredSport = sp.get('sport') || (isRugbyApiSportsTeamId(id) ? 'rugby' : '');
 
     useEffect(() => {
         async function fetchData() {
@@ -169,7 +173,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                     return;
                 }
 
-                if (payload?.resolvedClubId && payload.resolvedClubId !== id && !id.startsWith('fs-team-')) {
+                if (payload?.resolvedClubId && payload.resolvedClubId !== id && !id.startsWith('fs-team-') && !isRugbyApiSportsTeamId(id)) {
                     const nextParams = new URLSearchParams();
                     if (preferredSport) nextParams.set('sport', preferredSport);
                     if (hintName) nextParams.set('name', hintName);
@@ -261,6 +265,16 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     // Filtered matches by sport
     const filteredResults = selectedSport === 'all' ? results : results.filter(m => String(m.sport_id) === selectedSport);
     const filteredFixtures = selectedSport === 'all' ? fixtures : fixtures.filter(m => String(m.sport_id) === selectedSport);
+    const visibleTabs = useMemo(() => {
+        const supportedTabs = Array.isArray(details?.supported_tabs) ? details.supported_tabs : null;
+        if (!supportedTabs) return TABS;
+        return TABS.filter((tab) => supportedTabs.includes(tab.id));
+    }, [details?.supported_tabs]);
+
+    useEffect(() => {
+        if (visibleTabs.some((tab) => tab.id === activeTab)) return;
+        setActiveTab('summary');
+    }, [activeTab, visibleTabs]);
 
     if (loading) {
         return (
@@ -458,7 +472,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                     </div>
 
                     <nav className={styles.navTabs}>
-                        {TABS.map(tab => (
+                        {visibleTabs.map(tab => (
                             <button
                                 key={tab.id}
                                 className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
@@ -699,6 +713,24 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                     <span className={styles.value}>{countryName}</span>
                                 </div>
                             )}
+                            {details?.current_league && (
+                                <div className={styles.infoRow}>
+                                    <span className={styles.label}>Liga</span>
+                                    <span className={styles.value}>{details.current_league}</span>
+                                </div>
+                            )}
+                            {details?.current_season && (
+                                <div className={styles.infoRow}>
+                                    <span className={styles.label}>Temporada</span>
+                                    <span className={styles.value}>{details.current_season}</span>
+                                </div>
+                            )}
+                            {details?.standing?.position && (
+                                <div className={styles.infoRow}>
+                                    <span className={styles.label}>Posicion</span>
+                                    <span className={styles.value}>#{details.standing.position}</span>
+                                </div>
+                            )}
                             {venue && (
                                 <div className={styles.infoRow}>
                                     <span className={styles.label}>Estadio</span>
@@ -716,6 +748,28 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                     <span className={styles.label}>Fundado</span>
                                     <span className={styles.value}>{details.founded}</span>
                                 </div>
+                            )}
+                            {details?.statistics && (
+                                <>
+                                    <div className={styles.infoRow}>
+                                        <span className={styles.label}>PJ</span>
+                                        <span className={styles.value}>{details.statistics.played ?? '-'}</span>
+                                    </div>
+                                    <div className={styles.infoRow}>
+                                        <span className={styles.label}>G-E-P</span>
+                                        <span className={styles.value}>
+                                            {[details.statistics.wins, details.statistics.draws, details.statistics.losses]
+                                                .map((value: any) => value ?? '-')
+                                                .join('-')}
+                                        </span>
+                                    </div>
+                                    <div className={styles.infoRow}>
+                                        <span className={styles.label}>Pts +/-</span>
+                                        <span className={styles.value}>
+                                            {(details.statistics.pointsFor ?? '-')}/{(details.statistics.pointsAgainst ?? '-')}
+                                        </span>
+                                    </div>
+                                </>
                             )}
                             {(details?.type || details?.club_type) && (
                                 <div className={styles.infoRow}>

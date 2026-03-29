@@ -470,6 +470,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                 {!isApiManaged && (
                     <FlashScoreIntegrationSection
                         tournamentId={id}
+                        sportId={form.sport_id ?? null}
                         ruleset={form.ruleset}
                         onRulesetChange={(newRuleset) => update('ruleset', newRuleset)}
                     />

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { searchFlashScore } from '@/lib/services/flashscore';
+import { getRugbyApiSportsLeagues, getRugbyApiSportsTeams } from '@/lib/services/rugbyApiSports';
 
 type SearchResult = {
     id: string;
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
     };
 
     try {
-        const [tournamentsRes, clubsRes, fsSearchRaw] = await Promise.all([
+        const [tournamentsRes, clubsRes, fsSearchRaw, rugbyTeams, rugbyLeagues] = await Promise.all([
             supabase.from('tournaments')
                 .select('id, name, display_name, slug, logo_url, sport_id, country_id, is_visible, sport:sports(name), country:countries(name)')
                 .or(`name.ilike.%${search}%,display_name.ilike.%${search}%,slug.ilike.%${search}%`)
@@ -67,7 +68,9 @@ export async function GET(request: Request) {
                 .select('id, name, short_name, slug, city, country, logo_url, is_visible')
                 .or(`name.ilike.%${search}%,short_name.ilike.%${search}%,slug.ilike.%${search}%`)
                 .limit(limit),
-            searchFlashScore(search).catch(() => null)
+            searchFlashScore(search).catch(() => null),
+            search.length >= 3 ? getRugbyApiSportsTeams({ search }).catch(() => []) : Promise.resolve([]),
+            search.length >= 3 ? getRugbyApiSportsLeagues({ search }).catch(() => []) : Promise.resolve([]),
         ]);
 
         debugInfo = {
@@ -144,6 +147,45 @@ export async function GET(request: Request) {
                     url: clubUrl,
                     logo_url: item.image_path || item.logo || null,
                     searchWeight: calculateWeight(name, null, null, lSearch, 2)
+                });
+            }
+        }
+
+        if (Array.isArray(rugbyTeams)) {
+            for (const team of rugbyTeams) {
+                const name = String(team?.name || '').trim();
+                if (!name || dbClubNames.has(name.toLowerCase())) continue;
+
+                rawResults.push({
+                    id: `ras-team-${team.id}`,
+                    type: 'club',
+                    title: name,
+                    subtitle: `Club · Rugby API-Sports`,
+                    url: `/clubs/ras-team-${team.id}?name=${encodeURIComponent(name)}&sport=rugby`,
+                    logo_url: team.logo || null,
+                    searchWeight: calculateWeight(name, null, null, lSearch, 2),
+                });
+            }
+        }
+
+        if (Array.isArray(rugbyLeagues)) {
+            for (const league of rugbyLeagues) {
+                const name = String(league?.name || '').trim();
+                if (!name) continue;
+
+                const seasons = Array.isArray(league.seasons) ? [...league.seasons] : [];
+                seasons.sort((left, right) => Number(right?.season || 0) - Number(left?.season || 0));
+                const selectedSeason = seasons.find((season) => season.current === true)?.season ?? seasons[0]?.season ?? '';
+                const countryName = String(league.country?.name || 'Internacional').trim();
+
+                rawResults.push({
+                    id: `ras-league-${league.id}`,
+                    type: 'tournament',
+                    title: name,
+                    subtitle: `Rugby · ${countryName}`,
+                    url: `/tournaments/ras-league-${league.id}?sport=rugby${selectedSeason ? `&season=${selectedSeason}` : ''}`,
+                    logo_url: league.logo || null,
+                    searchWeight: calculateWeight(name, null, null, lSearch, 1),
                 });
             }
         }

@@ -13,14 +13,9 @@ function slugify(value: string) {
         .slice(0, 80);
 }
 
-function ensureFsPrefix(id?: string) {
+function ensurePrefixed(id: string | undefined, prefix: string) {
     if (!id) return undefined;
-    return id.startsWith('fs-') ? id : `fs-${id}`;
-}
-
-function ensureTeamPrefix(id?: string) {
-    if (!id) return undefined;
-    return id.startsWith('fs-team-') ? id : `fs-team-${id}`;
+    return id.startsWith(prefix) ? id : `${prefix}${id}`;
 }
 
 function pickTournamentName(details: any) {
@@ -53,10 +48,77 @@ function nowIso() {
     return new Date().toISOString();
 }
 
+function extractTeamsFromRows(rows: any[], teamPrefix: string) {
+    const teams: { id?: string; name?: string; logo?: string }[] = [];
+    rows.forEach((row) => {
+        const team = row.team || row.participant || row;
+        const name = safeText(team?.name || row.name || row.team_name);
+        const rawId = team?.id || team?.team_id || row.team_id;
+        const id = rawId ? ensurePrefixed(String(rawId), teamPrefix) : undefined;
+        const logo = team?.logo || team?.image_path || team?.small_image_path || row.logo || row.team_logo;
+        if (name) {
+            teams.push({ id, name, logo });
+        }
+    });
+    return teams;
+}
+
+function extractTeamsFromMatches(matches: any[], teamPrefix: string) {
+    const teams: { id?: string; name?: string; logo?: string }[] = [];
+    matches.forEach((match) => {
+        const homeName = safeText(match.home_team?.name || match.home_team_name || match.event_home_team);
+        const awayName = safeText(match.away_team?.name || match.away_team_name || match.event_away_team);
+        const homeId = match.home_team?.team_id || match.home_team?.id
+            ? ensurePrefixed(String(match.home_team?.team_id || match.home_team?.id), teamPrefix)
+            : undefined;
+        const awayId = match.away_team?.team_id || match.away_team?.id
+            ? ensurePrefixed(String(match.away_team?.team_id || match.away_team?.id), teamPrefix)
+            : undefined;
+        const homeLogo = match.home_team?.image_path || match.home_team?.small_image_path || match.home_team?.logo || match.home_team_logo;
+        const awayLogo = match.away_team?.image_path || match.away_team?.small_image_path || match.away_team?.logo || match.away_team_logo;
+
+        if (homeName) teams.push({ id: homeId, name: homeName, logo: homeLogo });
+        if (awayName) teams.push({ id: awayId, name: awayName, logo: awayLogo });
+    });
+    return teams;
+}
+
+function extractPlayersFromTopScorers(players: any[], teamPrefix: string, playerPrefix: string) {
+    return players.map((player) => {
+        const name = safeText(player.player_name || player.name);
+        const rawId = player.player_id || player.id;
+        const id = rawId ? `${playerPrefix}${rawId}` : `${playerPrefix}${slugify(name || 'unknown')}`;
+        const teamName = safeText(player.team_name || player.team?.name);
+        const teamId = player.team_id ? ensurePrefixed(String(player.team_id), teamPrefix) : undefined;
+        return {
+            id,
+            name,
+            teamName: teamName || undefined,
+            teamId: teamId || undefined,
+        };
+    });
+}
+
 export function persistFromExternalMatches(matches: any[], sport: string) {
+    persistFromExternalMatchesWithProvider(matches, sport, {
+        provider: 'flashscore',
+        tournamentPrefix: 'fs-',
+        teamPrefix: 'fs-team-',
+    });
+}
+
+export function persistFromExternalMatchesWithProvider(
+    matches: any[],
+    sport: string,
+    options: { provider: string; tournamentPrefix: string; teamPrefix: string }
+) {
     const updatedAt = nowIso();
-    matches.forEach(match => {
-        const tournamentId = ensureFsPrefix(match.tournamentId || match.leagueId || match.league_id || match.tournament_id);
+
+    matches.forEach((match) => {
+        const tournamentId = ensurePrefixed(
+            match.tournamentId || match.leagueId || match.league_id || match.tournament_id,
+            options.tournamentPrefix,
+        );
         const tournamentName = safeText(match.leagueName || match.league_name || match.tournamentName || 'Liga');
         const countryName = safeText(match.countryName || match.country_name);
 
@@ -68,15 +130,21 @@ export function persistFromExternalMatches(matches: any[], sport: string) {
                 country: countryName || undefined,
                 seasonId: match.seasonId || undefined,
                 source: 'API',
-                provider: 'flashscore',
+                provider: options.provider,
                 updatedAt,
-                logoUrl: match.tournamentLogo || match.tournament_logo || undefined
+                logoUrl: match.tournamentLogo || match.tournament_logo || undefined,
             };
             db.upsertExternalTournament(payload);
         }
 
-        const homeId = ensureTeamPrefix(match.homeTeamId || match.home_team_id || match.home_team?.team_id);
-        const awayId = ensureTeamPrefix(match.awayTeamId || match.away_team_id || match.away_team?.team_id);
+        const homeId = ensurePrefixed(
+            match.homeTeamId || match.home_team_id || match.home_team?.team_id || match.home_team?.id,
+            options.teamPrefix,
+        );
+        const awayId = ensurePrefixed(
+            match.awayTeamId || match.away_team_id || match.away_team?.team_id || match.away_team?.id,
+            options.teamPrefix,
+        );
         const homeName = safeText(match.homeTeamName || match.home_team_name || match.home_team?.name);
         const awayName = safeText(match.awayTeamName || match.away_team_name || match.away_team?.name);
 
@@ -88,8 +156,8 @@ export function persistFromExternalMatches(matches: any[], sport: string) {
                 logoUrl: match.homeTeamLogo || match.home_team?.image_path || match.home_team?.logo || undefined,
                 sports: [sport || 'unknown'],
                 source: 'API',
-                provider: 'flashscore',
-                updatedAt
+                provider: options.provider,
+                updatedAt,
             };
             db.upsertExternalClub(payload);
         }
@@ -102,58 +170,11 @@ export function persistFromExternalMatches(matches: any[], sport: string) {
                 logoUrl: match.awayTeamLogo || match.away_team?.image_path || match.away_team?.logo || undefined,
                 sports: [sport || 'unknown'],
                 source: 'API',
-                provider: 'flashscore',
-                updatedAt
+                provider: options.provider,
+                updatedAt,
             };
             db.upsertExternalClub(payload);
         }
-    });
-}
-
-function extractTeamsFromRows(rows: any[]) {
-    const teams: { id?: string; name?: string; logo?: string }[] = [];
-    rows.forEach(row => {
-        const team = row.team || row.participant || row;
-        const name = safeText(team?.name || row.name || row.team_name);
-        const rawId = team?.id || team?.team_id || row.team_id;
-        const id = rawId ? ensureTeamPrefix(String(rawId)) : undefined;
-        const logo = team?.logo || team?.image_path || team?.small_image_path || row.logo || row.team_logo;
-        if (name) {
-            teams.push({ id, name, logo });
-        }
-    });
-    return teams;
-}
-
-function extractTeamsFromMatches(matches: any[]) {
-    const teams: { id?: string; name?: string; logo?: string }[] = [];
-    matches.forEach(match => {
-        const homeName = safeText(match.home_team?.name || match.home_team_name || match.event_home_team);
-        const awayName = safeText(match.away_team?.name || match.away_team_name || match.event_away_team);
-        const homeId = match.home_team?.team_id ? ensureTeamPrefix(String(match.home_team.team_id)) : undefined;
-        const awayId = match.away_team?.team_id ? ensureTeamPrefix(String(match.away_team.team_id)) : undefined;
-        const homeLogo = match.home_team?.image_path || match.home_team?.small_image_path || match.home_team_logo;
-        const awayLogo = match.away_team?.image_path || match.away_team?.small_image_path || match.away_team_logo;
-
-        if (homeName) teams.push({ id: homeId, name: homeName, logo: homeLogo });
-        if (awayName) teams.push({ id: awayId, name: awayName, logo: awayLogo });
-    });
-    return teams;
-}
-
-function extractPlayersFromTopScorers(players: any[]) {
-    return players.map(player => {
-        const name = safeText(player.player_name || player.name);
-        const rawId = player.player_id || player.id;
-        const id = rawId ? `fs-player-${rawId}` : `fs-player-${slugify(name || 'unknown')}`;
-        const teamName = safeText(player.team_name || player.team?.name);
-        const teamId = player.team_id ? ensureTeamPrefix(String(player.team_id)) : undefined;
-        return {
-            id,
-            name,
-            teamName: teamName || undefined,
-            teamId: teamId || undefined
-        };
     });
 }
 
@@ -166,9 +187,31 @@ export function persistFromTournamentPayload(payload: {
     results?: any[];
     topScorers?: any[];
 }) {
+    persistFromTournamentPayloadWithProvider(payload, {
+        provider: 'flashscore',
+        tournamentPrefix: 'fs-',
+        teamPrefix: 'fs-team-',
+        playerPrefix: 'fs-player-',
+    });
+}
+
+export function persistFromTournamentPayloadWithProvider(
+    payload: {
+        ids: { tournamentId?: string; seasonId?: string };
+        sport: string;
+        details?: any;
+        standings?: any[];
+        fixtures?: any[];
+        results?: any[];
+        topScorers?: any[];
+    },
+    options: { provider: string; tournamentPrefix: string; teamPrefix: string; playerPrefix: string }
+) {
     const updatedAt = nowIso();
     const tournamentName = safeText(pickTournamentName(payload.details));
-    const tournamentId = ensureFsPrefix(payload.ids.tournamentId) || (tournamentName ? `fs-${slugify(tournamentName)}` : undefined);
+    const tournamentId = payload.ids.tournamentId
+        ? ensurePrefixed(payload.ids.tournamentId, options.tournamentPrefix)
+        : (tournamentName ? `${options.tournamentPrefix}${slugify(tournamentName)}` : undefined);
     const countryName = safeText(pickCountry(payload.details));
     const logoUrl = pickTournamentLogo(payload.details) || undefined;
 
@@ -180,9 +223,9 @@ export function persistFromTournamentPayload(payload: {
             country: countryName || undefined,
             seasonId: payload.ids.seasonId,
             source: 'API',
-            provider: 'flashscore',
+            provider: options.provider,
             updatedAt,
-            logoUrl
+            logoUrl,
         };
         db.upsertExternalTournament(tournament);
     }
@@ -192,6 +235,8 @@ export function persistFromTournamentPayload(payload: {
         payload.standings.forEach((group: any) => {
             if (Array.isArray(group?.rows)) {
                 standingsRows.push(...group.rows);
+            } else if (Array.isArray(group)) {
+                standingsRows.push(...group);
             } else {
                 standingsRows.push(group);
             }
@@ -199,14 +244,15 @@ export function persistFromTournamentPayload(payload: {
     }
 
     const teams = [
-        ...extractTeamsFromRows(standingsRows),
-        ...extractTeamsFromMatches(payload.results || []),
-        ...extractTeamsFromMatches(payload.fixtures || [])
+        ...extractTeamsFromRows(standingsRows, options.teamPrefix),
+        ...extractTeamsFromMatches(payload.results || [], options.teamPrefix),
+        ...extractTeamsFromMatches(payload.fixtures || [], options.teamPrefix),
     ];
 
-    teams.forEach(team => {
+    teams.forEach((team) => {
         if (!team.name) return;
-        const id = team.id || `fs-team-${slugify(team.name)}`;
+
+        const id = team.id || `${options.teamPrefix}${slugify(team.name)}`;
         const club: ExternalClub = {
             id,
             name: team.name,
@@ -214,16 +260,17 @@ export function persistFromTournamentPayload(payload: {
             logoUrl: team.logo || undefined,
             sports: [payload.sport || 'unknown'],
             source: 'API',
-            provider: 'flashscore',
-            updatedAt
+            provider: options.provider,
+            updatedAt,
         };
         db.upsertExternalClub(club);
     });
 
     if (payload.topScorers && payload.topScorers.length > 0) {
-        const players = extractPlayersFromTopScorers(payload.topScorers);
-        players.forEach(player => {
+        const players = extractPlayersFromTopScorers(payload.topScorers, options.teamPrefix, options.playerPrefix);
+        players.forEach((player) => {
             if (!player.name) return;
+
             const payloadPlayer: ExternalPlayer = {
                 id: player.id,
                 name: player.name,
@@ -233,8 +280,8 @@ export function persistFromTournamentPayload(payload: {
                 sport: payload.sport || 'unknown',
                 isIndividual: !player.teamId && !player.teamName,
                 source: 'API',
-                provider: 'flashscore',
-                updatedAt
+                provider: options.provider,
+                updatedAt,
             };
             db.upsertExternalPlayer(payloadPlayer);
         });

@@ -40,7 +40,12 @@
       "Bash(do echo \"=== $table ===\")",
       "Bash(done)",
       "Bash(wc -l /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/page.tsx /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/matches/[id]/page.tsx /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/clubs/[id]/page.tsx /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/api/matches/route.ts)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(ls -la \"c:\\\\Users\\\\srome\\\\OneDrive\\\\Escritorio\\\\Grupo-22-Scores\\\\src\\\\app\\\\admin\\\\\\(tournament\\)\\\\torneo\\\\[id]\\\\config\")",
+      "Bash(ls -la \"c:\\\\Users\\\\srome\\\\OneDrive\\\\Escritorio\\\\Grupo-22-Scores\\\\src\\\\app\\\\admin\\\\\\(tournament\\)\\\\torneo\\\\[id]\\\\fases\")",
+      "Bash(xargs -I {} basename {})",
+      "Bash(sed 's/^[[:space:]]*//')",
+      "Bash(ls /c/Users/srome/OneDrive/Escritorio/Grupo-22-Scores/src/app/api/admin/tournaments/[id]/)"
     ]
   }
 }

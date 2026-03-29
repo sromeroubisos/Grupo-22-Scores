@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ExportImage from '@/components/ExportImage';
@@ -16,6 +16,10 @@ function isExternalEntityId(value?: string) {
     return Boolean(value) && /^[A-Za-z0-9]+$/.test(value || '');
 }
 
+function isRugbyApiSportsMatchId(value: string) {
+    return /^ras-game-\d+$/i.test(value);
+}
+
 function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }, preferredSport?: string | number | null) {
     if (!team.id) return '/clubs';
 
@@ -24,7 +28,7 @@ function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }, p
     if (team.teamUrl) params.set('team_url', team.teamUrl);
     if (preferredSport) params.set('sport', String(preferredSport));
     const qs = params.toString();
-    const id = team.id.startsWith('fs-team-')
+    const id = team.id.startsWith('fs-team-') || team.id.startsWith('ras-team-')
         ? team.id
         : team.id.startsWith('fs-')
             ? `fs-team-${team.id.slice(3)}`
@@ -33,16 +37,25 @@ function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }, p
     return `/clubs/${id}${qs ? `?${qs}` : ''}`;
 }
 
-function buildTournamentHref(tournamentId?: string) {
+function buildTournamentHref(tournamentId?: string, season?: string | number | null) {
     if (!tournamentId) return null;
 
-    const id = tournamentId.startsWith('fs-')
+    const id = tournamentId.startsWith('fs-') || tournamentId.startsWith('ras-league-')
         ? tournamentId
         : isExternalEntityId(tournamentId)
             ? `fs-${tournamentId}`
             : tournamentId;
 
-    return `/tournaments/${id}`;
+    const params = new URLSearchParams();
+    if (tournamentId.startsWith('ras-league-')) {
+        params.set('sport', 'rugby');
+        if (season != null && season !== '') {
+            params.set('season', String(season));
+        }
+    }
+
+    const qs = params.toString();
+    return `/tournaments/${id}${qs ? `?${qs}` : ''}`;
 }
 
 function mapMatchStatus(matchStatusObj: any, simpleStatus?: string) {
@@ -172,7 +185,28 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const statusRef = useRef<string>('scheduled');
     const [showAllEvents, setShowAllEvents] = useState(false);
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
+    const isRugbyExternal = isRugbyApiSportsMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal;
     const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';
+    const visibleTabs = useMemo(() => (
+        isRugbyApiSportsSource
+            ? [
+                { id: 'summary', label: 'Resumen' },
+                { id: 'h2h', label: 'H2H' },
+                { id: 'standings', label: 'Clasificacion' },
+            ]
+            : [
+                { id: 'summary', label: 'Resumen' },
+                { id: 'timeline', label: 'Cronologia' },
+                { id: 'lineups', label: 'Alineaciones' },
+                { id: 'players', label: 'Jugadores' },
+                { id: 'stats', label: 'Estadisticas' },
+                { id: 'h2h', label: 'H2H' },
+                { id: 'standings', label: 'Clasificacion' },
+                { id: 'commentary', label: 'Comentarios' },
+            ]
+    ), [isRugbyApiSportsSource]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -181,7 +215,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
             setState(prev => prev.matchData ? prev : { ...prev, kind: 'loading' });
 
             try {
-                if (isFlashScore) {
+                if (isExternalMatch) {
                     const apiRes = await fetch(`/api/matches/${id}`, { signal: controller.signal });
                     const payload = await apiRes.json().catch(() => null);
 
@@ -192,6 +226,21 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             message: payload?.error || (apiRes.status === 404 ? 'No se encontró el partido' : 'Error cargando datos'),
                             debug: { ...prev.debug, details: payload }
                         }));
+                        return;
+                    }
+
+                    if (payload?.source === 'rugby-api-sports' && payload?.match) {
+                        statusRef.current = payload.match.status || 'scheduled';
+                        setState({
+                            kind: 'ok',
+                            matchData: payload.match,
+                            eventsData: [],
+                            statsData: [],
+                            playerStats: null,
+                            commentaryData: [],
+                            issues: [],
+                            debug: {},
+                        });
                         return;
                     }
 
@@ -626,6 +675,11 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         };
     }, [id]);
 
+    useEffect(() => {
+        if (visibleTabs.some((tab) => tab.id === activeTab)) return;
+        setActiveTab('summary');
+    }, [activeTab, visibleTabs]);
+
     if (state.kind === 'loading') return (
         <div className={styles.page} style={{ minHeight: '100vh', background: 'var(--bg-primary, #0f1117)' }}>
             <div style={{ background: 'linear-gradient(135deg, #1a1f2e 0%, #16213e 100%)', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -692,7 +746,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         <div className={styles.breadcrumbs}>
                             <span className={styles.breadcrumbItem}>{matchData.category}</span>
                             {matchData.tournamentId ? (
-                                <Link href={buildTournamentHref(matchData.tournamentId) || '#'} className={styles.breadcrumbItem} style={{ color: 'var(--color-accent, var(--accent))', textDecoration: 'none' }}>
+                                <Link href={buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason) || '#'} className={styles.breadcrumbItem} style={{ color: 'var(--color-accent, var(--accent))', textDecoration: 'none' }}>
                                     {matchData.tournament}
                                 </Link>
                             ) : (
@@ -703,7 +757,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         </div>
                     </div>
                     <div className={styles.matchActions}>
-                        {isSuperAdminUser && !isFlashScore && (
+                        {isSuperAdminUser && !isExternalMatch && (
                             <Link href={`/admin/super/partidos/${id}`} className={`${styles.btn} ${styles.btnPrimary}`}>
                                 Editar partido
                             </Link>
@@ -839,6 +893,20 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                 </section>
 
                 {/* Layer 4: Tabs */}
+                {isRugbyApiSportsSource && (
+                    <nav className={styles.tabsNav}>
+                        {visibleTabs.map((tab) => (
+                            <div
+                                key={tab.id}
+                                className={`${styles.tabItem} ${activeTab === tab.id ? styles.active : ''}`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                {tab.label}
+                            </div>
+                        ))}
+                    </nav>
+                )}
+                {!isRugbyApiSportsSource && (
                 <nav className={styles.tabsNav}>
                     <div className={`${styles.tabItem} ${activeTab === 'summary' ? styles.active : ''}`} onClick={() => setActiveTab('summary')}>Resumen</div>
                     <div className={`${styles.tabItem} ${activeTab === 'timeline' ? styles.active : ''}`} onClick={() => setActiveTab('timeline')}>Cronología</div>
@@ -849,6 +917,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     <div className={`${styles.tabItem} ${activeTab === 'standings' ? styles.active : ''}`} onClick={() => setActiveTab('standings')}>Clasificación</div>
                     <div className={`${styles.tabItem} ${activeTab === 'commentary' ? styles.active : ''}`} onClick={() => setActiveTab('commentary')}>Comentarios</div>
                 </nav>
+                )}
 
                 <main className={styles.tabContent}>
                     <section className={styles.panelBlock}>
@@ -1358,7 +1427,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             </section>
                         )}
 
-                        {matchData.topScorers && Array.isArray(matchData.topScorers) && matchData.topScorers.length > 0 && (
+                        {!isRugbyApiSportsSource && matchData.topScorers && Array.isArray(matchData.topScorers) && matchData.topScorers.length > 0 && (
                             <section className={styles.panelBlock}>
                                 <div className={styles.panelTitle}>Goleadores</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
