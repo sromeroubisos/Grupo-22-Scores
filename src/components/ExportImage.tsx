@@ -163,6 +163,17 @@ type LogoBadgeOptions = {
     isDark: boolean;
 };
 
+type OverflowCrestOptions = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    img: HTMLImageElement | null;
+    label: string;
+    rawLogo?: string;
+    isDark: boolean;
+};
+
 type ExportPalette = {
     id: string;
     name: string;
@@ -1222,6 +1233,45 @@ function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions)
     ctx.restore();
 }
 
+function drawOverflowCrest(ctx: CanvasRenderingContext2D, options: OverflowCrestOptions) {
+    const { x, y, width, height, img, label, rawLogo, isDark } = options;
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    if (img) {
+        const sourceWidth = img.naturalWidth || img.width || width;
+        const sourceHeight = img.naturalHeight || img.height || height;
+        const scale = Math.min(width / sourceWidth, height / sourceHeight) * 0.88;
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+
+        ctx.shadowColor = isDark ? 'rgba(0,0,0,0.32)' : 'rgba(15,23,42,0.18)';
+        ctx.shadowBlur = Math.max(8, Math.round(Math.max(width, height) * 0.12));
+        ctx.shadowOffsetY = Math.max(2, Math.round(height * 0.06));
+        ctx.drawImage(img, x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
+        ctx.restore();
+        return;
+    }
+
+    const fallbackRadius = Math.min(width, height) * 0.34;
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)';
+    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x - width / 2, y - height / 2, width, height, fallbackRadius);
+    ctx.fill();
+    ctx.stroke();
+
+    const isGlyph = rawLogo?.trim() && !isImageSource(rawLogo) && rawLogo.trim().length <= 4;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = getTextColor(isDark);
+    ctx.font = `800 ${Math.round((isGlyph ? height : Math.min(width, height)) * (isGlyph ? 0.4 : 0.24))}px ${FONT_BODY}`;
+    ctx.fillText(getFallbackLogoText(rawLogo, label), x, y + 1);
+    ctx.restore();
+}
+
 function drawCenteredPill(
     ctx: CanvasRenderingContext2D,
     centerX: number,
@@ -1633,7 +1683,8 @@ async function drawStandings(
     }, 0);
     const rawRowHeight = (bodyBottom - bodyTop - reservedGroupSpace) / Math.max(slide.totalRows, 1);
     const rowHeight = Math.max(isStory ? 32 : 28, Math.min(isStory ? 68 : 60, rawRowHeight));
-    const logoSize = Math.max(24, Math.min(isStory ? 42 : 38, rowHeight - (isStory ? 22 : 18)));
+    const crestHeight = Math.min(isStory ? 50 : 44, Math.max(isStory ? 38 : 34, rowHeight - 4));
+    const crestWidth = Math.min(isStory ? 46 : 40, crestHeight * 0.9);
     const posFontSize = Math.max(18, Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.42)));
     const statFontSize = Math.max(14, Math.min(isStory ? 24 : 20, Math.round(rowHeight * 0.34)));
     const pointsFontSize = Math.max(18, Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.4)));
@@ -1644,7 +1695,9 @@ async function drawStandings(
     const colLostX = panelX + panelWidth - 160;
     const colDiffX = panelX + panelWidth - 94;
     const colPointsX = panelX + panelWidth - 38;
-    const teamTextX = colTeamX + logoSize + 24;
+    const crestLeft = colTeamX - Math.round(crestWidth * 0.18);
+    const crestCenterX = crestLeft + crestWidth / 2;
+    const teamTextX = crestLeft + crestWidth + 14;
     const teamMaxWidth = colPlayedX - teamTextX - 26;
     let logoIndex = 0;
     let rowIndex = 0;
@@ -1698,10 +1751,11 @@ async function drawStandings(
             ctx.font = `800 ${posFontSize}px ${FONT_MONO}`;
             ctx.fillText(String(row.pos), colPosX, centerY + 1);
 
-            drawLogoBadge(ctx, {
-                x: colTeamX + logoSize / 2,
+            drawOverflowCrest(ctx, {
+                x: crestCenterX,
                 y: centerY,
-                size: logoSize,
+                width: crestWidth,
+                height: crestHeight,
                 img: teamLogos[logoIndex] || null,
                 label: row.team,
                 rawLogo: row.teamLogo,
@@ -1815,13 +1869,23 @@ async function drawDailyMatches(
         const y = listTop + index * (rowHeight + rowGap);
         const cardX = panelX + 18;
         const cardWidth = panelWidth - 36;
+        const cardRight = cardX + cardWidth;
         const logoOffset = 1 + index * 2;
         const homeLogo = logoLoads[logoOffset] || null;
         const awayLogo = logoLoads[logoOffset + 1] || null;
         const centerText = match.status === 'scheduled'
             ? match.time
             : `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`;
-        const sideWidth = cardWidth * 0.34;
+        const crestHeight = Math.min(isStory ? 88 : 74, rowHeight - 8);
+        const crestWidth = Math.min(isStory ? 78 : 64, crestHeight * 0.86);
+        const crestCenterY = y + rowHeight / 2;
+        const crestInset = isStory ? 18 : 14;
+        const homeCrestCenterX = cardX + crestInset + crestWidth / 2;
+        const awayCrestCenterX = cardRight - crestInset - crestWidth / 2;
+        const homeTextX = homeCrestCenterX + crestWidth / 2 + 18;
+        const awayTextX = awayCrestCenterX - crestWidth / 2 - 18;
+        const awayDateX = Math.min(cardRight - 18, awayTextX + 18);
+        const awayDateY = y + (isStory ? 30 : 24);
 
         ctx.save();
         ctx.fillStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)';
@@ -1837,21 +1901,39 @@ async function drawDailyMatches(
             ctx.textAlign = 'right';
             ctx.fillStyle = mutedColor;
             ctx.font = `700 ${isStory ? 16 : 14}px ${FONT_BODY}`;
-            ctx.fillText(match.dateLabel.toUpperCase(), cardX + cardWidth - 24, y + 36);
+            ctx.fillText(match.dateLabel.toUpperCase(), awayDateX, awayDateY);
         }
 
-        drawLogoBadge(ctx, { x: cardX + 52, y: y + rowHeight / 2 + 8, size: isStory ? 48 : 44, img: homeLogo, label: match.homeTeam, rawLogo: match.homeLogo, isDark });
-        drawLogoBadge(ctx, { x: cardX + cardWidth - 52, y: y + rowHeight / 2 + 8, size: isStory ? 48 : 44, img: awayLogo, label: match.awayTeam, rawLogo: match.awayLogo, isDark });
+        drawOverflowCrest(ctx, {
+            x: homeCrestCenterX,
+            y: crestCenterY,
+            width: crestWidth,
+            height: crestHeight,
+            img: homeLogo,
+            label: match.homeTeam,
+            rawLogo: match.homeLogo,
+            isDark,
+        });
+        drawOverflowCrest(ctx, {
+            x: awayCrestCenterX,
+            y: crestCenterY,
+            width: crestWidth,
+            height: crestHeight,
+            img: awayLogo,
+            label: match.awayTeam,
+            rawLogo: match.awayLogo,
+            isDark,
+        });
 
         ctx.textBaseline = 'middle';
         ctx.fillStyle = textColor;
         ctx.textAlign = 'left';
-        setFittedFont(ctx, match.homeTeam.toUpperCase(), sideWidth - 92, '800', isStory ? 26 : 22, FONT_DISPLAY, 14);
-        ctx.fillText(match.homeTeam.toUpperCase(), cardX + 84, y + rowHeight / 2 + 10);
+        setFittedFont(ctx, match.homeTeam.toUpperCase(), Math.max(110, safe.centerX - 118 - homeTextX), '800', isStory ? 26 : 22, FONT_DISPLAY, 14);
+        ctx.fillText(match.homeTeam.toUpperCase(), homeTextX, y + rowHeight / 2 + 10);
 
         ctx.textAlign = 'right';
-        setFittedFont(ctx, match.awayTeam.toUpperCase(), sideWidth - 92, '800', isStory ? 26 : 22, FONT_DISPLAY, 14);
-        ctx.fillText(match.awayTeam.toUpperCase(), cardX + cardWidth - 84, y + rowHeight / 2 + 10);
+        setFittedFont(ctx, match.awayTeam.toUpperCase(), Math.max(110, awayTextX - (safe.centerX + 118)), '800', isStory ? 26 : 22, FONT_DISPLAY, 14);
+        ctx.fillText(match.awayTeam.toUpperCase(), awayTextX, y + rowHeight / 2 + 10);
 
         ctx.textAlign = 'center';
         ctx.fillStyle = accentColor;
