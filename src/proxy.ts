@@ -6,9 +6,11 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
 
-// Public API routes that do NOT need session refresh in the proxy.
-// Checking auth on these adds 30-40s latency per request for no benefit.
-const PUBLIC_API_PREFIXES = [
+// Routes that do NOT need a proxy-level session refresh.
+// Some are public, while others enforce auth inside the route handler itself.
+// Skipping the proxy check here avoids an extra Supabase auth round-trip that
+// can add 30-40s latency to data-heavy admin requests.
+const SESSION_REFRESH_BYPASS_PREFIXES = [
     '/api/matches',
     '/api/news',
     '/api/home/',
@@ -16,19 +18,20 @@ const PUBLIC_API_PREFIXES = [
     '/api/search',
     '/api/clubs',
     '/api/players',
+    '/api/admin/super/console-data',
+    '/api/admin/super/matches',
     '/manifest.json',
 ]
 
-function isPublicRoute(pathname: string): boolean {
-    return PUBLIC_API_PREFIXES.some(prefix => pathname.startsWith(prefix))
+function shouldBypassSessionRefresh(pathname: string): boolean {
+    return SESSION_REFRESH_BYPASS_PREFIXES.some(prefix => pathname.startsWith(prefix))
 }
 
 export async function proxy(request: NextRequest) {
     const { pathname, searchParams } = request.nextUrl;
 
-    // 1. Skip auth session check for public API routes and static assets.
-    //    This prevents 30-40s latency on every public data fetch.
-    if (isPublicRoute(pathname)) {
+    // 1. Skip proxy-level auth refresh for routes that do not need it.
+    if (shouldBypassSessionRefresh(pathname)) {
         return NextResponse.next()
     }
 
