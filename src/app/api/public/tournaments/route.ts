@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
-import { isRugbySport } from '@/lib/externalProviderPolicy';
+import { isFlashScoreEnabledForSport, isRugbySport } from '@/lib/externalProviderPolicy';
 import {
     getCountriesBySport,
     getTournamentsBySportAndEntity,
@@ -77,7 +77,7 @@ type PublicExternalTournament = {
     display_name: string;
     country: string;
     country_id: string;
-    sport_id: 'rugby';
+    sport_id: string;
     logo_url: string | null;
     slug: null;
     priority: number;
@@ -116,6 +116,11 @@ function normalizeLookupValue(value: unknown): string {
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase();
+}
+
+function resolveFlashScoreSportKey(rawSport: string | null): string {
+    const normalized = normalizeText(rawSport);
+    return normalized || RUGBY_FLASHSCORE_SPORT_KEY;
 }
 
 function slugifyCountryId(value: string): string {
@@ -220,6 +225,7 @@ function buildRugbyCountrySummaries(payload: unknown): PublicRugbyCountrySummary
 function mapFlashScoreTournamentToPublicTournament(
     tournament: FlashScoreTournamentListItem,
     entity: FlashScoreTournamentEntity,
+    sportKey = RUGBY_FLASHSCORE_SPORT_KEY,
 ): PublicExternalTournament | null {
     const tournamentId = buildFlashScoreTournamentId(tournament.tournament_id ?? tournament.id);
     if (!tournamentId || isBlockedTournamentId(tournamentId)) {
@@ -236,7 +242,7 @@ function mapFlashScoreTournamentToPublicTournament(
         display_name: name,
         country: countryName,
         country_id: countryId,
-        sport_id: 'rugby',
+        sport_id: sportKey,
         logo_url: normalizeText(tournament.image || tournament.logo) || null,
         slug: null,
         priority: 0,
@@ -248,6 +254,11 @@ function mapFlashScoreTournamentToPublicTournament(
 
 async function queryRugbyCountrySummaries() {
     const payload = await getCountriesBySport(RUGBY_FLASHSCORE_SPORT_KEY);
+    return buildRugbyCountrySummaries(payload);
+}
+
+async function queryFlashScoreCountrySummaries(sportKey: string) {
+    const payload = await getCountriesBySport(sportKey);
     return buildRugbyCountrySummaries(payload);
 }
 
@@ -267,7 +278,47 @@ async function queryRugbyCountryTournaments(args: {
     };
 
     const mapped = extractListData<FlashScoreTournamentListItem>(payload)
-        .map((tournament) => mapFlashScoreTournamentToPublicTournament(tournament, entity))
+        .map((tournament) => mapFlashScoreTournamentToPublicTournament(tournament, entity, RUGBY_FLASHSCORE_SPORT_KEY))
+        .filter((tournament): tournament is PublicExternalTournament => tournament !== null);
+
+    const withOverrides = await applyStoredTournamentOverrides(mapped);
+
+    return sortTournamentsByPriority(withOverrides.filter((tournament) => {
+        if (resolveTournamentAudience({
+            name: tournament.name,
+            displayName: tournament.display_name,
+        }) !== args.audience) {
+            return false;
+        }
+
+        if (!args.search) return true;
+
+        const name = tournament.name.toLowerCase();
+        const displayName = tournament.display_name.toLowerCase();
+        const country = tournament.country.toLowerCase();
+
+        return name.includes(args.search) || displayName.includes(args.search) || country.includes(args.search);
+    }));
+}
+
+async function queryFlashScoreCountryTournaments(args: {
+    sportKey: string;
+    externalCountryId: string;
+    countryName: string;
+    flag?: string | null;
+    search: string;
+    audience: TournamentAudience;
+}) {
+    const payload = await getTournamentsBySportAndEntity(args.sportKey, args.externalCountryId);
+    const entity: FlashScoreTournamentEntity = {
+        id: args.externalCountryId,
+        name: args.countryName,
+        type: 'country',
+        flag: args.flag || null,
+    };
+
+    const mapped = extractListData<FlashScoreTournamentListItem>(payload)
+        .map((tournament) => mapFlashScoreTournamentToPublicTournament(tournament, entity, args.sportKey))
         .filter((tournament): tournament is PublicExternalTournament => tournament !== null);
 
     const withOverrides = await applyStoredTournamentOverrides(mapped);
@@ -301,6 +352,37 @@ async function queryPublicRugbyFlashScoreTournaments(args: {
 
     const grouped = await mapWithConcurrency(countries, 6, (country) =>
         queryRugbyCountryTournaments({
+            externalCountryId: country.external_country_id,
+            countryName: country.name,
+            flag: country.flag,
+            search: args.search,
+            audience: args.audience,
+        }),
+    );
+
+    const uniqueById = new Map<string, PublicExternalTournament>();
+    for (const tournament of grouped.flat()) {
+        if (!uniqueById.has(tournament.id)) {
+            uniqueById.set(tournament.id, tournament);
+        }
+    }
+
+    return sortTournamentsByPriority([...uniqueById.values()]);
+}
+
+async function queryPublicFlashScoreTournaments(args: {
+    sportKey: string;
+    search: string;
+    audience: TournamentAudience;
+}) {
+    const countries = await queryFlashScoreCountrySummaries(args.sportKey);
+    if (countries.length === 0) {
+        throw new Error(`FlashScore catalog is unavailable for ${args.sportKey}.`);
+    }
+
+    const grouped = await mapWithConcurrency(countries, 6, (country) =>
+        queryFlashScoreCountryTournaments({
+            sportKey: args.sportKey,
             externalCountryId: country.external_country_id,
             countryName: country.name,
             flag: country.flag,
@@ -454,21 +536,24 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const sport = searchParams.get('sport');
+        const flashScoreSportKey = resolveFlashScoreSportKey(sport);
+        const flashScoreCatalogEnabled = Boolean(sport) && isFlashScoreEnabledForSport(flashScoreSportKey);
         const scope = searchParams.get('scope');
+        const forceFullCatalog = scope === 'full';
         const search = searchParams.get('search')?.trim().toLowerCase() || '';
         const audience = resolveAudienceFilter(searchParams.get('audience'));
 
-        if (sport && isRugbySport(sport) && scope === 'summary') {
+        if (flashScoreCatalogEnabled && scope === 'summary') {
             try {
-                const countries = await queryRugbyCountrySummaries();
+                const countries = await queryFlashScoreCountrySummaries(flashScoreSportKey);
                 return withCacheControl({ data: { countries } }, CATALOG_CACHE_CONTROL);
             } catch (error) {
-                console.error('[GET /api/public/tournaments] rugby summary failed:', error);
+                console.error('[GET /api/public/tournaments] catalog summary failed:', error);
                 return withCacheControl({ data: { countries: [] } }, CATALOG_CACHE_CONTROL);
             }
         }
 
-        if (sport && isRugbySport(sport) && scope === 'country') {
+        if (flashScoreCatalogEnabled && scope === 'country') {
             const externalCountryId = searchParams.get('external_country_id')?.trim() || '';
             const countryName = searchParams.get('country_name')?.trim() || '';
             const countryFlag = searchParams.get('country_flag')?.trim() || '';
@@ -481,7 +566,8 @@ export async function GET(request: NextRequest) {
             }
 
             try {
-                const tournaments = await queryRugbyCountryTournaments({
+                const tournaments = await queryFlashScoreCountryTournaments({
+                    sportKey: flashScoreSportKey,
                     externalCountryId,
                     countryName,
                     flag: countryFlag || null,
@@ -490,7 +576,7 @@ export async function GET(request: NextRequest) {
                 });
                 return withCacheControl({ data: tournaments }, CATALOG_CACHE_CONTROL);
             } catch (error) {
-                console.error('[GET /api/public/tournaments] rugby country failed:', error);
+                console.error('[GET /api/public/tournaments] catalog country failed:', error);
                 return NextResponse.json(
                     { error: 'No se pudieron cargar las ligas de FlashScore.' },
                     { status: 500 },
@@ -512,14 +598,28 @@ export async function GET(request: NextRequest) {
             })
             : [];
 
-        if (sport && isRugbySport(sport)) {
+        if (scope === 'db') {
+            if (error) {
+                console.error('[GET /api/public/tournaments] query failed:', error);
+                return NextResponse.json(
+                    { error: 'No se pudieron cargar los torneos.' },
+                    { status: 500 },
+                );
+            }
+
+            return withCacheControl({ data: dbTournaments }, FLAT_CACHE_CONTROL);
+        }
+
+        if (flashScoreCatalogEnabled && (isRugbySport(flashScoreSportKey) || Boolean(search) || forceFullCatalog)) {
             try {
-                const rugbyTournaments = await queryPublicRugbyFlashScoreTournaments({ search, audience });
-                const combinedTournaments = mergePublicTournamentLists(dbTournaments, rugbyTournaments);
+                const flashScoreTournaments = isRugbySport(flashScoreSportKey)
+                    ? await queryPublicRugbyFlashScoreTournaments({ search, audience })
+                    : await queryPublicFlashScoreTournaments({ sportKey: flashScoreSportKey, search, audience });
+                const combinedTournaments = mergePublicTournamentLists(dbTournaments, flashScoreTournaments);
 
                 return withCacheControl({ data: combinedTournaments }, FLAT_CACHE_CONTROL);
-            } catch (rugbyError) {
-                console.error('[GET /api/public/tournaments] flashscore rugby fallback:', rugbyError);
+            } catch (flashScoreError) {
+                console.error('[GET /api/public/tournaments] flashscore catalog fallback:', flashScoreError);
 
                 if (!error) {
                     return withCacheControl({ data: dbTournaments }, FLAT_CACHE_CONTROL);

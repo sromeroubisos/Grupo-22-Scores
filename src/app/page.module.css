@@ -1340,10 +1340,6 @@
         display: flex;
     }
 
-    .mobileTournamentList {
-        display: flex;
-    }
-
     .mobileSportSelector::-webkit-scrollbar {
         display: none;
     }
