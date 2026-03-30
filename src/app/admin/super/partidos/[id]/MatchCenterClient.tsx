@@ -43,6 +43,7 @@ interface MatchEvent {
     minute: number;
     type: string;
     team: 'home' | 'away' | null;
+    playerId?: string | null;
     playerName: string;
     detail: string;
 }
@@ -64,6 +65,8 @@ interface LineupPlayer {
     position?: string;
     role?: string;
     isCaptain?: boolean;
+    squadMemberId?: string | null;
+    divisionId?: string | null;
 }
 
 interface MatchScore {
@@ -287,6 +290,8 @@ function buildLineupTemplate(count: number, existing: LineupPlayer[] = []): Line
             position: current?.position ?? '',
             role: current?.role ?? (number <= 15 ? 'starter' : 'substitute'),
             isCaptain: current?.isCaptain ?? false,
+            squadMemberId: current?.squadMemberId ?? null,
+            divisionId: current?.divisionId ?? null,
         };
     });
 }
@@ -1114,7 +1119,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                                 onChange={(e) => {
                                                                     const updated = [...lineups[team]];
                                                                     const realIdx = updated.findIndex(x => x.number === p.number);
-                                                                    if (realIdx >= 0) updated[realIdx] = { ...updated[realIdx], name: e.target.value };
+                                                                    if (realIdx >= 0) {
+                                                                        updated[realIdx] = {
+                                                                            ...updated[realIdx],
+                                                                            id: undefined,
+                                                                            squadMemberId: null,
+                                                                            name: e.target.value,
+                                                                        };
+                                                                    }
                                                                     setLocalLineups({ ...lineups, [team]: updated });
                                                                 }}
                                                             />
@@ -1138,7 +1150,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                                 onChange={(e) => {
                                                                     const updated = [...lineups[team]];
                                                                     const realIdx = updated.findIndex(x => x.number === p.number);
-                                                                    if (realIdx >= 0) updated[realIdx] = { ...updated[realIdx], name: e.target.value };
+                                                                    if (realIdx >= 0) {
+                                                                        updated[realIdx] = {
+                                                                            ...updated[realIdx],
+                                                                            id: undefined,
+                                                                            squadMemberId: null,
+                                                                            name: e.target.value,
+                                                                        };
+                                                                    }
                                                                     setLocalLineups({ ...lineups, [team]: updated });
                                                                 }}
                                                             />
@@ -1173,6 +1192,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     minute: 0,
                                     type: defaultEvent.type,
                                     team: defaultEvent.team === 'none' ? null : 'home',
+                                    playerId: null,
                                     playerName: '',
                                     detail: '',
                                 };
@@ -1218,6 +1238,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                         updateLocalEvent(ev.id, {
                                                             type: nextType,
                                                             team: nextDefinition?.team === 'none' ? null : ev.team ?? (nextDefinition?.team === 'required' ? 'home' : null),
+                                                            playerId: nextDefinition?.player === 'none' ? null : ev.playerId ?? null,
                                                             playerName: nextDefinition?.player === 'none' ? '' : ev.playerName,
                                                         });
                                                     }}
@@ -1237,7 +1258,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                     value={ev.team || (selectedDefinition.team === 'required' ? 'home' : '')}
                                                     disabled={selectedDefinition.team === 'none'}
                                                     style={{ background: '#222', border: 'none', color: '#fff', fontSize: '0.8rem', padding: 4, borderRadius: 4 }}
-                                                    onChange={(e) => updateLocalEvent(ev.id, { team: (e.target.value || null) as 'home' | 'away' | null })}
+                                                    onChange={(e) => updateLocalEvent(ev.id, {
+                                                        team: (e.target.value || null) as 'home' | 'away' | null,
+                                                        playerId: null,
+                                                    })}
                                                 >
                                                     <option value="">—</option>
                                                     <option value="home">{homeName}</option>
@@ -1248,7 +1272,9 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                 <input
                                                     type="text" value={selectedDefinition.player === 'none' ? ev.detail : ev.playerName} placeholder={selectedDefinition.player === 'none' ? 'Detalle del evento' : selectedDefinition.player === 'required' ? 'Nombre del jugador' : 'Jugador (opcional)'}
                                                     className="inline-input" style={{ fontSize: '0.85rem' }}
-                                                    onChange={(e) => updateLocalEvent(ev.id, selectedDefinition.player === 'none' ? { detail: e.target.value } : { playerName: e.target.value })}
+                                                    onChange={(e) => updateLocalEvent(ev.id, selectedDefinition.player === 'none'
+                                                        ? { detail: e.target.value }
+                                                        : { playerId: null, playerName: e.target.value })}
                                                 />
                                                 {selectedDefinition.player !== 'none' && (
                                                     <input

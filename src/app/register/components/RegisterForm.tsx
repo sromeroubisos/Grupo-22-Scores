@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import styles from '../../login/login.module.css'
 import { Eye, EyeOff } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import styles from '../../login/login.module.css'
 
 export default function RegisterForm({ onError }: { onError: (msg: string | null) => void }) {
     const [email, setEmail] = useState('')
@@ -12,7 +11,6 @@ export default function RegisterForm({ onError }: { onError: (msg: string | null
     const [confirmPassword, setConfirmPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
-    const router = useRouter()
     const supabase = createClient()
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,18 +34,24 @@ export default function RegisterForm({ onError }: { onError: (msg: string | null
 
         setLoading(true)
         try {
+            const emailRedirectTo =
+                typeof window !== 'undefined'
+                    ? `${window.location.origin}/auth/confirm?next=/`
+                    : undefined
+
             const { error } = await supabase.auth.signUp({
                 email,
                 password,
+                options: {
+                    emailRedirectTo,
+                },
             })
+
             if (error) throw error
 
-            // If success
-            onError('¡Cuenta creada! Revisa tu email para confirmar.')
-            // Optionally redirect or show success message properly
-            // router.push('/login?message=check-email')
-        } catch (error: any) {
-            onError(error.message || 'Ocurrió un error al registrarse')
+            onError('¡Cuenta creada! Revisá tu email y confirmá la cuenta antes de iniciar sesión.')
+        } catch (error: unknown) {
+            onError(error instanceof Error ? error.message : 'Ocurrió un error al registrarse')
         } finally {
             setLoading(false)
         }
@@ -86,7 +90,7 @@ export default function RegisterForm({ onError }: { onError: (msg: string | null
                         type="button"
                         className={styles.togglePass}
                         onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>

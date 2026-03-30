@@ -911,6 +911,9 @@ export async function POST(request: Request) {
             sportId,
             homeClubId,
             awayClubId,
+            homeSquadId,
+            awaySquadId,
+            category,
             dateTime,
             venue,
             status,
@@ -976,6 +979,9 @@ export async function POST(request: Request) {
             supportsBroadcastUrl,
             supportsSportId,
             supportsSport,
+            supportsHomeDivision,
+            supportsAwayDivision,
+            supportsCategory,
         ] = await Promise.all([
             normalizedRoundId ? supportsMatchesColumn(supabase, 'round_uuid') : Promise.resolve(false),
             normalizedRoundLabel ? supportsMatchesColumn(supabase, 'round_label') : Promise.resolve(false),
@@ -983,6 +989,9 @@ export async function POST(request: Request) {
             normalizedWatchUrl ? supportsMatchesColumn(supabase, 'broadcast_url') : Promise.resolve(false),
             normalizedSportId ? supportsMatchesColumn(supabase, 'sport_id') : Promise.resolve(false),
             normalizedSportId ? supportsMatchesColumn(supabase, 'sport') : Promise.resolve(false),
+            homeSquadId ? supportsMatchesColumn(supabase, 'home_division_id') : Promise.resolve(false),
+            awaySquadId ? supportsMatchesColumn(supabase, 'away_division_id') : Promise.resolve(false),
+            category ? supportsMatchesColumn(supabase, 'category') : Promise.resolve(false),
         ]);
 
         // Insert match
@@ -1026,6 +1035,18 @@ export async function POST(request: Request) {
             if (supportsSport) {
                 matchPayload.sport = normalizedSportId;
             }
+        }
+
+        if (supportsHomeDivision) {
+            matchPayload.home_division_id = homeSquadId || null;
+        }
+
+        if (supportsAwayDivision) {
+            matchPayload.away_division_id = awaySquadId || null;
+        }
+
+        if (supportsCategory) {
+            matchPayload.category = typeof category === 'string' && category.trim() ? category.trim() : null;
         }
 
         const { data: match, error: insertError } = await supabase

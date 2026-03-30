@@ -26,6 +26,9 @@ export interface Match {
   // Teams
   homeClubId: string | null;
   awayClubId: string | null;
+  homeSquadId?: string | null;
+  awaySquadId?: string | null;
+  category?: string | null;
 
   // Scheduling
   dateTime: string; // ISO timestamp
@@ -148,6 +151,9 @@ export interface MatchFormData {
   groupId?: string | null; // Persistence column: group_id
   homeClubId: string;
   awayClubId: string;
+  homeSquadId?: string | null;
+  awaySquadId?: string | null;
+  category?: string | null;
   dateTime: string;
   venue: string;
   status: MatchStatus;

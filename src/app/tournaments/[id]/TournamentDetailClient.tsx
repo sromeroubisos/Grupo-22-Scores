@@ -42,12 +42,13 @@ function isRugbyApiSportsTournamentId(value: string) {
     return /^ras-league-\d+$/i.test(value);
 }
 
-type CircuitStandingsView = {
+type StandingsScopeView = {
     id: string;
     kind: 'global' | 'phase';
     label: string;
     subtitle: string;
     standings: any[];
+    phase?: any | null;
 };
 
 type StandingsColumnMode = 'standard' | 'circuit-global';
@@ -521,6 +522,32 @@ function getPreferredDbPhase(phases: any[], matches: any[] = [], standings: any[
     return latestPhaseWithData ?? ordered[0] ?? null;
 }
 
+function getPreferredKnockoutPhase(phases: any[], rounds: any[] = [], matches: any[] = []) {
+    if (!Array.isArray(phases) || phases.length === 0) return null;
+
+    const knockoutPhases = sortTournamentPhases(phases).filter((phase: any) =>
+        isKnockoutPhaseType(phase?.phase_type),
+    );
+    if (knockoutPhases.length === 0) return null;
+
+    const explicitActiveKnockout = knockoutPhases.find((phase: any) => phase?.is_active);
+    if (explicitActiveKnockout) return explicitActiveKnockout;
+
+    const phaseIdsWithStructure = new Set<string>();
+    rounds.forEach((round: any) => {
+        if (round?.phase_id) phaseIdsWithStructure.add(String(round.phase_id));
+    });
+    matches.forEach((match: any) => {
+        if (match?.phase_id) phaseIdsWithStructure.add(String(match.phase_id));
+    });
+
+    const latestKnockoutWithData = [...knockoutPhases]
+        .reverse()
+        .find((phase: any) => phaseIdsWithStructure.has(String(phase.id)));
+
+    return latestKnockoutWithData ?? knockoutPhases[knockoutPhases.length - 1] ?? null;
+}
+
 function getDbStandingsContext(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
     const participants = Array.isArray(dbData.participants) ? (dbData.participants as any[]) : [];
     const matches = Array.isArray(dbData.matches) ? (dbData.matches as any[]) : [];
@@ -729,7 +756,9 @@ function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?
         const calculatedStandings = buildCalculatedStandings(dbData, preferredPhaseId);
         const hasActualMatchData = flattenStandingsRows(calculatedStandings)
             .some((row: any) => (row.matches_total || 0) > 0);
-        if (calculatedStandings.length > 0 && hasActualMatchData) return calculatedStandings;
+        if (calculatedStandings.length > 0 && (hasActualMatchData || Boolean(preferredPhaseId))) {
+            return calculatedStandings;
+        }
     }
 
     if (persistedStandings.length === 0) return [];
@@ -780,10 +809,6 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             return String(left?.id || '').localeCompare(String(right?.id || ''));
         });
 
-    if (phaseMatches.length === 0) {
-        return [];
-    }
-
     const mapMatch = (match: any) => {
         const scoreHome = match?.score?.home ?? null;
         const scoreAway = match?.score?.away ?? null;
@@ -825,6 +850,18 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             if (leftOrder !== rightOrder) return leftOrder - rightOrder;
             return String(left?.name || '').localeCompare(String(right?.name || ''));
         });
+
+    if (phaseMatches.length === 0 && phaseRounds.length > 0) {
+        return phaseRounds.map((round: any, index: number) => ({
+            round_id: round.id,
+            name: String(round?.name || `Ronda ${index + 1}`),
+            matches: [],
+        }));
+    }
+
+    if (phaseMatches.length === 0) {
+        return [];
+    }
 
     if (phaseRounds.length > 0) {
         const roundEntries = phaseRounds
@@ -985,9 +1022,9 @@ function buildCircuitGlobalStandings(dbData: TournamentInitialData) {
         }));
 }
 
-function buildCircuitStandingsViews(dbData: TournamentInitialData): CircuitStandingsView[] {
+function buildCircuitStandingsViews(dbData: TournamentInitialData): StandingsScopeView[] {
     const { phases } = getDbStandingsContext(dbData);
-    const views: CircuitStandingsView[] = [];
+    const views: StandingsScopeView[] = [];
     const globalStandings = buildCircuitGlobalStandings(dbData);
 
     if (globalStandings.length > 0) {
@@ -997,6 +1034,7 @@ function buildCircuitStandingsViews(dbData: TournamentInitialData): CircuitStand
             label: 'Tabla global',
             subtitle: 'Ranking acumulado del circuito',
             standings: globalStandings,
+            phase: null,
         });
     }
 
@@ -1014,6 +1052,32 @@ function buildCircuitStandingsViews(dbData: TournamentInitialData): CircuitStand
             label: phaseName,
             subtitle: `Tabla final de ${phaseName}`,
             standings: snapshot,
+            phase,
+        });
+    });
+
+    return views;
+}
+
+function buildPhaseStandingsViews(dbData: TournamentInitialData): StandingsScopeView[] {
+    const { phases } = getDbStandingsContext(dbData);
+    const views: StandingsScopeView[] = [];
+
+    phases.forEach((phase: any, index: number) => {
+        const phaseId = String(phase?.id || '').trim();
+        if (!phaseId) return;
+
+        const snapshot = buildStandingsSnapshot(dbData, phaseId);
+        if (flattenStandingsRows(snapshot).length === 0) return;
+
+        const phaseName = getPhaseDisplayName(phase, index);
+        views.push({
+            id: phaseId,
+            kind: 'phase',
+            label: phaseName,
+            subtitle: `Tabla de ${phaseName}`,
+            standings: snapshot,
+            phase,
         });
     });
 
@@ -1025,13 +1089,22 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     const tournament = dbData.tournament as any;
     const tournamentRuleset = tournament?.ruleset ?? null;
     const isCircuitCompetition = isCircuitTournamentRuleset(tournamentRuleset, tournament?.format ?? null);
-    const { activePhase } = getDbStandingsContext(dbData);
-    const circuitStandingsViews = isCircuitCompetition ? buildCircuitStandingsViews(dbData) : [];
-    const defaultStandingsScope = circuitStandingsViews[0]?.id ?? null;
+    const { activePhase, phases } = getDbStandingsContext(dbData);
+    const standingsScopeViews = isCircuitCompetition ? buildCircuitStandingsViews(dbData) : buildPhaseStandingsViews(dbData);
+    const defaultStandingsScope = isCircuitCompetition
+        ? standingsScopeViews[0]?.id ?? null
+        : (activePhase?.id && standingsScopeViews.some((view) => view.id === String(activePhase.id)))
+            ? String(activePhase.id)
+            : standingsScopeViews[0]?.id ?? null;
     const defaultStandings =
-        circuitStandingsViews[0]?.standings ??
+        standingsScopeViews.find((view) => view.id === defaultStandingsScope)?.standings ??
         buildStandingsSnapshot(dbData);
-    const draw = buildDbPlayoffDraw(dbData, activePhase?.id ?? null);
+    const preferredKnockoutPhase = getPreferredKnockoutPhase(
+        phases,
+        Array.isArray(dbData.rounds) ? dbData.rounds : [],
+        Array.isArray(dbData.matches) ? dbData.matches : [],
+    );
+    const draw = buildDbPlayoffDraw(dbData, preferredKnockoutPhase?.id ?? activePhase?.id ?? null);
 
     return {
         tournamentMeta: tournament ? {
@@ -1056,9 +1129,10 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
         activePhase: activePhase ?? null,
         dbGroups: Array.isArray(dbData.groups) ? (dbData.groups as any[]) : [],
         dbTeamLabels: normalizeTeamLabelAssignments(Array.isArray(dbData.teamLabels) ? dbData.teamLabels : []),
-        circuitStandingsViews,
+        standingsScopeViews,
         defaultStandingsScope,
         isCircuitCompetition,
+        preferredKnockoutPhase: preferredKnockoutPhase ?? null,
     };
 }
 
@@ -1131,10 +1205,14 @@ export default function TournamentDetailPage({
     const [draw, setDraw] = useState<any[]>(preloaded?.draw ?? []);
     const [standingsView, setStandingsView] = useState<'overall' | 'form' | 'htft' | 'overunder'>('overall');
     const [dbParticipants, setDbParticipants] = useState<any[]>(preloaded?.dbParticipants ?? []);
+    const [dbPhases, setDbPhases] = useState<any[]>(preloaded?.dbPhases ?? []);
     const [activeDbPhase, setActiveDbPhase] = useState<any>(preloaded?.activePhase ?? null);
     const [dbTeamLabels, setDbTeamLabels] = useState<any[]>(preloaded?.dbTeamLabels ?? []);
-    const [circuitStandingsViews, setCircuitStandingsViews] = useState<CircuitStandingsView[]>(preloaded?.circuitStandingsViews ?? []);
-    const [activeStandingsScope, setActiveStandingsScope] = useState<string>(preloaded?.defaultStandingsScope ?? CIRCUIT_GLOBAL_SCOPE);
+    const [preferredKnockoutPhase, setPreferredKnockoutPhase] = useState<any>(preloaded?.preferredKnockoutPhase ?? null);
+    const [standingsScopeViews, setStandingsScopeViews] = useState<StandingsScopeView[]>(preloaded?.standingsScopeViews ?? []);
+    const [activeStandingsScope, setActiveStandingsScope] = useState<string>(
+        preloaded?.defaultStandingsScope ?? preloaded?.standingsScopeViews?.[0]?.id ?? CIRCUIT_GLOBAL_SCOPE,
+    );
 
     // ── Data fetch ────────────────────────────────────────────────────────
 
@@ -1315,10 +1393,14 @@ export default function TournamentDetailPage({
                         if (!controller.signal.aborted) {
                             setTournamentData(tournamentMeta ?? localTournament);
                             setDbParticipants(snapshot.dbParticipants);
+                            setDbPhases(snapshot.dbPhases ?? []);
                             setActiveDbPhase(snapshot.activePhase ?? null);
                             setDbTeamLabels(snapshot.dbTeamLabels);
-                            setCircuitStandingsViews(snapshot.circuitStandingsViews ?? []);
-                            setActiveStandingsScope(snapshot.defaultStandingsScope ?? CIRCUIT_GLOBAL_SCOPE);
+                            setPreferredKnockoutPhase(snapshot.preferredKnockoutPhase ?? null);
+                            setStandingsScopeViews(snapshot.standingsScopeViews ?? []);
+                            setActiveStandingsScope(
+                                snapshot.defaultStandingsScope ?? snapshot.standingsScopeViews?.[0]?.id ?? CIRCUIT_GLOBAL_SCOPE,
+                            );
                             setResults(sortMatchesByDate(snapshot.results || [], 'desc'));
                             setFixtures(sortMatchesByDate(snapshot.fixtures || [], 'asc'));
                             setDraw(snapshot.draw ?? []);
@@ -1425,7 +1507,7 @@ export default function TournamentDetailPage({
                 if (Array.isArray(payload.teamLabels)) {
                     setDbTeamLabels(normalizeTeamLabelAssignments(payload.teamLabels));
                 }
-                setDraw((current) => Array.isArray(payload.draw) && payload.draw.length > 0 ? payload.draw : current);
+                setDraw((current) => Array.isArray(payload.draw) ? payload.draw : current);
                 setTopScorers(payload.topScorers || []);
                 setArchives(payload.archives || []);
             } catch (err: any) {
@@ -1444,16 +1526,23 @@ export default function TournamentDetailPage({
         return () => controller.abort();
     }, [id, initialData, preloaded]);
 
+    const hasDbKnockoutPhase = useMemo(
+        () => dbPhases.some((phase: any) => isKnockoutPhaseType(phase?.phase_type)),
+        [dbPhases],
+    );
+    const shouldUseIntegratedBracketView = !hasDbKnockoutPhase && (
+        Boolean(details?.current_stage_has_cup_trees) || isKnockoutPhaseType(activeDbPhase?.phase_type)
+    );
+    const hasDedicatedPlayoffTab = hasDbKnockoutPhase || (!shouldUseIntegratedBracketView && draw.length > 0);
+
     useEffect(() => {
-        const shouldUseBracketView = Boolean(details?.current_stage_has_cup_trees) || isKnockoutPhaseType(activeDbPhase?.phase_type);
-        if (shouldUseBracketView && activeTab === 'playoff') {
+        if (shouldUseIntegratedBracketView && activeTab === 'playoff') {
             setActiveTab('standings');
         }
-    }, [activeDbPhase?.phase_type, activeTab, details?.current_stage_has_cup_trees]);
+    }, [activeTab, shouldUseIntegratedBracketView]);
 
     // ── Loading / Error ────────────────────────────────────────────────────
 
-    const shouldRenderBracketInStandings = Boolean(details?.current_stage_has_cup_trees) || isKnockoutPhaseType(activeDbPhase?.phase_type);
     const isRugbyApiSportsProvider =
         details?.provider === 'rugby-api-sports' ||
         details?.externalProvider === 'rugby-api-sports' ||
@@ -1461,11 +1550,11 @@ export default function TournamentDetailPage({
     const navigationTabs = useMemo(() => (
         BASE_TABS
             .filter((tab: { id: string; label: string }) => !(isRugbyApiSportsProvider && (tab.id === 'stats' || tab.id === 'playoff')))
-            .filter((tab: { id: string; label: string }) => !(shouldRenderBracketInStandings && tab.id === 'playoff'))
-            .map((tab: { id: string; label: string }) => tab.id === 'standings' && shouldRenderBracketInStandings
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
+            .map((tab: { id: string; label: string }) => tab.id === 'standings' && shouldUseIntegratedBracketView
                 ? { ...tab, label: 'Cuadro' }
                 : tab)
-    ), [isRugbyApiSportsProvider, shouldRenderBracketInStandings]);
+    ), [hasDedicatedPlayoffTab, isRugbyApiSportsProvider, shouldUseIntegratedBracketView]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
@@ -1495,17 +1584,18 @@ export default function TournamentDetailPage({
     // ── Derived data ──────────────────────────────────────────────────────
 
     const isCircuitTournament = Boolean(
-        circuitStandingsViews.length > 0 ||
+        standingsScopeViews.some((view) => view.kind === 'global') ||
         tournamentData?.type === 'circuit' ||
         isCircuitTournamentRuleset(tournamentData?.ruleset),
     );
-    const selectedCircuitStandingsView = isCircuitTournament
-        ? (circuitStandingsViews.find((view) => view.id === activeStandingsScope) || circuitStandingsViews[0] || null)
+    const shouldUseStandingsScopeViews = isCircuitTournament || standingsScopeViews.length > 1 || hasDbKnockoutPhase;
+    const selectedStandingsScopeView = shouldUseStandingsScopeViews && standingsScopeViews.length > 0
+        ? (standingsScopeViews.find((view) => view.id === activeStandingsScope) || standingsScopeViews[0] || null)
         : null;
-    const isCircuitGlobalTable = selectedCircuitStandingsView?.kind === 'global';
-    const baseStandingsSource = selectedCircuitStandingsView?.standings ?? standings;
+    const isCircuitGlobalTable = selectedStandingsScopeView?.kind === 'global';
+    const baseStandingsSource = selectedStandingsScopeView?.standings ?? standings;
     const overallRows = flattenStandingsRows(standings);
-    const standingsSource = isCircuitTournament
+    const standingsSource = selectedStandingsScopeView
         ? baseStandingsSource
         : standingsView === 'form'
             ? standingsForm
@@ -1704,7 +1794,8 @@ export default function TournamentDetailPage({
         query.set('returnTo', `/tournaments/${id}${returnParams.toString() ? `?${returnParams.toString()}` : ''}`);
         return `/admin/super/torneos/externos/${encodeURIComponent(id)}?${query.toString()}`;
     })();
-    const bracketTitle = `${getKnockoutPhaseDisplayTitle(activeDbPhase)} - ${tournamentName}`;
+    const bracketPhase = preferredKnockoutPhase ?? activeDbPhase;
+    const bracketTitle = `${getKnockoutPhaseDisplayTitle(bracketPhase)} - ${tournamentName}`;
 
     // Quick stats
     const stats = getQuickStats(results, fixtures, overallRows, teamsList.length);
@@ -1716,7 +1807,7 @@ export default function TournamentDetailPage({
     const featured = getFeaturedMatch(results, fixtures);
 
     // Standings preview (top 8 flat rows only)
-    const standingsPreviewRows: any[] = shouldRenderBracketInStandings ? [] : overallRows.slice(0, 8);
+    const standingsPreviewRows: any[] = shouldUseIntegratedBracketView ? [] : overallRows.slice(0, 8);
     const standingsLegendItems = collectStandingsLegendItems(activeFlatRows, dbTeamLabels);
     const standingsPreviewLegendItems = collectStandingsLegendItems(standingsPreviewRows, dbTeamLabels);
     const standingsExportColumnLabels = standingsColumnMode === 'circuit-global'
@@ -2120,10 +2211,10 @@ export default function TournamentDetailPage({
                                 </button>
                                 <button
                                     className={styles.ctaBtnSecondary}
-                                    onClick={() => setActiveTab('standings')}
+                                    onClick={() => setActiveTab(hasDedicatedPlayoffTab ? 'playoff' : 'standings')}
                                     type="button"
                                 >
-                                    {shouldRenderBracketInStandings ? 'Ver Cuadro' : 'Ver Tabla'}
+                                    {hasDedicatedPlayoffTab || shouldUseIntegratedBracketView ? 'Ver Cuadro' : 'Ver Tabla'}
                                 </button>
                                 {isExactSuperAdmin && externalTournamentEditorHref && (
                                     <Link href={externalTournamentEditorHref} className={styles.ctaBtnSecondary}>
@@ -2242,11 +2333,16 @@ export default function TournamentDetailPage({
                         {/* Right: Sidebar */}
                         <aside className={styles.sidebar}>
 
-                            {shouldRenderBracketInStandings && (
+                            {(hasDedicatedPlayoffTab || shouldUseIntegratedBracketView) && (
                                 <div className={styles.infoCard}>
                                     <div className={styles.sectionHeader}>
                                         <h2 className={styles.sectionTitle}>Cuadro</h2>
-                                        <button className={styles.linkButton} onClick={() => setActiveTab('standings')}>Ver cuadro</button>
+                                        <button
+                                            className={styles.linkButton}
+                                            onClick={() => setActiveTab(hasDedicatedPlayoffTab ? 'playoff' : 'standings')}
+                                        >
+                                            Ver cuadro
+                                        </button>
                                     </div>
                                     <div className={styles.infoCardBody}>
                                         <p className={styles.emptyState} style={{ margin: 0, textAlign: 'left' }}>
@@ -2396,7 +2492,7 @@ export default function TournamentDetailPage({
                 {/* ── STANDINGS TAB ─────────────────────────────────────── */}
                 {activeTab === 'standings' && (
                     <div className={styles.section}>
-                        {shouldRenderBracketInStandings ? (
+                        {shouldUseIntegratedBracketView ? (
                             <>
                                 <div className={styles.standingsToolbar}>
                                     <div />
@@ -2405,7 +2501,7 @@ export default function TournamentDetailPage({
                                         filename={`cuadro-${tournamentData?.name}`}
                                         data={{
                                             title: bracketTitle,
-                                            subtitle: activeDbPhase?.name || details?.season || 'Cuadro eliminatorio',
+                                            subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
                                             tournamentLogo,
                                             rounds: draw,
                                         }}
@@ -2415,11 +2511,11 @@ export default function TournamentDetailPage({
                             </>
                         ) : (
                             <>
-                        {isCircuitTournament && circuitStandingsViews.length > 0 && (
+                        {standingsScopeViews.length > 1 && (
                             <div className={styles.standingsScopeBar}>
                                 <span className={styles.standingsScopeLabel}>Tabla</span>
                                 <div className={styles.pillsGroup}>
-                                    {circuitStandingsViews.map((view) => (
+                                    {standingsScopeViews.map((view) => (
                                         <button
                                             key={view.id}
                                             className={`${styles.pillBtn} ${activeStandingsScope === view.id ? styles.pillBtnActive : ''}`}
@@ -2433,7 +2529,7 @@ export default function TournamentDetailPage({
                             </div>
                         )}
                         <div className={styles.standingsToolbar}>
-                            {!isCircuitTournament && (
+                            {!selectedStandingsScopeView && !isCircuitTournament && (
                                 <div className={styles.pillsGroup}>
                                     <button className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overall')}>General</button>
                                     <button className={`${styles.pillBtn} ${standingsView === 'form' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('form')}>Forma</button>
@@ -2446,7 +2542,7 @@ export default function TournamentDetailPage({
                                 filename={`tabla-${tournamentData?.name}`}
                                 data={{
                                     title: tournamentData?.name || 'Tabla de Posiciones',
-                                    subtitle: selectedCircuitStandingsView?.subtitle || details?.season || 'Clasificación',
+                                    subtitle: selectedStandingsScopeView?.subtitle || details?.season || 'Clasificación',
                                     tournamentLogo,
                                     rows: standingsExportRows,
                                     groups: standingsExportGroups,
@@ -2458,7 +2554,7 @@ export default function TournamentDetailPage({
 
                         {activeRows.length === 0 && <p className={styles.emptyState}>Tabla no disponible.</p>}
 
-                        {activeRows.length > 0 && (isCircuitTournament || standingsView === 'overall' || standingsView === 'form') && (
+                        {activeRows.length > 0 && (selectedStandingsScopeView || isCircuitTournament || standingsView === 'overall' || standingsView === 'form') && (
                             <div className={styles.standingsContainer}>
                                 {activeRows[0]?.rows ? (
                                     <div className={styles.groupsStack}>
@@ -2484,7 +2580,7 @@ export default function TournamentDetailPage({
                             </div>
                         )}
 
-                        {!isCircuitTournament && activeRows.length > 0 && standingsView === 'overunder' && (
+                        {!selectedStandingsScopeView && !isCircuitTournament && activeRows.length > 0 && standingsView === 'overunder' && (
                             <div className={styles.sectionCard}>
                                 <div className={styles.tableScroll}>
                                     <div className={styles.tableCard} style={{ minWidth: 600 }}>
@@ -2511,7 +2607,7 @@ export default function TournamentDetailPage({
                             </div>
                         )}
 
-                        {!isCircuitTournament && activeRows.length > 0 && standingsView === 'htft' && (
+                        {!selectedStandingsScopeView && !isCircuitTournament && activeRows.length > 0 && standingsView === 'htft' && (
                             <div className={styles.sectionCard}>
                                 <div className={styles.tableScroll}>
                                     <div className={styles.tableCard} style={{ minWidth: 980 }}>
@@ -2613,13 +2709,13 @@ export default function TournamentDetailPage({
                                 filename={`cuadro-${tournamentData?.name}`}
                                 data={{
                                     title: bracketTitle,
-                                    subtitle: activeDbPhase?.name || details?.season || 'Cuadro eliminatorio',
+                                    subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
                                     tournamentLogo,
                                     rounds: draw,
                                 }}
                             />
                         </div>
-                        <PlayoffBracket data={draw} title={`Cuadro - ${tournamentName}`} />
+                        <PlayoffBracket data={draw} title={`Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`} />
                     </div>
                 )}
 

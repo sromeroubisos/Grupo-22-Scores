@@ -334,13 +334,18 @@ export type Database = {
         Row: {
           attendance: number | null
           away_club_id: string | null
+          away_division_id: string | null
           broadcast_url: string | null
+          category: string | null
           clock: Json | null
           created_at: string
           date_time: string | null
+          events: Json | null
           group_id: string | null
           home_club_id: string | null
+          home_division_id: string | null
           id: string
+          lineups: Json | null
           notes: string | null
           phase_id: string | null
           pitch: string | null
@@ -365,13 +370,18 @@ export type Database = {
         Insert: {
           attendance?: number | null
           away_club_id?: string | null
+          away_division_id?: string | null
           broadcast_url?: string | null
+          category?: string | null
           clock?: Json | null
           created_at?: string
           date_time?: string | null
+          events?: Json | null
           group_id?: string | null
           home_club_id?: string | null
+          home_division_id?: string | null
           id?: string
+          lineups?: Json | null
           notes?: string | null
           phase_id?: string | null
           pitch?: string | null
@@ -396,13 +406,18 @@ export type Database = {
         Update: {
           attendance?: number | null
           away_club_id?: string | null
+          away_division_id?: string | null
           broadcast_url?: string | null
+          category?: string | null
           clock?: Json | null
           created_at?: string
           date_time?: string | null
+          events?: Json | null
           group_id?: string | null
           home_club_id?: string | null
+          home_division_id?: string | null
           id?: string
+          lineups?: Json | null
           notes?: string | null
           phase_id?: string | null
           pitch?: string | null
@@ -425,6 +440,8 @@ export type Database = {
           points_override_reason?: string | null
         }
         Relationships: [
+          { foreignKeyName: "matches_away_division_id_fkey"; columns: ["away_division_id"]; referencedRelation: "club_divisions"; referencedColumns: ["id"] },
+          { foreignKeyName: "matches_home_division_id_fkey"; columns: ["home_division_id"]; referencedRelation: "club_divisions"; referencedColumns: ["id"] },
           { foreignKeyName: "matches_tournament_id_fkey"; columns: ["tournament_id"]; referencedRelation: "tournaments"; referencedColumns: ["id"] }
         ]
       }

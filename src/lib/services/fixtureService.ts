@@ -31,6 +31,7 @@ import type {
 
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
+  private static _matchColumnSupport = new Map<string, boolean>();
   private static _warnedWriteFallback = false;
 
   private static getMatchRoundId(match: { round_uuid?: string | null; round_id?: string | null }) {
@@ -169,6 +170,27 @@ export class FixtureService {
     }
 
     return this._supportsRoundLabel ?? false;
+  }
+
+  static async checkMatchColumnSupport(column: string): Promise<boolean> {
+    if (this._matchColumnSupport.has(column)) {
+      return this._matchColumnSupport.get(column) ?? false;
+    }
+
+    try {
+      const supabase = await createClient();
+      const { error } = await supabase
+        .from('matches')
+        .select(column)
+        .limit(0);
+
+      const supported = !error;
+      this._matchColumnSupport.set(column, supported);
+      return supported;
+    } catch {
+      this._matchColumnSupport.set(column, false);
+      return false;
+    }
   }
 
   /**
@@ -510,8 +532,16 @@ export class FixtureService {
       throw new Error('El equipo local y el visitante no pueden ser el mismo.');
     }
 
-    const [supportsRoundLabel] = await Promise.all([
-      this.checkRoundLabelSupport()
+    const [
+      supportsRoundLabel,
+      supportsHomeDivision,
+      supportsAwayDivision,
+      supportsCategory,
+    ] = await Promise.all([
+      this.checkRoundLabelSupport(),
+      data.homeSquadId ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
+      data.awaySquadId ? this.checkMatchColumnSupport('away_division_id') : Promise.resolve(false),
+      data.category ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] createMatch - round_label: ${supportsRoundLabel}`);
 
@@ -557,6 +587,18 @@ export class FixtureService {
       insertData.round_label = data.roundLabel || null;
     }
 
+    if (supportsHomeDivision) {
+      insertData.home_division_id = data.homeSquadId || null;
+    }
+
+    if (supportsAwayDivision) {
+      insertData.away_division_id = data.awaySquadId || null;
+    }
+
+    if (supportsCategory) {
+      insertData.category = data.category || null;
+    }
+
     const { data: match, error } = await supabase
       .from('matches')
       .insert(insertData)
@@ -582,8 +624,16 @@ export class FixtureService {
   static async updateMatch(matchId: string, data: Partial<MatchFormData>): Promise<Match | null> {
     const supabase = await this.getWriteClient();
 
-    const [supportsRoundLabel] = await Promise.all([
-      this.checkRoundLabelSupport()
+    const [
+      supportsRoundLabel,
+      supportsHomeDivision,
+      supportsAwayDivision,
+      supportsCategory,
+    ] = await Promise.all([
+      this.checkRoundLabelSupport(),
+      data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
+      data.awaySquadId !== undefined ? this.checkMatchColumnSupport('away_division_id') : Promise.resolve(false),
+      data.category !== undefined ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] updateMatch - round_label: ${supportsRoundLabel}`);
 
@@ -652,6 +702,18 @@ export class FixtureService {
 
     if (supportsRoundLabel && data.roundLabel !== undefined) {
       updateData.round_label = data.roundLabel;
+    }
+
+    if (supportsHomeDivision && data.homeSquadId !== undefined) {
+      updateData.home_division_id = data.homeSquadId || null;
+    }
+
+    if (supportsAwayDivision && data.awaySquadId !== undefined) {
+      updateData.away_division_id = data.awaySquadId || null;
+    }
+
+    if (supportsCategory && data.category !== undefined) {
+      updateData.category = data.category || null;
     }
 
     if (data.phaseId) updateData.phase_id = data.phaseId;
@@ -1251,6 +1313,9 @@ export class FixtureService {
       pitch: match.pitch ?? null,
       homeClubId: match.home_club_id,
       awayClubId: match.away_club_id,
+      homeSquadId: match.home_division_id ?? null,
+      awaySquadId: match.away_division_id ?? null,
+      category: match.category ?? null,
       dateTime: match.date_time,
       venue: match.venue || null,
       status: match.status,

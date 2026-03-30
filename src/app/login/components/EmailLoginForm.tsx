@@ -1,15 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useSearchParams } from 'next/navigation'
-import styles from '../login.module.css'
 import { Eye, EyeOff } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import styles from '../login.module.css'
 
-/** Only allow relative paths for returnTo to prevent open-redirect attacks. */
 function sanitizeReturnTo(raw: string | null, roleIntent?: string | null): string {
     if (!raw) {
-        // If we have a role intent but no returnTo, help the user get to the right place
         if (roleIntent === 'admin_general' || roleIntent === 'super_admin') return '/admin/super'
         if (roleIntent === 'admin_club') return '/club-admin'
         if (
@@ -22,10 +20,11 @@ function sanitizeReturnTo(raw: string | null, roleIntent?: string | null): strin
         ) return '/admin'
         return '/'
     }
-    // Must start with / and not // (which would be treated as protocol-relative)
+
     if (raw.startsWith('/') && !raw.startsWith('//')) {
         return raw
     }
+
     return '/'
 }
 
@@ -59,14 +58,17 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                 if (error.message.includes('Invalid login credentials')) {
                     throw new Error('Credenciales incorrectas. Verificá tu email y contraseña.')
                 }
+
+                if (error.message.includes('Email not confirmed')) {
+                    throw new Error('Tu email todavía no fue confirmado. Revisá tu correo y abrí el enlace de confirmación antes de iniciar sesión.')
+                }
+
                 throw error
             }
 
             console.log('[EmailLoginForm] Login successful for:', data.user?.email)
             console.log('[EmailLoginForm] Session present:', !!data.session)
 
-            // Ensure email/password logins also create/update the public.users profile
-            // before redirecting to pages that expect it server-side.
             try {
                 await fetch('/api/auth/sync-user', {
                     method: 'POST',
@@ -76,7 +78,6 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                 console.warn('[EmailLoginForm] sync-user failed, continuing with redirect:', syncError)
             }
 
-            // Use a hard navigation so client and server auth state stay aligned.
             window.location.assign(returnTo)
         } catch (error: unknown) {
             console.error('[EmailLoginForm] Login error:', error)

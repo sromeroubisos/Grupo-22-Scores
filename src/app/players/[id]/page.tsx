@@ -17,6 +17,15 @@ const getTeamLogo = (team: any) => {
     return resolveTeamLogo(team);
 };
 
+const buildTeamHref = (teamId?: string | null) => {
+    if (!teamId) return '/clubs';
+    if (teamId.startsWith('fs-team-') || teamId.startsWith('ras-team-')) return `/clubs/${teamId}`;
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(teamId)) {
+        return `/clubs/${teamId}`;
+    }
+    return `/clubs/fs-team-${teamId}`;
+};
+
 export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
@@ -141,7 +150,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                                 )}
                                 {position && <span className={styles.positionBadge}>{position}</span>}
                                 {currentTeamName && (
-                                    <Link href={`/clubs/fs-team-${currentTeamId}`} className={styles.teamLink}>
+                                    <Link href={buildTeamHref(currentTeamId)} className={styles.teamLink}>
                                         {currentTeamName}
                                     </Link>
                                 )}
@@ -232,7 +241,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                                         <div className={styles.infoItem}>
                                             <div className={styles.infoLabel}>Club Actual</div>
                                             <div className={styles.infoValue}>
-                                                <Link href={`/clubs/fs-team-${currentTeamId}`} className={styles.teamLink}>
+                                                <Link href={buildTeamHref(currentTeamId)} className={styles.teamLink}>
                                                     {currentTeamName}
                                                 </Link>
                                             </div>
@@ -330,7 +339,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                                 <div className={styles.infoRow}>
                                     <span className={styles.label}>Club</span>
                                     <span className={styles.value}>
-                                        <Link href={`/clubs/fs-team-${currentTeamId}`} className={styles.teamLink}>
+                                        <Link href={buildTeamHref(currentTeamId)} className={styles.teamLink}>
                                             {currentTeamName}
                                         </Link>
                                     </span>

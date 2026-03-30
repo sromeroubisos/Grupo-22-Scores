@@ -6,6 +6,13 @@ import { useRouter } from 'next/navigation';
 import ExportImage from '@/components/ExportImage';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import styles from './page.module.css';
+import {
+    buildLocalPlayerStatsRows,
+    buildLocalTeamStats,
+    normalizeLocalEvents,
+    normalizeLocalLineups,
+    type LocalPlayerStatsRow,
+} from '@/lib/localMatchData';
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
@@ -172,6 +179,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         eventsData: any[];
         statsData: any[];
         playerStats: any;
+        localPlayerRows: LocalPlayerStatsRow[];
         commentaryData: any[];
         issues: any[];
         debug: Record<string, unknown>;
@@ -181,6 +189,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         eventsData: [],
         statsData: [],
         playerStats: null,
+        localPlayerRows: [],
         commentaryData: [],
         issues: [],
         debug: {}
@@ -253,6 +262,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             eventsData: [],
                             statsData: [],
                             playerStats: null,
+                            localPlayerRows: [],
                             commentaryData: [],
                             issues: [],
                             debug: {},
@@ -330,6 +340,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         eventsData: [],
                         statsData: [],
                         playerStats: null,
+                        localPlayerRows: [],
                         commentaryData: [],
                         issues: zodIssues,
                         debug: { ...prev.debug, details: debugDetails }
@@ -506,6 +517,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             eventsData: incidents,
                             statsData: stats,
                             playerStats: playerStatsRes?.DATA || playerStatsRes || null,
+                            localPlayerRows: [],
                             commentaryData: commentaryRes?.DATA || commentaryRes || [],
                             issues: zodIssues,
                             debug: { ...prev.debug, details: debugDetails }
@@ -529,6 +541,15 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             const homeClubId = matchData.homeClub?.id || matchData.homeClubId || '';
                             const awayClubId = matchData.awayClub?.id || matchData.awayClubId || '';
                             const tournamentId = matchData.tournamentId || '';
+                            const localLineups = normalizeLocalLineups(matchData.lineups || null);
+                            const localEvents = normalizeLocalEvents(matchData.events || []);
+                            const localPlayerRows = buildLocalPlayerStatsRows({
+                                lineups: localLineups,
+                                events: localEvents,
+                                homeName: matchData.homeClub?.name || 'Local',
+                                awayName: matchData.awayClub?.name || 'Visitante',
+                            });
+                            const localStats = buildLocalTeamStats(localEvents);
                             const resolvedDbHomeLogo = resolveMatchTeamLogo(matchData.homeClub, null, matchData.homeClub?.logo || null);
                             const resolvedDbAwayLogo = resolveMatchTeamLogo(matchData.awayClub, null, matchData.awayClub?.logo || null);
 
@@ -543,7 +564,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 tournament: matchData.tournament?.name || 'Partido Local',
                                 tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
-                                category: 'General',
+                                category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
                                 referee: matchData.referee || null,
@@ -559,8 +580,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     logo: resolvedDbAwayLogo || null,
                                     score: matchData.status === 'scheduled' ? null : (score.away ?? 0)
                                 },
-                                events: matchData.events || [],
-                                lineups: matchData.lineups || null,
+                                events: localEvents,
+                                lineups: localLineups,
                                 standings: [],
                                 h2h: [],
                                 draw: []
@@ -570,9 +591,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             setState({
                                 kind: 'ok',
                                 matchData: baseProcessedMatch,
-                                eventsData: matchData.events || [],
-                                statsData: [],
+                                eventsData: localEvents,
+                                statsData: localStats,
                                 playerStats: null,
+                                localPlayerRows,
                                 commentaryData: [],
                                 issues: [],
                                 debug: {}
@@ -622,7 +644,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 tournament: matchData.tournament?.name || 'Partido Local',
                                 tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
-                                category: 'General',
+                                category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
                                 referee: matchData.referee || null,
@@ -638,8 +660,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     logo: resolvedDbAwayLogo || null,
                                     score: matchData.status === 'scheduled' ? null : (score.away ?? 0)
                                 },
-                                events: matchData.events || [],
-                                lineups: matchData.lineups || null,
+                                events: localEvents,
+                                lineups: localLineups,
                                 standings,
                                 h2h,
                                 draw: []
@@ -649,9 +671,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             setState({
                                 kind: 'ok',
                                 matchData: processedMatch,
-                                eventsData: matchData.events || [],
-                                statsData: [],
+                                eventsData: localEvents,
+                                statsData: localStats,
                                 playerStats: null,
+                                localPlayerRows,
                                 commentaryData: [],
                                 issues: [],
                                 debug: {}
@@ -763,6 +786,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     }
 
     const { matchData, eventsData, statsData, issues } = state;
+    const localLineups = normalizeLocalLineups(matchData.lineups || null);
+    const localHomeLineup = localLineups.home.filter((player) => Boolean(player.name));
+    const localAwayLineup = localLineups.away.filter((player) => Boolean(player.name));
+    const hasLocalLineups = localHomeLineup.length > 0 || localAwayLineup.length > 0;
 
     return (
         <div className={styles.page}>
@@ -1107,22 +1134,25 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                         {activeTab === 'lineups' && (
                             <div className={styles.lineupsContainer}>
-                                {((matchData.lineups?.HOME_STARTING_LINEUPS || matchData.lineups?.home_team?.starting_lineups || []).length > 0 ||
+                                {(hasLocalLineups ||
+                                    (matchData.lineups?.HOME_STARTING_LINEUPS || matchData.lineups?.home_team?.starting_lineups || []).length > 0 ||
                                     (matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || []).length > 0) ? (
                                     <div className={styles.lineupsGrid}>
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.home.name}</div>
                                             <div className={styles.playerList}>
-                                                {(matchData.lineups?.HOME_STARTING_LINEUPS || matchData.lineups?.home_team?.starting_lineups || []).map((p: any, i: number) => {
-                                                    const pId = p.PLAYER_ID || p.player_id || p.id;
-                                                    const pName = p.PLAYER_NAME || p.player_name;
+                                                {(hasLocalLineups ? localHomeLineup : (matchData.lineups?.HOME_STARTING_LINEUPS || matchData.lineups?.home_team?.starting_lineups || [])).map((p: any, i: number) => {
+                                                    const pId = hasLocalLineups ? p.id : (p.PLAYER_ID || p.player_id || p.id);
+                                                    const pName = hasLocalLineups ? p.name : (p.PLAYER_NAME || p.player_name);
+                                                    const pNumber = hasLocalLineups ? p.number : (p.PLAYER_NUMBER || p.player_number);
+                                                    const pPosition = hasLocalLineups ? p.position : (p.PLAYER_POSITION || p.player_position);
                                                     return (
                                                         <div key={i} className={styles.playerItem}>
                                                             <span>
-                                                                <span className={styles.playerNumber}>{p.PLAYER_NUMBER || p.player_number}</span>{' '}
+                                                                <span className={styles.playerNumber}>{pNumber}</span>{' '}
                                                                 {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                             </span>
-                                                            <span style={{ opacity: 0.5, fontSize: '11px' }}>{p.PLAYER_POSITION || p.player_position}</span>
+                                                            <span style={{ opacity: 0.5, fontSize: '11px' }}>{pPosition}</span>
                                                         </div>
                                                     );
                                                 })}
@@ -1131,16 +1161,18 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.away.name}</div>
                                             <div className={styles.playerList}>
-                                                {(matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || []).map((p: any, i: number) => {
-                                                    const pId = p.PLAYER_ID || p.player_id || p.id;
-                                                    const pName = p.PLAYER_NAME || p.player_name;
+                                                {(hasLocalLineups ? localAwayLineup : (matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || [])).map((p: any, i: number) => {
+                                                    const pId = hasLocalLineups ? p.id : (p.PLAYER_ID || p.player_id || p.id);
+                                                    const pName = hasLocalLineups ? p.name : (p.PLAYER_NAME || p.player_name);
+                                                    const pNumber = hasLocalLineups ? p.number : (p.PLAYER_NUMBER || p.player_number);
+                                                    const pPosition = hasLocalLineups ? p.position : (p.PLAYER_POSITION || p.player_position);
                                                     return (
                                                         <div key={i} className={styles.playerItem}>
                                                             <span>
-                                                                <span className={styles.playerNumber}>{p.PLAYER_NUMBER || p.player_number}</span>{' '}
+                                                                <span className={styles.playerNumber}>{pNumber}</span>{' '}
                                                                 {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                             </span>
-                                                            <span style={{ opacity: 0.5, fontSize: '11px' }}>{p.PLAYER_POSITION || p.player_position}</span>
+                                                            <span style={{ opacity: 0.5, fontSize: '11px' }}>{pPosition}</span>
                                                         </div>
                                                     );
                                                 })}
@@ -1365,7 +1397,36 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         {activeTab === 'players' && (
                             <div className={styles.playersStatsView}>
                                 <div className={styles.panelTitle}>Estadísticas de Jugadores</div>
-                                {state.playerStats?.stat_groups && state.playerStats.stat_groups.length > 0 ? (
+                                {state.localPlayerRows.length > 0 ? (
+                                    <div style={{ display: 'grid', gap: '12px' }}>
+                                        {state.localPlayerRows.map((player) => (
+                                            <div key={player.key} className={styles.playerStatRow} style={{ padding: '14px 16px', display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'center' }}>
+                                                <div style={{ display: 'grid', gap: '4px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                        <strong>
+                                                            {player.playerId ? (
+                                                                <Link href={`/players/${player.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                                                    {player.name}
+                                                                </Link>
+                                                            ) : player.name}
+                                                        </strong>
+                                                        {player.number != null && <span className={styles.playerNumber}>#{player.number}</span>}
+                                                        {player.isCaptain && <span className={styles.positionBadge}>Cap.</span>}
+                                                    </div>
+                                                    <div style={{ fontSize: '12px', opacity: 0.72 }}>
+                                                        {player.teamName}{player.position ? ` · ${player.position}` : ''}
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                                    <span className={styles.positionBadge}>Pts {player.points}</span>
+                                                    <span className={styles.positionBadge}>Tries {player.tries}</span>
+                                                    <span className={styles.positionBadge}>YC {player.yellowCards}</span>
+                                                    <span className={styles.positionBadge}>RC {player.redCards}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : state.playerStats?.stat_groups && state.playerStats.stat_groups.length > 0 ? (
                                     state.playerStats.stat_groups.map((group: any, i: number) => (
                                         group && group.stats && Array.isArray(group.stats) && (
                                             <div key={i} style={{ marginBottom: '24px' }}>
