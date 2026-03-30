@@ -1,11 +1,25 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { useAuth } from '@/context/AuthContext';
 import { useSuperConsole } from './SuperConsoleContext';
 import { superNavGroups } from './navigation';
+
+type DashboardStats = {
+    todayMatches: number;
+    liveMatches: number;
+    unlinkedTournaments: number;
+    unlinkedClubs: number;
+};
+
+const EMPTY_DASHBOARD_STATS: DashboardStats = {
+    todayMatches: 0,
+    liveMatches: 0,
+    unlinkedTournaments: 0,
+    unlinkedClubs: 0,
+};
 
 function NavGlyph({ path }: { path: string }) {
     return (
@@ -17,12 +31,47 @@ function NavGlyph({ path }: { path: string }) {
 
 export default function AdminPage() {
     const { user } = useAuth();
-    const { tournaments, matches, clubs, unions, news, refresh } = useSuperConsole();
+    const { tournaments, unions, news, refresh } = useSuperConsole();
     const [isSyncing, setIsSyncing] = useState(false);
+    const [dashboardStats, setDashboardStats] = useState<DashboardStats>(EMPTY_DASHBOARD_STATS);
+
+    const loadDashboardStats = useCallback(async () => {
+        try {
+            const response = await fetch('/api/admin/super/dashboard-stats', {
+                cache: 'no-store',
+                credentials: 'include',
+            });
+            const payload = await response.json() as {
+                data?: Partial<DashboardStats>;
+                error?: string;
+                details?: unknown;
+            };
+
+            if (!response.ok) {
+                const detail = typeof payload?.details === 'string' ? payload.details : null;
+                throw new Error(detail ? `${payload?.error || 'Failed to load dashboard stats'}: ${detail}` : (payload?.error || 'Failed to load dashboard stats'));
+            }
+
+            setDashboardStats({
+                ...EMPTY_DASHBOARD_STATS,
+                ...(payload.data || {}),
+            });
+        } catch (error) {
+            console.error('[SuperDashboard] Failed to load stats:', error);
+            setDashboardStats(EMPTY_DASHBOARD_STATS);
+        }
+    }, []);
+
+    useEffect(() => {
+        void loadDashboardStats();
+    }, [loadDashboardStats]);
 
     const handleSync = async () => {
         setIsSyncing(true);
-        refresh(); // Re-fetch all
+        refresh('tournaments');
+        refresh('unions');
+        refresh('news');
+        await loadDashboardStats();
         setTimeout(() => setIsSyncing(false), 1000);
     };
 
@@ -31,20 +80,12 @@ export default function AdminPage() {
     }, [news]);
 
     const stats = useMemo(() => {
-        const today = new Date().toISOString().split('T')[0];
-        const todayMatches = matches.filter(m => m.date_time.startsWith(today));
-        const liveMatches = todayMatches.filter(m => m.status === 'live');
-
-        // Conflicts: unlinked tournaments or clubs that might need attention
-        const unlinkedTournaments = tournaments.filter(t => !t.union_id);
-        const unlinkedClubs = clubs.filter(c => !c.union_id);
-
         return {
-            matches: { value: todayMatches.length, sub: `/ ${liveMatches.length} en vivo` },
-            conflicts: { value: unlinkedTournaments.length + unlinkedClubs.length, sub: 'Sin vinculación' },
+            matches: { value: dashboardStats.todayMatches, sub: `/ ${dashboardStats.liveMatches} en vivo` },
+            conflicts: { value: dashboardStats.unlinkedTournaments + dashboardStats.unlinkedClubs, sub: 'Sin vinculación' },
             latency: { value: 'STABLE', sub: 'v3.0 Opt' }
         };
-    }, [tournaments, matches, clubs]);
+    }, [dashboardStats]);
 
     const catalogRows = useMemo(() => {
         return tournaments.slice(0, 10).map(t => {
@@ -68,12 +109,12 @@ export default function AdminPage() {
     }, [tournaments, unions]);
 
     const conflictsMessage = useMemo(() => {
-        const unlinkedCount = tournaments.filter(t => !t.union_id).length;
+        const unlinkedCount = dashboardStats.unlinkedTournaments;
         if (unlinkedCount > 0) {
             return `${unlinkedCount} torneos requieren vinculación con una Unión territorial.`;
         }
         return 'Sincronización de catálogos completa.';
-    }, [tournaments]);
+    }, [dashboardStats.unlinkedTournaments]);
 
     if (!user) return null;
 

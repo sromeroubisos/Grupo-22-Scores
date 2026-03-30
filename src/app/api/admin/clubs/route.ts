@@ -6,18 +6,33 @@ import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
  * GET /api/admin/clubs
  * Get all clubs (for dropdowns, etc.)
  */
+type AdminClubRow = {
+  id: string
+  name: string
+  short_name?: string | null
+  logo_url?: string | null
+  region?: string | null
+  country?: string | null
+  sport?: string | null
+  sport_id?: string | null
+}
+
 export async function GET() {
   try {
     const supabase = await createClient();
 
     const variants = [
-      'id, name, short_name, logo_url, sport, sport_id',
-      'id, name, short_name, logo_url, sport_id',
-      'id, name, short_name, logo_url, sport',
-      'id, name, short_name, logo_url',
+      'id, name, short_name, logo_url, region, country, sport, sport_id',
+      'id, name, short_name, logo_url, region, country, sport_id',
+      'id, name, short_name, logo_url, region, country, sport',
+      'id, name, short_name, logo_url, region, country',
+      'id, name, short_name, region, country, sport, sport_id',
+      'id, name, short_name, region, country, sport_id',
+      'id, name, short_name, region, country, sport',
+      'id, name, short_name, region, country',
     ];
 
-    let clubs: any[] | null = null;
+    let clubs: AdminClubRow[] | null = null;
     let error: { message?: string | null; details?: string | null; code?: string | null } | null = null;
 
     for (const columns of variants) {

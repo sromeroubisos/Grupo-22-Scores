@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Eye, EyeOff, Link2, MoreVertical, Plus, RefreshCw, Star, StarOff, Users, Hash, Upload } from 'lucide-react';
 import styles from '../page.module.css';
@@ -35,8 +35,16 @@ const countryFlags: Record<string, string> = {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+type TopClubRow = {
+    id: string;
+    name: string;
+    logo_url: string | null;
+    primary_color: string | null;
+    followers_count: number;
+};
+
 export default function SuperadminTorneosPage() {
-    const { filters, setFilters, tournaments: rawTournaments, clubs, unions, loading, errors, refresh } = useSuperConsole();
+    const { filters, setFilters, tournaments: rawTournaments, unions, loading, errors, refresh } = useSuperConsole();
     const isLoading = loading.tournaments;
     const error = errors.tournaments;
     const supabase = createClient();
@@ -53,6 +61,35 @@ export default function SuperadminTorneosPage() {
     // Performance: local state for instant toggles
     const [localMetadata, setLocalMetadata] = useState<Record<string, { status?: string, is_visible?: boolean, is_popular?: boolean, priority?: number }>>({});
     const [priorityDrafts, setPriorityDrafts] = useState<Record<string, string>>({});
+    const [topClubsByFollowers, setTopClubsByFollowers] = useState<TopClubRow[]>([]);
+
+    const loadTopClubsByFollowers = useCallback(async () => {
+        try {
+            const response = await fetch('/api/admin/super/top-clubs', {
+                cache: 'no-store',
+                credentials: 'include',
+            });
+            const payload = await response.json() as {
+                data?: TopClubRow[];
+                error?: string;
+                details?: unknown;
+            };
+
+            if (!response.ok) {
+                const detail = typeof payload?.details === 'string' ? payload.details : null;
+                throw new Error(detail ? `${payload?.error || 'Failed to load top clubs'}: ${detail}` : (payload?.error || 'Failed to load top clubs'));
+            }
+
+            setTopClubsByFollowers(Array.isArray(payload.data) ? payload.data : []);
+        } catch (loadError) {
+            console.error('[SuperadminTorneosPage] Failed to load top clubs:', loadError);
+            setTopClubsByFollowers([]);
+        }
+    }, []);
+
+    useEffect(() => {
+        void loadTopClubsByFollowers();
+    }, [loadTopClubsByFollowers]);
 
     // ── Enriched Data ─────────────────────────────────────────────────────────
 
@@ -421,12 +458,6 @@ export default function SuperadminTorneosPage() {
     };
 
     // ── Top clubs by followers ────────────────────────────────────────────────
-    const topClubsByFollowers = useMemo(() =>
-        [...clubs]
-            .filter(c => (c.followers_count ?? 0) > 0)
-            .sort((a, b) => (b.followers_count ?? 0) - (a.followers_count ?? 0))
-            .slice(0, 10)
-    , [clubs]);
 
     // ── Render ────────────────────────────────────────────────────────────────
 

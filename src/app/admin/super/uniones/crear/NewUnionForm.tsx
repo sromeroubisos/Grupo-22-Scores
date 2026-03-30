@@ -36,6 +36,12 @@ const STEPS = [
 type StepId = typeof STEPS[number]['id'];
 type SlugStatus = 'idle' | 'checking' | 'available' | 'taken';
 type EntityOption = { id: string; label: string; meta?: string };
+type ClubOptionRow = {
+    id: string;
+    name: string;
+    region?: string | null;
+    country?: string | null;
+};
 
 function readUnionDraft(): { form: Partial<UnionFormData>; savedAt: string | null } {
     if (typeof window === 'undefined') {
@@ -62,7 +68,7 @@ function readUnionDraft(): { form: Partial<UnionFormData>; savedAt: string | nul
 export default function NewUnionForm() {
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
-    const { unions, clubs, tournaments, refresh } = useSuperConsole();
+    const { unions, tournaments, refresh } = useSuperConsole();
 
     const [draftSnapshot] = useState(() => readUnionDraft());
     const [form, setForm] = useState<UnionFormData>(() => ({ ...getDefaultUnionForm(), ...draftSnapshot.form }));
@@ -73,6 +79,44 @@ export default function NewUnionForm() {
     const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
     const [slugCheckValue, setSlugCheckValue] = useState('');
     const [savedAt, setSavedAt] = useState<string | null>(draftSnapshot.savedAt);
+    const [clubCatalog, setClubCatalog] = useState<ClubOptionRow[]>([]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadClubCatalog = async () => {
+            try {
+                const response = await fetch('/api/admin/clubs', {
+                    cache: 'no-store',
+                    credentials: 'include',
+                });
+                const payload = await response.json() as ClubOptionRow[] | { error?: string };
+
+                if (!response.ok) {
+                    throw new Error(
+                        !Array.isArray(payload) && payload?.error
+                            ? payload.error
+                            : 'No se pudo cargar el catalogo de clubes',
+                    );
+                }
+
+                if (!cancelled) {
+                    setClubCatalog(Array.isArray(payload) ? payload : []);
+                }
+            } catch (loadError) {
+                console.error('[NewUnionForm] Failed to load club catalog:', loadError);
+                if (!cancelled) {
+                    setClubCatalog([]);
+                }
+            }
+        };
+
+        void loadClubCatalog();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     useEffect(() => {
         if (!form.slug) return;
@@ -101,14 +145,14 @@ export default function NewUnionForm() {
     const sortedParentUnions = useMemo(() => [...unions].sort((a, b) => a.name.localeCompare(b.name)), [unions]);
     const clubOptions = useMemo(
         () =>
-            [...clubs]
+            [...clubCatalog]
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((club) => ({
                     id: club.id,
                     label: club.name,
                     meta: [club.region, club.country].filter(Boolean).join(' - ') || 'Sin region',
                 })),
-        [clubs],
+        [clubCatalog],
     );
     const unionOptions = useMemo(
         () =>

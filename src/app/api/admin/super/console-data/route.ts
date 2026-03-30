@@ -115,6 +115,30 @@ async function selectWithFallback<T>(
     return { data: null, error: lastError };
 }
 
+async function selectManyWithFallback<T>(
+    execute: (columns: string) => PromiseLike<{
+        data: T[] | null;
+        error: QueryError;
+    }>,
+    variants: string[],
+) {
+    let lastError: QueryError = null;
+
+    for (const columns of variants) {
+        const result = await execute(columns);
+        if (!result.error) {
+            return { data: result.data || [], error: null };
+        }
+
+        lastError = result.error;
+        if (!isRetryableMissingColumnError(result.error, columns)) {
+            return { data: [], error: result.error };
+        }
+    }
+
+    return { data: [], error: lastError };
+}
+
 type MatchConsoleRow = {
     id: string;
     round_id: string | null;
@@ -200,8 +224,7 @@ export async function GET(request: NextRequest) {
                         'id, name, city, country, logo_url, union_id, sport',
                         'id, name, city, country, logo_url, union_id, sport_id',
                         'id, name, union_id'
-                    ],
-                    { column: 'name', ascending: true }
+                    ]
                 ),
                 withSoftTimeout(
                     readClient
@@ -253,30 +276,6 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ data });
         }
 
-        const tournamentsPromise = selectWithFallback<TournamentConsoleRow>(
-            readClient.from('tournaments'),
-            [
-                'id, name, sport_id, sport, season_id',
-                'id, name, sport_id, sport',
-                'id, name, sport_id, season_id',
-                'id, name, sport',
-                'id, name'
-            ]
-        );
-        const clubsPromise = selectWithFallback<ClubConsoleRow>(
-            readClient.from('clubs'),
-            [
-                'id, name, logo_url, primary_color, sport, sport_id',
-                'id, name, logo_url, primary_color, sport_id',
-                'id, name, logo_url, primary_color, sport',
-                'id, name, logo_url, sport, sport_id',
-                'id, name, logo_url, sport_id',
-                'id, name, logo_url, sport',
-                'id, name, logo_url',
-                'id, name'
-            ]
-        );
-
         const matchesResult = await selectWithFallback<MatchConsoleRow>(
             readClient.from('matches'),
             [
@@ -292,14 +291,57 @@ export async function GET(request: NextRequest) {
             { column: 'date_time', ascending: false }
         );
 
-        const [{ data: tournaments, error: tournamentsError }, { data: clubs, error: clubsError }] = await Promise.all([
-            tournamentsPromise,
-            clubsPromise,
-        ]);
-
         const { data: matches, error: matchesError } = matchesResult;
 
         if (matchesError) return jsonError('Failed to load matches', 500, matchesError.message);
+
+        const tournamentIds = Array.from(new Set((matches ?? []).map((match) => match.tournament_id).filter(Boolean))) as string[];
+        const clubIds = Array.from(new Set(
+            (matches ?? []).flatMap((match) => [match.home_club_id, match.away_club_id]).filter(Boolean),
+        )) as string[];
+
+        const [{ data: tournaments, error: tournamentsError }, { data: clubs, error: clubsError }] = await Promise.all([
+            tournamentIds.length > 0
+                ? selectManyWithFallback<TournamentConsoleRow>(
+                    (columns) => readClient
+                        .from('tournaments')
+                        .select(columns)
+                        .in('id', tournamentIds) as PromiseLike<{
+                            data: TournamentConsoleRow[] | null;
+                            error: QueryError;
+                        }>,
+                    [
+                        'id, name, sport_id, sport, season_id',
+                        'id, name, sport_id, sport',
+                        'id, name, sport_id, season_id',
+                        'id, name, sport',
+                        'id, name'
+                    ]
+                )
+                : Promise.resolve({ data: [] as TournamentConsoleRow[], error: null }),
+            clubIds.length > 0
+                ? selectManyWithFallback<ClubConsoleRow>(
+                    (columns) => readClient
+                        .from('clubs')
+                        .select(columns)
+                        .in('id', clubIds) as PromiseLike<{
+                            data: ClubConsoleRow[] | null;
+                            error: QueryError;
+                        }>,
+                    [
+                        'id, name, logo_url, primary_color, sport, sport_id',
+                        'id, name, logo_url, primary_color, sport_id',
+                        'id, name, logo_url, primary_color, sport',
+                        'id, name, logo_url, sport, sport_id',
+                        'id, name, logo_url, sport_id',
+                        'id, name, logo_url, sport',
+                        'id, name, logo_url',
+                        'id, name'
+                    ]
+                )
+                : Promise.resolve({ data: [] as ClubConsoleRow[], error: null }),
+        ]);
+
         if (tournamentsError) return jsonError('Failed to load tournaments for matches', 500, tournamentsError.message);
         if (clubsError) return jsonError('Failed to load clubs for matches', 500, clubsError.message);
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, {
-    createContext, useContext, useMemo, useState, useEffect, useCallback, useRef
+    createContext, useContext, useMemo, useState, useEffect, useCallback
 } from 'react';
 import { usePathname } from 'next/navigation';
 import {
@@ -87,7 +87,20 @@ function toErrorLog(err: unknown) {
 
 export function SuperConsoleProvider({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const shouldPrefetchMatches = !(pathname?.startsWith('/admin/super/partidos') ?? false);
+    const currentPath = pathname ?? '';
+    const shouldAutoLoadClubs = currentPath.startsWith('/admin/super/clubes');
+    const shouldAutoLoadMatches = false;
+    const shouldAutoLoadTournaments =
+        currentPath === '/admin/super' ||
+        currentPath.startsWith('/admin/super/torneos') ||
+        currentPath === '/admin/super/uniones/crear';
+    const shouldAutoLoadUnions =
+        currentPath === '/admin/super' ||
+        currentPath.startsWith('/admin/super/uniones') ||
+        currentPath.startsWith('/admin/super/torneos');
+    const shouldAutoLoadNews =
+        currentPath === '/admin/super' ||
+        currentPath.startsWith('/admin/super/noticias');
     // ── Filters ─────────────────────────────────────────────────────────────────
     const [filters, setFilters] = useState<SuperConsoleFilters>(() => {
         if (typeof window !== 'undefined') {
@@ -125,11 +138,11 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
     // Loading is true only when there is NO data at all (first ever fetch).
     // If cache has data (even stale), loading starts false — data shows immediately.
     const [loading, setLoading] = useState({
-        clubs: getCachedStale(KEYS.clubs) === null,
-        matches: shouldPrefetchMatches ? getCachedStale(KEYS.matches) === null : false,
-        tournaments: getCachedStale(KEYS.tournaments) === null,
-        unions: getCachedStale(KEYS.unions) === null,
-        news: getCachedStale(KEYS.news) === null,
+        clubs: shouldAutoLoadClubs ? getCachedStale(KEYS.clubs) === null : false,
+        matches: shouldAutoLoadMatches ? getCachedStale(KEYS.matches) === null : false,
+        tournaments: shouldAutoLoadTournaments ? getCachedStale(KEYS.tournaments) === null : false,
+        unions: shouldAutoLoadUnions ? getCachedStale(KEYS.unions) === null : false,
+        news: shouldAutoLoadNews ? getCachedStale(KEYS.news) === null : false,
     });
     const [errors, setErrors] = useState({
         clubs: null as string | null,
@@ -138,10 +151,6 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
         unions: null as string | null,
         news: null as string | null,
     });
-
-    const prefetched = useRef(false);
-    const matchesPrefetched = useRef(false);
-
     // ── Stale-while-revalidate loaders ──────────────────────────────────────────
     //
     // Pattern:
@@ -281,25 +290,32 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
     // If cache is stale, loaders show data + revalidate in background.
     // If cache is cold (first visit), loaders show spinners.
     useEffect(() => {
-        if (prefetched.current) return;
-        prefetched.current = true;
-
+        if (!shouldAutoLoadClubs) return;
         loadClubs();
-        loadTournaments();
-        loadUnions();
-        loadNews();
-    }, [loadClubs, loadMatches, loadTournaments, loadUnions, loadNews]);
+    }, [loadClubs, shouldAutoLoadClubs]);
 
     useEffect(() => {
-        if (!shouldPrefetchMatches) {
+        if (!shouldAutoLoadMatches) {
             setLoading(prev => ({ ...prev, matches: false }));
             return;
         }
-
-        if (matchesPrefetched.current) return;
-        matchesPrefetched.current = true;
         loadMatches();
-    }, [loadMatches, shouldPrefetchMatches]);
+    }, [loadMatches, shouldAutoLoadMatches]);
+
+    useEffect(() => {
+        if (!shouldAutoLoadTournaments) return;
+        loadTournaments();
+    }, [loadTournaments, shouldAutoLoadTournaments]);
+
+    useEffect(() => {
+        if (!shouldAutoLoadUnions) return;
+        loadUnions();
+    }, [loadUnions, shouldAutoLoadUnions]);
+
+    useEffect(() => {
+        if (!shouldAutoLoadNews) return;
+        loadNews();
+    }, [loadNews, shouldAutoLoadNews]);
 
     // ── Public refresh (called after mutations) ──────────────────────────────────
     // force=true → invalidates cache + shows spinner → guarantees fresh data.
