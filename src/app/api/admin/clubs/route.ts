@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 /**
@@ -19,7 +20,8 @@ type AdminClubRow = {
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    await requireAdminApiUser();
+    const supabase = await getReadClient();
 
     const variants = [
       'id, name, short_name, logo_url, region, country, sport, sport_id',
@@ -68,9 +70,11 @@ export async function GET() {
     return NextResponse.json(clubs || []);
   } catch (error) {
     console.error('Unexpected error fetching clubs:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    const status = message === 'Unauthorized' ? 401 : 500;
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: message === 'Unauthorized' ? 'Unauthorized' : 'Internal server error' },
+      { status }
     );
   }
 }
