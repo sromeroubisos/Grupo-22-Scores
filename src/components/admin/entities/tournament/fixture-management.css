@@ -1002,6 +1002,52 @@
     white-space: nowrap;
 }
 
+.fixture-quick-action-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.fixture-quick-schedule-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 0 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fixture-text-dim);
+    user-select: none;
+}
+
+.fixture-quick-schedule-toggle:hover {
+    color: var(--fixture-text-muted);
+}
+
+.fixture-quick-schedule-toggle span {
+    flex: 1;
+    text-align: left;
+}
+
+.fixture-quick-chevron {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.fixture-quick-chevron.is-open {
+    transform: rotate(180deg);
+}
+
+.fixture-quick-grid-schedule {
+    grid-template-columns: 1fr 1fr;
+}
+
 .fixture-quick-totals {
     display: grid;
     gap: 12px;

@@ -13,11 +13,9 @@ const RUGBY_SPORT_KEYS = new Set([
     '/rugby-league/',
 ]);
 
-export const RUGBY_FLASHSCORE_DISABLED_MESSAGE =
-    'FlashScore esta deshabilitado para rugby. Configura otro proveedor externo para este deporte.';
-
 export const FLASHSCORE_PROVIDER = 'flashscore';
 export const RUGBY_API_SPORTS_PROVIDER = 'rugby-api-sports';
+export const RUGBY_FLASHSCORE_DISABLED_MESSAGE = 'FlashScore está deshabilitado para este torneo de rugby.';
 
 export function normalizeSportKey(value: unknown): string | null {
     if (value === null || value === undefined) return null;
@@ -38,12 +36,12 @@ export function isRugbySport(value: unknown): boolean {
     return RUGBY_SPORT_KEYS.has(normalized);
 }
 
-export function isFlashScoreEnabledForSport(value: unknown): boolean {
-    return !isRugbySport(value);
+export function isFlashScoreEnabledForSport(_value: unknown): boolean {
+    return true;
 }
 
-export function getPreferredExternalProviderForSport(value: unknown) {
-    return isRugbySport(value) ? RUGBY_API_SPORTS_PROVIDER : FLASHSCORE_PROVIDER;
+export function getPreferredExternalProviderForSport(_value: unknown) {
+    return FLASHSCORE_PROVIDER;
 }
 
 export function getRulesetFlashScoreConfig(ruleset: unknown): FlashScoreConfig | null {

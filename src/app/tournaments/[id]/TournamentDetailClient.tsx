@@ -374,6 +374,54 @@ function getStandingsTeamUrl(row: any) {
     return row.team?.team_url || row.participant?.team_url || row.team_url || null;
 }
 
+function normalizeExternalImageUrl(value: string | null | undefined) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (raw.startsWith('//')) return `https:${raw}`;
+    if (raw.startsWith('/res/')) return `https://static.flashscore.com${raw}`;
+    return raw;
+}
+
+function handleTeamLogoError(
+    event: React.SyntheticEvent<HTMLImageElement, Event>,
+) {
+    const image = event.currentTarget;
+    const rawSrc = image.getAttribute('src') || image.src || '';
+
+    if (!image.dataset.fallbackTried && rawSrc.includes('/api/assets/team-logo')) {
+        try {
+            const parsedUrl = new URL(rawSrc, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+            const fallback = normalizeExternalImageUrl(parsedUrl.searchParams.get('fallback'));
+            if (fallback) {
+                image.dataset.fallbackTried = '1';
+                image.src = fallback;
+                return;
+            }
+        } catch {
+            // Ignore and fall through to placeholder.
+        }
+    }
+
+    image.style.display = 'none';
+    const placeholder = image.nextElementSibling as HTMLElement | null;
+    if (placeholder) {
+        placeholder.style.display = 'block';
+    }
+}
+
+function handleTeamLogoLoad(
+    event: React.SyntheticEvent<HTMLImageElement, Event>,
+) {
+    const image = event.currentTarget;
+    image.style.display = 'block';
+    delete image.dataset.fallbackTried;
+
+    const placeholder = image.nextElementSibling as HTMLElement | null;
+    if (placeholder) {
+        placeholder.style.display = 'none';
+    }
+}
+
 function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants: any[]) {
     if (!Array.isArray(dbGroups) || dbGroups.length === 0) return [];
 
@@ -1374,6 +1422,9 @@ export default function TournamentDetailPage({
                     setStandingsHtFt(payload.standingsHtFt || []);
                     setStandingsOverUnder(payload.standingsOverUnder || []);
                 }
+                if (Array.isArray(payload.teamLabels)) {
+                    setDbTeamLabels(normalizeTeamLabelAssignments(payload.teamLabels));
+                }
                 setDraw((current) => Array.isArray(payload.draw) && payload.draw.length > 0 ? payload.draw : current);
                 setTopScorers(payload.topScorers || []);
                 setArchives(payload.archives || []);
@@ -1626,9 +1677,32 @@ export default function TournamentDetailPage({
     const tournamentName = details?.name || details?.tournament?.name || tournamentData?.name || 'Torneo';
     const sportLabel = tournamentData?.sportId ? tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1) : '';
     const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const isExactSuperAdmin = user?.role === 'super_admin';
+    const isExternalTournamentPage = id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id);
     const adminTournamentId = (() => {
         const candidate = String((initialData?.tournament as any)?.id || tournamentData?.id || '').trim();
         return UUID_RE.test(candidate) ? candidate : null;
+    })();
+    const externalTournamentEditorHref = (() => {
+        if (!isExternalTournamentPage) return null;
+
+        const query = new URLSearchParams();
+        const returnParams = new URLSearchParams();
+        const resolvedSport = tournamentData?.sportId || 'rugby';
+        const resolvedUrl = details?.url || tournamentData?.url || '';
+
+        if (resolvedSport) {
+            query.set('sport', resolvedSport);
+            returnParams.set('sport', resolvedSport);
+        }
+        if (resolvedUrl) query.set('url', resolvedUrl);
+        if (countryName) query.set('country', countryName);
+        if (tournamentData?.countryId) query.set('country_id', tournamentData.countryId);
+        if (tournamentName) query.set('name', tournamentName);
+        if (tournamentLogo) query.set('logo_url', tournamentLogo);
+
+        query.set('returnTo', `/tournaments/${id}${returnParams.toString() ? `?${returnParams.toString()}` : ''}`);
+        return `/admin/super/torneos/externos/${encodeURIComponent(id)}?${query.toString()}`;
     })();
     const bracketTitle = `${getKnockoutPhaseDisplayTitle(activeDbPhase)} - ${tournamentName}`;
 
@@ -1842,7 +1916,16 @@ export default function TournamentDetailPage({
                 <div className={styles.colPos}>{pos}</div>
                 <div className={styles.colTeam}>
                     {logo
-                        ? <img src={logo} alt={teamName} className={styles.teamLogo} />
+                        ? <>
+                            <img
+                                src={logo}
+                                alt={teamName}
+                                className={styles.teamLogo}
+                                onLoad={handleTeamLogoLoad}
+                                onError={handleTeamLogoError}
+                            />
+                            <div className={styles.teamLogoPlaceholder} style={{ display: 'none' }} />
+                        </>
                         : <div className={styles.teamLogoPlaceholder} />}
                     <div className={styles.colTeamMeta}>
                         {teamHref
@@ -2042,6 +2125,11 @@ export default function TournamentDetailPage({
                                 >
                                     {shouldRenderBracketInStandings ? 'Ver Cuadro' : 'Ver Tabla'}
                                 </button>
+                                {isExactSuperAdmin && externalTournamentEditorHref && (
+                                    <Link href={externalTournamentEditorHref} className={styles.ctaBtnSecondary}>
+                                        Editar API
+                                    </Link>
+                                )}
                                 {isSuperAdminUser && adminTournamentId && (
                                     <Link href={`/admin/super/torneos/${adminTournamentId}`} className={styles.ctaBtnSecondary}>
                                         Editar torneo

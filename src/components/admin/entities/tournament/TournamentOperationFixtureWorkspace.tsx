@@ -93,6 +93,8 @@ type QuickResultFormState = {
   awayBonusPoints: string;
   pointsAutocalculated: boolean;
   pointsOverrideReason: string;
+  scheduledDate: string;
+  scheduledTime: string;
 };
 
 type ManageContainer = {
@@ -267,6 +269,8 @@ function buildQuickResultForm(match: MatchWithClubs, rules: PointsRules): QuickR
     awayBonusPoints: formatQuickNumber(match.awayBonusPoints, 0),
     pointsAutocalculated: match.pointsAutocalculated ?? true,
     pointsOverrideReason: match.pointsOverrideReason ?? '',
+    scheduledDate: toInputDateInTimeZone(match.dateTime, APP_TIMEZONE),
+    scheduledTime: toInputTimeInTimeZone(match.dateTime, APP_TIMEZONE),
   };
 
   return initialForm.pointsAutocalculated
@@ -844,7 +848,6 @@ export function TournamentOperationFixtureWorkspace({
       nextErrors.awayClubId = 'Local y visitante no pueden ser el mismo club.';
     }
     if (!manualForm.matchDate) nextErrors.matchDate = 'Debes seleccionar una fecha para el partido.';
-    if (manualForm.roundMode === 'new' && !manualForm.roundLabel.trim()) nextErrors.roundLabel = 'Escribe el nombre de la jornada.';
     if (manualForm.roundMode === 'existing' && realRounds.length > 0 && !manualForm.roundId) nextErrors.roundId = 'Selecciona una jornada.';
     setManualErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -865,6 +868,10 @@ export function TournamentOperationFixtureWorkspace({
       const awayScore = Math.max(0, parseQuickNumber(quickResultForm.awayScore));
       const isFinal = quickResultForm.status === 'final';
 
+      const newDateTime = quickResultForm.scheduledDate && quickResultForm.scheduledTime
+        ? combineLocalDateTimeToUtcIso(quickResultForm.scheduledDate, quickResultForm.scheduledTime, APP_TIMEZONE)
+        : undefined;
+
       await saveMatch({
         id: match.id,
         status: quickResultForm.status,
@@ -877,6 +884,7 @@ export function TournamentOperationFixtureWorkspace({
         pointsOverrideReason: isFinal && !quickResultForm.pointsAutocalculated
           ? quickResultForm.pointsOverrideReason.trim() || null
           : null,
+        ...(newDateTime ? { dateTime: newDateTime } : {}),
       });
       await afterMutation('Resultado y puntos guardados.');
       setQuickResultMatchId(null);
@@ -1913,6 +1921,10 @@ function MatchCard({
   onDelete: () => void;
 }) {
   const { match, round } = entry;
+  const [showScheduleEdit, setShowScheduleEdit] = useState(false);
+  useEffect(() => {
+    if (!quickResultOpen) setShowScheduleEdit(false);
+  }, [quickResultOpen]);
   const quickBusy = busyAction === `quick-save-${match.id}`;
   const scoreVisible = match.status === 'live' || match.status === 'final';
   const totalHomePoints = quickResultForm ? parseQuickNumber(quickResultForm.homeBasePoints) + parseQuickNumber(quickResultForm.homeBonusPoints) : 0;
@@ -2064,14 +2076,39 @@ function MatchCard({
             </label>
           ) : null}
 
+          <button type="button" className="fixture-quick-schedule-toggle" onClick={() => setShowScheduleEdit((v) => !v)}>
+            <Clock3 size={13} />
+            <span>Editar horario</span>
+            <svg className={`fixture-quick-chevron ${showScheduleEdit ? 'is-open' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </button>
+
+          {showScheduleEdit ? (
+            <div className="fixture-quick-grid fixture-quick-grid-schedule">
+              <label className="fixture-quick-field">
+                <span>Fecha</span>
+                <input type="date" value={quickResultForm.scheduledDate} onChange={(event) => onQuickResultFieldChange('scheduledDate', event.target.value)} />
+              </label>
+              <label className="fixture-quick-field">
+                <span>Hora</span>
+                <input type="time" value={quickResultForm.scheduledTime} onChange={(event) => onQuickResultFieldChange('scheduledTime', event.target.value)} />
+              </label>
+            </div>
+          ) : null}
+
           <div className="fixture-quick-actions">
             <span className={`fixture-quick-badge ${quickResultForm.pointsAutocalculated ? 'is-auto' : 'is-manual'}`}>
               {quickResultForm.pointsAutocalculated ? 'Puntos autocompletados' : 'Puntos editados manualmente'}
             </span>
-            <button type="button" className="basalt-btn basalt-btn-primary" disabled={quickBusy} onClick={onQuickResultSave}>
-              {quickBusy ? <RefreshCw size={14} className="spin" /> : <CheckCircle2 size={14} />}
-              Guardar rapido
-            </button>
+            <div className="fixture-quick-action-btns">
+              <button type="button" className="basalt-btn basalt-btn-ghost" onClick={onEdit}>
+                <Clock3 size={14} />
+                Editar horario
+              </button>
+              <button type="button" className="basalt-btn basalt-btn-primary" disabled={quickBusy} onClick={onQuickResultSave}>
+                {quickBusy ? <RefreshCw size={14} className="spin" /> : <CheckCircle2 size={14} />}
+                Guardar rapido
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

@@ -13,27 +13,71 @@ const OVERRIDE_LOOKUP = Object.fromEntries(
     Object.entries(EXTERNAL_TEAM_LOGO_OVERRIDES).map(([key, value]) => [key.trim().toLowerCase(), value]),
 );
 
-const ID_FIELDS = ['team_id', 'teamId', 'id', 'external_id', 'externalId'] as const;
+const ID_FIELDS = [
+    'team_id',
+    'teamId',
+    'id',
+    'external_id',
+    'externalId',
+    'participant_id',
+    'participantId',
+    'event_participant_id',
+    'eventParticipantId',
+] as const;
 const LOGO_FIELDS = [
     'small_image_path',
     'smaill_image_path',
     'image_path',
+    'image',
     'logo',
     'logo_url',
     'logo_path',
     'team_logo',
+    'smallImagePath',
+    'imagePath',
 ] as const;
 const EXTERNAL_CONTEXT_FIELDS = ['team_url', 'teamUrl'] as const;
 const EXTERNAL_PROVIDER_FIELDS = ['provider', 'source', 'dataSource', 'data_source'] as const;
+const NAME_FIELDS = ['team_name', 'teamName', 'name', 'short_name', 'shortName'] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
 }
 
+function extractIdFromTeamUrl(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    let pathname = trimmed;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        try {
+            pathname = new URL(trimmed).pathname;
+        } catch {
+            pathname = trimmed;
+        }
+    }
+
+    const segments = pathname
+        .split('/')
+        .map((segment) => segment.trim())
+        .filter(Boolean);
+
+    if (segments.length < 2) return null;
+    if (segments[0].toLowerCase() !== 'team') return null;
+
+    const candidate = segments[segments.length - 1];
+    if (!candidate || !/^[a-z0-9]+$/i.test(candidate)) return null;
+
+    return candidate;
+}
+
 function addCandidate(candidates: Set<string>, value: unknown) {
     if (value === null || value === undefined) return;
 
-    const raw = String(value).trim();
+    const extractedFromUrl = extractIdFromTeamUrl(value);
+    const raw = (extractedFromUrl || String(value)).trim();
     if (!raw) return;
 
     const normalized = raw.toLowerCase();
@@ -83,9 +127,52 @@ function getFirstCandidateKey(...sources: TeamLogoSource[]): string | null {
             const raw = String(value).trim();
             if (raw) return raw;
         }
+
+        for (const field of EXTERNAL_CONTEXT_FIELDS) {
+            const extracted = extractIdFromTeamUrl(source[field]);
+            if (extracted) return extracted;
+        }
+
+        for (const field of NAME_FIELDS) {
+            const value = source[field];
+            if (value === null || value === undefined) continue;
+
+            const raw = String(value).trim();
+            if (raw) return raw;
+        }
     }
 
     return null;
+}
+
+function getFirstExternalTeamUrl(...sources: TeamLogoSource[]): string {
+    for (const source of sources) {
+        if (!isRecord(source)) continue;
+
+        for (const field of EXTERNAL_CONTEXT_FIELDS) {
+            const value = source[field];
+            if (typeof value === 'string' && value.trim()) {
+                return value.trim();
+            }
+        }
+    }
+
+    return '';
+}
+
+function getFirstExternalTeamName(...sources: TeamLogoSource[]): string {
+    for (const source of sources) {
+        if (!isRecord(source)) continue;
+
+        for (const field of NAME_FIELDS) {
+            const value = source[field];
+            if (typeof value === 'string' && value.trim()) {
+                return value.trim();
+            }
+        }
+    }
+
+    return '';
 }
 
 function getSourceLogo(source: TeamLogoSource): string {
@@ -93,7 +180,19 @@ function getSourceLogo(source: TeamLogoSource): string {
 
     for (const field of LOGO_FIELDS) {
         const value = source[field];
-        if (typeof value === 'string' && value.trim()) return value.trim();
+        if (typeof value === 'string' && value.trim()) {
+            const trimmed = value.trim();
+
+            if (trimmed.startsWith('//')) {
+                return `https:${trimmed}`;
+            }
+
+            if (trimmed.startsWith('/res/')) {
+                return `https://static.flashscore.com${trimmed}`;
+            }
+
+            return trimmed;
+        }
     }
 
     return '';
@@ -141,16 +240,55 @@ function hasExternalContext(...sources: TeamLogoSource[]): boolean {
                 return true;
             }
         }
+
+        for (const field of LOGO_FIELDS) {
+            const value = source[field];
+            if (typeof value !== 'string') continue;
+
+            const normalized = value.trim().toLowerCase();
+            if (!normalized) continue;
+
+            if (
+                normalized.includes('flashscore') ||
+                normalized.includes('api-sports') ||
+                normalized.includes('rapidapi')
+            ) {
+                return true;
+            }
+        }
     }
 
     return false;
 }
 
-function buildProxyLogoUrl(key: string, fallbackLogo: string): string {
+function buildProxyLogoUrl(key: string, fallbackLogo: string, teamUrl: string, teamName: string): string {
     const params = new URLSearchParams();
     params.set('key', key);
     if (fallbackLogo) params.set('fallback', fallbackLogo);
+    if (teamUrl) params.set('team_url', teamUrl);
+    if (teamName) params.set('name', teamName);
     return `${TEAM_LOGO_PROXY_PATH}?${params.toString()}`;
+}
+
+function extendProxyLogoUrl(
+    proxyLogoUrl: string,
+    key: string,
+    fallbackLogo: string,
+    teamUrl: string,
+    teamName: string,
+): string {
+    try {
+        const parsed = new URL(proxyLogoUrl, 'http://localhost');
+        if (key && !parsed.searchParams.get('key')) parsed.searchParams.set('key', key);
+        if (fallbackLogo && fallbackLogo !== proxyLogoUrl && !parsed.searchParams.get('fallback')) {
+            parsed.searchParams.set('fallback', fallbackLogo);
+        }
+        if (teamUrl && !parsed.searchParams.get('team_url')) parsed.searchParams.set('team_url', teamUrl);
+        if (teamName && !parsed.searchParams.get('name')) parsed.searchParams.set('name', teamName);
+        return `${TEAM_LOGO_PROXY_PATH}?${parsed.searchParams.toString()}`;
+    } catch {
+        return proxyLogoUrl;
+    }
 }
 
 export function getExternalTeamLogoOverride(...sources: TeamLogoSource[]): string | null {
@@ -160,6 +298,10 @@ export function getExternalTeamLogoOverride(...sources: TeamLogoSource[]): strin
         if (!isRecord(source)) continue;
 
         for (const field of ID_FIELDS) {
+            addCandidate(candidates, source[field]);
+        }
+
+        for (const field of EXTERNAL_CONTEXT_FIELDS) {
             addCandidate(candidates, source[field]);
         }
     }
@@ -176,12 +318,16 @@ export function resolveTeamLogo(...sources: TeamLogoSource[]): string {
     const override = getExternalTeamLogoOverride(...sources);
     if (override) return override;
 
-    const fallbackLogo = sources.map(getSourceLogo).find(Boolean) || '';
-    if (fallbackLogo.startsWith(`${TEAM_LOGO_PROXY_PATH}?`)) return fallbackLogo;
-
     const candidateKey = getFirstCandidateKey(...sources);
+    const teamUrl = getFirstExternalTeamUrl(...sources);
+    const teamName = getFirstExternalTeamName(...sources);
+    const fallbackLogo = sources.map(getSourceLogo).find(Boolean) || '';
+    if (fallbackLogo.startsWith(`${TEAM_LOGO_PROXY_PATH}?`)) {
+        return extendProxyLogoUrl(fallbackLogo, candidateKey || '', '', teamUrl, teamName);
+    }
+
     if (candidateKey && (hasExternalContext(...sources) || hasExternalKeyPrefix(candidateKey))) {
-        return buildProxyLogoUrl(candidateKey, fallbackLogo);
+        return buildProxyLogoUrl(candidateKey, fallbackLogo, teamUrl, teamName);
     }
 
     for (const source of sources) {

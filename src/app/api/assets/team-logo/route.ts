@@ -2,13 +2,57 @@ import { access } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
-import { getExternalTeamLogoOverride } from '@/lib/server/externalTeamLogoOverrides';
+import { findExternalTeamLogoOverride } from '@/lib/server/externalTeamLogoOverrides';
+import { getTeamDetails } from '@/lib/services/flashscore';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
 
+function normalizeSourceUrl(source: string): string {
+    const trimmed = source.trim();
+    if (!trimmed) return trimmed;
+
+    if (trimmed.startsWith('//')) {
+        return `https:${trimmed}`;
+    }
+
+    if (trimmed.startsWith('/res/')) {
+        return `https://static.flashscore.com${trimmed}`;
+    }
+
+    return trimmed;
+}
+
+function extractIdFromTeamUrl(value: string): string | null {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    let pathname = trimmed;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        try {
+            pathname = new URL(trimmed).pathname;
+        } catch {
+            pathname = trimmed;
+        }
+    }
+
+    const segments = pathname
+        .split('/')
+        .map((segment) => segment.trim())
+        .filter(Boolean);
+
+    if (segments.length < 2) return null;
+    if (segments[0].toLowerCase() !== 'team') return null;
+
+    const candidate = segments[segments.length - 1];
+    if (!candidate || !/^[a-z0-9]+$/i.test(candidate)) return null;
+
+    return candidate;
+}
+
 function addCandidate(candidates: Set<string>, value: string) {
-    const raw = value.trim();
+    const extractedFromUrl = extractIdFromTeamUrl(value);
+    const raw = (extractedFromUrl || value).trim();
     if (!raw) return;
 
     const normalized = raw.toLowerCase();
@@ -57,6 +101,29 @@ function addCandidate(candidates: Set<string>, value: string) {
     candidates.add(`ras-team-${normalized}`);
 }
 
+function firstNonEmptyString(...values: unknown[]): string {
+    for (const value of values) {
+        if (typeof value === 'string' && value.trim()) {
+            return value.trim();
+        }
+    }
+
+    return '';
+}
+
+function extractTeamDetailsLogo(details: any): string {
+    return normalizeSourceUrl(firstNonEmptyString(
+        details?.image_path,
+        details?.small_image_path,
+        details?.logo,
+        details?.logo_url,
+        details?.team?.image_path,
+        details?.team?.small_image_path,
+        details?.team?.logo,
+        details?.team?.logo_url,
+    ));
+}
+
 async function findLogoFile(key: string): Promise<string | null> {
     const candidates = new Set<string>();
     addCandidate(candidates, key);
@@ -78,52 +145,103 @@ async function findLogoFile(key: string): Promise<string | null> {
     return null;
 }
 
-async function findCachedLogo(key: string): Promise<string | null> {
+async function findCachedLogo(key: string, teamUrl: string, teamName: string): Promise<string | null> {
     const candidateSet = new Set<string>();
     addCandidate(candidateSet, key);
+    if (teamUrl) addCandidate(candidateSet, teamUrl);
+    if (teamName) addCandidate(candidateSet, teamName);
     const candidates = Array.from(candidateSet);
 
-    for (const candidate of candidates) {
-        const storedOverride = await getExternalTeamLogoOverride(candidate);
-        if (storedOverride?.logo_url) {
-            return storedOverride.logo_url;
-        }
+    const storedOverride = await findExternalTeamLogoOverride(key, teamUrl, teamName, ...candidates);
+    if (storedOverride?.logo_url) {
+        return storedOverride.logo_url;
     }
 
     try {
         const readClient = await getReadClient();
-        const { data } = await (readClient as any)
-            .from('external_teams')
-            .select('id, logo_url')
-            .in('id', candidates);
+        const idCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate));
+        if (idCandidates.length > 0) {
+            const { data } = await (readClient as any)
+                .from('external_teams')
+                .select('id, logo_url')
+                .in('id', idCandidates);
 
-        const byId = new Map<string, string>();
-        for (const row of data || []) {
-            if (row?.id && row?.logo_url) {
-                byId.set(String(row.id), String(row.logo_url));
+            const byId = new Map<string, string>();
+            for (const row of data || []) {
+                if (row?.id && row?.logo_url) {
+                    byId.set(String(row.id), String(row.logo_url));
+                }
+            }
+
+            for (const candidate of candidates) {
+                const logo = byId.get(candidate);
+                if (logo) return logo;
             }
         }
 
-        for (const candidate of candidates) {
-            const logo = byId.get(candidate);
-            if (logo) return logo;
+        if (teamUrl) {
+            const { data } = await (readClient as any)
+                .from('external_teams')
+                .select('logo_url')
+                .eq('team_url', teamUrl)
+                .maybeSingle();
+
+            if (data?.logo_url) {
+                return String(data.logo_url);
+            }
+        }
+
+        if (teamName) {
+            const { data: byName } = await (readClient as any)
+                .from('external_teams')
+                .select('logo_url')
+                .eq('name', teamName)
+                .maybeSingle();
+
+            if (byName?.logo_url) {
+                return String(byName.logo_url);
+            }
+
+            const { data: byShortName } = await (readClient as any)
+                .from('external_teams')
+                .select('logo_url')
+                .eq('short_name', teamName)
+                .maybeSingle();
+
+            if (byShortName?.logo_url) {
+                return String(byShortName.logo_url);
+            }
         }
     } catch {
         // Ignore missing table/schema issues and fall back to the original logo.
+    }
+
+    if (teamUrl) {
+        try {
+            const details = await getTeamDetails(teamUrl);
+            const liveLogo = extractTeamDetailsLogo(details);
+            if (liveLogo) {
+                return liveLogo;
+            }
+        } catch {
+            // Ignore upstream lookup failures and let the route fall through.
+        }
     }
 
     return null;
 }
 
 function buildImageResponse(source: string, url: URL) {
-    if (source.startsWith('data:')) {
-        const commaIndex = source.indexOf(',');
+    const normalizedSource = normalizeSourceUrl(source);
+
+    if (normalizedSource.startsWith('data:')) {
+        const commaIndex = normalizedSource.indexOf(',');
         if (commaIndex === -1) {
             return NextResponse.json({ ok: false, error: 'invalid data url' }, { status: 400 });
         }
 
-        const header = source.slice(5, commaIndex);
-        const body = source.slice(commaIndex + 1);
+        const header = normalizedSource.slice(5, commaIndex);
+        const body = normalizedSource.slice(commaIndex + 1);
         const mimeType = header.split(';')[0] || 'application/octet-stream';
         const isBase64 = header.includes(';base64');
         const payload = isBase64 ? Buffer.from(body, 'base64') : Buffer.from(decodeURIComponent(body), 'utf-8');
@@ -136,9 +254,9 @@ function buildImageResponse(source: string, url: URL) {
         });
     }
 
-    const target = source.startsWith('http://') || source.startsWith('https://')
-        ? new URL(source)
-        : new URL(source, url.origin);
+    const target = normalizedSource.startsWith('http://') || normalizedSource.startsWith('https://')
+        ? new URL(normalizedSource)
+        : new URL(normalizedSource, url.origin);
 
     return NextResponse.redirect(target);
 }
@@ -147,6 +265,8 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const key = url.searchParams.get('key')?.trim() || '';
     const fallback = url.searchParams.get('fallback')?.trim() || '';
+    const teamUrl = url.searchParams.get('team_url')?.trim() || '';
+    const teamName = url.searchParams.get('name')?.trim() || '';
 
     if (!key) {
         return NextResponse.json({ ok: false, error: 'key is required' }, { status: 400 });
@@ -157,7 +277,7 @@ export async function GET(request: Request) {
         return buildImageResponse(localLogo, url);
     }
 
-    const cachedLogo = await findCachedLogo(key);
+    const cachedLogo = await findCachedLogo(key, teamUrl, teamName);
     if (cachedLogo) {
         return buildImageResponse(cachedLogo, url);
     }

@@ -12,6 +12,7 @@ const CACHE_TTL_MATCHES = 60;   // 60 seconds for match lists default
 const CACHE_TTL_LIVE = 5;       // 5 seconds for live matches
 const CACHE_TTL_DETAILS = 30;   // 30 seconds for match details
 const CACHE_TTL_TOURNAMENTS = 24 * 60 * 60; // 24 hours for tournaments
+const CACHE_TTL_CATALOG = 7 * 24 * 60 * 60; // 7 days for countries and leagues catalog
 const CACHE_TTL_TEAMS = 24 * 60 * 60;       // 24 hours for teams
 const CACHE_TTL_PLAYERS = 24 * 60 * 60;     // 24 hours for player info
 
@@ -1002,6 +1003,92 @@ export async function getSports() {
     return data;
 }
 
+function extractFlashScoreList<T>(payload: any): T[] {
+    if (Array.isArray(payload)) return payload as T[];
+    if (!payload || typeof payload !== 'object') return [];
+
+    if (Array.isArray(payload.data)) return payload.data as T[];
+    if (Array.isArray(payload.DATA)) return payload.DATA as T[];
+    if (Array.isArray(payload.countries)) return payload.countries as T[];
+    if (Array.isArray(payload.tournaments)) return payload.tournaments as T[];
+    if (Array.isArray(payload.results)) return payload.results as T[];
+
+    return [];
+}
+
+function normalizeFlashScoreCountryList(payload: any) {
+    return {
+        data: extractFlashScoreList<any>(payload)
+            .map((country) => ({
+                country_id: country?.country_id ?? country?.id ?? null,
+                id: country?.id ?? country?.country_id ?? null,
+                name: country?.name ?? country?.country_name ?? '',
+                flag: country?.flag ?? country?.flag_emoji ?? country?.flagEmoji ?? null,
+                tournament_count:
+                    typeof country?.tournaments_count === 'number' ? country.tournaments_count :
+                    typeof country?.tournamentsCount === 'number' ? country.tournamentsCount :
+                    typeof country?.league_count === 'number' ? country.league_count :
+                    typeof country?.leagueCount === 'number' ? country.leagueCount :
+                    typeof country?.competitions_count === 'number' ? country.competitions_count :
+                    typeof country?.competitionsCount === 'number' ? country.competitionsCount :
+                    typeof country?.count === 'number' ? country.count :
+                    null,
+            }))
+            .filter((country) => country.country_id != null && country.name),
+    };
+}
+
+function normalizeFlashScoreTournamentList(payload: any) {
+    return {
+        data: extractFlashScoreList<any>(payload)
+            .map((tournament) => ({
+                tournament_id:
+                    tournament?.tournament_id ??
+                    tournament?.id ??
+                    tournament?.tournament?.id ??
+                    null,
+                tournament_stage_id:
+                    tournament?.tournament_stage_id ??
+                    tournament?.stage_id ??
+                    tournament?.stageId ??
+                    tournament?.tournament_stage?.id ??
+                    null,
+                name:
+                    tournament?.name ??
+                    tournament?.tournament_name ??
+                    tournament?.league_name ??
+                    '',
+                image:
+                    tournament?.image ??
+                    tournament?.logo ??
+                    tournament?.image_path ??
+                    tournament?.logo_url ??
+                    null,
+                logo:
+                    tournament?.logo ??
+                    tournament?.image ??
+                    tournament?.logo_url ??
+                    tournament?.image_path ??
+                    null,
+                url:
+                    tournament?.url ??
+                    tournament?.link ??
+                    tournament?.tournament_url ??
+                    null,
+                link:
+                    tournament?.link ??
+                    tournament?.url ??
+                    tournament?.tournament_url ??
+                    null,
+                country_id:
+                    tournament?.country_id ??
+                    tournament?.country?.id ??
+                    null,
+            }))
+            .filter((tournament) => tournament.tournament_id != null && tournament.name),
+    };
+}
+
 /**
  * Get countries associated with a sport
  */
@@ -1011,16 +1098,39 @@ export async function getCountriesBySport(sportId: string | number) {
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;
 
-    const url = `https://${API_HOST}/api/flashscore/v2/countries/list?sport_id=${flashScoreSportId}`;
-    const { data } = await apiFetch<any>(url, {
-        headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
+    const headers = { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY };
+    const primaryUrl = `https://${API_HOST}/api/flashscore/v2/general/countries?sport_id=${flashScoreSportId}`;
+    const fallbackUrl = `https://${API_HOST}/api/flashscore/v2/countries/list?sport_id=${flashScoreSportId}`;
+
+    try {
+        const { data } = await apiFetch<any>(primaryUrl, {
+            headers,
+            debugTag: 'GeneralCountriesBySport',
+            silent: true,
+            cacheTtl: CACHE_TTL_CATALOG,
+        });
+        const normalized = normalizeFlashScoreCountryList(data);
+        if (normalized.data.length > 0) {
+            memoryCache.set(cacheKey, normalized, CACHE_TTL_CATALOG);
+            return normalized;
+        }
+    } catch {
+        // Fall through to legacy endpoint.
+    }
+
+    const { data } = await apiFetch<any>(fallbackUrl, {
+        headers,
         debugTag: 'CountriesBySport',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: CACHE_TTL_CATALOG,
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
-    return data;
+    const normalized = normalizeFlashScoreCountryList(data);
+    if (normalized.data.length > 0) {
+        memoryCache.set(cacheKey, normalized, CACHE_TTL_CATALOG);
+    }
+
+    return normalized;
 }
 
 /**
@@ -1032,16 +1142,39 @@ export async function getTournamentsBySportAndEntity(sportId: string | number, e
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;
 
-    const url = `https://${API_HOST}/api/flashscore/v2/tournaments/list?sport_id=${flashScoreSportId}&country_id=${entityId}`;
-    const { data } = await apiFetch<any>(url, {
-        headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
+    const headers = { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY };
+    const primaryUrl = `https://${API_HOST}/api/flashscore/v2/general/tournaments?country_id=${entityId}&sport_id=${flashScoreSportId}`;
+    const fallbackUrl = `https://${API_HOST}/api/flashscore/v2/tournaments/list?sport_id=${flashScoreSportId}&country_id=${entityId}`;
+
+    try {
+        const { data } = await apiFetch<any>(primaryUrl, {
+            headers,
+            debugTag: 'GeneralTournamentsByEntity',
+            silent: true,
+            cacheTtl: CACHE_TTL_CATALOG,
+        });
+        const normalized = normalizeFlashScoreTournamentList(data);
+        if (normalized.data.length > 0) {
+            memoryCache.set(cacheKey, normalized, CACHE_TTL_CATALOG);
+            return normalized;
+        }
+    } catch {
+        // Fall through to legacy endpoint.
+    }
+
+    const { data } = await apiFetch<any>(fallbackUrl, {
+        headers,
         debugTag: 'TournamentsByEntity',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: CACHE_TTL_CATALOG,
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
-    return data;
+    const normalized = normalizeFlashScoreTournamentList(data);
+    if (normalized.data.length > 0) {
+        memoryCache.set(cacheKey, normalized, CACHE_TTL_CATALOG);
+    }
+
+    return normalized;
 }
 
 /**

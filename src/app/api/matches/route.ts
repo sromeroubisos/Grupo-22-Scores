@@ -1,13 +1,23 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/mock-db';
 import { getFlashScoreMatches, getFlashScoreLiveMatches } from '@/lib/services/flashscore';
-import { persistFromExternalMatches, persistFromExternalMatchesWithProvider } from '@/lib/sync/catalog';
-import { formatDateKey, canonicalizeTimezone, toLocalMatch } from '@/lib/timezone';
+import { persistFromExternalMatches } from '@/lib/sync/catalog';
+import {
+    addDaysToIsoDate,
+    combineLocalDateTimeToUtcIso,
+    formatDateKey,
+    canonicalizeTimezone,
+    toLocalMatch,
+} from '@/lib/timezone';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getCountryById } from '@/lib/data/countries';
-import { isFlashScoreEnabledForSport, isRugbySport } from '@/lib/externalProviderPolicy';
+import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
+import {
+    applyExternalTournamentOverride,
+    getStoredExternalTournamentOverrides,
+} from '@/lib/server/externalTournamentOverrides';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
@@ -15,16 +25,7 @@ import {
     getMatchesForDate,
     getLiveMatches,
     mapCachedToEnrichedMatch,
-    mapExternalMatchToCached,
-    upsertMatches,
 } from '@/lib/services/externalMatchCache';
-import {
-    getRugbyApiSportsGames,
-    mapRugbyApiSportsStatus,
-    toRugbyApiSportsTeamId,
-    toRugbyApiSportsTournamentId,
-    type RugbyApiSportsGame,
-} from '@/lib/services/rugbyApiSports';
 
 function isUuidLike(value: unknown): value is string {
     return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -91,6 +92,9 @@ function buildResolvedMatchTeam(
         logo_url?: string | null;
         image_path?: string | null;
         small_image_path?: string | null;
+        source?: string | null;
+        team_url?: string | null;
+        teamUrl?: string | null;
     } | null | undefined,
     fallbackName: string,
     fallbackShortName: string
@@ -113,9 +117,44 @@ function buildResolvedMatchTeam(
             logo_url: team?.logo_url || '',
             image_path: team?.image_path || '',
             small_image_path: team?.small_image_path || '',
+            source: team?.source || '',
+            team_url: team?.team_url || team?.teamUrl || '',
         }),
         shortName,
     };
+}
+
+async function applyStoredTournamentOverridesToMatches<T extends {
+    tournament?: Record<string, unknown> & { id?: string | null } | null;
+}>(matches: T[]): Promise<T[]> {
+    const tournamentIds = [...new Set(
+        matches
+            .map((match) => (typeof match.tournament?.id === 'string' ? match.tournament.id : null))
+            .filter((id): id is string => typeof id === 'string' && /^fs-/i.test(id)),
+    )];
+
+    if (tournamentIds.length === 0) {
+        return matches;
+    }
+
+    const overrides = await getStoredExternalTournamentOverrides(tournamentIds);
+
+    return matches.map((match) => {
+        const tournamentId = typeof match.tournament?.id === 'string' ? match.tournament.id : null;
+        if (!tournamentId || !match.tournament) {
+            return match;
+        }
+
+        const override = overrides.get(tournamentId) || overrides.get(tournamentId.toLowerCase());
+        if (!override) {
+            return match;
+        }
+
+        return {
+            ...match,
+            tournament: applyExternalTournamentOverride(match.tournament, override),
+        };
+    });
 }
 
 async function selectManyWithFallback<T>(
@@ -305,82 +344,6 @@ function jsonWithPublicCache(payload: unknown, options: { liveOnly: boolean; dat
     return NextResponse.json(payload, headers.get('Cache-Control') ? { headers } : undefined);
 }
 
-function mapRugbyGameToEnrichedMatch(game: RugbyApiSportsGame, sport: string, timeZone: string) {
-    const status = mapRugbyApiSportsStatus(game.status);
-    const localDate = new Date(game.date);
-    const { localTime } = toLocalMatch(localDate.toISOString(), timeZone);
-
-    return {
-        id: `ras-game-${game.id}`,
-        tournamentId: toRugbyApiSportsTournamentId(game.league?.id || 'unknown'),
-        dateTime: localDate.toISOString(),
-        time: localTime,
-        status,
-        score: game.scores?.home != null || game.scores?.away != null
-            ? { home: game.scores?.home ?? null, away: game.scores?.away ?? null }
-            : null,
-        clock: {
-            running: status === 'live',
-            seconds: 0,
-            period: status === 'live' ? (game.status?.long || 'En Vivo') : (game.week || 'General'),
-        },
-        roundId: game.week || 'General',
-        venue: '',
-        homeClubId: game.teams?.home?.id ? toRugbyApiSportsTeamId(game.teams.home.id) : null,
-        awayClubId: game.teams?.away?.id ? toRugbyApiSportsTeamId(game.teams.away.id) : null,
-        homeTeam: buildResolvedMatchTeam({
-            id: game.teams?.home?.id ? toRugbyApiSportsTeamId(game.teams.home.id) : null,
-            name: game.teams?.home?.name || 'Local',
-            logo: game.teams?.home?.logo || '',
-            shortName: (game.teams?.home?.name || 'LOC').slice(0, 3).toUpperCase(),
-        }, 'Local', 'LOC'),
-        awayTeam: buildResolvedMatchTeam({
-            id: game.teams?.away?.id ? toRugbyApiSportsTeamId(game.teams.away.id) : null,
-            name: game.teams?.away?.name || 'Visitante',
-            logo: game.teams?.away?.logo || '',
-            shortName: (game.teams?.away?.name || 'VIS').slice(0, 3).toUpperCase(),
-        }, 'Visitante', 'VIS'),
-        tournament: {
-            id: toRugbyApiSportsTournamentId(game.league?.id || 'unknown'),
-            name: game.league?.name || 'Liga',
-            sport,
-            status: 'published' as const,
-            country: game.country?.name || 'Internacional',
-        },
-        liveEnabled: status === 'live',
-        source: 'rugby-api-sports' as const,
-    };
-}
-
-function mapRugbyGameToCachedMatch(game: RugbyApiSportsGame, sport: string) {
-    return mapExternalMatchToCached({
-        id: `ras-game-${game.id}`,
-        sport,
-        tournamentId: toRugbyApiSportsTournamentId(game.league?.id || 'unknown'),
-        tournamentName: game.league?.name || 'Liga',
-        countryName: game.country?.name || 'Internacional',
-        homeTeam: buildResolvedMatchTeam({
-            id: game.teams?.home?.id ? toRugbyApiSportsTeamId(game.teams.home.id) : 'ras-team-home',
-            name: game.teams?.home?.name || 'Local',
-            logo: game.teams?.home?.logo || '',
-            shortName: (game.teams?.home?.name || 'LOC').slice(0, 3).toUpperCase(),
-        }, 'Local', 'LOC'),
-        awayTeam: buildResolvedMatchTeam({
-            id: game.teams?.away?.id ? toRugbyApiSportsTeamId(game.teams.away.id) : 'ras-team-away',
-            name: game.teams?.away?.name || 'Visitante',
-            logo: game.teams?.away?.logo || '',
-            shortName: (game.teams?.away?.name || 'VIS').slice(0, 3).toUpperCase(),
-        }, 'Visitante', 'VIS'),
-        score: {
-            home: game.scores?.home ?? null,
-            away: game.scores?.away ?? null,
-        },
-        status: mapRugbyApiSportsStatus(game.status),
-        dateTime: game.date,
-        roundLabel: game.week || null,
-    });
-}
-
 // GET /api/matches
 // Parameters: 
 // - date: YYYY-MM-DD
@@ -403,44 +366,10 @@ export async function GET(request: Request) {
                 return 'America/Argentina/Buenos_Aires';
             }
         })();
+        const requestedDate = date || formatDateKey(new Date(), timeZone);
 
         // Fast path: live=true returns only live matches (for polling)
         const liveOnly = searchParams.get('live') === 'true';
-        if (liveOnly && sport && isRugbySport(sport)) {
-            try {
-                const todayKey = formatDateKey(new Date(), timeZone);
-                const games = await getRugbyApiSportsGames({
-                    date: todayKey,
-                    timezone: timeZone,
-                });
-
-                const liveGames = games.filter((game) => mapRugbyApiSportsStatus(game.status) === 'live');
-                const enrichedLive = liveGames.map((game) => mapRugbyGameToEnrichedMatch(game, sport, timeZone));
-
-                if (liveGames.length > 0) {
-                    const adminClient = process.env.SUPABASE_SERVICE_ROLE_KEY
-                        ? createAdminClient()
-                        : await createClient();
-                    await upsertMatches(liveGames.map((game) => mapRugbyGameToCachedMatch(game, sport)), adminClient);
-                }
-
-                return jsonWithPublicCache({ data: enrichedLive }, { liveOnly: true });
-            } catch (error) {
-                console.error('Rugby live-only fetch failed, trying external_match_cache:', error);
-                try {
-                    const supabase = await getReadClient();
-                    const cachedLive = await getLiveMatches(sport, supabase);
-                    const enriched = cachedLive.map((match) => mapCachedToEnrichedMatch(match, sport));
-                    return jsonWithPublicCache({
-                        data: enriched,
-                        sources: { flashscore: { ok: true, count: enriched.length, fromCache: cachedLive.length > 0 } }
-                    }, { liveOnly: true });
-                } catch {
-                    return jsonWithPublicCache({ data: [] }, { liveOnly: true });
-                }
-            }
-        }
-
         if (liveOnly && sport) {
             try {
                 const liveMatches = await getFlashScoreLiveMatches(sport);
@@ -474,13 +403,15 @@ export async function GET(request: Request) {
                             id: m.homeTeamId,
                             name: m.homeTeamName,
                             logo: m.homeTeamLogo || '',
-                            shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC'
+                            shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC',
+                            source: 'flashscore',
                         }, 'Local', 'LOC'),
                         awayTeam: buildResolvedMatchTeam({
                             id: m.awayTeamId,
                             name: m.awayTeamName,
                             logo: m.awayTeamLogo || '',
-                            shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS'
+                            shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS',
+                            source: 'flashscore',
                         }, 'Visitante', 'VIS'),
                         tournament: {
                             id: m.tournamentId,
@@ -565,13 +496,16 @@ export async function GET(request: Request) {
                     console.error('DB Live-only fetch failed:', dbErr);
                 }
 
+                finalLiveMatches = await applyStoredTournamentOverridesToMatches(finalLiveMatches);
                 return jsonWithPublicCache({ data: finalLiveMatches }, { liveOnly: true });
             } catch (e) {
                 console.error('Live-only fetch failed, trying external_match_cache:', e);
                 try {
                     const supabase = await getReadClient();
                     const cachedLive = await getLiveMatches(sport, supabase);
-                    const enriched = cachedLive.map(m => mapCachedToEnrichedMatch(m, sport));
+                    const enriched = await applyStoredTournamentOverridesToMatches(
+                        cachedLive.map(m => mapCachedToEnrichedMatch(m, sport)),
+                    );
                     return jsonWithPublicCache({
                         data: enriched,
                         sources: { flashscore: { ok: false, count: 0, fromCache: cachedLive.length > 0 } }
@@ -649,75 +583,7 @@ export async function GET(request: Request) {
 
         const flashScoreEnabledForRequestedSport = isFlashScoreEnabledForSport(sport || 'rugby');
 
-        if (useExternal && date && sport && isRugbySport(sport)) {
-            try {
-                const games = await getRugbyApiSportsGames({
-                    date,
-                    timezone: timeZone,
-                });
-
-                const enrichedExternalMatches = games.map((game) => mapRugbyGameToEnrichedMatch(game, sport, timeZone));
-                const filteredRugbyMatches = enrichedExternalMatches.filter(
-                    m => !isBlockedTournamentId(m.tournamentId)
-                );
-                enrichedMatches = [...enrichedMatches, ...filteredRugbyMatches];
-                fsOk = true;
-                fsCount = filteredRugbyMatches.length;
-                fsReason = fsCount === 0 ? 'empty_result' : null;
-                fsMessage = fsCount === 0 ? 'No hay partidos externos para este filtro.' : null;
-
-                if (games.length > 0) {
-                    const adminClient = process.env.SUPABASE_SERVICE_ROLE_KEY
-                        ? createAdminClient()
-                        : await createClient();
-                    await upsertMatches(games.map((game) => mapRugbyGameToCachedMatch(game, sport)), adminClient);
-
-                    persistFromExternalMatchesWithProvider(
-                        games.map((game) => ({
-                            tournamentId: game.league?.id ? toRugbyApiSportsTournamentId(game.league.id) : undefined,
-                            leagueId: game.league?.id ? String(game.league.id) : undefined,
-                            leagueName: game.league?.name || 'Liga',
-                            countryName: game.country?.name || 'Internacional',
-                            seasonId: game.league?.season ? String(game.league.season) : undefined,
-                            homeTeamId: game.teams?.home?.id ? toRugbyApiSportsTeamId(game.teams.home.id) : undefined,
-                            awayTeamId: game.teams?.away?.id ? toRugbyApiSportsTeamId(game.teams.away.id) : undefined,
-                            homeTeamName: game.teams?.home?.name || 'Local',
-                            awayTeamName: game.teams?.away?.name || 'Visitante',
-                            homeTeamLogo: game.teams?.home?.logo || '',
-                            awayTeamLogo: game.teams?.away?.logo || '',
-                            tournamentLogo: game.league?.logo || '',
-                        })),
-                        sport,
-                        {
-                            provider: 'rugby-api-sports',
-                            tournamentPrefix: 'ras-league-',
-                            teamPrefix: 'ras-team-',
-                        },
-                    );
-                }
-            } catch (error) {
-                console.error('Rugby external section failed:', error);
-                try {
-                    const supabaseForCache = await getReadClient();
-                    const cached = await getMatchesForDate(date, sport, supabaseForCache);
-                    if (cached.length > 0) {
-                        const fromCache = cached.map((match) => mapCachedToEnrichedMatch(match, sport));
-                        enrichedMatches = [...enrichedMatches, ...fromCache];
-                        fsOk = true;
-                        fsFromCache = true;
-                        fsCount = fromCache.length;
-                        fsReason = 'rugby_api_sports_cache_fallback';
-                        fsMessage = 'Datos externos desde cache; puede haber un leve retraso.';
-                    } else {
-                        fsReason = 'rugby_api_sports_failed';
-                        fsMessage = 'No se pudieron cargar los partidos externos de rugby.';
-                    }
-                } catch {
-                    fsReason = 'rugby_api_sports_failed';
-                    fsMessage = 'No se pudieron cargar los partidos externos de rugby.';
-                }
-            }
-        } else if (useExternal && date && flashScoreEnabledForRequestedSport) {
+        if (useExternal && date && flashScoreEnabledForRequestedSport) {
             try {
                 // Fix: Parse YYYY-MM-DD as local date to avoid UTC timezone shift
                 const [year, month, day] = date.split('-').map(Number);
@@ -821,13 +687,15 @@ export async function GET(request: Request) {
                             id: m.homeTeamId,
                             name: m.homeTeamName,
                             logo: m.homeTeamLogo || '',
-                            shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC'
+                            shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC',
+                            source: 'flashscore',
                         }, 'Local', 'LOC'),
                         awayTeam: buildResolvedMatchTeam({
                             id: m.awayTeamId,
                             name: m.awayTeamName,
                             logo: m.awayTeamLogo || '',
-                            shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS'
+                            shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS',
+                            source: 'flashscore',
                         }, 'Visitante', 'VIS'),
                         tournament: {
                             id: m.tournamentId,
@@ -868,15 +736,12 @@ export async function GET(request: Request) {
             const supabase = await getReadClient();
 
             // Build the base query for the selected date
-            const { localStart, localEnd } = (() => {
-                // date is YYYY-MM-DD. We want the full range of that day in UTC for the DB query.
-                // However, since we use TIMESTAMPTZ, comparing with string dates works well if they include the offset.
-                // For simplicity, we use the date as-is which PostgreSQL interprets relative to UTC if no offset.
-                return {
-                    localStart: `${date}T00:00:00Z`,
-                    localEnd: `${date}T23:59:59Z`
-                };
-            })();
+            const utcStart = combineLocalDateTimeToUtcIso(requestedDate, '00:00:00', timeZone);
+            const utcNextDayStart = combineLocalDateTimeToUtcIso(addDaysToIsoDate(requestedDate, 1), '00:00:00', timeZone);
+
+            if (!utcStart || !utcNextDayStart) {
+                throw new Error('No se pudo construir el rango horario local para la consulta de partidos.');
+            }
 
             // Filter by sport through tournament relationship
             const sportVariants = sport ? getSportVariants(sport) : null;
@@ -884,8 +749,8 @@ export async function GET(request: Request) {
             const query = supabase
                 .from('matches')
                 .select('*')
-                .gte('date_time', localStart)
-                .lte('date_time', localEnd)
+                .gte('date_time', utcStart)
+                .lt('date_time', utcNextDayStart)
                 .order('date_time', { ascending: true });
 
             const { data: dbMatches, error: dbError } = await query;
@@ -994,6 +859,8 @@ export async function GET(request: Request) {
         // ─── Date Filter ─────────────────────────────────────────────────────
         // Always use timezone-aware comparison so that
         // e.g. 00:00 UTC correctly maps to 21:00 previous day in UTC-3.
+        enrichedMatches = await applyStoredTournamentOverridesToMatches(enrichedMatches);
+
         if (date) {
             enrichedMatches = enrichedMatches.filter(m => {
                 const dt = new Date(m.dateTime);

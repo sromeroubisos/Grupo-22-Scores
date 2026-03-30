@@ -1,5 +1,6 @@
 const BLOCKED_TOURNAMENT_IDS = [
     'fs-ofv2oc3e',
+    'fs-folzz955',
     'ras-league-1',
     'ras-league-41',
 ] as const;
@@ -25,9 +26,27 @@ function normalizeValue(value: unknown): string | null {
     return normalized || null;
 }
 
-export function isBlockedTournamentId(value: unknown): boolean {
+function buildBlockedCandidates(value: unknown): string[] {
     const normalized = normalizeValue(value);
-    return normalized ? BLOCKED_TOURNAMENT_ID_SET.has(normalized) : false;
+    if (!normalized) return [];
+
+    const candidates = new Set<string>([normalized]);
+
+    if (normalized.startsWith('fs-')) {
+        const stripped = normalized.slice(3);
+        if (stripped) candidates.add(stripped);
+    }
+
+    if (normalized.startsWith('ras-league-')) {
+        const stripped = normalized.slice('ras-league-'.length);
+        if (stripped) candidates.add(stripped);
+    }
+
+    return [...candidates];
+}
+
+export function isBlockedTournamentId(value: unknown): boolean {
+    return buildBlockedCandidates(value).some((candidate) => BLOCKED_TOURNAMENT_ID_SET.has(candidate));
 }
 
 export function isBlockedRugbyApiSportsLeagueId(value: unknown): boolean {

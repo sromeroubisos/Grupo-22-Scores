@@ -1222,6 +1222,65 @@
     display: none;
 }
 
+/* Mobile Tournament List */
+.mobileTournamentList {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+}
+
+.mobileTournamentToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mobileTournamentToggle:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+}
+
+.mobileTournamentCount {
+    background: var(--color-bg-tertiary);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+}
+
+.mobileTournamentPanel {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    border: 1px solid var(--color-border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    background: var(--color-bg-secondary);
+    margin-top: -1px;
+}
+
+.mobileTournamentPanelOpen {
+    max-height: 70vh;
+    overflow-y: auto;
+    opacity: 1;
+    padding: 8px 0;
+}
+
 /* Breakpoints */
 
 @media (min-width: 1101px) {
@@ -1278,6 +1337,10 @@
     }
 
     .mobileAudienceSwitch {
+        display: flex;
+    }
+
+    .mobileTournamentList {
         display: flex;
     }
 
