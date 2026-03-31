@@ -10,6 +10,30 @@
 
 @import "./admin/styles/tournament-theme.css";
 
+@font-face {
+    font-family: 'Dharma Gothic Expanded Heavy';
+    src:
+        local('Dharma Gothic Expanded Heavy'),
+        local('Dharma Gothic E Heavy'),
+        local('DharmaGothicE-Heavy');
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Dharma Gothic Expanded';
+    src:
+        local('Dharma Gothic Expanded Bold'),
+        local('Dharma Gothic Expanded'),
+        local('Dharma Gothic E Bold'),
+        local('Dharma Gothic E'),
+        local('DharmaGothicE-Bold');
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
 @theme {
     --color-primary: #2563EB;
     --color-primary-hover: #1D4ED8;

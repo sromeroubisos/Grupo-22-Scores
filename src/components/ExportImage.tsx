@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
+import { JetBrains_Mono, Outfit } from 'next/font/google';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
 export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket';
 type ExportDateValue = string | number | Date;
 type MatchExportMode = 'schedule' | 'result';
+type MatchExportLayout = 'classic' | 'editorial4x5';
 type StandingsExportMode = 'table' | 'groups';
 
 interface StandingsRowData {
@@ -38,6 +40,12 @@ interface StandingsSlideData {
     totalPages: number;
     totalRows: number;
 }
+
+type StandingsLegendEntry = {
+    key: string;
+    label: string;
+    color: string;
+};
 
 interface StandingsData {
     title: string;
@@ -88,6 +96,9 @@ interface MatchStatsData {
     time?: string;
     venue?: string;
     kickoffAt?: ExportDateValue | null;
+    backgroundImage?: string;
+    editorialLayoutPresetId?: MatchEditorialPresetId;
+    sponsors?: MatchSponsorData[];
     stats: Array<{ label: string; home: number | string; away: number | string }>;
 }
 
@@ -145,6 +156,45 @@ interface PlayoffBracketData {
 type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData;
 type CanvasFormat = { width: number; height: number };
 type SafeArea = { top: number; bottom: number; centerX: number; width: number; height: number };
+type MatchBackgroundUpload = { name: string; src: string };
+type MatchSponsorData = {
+    id?: string;
+    name?: string;
+    logo?: string;
+    placement?: string;
+};
+type MatchEditorialPresetId = 'balanced' | 'broadcast' | 'hero';
+type MatchEditorialLayoutPreset = {
+    id: MatchEditorialPresetId;
+    label: string;
+    description: string;
+    scoreInset: number;
+    lineWidth: number;
+    centerGap: number;
+    logoWidth: number;
+    logoHeight: number;
+    logoOffsetY: number;
+    scoreFontSize: number;
+    scoreTopGap: number;
+    scoreBottomGap: number;
+    bottomRuleInset: number;
+    titleFontSize: number;
+    tournamentLogoSize: number;
+    tournamentLogoOffsetY: number;
+    gradientBottomOpacity: number;
+    gradientSideCoreOpacity: number;
+    gradientSideMidOpacity: number;
+    sponsorLogoHeight: number;
+    sponsorGap: number;
+};
+type SavedMatchEditorialPreset = {
+    id: string;
+    name: string;
+    layoutPresetId: MatchEditorialPresetId;
+    gradientLeftColor: string;
+    gradientRightColor: string;
+    sponsors: MatchSponsorData[];
+};
 
 interface ExportImageProps {
     template: ExportTemplate;
@@ -194,10 +244,27 @@ const FORMATS: Array<{ value: ExportFormat; label: string; width: number; height
     { value: '1080x1920', label: 'Story (1080x1920)', width: 1080, height: 1920 },
 ];
 
-const FONT_DISPLAY = '"Outfit", "Inter", system-ui, sans-serif';
-const FONT_BODY = '"Outfit", "Inter", system-ui, sans-serif';
-const FONT_MONO = '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+const exportOutfitFont = Outfit({
+    subsets: ['latin'],
+    weight: ['300', '400', '500', '600', '700', '800', '900'],
+    display: 'swap',
+});
+const exportJetBrainsMonoFont = JetBrains_Mono({
+    subsets: ['latin'],
+    weight: ['400', '500', '600', '700', '800'],
+    display: 'swap',
+});
+
+const FONT_DISPLAY = exportOutfitFont.style.fontFamily;
+const FONT_BODY = exportOutfitFont.style.fontFamily;
+const FONT_MONO = exportJetBrainsMonoFont.style.fontFamily;
+const FONT_OUTFIT_BLACK = exportOutfitFont.style.fontFamily;
+const FONT_EDITORIAL = '"Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
+const FONT_EDITORIAL_SCORE = '"Dharma Gothic Expanded Heavy", "Dharma Gothic E Heavy", "Dharma Gothic Expanded", "Dharma Gothic E", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
 const BRAND_ACCENT = '#00a365';
+const EDITORIAL_PRESET_STORAGE_KEY = 'g22-export-editorial-presets-v1';
+const EDITORIAL_SPONSOR_SLOTS = 6;
+const EDITORIAL_TEXTURE_SOURCE = '/textures/vecteezy_grey-distressed-grunge-background_154365.svg';
 const EXPORT_PALETTES: ExportPalette[] = [
     { id: 'g22-dark', name: 'G22 Dark', description: 'Carbono y verde marca', bg: '#0a0a0b', accent: '#00a365' },
     { id: 'g22-light', name: 'G22 Light', description: 'Claro con acento marca', bg: '#f8fafc', accent: '#00a365' },
@@ -214,6 +281,82 @@ const MATCH_EXPORT_MODE_OPTIONS: Array<{ value: MatchExportMode; label: string; 
     { value: 'schedule', label: 'Horario', description: 'Muestra la programacion del partido' },
     { value: 'result', label: 'Resultado', description: 'Muestra el marcador cargado' },
 ];
+const MATCH_EXPORT_LAYOUT_OPTIONS: Array<{ value: MatchExportLayout; label: string; description: string }> = [
+    { value: 'classic', label: 'Clasico', description: 'Panel actual con marcador y estadisticas' },
+    { value: 'editorial4x5', label: 'Editorial 4:5', description: 'Foto full-bleed con overlay para Instagram post' },
+];
+const EDITORIAL_LAYOUT_PRESETS: MatchEditorialLayoutPreset[] = [
+    {
+        id: 'balanced',
+        label: 'Balanced',
+        description: 'Bloque editorial equilibrado para resultado final',
+        scoreInset: 210,
+        lineWidth: 286,
+        centerGap: 188,
+        logoWidth: 286,
+        logoHeight: 186,
+        logoOffsetY: 96,
+        scoreFontSize: 266,
+        scoreTopGap: 34,
+        scoreBottomGap: 48,
+        bottomRuleInset: 88,
+        titleFontSize: 34,
+        tournamentLogoSize: 196,
+        tournamentLogoOffsetY: 0,
+        gradientBottomOpacity: 0.97,
+        gradientSideCoreOpacity: 0.94,
+        gradientSideMidOpacity: 0.48,
+        sponsorLogoHeight: 58,
+        sponsorGap: 24,
+    },
+    {
+        id: 'broadcast',
+        label: 'Broadcast',
+        description: 'Mas aire superior y bloque central compacto',
+        scoreInset: 204,
+        lineWidth: 300,
+        centerGap: 176,
+        logoWidth: 300,
+        logoHeight: 194,
+        logoOffsetY: 102,
+        scoreFontSize: 272,
+        scoreTopGap: 30,
+        scoreBottomGap: 46,
+        bottomRuleInset: 88,
+        titleFontSize: 36,
+        tournamentLogoSize: 204,
+        tournamentLogoOffsetY: -4,
+        gradientBottomOpacity: 0.98,
+        gradientSideCoreOpacity: 0.96,
+        gradientSideMidOpacity: 0.5,
+        sponsorLogoHeight: 60,
+        sponsorGap: 26,
+    },
+    {
+        id: 'hero',
+        label: 'Hero',
+        description: 'Mas protagonismo para logos y branding central',
+        scoreInset: 216,
+        lineWidth: 294,
+        centerGap: 192,
+        logoWidth: 294,
+        logoHeight: 198,
+        logoOffsetY: 104,
+        scoreFontSize: 270,
+        scoreTopGap: 38,
+        scoreBottomGap: 52,
+        bottomRuleInset: 86,
+        titleFontSize: 34,
+        tournamentLogoSize: 212,
+        tournamentLogoOffsetY: 4,
+        gradientBottomOpacity: 0.99,
+        gradientSideCoreOpacity: 0.98,
+        gradientSideMidOpacity: 0.52,
+        sponsorLogoHeight: 62,
+        sponsorGap: 28,
+    },
+];
+const DEFAULT_EDITORIAL_LAYOUT_PRESET_ID: MatchEditorialPresetId = 'balanced';
 const EXPORT_TIMEZONE_PRESETS: ExportTimeZonePreset[] = [
     { id: 'baker-island-us', city: 'Baker Island', country: 'Estados Unidos', utcOffsetMinutes: -720 },
     { id: 'pago-pago-as', city: 'Pago Pago', country: 'Samoa Americana', utcOffsetMinutes: -660 },
@@ -267,6 +410,8 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const [isTimeZoneDropdownOpen, setIsTimeZoneDropdownOpen] = useState(false);
     const [matchExportMode, setMatchExportMode] = useState<MatchExportMode>(defaultMatchExportMode);
     const [isMatchModeDropdownOpen, setIsMatchModeDropdownOpen] = useState(false);
+    const [matchExportLayout, setMatchExportLayout] = useState<MatchExportLayout>('classic');
+    const [isMatchLayoutDropdownOpen, setIsMatchLayoutDropdownOpen] = useState(false);
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -277,6 +422,25 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const [selectedPaletteId, setSelectedPaletteId] = useState(DEFAULT_PALETTE.id);
     const [accentColor, setAccentColor] = useState(DEFAULT_PALETTE.accent);
     const [bgColor, setBgColor] = useState(DEFAULT_PALETTE.bg);
+    const [editorialGradientLeftColor, setEditorialGradientLeftColor] = useState('#df255c');
+    const [editorialGradientRightColor, setEditorialGradientRightColor] = useState(DEFAULT_PALETTE.accent);
+    const [editorialLayoutPresetId, setEditorialLayoutPresetId] = useState<MatchEditorialPresetId>(() => (
+        template === 'matchStats'
+            ? getEditorialLayoutPreset((data as MatchStatsData).editorialLayoutPresetId).id
+            : DEFAULT_EDITORIAL_LAYOUT_PRESET_ID
+    ));
+    const [savedEditorialPresets, setSavedEditorialPresets] = useState<SavedMatchEditorialPreset[]>([]);
+    const [editorialPresetName, setEditorialPresetName] = useState('');
+    const [editorialSponsors, setEditorialSponsors] = useState<MatchSponsorData[]>(() => (
+        template === 'matchStats'
+            ? buildEditorialSponsorSlots((data as MatchStatsData).sponsors)
+            : buildEditorialSponsorSlots()
+    ));
+    const [matchBackgroundUpload, setMatchBackgroundUpload] = useState<MatchBackgroundUpload | null>(() => {
+        if (template !== 'matchStats') return null;
+        const backgroundImage = (data as MatchStatsData).backgroundImage?.trim();
+        return backgroundImage ? { name: 'Fondo preconfigurado', src: backgroundImage } : null;
+    });
     const [selectedMatchIndices, setSelectedMatchIndices] = useState<Set<number>>(() => {
         if (template !== 'dailyMatches') return new Set<number>();
         const matches = (data as DailyMatchesData).matches ?? [];
@@ -299,8 +463,37 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         if (!showModal) {
             setIsTimeZoneDropdownOpen(false);
             setIsMatchModeDropdownOpen(false);
+            setIsMatchLayoutDropdownOpen(false);
         }
     }, [showModal]);
+
+    useEffect(() => {
+        if (template !== 'matchStats') return;
+        const backgroundImage = (data as MatchStatsData).backgroundImage?.trim();
+        if (!backgroundImage) return;
+        setMatchBackgroundUpload((current) => current ?? { name: 'Fondo preconfigurado', src: backgroundImage });
+    }, [data, template]);
+
+    useEffect(() => {
+        setSavedEditorialPresets(readSavedEditorialPresets());
+    }, []);
+
+    useEffect(() => {
+        if (template !== 'matchStats') return;
+        const matchData = data as MatchStatsData;
+        setEditorialLayoutPresetId(getEditorialLayoutPreset(matchData.editorialLayoutPresetId).id);
+        setEditorialSponsors(buildEditorialSponsorSlots(matchData.sponsors));
+    }, [data, template]);
+
+    useEffect(() => {
+        if (template !== 'matchStats' || matchExportLayout !== 'editorial4x5') return;
+        if (format !== '1080x1350') {
+            setFormat('1080x1350');
+        }
+        if (matchExportMode !== 'result') {
+            setMatchExportMode('result');
+        }
+    }, [format, matchExportLayout, matchExportMode, template]);
 
     useEffect(() => {
         const browserOffsetMinutes = getBrowserOffsetMinutes();
@@ -333,6 +526,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         () => standingsExportData ? buildStandingsSlides(standingsExportData, standingsExportMode) : [],
         [standingsExportData, standingsExportMode]
     );
+    const activeEditorialSponsors = useMemo(
+        () => getActiveEditorialSponsors(editorialSponsors),
+        [editorialSponsors]
+    );
     const exportActionLabel = template === 'standings' && standingsSlides.length > 1
         ? `Exportar ${standingsSlides.length} imagenes`
         : 'Exportar imagen';
@@ -350,6 +547,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setSelectedPaletteId(palette.id);
         setBgColor(palette.bg);
         setAccentColor(palette.accent);
+        if (template === 'matchStats' && matchExportLayout === 'editorial4x5') {
+            setEditorialGradientRightColor(palette.accent);
+        }
     };
 
     const handleBgColorChange = (value: string) => {
@@ -362,13 +562,116 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setAccentColor(value);
     };
 
+    const handleEditorialGradientLeftColorChange = (value: string) => {
+        setEditorialGradientLeftColor(value);
+    };
+
+    const handleEditorialGradientRightColorChange = (value: string) => {
+        setEditorialGradientRightColor(value);
+    };
+
+    const updateEditorialSponsor = (index: number, changes: Partial<MatchSponsorData>) => {
+        setEditorialSponsors((current) => current.map((sponsor, sponsorIndex) => (
+            sponsorIndex === index
+                ? { ...sponsor, ...changes }
+                : sponsor
+        )));
+    };
+
+    const handleEditorialSponsorUpload = async (index: number, event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setStatus('Subi un archivo de imagen valido para el sponsor');
+            return;
+        }
+
+        try {
+            const src = await readFileAsDataUrl(file);
+            updateEditorialSponsor(index, { logo: src });
+            setStatus('');
+        } catch (error) {
+            console.error('Sponsor upload error:', error);
+            setStatus('No se pudo leer el logo del sponsor');
+        }
+    };
+
+    const clearEditorialSponsor = (index: number) => {
+        updateEditorialSponsor(index, { logo: '' });
+        setStatus('');
+    };
+
+    const handleSaveEditorialPreset = () => {
+        const name = editorialPresetName.trim();
+        if (!name) {
+            setStatus('Dale un nombre al preset antes de guardarlo');
+            return;
+        }
+
+        const nextPreset: SavedMatchEditorialPreset = {
+            id: `${Date.now()}`,
+            name,
+            layoutPresetId: editorialLayoutPresetId,
+            gradientLeftColor: editorialGradientLeftColor,
+            gradientRightColor: editorialGradientRightColor,
+            sponsors: activeEditorialSponsors,
+        };
+
+        const nextPresets = [nextPreset, ...savedEditorialPresets].slice(0, 12);
+        setSavedEditorialPresets(nextPresets);
+        persistSavedEditorialPresets(nextPresets);
+        setEditorialPresetName('');
+        setStatus(`Preset "${name}" guardado`);
+        window.setTimeout(() => setStatus(''), 2200);
+    };
+
+    const applySavedEditorialPreset = (preset: SavedMatchEditorialPreset) => {
+        setEditorialLayoutPresetId(getEditorialLayoutPreset(preset.layoutPresetId).id);
+        setEditorialGradientLeftColor(preset.gradientLeftColor);
+        setEditorialGradientRightColor(preset.gradientRightColor);
+        setEditorialSponsors(buildEditorialSponsorSlots(preset.sponsors));
+        setSelectedPaletteId('custom');
+        setStatus(`Preset "${preset.name}" aplicado`);
+        window.setTimeout(() => setStatus(''), 2200);
+    };
+
+    const handleMatchBackgroundUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setStatus('Subi un archivo de imagen valido');
+            return;
+        }
+
+        try {
+            const src = await readFileAsDataUrl(file);
+            setMatchBackgroundUpload({ name: file.name, src });
+            setStatus('');
+        } catch (error) {
+            console.error('Background upload error:', error);
+            setStatus('No se pudo leer la foto seleccionada');
+        }
+    };
+
+    const clearMatchBackgroundUpload = () => {
+        setMatchBackgroundUpload(null);
+        setStatus('');
+    };
+
     const handleExport = async () => {
         setIsExporting(true);
         setStatus('Generando...');
         setShowModal(false);
 
         try {
-            const config = FORMATS.find((item) => item.value === format)!;
+            const resolvedFormat: ExportFormat = template === 'matchStats' && matchExportLayout === 'editorial4x5'
+                ? '1080x1350'
+                : format;
+            const config = FORMATS.find((item) => item.value === resolvedFormat)!;
             const [, brandLogo] = await Promise.all([ensureExportFonts(), loadImage('/icon.png')]);
             const canvas = document.createElement('canvas');
             canvas.width = config.width;
@@ -379,7 +682,32 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 
             if (template === 'matchStats') {
                 const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);
-                await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                if (matchExportLayout === 'editorial4x5') {
+                    const backgroundImage = matchBackgroundUpload?.src || matchData.backgroundImage || '';
+                    if (!backgroundImage) {
+                        throw new Error('Subi una foto de fondo para usar el layout editorial 4:5');
+                    }
+                    const editorialMatchData: MatchStatsData = {
+                        ...matchData,
+                        backgroundImage,
+                        editorialLayoutPresetId,
+                        sponsors: activeEditorialSponsors,
+                    };
+                    await drawMatchEditorialResult(
+                        ctx,
+                        canvas,
+                        editorialMatchData,
+                        config,
+                        accentColor,
+                        bgColor,
+                        brandLogo,
+                        backgroundImage,
+                        editorialGradientLeftColor,
+                        editorialGradientRightColor
+                    );
+                } else {
+                    await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                }
             } else if (template === 'standings') {
                 const standingsData = exportData as StandingsData;
                 const slides = buildStandingsSlides(standingsData, standingsExportMode);
@@ -388,7 +716,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 for (const [index, slide] of slides.entries()) {
                     setStatus(slides.length > 1 ? `Generando ${index + 1}/${slides.length}...` : 'Generando...');
                     await drawStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
-                    await downloadCanvas(canvas, buildExportFilename(filename, template, format, index + 1, slides.length));
+                    await downloadCanvas(canvas, buildExportFilename(filename, template, resolvedFormat, index + 1, slides.length));
                     if (index < slides.length - 1) {
                         await wait(140);
                     }
@@ -407,12 +735,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 await drawPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
             }
 
-            await downloadCanvas(canvas, buildExportFilename(filename, template, format));
+            await downloadCanvas(canvas, buildExportFilename(filename, template, resolvedFormat));
             setStatus('Listo');
             window.setTimeout(() => setStatus(''), 2000);
         } catch (error) {
             console.error('Export error:', error);
-            setStatus('Error al exportar');
+            setStatus(error instanceof Error ? error.message : 'Error al exportar');
         } finally {
             setIsExporting(false);
         }
@@ -422,6 +750,20 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 
     return (
         <div className={`${styles.container} ${className}`}>
+            <div
+                aria-hidden="true"
+                style={{
+                    position: 'absolute',
+                    width: 0,
+                    height: 0,
+                    overflow: 'hidden',
+                    opacity: 0,
+                    pointerEvents: 'none',
+                }}
+            >
+                <span className={exportOutfitFont.className}>OUTFIT BLACK</span>
+                <span className={exportJetBrainsMonoFont.className}>0123456789 +-</span>
+            </div>
             <button className={styles.exportButton} onClick={() => setShowModal(true)} disabled={isExporting} type="button">
                 {isExporting ? 'Generando...' : 'Exportar'}
             </button>
@@ -444,13 +786,66 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             key={item.value}
                                             className={`${styles.formatBtn} ${format === item.value ? styles.active : ''}`}
                                             onClick={() => setFormat(item.value)}
+                                            disabled={template === 'matchStats' && matchExportLayout === 'editorial4x5' && item.value !== '1080x1350'}
                                             type="button"
                                         >
                                             {item.label}
                                         </button>
                                     ))}
                                 </div>
+                                {template === 'matchStats' && matchExportLayout === 'editorial4x5' && (
+                                    <p className={styles.modalHint}>El layout editorial usa siempre canvas 1080x1350 para respetar la composicion 4:5.</p>
+                                )}
                             </div>
+
+                            {template === 'matchStats' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Diseno</label>
+                                    <div className={styles.dropdown}>
+                                        <button
+                                            className={`${styles.dropdownTrigger} ${isMatchLayoutDropdownOpen ? styles.dropdownTriggerOpen : ''}`}
+                                            onClick={() => {
+                                                setIsMatchLayoutDropdownOpen((current) => !current);
+                                                setIsMatchModeDropdownOpen(false);
+                                                setIsTimeZoneDropdownOpen(false);
+                                            }}
+                                            type="button"
+                                        >
+                                            <span className={styles.dropdownTriggerText}>
+                                                <strong>{getMatchExportLayoutLabel(matchExportLayout)}</strong>
+                                                <span className={styles.dropdownTriggerMeta}>
+                                                    {MATCH_EXPORT_LAYOUT_OPTIONS.find((option) => option.value === matchExportLayout)?.description}
+                                                </span>
+                                            </span>
+                                            <span className={`${styles.dropdownChevron} ${isMatchLayoutDropdownOpen ? styles.dropdownChevronOpen : ''}`} aria-hidden="true">
+                                                v
+                                            </span>
+                                        </button>
+
+                                        {isMatchLayoutDropdownOpen && (
+                                            <div className={styles.dropdownMenu}>
+                                                {MATCH_EXPORT_LAYOUT_OPTIONS.map((option) => {
+                                                    const isActive = option.value === matchExportLayout;
+                                                    return (
+                                                        <button
+                                                            key={option.value}
+                                                            className={`${styles.dropdownOption} ${isActive ? styles.dropdownOptionActive : ''}`}
+                                                            onClick={() => {
+                                                                setMatchExportLayout(option.value);
+                                                                setIsMatchLayoutDropdownOpen(false);
+                                                            }}
+                                                            type="button"
+                                                        >
+                                                            <span className={styles.dropdownOptionTitle}>{option.label}</span>
+                                                            <span className={styles.dropdownOptionMeta}>{option.description}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {template !== 'playerStats' && (
                                 <div className={styles.modalSection}>
@@ -464,7 +859,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                 </div>
                             )}
 
-                            {template === 'matchStats' && (
+                            {template === 'matchStats' && matchExportLayout === 'classic' && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Modo del encabezado</label>
                                     <div className={styles.dropdown}>
@@ -473,6 +868,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             onClick={() => {
                                                 setIsMatchModeDropdownOpen((current) => !current);
                                                 setIsTimeZoneDropdownOpen(false);
+                                                setIsMatchLayoutDropdownOpen(false);
                                             }}
                                             type="button"
                                         >
@@ -514,7 +910,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                 </div>
                             )}
 
-                            {(template === 'dailyMatches' || template === 'matchStats') && (
+                            {(template === 'dailyMatches' || (template === 'matchStats' && matchExportLayout === 'classic')) && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Uso horario</label>
                                     <div className={styles.timeZoneSummary}>
@@ -527,6 +923,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             onClick={() => {
                                                 setIsTimeZoneDropdownOpen((current) => !current);
                                                 setIsMatchModeDropdownOpen(false);
+                                                setIsMatchLayoutDropdownOpen(false);
                                             }}
                                             type="button"
                                         >
@@ -569,6 +966,184 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         Exportar en {selectedTimeZonePreset.city}, {selectedTimeZonePreset.country} ({formatUtcOffset(selectedTimeZonePreset.utcOffsetMinutes)}).
                                         {' '}La diferencia se calcula contra la hora detectada en tu navegador.
                                     </p>
+                                </div>
+                            )}
+
+                            {template === 'matchStats' && matchExportLayout === 'editorial4x5' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Foto de fondo</label>
+                                    <div className={styles.uploadCard}>
+                                        <div className={styles.uploadMeta}>
+                                            <span className={styles.uploadTitle}>Subi la imagen principal del jugador</span>
+                                            <span className={styles.uploadSubtitle}>
+                                                Idealmente en 1080x1350 para mantener el encuadre y el aire del layout editorial.
+                                            </span>
+                                        </div>
+                                        <div className={styles.uploadActions}>
+                                            <label className={styles.uploadBtn}>
+                                                Subir foto
+                                                <input
+                                                    className={styles.fileInput}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleMatchBackgroundUpload}
+                                                />
+                                            </label>
+                                            <button
+                                                className={styles.ghostBtn}
+                                                onClick={clearMatchBackgroundUpload}
+                                                disabled={!matchBackgroundUpload}
+                                                type="button"
+                                            >
+                                                Quitar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        Esta variante exporta resultado, overlay inferior y logos mas separados. La foto se usa full-bleed como fondo.
+                                    </p>
+                                    {matchBackgroundUpload && (
+                                        <div className={styles.uploadPreview}>
+                                            <div
+                                                className={styles.uploadThumb}
+                                                style={{ backgroundImage: `url(${matchBackgroundUpload.src})` }}
+                                            />
+                                            <div className={styles.uploadMeta}>
+                                                <span className={styles.uploadTitle}>{matchBackgroundUpload.name}</span>
+                                                <span className={styles.uploadSubtitle}>Se aplicara como fondo principal del canvas 1080x1350.</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Preset de layout</label>
+                                        <div className={styles.formatOptions}>
+                                            {EDITORIAL_LAYOUT_PRESETS.map((preset) => (
+                                                <button
+                                                    key={preset.id}
+                                                    className={`${styles.formatBtn} ${editorialLayoutPresetId === preset.id ? styles.active : ''}`}
+                                                    onClick={() => setEditorialLayoutPresetId(preset.id)}
+                                                    type="button"
+                                                >
+                                                    {preset.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <p className={styles.modalHint}>
+                                            Cada preset agrupa posiciones, tamanos y respiracion del bloque editorial para reutilizarlo por torneo o liga.
+                                        </p>
+                                    </div>
+                                    <div className={styles.customColors} style={{ marginTop: 14 }}>
+                                        <div className={styles.colorInp}>
+                                            <span>Gradiente izq.</span>
+                                            <input
+                                                type="color"
+                                                value={editorialGradientLeftColor}
+                                                onChange={(event) => handleEditorialGradientLeftColorChange(event.target.value)}
+                                            />
+                                        </div>
+                                        <div className={styles.colorInp}>
+                                            <span>Gradiente der.</span>
+                                            <input
+                                                type="color"
+                                                value={editorialGradientRightColor}
+                                                onChange={(event) => handleEditorialGradientRightColorChange(event.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className={styles.uploadCard} style={{ marginTop: 16 }}>
+                                        <div className={styles.uploadMeta}>
+                                            <span className={styles.uploadTitle}>Guardar preset reusable</span>
+                                            <span className={styles.uploadSubtitle}>
+                                                Guarda layout + gradientes + sponsors para reutilizar la configuracion en otros torneos sin redisenar la pieza.
+                                            </span>
+                                        </div>
+                                        <div className={styles.uploadActions} style={{ width: '100%', justifyContent: 'flex-end' }}>
+                                            <input
+                                                className={styles.modalInput}
+                                                value={editorialPresetName}
+                                                onChange={(event) => setEditorialPresetName(event.target.value)}
+                                                placeholder="Ej: SRA resultado final"
+                                                style={{ minWidth: 220, flex: '1 1 220px' }}
+                                            />
+                                            <button className={styles.uploadBtn} onClick={handleSaveEditorialPreset} type="button">
+                                                Guardar preset
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {savedEditorialPresets.length > 0 && (
+                                        <div style={{ marginTop: 12 }}>
+                                            <label className={styles.modalLabel}>Presets guardados</label>
+                                            <div className={styles.formatOptions}>
+                                                {savedEditorialPresets.map((preset) => (
+                                                    <button
+                                                        key={preset.id}
+                                                        className={styles.formatBtn}
+                                                        onClick={() => applySavedEditorialPreset(preset)}
+                                                        type="button"
+                                                        title={`Aplicar ${preset.name}`}
+                                                    >
+                                                        {preset.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Sponsors del template</label>
+                                        <p className={styles.modalHint}>
+                                            Los escudos de equipos ya se toman dinamicamente desde el partido. Aca podes cargar sponsors para el footer editorial.
+                                        </p>
+                                        <div style={{ display: 'grid', gap: 12 }}>
+                                            {editorialSponsors.map((sponsor, index) => (
+                                                <div key={sponsor.id || index}>
+                                                    <div className={styles.uploadCard}>
+                                                        <div className={styles.uploadMeta}>
+                                                            <span className={styles.uploadTitle}>Sponsor {index + 1}</span>
+                                                            <span className={styles.uploadSubtitle}>Carga opcional para branding comercial del template.</span>
+                                                        </div>
+                                                        <div className={styles.uploadActions} style={{ width: '100%', justifyContent: 'flex-end' }}>
+                                                            <input
+                                                                className={styles.modalInput}
+                                                                value={sponsor.name || ''}
+                                                                onChange={(event) => updateEditorialSponsor(index, { name: event.target.value })}
+                                                                placeholder="Nombre del sponsor"
+                                                                style={{ minWidth: 220, flex: '1 1 220px' }}
+                                                            />
+                                                            <label className={styles.uploadBtn}>
+                                                                Subir logo
+                                                                <input
+                                                                    className={styles.fileInput}
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    onChange={(event) => handleEditorialSponsorUpload(index, event)}
+                                                                />
+                                                            </label>
+                                                            <button
+                                                                className={styles.ghostBtn}
+                                                                onClick={() => clearEditorialSponsor(index)}
+                                                                disabled={!sponsor.logo}
+                                                                type="button"
+                                                            >
+                                                                Quitar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    {sponsor.logo && (
+                                                        <div className={styles.uploadPreview}>
+                                                            <div
+                                                                className={styles.uploadThumb}
+                                                                style={{ backgroundImage: `url(${sponsor.logo})` }}
+                                                            />
+                                                            <div className={styles.uploadMeta}>
+                                                                <span className={styles.uploadTitle}>{sponsor.name || `Sponsor ${index + 1}`}</span>
+                                                                <span className={styles.uploadSubtitle}>Se integrara de forma dinamica en el footer del template.</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -676,7 +1251,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                             <button
                                 className={styles.exportBtn}
                                 onClick={handleExport}
-                                disabled={template === 'dailyMatches' && selectedMatchIndices.size === 0}
+                                disabled={
+                                    (template === 'dailyMatches' && selectedMatchIndices.size === 0)
+                                    || (template === 'matchStats' && matchExportLayout === 'editorial4x5' && !matchBackgroundUpload)
+                                }
                                 type="button"
                             >
                                 {exportActionLabel}
@@ -704,6 +1282,79 @@ function getDefaultMatchExportMode(template: ExportTemplate, data: ExportData): 
 
 function getMatchExportModeLabel(mode: MatchExportMode): string {
     return mode === 'schedule' ? 'Horario' : 'Resultado';
+}
+
+function getMatchExportLayoutLabel(layout: MatchExportLayout): string {
+    return MATCH_EXPORT_LAYOUT_OPTIONS.find((option) => option.value === layout)?.label || 'Clasico';
+}
+
+function getEditorialLayoutPreset(id?: string): MatchEditorialLayoutPreset {
+    return EDITORIAL_LAYOUT_PRESETS.find((preset) => preset.id === id) || EDITORIAL_LAYOUT_PRESETS[0];
+}
+
+function buildEmptySponsorSlot(index: number): MatchSponsorData {
+    return {
+        id: `slot-${index + 1}`,
+        name: '',
+        logo: '',
+    };
+}
+
+function buildEditorialSponsorSlots(sponsors?: MatchSponsorData[]): MatchSponsorData[] {
+    const normalized = Array.isArray(sponsors)
+        ? sponsors.slice(0, EDITORIAL_SPONSOR_SLOTS).map((sponsor, index) => ({
+            id: sponsor?.id || `slot-${index + 1}`,
+            name: sponsor?.name?.trim() || '',
+            logo: sponsor?.logo?.trim() || '',
+            placement: sponsor?.placement?.trim() || '',
+        }))
+        : [];
+
+    while (normalized.length < EDITORIAL_SPONSOR_SLOTS) {
+        normalized.push(buildEmptySponsorSlot(normalized.length));
+    }
+
+    return normalized;
+}
+
+function getActiveEditorialSponsors(sponsors: MatchSponsorData[]): MatchSponsorData[] {
+    return sponsors
+        .map((sponsor, index) => ({
+            id: sponsor?.id || `slot-${index + 1}`,
+            name: sponsor?.name?.trim() || '',
+            logo: sponsor?.logo?.trim() || '',
+            placement: sponsor?.placement?.trim() || '',
+        }))
+        .filter((sponsor) => Boolean(sponsor.logo || sponsor.name));
+}
+
+function readSavedEditorialPresets(): SavedMatchEditorialPreset[] {
+    if (typeof window === 'undefined') return [];
+
+    try {
+        const raw = window.localStorage.getItem(EDITORIAL_PRESET_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+            .map((item, index) => ({
+                id: typeof item?.id === 'string' && item.id ? item.id : `preset-${index + 1}`,
+                name: typeof item?.name === 'string' && item.name.trim() ? item.name.trim() : `Preset ${index + 1}`,
+                layoutPresetId: getEditorialLayoutPreset(item?.layoutPresetId).id,
+                gradientLeftColor: typeof item?.gradientLeftColor === 'string' && item.gradientLeftColor ? item.gradientLeftColor : '#df255c',
+                gradientRightColor: typeof item?.gradientRightColor === 'string' && item.gradientRightColor ? item.gradientRightColor : DEFAULT_PALETTE.accent,
+                sponsors: getActiveEditorialSponsors(buildEditorialSponsorSlots(item?.sponsors)),
+            }))
+            .slice(0, 12);
+    } catch {
+        return [];
+    }
+}
+
+function persistSavedEditorialPresets(presets: SavedMatchEditorialPreset[]) {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(EDITORIAL_PRESET_STORAGE_KEY, JSON.stringify(presets));
 }
 
 function applyMatchExportMode(data: MatchStatsData, mode: MatchExportMode): MatchStatsData {
@@ -866,6 +1517,21 @@ function buildExportFilename(
 function wait(ms: number) {
     return new Promise<void>((resolve) => {
         window.setTimeout(resolve, ms);
+    });
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (typeof reader.result === 'string') {
+                resolve(reader.result);
+                return;
+            }
+            reject(new Error('No se pudo leer la imagen'));
+        };
+        reader.onerror = () => reject(reader.error || new Error('No se pudo leer la imagen'));
+        reader.readAsDataURL(file);
     });
 }
 
@@ -1042,9 +1708,15 @@ async function ensureExportFonts(): Promise<void> {
     if (typeof document === 'undefined' || !('fonts' in document)) return;
     try {
         await Promise.allSettled([
-            document.fonts.load('700 24px Outfit'),
+            document.fonts.load('800 24px "Dharma Gothic Expanded Heavy"'),
+            document.fonts.load('800 24px "Dharma Gothic E Heavy"'),
+            document.fonts.load('700 24px "Dharma Gothic Expanded"'),
+            document.fonts.load('700 24px "Dharma Gothic E"'),
+            document.fonts.load(`700 24px ${FONT_BODY}`),
+            document.fonts.load(`900 24px ${FONT_OUTFIT_BLACK}`),
             document.fonts.load('700 24px Inter'),
-            document.fonts.load('700 24px "JetBrains Mono"'),
+            document.fonts.load('700 24px "Bebas Neue"'),
+            document.fonts.load(`700 24px ${FONT_MONO}`),
             document.fonts.ready,
         ]);
     } catch {
@@ -1114,6 +1786,26 @@ function hexToRGBA(hex: string, alpha: number) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function mixHexColors(colorA: string, colorB: string, ratio: number) {
+    if (!/^#[0-9a-f]{6}$/i.test(colorA) || !/^#[0-9a-f]{6}$/i.test(colorB)) {
+        return colorA;
+    }
+
+    const weight = Math.max(0, Math.min(1, ratio));
+    const rA = parseInt(colorA.slice(1, 3), 16);
+    const gA = parseInt(colorA.slice(3, 5), 16);
+    const bA = parseInt(colorA.slice(5, 7), 16);
+    const rB = parseInt(colorB.slice(1, 3), 16);
+    const gB = parseInt(colorB.slice(3, 5), 16);
+    const bB = parseInt(colorB.slice(5, 7), 16);
+
+    const toHex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
+    const r = rA + (rB - rA) * weight;
+    const g = gA + (gB - gA) * weight;
+    const b = bA + (bB - bA) * weight;
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 function getSafeArea(canvas: HTMLCanvasElement): SafeArea {
     const isStory = canvas.height > 1500;
     return { top: isStory ? 320 : 220, bottom: canvas.height - (isStory ? 220 : 150), centerX: canvas.width / 2, width: canvas.width, height: canvas.height };
@@ -1157,6 +1849,30 @@ function truncateTextToWidth(ctx: CanvasRenderingContext2D, text: string, maxWid
     }
 
     return current.length > 1 ? `${current}...` : text;
+}
+
+function drawStandingsTeamName(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    centerY: number,
+    maxWidth: number,
+    isStory: boolean,
+    rowHeight: number
+) {
+    const teamName = text.trim().toUpperCase();
+    const targetWidth = Math.max(72, maxWidth);
+    setFittedFont(
+        ctx,
+        teamName,
+        targetWidth,
+        '900',
+        Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.4)),
+        FONT_OUTFIT_BLACK,
+        16
+    );
+    const safeTeamName = truncateTextToWidth(ctx, teamName, targetWidth);
+    ctx.fillText(safeTeamName, x, centerY + 1);
 }
 
 function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean) {
@@ -1335,6 +2051,133 @@ function drawStandingsLabelPill(
     ctx.restore();
 }
 
+function collectStandingsLegendEntries(rows: StandingsRowData[], fallbackColor: string) {
+    const entries = new Map<string, StandingsLegendEntry>();
+
+    rows.forEach((row) => {
+        const label = row.labelName?.trim();
+        if (!label) return;
+
+        const color = row.zoneColor || fallbackColor;
+        const key = `${label.toLowerCase()}|${color.toLowerCase()}`;
+
+        if (!entries.has(key)) {
+            entries.set(key, {
+                key,
+                label,
+                color,
+            });
+        }
+    });
+
+    return Array.from(entries.values());
+}
+
+function buildStandingsLegendLayout(
+    ctx: CanvasRenderingContext2D,
+    items: StandingsLegendEntry[],
+    maxWidth: number,
+    isStory: boolean,
+) {
+    if (items.length === 0) {
+        return {
+            rows: [] as Array<Array<StandingsLegendEntry & { width: number }>>,
+            chipHeight: 0,
+            titleHeight: 0,
+            totalHeight: 0,
+        };
+    }
+
+    const chipHeight = isStory ? 30 : 26;
+    const horizontalPadding = isStory ? 14 : 12;
+    const gapX = isStory ? 12 : 10;
+    const gapY = isStory ? 12 : 10;
+    const titleHeight = isStory ? 18 : 16;
+
+    ctx.save();
+    ctx.font = `800 ${isStory ? 13 : 12}px ${FONT_BODY}`;
+
+    const rows: Array<Array<StandingsLegendEntry & { width: number }>> = [];
+    let currentRow: Array<StandingsLegendEntry & { width: number }> = [];
+    let currentWidth = 0;
+
+    items.forEach((item) => {
+        const label = item.label.trim().toUpperCase();
+        const textWidth = ctx.measureText(label).width;
+        const chipWidth = Math.max(82, Math.min(maxWidth, textWidth + horizontalPadding * 2));
+        const nextWidth = currentRow.length === 0 ? chipWidth : currentWidth + gapX + chipWidth;
+
+        if (currentRow.length > 0 && nextWidth > maxWidth) {
+            rows.push(currentRow);
+            currentRow = [{ ...item, width: chipWidth }];
+            currentWidth = chipWidth;
+            return;
+        }
+
+        currentRow.push({ ...item, width: chipWidth });
+        currentWidth = nextWidth;
+    });
+
+    if (currentRow.length > 0) rows.push(currentRow);
+    ctx.restore();
+
+    const totalHeight = titleHeight + 10 + rows.length * chipHeight + Math.max(0, rows.length - 1) * gapY;
+
+    return {
+        rows,
+        chipHeight,
+        titleHeight,
+        totalHeight,
+    };
+}
+
+function drawStandingsLegend(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    maxWidth: number,
+    items: StandingsLegendEntry[],
+    isDark: boolean,
+    isStory: boolean,
+) {
+    const layout = buildStandingsLegendLayout(ctx, items, maxWidth, isStory);
+    if (layout.rows.length === 0) return 0;
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = getMutedColor(isDark, 0.72);
+    ctx.font = `800 ${isStory ? 14 : 12}px ${FONT_BODY}`;
+    ctx.fillText('LEYENDA', x, y + layout.titleHeight);
+    ctx.restore();
+
+    let cursorY = y + layout.titleHeight + 10 + layout.chipHeight / 2;
+    const gapX = isStory ? 12 : 10;
+    const gapY = isStory ? 12 : 10;
+
+    layout.rows.forEach((row) => {
+        let cursorX = x;
+
+        row.forEach((item) => {
+            drawStandingsLabelPill(
+                ctx,
+                cursorX,
+                cursorY,
+                item.label,
+                item.color,
+                isDark,
+                layout.chipHeight,
+                item.width,
+            );
+            cursorX += item.width + gapX;
+        });
+
+        cursorY += layout.chipHeight + gapY;
+    });
+
+    return layout.totalHeight;
+}
+
 function drawTournamentRibbon(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -1398,6 +2241,271 @@ function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
     ctx.restore();
 }
 
+function buildEditorialContextLabel(data: MatchStatsData) {
+    const rawTournament = data.tournament?.trim().toUpperCase() || '';
+    const compactTournament = rawTournament
+        .replace(/^SUPER RUGBY AMERICAS\s*/i, 'SRA ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    if (compactTournament && compactTournament.length <= 20) {
+        return compactTournament;
+    }
+
+    if (data.date && data.time) {
+        return `${data.date} - ${data.time}`.toUpperCase();
+    }
+
+    if (data.date) {
+        return data.date.toUpperCase();
+    }
+
+    return compactTournament || 'RESULTADO FINAL';
+}
+
+function drawCoverImage(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    image: HTMLImageElement | null,
+    options: { focusX?: number; focusY?: number } = {}
+) {
+    if (!image) return false;
+    const sourceWidth = image.naturalWidth || image.width || canvas.width;
+    const sourceHeight = image.naturalHeight || image.height || canvas.height;
+    const scale = Math.max(canvas.width / sourceWidth, canvas.height / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    const focusX = Math.min(1, Math.max(0, options.focusX ?? 0.5));
+    const focusY = Math.min(1, Math.max(0, options.focusY ?? 0.5));
+    const desiredOffsetX = canvas.width / 2 - drawWidth * focusX;
+    const desiredOffsetY = canvas.height / 2 - drawHeight * focusY;
+    const offsetX = Math.min(0, Math.max(canvas.width - drawWidth, desiredOffsetX));
+    const offsetY = Math.min(0, Math.max(canvas.height - drawHeight, desiredOffsetY));
+    ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+    return true;
+}
+
+function drawEditorialHeaderArrows(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+    ctx.save();
+    ctx.translate(canvas.width - 146, 88);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 12;
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#ffffff';
+
+    for (let index = 0; index < 3; index += 1) {
+        const x = index * 32;
+        ctx.beginPath();
+        ctx.moveTo(x, -18);
+        ctx.lineTo(x + 18, 0);
+        ctx.lineTo(x, 18);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function drawEditorialTopBadge(ctx: CanvasRenderingContext2D, label: string) {
+    const text = label.toUpperCase();
+    const x = 66;
+    const y = 62;
+    const height = 50;
+    const paddingX = 20;
+
+    ctx.save();
+    ctx.font = `900 30px ${FONT_EDITORIAL}`;
+    const width = ctx.measureText(text).width + paddingX * 2;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.76)';
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, 6);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + paddingX, y + height / 2 + 2);
+    ctx.restore();
+}
+
+function drawEditorialFooter(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    brandLogo: HTMLImageElement | null,
+    centerY: number
+) {
+    const iconSize = 22;
+    const gap = 10;
+
+    ctx.save();
+    ctx.font = `800 18px ${FONT_EDITORIAL}`;
+    const g22Width = ctx.measureText('G22').width;
+    ctx.font = `800 18px ${FONT_BODY}`;
+    const scoresWidth = ctx.measureText('Scores').width;
+    const totalWidth = iconSize + gap + g22Width + 6 + scoresWidth;
+    const pillWidth = totalWidth + 22;
+    const pillHeight = 36;
+    const startX = canvas.width / 2 - totalWidth / 2;
+    const pillY = centerY - pillHeight / 2;
+
+    ctx.fillStyle = 'rgba(6, 10, 14, 0.48)';
+    ctx.beginPath();
+    ctx.roundRect(canvas.width / 2 - pillWidth / 2, pillY, pillWidth, pillHeight, 999);
+    ctx.fill();
+    ctx.restore();
+
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: startX + iconSize / 2,
+            y: centerY,
+            size: iconSize,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark: true,
+        });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = `800 18px ${FONT_EDITORIAL}`;
+    ctx.fillStyle = BRAND_ACCENT;
+    ctx.fillText('G22', startX + iconSize + gap, centerY + 1);
+    ctx.font = `800 18px ${FONT_BODY}`;
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('Scores', startX + iconSize + gap + g22Width + 6, centerY + 1);
+    ctx.restore();
+
+    return { pillWidth, pillHeight };
+}
+
+function drawEditorialSponsorsRow(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    sponsors: MatchSponsorData[],
+    sponsorImages: Array<HTMLImageElement | null>,
+    brandLogo: HTMLImageElement | null,
+    centerY: number,
+    logoHeight: number,
+    gap: number
+) {
+    const sponsorItems = sponsors
+        .map((sponsor, index) => ({
+            sponsor,
+            img: sponsorImages[index] || null,
+        }))
+        .filter((item) => item.img || item.sponsor.name?.trim())
+        .slice(0, EDITORIAL_SPONSOR_SLOTS);
+
+    const leftCount = Math.min(3, Math.ceil(sponsorItems.length / 2));
+    const leftSponsors = sponsorItems.slice(0, leftCount);
+    const rightSponsors = sponsorItems.slice(leftCount, leftCount + 3);
+    const brandMetrics = drawEditorialFooter(ctx, canvas, brandLogo, centerY);
+    const sidePadding = 64;
+    const centerGap = 34;
+    const sideZoneWidth = canvas.width / 2 - sidePadding - brandMetrics.pillWidth / 2 - centerGap;
+    const maxSideCount = Math.max(leftSponsors.length, rightSponsors.length, 1);
+    const slotWidth = Math.max(94, Math.min(120, Math.floor((sideZoneWidth - gap * (maxSideCount - 1)) / maxSideCount)));
+    const bandWidth = canvas.width - sidePadding * 2;
+    const bandHeight = Math.round(logoHeight * 1.18);
+    const bandY = centerY - bandHeight / 2;
+
+    ctx.save();
+    const bandGlow = ctx.createLinearGradient(0, bandY, 0, bandY + bandHeight);
+    bandGlow.addColorStop(0, 'rgba(8, 12, 18, 0)');
+    bandGlow.addColorStop(0.34, 'rgba(8, 12, 18, 0.08)');
+    bandGlow.addColorStop(1, 'rgba(8, 12, 18, 0.2)');
+    ctx.fillStyle = bandGlow;
+    ctx.beginPath();
+    ctx.roundRect(sidePadding, bandY, bandWidth, bandHeight, bandHeight / 2);
+    ctx.fill();
+    ctx.restore();
+
+    const drawSponsorGroup = (
+        items: Array<{ sponsor: MatchSponsorData; img: HTMLImageElement | null }>,
+        startX: number,
+        endX: number
+    ) => {
+        if (items.length === 0) return;
+
+        const groupWidth = items.length * slotWidth + Math.max(0, items.length - 1) * gap;
+        let cursorX = startX + (endX - startX - groupWidth) / 2;
+
+        items.forEach(({ sponsor, img }) => {
+            const drawX = cursorX + slotWidth / 2;
+
+            ctx.save();
+            const logoShadow = ctx.createRadialGradient(drawX, centerY + logoHeight * 0.18, 8, drawX, centerY + logoHeight * 0.18, slotWidth * 0.46);
+            logoShadow.addColorStop(0, 'rgba(0,0,0,0.26)');
+            logoShadow.addColorStop(0.65, 'rgba(0,0,0,0.1)');
+            logoShadow.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = logoShadow;
+            ctx.fillRect(drawX - slotWidth / 2, centerY - logoHeight * 0.46, slotWidth, logoHeight * 1.1);
+            ctx.restore();
+
+            if (img) {
+                const sourceWidth = img.naturalWidth || img.width || slotWidth;
+                const sourceHeight = img.naturalHeight || img.height || logoHeight;
+                const scale = Math.min(slotWidth / Math.max(sourceWidth, 1), logoHeight / Math.max(sourceHeight, 1));
+                const drawWidth = sourceWidth * scale;
+                const drawHeight = sourceHeight * scale;
+
+                ctx.save();
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.globalAlpha = 1;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.38)';
+                ctx.shadowBlur = 16;
+                ctx.shadowOffsetY = 6;
+                ctx.drawImage(img, drawX - drawWidth / 2, centerY - drawHeight / 2, drawWidth, drawHeight);
+                ctx.restore();
+            } else {
+                ctx.save();
+                ctx.fillStyle = 'rgba(255,255,255,0.97)';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = `800 18px ${FONT_BODY}`;
+                ctx.fillText((sponsor.name || 'SPONSOR').toUpperCase(), drawX, centerY + 1);
+                ctx.restore();
+            }
+
+            cursorX += slotWidth + gap;
+        });
+    };
+
+    drawSponsorGroup(leftSponsors, sidePadding, canvas.width / 2 - brandMetrics.pillWidth / 2 - centerGap);
+    drawSponsorGroup(rightSponsors, canvas.width / 2 + brandMetrics.pillWidth / 2 + centerGap, canvas.width - sidePadding);
+}
+
+function drawEditorialGradientTexture(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    textureImage: HTMLImageElement | null,
+    startY: number
+) {
+    if (!textureImage) return;
+    const height = canvas.height - startY;
+
+    ctx.save();
+    ctx.translate(0, startY);
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.globalAlpha = 0.1;
+    ctx.drawImage(textureImage, 0, 0, canvas.width, height);
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.globalAlpha = 0.14;
+    ctx.drawImage(textureImage, 0, 0, canvas.width, height);
+
+    const paperFade = ctx.createLinearGradient(0, 0, 0, height);
+    paperFade.addColorStop(0, 'rgba(255,255,255,0.014)');
+    paperFade.addColorStop(0.42, 'rgba(255,255,255,0.006)');
+    paperFade.addColorStop(1, 'rgba(0,0,0,0.032)');
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = paperFade;
+    ctx.fillRect(0, 0, canvas.width, height);
+    ctx.restore();
+}
+
 function formatDiff(value: string | number) {
     if (typeof value === 'number') return value > 0 ? `+${value}` : String(value);
     const trimmed = value.trim();
@@ -1416,6 +2524,249 @@ function getStatusColor(status: string | undefined, accentColor: string, isDark:
     if (status === 'live') return '#ef4444';
     if (status === 'finished' || status === 'final') return accentColor;
     return isDark ? '#cbd5e1' : '#475569';
+}
+
+async function drawMatchEditorialResult(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    backgroundImageSrc: string,
+    gradientLeftColor: string,
+    gradientRightColor: string
+) {
+    const editorialPreset = getEditorialLayoutPreset(data.editorialLayoutPresetId);
+    const sponsors = getActiveEditorialSponsors(buildEditorialSponsorSlots(data.sponsors));
+    const [backgroundImage, homeLogo, awayLogo, tournamentLogo, textureImage, ...sponsorImages] = await Promise.all([
+        loadImage(backgroundImageSrc),
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        loadImage(EDITORIAL_TEXTURE_SOURCE),
+        ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
+    ]);
+
+    if (!backgroundImage) {
+        throw new Error('No se pudo cargar la foto de fondo');
+    }
+
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawCoverImage(ctx, canvas, backgroundImage, { focusX: 0.56, focusY: 0.4 });
+    const overlayTop = canvas.height * (format.height > format.width ? 0.61 : 0.58);
+
+    ctx.save();
+    ctx.font = `800 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    const scoreMetrics = ctx.measureText('88');
+    ctx.restore();
+
+    const scoreAscent = scoreMetrics.actualBoundingBoxAscent || 196;
+    const scoreDescent = scoreMetrics.actualBoundingBoxDescent || 22;
+    const scoreHeight = scoreAscent + scoreDescent;
+    const lineColor = 'rgba(255, 255, 255, 0.88)';
+    const sidePadding = 72;
+    const leftColumnX = editorialPreset.scoreInset;
+    const rightColumnX = canvas.width - editorialPreset.scoreInset;
+    const lineHalfWidth = editorialPreset.lineWidth / 2;
+    const leftLineStartX = leftColumnX - lineHalfWidth;
+    const leftLineEndX = leftColumnX + lineHalfWidth;
+    const rightLineStartX = rightColumnX - lineHalfWidth;
+    const rightLineEndX = rightColumnX + lineHalfWidth;
+    const bottomRuleY = canvas.height - editorialPreset.bottomRuleInset;
+    const topRuleY = bottomRuleY - editorialPreset.scoreBottomGap - scoreHeight - editorialPreset.scoreTopGap;
+    const scoreTopY = topRuleY + editorialPreset.scoreTopGap;
+    const scoreBaselineY = scoreTopY + scoreAscent;
+    const scoreCenterY = scoreTopY + scoreHeight / 2;
+    const titleY = topRuleY;
+    const tournamentLogoY = scoreCenterY + editorialPreset.tournamentLogoOffsetY;
+    const teamLogoY = topRuleY - editorialPreset.logoOffsetY;
+    const gradientStartY = Math.max(Math.round(titleY - editorialPreset.titleFontSize * 0.95), Math.round(overlayTop - 16));
+
+    const topShade = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.24);
+    topShade.addColorStop(0, 'rgba(0, 0, 0, 0.78)');
+    topShade.addColorStop(0.54, 'rgba(0, 0, 0, 0.18)');
+    ctx.fillStyle = topShade;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const bottomShade = ctx.createLinearGradient(0, gradientStartY - 24, 0, canvas.height);
+    bottomShade.addColorStop(0, 'rgba(2, 6, 10, 0)');
+    bottomShade.addColorStop(0.16, 'rgba(2, 6, 10, 0.46)');
+    bottomShade.addColorStop(0.56, 'rgba(2, 6, 10, 0.6)');
+    bottomShade.addColorStop(1, `rgba(2, 6, 10, ${editorialPreset.gradientBottomOpacity})`);
+    ctx.fillStyle = bottomShade;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const gradientHeight = canvas.height - gradientStartY;
+    const gradientLayer = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+    if (gradientLayer) {
+        gradientLayer.width = canvas.width;
+        gradientLayer.height = gradientHeight;
+        const gradientLayerCtx = gradientLayer.getContext('2d');
+
+        if (gradientLayerCtx) {
+            const centerBlendColor = mixHexColors(gradientLeftColor, gradientRightColor, 0.5);
+            const horizontalBlend = gradientLayerCtx.createLinearGradient(0, 0, gradientLayer.width, 0);
+            horizontalBlend.addColorStop(0, hexToRGBA(gradientLeftColor, 1));
+            horizontalBlend.addColorStop(0.2, hexToRGBA(gradientLeftColor, 1));
+            horizontalBlend.addColorStop(0.5, hexToRGBA(centerBlendColor, 1));
+            horizontalBlend.addColorStop(0.8, hexToRGBA(gradientRightColor, 1));
+            horizontalBlend.addColorStop(1, hexToRGBA(gradientRightColor, 1));
+            gradientLayerCtx.fillStyle = horizontalBlend;
+            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+            const leftBloom = gradientLayerCtx.createRadialGradient(
+                gradientLayer.width * 0.14,
+                gradientLayer.height * 0.9,
+                12,
+                gradientLayer.width * 0.14,
+                gradientLayer.height * 0.9,
+                gradientLayer.width * 0.34
+            );
+            leftBloom.addColorStop(0, hexToRGBA(gradientLeftColor, 0.68));
+            leftBloom.addColorStop(0.64, hexToRGBA(gradientLeftColor, 0.3));
+            leftBloom.addColorStop(1, 'rgba(255, 41, 84, 0)');
+            gradientLayerCtx.fillStyle = leftBloom;
+            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+            const rightBloom = gradientLayerCtx.createRadialGradient(
+                gradientLayer.width * 0.86,
+                gradientLayer.height * 0.9,
+                12,
+                gradientLayer.width * 0.86,
+                gradientLayer.height * 0.9,
+                gradientLayer.width * 0.34
+            );
+            rightBloom.addColorStop(0, hexToRGBA(gradientRightColor, 0.68));
+            rightBloom.addColorStop(0.64, hexToRGBA(gradientRightColor, 0.3));
+            rightBloom.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            gradientLayerCtx.fillStyle = rightBloom;
+            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+            gradientLayerCtx.globalCompositeOperation = 'destination-in';
+            const verticalFade = gradientLayerCtx.createLinearGradient(0, 0, 0, gradientLayer.height);
+            verticalFade.addColorStop(0, 'rgba(0,0,0,0)');
+            verticalFade.addColorStop(0.16, 'rgba(0,0,0,0.16)');
+            verticalFade.addColorStop(0.42, 'rgba(0,0,0,0.58)');
+            verticalFade.addColorStop(0.72, 'rgba(0,0,0,0.94)');
+            verticalFade.addColorStop(1, 'rgba(0,0,0,1)');
+            gradientLayerCtx.fillStyle = verticalFade;
+            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'soft-light';
+            ctx.globalAlpha = 0.6;
+            ctx.drawImage(gradientLayer, 0, gradientStartY);
+            ctx.restore();
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 0.55;
+            ctx.drawImage(gradientLayer, 0, gradientStartY);
+            ctx.restore();
+        }
+    }
+
+    const centerVignette = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.46, 110, canvas.width / 2, canvas.height * 0.66, canvas.width * 0.88);
+    centerVignette.addColorStop(0, 'rgba(255,255,255,0)');
+    centerVignette.addColorStop(1, 'rgba(2, 6, 10, 0.22)');
+    ctx.fillStyle = centerVignette;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawEditorialGradientTexture(ctx, canvas, textureImage, gradientStartY);
+
+    drawEditorialTopBadge(ctx, (data.mainTitle || getStatusLabel(data.status)).replace('PROGRAMADO', 'FIXTURE'));
+    drawEditorialHeaderArrows(ctx, canvas);
+
+    drawOverflowCrest(ctx, {
+        x: leftColumnX,
+        y: teamLogoY,
+        width: editorialPreset.logoWidth,
+        height: editorialPreset.logoHeight,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: true,
+    });
+    drawOverflowCrest(ctx, {
+        x: rightColumnX,
+        y: teamLogoY,
+        width: editorialPreset.logoWidth,
+        height: editorialPreset.logoHeight,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: true,
+    });
+
+    const contextLabel = buildEditorialContextLabel(data);
+    ctx.save();
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(leftLineStartX, topRuleY);
+    ctx.lineTo(leftLineEndX, topRuleY);
+    ctx.moveTo(rightLineStartX, topRuleY);
+    ctx.lineTo(rightLineEndX, topRuleY);
+    ctx.moveTo(sidePadding, bottomRuleY);
+    ctx.lineTo(canvas.width - sidePadding, bottomRuleY);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 ${editorialPreset.titleFontSize}px ${FONT_BODY}`;
+    ctx.fillText(contextLabel, canvas.width / 2, titleY + 1);
+    ctx.restore();
+
+    if (tournamentLogo) {
+        drawOverflowCrest(ctx, {
+            x: canvas.width / 2,
+            y: tournamentLogoY,
+            width: editorialPreset.tournamentLogoSize,
+            height: editorialPreset.tournamentLogoSize,
+            img: tournamentLogo,
+            label: data.tournament || 'Torneo',
+            rawLogo: data.tournamentLogo,
+            isDark: true,
+        });
+    } else {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(255,255,255,0.94)';
+        ctx.font = `900 40px ${FONT_EDITORIAL}`;
+        ctx.fillText('G22', canvas.width / 2, tournamentLogoY);
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.32)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetY = 10;
+    ctx.font = `800 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(String(data.homeScore ?? '-'), leftColumnX, scoreBaselineY);
+    ctx.fillText(String(data.awayScore ?? '-'), rightColumnX, scoreBaselineY);
+    ctx.restore();
+
+    const sponsorBandCenterY = bottomRuleY + Math.round(editorialPreset.sponsorLogoHeight * 0.5) + 12;
+    drawEditorialSponsorsRow(
+        ctx,
+        canvas,
+        sponsors,
+        sponsorImages,
+        brandLogo,
+        sponsorBandCenterY,
+        editorialPreset.sponsorLogoHeight,
+        editorialPreset.sponsorGap
+    );
 }
 
 async function drawMatchResult(
@@ -1608,6 +2959,7 @@ async function drawStandings(
     const safe = getSafeArea(canvas);
     const isStory = format.height > format.width;
     const slideRows = slide.groups.flatMap((group) => group.rows);
+    const legendItems = collectStandingsLegendEntries(slideRows, accentColor);
     const [tournamentLogo, ...teamLogos] = await Promise.all([
         loadImage(data.tournamentLogo || ''),
         ...slideRows.map((row) => loadImage(row.teamLogo || '')),
@@ -1649,7 +3001,7 @@ async function drawStandings(
     const headerY = panelY + 34;
     ctx.save();
     ctx.fillStyle = mutedColor;
-    ctx.font = `700 ${isStory ? 16 : 14}px ${FONT_BODY}`;
+    ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
     ctx.textAlign = 'center';
     ctx.fillText('POS', panelX + 58, headerY);
     ctx.textAlign = 'left';
@@ -1671,8 +3023,9 @@ async function drawStandings(
     ctx.stroke();
     ctx.restore();
 
+    const legendLayout = buildStandingsLegendLayout(ctx, legendItems, panelWidth - 48, isStory);
     const bodyTop = headerY + 46;
-    const bodyBottom = panelY + panelHeight - 24;
+    const bodyBottom = panelY + panelHeight - 24 - (legendLayout.totalHeight > 0 ? legendLayout.totalHeight + (isStory ? 26 : 22) : 0);
     const hasGroupHeaders = slide.groups.some((group) => group.name);
     const groupTitleHeight = hasGroupHeaders ? (isStory ? 34 : 30) : 0;
     const groupTitleGap = hasGroupHeaders ? (isStory ? 10 : 8) : 0;
@@ -1682,12 +3035,12 @@ async function drawStandings(
         return total + groupTitleHeight + groupTitleGap + (index > 0 ? interGroupGap : 0);
     }, 0);
     const rawRowHeight = (bodyBottom - bodyTop - reservedGroupSpace) / Math.max(slide.totalRows, 1);
-    const rowHeight = Math.max(isStory ? 32 : 28, Math.min(isStory ? 68 : 60, rawRowHeight));
+    const rowHeight = Math.max(isStory ? 32 : 30, Math.min(isStory ? 70 : 62, rawRowHeight));
     const crestHeight = Math.min(isStory ? 50 : 44, Math.max(isStory ? 38 : 34, rowHeight - 4));
     const crestWidth = Math.min(isStory ? 46 : 40, crestHeight * 0.9);
-    const posFontSize = Math.max(18, Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.42)));
-    const statFontSize = Math.max(14, Math.min(isStory ? 24 : 20, Math.round(rowHeight * 0.34)));
-    const pointsFontSize = Math.max(18, Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.4)));
+    const posFontSize = Math.max(20, Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.44)));
+    const statFontSize = Math.max(16, Math.min(isStory ? 26 : 22, Math.round(rowHeight * 0.36)));
+    const pointsFontSize = Math.max(20, Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.42)));
     const colPosX = panelX + 58;
     const colTeamX = panelX + 118;
     const colPlayedX = panelX + panelWidth - 292;
@@ -1727,25 +3080,26 @@ async function drawStandings(
         group.rows.forEach((row) => {
             const y = cursorY;
             const centerY = y + rowHeight / 2;
-            const rowBg = rowIndex % 2 === 0 ? hexToRGBA(accentColor, isDark ? 0.05 : 0.035) : 'transparent';
             const rowLabel = row.labelName?.trim() || '';
-            const rowLabelColor = row.zoneColor || accentColor;
+            const rowAccentColor = row.zoneColor || accentColor;
+            const rowBg = rowLabel
+                ? hexToRGBA(rowAccentColor, isDark ? 0.18 : 0.12)
+                : rowIndex % 2 === 0
+                    ? hexToRGBA(accentColor, isDark ? 0.05 : 0.035)
+                    : 'transparent';
 
             ctx.save();
             if (rowBg !== 'transparent') {
                 ctx.fillStyle = rowBg;
-                ctx.beginPath();
-                ctx.roundRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4, 20);
-                ctx.fill();
+                ctx.fillRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4);
             }
-            if (row.zoneColor) {
-                ctx.fillStyle = row.zoneColor;
-                ctx.beginPath();
-                ctx.roundRect(panelX + 20, y + Math.max(6, rowHeight * 0.14), 6, Math.max(14, rowHeight - 16), 999);
-                ctx.fill();
+            if (rowLabel) {
+                ctx.strokeStyle = hexToRGBA(rowAccentColor, isDark ? 0.34 : 0.22);
+                ctx.lineWidth = 1;
+                ctx.strokeRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4);
             }
 
-            ctx.fillStyle = accentColor;
+            ctx.fillStyle = rowAccentColor;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.font = `800 ${posFontSize}px ${FONT_MONO}`;
@@ -1766,20 +3120,7 @@ async function drawStandings(
             ctx.textAlign = 'left';
             ctx.fillStyle = textColor;
             ctx.textBaseline = 'middle';
-            const labelFontSize = Math.max(10, Math.min(14, Math.round(rowHeight * 0.24)));
-            let labelWidth = 0;
-            if (rowLabel) {
-                ctx.font = `800 ${labelFontSize}px ${FONT_BODY}`;
-                labelWidth = Math.min(Math.max(56, ctx.measureText(rowLabel.toUpperCase()).width + 22), Math.max(72, teamMaxWidth * 0.42));
-            }
-            const teamTextWidth = Math.max(64, teamMaxWidth - (rowLabel ? labelWidth + 12 : 0));
-            setFittedFont(ctx, row.team.toUpperCase(), teamTextWidth, '800', Math.min(isStory ? 28 : 24, Math.round(rowHeight * 0.38)), FONT_DISPLAY, 14);
-            ctx.fillText(row.team.toUpperCase(), teamTextX, centerY + 1);
-            if (rowLabel) {
-                const renderedTeamWidth = ctx.measureText(row.team.toUpperCase()).width;
-                const labelX = Math.min(teamTextX + renderedTeamWidth + 12, colPlayedX - labelWidth - 12);
-                drawStandingsLabelPill(ctx, labelX, centerY, rowLabel, rowLabelColor, isDark, rowHeight, labelWidth);
-            }
+            drawStandingsTeamName(ctx, row.team, teamTextX, centerY, teamMaxWidth, isStory, rowHeight);
 
             ctx.textAlign = 'center';
             ctx.font = `700 ${statFontSize}px ${FONT_BODY}`;
@@ -1788,7 +3129,7 @@ async function drawStandings(
             ctx.fillText(String(row.lost), colLostX, centerY + 1);
 
             const diffText = data.plainDiff ? String(row.diff).trim() : formatDiff(row.diff);
-            ctx.fillStyle = !data.plainDiff && diffText.startsWith('-') ? '#ef4444' : accentColor;
+            ctx.fillStyle = !data.plainDiff && diffText.startsWith('-') ? '#ef4444' : rowAccentColor;
             ctx.font = `800 ${statFontSize}px ${FONT_MONO}`;
             ctx.fillText(diffText, colDiffX, centerY + 1);
 
@@ -1801,6 +3142,29 @@ async function drawStandings(
             cursorY += rowHeight;
         });
     });
+
+    if (legendItems.length > 0) {
+        const legendTop = bodyBottom + (isStory ? 18 : 16);
+
+        ctx.save();
+        ctx.strokeStyle = softColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(panelX + 24, legendTop - (isStory ? 10 : 8));
+        ctx.lineTo(panelX + panelWidth - 24, legendTop - (isStory ? 10 : 8));
+        ctx.stroke();
+        ctx.restore();
+
+        drawStandingsLegend(
+            ctx,
+            panelX + 24,
+            legendTop,
+            panelWidth - 48,
+            legendItems,
+            isDark,
+            isStory,
+        );
+    }
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }

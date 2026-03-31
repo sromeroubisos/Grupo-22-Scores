@@ -960,7 +960,8 @@
 .teamName {
   color: var(--text);
   font-size: 13px;
-  font-weight: 700;
+  font-family: "Outfit", "Inter", system-ui, sans-serif;
+  font-weight: 900;
   letter-spacing: 0.01em;
 }
 

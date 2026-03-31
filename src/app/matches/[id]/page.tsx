@@ -118,20 +118,99 @@ function resolveMatchTeamLogo(primaryTeam: any, fallbackTeam?: any, fallbackLogo
     return resolveTeamLogo(primaryTeam, fallbackTeam, { logo: fallbackLogo || '' });
 }
 
-function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamName?: string }) {
+function normalizeComparableTeamValue(value: unknown) {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function getComparableTeamId(value: unknown) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function getH2HSideId(match: any, side: 'home' | 'away') {
+    return getComparableTeamId(
+        match?.[`${side}_team`]?.id ||
+        match?.[`${side}_team`]?.team_id ||
+        match?.[`${side}_club_id`] ||
+        '',
+    );
+}
+
+function getH2HSideName(match: any, side: 'home' | 'away') {
+    return normalizeComparableTeamValue(
+        match?.[`${side}_team`]?.name ||
+        match?.[`${side}_team`]?.short_name ||
+        match?.[side] ||
+        '',
+    );
+}
+
+function doesH2HSideMatchTeam(
+    match: any,
+    side: 'home' | 'away',
+    team: { id?: string | null; name?: string | null } | null | undefined,
+) {
+    if (!team) return false;
+
+    const teamId = getComparableTeamId(team.id);
+    const sideId = getH2HSideId(match, side);
+    if (teamId && sideId && teamId === sideId) return true;
+
+    const teamName = normalizeComparableTeamValue(team.name);
+    const sideName = getH2HSideName(match, side);
+    return Boolean(teamName) && Boolean(sideName) && teamName === sideName;
+}
+
+function doesH2HMatchTeam(match: any, team: { id?: string | null; name?: string | null } | null | undefined) {
+    return doesH2HSideMatchTeam(match, 'home', team) || doesH2HSideMatchTeam(match, 'away', team);
+}
+
+function isDirectH2HMatch(
+    match: any,
+    homeTeam: { id?: string | null; name?: string | null } | null | undefined,
+    awayTeam: { id?: string | null; name?: string | null } | null | undefined,
+) {
+    const sameOrder = doesH2HSideMatchTeam(match, 'home', homeTeam) && doesH2HSideMatchTeam(match, 'away', awayTeam);
+    const swappedOrder = doesH2HSideMatchTeam(match, 'home', awayTeam) && doesH2HSideMatchTeam(match, 'away', homeTeam);
+    return sameOrder || swappedOrder;
+}
+
+function H2HItem({
+    m,
+    styles,
+    focusTeam,
+    referenceTeams,
+}: {
+    m: any,
+    styles: any,
+    focusTeam?: { id?: string | null; name?: string | null },
+    referenceTeams?: {
+        home?: { id?: string | null; name?: string | null; logo?: string | null };
+        away?: { id?: string | null; name?: string | null; logo?: string | null };
+    }
+}) {
     const date = m.timestamp ? new Date(m.timestamp * 1000).toLocaleDateString('es-AR', { timeZone: USER_TZ }) : (m.date || '');
+    const fallbackHomeLogo = referenceTeams?.home && doesH2HSideMatchTeam(m, 'home', referenceTeams.home)
+        ? referenceTeams.home.logo
+        : null;
+    const fallbackAwayLogo = referenceTeams?.away && doesH2HSideMatchTeam(m, 'away', referenceTeams.away)
+        ? referenceTeams.away.logo
+        : null;
+    const homeLogo = resolveMatchTeamLogo(m.home_team, referenceTeams?.home, fallbackHomeLogo);
+    const awayLogo = resolveMatchTeamLogo(m.away_team, referenceTeams?.away, fallbackAwayLogo);
 
     // Determine status relative to focusTeamName if provided
     let status = m.status;
-    if (focusTeamName && m.scores) {
+    if (focusTeam && m.scores) {
         const hScore = parseInt(m.scores.home || '0');
         const aScore = parseInt(m.scores.away || '0');
-        const homeName = m.home_team?.name || m.home;
-        const awayName = m.away_team?.name || m.away;
 
-        if (homeName === focusTeamName) {
+        if (doesH2HSideMatchTeam(m, 'home', focusTeam)) {
             status = hScore > aScore ? 'W' : hScore < aScore ? 'L' : 'D';
-        } else if (awayName === focusTeamName) {
+        } else if (doesH2HSideMatchTeam(m, 'away', focusTeam)) {
             status = aScore > hScore ? 'W' : aScore < hScore ? 'L' : 'D';
         }
     }
@@ -144,16 +223,16 @@ function H2HItem({ m, styles, focusTeamName }: { m: any, styles: any, focusTeamN
             </div>
             <div className={styles.h2hTeams}>
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                    {getTeamLogo(m.home_team) ? (
-                        <img src={getTeamLogo(m.home_team)} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                    {homeLogo ? (
+                        <img src={homeLogo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
                     ) : (
                         <div style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
                     )}
                 </div>
                 <span className={styles.h2hScore}>{m.scores?.home} - {m.scores?.away}</span>
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-                    {getTeamLogo(m.away_team) ? (
-                        <img src={getTeamLogo(m.away_team)} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                    {awayLogo ? (
+                        <img src={awayLogo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
                     ) : (
                         <div style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
                     )}
@@ -541,6 +620,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             const homeClubId = matchData.homeClub?.id || matchData.homeClubId || '';
                             const awayClubId = matchData.awayClub?.id || matchData.awayClubId || '';
                             const tournamentId = matchData.tournamentId || '';
+                            const phaseId = matchData.phaseId || matchData.phase_id || '';
+                            const groupId = matchData.groupId || matchData.group_id || '';
                             const localLineups = normalizeLocalLineups(matchData.lineups || null);
                             const localEvents = normalizeLocalEvents(matchData.events || []);
                             const localPlayerRows = buildLocalPlayerStatsRows({
@@ -561,6 +642,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 time: matchData.dateTime
                                     ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
                                     : '--:--',
+                                phaseId: phaseId || null,
+                                groupId: groupId || null,
                                 tournament: matchData.tournament?.name || 'Partido Local',
                                 tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
@@ -602,9 +685,16 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                             // Parallel-fetch standings + H2H
                             const [standingsRes, h2hRes] = await Promise.allSettled([
-                                tournamentId
-                                    ? fetch(`/api/db/standings?tournament=${tournamentId}`, { signal: controller.signal }).then(r => r.ok ? r.json() : null)
-                                    : Promise.resolve(null),
+                                (() => {
+                                    if (!tournamentId) return Promise.resolve(null);
+
+                                    const params = new URLSearchParams({ tournament: tournamentId });
+                                    if (phaseId) params.set('phase', phaseId);
+                                    if (groupId) params.set('group', groupId);
+
+                                    return fetch(`/api/db/standings?${params.toString()}`, { signal: controller.signal })
+                                        .then(r => r.ok ? r.json() : null);
+                                })(),
                                 homeClubId && awayClubId
                                     ? fetch(
                                         `/api/db/h2h?home=${homeClubId}&away=${awayClubId}${sportId ? `&sport=${encodeURIComponent(String(sportId))}` : ''}`,
@@ -623,7 +713,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 rank: row.position,
                                 name: row.team?.name ?? row.team_name ?? '',
                                 team_id: row.team?.id ?? row.team_id ?? null,
-                                logo: row.team?.logo ?? row.team_logo ?? '',
+                                logo: resolveMatchTeamLogo(row.team, row, row.team_logo ?? row.logo ?? ''),
                                 team: row.team ?? null,
                                 matches_played: row.matches_total ?? 0,
                                 goal_difference: row.goal_difference ?? 0,
@@ -641,6 +731,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 time: matchData.dateTime
                                     ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
                                     : '--:--',
+                                phaseId: phaseId || null,
+                                groupId: groupId || null,
                                 tournament: matchData.tournament?.name || 'Partido Local',
                                 tournamentLogo: matchData.tournament?.logo || null,
                                 tournamentId,
@@ -1225,12 +1317,17 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                         <div className={styles.h2hColTitle}>Forma: {matchData.home.name}</div>
                                         <div className={styles.h2hList}>
                                             {matchData.h2h?.filter((m: any) => {
-                                                const isHomeMatch = m.home_team?.name === matchData.home.name || m.away_team?.name === matchData.home.name;
-                                                const isDirectH2H = (m.home_team?.name === matchData.home.name && m.away_team?.name === matchData.away.name) ||
-                                                    (m.home_team?.name === matchData.away.name && m.away_team?.name === matchData.home.name);
+                                                const isHomeMatch = doesH2HMatchTeam(m, matchData.home);
+                                                const isDirectH2H = isDirectH2HMatch(m, matchData.home, matchData.away);
                                                 return isHomeMatch && !isDirectH2H;
                                             }).slice(0, 5).map((m: any, i: number) => (
-                                                <H2HItem key={i} m={m} styles={styles} focusTeamName={matchData.home.name} />
+                                                <H2HItem
+                                                    key={i}
+                                                    m={m}
+                                                    styles={styles}
+                                                    focusTeam={matchData.home}
+                                                    referenceTeams={{ home: matchData.home, away: matchData.away }}
+                                                />
                                             ))}
                                         </div>
                                     </div>
@@ -1240,10 +1337,14 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                         <div className={styles.h2hColTitle}>Frente a Frente</div>
                                         <div className={styles.h2hList}>
                                             {matchData.h2h?.filter((m: any) =>
-                                                (m.home_team?.name === matchData.home.name && m.away_team?.name === matchData.away.name) ||
-                                                (m.home_team?.name === matchData.away.name && m.away_team?.name === matchData.home.name)
+                                                isDirectH2HMatch(m, matchData.home, matchData.away)
                                             ).slice(0, 5).map((m: any, i: number) => (
-                                                <H2HItem key={i} m={m} styles={styles} />
+                                                <H2HItem
+                                                    key={i}
+                                                    m={m}
+                                                    styles={styles}
+                                                    referenceTeams={{ home: matchData.home, away: matchData.away }}
+                                                />
                                             ))}
                                         </div>
                                     </div>
@@ -1253,12 +1354,17 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                         <div className={styles.h2hColTitle}>Forma: {matchData.away.name}</div>
                                         <div className={styles.h2hList}>
                                             {matchData.h2h?.filter((m: any) => {
-                                                const isAwayMatch = m.home_team?.name === matchData.away.name || m.away_team?.name === matchData.away.name;
-                                                const isDirectH2H = (m.home_team?.name === matchData.home.name && m.away_team?.name === matchData.away.name) ||
-                                                    (m.home_team?.name === matchData.away.name && m.away_team?.name === matchData.home.name);
+                                                const isAwayMatch = doesH2HMatchTeam(m, matchData.away);
+                                                const isDirectH2H = isDirectH2HMatch(m, matchData.home, matchData.away);
                                                 return isAwayMatch && !isDirectH2H;
                                             }).slice(0, 5).map((m: any, i: number) => (
-                                                <H2HItem key={i} m={m} styles={styles} focusTeamName={matchData.away.name} />
+                                                <H2HItem
+                                                    key={i}
+                                                    m={m}
+                                                    styles={styles}
+                                                    focusTeam={matchData.away}
+                                                    referenceTeams={{ home: matchData.home, away: matchData.away }}
+                                                />
                                             ))}
                                         </div>
                                     </div>

@@ -13,7 +13,7 @@ import {
     completeOnboarding,
     getOnboardingStatus,
 } from '@/lib/services/preferencesService';
-import { createClient } from '@/lib/supabase/client';
+import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client';
 
 interface User {
     id: string;
@@ -57,6 +57,18 @@ const isAbortError = (err: unknown) => {
     );
 };
 
+const isSupabaseNetworkError = (err: unknown) => {
+    if (!(err instanceof Error)) {
+        return false;
+    }
+
+    return (
+        err.message.includes('Failed to fetch') ||
+        err.message.includes('NetworkError') ||
+        err.message.includes('Load failed')
+    );
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +87,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const rehydrateMissingOnboardingStatus = useCallback((userId: string) => {
         completeOnboarding(supabase, userId, { skipped: true }).catch(() => { });
+    }, [supabase]);
+
+    const resetBrokenSession = useCallback((reason: string) => {
+        console.warn('[AuthContext] Clearing local Supabase session after auth failure:', reason);
+        clearSupabaseBrowserSession();
+        if (typeof window !== 'undefined') {
+            window.localStorage.removeItem('g22_user');
+        }
+        void supabase.auth.signOut({ scope: 'local' }).catch(() => { });
+
+        if (isMounted.current) {
+            setUser(null);
+            setIsLoading(false);
+        }
     }, [supabase]);
 
     const fetchAndSetUser = useCallback(async (sbUser: SupabaseUser) => {
@@ -213,6 +239,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } catch (err: unknown) {
                 if (isAbortError(err)) return;
                 console.error('[AuthContext] initAuth error:', err);
+                if (isSupabaseNetworkError(err)) {
+                    resetBrokenSession('initAuth network failure');
+                    return;
+                }
                 if (isMounted.current) setIsLoading(false);
             }
         };
@@ -254,7 +284,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isMounted.current = false;
             subscription.unsubscribe();
         };
-    }, [fetchAndSetUser, supabase]);
+    }, [fetchAndSetUser, resetBrokenSession, supabase]);
 
     const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
         void _role;
@@ -276,6 +306,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         } catch (error) {
             console.error('Error logging out:', error);
+            clearSupabaseBrowserSession();
         }
     };
 
