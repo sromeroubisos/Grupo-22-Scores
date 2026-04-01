@@ -1,12 +1,4 @@
 {
-  "fs-qn09jaqf": {
-    "id": "fs-qn09jaqf",
-    "source": "external-api",
-    "groups": [],
-    "assignments": [],
-    "labels": [],
-    "updated_at": "2026-03-30T00:57:40.735Z"
-  },
   "fs-2towypbc": {
     "id": "fs-2towypbc",
     "source": "external-api",
@@ -22,5 +14,70 @@
     "assignments": [],
     "labels": [],
     "updated_at": "2026-03-30T01:07:21.724Z"
+  },
+  "fs-qn09jaqf": {
+    "id": "fs-qn09jaqf",
+    "source": "external-api",
+    "groups": [],
+    "assignments": [],
+    "labels": [
+      {
+        "id": "label-1775033535509-1",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 1,
+        "group_id": null
+      },
+      {
+        "id": "label-1775033615197-2",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 2,
+        "group_id": null
+      },
+      {
+        "id": "label-1775033615837-3",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 3,
+        "group_id": null
+      },
+      {
+        "id": "label-1775033616278-4",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 4,
+        "group_id": null
+      },
+      {
+        "id": "label-1775033616653-5",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 5,
+        "group_id": null
+      },
+      {
+        "id": "label-1775033617053-6",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 6,
+        "group_id": null
+      },
+      {
+        "id": "label-1775033617662-7",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 7,
+        "group_id": null
+      },
+      {
+        "id": "label-1775033618053-8",
+        "name": "Nueva etiqueta",
+        "color": "#00a365",
+        "position": 8,
+        "group_id": null
+      }
+    ],
+    "updated_at": "2026-04-01T08:53:48.390Z"
   }
 }

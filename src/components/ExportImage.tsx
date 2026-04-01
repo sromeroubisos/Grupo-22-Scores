@@ -238,6 +238,12 @@ type ExportTimeZonePreset = {
     country: string;
     utcOffsetMinutes: number;
 };
+type LocalExportFont = {
+    family: string;
+    weight: string;
+    style?: string;
+    sources: string[];
+};
 
 const FORMATS: Array<{ value: ExportFormat; label: string; width: number; height: number }> = [
     { value: '1080x1350', label: 'Post (1080x1350)', width: 1080, height: 1350 },
@@ -260,11 +266,24 @@ const FONT_BODY = exportOutfitFont.style.fontFamily;
 const FONT_MONO = exportJetBrainsMonoFont.style.fontFamily;
 const FONT_OUTFIT_BLACK = exportOutfitFont.style.fontFamily;
 const FONT_EDITORIAL = '"Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
-const FONT_EDITORIAL_SCORE = '"Dharma Gothic Expanded Heavy", "Dharma Gothic E Heavy", "Dharma Gothic Expanded", "Dharma Gothic E", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
+const FONT_CLASSIC_MATCH_SCORE = '"dharma-gothic-m", "dharma-gothic-c", "dharma-gothic-e", "G22 Dharma Gothic", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
+const FONT_EDITORIAL_SCORE = '"dharma-gothic-e", "dharma-gothic-c", "G22 Dharma Gothic", "Dharma Gothic Expanded Heavy", "Dharma Gothic E Heavy", "Dharma Gothic Expanded", "Dharma Gothic E", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
 const BRAND_ACCENT = '#00a365';
 const EDITORIAL_PRESET_STORAGE_KEY = 'g22-export-editorial-presets-v1';
 const EDITORIAL_SPONSOR_SLOTS = 6;
 const EDITORIAL_TEXTURE_SOURCE = '/textures/vecteezy_grey-distressed-grunge-background_154365.svg';
+const LOCAL_EXPORT_FONTS: LocalExportFont[] = [
+    {
+        family: 'G22 Dharma Gothic',
+        weight: '800',
+        sources: [
+            '/fonts/dharma-gothic-heavy.woff2',
+            '/fonts/dharma-gothic-expanded-heavy.woff2',
+            '/fonts/dharma-gothic-e-heavy.woff2',
+            '/fonts/dharma-gothic-heavy.woff',
+        ],
+    },
+];
 const EXPORT_PALETTES: ExportPalette[] = [
     { id: 'g22-dark', name: 'G22 Dark', description: 'Carbono y verde marca', bg: '#0a0a0b', accent: '#00a365' },
     { id: 'g22-light', name: 'G22 Light', description: 'Claro con acento marca', bg: '#f8fafc', accent: '#00a365' },
@@ -276,7 +295,7 @@ const EXPORT_PALETTES: ExportPalette[] = [
 const DEFAULT_PALETTE = EXPORT_PALETTES[0];
 const DEFAULT_TIMEZONE_PRESET_ID = 'buenos-aires-ar';
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = -180;
-const MAX_STANDINGS_ROWS_PER_SLIDE = 16;
+const MAX_STANDINGS_ROWS_PER_SLIDE = 20;
 const MATCH_EXPORT_MODE_OPTIONS: Array<{ value: MatchExportMode; label: string; description: string }> = [
     { value: 'schedule', label: 'Horario', description: 'Muestra la programacion del partido' },
     { value: 'result', label: 'Resultado', description: 'Muestra el marcador cargado' },
@@ -397,6 +416,7 @@ const EXPORT_TIMEZONE_PRESETS: ExportTimeZonePreset[] = [
     { id: 'apia-ws', city: 'Apia', country: 'Samoa', utcOffsetMinutes: 780 },
     { id: 'kiritimati-ki', city: 'Kiritimati', country: 'Kiribati', utcOffsetMinutes: 840 },
 ];
+let localExportFontsPromise: Promise<void> | null = null;
 
 export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
     const [isExporting, setIsExporting] = useState(false);
@@ -1196,7 +1216,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         )}
                                     </div>
                                     <p className={styles.modalHint}>
-                                        Maximo 16 equipos por imagen.
+                                        Maximo 20 equipos por imagen.
                                         {standingsExportMode === 'groups' && groupedStandings.length > 0
                                             ? ' Los grupos se mantienen separados y continuan en otra imagen cuando hace falta.'
                                             : ' Si la tabla supera el limite, se reparte automaticamente en varias imagenes.'}
@@ -1297,11 +1317,12 @@ function buildEmptySponsorSlot(index: number): MatchSponsorData {
         id: `slot-${index + 1}`,
         name: '',
         logo: '',
+        placement: '',
     };
 }
 
 function buildEditorialSponsorSlots(sponsors?: MatchSponsorData[]): MatchSponsorData[] {
-    const normalized = Array.isArray(sponsors)
+    const normalized: MatchSponsorData[] = Array.isArray(sponsors)
         ? sponsors.slice(0, EDITORIAL_SPONSOR_SLOTS).map((sponsor, index) => ({
             id: sponsor?.id || `slot-${index + 1}`,
             name: sponsor?.name?.trim() || '',
@@ -1704,10 +1725,47 @@ function shouldAppendDateToMatchTime(value: string): boolean {
     return /\d{1,2}:\d{2}.*\d{1,2}[\/.-]\d{1,2}/.test(value);
 }
 
+async function loadLocalExportFonts(): Promise<void> {
+    if (typeof document === 'undefined' || typeof FontFace === 'undefined' || !('fonts' in document)) return;
+    if (document.fonts.check('900 24px "dharma-gothic-e"') || document.fonts.check('800 24px "dharma-gothic-e"')) return;
+    if (localExportFontsPromise) {
+        await localExportFontsPromise;
+        return;
+    }
+
+    localExportFontsPromise = Promise.all(LOCAL_EXPORT_FONTS.map((font) => tryLoadLocalExportFont(font))).then(() => undefined);
+    await localExportFontsPromise;
+}
+
+async function tryLoadLocalExportFont(font: LocalExportFont): Promise<void> {
+    const fontDescriptor = `${font.weight} 24px "${font.family}"`;
+    if (document.fonts.check(fontDescriptor)) return;
+
+    for (const source of font.sources) {
+        try {
+            const nextFont = new FontFace(font.family, `url("${source}")`, {
+                weight: font.weight,
+                style: font.style || 'normal',
+            });
+            const loadedFont = await nextFont.load();
+            document.fonts.add(loadedFont);
+            return;
+        } catch {
+            // Try the next available source path.
+        }
+    }
+}
+
 async function ensureExportFonts(): Promise<void> {
     if (typeof document === 'undefined' || !('fonts' in document)) return;
     try {
+        await loadLocalExportFonts();
         await Promise.allSettled([
+            document.fonts.load('900 24px "dharma-gothic-e"'),
+            document.fonts.load('800 24px "dharma-gothic-e"'),
+            document.fonts.load('900 24px "dharma-gothic-c"'),
+            document.fonts.load('900 24px "dharma-gothic-m"'),
+            document.fonts.load('800 24px "G22 Dharma Gothic"'),
             document.fonts.load('800 24px "Dharma Gothic Expanded Heavy"'),
             document.fonts.load('800 24px "Dharma Gothic E Heavy"'),
             document.fonts.load('700 24px "Dharma Gothic Expanded"'),
@@ -1840,6 +1898,18 @@ function setFittedFont(ctx: CanvasRenderingContext2D, text: string, maxWidth: nu
     return currentSize;
 }
 
+function getCenteredTextBaseline(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    centerY: number,
+    fallbackFontSize: number
+) {
+    const metrics = ctx.measureText(text);
+    const ascent = metrics.actualBoundingBoxAscent || fallbackFontSize * 0.72;
+    const descent = metrics.actualBoundingBoxDescent || fallbackFontSize * 0.18;
+    return centerY + (ascent - descent) / 2;
+}
+
 function truncateTextToWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
     if (ctx.measureText(text).width <= maxWidth) return text;
 
@@ -1862,6 +1932,7 @@ function drawStandingsTeamName(
 ) {
     const teamName = text.trim().toUpperCase();
     const targetWidth = Math.max(72, maxWidth);
+    const minFontSize = Math.max(12, Math.min(16, Math.round(rowHeight * 0.3)));
     setFittedFont(
         ctx,
         teamName,
@@ -1869,7 +1940,7 @@ function drawStandingsTeamName(
         '900',
         Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.4)),
         FONT_OUTFIT_BLACK,
-        16
+        minFontSize
     );
     const safeTeamName = truncateTextToWidth(ctx, teamName, targetWidth);
     ctx.fillText(safeTeamName, x, centerY + 1);
@@ -1985,6 +2056,57 @@ function drawOverflowCrest(ctx: CanvasRenderingContext2D, options: OverflowCrest
     ctx.fillStyle = getTextColor(isDark);
     ctx.font = `800 ${Math.round((isGlyph ? height : Math.min(width, height)) * (isGlyph ? 0.4 : 0.24))}px ${FONT_BODY}`;
     ctx.fillText(getFallbackLogoText(rawLogo, label), x, y + 1);
+    ctx.restore();
+}
+
+function drawEditorialCrestStroke(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    img: HTMLImageElement | null,
+    strokeWidth = 5,
+    color = '#ffffff'
+) {
+    if (!img || typeof document === 'undefined') return;
+
+    const sourceWidth = img.naturalWidth || img.width || width;
+    const sourceHeight = img.naturalHeight || img.height || height;
+    const scale = Math.min(width / sourceWidth, height / sourceHeight) * 0.88;
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = Math.max(1, Math.ceil(drawWidth + strokeWidth * 2));
+    maskCanvas.height = Math.max(1, Math.ceil(drawHeight + strokeWidth * 2));
+
+    const maskCtx = maskCanvas.getContext('2d');
+    if (!maskCtx) return;
+
+    // Build an alpha mask so the outline follows the transparent edges of the crest.
+    maskCtx.imageSmoothingEnabled = true;
+    maskCtx.imageSmoothingQuality = 'high';
+    maskCtx.drawImage(img, strokeWidth, strokeWidth, drawWidth, drawHeight);
+    maskCtx.globalCompositeOperation = 'source-in';
+    maskCtx.fillStyle = color;
+    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+    const originX = x - drawWidth / 2 - strokeWidth;
+    const originY = y - drawHeight / 2 - strokeWidth;
+    const steps = 24;
+
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.globalAlpha = 0.98;
+
+    for (let index = 0; index < steps; index += 1) {
+        const angle = (Math.PI * 2 * index) / steps;
+        const offsetX = Math.cos(angle) * strokeWidth;
+        const offsetY = Math.sin(angle) * strokeWidth;
+        ctx.drawImage(maskCanvas, originX + offsetX, originY + offsetY, maskCanvas.width, maskCanvas.height);
+    }
+
     ctx.restore();
 }
 
@@ -2559,7 +2681,7 @@ async function drawMatchEditorialResult(
     const overlayTop = canvas.height * (format.height > format.width ? 0.61 : 0.58);
 
     ctx.save();
-    ctx.font = `800 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.font = `900 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
     const scoreMetrics = ctx.measureText('88');
     ctx.restore();
 
@@ -2679,6 +2801,7 @@ async function drawMatchEditorialResult(
     drawEditorialTopBadge(ctx, (data.mainTitle || getStatusLabel(data.status)).replace('PROGRAMADO', 'FIXTURE'));
     drawEditorialHeaderArrows(ctx, canvas);
 
+    drawEditorialCrestStroke(ctx, leftColumnX, teamLogoY, editorialPreset.logoWidth, editorialPreset.logoHeight, homeLogo, 5);
     drawOverflowCrest(ctx, {
         x: leftColumnX,
         y: teamLogoY,
@@ -2689,6 +2812,7 @@ async function drawMatchEditorialResult(
         rawLogo: data.homeLogo,
         isDark: true,
     });
+    drawEditorialCrestStroke(ctx, rightColumnX, teamLogoY, editorialPreset.logoWidth, editorialPreset.logoHeight, awayLogo, 5);
     drawOverflowCrest(ctx, {
         x: rightColumnX,
         y: teamLogoY,
@@ -2724,6 +2848,15 @@ async function drawMatchEditorialResult(
     ctx.restore();
 
     if (tournamentLogo) {
+        drawEditorialCrestStroke(
+            ctx,
+            canvas.width / 2,
+            tournamentLogoY,
+            editorialPreset.tournamentLogoSize,
+            editorialPreset.tournamentLogoSize,
+            tournamentLogo,
+            5,
+        );
         drawOverflowCrest(ctx, {
             x: canvas.width / 2,
             y: tournamentLogoY,
@@ -2751,7 +2884,7 @@ async function drawMatchEditorialResult(
     ctx.shadowColor = 'rgba(0, 0, 0, 0.32)';
     ctx.shadowBlur = 20;
     ctx.shadowOffsetY = 10;
-    ctx.font = `800 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.font = `900 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
     ctx.fillText(String(data.homeScore ?? '-'), leftColumnX, scoreBaselineY);
     ctx.fillText(String(data.awayScore ?? '-'), rightColumnX, scoreBaselineY);
     ctx.restore();
@@ -2867,13 +3000,21 @@ async function drawMatchResult(
         ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
         ctx.fillText('HORARIO DEL PARTIDO', safe.centerX, scoreY + (isStory ? 92 : 82));
     } else {
+        const classicScoreFontSize = isStory ? 168 : 148;
+        const classicScoreOffsetX = isStory ? 88 : 78;
+        const classicScoreCenterY = scoreY;
         ctx.fillStyle = accentColor;
-        ctx.font = `800 ${isStory ? 118 : 102}px ${FONT_MONO}`;
-        ctx.fillText(String(data.homeScore ?? '-'), safe.centerX - (isStory ? 84 : 74), scoreY + (isStory ? 20 : 18));
-        ctx.fillText(String(data.awayScore ?? '-'), safe.centerX + (isStory ? 84 : 74), scoreY + (isStory ? 20 : 18));
+        ctx.font = `900 ${classicScoreFontSize}px ${FONT_CLASSIC_MATCH_SCORE}`;
+        ctx.textBaseline = 'alphabetic';
+        const homeScoreText = String(data.homeScore ?? '-');
+        const awayScoreText = String(data.awayScore ?? '-');
+        const scoreBaselineY = getCenteredTextBaseline(ctx, '88', classicScoreCenterY, classicScoreFontSize);
+        ctx.fillText(homeScoreText, safe.centerX - classicScoreOffsetX, scoreBaselineY);
+        ctx.fillText(awayScoreText, safe.centerX + classicScoreOffsetX, scoreBaselineY);
         ctx.fillStyle = mutedColor;
         ctx.font = `700 ${isStory ? 52 : 44}px ${FONT_DISPLAY}`;
-        ctx.fillText(':', safe.centerX, scoreY + (isStory ? 10 : 8));
+        ctx.textBaseline = 'middle';
+        ctx.fillText(':', safe.centerX, classicScoreCenterY);
     }
     ctx.restore();
 
@@ -2953,6 +3094,7 @@ async function drawStandings(
     brandLogo: HTMLImageElement | null
 ) {
     const isDark = getContrastColor(bgColor) === '#ffffff';
+    const isDenseStandingsSlide = slide.totalRows > 16;
     const textColor = getTextColor(isDark);
     const mutedColor = getMutedColor(isDark, 0.68);
     const softColor = getMutedColor(isDark, 0.1);
@@ -2993,15 +3135,16 @@ async function drawStandings(
     ctx.restore();
 
     const panelX = isStory ? 46 : 54;
-    const panelY = isStory ? 252 : 224;
+    const panelY = isStory ? 252 : (isDenseStandingsSlide ? 216 : 224);
     const panelWidth = canvas.width - panelX * 2;
-    const panelHeight = safe.bottom - panelY - (isStory ? 22 : 10);
+    const panelHeight = safe.bottom - panelY - (isStory ? 22 : (isDenseStandingsSlide ? 6 : 10));
     drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
 
-    const headerY = panelY + 34;
+    const headerFontSize = isStory ? 18 : (isDenseStandingsSlide ? 15 : 16);
+    const headerY = panelY + (isDenseStandingsSlide ? 30 : 34);
     ctx.save();
     ctx.fillStyle = mutedColor;
-    ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
+    ctx.font = `700 ${headerFontSize}px ${FONT_BODY}`;
     ctx.textAlign = 'center';
     ctx.fillText('POS', panelX + 58, headerY);
     ctx.textAlign = 'left';
@@ -3024,23 +3167,23 @@ async function drawStandings(
     ctx.restore();
 
     const legendLayout = buildStandingsLegendLayout(ctx, legendItems, panelWidth - 48, isStory);
-    const bodyTop = headerY + 46;
+    const bodyTop = headerY + (isDenseStandingsSlide ? 42 : 46);
     const bodyBottom = panelY + panelHeight - 24 - (legendLayout.totalHeight > 0 ? legendLayout.totalHeight + (isStory ? 26 : 22) : 0);
     const hasGroupHeaders = slide.groups.some((group) => group.name);
-    const groupTitleHeight = hasGroupHeaders ? (isStory ? 34 : 30) : 0;
-    const groupTitleGap = hasGroupHeaders ? (isStory ? 10 : 8) : 0;
-    const interGroupGap = hasGroupHeaders ? (isStory ? 12 : 10) : 0;
+    const groupTitleHeight = hasGroupHeaders ? (isStory ? (isDenseStandingsSlide ? 32 : 34) : (isDenseStandingsSlide ? 28 : 30)) : 0;
+    const groupTitleGap = hasGroupHeaders ? (isStory ? (isDenseStandingsSlide ? 8 : 10) : (isDenseStandingsSlide ? 6 : 8)) : 0;
+    const interGroupGap = hasGroupHeaders ? (isStory ? (isDenseStandingsSlide ? 10 : 12) : (isDenseStandingsSlide ? 8 : 10)) : 0;
     const reservedGroupSpace = slide.groups.reduce((total, group, index) => {
         if (!group.name) return total;
         return total + groupTitleHeight + groupTitleGap + (index > 0 ? interGroupGap : 0);
     }, 0);
     const rawRowHeight = (bodyBottom - bodyTop - reservedGroupSpace) / Math.max(slide.totalRows, 1);
-    const rowHeight = Math.max(isStory ? 32 : 30, Math.min(isStory ? 70 : 62, rawRowHeight));
-    const crestHeight = Math.min(isStory ? 50 : 44, Math.max(isStory ? 38 : 34, rowHeight - 4));
+    const rowHeight = Math.max(isStory ? (isDenseStandingsSlide ? 30 : 32) : (isDenseStandingsSlide ? 26 : 30), Math.min(isStory ? 70 : 62, rawRowHeight));
+    const crestHeight = Math.min(isStory ? 50 : 44, Math.max(isStory ? (isDenseStandingsSlide ? 34 : 38) : (isDenseStandingsSlide ? 28 : 34), rowHeight - 4));
     const crestWidth = Math.min(isStory ? 46 : 40, crestHeight * 0.9);
-    const posFontSize = Math.max(20, Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.44)));
-    const statFontSize = Math.max(16, Math.min(isStory ? 26 : 22, Math.round(rowHeight * 0.36)));
-    const pointsFontSize = Math.max(20, Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.42)));
+    const posFontSize = Math.max(isStory ? 20 : (isDenseStandingsSlide ? 18 : 20), Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.44)));
+    const statFontSize = Math.max(isStory ? 16 : (isDenseStandingsSlide ? 14 : 16), Math.min(isStory ? 26 : 22, Math.round(rowHeight * 0.36)));
+    const pointsFontSize = Math.max(isStory ? 20 : (isDenseStandingsSlide ? 18 : 20), Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.42)));
     const colPosX = panelX + 58;
     const colTeamX = panelX + 118;
     const colPlayedX = panelX + panelWidth - 292;
@@ -3062,7 +3205,7 @@ async function drawStandings(
             if (groupIndex > 0) cursorY += interGroupGap;
 
             ctx.save();
-            ctx.font = `800 ${isStory ? 18 : 16}px ${FONT_BODY}`;
+            ctx.font = `800 ${isStory ? 18 : (isDenseStandingsSlide ? 15 : 16)}px ${FONT_BODY}`;
             const pillWidth = Math.min(panelWidth - 48, ctx.measureText(groupLabel).width + 28);
             ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.16 : 0.12);
             ctx.beginPath();
@@ -3091,12 +3234,16 @@ async function drawStandings(
             ctx.save();
             if (rowBg !== 'transparent') {
                 ctx.fillStyle = rowBg;
-                ctx.fillRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4);
+                ctx.beginPath();
+                ctx.roundRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4, 7);
+                ctx.fill();
             }
             if (rowLabel) {
                 ctx.strokeStyle = hexToRGBA(rowAccentColor, isDark ? 0.34 : 0.22);
                 ctx.lineWidth = 1;
-                ctx.strokeRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4);
+                ctx.beginPath();
+                ctx.roundRect(panelX + 14, y + 2, panelWidth - 28, rowHeight - 4, 7);
+                ctx.stroke();
             }
 
             ctx.fillStyle = rowAccentColor;

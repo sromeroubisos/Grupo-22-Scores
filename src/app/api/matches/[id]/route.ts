@@ -23,7 +23,6 @@ import {
   getFlashScoreStandingsForm,
   getFlashScoreTopScorers,
 } from '@/lib/services/flashscore';
-import { isRugbySport } from '@/lib/externalProviderPolicy';
 import {
   getRugbyApiSportsGame,
   getRugbyApiSportsGamesH2H,
@@ -106,17 +105,6 @@ async function getFlashScoreMatchBundle(matchId: string) {
     draw,
     topScorers,
   };
-}
-
-async function getCachedExternalMatchSport(matchId: string) {
-  const readClient = await getReadClient();
-  const { data } = await readClient
-    .from('external_match_cache')
-    .select('sport')
-    .eq('id', matchId)
-    .maybeSingle();
-
-  return data?.sport ?? null;
 }
 
 async function getRugbyApiSportsMatchBundle(matchId: string) {
@@ -215,27 +203,12 @@ export async function GET(
     }
 
     if (isFlashScoreMatchId(matchId)) {
-      const cachedSport = await getCachedExternalMatchSport(matchId).catch(() => null);
       const bundle = await getFlashScoreMatchBundle(matchId);
 
       if (!bundle) {
         return NextResponse.json(
           { error: 'Match not found' },
           { status: 404 }
-        );
-      }
-
-      const detailsSportId =
-        bundle.details?.DATA?.EVENT?.sport?.sport_id ??
-        bundle.details?.DATA?.EVENT?.SPORT_ID ??
-        bundle.details?.sport?.sport_id ??
-        bundle.details?.SPORT_ID ??
-        null;
-
-      if (isRugbySport(detailsSportId) || isRugbySport(cachedSport)) {
-        return NextResponse.json(
-          { error: 'This match now uses Rugby API-Sports. Refresh the page from the rugby external listing.' },
-          { status: 409 }
         );
       }
 
