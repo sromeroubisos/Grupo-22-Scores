@@ -3,8 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import LoginScreen from './components/LoginScreen';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
-import { resolveAdminPanel } from '@/lib/auth/roles';
+import { hasEditorialAccess, hasFederationAdminAccess, resolveAdminPanel } from '@/lib/auth/roles';
 
 function buildReturnTo(pathname: string, searchParams: ReturnType<typeof useSearchParams>): string {
     const qs = searchParams.toString();
@@ -20,10 +19,12 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
     const currentReturnTo = buildReturnTo(pathname ?? '', searchParams);
 
     const isMatchConsole = pathname?.startsWith('/admin/matches/');
+    const isEditorialRoute = pathname === '/admin' || pathname?.startsWith('/admin/editorial');
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
-    const isFederationAdmin = Boolean(adminPanel && adminPanel.href.startsWith('/admin'));
-    const isAllowed = user && isFederationAdmin;
+    const isFederationAdmin = hasFederationAdminAccess(user?.role, user?.memberships);
+    const isEditorialUser = hasEditorialAccess(user?.role, user?.memberships);
+    const isAllowed = user && (isFederationAdmin || (isEditorialUser && isEditorialRoute));
 
     if (isLoading) {
         return (
@@ -61,13 +62,13 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
                         Your current clearance level is insufficient to access the <span className="text-white font-bold">Federation Control Center</span>.
                     </p>
 
-                    {adminPanel?.href === '/club-admin' ? (
+                    {adminPanel?.href ? (
                         <button
-                            onClick={() => router.push('/club-admin')}
+                            onClick={() => router.push(adminPanel.href)}
                             className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#00ff88] text-[#0a0a0f] font-black text-xs uppercase tracking-widest shadow-[0_15px_30px_-5px_rgba(0,255,136,0.3)] hover:scale-105 active:scale-95 transition-all"
                         >
                             <span className="material-symbols-outlined text-lg">rebase_edit</span>
-                            Switch to Club Panel
+                            {`Ir a ${adminPanel.label}`}
                         </button>
                     ) : (
                         <button

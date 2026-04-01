@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { clsx } from 'clsx';
 
 interface ClubManageTabsProps {
     id: string;
@@ -24,7 +23,7 @@ const TABS = [
     { id: 'auditoria', label: 'Auditoría' },
 ];
 
-export function ClubManageTabs({ currentTab }: ClubManageTabsProps) {
+export function ClubManageTabs({ currentTab, squadCount }: ClubManageTabsProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
@@ -44,6 +43,22 @@ export function ClubManageTabs({ currentTab }: ClubManageTabsProps) {
                         className={`tab-item ${isActive ? 'active' : ''}`}
                     >
                         {tab.label}
+                        {tab.id === 'planteles' && squadCount > 0 && (
+                            <span
+                                style={{
+                                    marginLeft: '0.5rem',
+                                    padding: '0.15rem 0.4rem',
+                                    borderRadius: '999px',
+                                    border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+                                    background: isActive ? 'rgba(59, 130, 246, 0.12)' : 'var(--surface-elevated)',
+                                    color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 800,
+                                }}
+                            >
+                                {squadCount}
+                            </span>
+                        )}
                     </Link>
                 );
             })}

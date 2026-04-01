@@ -11,6 +11,7 @@ import {
 } from '@/lib/clubDerivatives';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { normalizeSlug } from '@/lib/utils/normalize';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 type TournamentContextRow = {
   id: string;
@@ -21,6 +22,97 @@ type TournamentContextRow = {
   sport_id?: string | null;
   union_id?: string | null;
   country?: string | null;
+};
+
+type DivisionContextRow = {
+  id: string;
+  club_id: string;
+  name?: string | null;
+  sport?: string | null;
+  gender?: string | null;
+  category?: string | null;
+  season?: string | null;
+  status?: string | null;
+};
+
+type SupabaseLikeError = {
+  message: string;
+  code?: string;
+  details?: string | null;
+  hint?: string | null;
+};
+
+type TournamentParticipantRecord = {
+  id: string;
+  club_id: string | null;
+  division_id?: string | null;
+  name?: string | null;
+  type?: string | null;
+  status?: string | null;
+  seed?: number | null;
+  group_id?: string | null;
+  short_code?: string | null;
+  notes?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  clubs?: {
+    id: string;
+    name?: string | null;
+    short_name?: string | null;
+    logo_url?: string | null;
+    logo?: string | null;
+  } | null;
+  division?: DivisionContextRow | null;
+};
+
+type TournamentParticipantsListQuery = {
+  select(columns: string): {
+    eq(column: 'tournament_id', value: string): {
+      order(
+        column: 'created_at',
+        options: { ascending: boolean },
+      ): Promise<{ data: TournamentParticipantRecord[] | null; error: SupabaseLikeError | null }>;
+    };
+  };
+};
+
+type FlashscoreParticipantLike = {
+  name?: string | null;
+  id?: string | number | null;
+  team_id?: string | number | null;
+  team?: FlashscoreParticipantLike | null;
+  participant?: FlashscoreParticipantLike | null;
+  rows?: FlashscoreParticipantLike[] | null;
+};
+
+type TournamentParticipantsTableClient = {
+  select(columns: string): {
+    eq(column: 'tournament_id' | 'id', value: string): {
+      order(
+        column: 'created_at',
+        options: { ascending: boolean },
+      ): Promise<{ data: TournamentParticipantRecord[] | null; error: SupabaseLikeError | null }>;
+      single(): Promise<{
+        data: { club_id: string | null; division_id?: string | null } | TournamentParticipantRecord | null;
+        error: SupabaseLikeError | null;
+      }>;
+    };
+  };
+  insert(values: Record<string, unknown>): {
+    select(columns: string): {
+      single(): Promise<{ data: TournamentParticipantRecord | null; error: SupabaseLikeError | null }>;
+    };
+  };
+  update(values: Record<string, unknown>): {
+    eq(column: 'id', value: string): {
+      select(columns: string): {
+        single(): Promise<{ data: TournamentParticipantRecord | null; error: SupabaseLikeError | null }>;
+      };
+    };
+  };
+  delete(): {
+    eq(column: 'id', value: string): Promise<{ error: SupabaseLikeError | null }>;
+  };
 };
 
 type ClubContextRow = {
@@ -84,6 +176,106 @@ const MALE_PATTERNS = [
 ];
 
 const VARIANT_CATEGORY_PREFIXES = ['gender:', 'age_grade:', 'audience:', 'variant:', 'sport:'];
+let tournamentParticipantDivisionIdSupport: boolean | null = null;
+
+async function supportsTournamentParticipantDivisionId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<boolean> {
+  if (tournamentParticipantDivisionIdSupport !== null) {
+    return tournamentParticipantDivisionIdSupport;
+  }
+
+  const { error } = await supabase
+    .from('tournament_participants')
+    .select('division_id')
+    .limit(0);
+
+  if (error) {
+    if (isMissingColumnError(error, 'division_id')) {
+      tournamentParticipantDivisionIdSupport = false;
+      return false;
+    }
+
+    console.warn('[Participants API] Could not verify division_id support:', error.message);
+    tournamentParticipantDivisionIdSupport = false;
+    return false;
+  }
+
+  tournamentParticipantDivisionIdSupport = true;
+  return true;
+}
+
+function getTournamentParticipantSelectColumns(supportsDivisionId: boolean) {
+  return supportsDivisionId
+    ? `
+        id,
+        tournament_id,
+        club_id,
+        division_id,
+        name,
+        type,
+        status,
+        seed,
+        group_id,
+        short_code,
+        notes,
+        created_at,
+        updated_at,
+        clubs:club_id (
+          id,
+          name,
+          short_name,
+          logo_url
+        ),
+        division:division_id (
+          id,
+          club_id,
+          name,
+          sport,
+          gender,
+          category,
+          season,
+          status
+        )
+      `
+    : `
+        id,
+        tournament_id,
+        club_id,
+        name,
+        type,
+        status,
+        seed,
+        group_id,
+        short_code,
+        notes,
+        created_at,
+        updated_at,
+        clubs:club_id (
+          id,
+          name,
+          short_name,
+          logo_url
+        )
+      `;
+}
+
+async function loadDivisionContext(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  divisionId: string,
+): Promise<DivisionContextRow | null> {
+  const { data, error } = await supabase
+    .from('club_divisions')
+    .select('id, club_id, name, sport, gender, category, season, status')
+    .eq('id', divisionId)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data as DivisionContextRow;
+}
 
 function normalizeGenderValue(value: string | null | undefined): VariantGender | null {
   const text = String(value ?? '').trim();
@@ -354,6 +546,8 @@ async function loadClubFamily(
   };
 }
 
+// Legacy local resolver kept for reference while the shared service handles runtime resolution.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function resolveParticipantClubForTournament(
   supabase: Awaited<ReturnType<typeof createClient>>,
   tournament: TournamentContextRow,
@@ -457,20 +651,17 @@ export async function GET(
       console.log(`[Participants API] Fetching FS participants for stage ${stageId}`);
 
       const standingsRes = await getTournamentStandings(tournamentFsId, stageId);
-      const standings = standingsRes?.DATA || [];
+      const standings = Array.isArray(standingsRes?.DATA)
+        ? (standingsRes.DATA as FlashscoreParticipantLike[])
+        : [];
 
       // Extract all team names from standings
       const teamNames: string[] = [];
-      const teamIdMap: Record<string, string> = {}; // Name -> FS ID
-
-      const processStandings = (rows: any[]) => {
+      const processStandings = (rows: FlashscoreParticipantLike[]) => {
         rows.forEach(row => {
           const team = row.team || row.participant || row;
           if (team?.name) {
             teamNames.push(team.name);
-            if (team.id || team.team_id) {
-              teamIdMap[team.name] = String(team.id || team.team_id);
-            }
           }
         });
       };
@@ -478,7 +669,7 @@ export async function GET(
       if (Array.isArray(standings)) {
         if (standings[0]?.rows) {
           // Grouped standings
-          standings.forEach((g: any) => processStandings(g.rows || []));
+          standings.forEach((group) => processStandings(group.rows || []));
         } else {
           // Flat standings
           processStandings(standings);
@@ -515,13 +706,15 @@ export async function GET(
         return NextResponse.json(clubs.map(c => ({
           id: `fs-link-${c.id}`,
           club_id: c.id,
+          division_id: null,
           status: 'active',
           clubs: {
             id: c.id,
             name: c.name,
             short_name: c.short_name,
             logo: c.logo
-          }
+          },
+          division: null,
         })));
       }
 
@@ -529,28 +722,13 @@ export async function GET(
     }
 
     // ─── REGULAR SUPABASE SUPPORT ─────────────────────────────────────────────
-    const { data: participants, error } = await supabase
-      .from('tournament_participants')
-      .select(`
-        id,
-        tournament_id,
-        club_id,
-        name,
-        type,
-        status,
-        seed,
-        group_id,
-        short_code,
-        notes,
-        created_at,
-        updated_at,
-        clubs:club_id (
-          id,
-          name,
-          short_name,
-          logo_url
-        )
-      `)
+    const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
+
+    const participantListQuery = supabase
+      .from('tournament_participants') as unknown as TournamentParticipantsListQuery;
+
+    const { data: participants, error } = await participantListQuery
+      .select(getTournamentParticipantSelectColumns(supportsDivisionId))
       .eq('tournament_id', tournamentId)
       .order('created_at', { ascending: false });
 
@@ -567,20 +745,22 @@ export async function GET(
       return NextResponse.json(participants || []);
     } else {
       const clubs = (participants || [])
-        .filter((p: any) => p.status === 'active' && p.clubs)
-        .map((p: any) => ({
-          id: p.clubs.id,
-          name: p.clubs.name,
-          short_name: p.clubs.short_name,
-          logo: p.clubs.logo_url,
+        .filter((participant) => participant.status === 'active' && participant.clubs)
+        .map((participant) => ({
+          id: participant.clubs?.id,
+          name: participant.clubs?.name,
+          short_name: participant.clubs?.short_name,
+          logo: participant.clubs?.logo_url,
+          division_id: supportsDivisionId ? participant.division_id ?? null : null,
+          division_name: supportsDivisionId ? participant.division?.name ?? null : null,
         }));
 
       return NextResponse.json(clubs);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in GET /api/tournaments/[id]/participants:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -594,6 +774,7 @@ export async function POST(
     const supabase = await createClient();
     const tournamentId = (await params).id;
     const body = await request.json();
+    const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
 
     // Validate required fields
     if (!body.name && !body.club_id) {
@@ -605,10 +786,25 @@ export async function POST(
     }
 
     let resolvedClub: ClubContextRow | null = null;
+    let resolvedDivision: DivisionContextRow | null = null;
     const shouldResolveClubVariant =
       body.resolve_club_variant === true || body.resolveClubVariant === true;
+    const requestedDivisionId = typeof body.division_id === 'string' ? body.division_id.trim() : '';
 
-    if (body.club_id) {
+    if (supportsDivisionId && requestedDivisionId) {
+      resolvedDivision = await loadDivisionContext(supabase, requestedDivisionId);
+
+      if (!resolvedDivision) {
+        return NextResponse.json(
+          { error: 'El plantel seleccionado no existe en la base de datos' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const requestedClubId = String(body.club_id ?? resolvedDivision?.club_id ?? '').trim();
+
+    if (requestedClubId) {
       if (shouldResolveClubVariant) {
         const { data: tournamentRow, error: tournamentError } = await supabase
           .from('tournaments')
@@ -626,13 +822,13 @@ export async function POST(
         resolvedClub = (await resolveParticipantClubForTournamentViaService(
           supabase,
           tournamentRow as TournamentContextRow,
-          String(body.club_id),
+          requestedClubId,
         )).club;
       } else {
         const { data: clubRow, error: clubError } = await supabase
           .from('clubs')
           .select('*')
-          .eq('id', String(body.club_id))
+          .eq('id', requestedClubId)
           .single();
 
         if (clubError || !clubRow) {
@@ -646,10 +842,19 @@ export async function POST(
       }
     }
 
+    const finalClubId = resolvedClub?.id ?? (requestedClubId || null);
+
+    if (supportsDivisionId && resolvedDivision && finalClubId && resolvedDivision.club_id !== finalClubId) {
+      return NextResponse.json(
+        { error: 'El plantel seleccionado no pertenece al club indicado' },
+        { status: 400 }
+      );
+    }
+
     // Log the data being inserted for debugging
     const insertData = {
       tournament_id: tournamentId,
-      club_id: resolvedClub?.id ?? body.club_id ?? null,
+      club_id: finalClubId,
       name: resolvedClub?.name ?? body.name ?? null,
       type: body.type ?? 'club',
       status: body.status ?? 'active',
@@ -657,32 +862,16 @@ export async function POST(
       group_id: body.group_id ?? null,
       short_code: resolvedClub?.short_name ?? body.short_code ?? null,
       notes: body.notes ?? null,
+      ...(supportsDivisionId ? { division_id: resolvedDivision?.id ?? null } : {}),
     };
     console.log('[Participants API] Inserting participant:', insertData);
 
-    const { data, error } = await supabase
-      .from('tournament_participants')
+    const participantsTable = supabase
+      .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
+
+    const { data, error } = await participantsTable
       .insert(insertData)
-      .select(`
-        id,
-        tournament_id,
-        club_id,
-        name,
-        type,
-        status,
-        seed,
-        group_id,
-        short_code,
-        notes,
-        created_at,
-        updated_at,
-        clubs:club_id (
-          id,
-          name,
-          short_name,
-          logo_url
-        )
-      `)
+      .select(getTournamentParticipantSelectColumns(supportsDivisionId))
       .single();
 
     if (error) {
@@ -707,21 +896,25 @@ export async function POST(
       return NextResponse.json({ error: userMessage }, { status: 400 });
     }
 
+    if (!data) {
+      return NextResponse.json(
+        { error: 'No se pudo crear el participante en el torneo' },
+        { status: 500 },
+      );
+    }
+
     console.log('[Participants API] Participant created successfully:', data.id);
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Participants API] Unexpected error in POST:', error);
     return NextResponse.json(
-      { error: error.message || 'Error interno del servidor' },
+      { error: error instanceof Error ? error.message : 'Error interno del servidor' },
       { status: 500 }
     );
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
@@ -732,9 +925,28 @@ export async function PATCH(
     }
 
     const body = await request.json();
+    const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
 
     // Build update object with only provided fields
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
+    let existingParticipant: { club_id: string | null; division_id?: string | null } | null = null;
+
+    if (supportsDivisionId && (body.division_id !== undefined || body.club_id !== undefined)) {
+      const participantsTable = supabase
+        .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
+
+      const { data: currentParticipant, error: currentParticipantError } = await participantsTable
+        .select('club_id, division_id')
+        .eq('id', participantId)
+        .single();
+
+      if (currentParticipantError || !currentParticipant) {
+        return NextResponse.json({ error: 'No se pudo cargar el participante actual' }, { status: 400 });
+      }
+
+      existingParticipant = currentParticipant;
+    }
+
     if (body.name !== undefined) updateData.name = body.name;
     if (body.type !== undefined) updateData.type = body.type;
     if (body.status !== undefined) updateData.status = body.status;
@@ -744,30 +956,46 @@ export async function PATCH(
     if (body.short_code !== undefined) updateData.short_code = body.short_code;
     if (body.notes !== undefined) updateData.notes = body.notes;
 
-    const { data, error } = await supabase
-      .from('tournament_participants')
+    if (supportsDivisionId) {
+      if (body.division_id !== undefined) {
+        const nextDivisionId = typeof body.division_id === 'string' ? body.division_id.trim() : '';
+
+        if (nextDivisionId) {
+          const nextDivision = await loadDivisionContext(supabase, nextDivisionId);
+          const finalClubId = String(body.club_id ?? existingParticipant?.club_id ?? '').trim();
+
+          if (!nextDivision) {
+            return NextResponse.json({ error: 'El plantel seleccionado no existe en la base de datos' }, { status: 400 });
+          }
+
+          if (finalClubId && nextDivision.club_id !== finalClubId) {
+            return NextResponse.json({ error: 'El plantel seleccionado no pertenece al club indicado' }, { status: 400 });
+          }
+
+          updateData.division_id = nextDivision.id;
+        } else {
+          updateData.division_id = null;
+        }
+      } else if (body.club_id !== undefined && existingParticipant?.division_id) {
+        const currentDivision = await loadDivisionContext(supabase, existingParticipant.division_id);
+        const nextClubId = String(body.club_id).trim();
+
+        if (currentDivision && nextClubId && currentDivision.club_id !== nextClubId) {
+          return NextResponse.json(
+            { error: 'Debes limpiar o cambiar el plantel al modificar el club participante' },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    const participantsTable = supabase
+      .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
+
+    const { data, error } = await participantsTable
       .update(updateData)
       .eq('id', participantId)
-      .select(`
-        id,
-        tournament_id,
-        club_id,
-        name,
-        type,
-        status,
-        seed,
-        group_id,
-        short_code,
-        notes,
-        created_at,
-        updated_at,
-        clubs:club_id (
-          id,
-          name,
-          short_name,
-          logo_url
-        )
-      `)
+      .select(getTournamentParticipantSelectColumns(supportsDivisionId))
       .single();
 
     if (error) {
@@ -776,15 +1004,15 @@ export async function PATCH(
     }
 
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 },
+    );
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
@@ -794,8 +1022,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Missing participant ID' }, { status: 400 });
     }
 
-    const { error } = await supabase
-      .from('tournament_participants')
+    const participantsTable = supabase
+      .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
+
+    const { error } = await participantsTable
       .delete()
       .eq('id', id);
 
@@ -804,7 +1034,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 },
+    );
   }
 }

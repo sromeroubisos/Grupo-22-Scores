@@ -1,148 +1,337 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import ExportImage from '@/components/ExportImage';
-import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
+import DateStrip from '@/components/DateStrip';
+import { useSport } from '@/context/SportContext';
+import { useMatchesStore } from '@/hooks/useMatchesStore';
+import { generateLocalDateKeys } from '@/lib/timezone';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import styles from './page.module.css';
 
-// Mock data
-const resultsByDate = [
-    {
-        date: '2026-02-03',
-        label: 'Hoy',
-        matches: [
-            { id: 1, time: '15:30', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'Club Atlético', homeLogo: '🔵', homeScore: 28, away: 'Racing Club', awayLogo: '🟢', awayScore: 17, status: 'finished' },
-        ]
-    },
-    {
-        date: '2026-02-01',
-        label: 'Sábado 1 Feb',
-        matches: [
-            { id: 2, time: '15:30', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'Club Atlético', homeLogo: '🔵', homeScore: 28, away: 'San Lorenzo', awayLogo: '🟡', awayScore: 17, status: 'finished' },
-            { id: 3, time: '15:30', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'Racing Club', homeLogo: '🟢', homeScore: 35, away: 'Deportivo FC', awayLogo: '🔴', awayScore: 21, status: 'finished' },
-            { id: 4, time: '18:00', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'CASI', homeLogo: '⚪', homeScore: 24, away: 'Newman', awayLogo: '🔴', awayScore: 24, status: 'finished' },
-            { id: 5, time: '18:00', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'Hindu Club', homeLogo: '🟠', homeScore: 19, away: 'Belgrano AC', awayLogo: '🔵', awayScore: 22, status: 'finished' },
-        ]
-    },
-    {
-        date: '2026-01-25',
-        label: 'Sábado 25 Ene',
-        matches: [
-            { id: 6, time: '15:30', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'San Lorenzo', homeLogo: '🟡', homeScore: 31, away: 'CASI', awayLogo: '⚪', awayScore: 14, status: 'finished' },
-            { id: 7, time: '15:30', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'Deportivo FC', homeLogo: '🔴', homeScore: 27, away: 'Club Atlético', awayLogo: '🔵', awayScore: 34, status: 'finished' },
-            { id: 8, time: '18:00', tournament: 'Torneo Apertura 2026', category: 'Primera División', home: 'Newman', homeLogo: '🔴', homeScore: 21, away: 'Racing Club', awayLogo: '🟢', awayScore: 28, status: 'finished' },
-        ]
-    },
-];
+type PublicMatch = {
+    id: string | number;
+    dateTime: string;
+    status?: string | null;
+    roundId?: string | null;
+    score?: { home?: number | null; away?: number | null } | null;
+    homeTeam?: { name?: string | null; logo?: string | null } | null;
+    awayTeam?: { name?: string | null; logo?: string | null } | null;
+    tournament?: {
+        id?: string | null;
+        name?: string | null;
+        country?: string | null;
+    } | null;
+};
+
+type ResultRow = {
+    id: string;
+    tournamentName: string;
+    country: string;
+    roundLabel: string;
+    home: string;
+    homeLogo: string;
+    homeScore: number | null;
+    away: string;
+    awayLogo: string;
+    awayScore: number | null;
+    dateTime: string;
+};
+
+type ResultGroup = {
+    id: string;
+    tournamentName: string;
+    country: string;
+    matches: ResultRow[];
+};
+
+function isFinishedStatus(status: unknown) {
+    const normalized = String(status ?? '').trim().toLowerCase();
+    return normalized === 'final' || normalized === 'finished' || normalized === 'ft';
+}
+
+function formatRoundLabel(roundId: unknown): string {
+    const normalized = String(roundId ?? '').trim();
+    if (!normalized) return 'Final';
+    if (/^f\d+$/i.test(normalized)) {
+        return normalized.replace(/^f/i, 'Fecha ');
+    }
+    return normalized;
+}
 
 export default function ResultadosPage() {
+    const { activeSports, selectedSport, setSelectedSport } = useSport();
+    const timeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
+    const [selectedDate, setSelectedDate] = useState('');
     const [selectedTournament, setSelectedTournament] = useState('all');
+    const { matches, loading, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id);
+
+    useEffect(() => {
+        const today = generateLocalDateKeys(timeZone, 0, 0)[0]?.dateKey || '';
+        if (today) {
+            setSelectedDate((current) => current || today);
+        }
+    }, [timeZone]);
+
+    const resultGroups = useMemo<ResultGroup[]>(() => {
+        const groups = new Map<string, ResultGroup>();
+
+        (matches as PublicMatch[])
+            .filter((match) => isFinishedStatus(match.status))
+            .forEach((match) => {
+                const country = String(match.tournament?.country || 'Internacional');
+                const tournamentName = String(match.tournament?.name || 'Competencia');
+                const key = String(match.tournament?.id || `${country}::${tournamentName}`);
+                const row: ResultRow = {
+                    id: String(match.id),
+                    tournamentName,
+                    country,
+                    roundLabel: formatRoundLabel(match.roundId),
+                    home: String(match.homeTeam?.name || 'Local'),
+                    homeLogo: resolveTeamLogo(match.homeTeam),
+                    homeScore: typeof match.score?.home === 'number' ? match.score.home : null,
+                    away: String(match.awayTeam?.name || 'Visitante'),
+                    awayLogo: resolveTeamLogo(match.awayTeam),
+                    awayScore: typeof match.score?.away === 'number' ? match.score.away : null,
+                    dateTime: match.dateTime,
+                };
+
+                const existing = groups.get(key);
+                if (existing) {
+                    existing.matches.push(row);
+                    return;
+                }
+
+                groups.set(key, {
+                    id: key,
+                    tournamentName,
+                    country,
+                    matches: [row],
+                });
+            });
+
+        return [...groups.values()]
+            .map((group) => ({
+                ...group,
+                matches: [...group.matches].sort((left, right) => (
+                    new Date(right.dateTime).getTime() - new Date(left.dateTime).getTime()
+                )),
+            }))
+            .sort((left, right) => (
+                `${left.country}: ${left.tournamentName}`.localeCompare(`${right.country}: ${right.tournamentName}`)
+            ));
+    }, [matches]);
+
+    const tournamentOptions = useMemo(() => (
+        resultGroups.map((group) => ({
+            id: group.id,
+            label: `${group.country}: ${group.tournamentName}`,
+        }))
+    ), [resultGroups]);
+
+    useEffect(() => {
+        if (selectedTournament === 'all') return;
+        if (!tournamentOptions.some((option) => option.id === selectedTournament)) {
+            setSelectedTournament('all');
+        }
+    }, [selectedTournament, tournamentOptions]);
+
+    const filteredGroups = useMemo(() => (
+        selectedTournament === 'all'
+            ? resultGroups
+            : resultGroups.filter((group) => group.id === selectedTournament)
+    ), [resultGroups, selectedTournament]);
+
+    const exportMatches = useMemo(() => (
+        filteredGroups.flatMap((group) => (
+            group.matches.map((match) => ({
+                homeTeam: match.home,
+                awayTeam: match.away,
+                homeLogo: match.homeLogo,
+                awayLogo: match.awayLogo,
+                homeScore: match.homeScore ?? undefined,
+                awayScore: match.awayScore ?? undefined,
+                time: 'FT',
+                status: 'finished' as const,
+                dateLabel: `${group.country}: ${group.tournamentName}`,
+                kickoffAt: match.dateTime,
+            }))
+        ))
+    ), [filteredGroups]);
+
+    const selectedTournamentLabel = tournamentOptions.find((option) => option.id === selectedTournament)?.label;
 
     return (
         <div className={styles.page}>
-            {/* Header */}
             <section className={styles.header}>
                 <div className="container">
                     <div className={styles.headerContent}>
                         <div>
                             <h1 className={styles.title}>Resultados</h1>
                             <p className={styles.subtitle}>
-                                Todos los resultados oficiales de los partidos finalizados
+                                Resultados p&uacute;blicos de {selectedSport.nameEs} conectados a la API para la fecha elegida.
                             </p>
                         </div>
 
                         <div className={styles.headerActions}>
                             <select
                                 className={styles.select}
-                                value={selectedTournament}
-                                onChange={(e) => setSelectedTournament(e.target.value)}
+                                value={selectedSport.id}
+                                onChange={(event) => {
+                                    const nextSport = activeSports.find((sport) => sport.id === event.target.value);
+                                    if (nextSport) setSelectedSport(nextSport);
+                                }}
+                                aria-label="Seleccionar deporte"
                             >
-                                <option value="all">Todos los torneos</option>
-                                <option value="apertura-2026">Torneo Apertura 2026</option>
-                                <option value="liga-nacional-2026">Liga Nacional 2026</option>
+                                {activeSports.map((sport) => (
+                                    <option key={sport.id} value={sport.id}>
+                                        {sport.nameEs}
+                                    </option>
+                                ))}
                             </select>
 
-                            <ExportImage
-                                template="dailyMatches"
-                                data={{
-                                    date: 'Resultados',
-                                    tournament: 'Torneo Apertura 2026',
-                                    matches: resultsByDate.flatMap(group =>
-                                        group.matches.map(m => ({
-                                            homeTeam: m.home,
-                                            awayTeam: m.away,
-                                            homeLogo: m.homeLogo,
-                                            awayLogo: m.awayLogo,
-                                            homeScore: m.homeScore,
-                                            awayScore: m.awayScore,
-                                            time: m.time,
-                                            status: m.status as 'scheduled' | 'live' | 'finished',
-                                            dateLabel: group.label,
-                                            kickoffAt: combineLocalDateTimeToUtcIso(group.date, m.time, APP_TIMEZONE) || undefined,
-                                        }))
-                                    ),
-                                }}
-                                filename="resultados"
-                            />
+                            <div className={styles.dateSelector}>
+                                <DateStrip
+                                    selectedDate={selectedDate}
+                                    onSelectDate={setSelectedDate}
+                                />
+                            </div>
+
+                            <select
+                                className={styles.select}
+                                value={selectedTournament}
+                                onChange={(event) => setSelectedTournament(event.target.value)}
+                                aria-label="Filtrar torneo"
+                            >
+                                <option value="all">Todas las competencias</option>
+                                {tournamentOptions.map((option) => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {exportMatches.length > 0 ? (
+                                <ExportImage
+                                    template="dailyMatches"
+                                    data={{
+                                        date: selectedDate,
+                                        tournament: selectedTournamentLabel || selectedSport.nameEs,
+                                        matches: exportMatches,
+                                    }}
+                                    filename={`resultados-${selectedSport.id}-${selectedDate}`}
+                                />
+                            ) : null}
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Results by Date */}
+            {sourceError?.message ? (
+                <section className={styles.content}>
+                    <div className="container">
+                        <div className={styles.statusMessage}>
+                            {sourceError.message}
+                        </div>
+                    </div>
+                </section>
+            ) : null}
+
             <section className={styles.content}>
                 <div className="container">
-                    {resultsByDate.map((dateGroup) => (
-                        <div key={dateGroup.date} className={styles.dateGroup}>
-                            <div className={styles.dateHeader}>
-                                <h2 className={styles.dateTitle}>{dateGroup.label}</h2>
-                                <span className={styles.dateCount}>
-                                    {dateGroup.matches.length} partidos
-                                </span>
-                            </div>
-
-                            <div className={styles.matchesList}>
-                                {dateGroup.matches.map(match => (
-                                    <Link key={match.id} href={`/matches/${match.id}`} className={styles.resultCard}>
-                                        <div className={styles.resultMeta}>
-                                            <span className={styles.resultTournament}>{match.tournament}</span>
-                                            <span className={styles.resultCategory}>{match.category}</span>
-                                        </div>
-
-                                        <div className={styles.resultContent}>
-                                            <div className={styles.resultTeam}>
-                                                <span className={styles.teamLogo}>{match.homeLogo}</span>
-                                                <span className={styles.teamName}>{match.home}</span>
-                                                <span className={`${styles.teamScore} ${match.homeScore > match.awayScore ? styles.winner : ''}`}>
-                                                    {match.homeScore}
-                                                </span>
-                                            </div>
-
-                                            <div className={styles.resultDivider}>
-                                                <span className={styles.resultFinal}>Final</span>
-                                            </div>
-
-                                            <div className={styles.resultTeam}>
-                                                <span className={styles.teamLogo}>{match.awayLogo}</span>
-                                                <span className={styles.teamName}>{match.away}</span>
-                                                <span className={`${styles.teamScore} ${match.awayScore > match.homeScore ? styles.winner : ''}`}>
-                                                    {match.awayScore}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.resultAction}>
-                                            <span>Ver detalles</span>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M9 18l6-6-6-6" />
-                                            </svg>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
+                    {loading ? (
+                        <div className={styles.emptyState}>
+                            <p>Cargando resultados...</p>
                         </div>
-                    ))}
+                    ) : null}
+
+                    {!loading && filteredGroups.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <p>No hay resultados finales para {selectedSport.nameEs} en esta fecha.</p>
+                        </div>
+                    ) : null}
+
+                    {!loading && filteredGroups.length > 0 ? (
+                        filteredGroups.map((group) => (
+                            <div key={group.id} className={styles.dateGroup}>
+                                <div className={styles.dateHeader}>
+                                    <div>
+                                        <h2 className={styles.dateTitle}>{group.tournamentName}</h2>
+                                        <span className={styles.dateCount}>{group.country}</span>
+                                    </div>
+                                    <span className={styles.dateCount}>
+                                        {group.matches.length} resultado{group.matches.length === 1 ? '' : 's'}
+                                    </span>
+                                </div>
+
+                                <div className={styles.matchesList}>
+                                    {group.matches.map((match) => (
+                                        <Link key={match.id} href={`/matches/${encodeURIComponent(match.id)}`} className={styles.resultCard}>
+                                            <div className={styles.resultMeta}>
+                                                <span className={styles.resultTournament}>{group.country}: {group.tournamentName}</span>
+                                                <span className={styles.resultCategory}>{match.roundLabel}</span>
+                                            </div>
+
+                                            <div className={styles.resultContent}>
+                                                <div className={styles.resultTeam}>
+                                                    <span className={styles.teamLogo}>
+                                                        {match.homeLogo ? (
+                                                            <Image
+                                                                src={match.homeLogo}
+                                                                alt={match.home}
+                                                                className={styles.teamLogoImg}
+                                                                width={40}
+                                                                height={40}
+                                                            />
+                                                        ) : (
+                                                            <span className={styles.teamLogoFallback}>?</span>
+                                                        )}
+                                                    </span>
+                                                    <span className={styles.teamName}>{match.home}</span>
+                                                    <span className={`${styles.teamScore} ${(match.homeScore ?? -1) > (match.awayScore ?? -1) ? styles.winner : ''}`}>
+                                                        {match.homeScore ?? '-'}
+                                                    </span>
+                                                </div>
+
+                                                <div className={styles.resultDivider}>
+                                                    <span className={styles.resultFinal}>Final</span>
+                                                </div>
+
+                                                <div className={styles.resultTeam}>
+                                                    <span className={styles.teamLogo}>
+                                                        {match.awayLogo ? (
+                                                            <Image
+                                                                src={match.awayLogo}
+                                                                alt={match.away}
+                                                                className={styles.teamLogoImg}
+                                                                width={40}
+                                                                height={40}
+                                                            />
+                                                        ) : (
+                                                            <span className={styles.teamLogoFallback}>?</span>
+                                                        )}
+                                                    </span>
+                                                    <span className={styles.teamName}>{match.away}</span>
+                                                    <span className={`${styles.teamScore} ${(match.awayScore ?? -1) > (match.homeScore ?? -1) ? styles.winner : ''}`}>
+                                                        {match.awayScore ?? '-'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.resultAction}>
+                                                <span>Ver detalles</span>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M9 18l6-6-6-6" />
+                                                </svg>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    ) : null}
                 </div>
             </section>
         </div>

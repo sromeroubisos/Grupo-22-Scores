@@ -84,6 +84,12 @@ function getAccessSummary(accessCount: number) {
 
 const MANAGEMENT_PRESETS = [
     {
+        id: 'redactor',
+        title: 'Redactor',
+        desc: 'Crea, edita y publica noticias desde el panel editorial sin acceso al resto de la consola operativa.',
+        accent: '#f97316',
+    },
+    {
         id: 'gestor_deportes',
         title: 'Gestor de Deportes',
         desc: 'Administra uno o varios deportes y hereda acceso a sus torneos, clubes y partidos.',
@@ -335,7 +341,7 @@ export default function PersonasRolesPage() {
         const usersById = new Map(users.map((user) => [user.id, user]));
 
         const globalAssignments = users
-            .filter((user) => ['super_admin', 'admin_general'].includes(user.role))
+            .filter((user) => ['super_admin', 'admin_general', 'redactor'].includes(user.role))
             .map((user) => ({
                 id: `global-${user.id}`,
                 userId: user.id,

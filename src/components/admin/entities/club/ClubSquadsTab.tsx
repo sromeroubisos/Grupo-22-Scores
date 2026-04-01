@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Database } from '@/lib/database.types';
 import { clsx } from 'clsx';
-import { fetchDivisions, createDivision, Division } from '@/lib/services/divisionService';
-import { createClient } from '@/lib/supabase/client';
-import { Users, Trophy, Calendar, Plus, LayoutGrid, List, Filter, Search, Shield, ChevronRight } from 'lucide-react';
+import { fetchDivisions, createDivision } from '@/lib/services/divisionService';
+import { Users, Trophy, Calendar, Plus, LayoutGrid, List, Filter, Search, Shield } from 'lucide-react';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 
@@ -17,7 +16,7 @@ function getColorClass(id: string) {
         'from-emerald-500 to-teal-600',
         'from-orange-400 to-red-500',
         'from-purple-500 to-fuchsia-600',
-        'from-cyan-500 to-blue-500'
+        'from-cyan-500 to-blue-500',
     ];
     return classes[num % classes.length];
 }
@@ -27,49 +26,92 @@ interface ClubSquadsTabProps {
     data?: ClubRow;
 }
 
-export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
+interface SquadSummary {
+    id: string;
+    name: string;
+    shortName: string;
+    category: string;
+    season: string;
+    tag: string;
+    tagColor: string;
+    sport: string;
+    status: string;
+    colorClass: string;
+    players: number;
+    staff: number;
+}
+
+async function loadClubSquads(clubId: string): Promise<SquadSummary[]> {
+    const divisions = await fetchDivisions(clubId);
+
+    return divisions.map((division) => ({
+        id: division.id,
+        name: division.name || 'Sin nombre',
+        shortName: (division.name || 'SQD').substring(0, 3).toUpperCase(),
+        category: division.category || division.sport || 'Categoria',
+        season: division.season || String(new Date().getFullYear()),
+        tag: division.status === 'active' ? 'Competencia' : '',
+        tagColor: division.status === 'active' ? 'green' : 'gray',
+        sport: division.sport || 'Rugby',
+        status: division.status || 'draft',
+        colorClass: getColorClass(division.id),
+        players: division.players_count || 0,
+        staff: division.staff_count || 0,
+    }));
+}
+
+export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
     const router = useRouter();
     const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
     const [searchQuery, setSearchQuery] = useState('');
-    const [squads, setSquads] = useState<any[]>([]); // We map them to a local structure, so any[] is fine or we can define UI structure
+    const [squads, setSquads] = useState<SquadSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-
-    const supabase = createClient();
-
-    useEffect(() => {
-        loadSquads();
-    }, [id]);
 
     async function loadSquads() {
         setLoading(true);
         try {
-            const data = await fetchDivisions(id);
-            const mappedDivisions = data.map(d => ({
-                id: d.id,
-                name: d.name || 'Sin nombre',
-                shortName: (d.name || 'SQD').substring(0, 3).toUpperCase(),
-                category: d.category || d.sport || 'Categoría',
-                season: d.season || String(new Date().getFullYear()),
-                tag: d.status === 'active' ? 'Competencia' : '',
-                tagColor: d.status === 'active' ? 'green' : 'gray',
-                sport: d.sport || 'Rugby',
-                status: d.status || 'draft',
-                colorClass: getColorClass(d.id),
-                players: d.players_count || 0,
-                staff: d.staff_count || 0
-            }));
-            setSquads(mappedDivisions);
+            const nextSquads = await loadClubSquads(id);
+            setSquads(nextSquads);
         } catch (error) {
-            console.error("Error loading squads:", error);
+            console.error('Error loading squads:', error);
             setSquads([]);
         } finally {
             setLoading(false);
         }
     }
 
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadInitialSquads = async () => {
+            setLoading(true);
+            try {
+                const nextSquads = await loadClubSquads(id);
+                if (isMounted) {
+                    setSquads(nextSquads);
+                }
+            } catch (error) {
+                console.error('Error loading squads:', error);
+                if (isMounted) {
+                    setSquads([]);
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void loadInitialSquads();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [id]);
+
     async function handleCreateSquad() {
-        const name = window.prompt("Ingrese el nombre del nuevo plantel (ej: Primera División, M19...):");
+        const name = window.prompt('Ingrese el nombre del nuevo plantel (ej: Primera Division, M19...):');
         if (!name || name.trim() === '') return;
 
         setIsSaving(true);
@@ -77,32 +119,32 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
             const result = await createDivision(id, name.trim());
             if (result.success) {
                 await loadSquads();
+                window.dispatchEvent(new CustomEvent('club:divisions-updated'));
             } else {
-                console.error("Error al crear:", result.error);
-                alert("Hubo un error al crear el plantel.");
+                console.error('Error al crear:', result.error);
+                alert('Hubo un error al crear el plantel.');
             }
         } finally {
             setIsSaving(false);
         }
     }
 
-    const filteredSquads = squads.filter(s =>
-        (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (s.category || '').toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredSquads = squads.filter((squad) =>
+        squad.name.toLowerCase().includes(searchQuery.toLowerCase())
+        || squad.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const activeSquads = filteredSquads.filter(s => s.status === 'active' || s.status === 'paused');
-    const draftSquads = filteredSquads.filter(s => s.status === 'draft');
-    const historicalSquads = filteredSquads.filter(s => s.status === 'archived');
+    const activeSquads = filteredSquads.filter((squad) => squad.status === 'active' || squad.status === 'paused');
+    const draftSquads = filteredSquads.filter((squad) => squad.status === 'draft');
+    const historicalSquads = filteredSquads.filter((squad) => squad.status === 'archived');
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
-            {/* Controles y Filtros (Kinetic Structuralism) */}
             <div className="manager-card">
                 <header className="manager-header">
                     <div className="manager-header-titles">
-                        <h1 className="flex items-center gap-3"><Shield className="w-6 h-6 text-[var(--accent)]" /> Gestión de Planteles</h1>
-                        <p>Administración de divisiones, planteles y categorías del club.</p>
+                        <h1 className="flex items-center gap-3"><Shield className="w-6 h-6 text-[var(--accent)]" /> Gestion de Planteles</h1>
+                        <p>Administracion de divisiones, planteles y categorias del club.</p>
                     </div>
                     <div className="manager-metadata-box" id="status-indicator">
                         TOTAL: {squads.length} | ACTIVOS: {activeSquads.length}
@@ -110,22 +152,20 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Búsqueda */}
                     <div className="manager-input-group">
-                        <label className="manager-field-label">Búsqueda Rápida</label>
+                        <label className="manager-field-label">Busqueda Rapida</label>
                         <div className="relative flex items-center">
                             <Search className="absolute left-4 w-4 h-4 text-[#888]" />
                             <input
                                 type="text"
                                 className="manager-url-input pl-12"
-                                placeholder="Nombre o categoría..."
+                                placeholder="Nombre o categoria..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    {/* Vista */}
                     <div className="manager-input-group">
                         <label className="manager-field-label">Modo de Vista</label>
                         <div className="manager-tabs">
@@ -145,9 +185,8 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                         </div>
                     </div>
 
-                    {/* Acciones */}
                     <div className="manager-input-group">
-                        <label className="manager-field-label">Acciones Rápidas</label>
+                        <label className="manager-field-label">Acciones Rapidas</label>
                         <div className="flex gap-3">
                             <button
                                 onClick={handleCreateSquad}
@@ -174,7 +213,6 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                 </div>
             ) : viewMode === 'cards' ? (
                 <>
-                    {/* Planteles Activos */}
                     {activeSquads.length > 0 && (
                         <div className="manager-card">
                             <header className="manager-header">
@@ -194,7 +232,7 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                                         className="strata-card p-0 overflow-hidden cursor-pointer group"
                                         onClick={() => router.push(`/admin/super/clubes/${id}/planteles/${squad.id}`)}
                                     >
-                                        <div className={clsx("h-28 relative overflow-hidden bg-gradient-to-br", squad.colorClass)}>
+                                        <div className={clsx('h-28 relative overflow-hidden bg-gradient-to-br', squad.colorClass)}>
                                             <div className="absolute inset-0 flex items-center justify-center">
                                                 <span className="text-white/10 text-7xl font-black tracking-tighter">{squad.shortName}</span>
                                             </div>
@@ -207,16 +245,16 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
 
                                         <div className="p-5">
                                             <h3 className="font-bold text-lg text-[#e2e2e2] mb-1 truncate uppercase tracking-tight">
-                                                {squad.name || 'Sin nombre'}
+                                                {squad.name}
                                             </h3>
                                             <p className="text-[#888] text-xs uppercase tracking-widest mb-4 font-bold">
-                                                {squad.sport} · {squad.category}
+                                                {squad.sport} / {squad.category}
                                             </p>
 
                                             <div className="flex items-center justify-between pt-4 border-t border-[rgba(255,255,255,0.05)]">
                                                 <div className="flex items-center gap-2 text-[#e2e2e2]">
                                                     <Users className="w-4 h-4 text-[var(--accent)]" />
-                                                    <span className="font-black text-sm">{squad.players || 0}</span>
+                                                    <span className="font-black text-sm">{squad.players}</span>
                                                     <span className="text-[#888] text-xs uppercase">jugadores</span>
                                                 </div>
                                                 <div className="anodized-tag text-[#888]">
@@ -230,13 +268,12 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                         </div>
                     )}
 
-                    {/* Borradores */}
                     {draftSquads.length > 0 && (
                         <div className="manager-card">
                             <header className="manager-header">
                                 <div className="manager-header-titles">
                                     <h1 className="flex items-center gap-3"><Calendar className="w-6 h-6 text-[var(--warning)]" /> Borradores</h1>
-                                    <p>Planteles en preparación o pendientes de activación.</p>
+                                    <p>Planteles en preparacion o pendientes de activacion.</p>
                                 </div>
                                 <div className="manager-metadata-box">
                                     COUNT: {draftSquads.length}
@@ -258,10 +295,10 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
 
                                         <div className="p-5">
                                             <h3 className="font-bold text-lg text-[#e2e2e2] mb-1 truncate uppercase tracking-tight">
-                                                {squad.name || 'Sin nombre'}
+                                                {squad.name}
                                             </h3>
                                             <p className="text-[#888] text-xs uppercase tracking-widest mb-4 font-bold">
-                                                {squad.sport} · {squad.category}
+                                                {squad.sport} / {squad.category}
                                             </p>
 
                                             <div className="flex items-center justify-between pt-4 border-t border-[rgba(255,255,255,0.05)]">
@@ -279,13 +316,12 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                         </div>
                     )}
 
-                    {/* Archivados */}
                     {historicalSquads.length > 0 && (
                         <div className="manager-card opacity-60 hover:opacity-100 transition-opacity">
                             <header className="manager-header">
                                 <div className="manager-header-titles">
                                     <h1>Archivados</h1>
-                                    <p>Planteles históricos y temporadas pasadas.</p>
+                                    <p>Planteles historicos y temporadas pasadas.</p>
                                 </div>
                                 <div className="manager-metadata-box">
                                     COUNT: {historicalSquads.length}
@@ -307,7 +343,7 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
 
                                         <div className="p-5">
                                             <h3 className="font-bold text-lg text-[#e2e2e2] mb-1 truncate uppercase tracking-tight">
-                                                {squad.name || 'Sin nombre'}
+                                                {squad.name}
                                             </h3>
                                             <p className="text-[#888] text-xs uppercase tracking-widest mb-4 font-bold">
                                                 Temporada {squad.season}
@@ -325,7 +361,6 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                         </div>
                     )}
 
-                    {/* Sin resultados */}
                     {filteredSquads.length === 0 && (
                         <div className="manager-card">
                             <div className="flex flex-col items-center justify-center py-16 gap-4">
@@ -344,12 +379,11 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                     )}
                 </>
             ) : (
-                /* Vista de Tabla */
                 <div className="manager-card">
                     <header className="manager-header">
                         <div className="manager-header-titles">
                             <h1>Vista Completa de Planteles</h1>
-                            <p>Listado detallado con información expandida.</p>
+                            <p>Listado detallado con informacion expandida.</p>
                         </div>
                     </header>
 
@@ -372,7 +406,7 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                                         onClick={() => router.push(`/admin/super/clubes/${id}/planteles/${squad.id}`)}
                                     >
                                         <td className="px-6 py-5">
-                                            <div className="font-bold text-sm text-[#e2e2e2] uppercase tracking-tight">{squad.name || 'Sin nombre'}</div>
+                                            <div className="font-bold text-sm text-[#e2e2e2] uppercase tracking-tight">{squad.name}</div>
                                             <div className="text-xs text-[#888] mt-0.5 font-mono">{squad.category}</div>
                                         </td>
                                         <td className="px-6 py-5 text-sm text-[#e2e2e2] font-medium uppercase">{squad.sport}</td>
@@ -380,14 +414,14 @@ export function ClubSquadsTab({ id, data }: ClubSquadsTabProps) {
                                             <div className="anodized-tag inline-block">{squad.season}</div>
                                         </td>
                                         <td className="px-6 py-5 text-center">
-                                            <span className="font-black text-[#e2e2e2] text-base">{squad.players || 0}</span>
+                                            <span className="font-black text-[#e2e2e2] text-base">{squad.players}</span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <span className={clsx(
-                                                "anodized-tag inline-flex items-center gap-2",
-                                                squad.status === 'active' ? 'text-[var(--success)] border-[var(--success)]/30' :
-                                                    squad.status === 'draft' ? 'text-[var(--warning)] border-[var(--warning)]/30' :
-                                                        'text-[#666] border-[#666]/30'
+                                                'anodized-tag inline-flex items-center gap-2',
+                                                squad.status === 'active' ? 'text-[var(--success)] border-[var(--success)]/30'
+                                                    : squad.status === 'draft' ? 'text-[var(--warning)] border-[var(--warning)]/30'
+                                                        : 'text-[#666] border-[#666]/30'
                                             )}>
                                                 {squad.status === 'active' && <span className="status-badge bg-[var(--success)]"></span>}
                                                 {squad.status === 'active' ? 'ACTIVO' : squad.status === 'draft' ? 'BORRADOR' : squad.status === 'paused' ? 'RECESO' : 'ARCHIVADO'}

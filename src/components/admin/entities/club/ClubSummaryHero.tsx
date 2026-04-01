@@ -2,17 +2,17 @@
 
 import { Database } from '@/lib/database.types';
 import { useRouter } from 'next/navigation';
-import { MapPin, Shield, Globe, ShieldCheck } from 'lucide-react';
-import { clsx } from 'clsx';
+import { MapPin, Shield, ShieldCheck } from 'lucide-react';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 
 interface ClubSummaryHeroProps {
     data: Partial<ClubRow>;
     unionName?: string;
+    sportLabel?: string;
 }
 
-export function ClubSummaryHero({ data, unionName }: ClubSummaryHeroProps) {
+export function ClubSummaryHero({ data, unionName, sportLabel }: ClubSummaryHeroProps) {
     const router = useRouter();
 
     return (
@@ -36,12 +36,12 @@ export function ClubSummaryHero({ data, unionName }: ClubSummaryHeroProps) {
                 </div>
 
                 <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}><ShieldCheck className="w-3 h-3" /> Rugby Union</span>
-                    <span>·</span>
+                    <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}><ShieldCheck className="w-3 h-3" /> {sportLabel || 'Deporte'}</span>
+                    <span>/</span>
                     <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}><MapPin className="w-3 h-3" /> {data.city || '...'}, {data.country || 'ARG'}</span>
-                    <span>·</span>
+                    <span>/</span>
                     <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}><Shield className="w-3 h-3" /> {unionName || 'S/V'}</span>
-                    <span>·</span>
+                    <span>/</span>
                     <div className="mono" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: data.is_visible ? 'var(--success)' : 'var(--text-muted)' }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: data.is_visible ? 'var(--success)' : 'var(--border)' }} />
                         {data.is_visible ? 'Publicado' : 'Draft'}

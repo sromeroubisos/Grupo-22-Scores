@@ -13,11 +13,12 @@ export async function GET(
     const supabase = await createClient();
     const { clubId } = await params;
 
-    let { data: squads, error } = await supabase
+    const { data: initialSquads, error } = await supabase
       .from('club_divisions')
-      .select('id, name, category, season, status')
+      .select('id, name, sport, gender, category, season, status')
       .eq('club_id', clubId)
       .order('name', { ascending: true });
+    let squads = initialSquads;
 
     if (error) {
       console.warn('Error fetching club_divisions, falling back to club categories:', error);
@@ -32,6 +33,8 @@ export async function GET(
         squads = club.categories.map((cat: string, i: number) => ({
           id: `legacy-${i}`,
           name: cat,
+          sport: 'rugby',
+          gender: 'Masculino',
           category: cat,
           season: String(new Date().getFullYear()),
           status: 'active'

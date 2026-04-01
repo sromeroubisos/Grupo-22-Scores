@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useEffectEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { updateEntity, deleteEntity, createEntity, getClubDashboardData } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
+import { fetchDivisions, type Division } from '@/lib/services/divisionService';
 import { ClubContext } from './ClubContext';
 import { ClubManageHeader } from './ClubManageHeader';
 import { ClubManageTabs } from './ClubManageTabs';
@@ -22,10 +23,35 @@ import './vitreous-club.css';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 
+interface DashboardMatch {
+    id: string;
+    date_time: string;
+    status: string;
+    venue: string | null;
+    home: { name: string; short_name: string; logo_url: string };
+    away: { name: string; short_name: string; logo_url: string };
+    tournament: { name: string } | null;
+}
+
 interface ClubManageShellProps {
     id: string;
     data: ClubRow | null;
     unions: { id: string, name: string }[];
+}
+
+function formatSportLabel(sport?: string | null) {
+    if (!sport?.trim()) return null;
+
+    return sport
+        .trim()
+        .replace(/[-_]+/g, ' ')
+        .split(/\s+/)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join(' ');
+}
+
+function getDivisionDisplayName(division: Division) {
+    return division.name?.trim() || division.category?.trim() || 'Sin nombre';
 }
 
 export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
@@ -50,8 +76,10 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
         categories: [],
     });
 
-    const [dashboardData, setDashboardData] = useState<{ matches: any[] }>({ matches: [] });
+    const [dashboardData, setDashboardData] = useState<{ matches: DashboardMatch[] }>({ matches: [] });
     const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+    const [linkedDivisions, setLinkedDivisions] = useState<Division[]>([]);
+    const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate);
 
     useEffect(() => {
         if (isCreate) return;
@@ -71,13 +99,76 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
         loadDashboard();
     }, [id, isCreate]);
 
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadLinkedDivisions = async () => {
+            if (isCreate) {
+                if (isMounted) {
+                    setLinkedDivisions([]);
+                    setIsLoadingDivisions(false);
+                }
+                return;
+            }
+
+            if (isMounted) {
+                setIsLoadingDivisions(true);
+            }
+
+            try {
+                const divisions = await fetchDivisions(id);
+                if (isMounted) {
+                    setLinkedDivisions(divisions);
+                }
+            } catch (error) {
+                console.error('Division load error:', error);
+                if (isMounted) {
+                    setLinkedDivisions([]);
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoadingDivisions(false);
+                }
+            }
+        };
+
+        void loadLinkedDivisions();
+
+        const refreshDivisions = () => {
+            void loadLinkedDivisions();
+        };
+
+        window.addEventListener('club:divisions-updated', refreshDivisions);
+
+        return () => {
+            isMounted = false;
+            window.removeEventListener('club:divisions-updated', refreshDivisions);
+        };
+    }, [id, isCreate]);
+
     const unionName = unions.find(u => u.id === form.union_id)?.name;
+    const legacyCategories = form.categories || [];
+    const divisionFilterOptions = linkedDivisions.length > 0
+        ? Array.from(new Set(linkedDivisions.map((division) => getDivisionDisplayName(division))))
+        : legacyCategories;
+    const linkedSports = Array.from(
+        new Set(
+            linkedDivisions
+                .map((division) => formatSportLabel(division.sport))
+                .filter((sport): sport is string => Boolean(sport))
+        )
+    );
+    const primarySportLabel = linkedSports.length > 1
+        ? 'Multideporte'
+        : linkedSports[0] || (legacyCategories.length > 0 ? 'Rugby' : 'Deporte');
+    const squadCount = linkedDivisions.length > 0 ? linkedDivisions.length : legacyCategories.length;
 
     // Handle form updates via custom events
     useEffect(() => {
-        const handler = (e: any) => {
-            if (e.detail) {
-                setForm(prev => ({ ...prev, ...e.detail }));
+        const handler = (event: Event) => {
+            const customEvent = event as CustomEvent<Partial<ClubRow>>;
+            if (customEvent.detail) {
+                setForm(prev => ({ ...prev, ...customEvent.detail }));
                 setIsDirty(true);
             }
         };
@@ -85,19 +176,23 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
         return () => window.removeEventListener('club:form-update', handler);
     }, []);
 
+    const handleSaveShortcut = useEffectEvent(() => {
+        void handleSave();
+    });
+
     // Global Shortcuts
     useEffect(() => {
         const handleKeys = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 's') {
                 e.preventDefault();
-                handleSave();
+                handleSaveShortcut();
             }
         };
         window.addEventListener('keydown', handleKeys);
         return () => window.removeEventListener('keydown', handleKeys);
-    }, [form, isDirty, isSaving]);
+    }, []);
 
-    const handleSave = async () => {
+    async function handleSave() {
         if (!form.name?.trim()) {
             alert('❌ El nombre del club es obligatorio');
             return;
@@ -105,7 +200,7 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
         setIsSaving(true);
         try {
             if (isCreate) {
-                const res = await createEntity('club', form as any);
+                const res = await createEntity('club', form as Record<string, unknown>);
                 setIsDirty(false);
                 router.push(`/admin/entities/${res.id}/manage?type=club&tab=resumen`);
             } else {
@@ -114,13 +209,13 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                 window.dispatchEvent(new CustomEvent('club:save-success'));
                 router.refresh();
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Save error:', err);
             alert('Error al guardar: ' + (err instanceof Error ? err.message : String(err)));
         } finally {
             setIsSaving(false);
         }
-    };
+    }
 
     const handleDelete = async () => {
         if (!window.confirm('¿ELIMINAR ESTE CLUB? Esta acción es irreversible.')) return;
@@ -128,7 +223,7 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
         try {
             await deleteEntity('club', id);
             router.push('/admin/super/clubes');
-        } catch (err: any) {
+        } catch (err: unknown) {
             alert(err instanceof Error ? err.message : String(err));
             setIsSaving(false);
         }
@@ -155,6 +250,7 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                         <ClubManageHeader
                             id={id}
                             data={form}
+                            sportLabel={primarySportLabel}
                             isDirty={isDirty}
                             isSaving={isSaving}
                             onSave={handleSave}
@@ -165,7 +261,7 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                             <ClubManageTabs
                                 id={id}
                                 currentTab={currentTab}
-                                squadCount={form.categories?.length || 0}
+                                squadCount={squadCount}
                             />
                         </Suspense>
 
@@ -173,11 +269,15 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                             {currentTab === 'resumen' && (
                                 <>
                                     <div className="card col-12">
-                                        <ClubSummaryHero data={form} unionName={unionName} />
+                                        <ClubSummaryHero data={form} unionName={unionName} sportLabel={primarySportLabel} />
                                     </div>
 
                                     <div className="card col-8">
-                                        <ClubSquadsCard categories={form.categories || []} />
+                                        <ClubSquadsCard
+                                            divisions={linkedDivisions}
+                                            fallbackCategories={legacyCategories}
+                                            loading={isLoadingDivisions}
+                                        />
                                     </div>
                                     <div className="card col-4">
                                         <ClubDataHealthCard diagnostics={diagnostics} />
@@ -185,7 +285,7 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
 
                                     <div className="card col-8">
                                         <ClubNextMatchesCard
-                                            categories={form.categories || []}
+                                            categories={divisionFilterOptions}
                                             matches={dashboardData.matches}
                                             loading={isLoadingDashboard}
                                         />

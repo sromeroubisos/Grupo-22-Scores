@@ -5,6 +5,7 @@ import { Database } from "../database.types";
 export type UserRole =
     | 'fan'
     | 'user'
+    | 'redactor'
     | 'super_admin'
     | 'operator'
     | 'club_admin'
@@ -57,6 +58,7 @@ export function isSuperAdmin(user: User | null): boolean {
 export function canAccessAdminPanel(user: User | null): boolean {
     return Boolean(
         isSuperAdmin(user) ||
+        user?.role === 'redactor' ||
         user?.role === 'operator' ||
         user?.role === 'club_admin' ||
         user?.role === 'gestor_deportes' ||

@@ -4,22 +4,39 @@ export type NewsItem = Database['public']['Tables']['news']['Row'];
 export type NewsInsert = Database['public']['Tables']['news']['Insert'];
 export type NewsUpdate = Database['public']['Tables']['news']['Update'];
 
+async function getErrorMessage(response: Response, fallback: string) {
+    try {
+        const data = await response.json();
+        if (typeof data?.error === 'string' && data.error.trim()) {
+            return data.error;
+        }
+        if (data?.error && typeof data.error === 'object') {
+            const values = [data.error.message, data.error.details, data.error.hint]
+                .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+            if (values.length > 0) {
+                return values.join(' | ');
+            }
+        }
+    } catch {
+        // Ignore JSON parsing errors and fall back to text/status.
+    }
+
+    const text = await response.text().catch(() => '');
+    return text || fallback;
+}
+
 export const newsService = {
     async getAll() {
         const response = await fetch('/api/news');
-        if (!response.ok) throw new Error('Failed to fetch news');
+        if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to fetch news'));
         const data = await response.json();
         return data.data as NewsItem[];
     },
 
     async getById(id: string) {
-        // We can fetch all and find, or use a specific single fetch if API supports it
-        // The current API doesn't have a direct GET /api/news?id=XYZ but let's check
         const response = await fetch(`/api/news?id=${id}`);
-        if (!response.ok) throw new Error('Failed to fetch news item');
+        if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to fetch news item'));
         const data = await response.json();
-        // The API returns an array even for single ID if not handled specifically,
-        // let's assume it returns { data: NewsItem } or { data: NewsItem[] }
         return Array.isArray(data.data) ? data.data[0] : data.data;
     },
 
@@ -29,7 +46,7 @@ export const newsService = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(news),
         });
-        if (!response.ok) throw new Error('Failed to create news');
+        if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to create news'));
         return response.json();
     },
 
@@ -39,7 +56,7 @@ export const newsService = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...news, id }),
         });
-        if (!response.ok) throw new Error('Failed to update news');
+        if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to update news'));
         return response.json();
     },
 
@@ -47,7 +64,7 @@ export const newsService = {
         const response = await fetch(`/api/news?id=${id}`, {
             method: 'DELETE',
         });
-        if (!response.ok) throw new Error('Failed to delete news');
+        if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to delete news'));
         return response.json();
     },
 

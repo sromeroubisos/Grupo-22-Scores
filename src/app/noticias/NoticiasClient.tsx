@@ -10,7 +10,6 @@ import {
     Users,
     Globe,
     MoreVertical,
-    Image as ImageIcon,
     FolderOpen,
     Tag,
     Trash2,
@@ -28,20 +27,26 @@ export interface NewsItem {
     content: string;
     published_at?: string;
     image_url?: string;
-    author_id: string;
+    author_id?: string;
     status: 'draft' | 'published' | 'archived';
-    sport: string;
-    scope: 'global' | 'tournament' | 'club';
+    sport?: string;
+    scope?: 'global' | 'tournament' | 'club' | 'union' | string;
 }
 
 interface NoticiasClientProps {
-    initialNews: any[];
-    isAdmin: boolean;
+    initialNews: NewsItem[];
+    canManageNews: boolean;
 }
 
-export default function NoticiasClient({ initialNews, isAdmin }: NoticiasClientProps) {
+export default function NoticiasClient({ initialNews, canManageNews }: NoticiasClientProps) {
     const router = useRouter();
-    const [news, setNews] = useState<NewsItem[]>(initialNews);
+    const [news, setNews] = useState<NewsItem[]>(
+        initialNews.map((item) => ({
+            ...item,
+            scope: item.scope || 'global',
+            sport: item.sport || 'rugby',
+        }))
+    );
     const [activeFolder, setActiveFolder] = useState<FolderType>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -112,8 +117,8 @@ export default function NoticiasClient({ initialNews, isAdmin }: NoticiasClientP
         return news.filter(item => {
             if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
             if (activeFolder === 'all') return true;
-            if (['rugby', 'hockey', 'football'].includes(activeFolder)) return item.sport === activeFolder;
-            if (['global', 'tournament', 'club'].includes(activeFolder)) return item.scope === activeFolder;
+            if (['rugby', 'hockey', 'football'].includes(activeFolder)) return (item.sport || 'rugby') === activeFolder;
+            if (['global', 'tournament', 'club'].includes(activeFolder)) return (item.scope || 'global') === activeFolder;
             return true;
         });
     }, [activeFolder, searchQuery, news]);
@@ -136,7 +141,7 @@ export default function NoticiasClient({ initialNews, isAdmin }: NoticiasClientP
                     <p>Últimas novedades y comunicados oficiales</p>
                 </div>
 
-                {isAdmin && (
+                {canManageNews && (
                     <div className={styles.statusSync}>
                         <div className={styles.statusPill}>
                             <span className={styles.statusIndicator}></span>
@@ -193,7 +198,7 @@ export default function NoticiasClient({ initialNews, isAdmin }: NoticiasClientP
                                         backgroundRepeat: 'no-repeat'
                                     }}
                                 >
-                                    {isAdmin && (
+                                    {canManageNews && (
                                         <span
                                             className={`${styles.badge} ${item.status === 'published' ? styles.badgePublished : styles.badgeDraft}`}
                                             style={{ position: 'absolute', top: 8, left: 8 }}
@@ -206,7 +211,7 @@ export default function NoticiasClient({ initialNews, isAdmin }: NoticiasClientP
                                 <div className={styles.newsContent}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                                         <span className={styles.rowMeta} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <Tag size={12} /> {item.scope}
+                                            <Tag size={12} /> {item.scope || 'global'}
                                         </span>
                                         <span className={styles.rowMeta}>{item.published_at ? new Date(item.published_at).toLocaleDateString() : 'N/A'}</span>
                                     </div>
@@ -215,7 +220,7 @@ export default function NoticiasClient({ initialNews, isAdmin }: NoticiasClientP
                                         {item.summary || (item.content ? item.content.substring(0, 80) + '...' : '')}
                                     </p>
 
-                                    {isAdmin && (
+                                    {canManageNews && (
                                         <div style={{ display: 'flex', gap: 8, marginTop: 'auto', paddingTop: 16 }}>
                                             <button
                                                 className={styles.btn}

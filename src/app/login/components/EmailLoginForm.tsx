@@ -9,6 +9,7 @@ import styles from '../login.module.css'
 function sanitizeReturnTo(raw: string | null, roleIntent?: string | null): string {
     if (!raw) {
         if (roleIntent === 'admin_general' || roleIntent === 'super_admin') return '/admin/super'
+        if (roleIntent === 'redactor') return '/admin/editorial'
         if (roleIntent === 'admin_club') return '/club-admin'
         if (
             roleIntent === 'admin_union' ||

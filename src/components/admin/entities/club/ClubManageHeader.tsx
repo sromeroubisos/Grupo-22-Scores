@@ -1,8 +1,7 @@
 'use client';
 
-import { ExternalLink, MoreVertical, Save, Loader2, Globe, Shield, ChevronRight } from 'lucide-react';
+import { ExternalLink, MoreVertical, Save, Loader2 } from 'lucide-react';
 import { Database } from '@/lib/database.types';
-import { clsx } from 'clsx';
 import Link from 'next/link';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
@@ -10,13 +9,14 @@ type ClubRow = Database['public']['Tables']['clubs']['Row'];
 interface ClubManageHeaderProps {
     id: string;
     data: Partial<ClubRow>;
+    sportLabel?: string;
     isDirty: boolean;
     isSaving: boolean;
     onSave: () => void;
     unionName?: string;
 }
 
-export function ClubManageHeader({ id, data, isDirty, isSaving, onSave, unionName }: ClubManageHeaderProps) {
+export function ClubManageHeader({ id, data, sportLabel, isDirty, isSaving, onSave, unionName }: ClubManageHeaderProps) {
     return (
         <header className="main-header">
             <div className="header-left">
@@ -25,7 +25,7 @@ export function ClubManageHeader({ id, data, isDirty, isSaving, onSave, unionNam
                     <span className="mono" style={{ color: 'var(--accent)' }}>{new Date().getFullYear()}</span>
                 </div>
                 <div className="subinfo">
-                    {data.categories?.length ? 'Rugby' : 'Deporte'} · {data.country || 'País'} {data.city ? `/ ${data.city}` : ''} {unionName ? `· ${unionName}` : ''}
+                    {sportLabel || (data.categories?.length ? 'Rugby' : 'Deporte')} / {data.country || 'Pais'} {data.city ? `/ ${data.city}` : ''} {unionName ? `/ ${unionName}` : ''}
                 </div>
                 <div className="badges">
                     <span className={`badge ${data.is_visible ? 'badge-visible' : 'badge-draft'}`}>
@@ -50,7 +50,7 @@ export function ClubManageHeader({ id, data, isDirty, isSaving, onSave, unionNam
                         className="btn"
                     >
                         <ExternalLink className="w-4 h-4" />
-                        Portal Público
+                        Portal Publico
                     </Link>
                 )}
 

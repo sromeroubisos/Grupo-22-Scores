@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getActiveSports } from '@/lib/data/sports';
+import { resolveManagedClubId } from '@/lib/club-admin/resolveManagedClubId';
 import SectionShell from '../components/SectionShell';
 import SportFilter from '../components/SportFilter';
 import { useDisciplinas } from '../components/DisciplinasContext';
@@ -80,10 +81,8 @@ export default function ClubDivisionesPage() {
     const { user } = useAuth();
     const { clubSports } = useDisciplinas();
 
-    // Derivar clubId del user — primero membership de club, si no user.clubId
     const clubId = useMemo(() => {
-        const clubMembership = user?.memberships?.find(m => m.scopeType === 'club');
-        return clubMembership?.scopeId || user?.clubId || null;
+        return resolveManagedClubId(user);
     }, [user]);
 
     const canManage = user?.role === 'admin_club' || user?.role === 'admin_general' || user?.role === 'super_admin';
@@ -155,7 +154,7 @@ export default function ClubDivisionesPage() {
             ...prev,
             name: division.name,
             slug: division.slug || division.id,
-            sport: (division.sport || prev.sport) as any,
+            sport: (division.sport as typeof prev.sport | undefined) || prev.sport,
             branch: division.gender || 'Masculino',
             category: division.category || '',
             status: division.status || 'active',
@@ -197,9 +196,21 @@ export default function ClubDivisionesPage() {
             };
 
             if (editingId) {
+                const optimisticDivisionPatch: Partial<Division> = {
+                    name: payload.name,
+                    slug: payload.slug,
+                    sport: payload.sport ?? undefined,
+                    category: payload.category ?? undefined,
+                    gender: payload.gender ?? undefined,
+                    status: payload.status,
+                    season: payload.season,
+                };
+
                 // UPDATE: por ahora re-crear (PATCH por id de división requeriría otro endpoint)
                 // Optimistic update en UI
-                setDivisions(prev => prev.map(d => d.id === editingId ? { ...d, ...payload } as any : d));
+                setDivisions(prev => prev.map((division) => (
+                    division.id === editingId ? { ...division, ...optimisticDivisionPatch } : division
+                )));
                 showToast('División actualizada', 'success');
             } else {
                 // CREATE

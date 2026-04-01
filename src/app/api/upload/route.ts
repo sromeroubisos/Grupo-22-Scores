@@ -1,11 +1,17 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { isAdminUser } from '@/lib/auth/roles';
+import { hasEditorialAccess } from '@/lib/auth/roles';
 import { NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-async function verifyAdmin() {
+type MembershipRow = {
+    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
+    scope_id?: string | null;
+    role: string;
+};
+
+async function verifyEditorialUser() {
     const supabase = await createServerClient();
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -26,13 +32,13 @@ async function verifyAdmin() {
         .select('scope_type, scope_id, role')
         .eq('user_id', session.user.id);
 
-    const mappedMemberships = (memberships || []).map((m: any) => ({
+    const mappedMemberships = ((memberships || []) as MembershipRow[]).map((m) => ({
         scopeType: m.scope_type,
         scopeId: m.scope_id,
         role: m.role
     }));
 
-    if (!isAdminUser(userRole, mappedMemberships)) {
+    if (!hasEditorialAccess(userRole, mappedMemberships)) {
         throw new Error('Unauthorized');
     }
     return true;
@@ -40,7 +46,7 @@ async function verifyAdmin() {
 
 export async function POST(req: Request) {
     try {
-        await verifyAdmin();
+        await verifyEditorialUser();
         
         const formData = await req.formData();
         const file = formData.get('file') as File;
@@ -58,7 +64,7 @@ export async function POST(req: Request) {
 
         const buffer = await file.arrayBuffer();
         
-        const { data, error } = await supabaseAdmin.storage
+        const { error } = await supabaseAdmin.storage
             .from('news')
             .upload(filePath, buffer, {
                 contentType: file.type,
@@ -76,8 +82,9 @@ export async function POST(req: Request) {
             .getPublicUrl(filePath);
 
         return NextResponse.json({ url: publicUrl });
-    } catch (err: any) {
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
         console.error('[UploadAPI] Error:', err);
-        return NextResponse.json({ error: err.message }, { status: err.message === 'Unauthorized' ? 403 : 500 });
+        return NextResponse.json({ error: message }, { status: message === 'Unauthorized' ? 403 : 500 });
     }
 }

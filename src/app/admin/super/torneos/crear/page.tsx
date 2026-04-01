@@ -119,6 +119,17 @@ type ClubRecord = {
     primary_color?: string | null;
 };
 
+type SquadRecord = {
+    id: string;
+    club_id?: string | null;
+    name: string;
+    sport?: string | null;
+    gender?: string | null;
+    category?: string | null;
+    season?: string | null;
+    status?: string | null;
+};
+
 type TournamentRecord = {
     name?: string | null;
     sport_id?: string | null;
@@ -142,7 +153,19 @@ type TournamentRecord = {
 
 type ParticipantRow = {
     club_id: string;
+    division_id?: string | null;
+    division?: SquadRecord | null;
 };
+
+function formatSquadLabel(squad: SquadRecord): string {
+    const suffix = [squad.sport, squad.gender, squad.category]
+        .map((value) => String(value || '').trim())
+        .filter(Boolean)
+        .join(' / ');
+
+    const seasonLabel = squad.season ? ` · ${squad.season}` : '';
+    return `${squad.name}${suffix ? ` (${suffix})` : ''}${seasonLabel}`;
+}
 
 function sameIdList(left: string[], right: string[]): boolean {
     if (left.length !== right.length) return false;
@@ -281,6 +304,9 @@ export default function SuperCreateTournament() {
     const [unions, setUnions] = useState<UnionOption[]>([]);
     const [clubs, setClubs] = useState<ClubRecord[]>([]);
     const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
+    const [selectedDivisionByClub, setSelectedDivisionByClub] = useState<Record<string, string>>({});
+    const [clubSquadsByClub, setClubSquadsByClub] = useState<Record<string, SquadRecord[]>>({});
+    const [loadingSquadsByClub, setLoadingSquadsByClub] = useState<Record<string, boolean>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [saving, setSaving] = useState(false);
     const [countryOptions, setCountryOptions] = useState<TournamentCountryOption[]>(() => getTournamentCountryOptions());
@@ -307,6 +333,35 @@ export default function SuperCreateTournament() {
             pointsBonusLoss: 1,
         }
     });
+
+    const setClubSelection = (clubId: string, isSelected: boolean) => {
+        setSelectedClubs((prev) => {
+            if (isSelected) {
+                return prev.includes(clubId) ? prev : [...prev, clubId];
+            }
+
+            return prev.filter((id) => id !== clubId);
+        });
+
+        if (!isSelected) {
+            setSelectedDivisionByClub((prev) => {
+                if (!(clubId in prev)) return prev;
+                const next = { ...prev };
+                delete next[clubId];
+                return next;
+            });
+        }
+    };
+
+    const toggleAllClubs = () => {
+        if (selectedClubs.length === clubs.length) {
+            setSelectedClubs([]);
+            setSelectedDivisionByClub({});
+            return;
+        }
+
+        setSelectedClubs(clubs.map((club) => club.id));
+    };
 
     // Load reference data
     useEffect(() => {
@@ -364,11 +419,34 @@ export default function SuperCreateTournament() {
             });
 
         // Load existing participants
-        supabase.from('tournament_participants')
-            .select('club_id')
-            .eq('tournament_id', tournamentId)
-            .then(({ data }) => {
-                setSelectedClubs((data as ParticipantRow[] | null)?.map((participant) => participant.club_id) || []);
+        fetch(`/api/tournaments/${tournamentId}/participants?full=true`, { cache: 'no-store' })
+            .then(async (response) => {
+                if (!response.ok) return null;
+                return response.json();
+            })
+            .then((participants: ParticipantRow[] | null) => {
+                if (!participants) return;
+
+                const nextSelectedClubs = Array.from(
+                    new Set(
+                        participants
+                            .map((participant) => participant.club_id)
+                            .filter((clubId): clubId is string => Boolean(clubId))
+                    )
+                );
+
+                const nextSelectedDivisions = participants.reduce<Record<string, string>>((accumulator, participant) => {
+                    if (participant.club_id && participant.division_id) {
+                        accumulator[participant.club_id] = participant.division_id;
+                    }
+                    return accumulator;
+                }, {});
+
+                setSelectedClubs(nextSelectedClubs);
+                setSelectedDivisionByClub(nextSelectedDivisions);
+            })
+            .catch((error) => {
+                console.error('Error loading tournament participants:', error);
             });
 
         fetch(`/api/tournaments/${tournamentId}/phases`)
@@ -449,6 +527,76 @@ export default function SuperCreateTournament() {
             };
         });
     }, [selectedClubs]);
+
+    useEffect(() => {
+        let isCancelled = false;
+        const missingClubIds = selectedClubs.filter(
+            (clubId) => !(clubId in clubSquadsByClub) && !loadingSquadsByClub[clubId]
+        );
+
+        if (missingClubIds.length === 0) return;
+
+        missingClubIds.forEach((clubId) => {
+            setLoadingSquadsByClub((prev) => ({ ...prev, [clubId]: true }));
+
+            fetch(`/api/admin/clubs/${clubId}/squads`, { cache: 'no-store' })
+                .then(async (response) => {
+                    const payload = await response.json().catch(() => []);
+                    if (!response.ok) {
+                        throw new Error(payload?.error || 'No se pudieron cargar los planteles del club');
+                    }
+                    return Array.isArray(payload) ? payload as SquadRecord[] : [];
+                })
+                .then((squads) => {
+                    if (isCancelled) return;
+                    setClubSquadsByClub((prev) => ({ ...prev, [clubId]: squads }));
+                })
+                .catch((error) => {
+                    if (isCancelled) return;
+                    console.error(`Error loading squads for club ${clubId}:`, error);
+                    setClubSquadsByClub((prev) => ({ ...prev, [clubId]: [] }));
+                })
+                .finally(() => {
+                    if (isCancelled) return;
+                    setLoadingSquadsByClub((prev) => ({ ...prev, [clubId]: false }));
+                });
+        });
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [clubSquadsByClub, loadingSquadsByClub, selectedClubs]);
+
+    useEffect(() => {
+        setSelectedDivisionByClub((current) => {
+            let changed = false;
+            const next = { ...current };
+
+            Object.keys(next).forEach((clubId) => {
+                if (!selectedClubs.includes(clubId)) {
+                    delete next[clubId];
+                    changed = true;
+                }
+            });
+
+            selectedClubs.forEach((clubId) => {
+                const squads = clubSquadsByClub[clubId] || [];
+                const selectedDivisionId = next[clubId];
+
+                if (selectedDivisionId && squads.length > 0 && !squads.some((squad) => squad.id === selectedDivisionId)) {
+                    delete next[clubId];
+                    changed = true;
+                }
+
+                if (!next[clubId] && squads.length === 1) {
+                    next[clubId] = squads[0].id;
+                    changed = true;
+                }
+            });
+
+            return changed ? next : current;
+        });
+    }, [clubSquadsByClub, selectedClubs]);
 
     const applyPhaseConfig = (nextConfig: PhaseConfiguration) => {
         setPhaseConfig(nextConfig);
@@ -561,6 +709,20 @@ export default function SuperCreateTournament() {
             }
 
             const participantClubIds = Array.from(new Set(selectedClubs.filter(Boolean)));
+            const clubsMissingDivisionSelection = participantClubIds.filter((clubId) => {
+                const squads = clubSquadsByClub[clubId] || [];
+                return squads.length > 1 && !selectedDivisionByClub[clubId];
+            });
+
+            if (clubsMissingDivisionSelection.length > 0) {
+                const missingClubNames = clubs
+                    .filter((club) => clubsMissingDivisionSelection.includes(club.id))
+                    .map((club) => club.name)
+                    .slice(0, 3)
+                    .join(', ');
+
+                throw new Error(`Selecciona el plantel participante para: ${missingClubNames}`);
+            }
 
             // Persist participants
             if (isEdit) {
@@ -569,11 +731,13 @@ export default function SuperCreateTournament() {
             if (participantClubIds.length > 0) {
                 await Promise.all(
                     participantClubIds.map(async (clubId) => {
+                        const selectedDivisionId = selectedDivisionByClub[clubId] || null;
                         const response = await fetch(`/api/tournaments/${savedId}/participants`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 club_id: clubId,
+                                division_id: selectedDivisionId,
                                 type: 'club',
                                 status: 'active',
                             }),
@@ -968,13 +1132,11 @@ export default function SuperCreateTournament() {
                                                     <input
                                                         type="checkbox"
                                                         checked={clubs.length > 0 && selectedClubs.length === clubs.length}
-                                                        onChange={() => {
-                                                            if (selectedClubs.length === clubs.length) setSelectedClubs([]);
-                                                            else setSelectedClubs(clubs.map(c => c.id));
-                                                        }}
+                                                        onChange={toggleAllClubs}
                                                     />
                                                 </th>
                                                 <th>CLUB</th>
+                                                <th>PLANTEL</th>
                                                 <th>UBICACIÓN</th>
                                                 <th style={{ width: '100px' }}>ACCIÓN</th>
                                             </tr>
@@ -982,7 +1144,7 @@ export default function SuperCreateTournament() {
                                         <tbody>
                                             {clubs.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
+                                                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
                                                         Cargando clubes...
                                                     </td>
                                                 </tr>
@@ -992,10 +1154,7 @@ export default function SuperCreateTournament() {
                                                         <input
                                                             type="checkbox"
                                                             checked={selectedClubs.includes(club.id)}
-                                                            onChange={() => {
-                                                                if (selectedClubs.includes(club.id)) setSelectedClubs(p => p.filter(id => id !== club.id));
-                                                                else setSelectedClubs(p => [...p, club.id]);
-                                                            }}
+                                                            onChange={() => setClubSelection(club.id, !selectedClubs.includes(club.id))}
                                                         />
                                                     </td>
                                                     <td>
@@ -1004,16 +1163,55 @@ export default function SuperCreateTournament() {
                                                             <span>{club.name}</span>
                                                         </div>
                                                     </td>
+                                                    <td>
+                                                        {selectedClubs.includes(club.id) ? (
+                                                            <div style={{ display: 'grid', gap: '6px' }}>
+                                                                <select
+                                                                    className="form-select"
+                                                                    value={selectedDivisionByClub[club.id] || ''}
+                                                                    onChange={(e) => setSelectedDivisionByClub((prev) => ({
+                                                                        ...prev,
+                                                                        [club.id]: e.target.value,
+                                                                    }))}
+                                                                    disabled={Boolean(loadingSquadsByClub[club.id])}
+                                                                >
+                                                                    <option value="">
+                                                                        {loadingSquadsByClub[club.id]
+                                                                            ? 'Cargando planteles...'
+                                                                            : (clubSquadsByClub[club.id] || []).length === 0
+                                                                                ? 'Sin planteles vinculados'
+                                                                                : (clubSquadsByClub[club.id] || []).length === 1
+                                                                                    ? 'Plantel detectado automaticamente'
+                                                                                    : 'Selecciona el plantel'}
+                                                                    </option>
+                                                                    {(clubSquadsByClub[club.id] || []).map((squad) => (
+                                                                        <option key={squad.id} value={squad.id}>
+                                                                            {formatSquadLabel(squad)}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                                {(clubSquadsByClub[club.id] || []).length === 0 && (
+                                                                    <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                                                                        Este club competira en modo legacy hasta que tenga planteles vinculados.
+                                                                    </span>
+                                                                )}
+                                                                {(clubSquadsByClub[club.id] || []).length > 1 && !selectedDivisionByClub[club.id] && (
+                                                                    <span style={{ fontSize: '11px', color: 'var(--accent)' }}>
+                                                                        Elige que plantel quieres inscribir.
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span style={{ color: 'var(--text-dim)' }}>Selecciona el club</span>
+                                                        )}
+                                                    </td>
                                                     <td>{club.city || club.short_name || 'Sede Central'}</td>
                                                     <td>
                                                         <button
                                                             type="button"
                                                             className={`btn ${selectedClubs.includes(club.id) ? 'btn-primary' : 'btn-outline'}`}
                                                             style={{ padding: '4px 12px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
-                                                            onClick={() => {
-                                                                if (selectedClubs.includes(club.id)) setSelectedClubs(p => p.filter(id => id !== club.id));
-                                                                else setSelectedClubs(p => [...p, club.id]);
-                                                            }}
+                                                            onClick={() => setClubSelection(club.id, !selectedClubs.includes(club.id))}
                                                         >
                                                             {selectedClubs.includes(club.id) ? '✓ Añadido' : '+ Añadir'}
                                                         </button>

@@ -74,6 +74,45 @@
     gap: 12px;
 }
 
+.g22-desktop-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #121212;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    transition: var(--transition-smooth);
+}
+
+.g22-desktop-link svg {
+    width: 15px;
+    height: 15px;
+    opacity: 0.88;
+}
+
+.g22-desktop-link:hover,
+.g22-desktop-link:focus-visible {
+    color: #fff;
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    background: rgba(var(--color-accent-rgb), 0.12);
+    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.12) inset;
+}
+
+.g22-desktop-link.active {
+    color: var(--g22-emerald);
+    border-color: rgba(var(--color-accent-rgb), 0.42);
+    background: rgba(var(--color-accent-rgb), 0.14);
+    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.16) inset;
+}
+
 /* LOGO ZONE */
 .g22-logo {
     font-size: 20px;
@@ -207,6 +246,10 @@
 
     .g22-mobile-search-btn {
         display: flex;
+    }
+
+    .g22-desktop-link {
+        display: none;
     }
 
     /* Adjust Logo */
@@ -502,6 +545,25 @@
 
 [data-theme="light"] .g22-user .name {
     color: var(--text-main);
+}
+
+[data-theme="light"] .g22-desktop-link {
+    background: #fff;
+    border-color: rgba(15, 23, 42, 0.1);
+    color: rgba(15, 23, 42, 0.8);
+}
+
+[data-theme="light"] .g22-desktop-link:hover,
+[data-theme="light"] .g22-desktop-link:focus-visible {
+    color: var(--text-main);
+    border-color: rgba(var(--color-accent-rgb), 0.32);
+    background: rgba(var(--color-accent-rgb), 0.1);
+}
+
+[data-theme="light"] .g22-desktop-link.active {
+    color: var(--g22-emerald);
+    border-color: rgba(var(--color-accent-rgb), 0.36);
+    background: rgba(var(--color-accent-rgb), 0.14);
 }
 
 [data-theme="light"] .g22-user-menu {

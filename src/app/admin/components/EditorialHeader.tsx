@@ -11,6 +11,8 @@ interface EditorialHeaderProps {
     isSaving?: boolean;
     onSave: () => void;
     onPublish: () => void;
+    onPreview?: () => void;
+    canPreview?: boolean;
 }
 
 export const EditorialHeader = ({
@@ -18,7 +20,9 @@ export const EditorialHeader = ({
     status,
     isSaving,
     onSave,
-    onPublish
+    onPublish,
+    onPreview,
+    canPreview = false,
 }: EditorialHeaderProps) => {
     const router = useRouter();
 
@@ -27,7 +31,7 @@ export const EditorialHeader = ({
             <div className={styles.headerLeft}>
                 <button
                     className={styles.headerBackBtn}
-                    onClick={() => router.push('/admin/news')}
+                    onClick={() => router.push('/noticias')}
                     title="Volver"
                 >
                     <ArrowLeft size={18} />
@@ -35,7 +39,7 @@ export const EditorialHeader = ({
                 <div className={styles.headerInfo}>
                     <div className={`${styles.statusBadge} ${status === 'published' ? styles.statusPublished : styles.statusDraft}`}>
                         <div className={styles.statusIndicatorCircle} />
-                        {status === 'published' ? 'Publicado' : 'Borrador'}
+                        {status === 'published' ? 'Publicado' : status === 'archived' ? 'Archivado' : 'Borrador'}
                     </div>
                     <span className={styles.headerTitle} title={title || 'Nueva Noticia'}>
                         {title || 'Nueva Noticia'}
@@ -53,7 +57,13 @@ export const EditorialHeader = ({
                     <span className={styles.hideOnMobile}>{isSaving ? 'Guardando...' : 'Guardar borrador'}</span>
                 </button>
 
-                <button className={`${styles.btn} ${styles.btnSecondary} ${styles.hideOnMobile}`} title="Previsualizar">
+                <button
+                    className={`${styles.btn} ${styles.btnSecondary} ${styles.hideOnMobile}`}
+                    title="Previsualizar"
+                    onClick={onPreview}
+                    disabled={!canPreview}
+                    type="button"
+                >
                     <Eye size={16} />
                     <span>Preview</span>
                 </button>

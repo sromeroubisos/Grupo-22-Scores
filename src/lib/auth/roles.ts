@@ -2,6 +2,7 @@ export type AppUserRole =
     | 'fan'
     | 'jugador'
     | 'entrenador'
+    | 'redactor'
     | 'admin_general'
     | 'super_admin' // Added explicitly
     | 'admin_union'
@@ -31,6 +32,7 @@ export const APP_ROLES: AppUserRole[] = [
     'fan',
     'jugador',
     'entrenador',
+    'redactor',
     'admin_general',
     'super_admin',
     'admin_union',
@@ -46,6 +48,9 @@ export const APP_ROLES: AppUserRole[] = [
 const ROLE_ALIASES: Record<string, AppUserRole> = {
     super_admin: 'super_admin', // Identity mapping
     admin_general: 'admin_general',
+    redactor: 'redactor',
+    editor_noticias: 'redactor',
+    editorial: 'redactor',
     admin_union: 'admin_union',
     admin_torneo: 'admin_torneo',
     admin_club: 'admin_club',
@@ -75,6 +80,7 @@ export const ROLE_LABELS: Record<AppUserRole, string> = {
     fan: 'Fan',
     jugador: 'Jugador',
     entrenador: 'Entrenador',
+    redactor: 'Redactor',
     admin_general: 'Admin General',
     super_admin: 'Super Admin',
     admin_union: 'Admin Unión',
@@ -107,8 +113,25 @@ const ADMIN_PANEL_ROLES = new Set<AppUserRole>([
     'gestor_clubes',
 ]);
 
+const EDITORIAL_PANEL_ROLES = new Set<AppUserRole>(['redactor']);
 const CLUB_PANEL_SCOPE_TYPES = new Set<MembershipScope>(['club']);
 const ADMIN_PANEL_SCOPE_TYPES = new Set<MembershipScope>(['union', 'sport', 'tournament', 'match']);
+
+function hasAdminPanelMembershipAccess(memberships?: MembershipLike[] | null) {
+    return hasMembershipRoleAccess(
+        memberships,
+        MANAGEMENT_MEMBERSHIP_ROLES,
+        ADMIN_PANEL_SCOPE_TYPES
+    );
+}
+
+function hasClubPanelMembershipAccess(memberships?: MembershipLike[] | null) {
+    return hasMembershipRoleAccess(
+        memberships,
+        MANAGEMENT_MEMBERSHIP_ROLES,
+        CLUB_PANEL_SCOPE_TYPES
+    );
+}
 
 export function normalizeRole(rawRole?: string | null): AppUserRole {
     if (!rawRole) {
@@ -185,21 +208,17 @@ export function resolveAdminPanel(
         return { href: '/club-admin', label: 'Panel Club' };
     }
 
+    if (EDITORIAL_PANEL_ROLES.has(normalized)) {
+        return { href: '/admin/editorial', label: 'Panel Editorial' };
+    }
+
     if (ADMIN_PANEL_ROLES.has(normalized)) {
         return { href: '/admin', label: 'Panel Admin' };
     }
 
     if (memberships?.length) {
-        const hasAdminPanelAccess = hasMembershipRoleAccess(
-            memberships,
-            MANAGEMENT_MEMBERSHIP_ROLES,
-            ADMIN_PANEL_SCOPE_TYPES
-        );
-        const hasClubPanelAccess = hasMembershipRoleAccess(
-            memberships,
-            MANAGEMENT_MEMBERSHIP_ROLES,
-            CLUB_PANEL_SCOPE_TYPES
-        );
+        const hasAdminPanelAccess = hasAdminPanelMembershipAccess(memberships);
+        const hasClubPanelAccess = hasClubPanelMembershipAccess(memberships);
 
         if (hasAdminPanelAccess) {
             return { href: '/admin', label: 'Panel Admin' };
@@ -213,14 +232,34 @@ export function resolveAdminPanel(
     return null;
 }
 
+export function hasEditorialAccess(
+    role?: string | null,
+    memberships?: MembershipLike[] | null
+): boolean {
+    void memberships;
+    const normalized = normalizeRole(role);
+    return isGlobalAdminRole(normalized) || EDITORIAL_PANEL_ROLES.has(normalized);
+}
+
 export function hasFederationAdminAccess(
     role?: string | null,
     memberships?: MembershipLike[] | null
 ): boolean {
-    const adminPanel = resolveAdminPanel(role, memberships);
-    return Boolean(adminPanel && adminPanel.href.startsWith('/admin'));
+    const normalized = normalizeRole(role);
+
+    return (
+        isGlobalAdminRole(normalized) ||
+        ADMIN_PANEL_ROLES.has(normalized) ||
+        hasAdminPanelMembershipAccess(memberships)
+    );
 }
 
 export function isAdminUser(role?: string | null, memberships?: MembershipLike[] | null): boolean {
-    return Boolean(resolveAdminPanel(role, memberships));
+    const normalized = normalizeRole(role);
+
+    return (
+        hasFederationAdminAccess(normalized, memberships) ||
+        normalized === 'admin_club' ||
+        hasClubPanelMembershipAccess(memberships)
+    );
 }

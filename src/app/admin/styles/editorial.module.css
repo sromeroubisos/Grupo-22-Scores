@@ -260,6 +260,13 @@
     resize: vertical;
 }
 
+.fieldHint {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.45);
+}
+
 /* Tag Input Styles */
 .tagsContainer {
     display: flex;

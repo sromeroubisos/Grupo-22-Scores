@@ -10,7 +10,7 @@ const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: f
 import { resolveAdminPanel } from '@/lib/auth/roles';
 
 export default function Header() {
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, logout } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -110,6 +110,7 @@ export default function Header() {
     }, [pathname]);
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
+    const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
 
     return (
         <header className="g22-header">
@@ -127,6 +128,20 @@ export default function Header() {
 
                 {/* USER + THEME: Right Zone */}
                 <div className="g22-header-actions">
+                    <Link
+                        href="/noticias"
+                        className={`g22-desktop-link ${isNewsRoute ? 'active' : ''}`}
+                        aria-current={isNewsRoute ? 'page' : undefined}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M5 7h14" />
+                            <path d="M5 12h10" />
+                            <path d="M5 17h14" />
+                            <path d="M19 5v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5" />
+                        </svg>
+                        <span>Noticias</span>
+                    </Link>
+
                     <button 
                         className="g22-mobile-search-btn" 
                         aria-label="Buscar" 

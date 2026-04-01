@@ -4,27 +4,25 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { db } from '@/lib/mock-db';
+import { useManagedClubData } from '@/hooks/useManagedClubData';
 import styles from './page.module.css';
 
 export default function ClubAdminDashboardPage() {
     const { user } = useAuth();
-    const club = db.clubs.find((c) => c.id === user?.clubId);
-    const clubName = club?.name || 'Mi Club';
-    const shortName = club?.shortName || 'CLUB';
+    const { club, clubId, loading } = useManagedClubData(user);
+    const clubName = club?.core.name || 'Mi Club';
+    const shortName = club?.core.short_name || club?.core.name?.slice(0, 4).toUpperCase() || 'CLUB';
     const router = useRouter();
     const [showQuickActions, setShowQuickActions] = useState(false);
 
     const handleExport = () => {
+        if (!clubId || !club) {
+            return;
+        }
+
         const payload = {
             exportedAt: new Date().toISOString(),
-            club: {
-                id: club?.id,
-                name: club?.name,
-                shortName: club?.shortName,
-                city: club?.city,
-                primaryColor: club?.primaryColor,
-            },
+            club,
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -40,13 +38,26 @@ export default function ClubAdminDashboardPage() {
             <header className={styles.headerTop}>
                 <div className={styles.viewTitle}>
                     <h1>Panel Institucional</h1>
-                    <p>{clubName} — Temporada 2026</p>
+                    <p>{loading ? 'Cargando club...' : `${clubName} — Temporada ${new Date().getFullYear()}`}</p>
                 </div>
                 <div className={styles.userActions}>
-                    <button className={`${styles.btn} ${styles.btnGhost}`} type="button" onClick={handleExport}>Exportar Datos</button>
+                    <button
+                        className={`${styles.btn} ${styles.btnGhost}`}
+                        type="button"
+                        onClick={handleExport}
+                        disabled={!club}
+                    >
+                        Exportar Datos
+                    </button>
                     <button className={styles.btn} type="button" onClick={() => setShowQuickActions(true)}>Accion Rapida</button>
                 </div>
             </header>
+            {!loading && !club && (
+                <div className={styles.callout} style={{ marginBottom: '24px' }}>
+                    <span className={styles.calloutTitle}>Club no disponible</span>
+                    <p>No encontramos un club gestionable para este usuario en la fuente real de datos.</p>
+                </div>
+            )}
             {showQuickActions && (
                 <div className={styles.modalOverlay} onClick={() => setShowQuickActions(false)}>
                     <div className={styles.modalCard} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>

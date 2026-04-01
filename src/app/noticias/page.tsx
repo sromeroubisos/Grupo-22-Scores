@@ -1,9 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
-import { isAdminUser } from '@/lib/auth/roles';
+import { hasEditorialAccess } from '@/lib/auth/roles';
 import NoticiasClient from './NoticiasClient';
 import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+type MembershipRow = {
+    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
+    scope_id?: string | null;
+    role: string;
+};
 
 export const metadata: Metadata = {
     title: 'Noticias | Torneos',
@@ -17,7 +23,7 @@ export default async function NoticiasPage() {
         data: { session },
     } = await supabase.auth.getSession();
 
-    let isAdmin = false;
+    let canManageNews = false;
 
     if (session?.user?.id) {
         // Fetch the real role from public.users
@@ -35,31 +41,30 @@ export default async function NoticiasPage() {
             .select('scope_type, scope_id, role')
             .eq('user_id', session.user.id);
 
-        // Map memberships to the structure expected by isAdminUser
-        const mappedMemberships = (memberships || []).map((m: any) => ({
+        // Map memberships to the structure expected by the auth helpers
+        const mappedMemberships = ((memberships || []) as MembershipRow[]).map((m) => ({
             scopeType: m.scope_type,
             scopeId: m.scope_id,
             role: m.role
         }));
 
-        isAdmin = isAdminUser(userRole, mappedMemberships);
+        canManageNews = hasEditorialAccess(userRole, mappedMemberships);
     }
 
-    // Fetch news depending on role
-    // Admins see all (including drafts), normal users only see published
+    // Editorial users see all (including drafts), public users only see published
     let query = supabase.from('news').select('*').order('published_at', { ascending: false });
 
-    if (!isAdmin) {
+    if (!canManageNews) {
         query = query.eq('status', 'published');
     }
 
-    const { data: initialNews, error } = await query;
+    const { data: initialNews } = await query;
 
     return (
         <div style={{ minHeight: '100vh', background: '#0a0a0b' }}>
             <NoticiasClient
                 initialNews={initialNews || []}
-                isAdmin={isAdmin}
+                canManageNews={canManageNews}
             />
         </div>
     );
