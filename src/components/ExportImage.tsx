@@ -98,6 +98,10 @@ interface MatchStatsData {
     kickoffAt?: ExportDateValue | null;
     backgroundImage?: string;
     editorialLayoutPresetId?: MatchEditorialPresetId;
+    editorialContextLabel?: string;
+    editorialShowTopBadge?: boolean;
+    editorialShowHeaderArrows?: boolean;
+    editorialGradientImage?: string;
     sponsors?: MatchSponsorData[];
     stats: Array<{ label: string; home: number | string; away: number | string }>;
 }
@@ -193,6 +197,7 @@ type SavedMatchEditorialPreset = {
     layoutPresetId: MatchEditorialPresetId;
     gradientLeftColor: string;
     gradientRightColor: string;
+    gradientImage: MatchBackgroundUpload | null;
     sponsors: MatchSponsorData[];
 };
 
@@ -449,6 +454,21 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             ? getEditorialLayoutPreset((data as MatchStatsData).editorialLayoutPresetId).id
             : DEFAULT_EDITORIAL_LAYOUT_PRESET_ID
     ));
+    const [editorialContextLabel, setEditorialContextLabel] = useState(() => (
+        template === 'matchStats'
+            ? (data as MatchStatsData).editorialContextLabel || ''
+            : ''
+    ));
+    const [editorialShowTopBadge, setEditorialShowTopBadge] = useState(() => (
+        template === 'matchStats'
+            ? (data as MatchStatsData).editorialShowTopBadge !== false
+            : true
+    ));
+    const [editorialShowHeaderArrows, setEditorialShowHeaderArrows] = useState(() => (
+        template === 'matchStats'
+            ? (data as MatchStatsData).editorialShowHeaderArrows !== false
+            : true
+    ));
     const [savedEditorialPresets, setSavedEditorialPresets] = useState<SavedMatchEditorialPreset[]>([]);
     const [editorialPresetName, setEditorialPresetName] = useState('');
     const [editorialSponsors, setEditorialSponsors] = useState<MatchSponsorData[]>(() => (
@@ -456,6 +476,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             ? buildEditorialSponsorSlots((data as MatchStatsData).sponsors)
             : buildEditorialSponsorSlots()
     ));
+    const [editorialGradientUpload, setEditorialGradientUpload] = useState<MatchBackgroundUpload | null>(() => {
+        if (template !== 'matchStats') return null;
+        const gradientImage = (data as MatchStatsData).editorialGradientImage?.trim();
+        return gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null;
+    });
+    const [editorialCompetitionLogoUpload, setEditorialCompetitionLogoUpload] = useState<MatchBackgroundUpload | null>(null);
     const [matchBackgroundUpload, setMatchBackgroundUpload] = useState<MatchBackgroundUpload | null>(() => {
         if (template !== 'matchStats') return null;
         const backgroundImage = (data as MatchStatsData).backgroundImage?.trim();
@@ -502,7 +528,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         if (template !== 'matchStats') return;
         const matchData = data as MatchStatsData;
         setEditorialLayoutPresetId(getEditorialLayoutPreset(matchData.editorialLayoutPresetId).id);
+        setEditorialContextLabel(matchData.editorialContextLabel || '');
+        setEditorialShowTopBadge(matchData.editorialShowTopBadge !== false);
+        setEditorialShowHeaderArrows(matchData.editorialShowHeaderArrows !== false);
         setEditorialSponsors(buildEditorialSponsorSlots(matchData.sponsors));
+        const gradientImage = matchData.editorialGradientImage?.trim();
+        setEditorialGradientUpload((current) => current ?? (gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null));
     }, [data, template]);
 
     useEffect(() => {
@@ -550,6 +581,11 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         () => getActiveEditorialSponsors(editorialSponsors),
         [editorialSponsors]
     );
+    const editorialAutoContextLabel = useMemo(() => {
+        if (template !== 'matchStats') return '';
+        const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as MatchStatsData;
+        return buildAutoEditorialContextLabel(applyMatchExportMode(exportData, 'result'));
+    }, [customTournamentName, data, selectedTimeZonePreset, template]);
     const exportActionLabel = template === 'standings' && standingsSlides.length > 1
         ? `Exportar ${standingsSlides.length} imagenes`
         : 'Exportar imagen';
@@ -636,6 +672,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             layoutPresetId: editorialLayoutPresetId,
             gradientLeftColor: editorialGradientLeftColor,
             gradientRightColor: editorialGradientRightColor,
+            gradientImage: editorialGradientUpload ? { ...editorialGradientUpload } : null,
             sponsors: activeEditorialSponsors,
         };
 
@@ -651,6 +688,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setEditorialLayoutPresetId(getEditorialLayoutPreset(preset.layoutPresetId).id);
         setEditorialGradientLeftColor(preset.gradientLeftColor);
         setEditorialGradientRightColor(preset.gradientRightColor);
+        setEditorialGradientUpload(preset.gradientImage ? { ...preset.gradientImage } : null);
         setEditorialSponsors(buildEditorialSponsorSlots(preset.sponsors));
         setSelectedPaletteId('custom');
         setStatus(`Preset "${preset.name}" aplicado`);
@@ -682,6 +720,56 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setStatus('');
     };
 
+    const handleEditorialGradientUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setStatus('Subi un PNG o imagen valida para el degradado');
+            return;
+        }
+
+        try {
+            const src = await readFileAsDataUrl(file);
+            setEditorialGradientUpload({ name: file.name, src });
+            setStatus('');
+        } catch (error) {
+            console.error('Editorial gradient upload error:', error);
+            setStatus('No se pudo leer el degradado');
+        }
+    };
+
+    const clearEditorialGradientUpload = () => {
+        setEditorialGradientUpload(null);
+        setStatus('');
+    };
+
+    const handleEditorialCompetitionLogoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setStatus('Subi una imagen valida para el logo de la competencia');
+            return;
+        }
+
+        try {
+            const src = await readFileAsDataUrl(file);
+            setEditorialCompetitionLogoUpload({ name: file.name, src });
+            setStatus('');
+        } catch (error) {
+            console.error('Editorial competition logo upload error:', error);
+            setStatus('No se pudo leer el logo de la competencia');
+        }
+    };
+
+    const clearEditorialCompetitionLogoUpload = () => {
+        setEditorialCompetitionLogoUpload(null);
+        setStatus('');
+    };
+
     const handleExport = async () => {
         setIsExporting(true);
         setStatus('Generando...');
@@ -710,7 +798,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                     const editorialMatchData: MatchStatsData = {
                         ...matchData,
                         backgroundImage,
+                        tournamentLogo: editorialCompetitionLogoUpload?.src || matchData.tournamentLogo,
                         editorialLayoutPresetId,
+                        editorialContextLabel,
+                        editorialShowTopBadge,
+                        editorialShowHeaderArrows,
+                        editorialGradientImage: editorialGradientUpload?.src || matchData.editorialGradientImage,
                         sponsors: activeEditorialSponsors,
                     };
                     await drawMatchEditorialResult(
@@ -1035,6 +1128,48 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         </div>
                                     )}
                                     <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Logo central de competencia</label>
+                                        <div className={styles.uploadCard}>
+                                            <div className={styles.uploadMeta}>
+                                                <span className={styles.uploadTitle}>Logo entre los dos scores</span>
+                                                <span className={styles.uploadSubtitle}>
+                                                    Si no subis nada, se usa el logo del torneo cargado en el partido. Solo hace override cuando queres cambiarlo.
+                                                </span>
+                                            </div>
+                                            <div className={styles.uploadActions}>
+                                                <label className={styles.uploadBtn}>
+                                                    Subir logo
+                                                    <input
+                                                        className={styles.fileInput}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleEditorialCompetitionLogoUpload}
+                                                    />
+                                                </label>
+                                                <button
+                                                    className={styles.ghostBtn}
+                                                    onClick={clearEditorialCompetitionLogoUpload}
+                                                    disabled={!editorialCompetitionLogoUpload}
+                                                    type="button"
+                                                >
+                                                    Quitar override
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {editorialCompetitionLogoUpload && (
+                                            <div className={styles.uploadPreview}>
+                                                <div
+                                                    className={`${styles.uploadThumb} ${styles.uploadThumbContain}`}
+                                                    style={{ backgroundImage: `url(${editorialCompetitionLogoUpload.src})` }}
+                                                />
+                                                <div className={styles.uploadMeta}>
+                                                    <span className={styles.uploadTitle}>{editorialCompetitionLogoUpload.name}</span>
+                                                    <span className={styles.uploadSubtitle}>Este logo reemplazara al del torneo solo en esta exportacion.</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div style={{ marginTop: 16 }}>
                                         <label className={styles.modalLabel}>Preset de layout</label>
                                         <div className={styles.formatOptions}>
                                             {EDITORIAL_LAYOUT_PRESETS.map((preset) => (
@@ -1051,6 +1186,45 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         <p className={styles.modalHint}>
                                             Cada preset agrupa posiciones, tamanos y respiracion del bloque editorial para reutilizarlo por torneo o liga.
                                         </p>
+                                    </div>
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Texto central</label>
+                                        <input
+                                            className={styles.modalInput}
+                                            value={editorialContextLabel}
+                                            onChange={(event) => setEditorialContextLabel(event.target.value)}
+                                            placeholder={editorialAutoContextLabel || 'Ej: Final - Fecha 3'}
+                                        />
+                                        <p className={styles.modalHint}>
+                                            Si lo dejas vacio, se usa el texto automatico del partido. Aca puedes reemplazar la fecha/hora por cualquier copy editorial.
+                                        </p>
+                                    </div>
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Elementos superiores</label>
+                                        <div className={styles.toggleGrid}>
+                                            <label className={styles.toggleCard}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editorialShowTopBadge}
+                                                    onChange={(event) => setEditorialShowTopBadge(event.target.checked)}
+                                                />
+                                                <span className={styles.toggleCopy}>
+                                                    <span className={styles.toggleLabel}>Panel &quot;Resultado&quot;</span>
+                                                    <span className={styles.toggleHint}>Activa o esconde el badge superior izquierdo.</span>
+                                                </span>
+                                            </label>
+                                            <label className={styles.toggleCard}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editorialShowHeaderArrows}
+                                                    onChange={(event) => setEditorialShowHeaderArrows(event.target.checked)}
+                                                />
+                                                <span className={styles.toggleCopy}>
+                                                    <span className={styles.toggleLabel}>Tres flechas</span>
+                                                    <span className={styles.toggleHint}>Muestra u oculta las flechas de la esquina superior derecha.</span>
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
                                     <div className={styles.customColors} style={{ marginTop: 14 }}>
                                         <div className={styles.colorInp}>
@@ -1069,6 +1243,48 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                                 onChange={(event) => handleEditorialGradientRightColorChange(event.target.value)}
                                             />
                                         </div>
+                                    </div>
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Degradado PNG opcional</label>
+                                        <div className={styles.uploadCard}>
+                                            <div className={styles.uploadMeta}>
+                                                <span className={styles.uploadTitle}>Override del degradado</span>
+                                                <span className={styles.uploadSubtitle}>
+                                                    Si subes un PNG, reemplaza el degradado generado por colores. Si no, el export usa el degradado actual configurado arriba.
+                                                </span>
+                                            </div>
+                                            <div className={styles.uploadActions}>
+                                                <label className={styles.uploadBtn}>
+                                                    Subir PNG
+                                                    <input
+                                                        className={styles.fileInput}
+                                                        type="file"
+                                                        accept="image/png,image/*"
+                                                        onChange={handleEditorialGradientUpload}
+                                                    />
+                                                </label>
+                                                <button
+                                                    className={styles.ghostBtn}
+                                                    onClick={clearEditorialGradientUpload}
+                                                    disabled={!editorialGradientUpload}
+                                                    type="button"
+                                                >
+                                                    Usar degradado actual
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {editorialGradientUpload && (
+                                            <div className={styles.uploadPreview}>
+                                                <div
+                                                    className={`${styles.uploadThumb} ${styles.uploadThumbWide}`}
+                                                    style={{ backgroundImage: `url(${editorialGradientUpload.src})` }}
+                                                />
+                                                <div className={styles.uploadMeta}>
+                                                    <span className={styles.uploadTitle}>{editorialGradientUpload.name}</span>
+                                                    <span className={styles.uploadSubtitle}>Se aplicara solo sobre la zona del degradado editorial.</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className={styles.uploadCard} style={{ marginTop: 16 }}>
                                         <div className={styles.uploadMeta}>
@@ -1365,6 +1581,14 @@ function readSavedEditorialPresets(): SavedMatchEditorialPreset[] {
                 layoutPresetId: getEditorialLayoutPreset(item?.layoutPresetId).id,
                 gradientLeftColor: typeof item?.gradientLeftColor === 'string' && item.gradientLeftColor ? item.gradientLeftColor : '#df255c',
                 gradientRightColor: typeof item?.gradientRightColor === 'string' && item.gradientRightColor ? item.gradientRightColor : DEFAULT_PALETTE.accent,
+                gradientImage: typeof item?.gradientImage?.src === 'string' && item.gradientImage.src
+                    ? {
+                        name: typeof item?.gradientImage?.name === 'string' && item.gradientImage.name.trim()
+                            ? item.gradientImage.name.trim()
+                            : 'Degradado guardado',
+                        src: item.gradientImage.src,
+                    }
+                    : null,
                 sponsors: getActiveEditorialSponsors(buildEditorialSponsorSlots(item?.sponsors)),
             }))
             .slice(0, 12);
@@ -2363,7 +2587,7 @@ function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
     ctx.restore();
 }
 
-function buildEditorialContextLabel(data: MatchStatsData) {
+function buildAutoEditorialContextLabel(data: MatchStatsData) {
     const rawTournament = data.tournament?.trim().toUpperCase() || '';
     const compactTournament = rawTournament
         .replace(/^SUPER RUGBY AMERICAS\s*/i, 'SRA ')
@@ -2383,6 +2607,12 @@ function buildEditorialContextLabel(data: MatchStatsData) {
     }
 
     return compactTournament || 'RESULTADO FINAL';
+}
+
+function buildEditorialContextLabel(data: MatchStatsData) {
+    const customLabel = data.editorialContextLabel?.trim();
+    if (customLabel) return customLabel;
+    return buildAutoEditorialContextLabel(data);
 }
 
 function drawCoverImage(
@@ -2446,6 +2676,27 @@ function drawEditorialTopBadge(ctx: CanvasRenderingContext2D, label: string) {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, x + paddingX, y + height / 2 + 2);
+    ctx.restore();
+}
+
+function drawEditorialGradientImage(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    gradientImage: HTMLImageElement | null
+) {
+    if (!gradientImage) return;
+    const sourceWidth = gradientImage.naturalWidth || gradientImage.width || canvas.width;
+    const sourceHeight = gradientImage.naturalHeight || gradientImage.height || canvas.height;
+    const scale = Math.min(canvas.width / sourceWidth, canvas.height / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    const drawX = (canvas.width - drawWidth) / 2;
+    const drawY = (canvas.height - drawHeight) / 2;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.drawImage(gradientImage, drawX, drawY, drawWidth, drawHeight);
     ctx.restore();
 }
 
@@ -2662,12 +2913,13 @@ async function drawMatchEditorialResult(
 ) {
     const editorialPreset = getEditorialLayoutPreset(data.editorialLayoutPresetId);
     const sponsors = getActiveEditorialSponsors(buildEditorialSponsorSlots(data.sponsors));
-    const [backgroundImage, homeLogo, awayLogo, tournamentLogo, textureImage, ...sponsorImages] = await Promise.all([
+    const [backgroundImage, homeLogo, awayLogo, tournamentLogo, textureImage, gradientImage, ...sponsorImages] = await Promise.all([
         loadImage(backgroundImageSrc),
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
         loadImage(data.tournamentLogo || ''),
         loadImage(EDITORIAL_TEXTURE_SOURCE),
+        loadImage(data.editorialGradientImage || ''),
         ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
     ]);
 
@@ -2706,100 +2958,115 @@ async function drawMatchEditorialResult(
     const tournamentLogoY = scoreCenterY + editorialPreset.tournamentLogoOffsetY;
     const teamLogoY = topRuleY - editorialPreset.logoOffsetY;
     const gradientStartY = Math.max(Math.round(titleY - editorialPreset.titleFontSize * 0.95), Math.round(overlayTop - 16));
+    const usesUploadedGradientImage = Boolean(gradientImage);
 
-    const topShade = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.24);
-    topShade.addColorStop(0, 'rgba(0, 0, 0, 0.78)');
-    topShade.addColorStop(0.54, 'rgba(0, 0, 0, 0.18)');
-    ctx.fillStyle = topShade;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const bottomShade = ctx.createLinearGradient(0, gradientStartY - 24, 0, canvas.height);
-    bottomShade.addColorStop(0, 'rgba(2, 6, 10, 0)');
-    bottomShade.addColorStop(0.16, 'rgba(2, 6, 10, 0.46)');
-    bottomShade.addColorStop(0.56, 'rgba(2, 6, 10, 0.6)');
-    bottomShade.addColorStop(1, `rgba(2, 6, 10, ${editorialPreset.gradientBottomOpacity})`);
-    ctx.fillStyle = bottomShade;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const gradientHeight = canvas.height - gradientStartY;
-    const gradientLayer = typeof document !== 'undefined' ? document.createElement('canvas') : null;
-    if (gradientLayer) {
-        gradientLayer.width = canvas.width;
-        gradientLayer.height = gradientHeight;
-        const gradientLayerCtx = gradientLayer.getContext('2d');
-
-        if (gradientLayerCtx) {
-            const centerBlendColor = mixHexColors(gradientLeftColor, gradientRightColor, 0.5);
-            const horizontalBlend = gradientLayerCtx.createLinearGradient(0, 0, gradientLayer.width, 0);
-            horizontalBlend.addColorStop(0, hexToRGBA(gradientLeftColor, 1));
-            horizontalBlend.addColorStop(0.2, hexToRGBA(gradientLeftColor, 1));
-            horizontalBlend.addColorStop(0.5, hexToRGBA(centerBlendColor, 1));
-            horizontalBlend.addColorStop(0.8, hexToRGBA(gradientRightColor, 1));
-            horizontalBlend.addColorStop(1, hexToRGBA(gradientRightColor, 1));
-            gradientLayerCtx.fillStyle = horizontalBlend;
-            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-            const leftBloom = gradientLayerCtx.createRadialGradient(
-                gradientLayer.width * 0.14,
-                gradientLayer.height * 0.9,
-                12,
-                gradientLayer.width * 0.14,
-                gradientLayer.height * 0.9,
-                gradientLayer.width * 0.34
-            );
-            leftBloom.addColorStop(0, hexToRGBA(gradientLeftColor, 0.68));
-            leftBloom.addColorStop(0.64, hexToRGBA(gradientLeftColor, 0.3));
-            leftBloom.addColorStop(1, 'rgba(255, 41, 84, 0)');
-            gradientLayerCtx.fillStyle = leftBloom;
-            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-            const rightBloom = gradientLayerCtx.createRadialGradient(
-                gradientLayer.width * 0.86,
-                gradientLayer.height * 0.9,
-                12,
-                gradientLayer.width * 0.86,
-                gradientLayer.height * 0.9,
-                gradientLayer.width * 0.34
-            );
-            rightBloom.addColorStop(0, hexToRGBA(gradientRightColor, 0.68));
-            rightBloom.addColorStop(0.64, hexToRGBA(gradientRightColor, 0.3));
-            rightBloom.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            gradientLayerCtx.fillStyle = rightBloom;
-            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-            gradientLayerCtx.globalCompositeOperation = 'destination-in';
-            const verticalFade = gradientLayerCtx.createLinearGradient(0, 0, 0, gradientLayer.height);
-            verticalFade.addColorStop(0, 'rgba(0,0,0,0)');
-            verticalFade.addColorStop(0.16, 'rgba(0,0,0,0.16)');
-            verticalFade.addColorStop(0.42, 'rgba(0,0,0,0.58)');
-            verticalFade.addColorStop(0.72, 'rgba(0,0,0,0.94)');
-            verticalFade.addColorStop(1, 'rgba(0,0,0,1)');
-            gradientLayerCtx.fillStyle = verticalFade;
-            gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-            ctx.save();
-            ctx.globalCompositeOperation = 'soft-light';
-            ctx.globalAlpha = 0.6;
-            ctx.drawImage(gradientLayer, 0, gradientStartY);
-            ctx.restore();
-
-            ctx.save();
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.globalAlpha = 0.55;
-            ctx.drawImage(gradientLayer, 0, gradientStartY);
-            ctx.restore();
-        }
+    if (!usesUploadedGradientImage) {
+        const topShade = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.24);
+        topShade.addColorStop(0, 'rgba(0, 0, 0, 0.78)');
+        topShade.addColorStop(0.54, 'rgba(0, 0, 0, 0.18)');
+        ctx.fillStyle = topShade;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    const centerVignette = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.46, 110, canvas.width / 2, canvas.height * 0.66, canvas.width * 0.88);
-    centerVignette.addColorStop(0, 'rgba(255,255,255,0)');
-    centerVignette.addColorStop(1, 'rgba(2, 6, 10, 0.22)');
-    ctx.fillStyle = centerVignette;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawEditorialGradientTexture(ctx, canvas, textureImage, gradientStartY);
+    if (!usesUploadedGradientImage) {
+        const bottomShade = ctx.createLinearGradient(0, gradientStartY - 24, 0, canvas.height);
+        bottomShade.addColorStop(0, 'rgba(2, 6, 10, 0)');
+        bottomShade.addColorStop(0.16, 'rgba(2, 6, 10, 0.46)');
+        bottomShade.addColorStop(0.56, 'rgba(2, 6, 10, 0.6)');
+        bottomShade.addColorStop(1, `rgba(2, 6, 10, ${editorialPreset.gradientBottomOpacity})`);
+        ctx.fillStyle = bottomShade;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
-    drawEditorialTopBadge(ctx, (data.mainTitle || getStatusLabel(data.status)).replace('PROGRAMADO', 'FIXTURE'));
-    drawEditorialHeaderArrows(ctx, canvas);
+    if (usesUploadedGradientImage) {
+        drawEditorialGradientImage(ctx, canvas, gradientImage);
+    } else {
+        const gradientHeight = canvas.height - gradientStartY;
+        const gradientLayer = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+        if (gradientLayer) {
+            gradientLayer.width = canvas.width;
+            gradientLayer.height = gradientHeight;
+            const gradientLayerCtx = gradientLayer.getContext('2d');
+
+            if (gradientLayerCtx) {
+                const centerBlendColor = mixHexColors(gradientLeftColor, gradientRightColor, 0.5);
+                const horizontalBlend = gradientLayerCtx.createLinearGradient(0, 0, gradientLayer.width, 0);
+                horizontalBlend.addColorStop(0, hexToRGBA(gradientLeftColor, 1));
+                horizontalBlend.addColorStop(0.2, hexToRGBA(gradientLeftColor, 1));
+                horizontalBlend.addColorStop(0.5, hexToRGBA(centerBlendColor, 1));
+                horizontalBlend.addColorStop(0.8, hexToRGBA(gradientRightColor, 1));
+                horizontalBlend.addColorStop(1, hexToRGBA(gradientRightColor, 1));
+                gradientLayerCtx.fillStyle = horizontalBlend;
+                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+                const leftBloom = gradientLayerCtx.createRadialGradient(
+                    gradientLayer.width * 0.14,
+                    gradientLayer.height * 0.9,
+                    12,
+                    gradientLayer.width * 0.14,
+                    gradientLayer.height * 0.9,
+                    gradientLayer.width * 0.34
+                );
+                leftBloom.addColorStop(0, hexToRGBA(gradientLeftColor, 0.68));
+                leftBloom.addColorStop(0.64, hexToRGBA(gradientLeftColor, 0.3));
+                leftBloom.addColorStop(1, 'rgba(255, 41, 84, 0)');
+                gradientLayerCtx.fillStyle = leftBloom;
+                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+                const rightBloom = gradientLayerCtx.createRadialGradient(
+                    gradientLayer.width * 0.86,
+                    gradientLayer.height * 0.9,
+                    12,
+                    gradientLayer.width * 0.86,
+                    gradientLayer.height * 0.9,
+                    gradientLayer.width * 0.34
+                );
+                rightBloom.addColorStop(0, hexToRGBA(gradientRightColor, 0.68));
+                rightBloom.addColorStop(0.64, hexToRGBA(gradientRightColor, 0.3));
+                rightBloom.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                gradientLayerCtx.fillStyle = rightBloom;
+                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+                gradientLayerCtx.globalCompositeOperation = 'destination-in';
+                const verticalFade = gradientLayerCtx.createLinearGradient(0, 0, 0, gradientLayer.height);
+                verticalFade.addColorStop(0, 'rgba(0,0,0,0)');
+                verticalFade.addColorStop(0.16, 'rgba(0,0,0,0.16)');
+                verticalFade.addColorStop(0.42, 'rgba(0,0,0,0.58)');
+                verticalFade.addColorStop(0.72, 'rgba(0,0,0,0.94)');
+                verticalFade.addColorStop(1, 'rgba(0,0,0,1)');
+                gradientLayerCtx.fillStyle = verticalFade;
+                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'soft-light';
+                ctx.globalAlpha = 0.6;
+                ctx.drawImage(gradientLayer, 0, gradientStartY);
+                ctx.restore();
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 0.55;
+                ctx.drawImage(gradientLayer, 0, gradientStartY);
+                ctx.restore();
+            }
+        }
+
+        drawEditorialGradientTexture(ctx, canvas, textureImage, gradientStartY);
+    }
+
+    if (!usesUploadedGradientImage) {
+        const centerVignette = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.46, 110, canvas.width / 2, canvas.height * 0.66, canvas.width * 0.88);
+        centerVignette.addColorStop(0, 'rgba(255,255,255,0)');
+        centerVignette.addColorStop(1, 'rgba(2, 6, 10, 0.22)');
+        ctx.fillStyle = centerVignette;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    if (data.editorialShowTopBadge !== false) {
+        drawEditorialTopBadge(ctx, (data.mainTitle || getStatusLabel(data.status)).replace('PROGRAMADO', 'FIXTURE'));
+    }
+    if (data.editorialShowHeaderArrows !== false) {
+        drawEditorialHeaderArrows(ctx, canvas);
+    }
 
     drawEditorialCrestStroke(ctx, leftColumnX, teamLogoY, editorialPreset.logoWidth, editorialPreset.logoHeight, homeLogo, 5);
     drawOverflowCrest(ctx, {
