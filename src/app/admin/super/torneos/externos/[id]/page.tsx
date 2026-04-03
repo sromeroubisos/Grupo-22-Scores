@@ -39,6 +39,7 @@ type ExternalStandingsLabel = {
     name: string;
     color: string;
     position: number;
+    positions_input?: string;
     group_id?: string | null;
 };
 
@@ -49,6 +50,12 @@ type ExternalStandingsPayload = {
     assignments: ExternalStandingsAssignment[];
     labels: ExternalStandingsLabel[];
 };
+
+type ApiResponseEnvelope = {
+    ok?: boolean;
+    error?: string;
+    [key: string]: unknown;
+} | null;
 
 type StandingsPreviewRow = {
     id: string;
@@ -84,6 +91,98 @@ function slugify(value: string): string {
         .toLowerCase()
         .replace(/[\s_-]+/g, '-')
         .replace(/^-+|-+$/g, '');
+}
+
+function stripLabelPositionSuffix(value: string | null | undefined) {
+    const normalized = normalizeString(value);
+    if (!normalized) return null;
+    return normalized.replace(/__p\d+$/i, '');
+}
+
+function parseLabelPositions(value: unknown, fallback?: number | null): number[] {
+    const raw = typeof value === 'string' ? value : String(value ?? '');
+    const parts = raw
+        .split(',')
+        .map((part) => normalizeInteger(part))
+        .filter((position): position is number => typeof position === 'number' && position > 0);
+
+    const unique = [...new Set(parts)];
+    if (unique.length > 0) return unique.sort((left, right) => left - right);
+
+    if (typeof fallback === 'number' && Number.isFinite(fallback) && fallback > 0) {
+        return [Math.trunc(fallback)];
+    }
+
+    return [1];
+}
+
+function formatLabelPositions(positions: number[]) {
+    return positions.join(', ');
+}
+
+function normalizeEditorLabels(labels: ExternalStandingsLabel[]): ExternalStandingsLabel[] {
+    const grouped = new Map<string, ExternalStandingsLabel & { __positions: number[] }>();
+
+    labels.forEach((label, index) => {
+        const name = normalizeString(label.name);
+        const color = normalizeString(label.color);
+        if (!name || !color) return;
+
+        const baseId = stripLabelPositionSuffix(label.id) || `label-${index + 1}`;
+        const groupId = normalizeString(label.group_id);
+        const positions = parseLabelPositions(label.positions_input ?? label.position, label.position);
+        const key = `${baseId}:${name}:${color}:${groupId || 'global'}`;
+
+        const existing = grouped.get(key);
+        if (existing) {
+            existing.__positions = [...new Set([...existing.__positions, ...positions])].sort((left, right) => left - right);
+            existing.position = existing.__positions[0] || existing.position;
+            existing.positions_input = formatLabelPositions(existing.__positions);
+            return;
+        }
+
+        grouped.set(key, {
+            id: baseId,
+            name,
+            color,
+            position: positions[0] || 1,
+            positions_input: formatLabelPositions(positions),
+            group_id: groupId,
+            __positions: positions,
+        });
+    });
+
+    return [...grouped.values()]
+        .sort((left, right) => {
+            if (left.position !== right.position) return left.position - right.position;
+            return left.name.localeCompare(right.name);
+        })
+        .map(({ __positions: _positions, ...label }) => label);
+}
+
+function expandLabelsForSave(labels: ExternalStandingsLabel[]): ExternalStandingsLabel[] {
+    const expanded: ExternalStandingsLabel[] = [];
+
+    labels.forEach((label, index) => {
+        const name = normalizeString(label.name);
+        const color = normalizeString(label.color);
+        if (!name || !color) return;
+
+        const baseId = stripLabelPositionSuffix(label.id) || `label-${index + 1}`;
+        const positions = parseLabelPositions(label.positions_input ?? label.position, label.position);
+
+        positions.forEach((position) => {
+            expanded.push({
+                id: positions.length === 1 ? baseId : `${baseId}__p${position}`,
+                name,
+                color,
+                position,
+                group_id: normalizeString(label.group_id),
+            });
+        });
+    });
+
+    return expanded;
 }
 
 function isGroupedStandings(rows: any[]): boolean {
@@ -186,26 +285,45 @@ function deriveAssignments(rows: StandingsPreviewRow[]): ExternalStandingsAssign
 function deriveLabels(teamLabels: any[]): ExternalStandingsLabel[] {
     if (!Array.isArray(teamLabels)) return [];
 
-    const seen = new Set<string>();
-    const labels: ExternalStandingsLabel[] = [];
+    return normalizeEditorLabels(
+        teamLabels.flatMap((record: any, index: number) => {
+            const label = Array.isArray(record?.label) ? record.label[0] : record?.label;
+            const name = normalizeString(label?.name);
+            const color = normalizeString(label?.color);
+            const position = normalizeInteger(record?.position);
+            const groupId = normalizeString(record?.group_id);
+            if (!name || !color || !position) return [];
 
-    teamLabels.forEach((record: any, index: number) => {
-        const label = Array.isArray(record?.label) ? record.label[0] : record?.label;
-        const name = normalizeString(label?.name);
-        const color = normalizeString(label?.color);
-        const position = normalizeInteger(record?.position);
-        const groupId = normalizeString(record?.group_id);
-        if (!name || !color || !position) return;
+            return [{
+                id: normalizeString(record?.label_id) || normalizeString(label?.id) || `label-${index + 1}`,
+                name,
+                color,
+                position,
+                positions_input: String(position),
+                group_id: groupId,
+            }];
+        }),
+    );
+}
 
-        const id = normalizeString(record?.label_id) || normalizeString(label?.id) || `label-${index + 1}`;
-        const key = `${id}:${position}:${groupId || 'global'}`;
-        if (seen.has(key)) return;
-        seen.add(key);
+async function readApiEnvelope(response: Response): Promise<{ payload: ApiResponseEnvelope; text: string }> {
+    const text = await response.text().catch(() => '');
 
-        labels.push({ id, name, color, position, group_id: groupId });
-    });
+    if (!text) {
+        return { payload: null, text: '' };
+    }
 
-    return labels;
+    try {
+        return {
+            payload: JSON.parse(text) as ApiResponseEnvelope,
+            text,
+        };
+    } catch {
+        return {
+            payload: null,
+            text,
+        };
+    }
 }
 
 export default function ExternalTournamentOverridePage() {
@@ -340,7 +458,7 @@ export default function ExternalTournamentOverridePage() {
                     nextStandings.source = override.source || 'external-api';
                     nextStandings.groups = Array.isArray(override.groups) ? override.groups : [];
                     nextStandings.assignments = Array.isArray(override.assignments) ? override.assignments : [];
-                    nextStandings.labels = Array.isArray(override.labels) ? override.labels : [];
+                    nextStandings.labels = normalizeEditorLabels(Array.isArray(override.labels) ? override.labels : []);
                 }
 
                 if (publicResponse.status === 'fulfilled' && publicResponse.value.ok && publicResponse.value.payload?.ok) {
@@ -456,21 +574,29 @@ export default function ExternalTournamentOverridePage() {
                         source: standingsForm.source || 'external-api',
                         groups: standingsForm.groups,
                         assignments: standingsForm.assignments,
-                        labels: standingsForm.labels,
+                        labels: expandLabelsForSave(standingsForm.labels),
                     }),
                 }),
             ]);
 
-            const [metaPayload, standingsPayload] = await Promise.all([
-                metaResponse.json().catch(() => ({})),
-                standingsResponse.json().catch(() => ({})),
+            const [metaResult, standingsResult] = await Promise.all([
+                readApiEnvelope(metaResponse),
+                readApiEnvelope(standingsResponse),
             ]);
 
             if (!metaResponse.ok) {
-                throw new Error(metaPayload?.error || 'No se pudo guardar el override del torneo.');
+                throw new Error(
+                    metaResult.payload?.error ||
+                    metaResult.text ||
+                    `No se pudo guardar el override del torneo. HTTP ${metaResponse.status}.`,
+                );
             }
             if (!standingsResponse.ok) {
-                throw new Error(standingsPayload?.error || 'No se pudo guardar la configuracion editorial de standings.');
+                throw new Error(
+                    standingsResult.payload?.error ||
+                    standingsResult.text ||
+                    `No se pudo guardar la configuracion editorial de standings. HTTP ${standingsResponse.status}.`,
+                );
             }
 
             setSaved(true);
@@ -548,6 +674,7 @@ export default function ExternalTournamentOverridePage() {
                     name: 'Nueva etiqueta',
                     color: '#00a365',
                     position: current.labels.length + 1,
+                    positions_input: String(current.labels.length + 1),
                     group_id: null,
                 },
             ],
@@ -558,6 +685,36 @@ export default function ExternalTournamentOverridePage() {
         setStandingsForm((current) => ({
             ...current,
             labels: current.labels.map((label) => label.id === labelId ? { ...label, ...patch } : label),
+        }));
+    }
+
+    function updateLabelPositions(labelId: string, rawValue: string) {
+        setStandingsForm((current) => ({
+            ...current,
+            labels: current.labels.map((label) => {
+                if (label.id !== labelId) return label;
+                const positions = parseLabelPositions(rawValue, label.position);
+                return {
+                    ...label,
+                    position: positions[0] || label.position,
+                    positions_input: rawValue,
+                };
+            }),
+        }));
+    }
+
+    function normalizeLabelPositionsInput(labelId: string) {
+        setStandingsForm((current) => ({
+            ...current,
+            labels: current.labels.map((label) => {
+                if (label.id !== labelId) return label;
+                const positions = parseLabelPositions(label.positions_input ?? label.position, label.position);
+                return {
+                    ...label,
+                    position: positions[0] || label.position,
+                    positions_input: formatLabelPositions(positions),
+                };
+            }),
         }));
     }
 
@@ -860,7 +1017,7 @@ export default function ExternalTournamentOverridePage() {
                             {standingsForm.labels.length === 0 ? (
                                 <div style={{ color: '#9aa4b2' }}>Sin etiquetas configuradas.</div>
                             ) : standingsForm.labels.map((label) => (
-                                <div key={label.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 100px 130px 180px auto', gap: 12, alignItems: 'center' }}>
+                                <div key={label.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 140px 130px 180px auto', gap: 12, alignItems: 'center' }}>
                                     <input
                                         value={label.name}
                                         onChange={(event) => updateLabel(label.id, { name: event.target.value })}
@@ -874,10 +1031,13 @@ export default function ExternalTournamentOverridePage() {
                                         }}
                                     />
                                     <input
-                                        type="number"
-                                        min={1}
-                                        value={label.position}
-                                        onChange={(event) => updateLabel(label.id, { position: Math.max(1, Number(event.target.value || 1)) })}
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={label.positions_input ?? String(label.position)}
+                                        onChange={(event) => updateLabelPositions(label.id, event.target.value)}
+                                        onBlur={() => normalizeLabelPositionsInput(label.id)}
+                                        placeholder="1, 2, 3"
+                                        title="Podés escribir varias posiciones separadas por coma"
                                         style={{
                                             height: 42,
                                             borderRadius: 12,

@@ -34,5 +34,17 @@
     "country_id": "international",
     "url": null,
     "updated_at": "2026-04-01T08:53:48.338Z"
+  },
+  "fs-kyiwfjvg": {
+    "id": "fs-kyiwfjvg",
+    "source": "flashscore",
+    "name": "Liga Profesional",
+    "display_name": "Liga Profesional",
+    "logo_url": "https://static.flashscore.com/res/image/data/MHE5g4CO-fiW14XME.png",
+    "sport": "football",
+    "country": "Argentina",
+    "country_id": "international",
+    "url": null,
+    "updated_at": "2026-04-03T03:36:25.437Z"
   }
 }

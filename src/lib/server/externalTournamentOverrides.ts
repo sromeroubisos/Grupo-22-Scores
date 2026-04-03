@@ -16,9 +16,21 @@ export type ExternalTournamentOverrideRecord = {
 };
 
 type ExternalTournamentOverrideStore = Record<string, ExternalTournamentOverrideRecord>;
+type MinimalReadClient = {
+    from: (table: string) => {
+        select: (columns: string) => {
+            in: (
+                column: string,
+                values: string[],
+            ) => Promise<{ data: Record<string, unknown>[] | null; error: { message?: string | null } | null }>;
+        };
+    };
+};
 
 const STORE_DIR = path.join(process.cwd(), 'storage');
 const STORE_PATH = path.join(STORE_DIR, 'external-tournament-overrides.json');
+const EXTERNAL_TOURNAMENT_SELECT = 'id, source, name, display_name, logo_url, sport, country, country_id, url, updated_at';
+const LEGACY_TOURNAMENT_SELECT = 'id, external_id, name, display_name, logo_url, sport_id, sport, country, country_id, url';
 
 function normalizeString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -78,7 +90,50 @@ async function writeStore(store: ExternalTournamentOverrideStore) {
     await writeFile(STORE_PATH, JSON.stringify(store, null, 2), 'utf-8');
 }
 
-function mapDbTournamentOverride(row: Record<string, unknown> | null | undefined): ExternalTournamentOverrideRecord | null {
+export function normalizeExternalTournamentOverrideRecord(
+    record: ExternalTournamentOverrideRecord,
+): ExternalTournamentOverrideRecord {
+    const normalizedId = normalizeString(record.id);
+    if (!normalizedId) {
+        throw new Error('Tournament id is required');
+    }
+
+    return {
+        ...record,
+        id: normalizedId,
+        name: normalizeString(record.display_name) || normalizeString(record.name),
+        display_name: normalizeString(record.display_name) || normalizeString(record.name),
+        logo_url: normalizeString(record.logo_url),
+        source: normalizeString(record.source) || 'flashscore',
+        sport: normalizeString(record.sport) || 'rugby',
+        country: normalizeString(record.country),
+        country_id: normalizeString(record.country_id),
+        url: normalizeString(record.url),
+        updated_at: new Date().toISOString(),
+    };
+}
+
+function mapExternalTournamentOverrideRow(row: Record<string, unknown> | null | undefined): ExternalTournamentOverrideRecord | null {
+    if (!row) return null;
+
+    const id = normalizeString(row.id);
+    if (!id) return null;
+
+    return {
+        id,
+        source: normalizeString(row.source) || 'database',
+        name: normalizeString(row.display_name) || normalizeString(row.name),
+        display_name: normalizeString(row.display_name) || normalizeString(row.name),
+        logo_url: normalizeString(row.logo_url),
+        sport: normalizeString(row.sport),
+        country: normalizeString(row.country),
+        country_id: normalizeString(row.country_id),
+        url: normalizeString(row.url),
+        updated_at: normalizeString(row.updated_at),
+    };
+}
+
+function mapLegacyTournamentOverrideRow(row: Record<string, unknown> | null | undefined): ExternalTournamentOverrideRecord | null {
     if (!row) return null;
 
     const externalId = normalizeString(row.external_id) || normalizeString(row.id);
@@ -89,19 +144,12 @@ function mapDbTournamentOverride(row: Record<string, unknown> | null | undefined
         source: 'database',
         name: normalizeString(row.display_name) || normalizeString(row.name),
         display_name: normalizeString(row.display_name) || normalizeString(row.name),
-        logo_url: normalizeString(row.logo_url) || null,
+        logo_url: normalizeString(row.logo_url),
         sport: normalizeString(row.sport_id) || normalizeString(row.sport),
         country: normalizeString(row.country),
         country_id: normalizeString(row.country_id),
         url: normalizeString(row.url),
     };
-}
-
-export async function getStoredExternalTournamentOverride(id: string): Promise<ExternalTournamentOverrideRecord | null> {
-    const store = await readStore();
-    const candidates = buildExternalTournamentOverrideCandidates(id);
-
-    return findStoredOverrideByCandidates(store, candidates);
 }
 
 function findStoredOverrideByCandidates(
@@ -123,15 +171,112 @@ function findStoredOverrideByCandidates(
     return null;
 }
 
-export async function getStoredExternalTournamentOverrides(ids: string[]): Promise<Map<string, ExternalTournamentOverrideRecord>> {
+function buildRecordCandidateMap(records: ExternalTournamentOverrideRecord[]): Map<string, ExternalTournamentOverrideRecord> {
+    const lookup = new Map<string, ExternalTournamentOverrideRecord>();
+
+    records.forEach((record) => {
+        buildExternalTournamentOverrideCandidates(record.id).forEach((candidate) => {
+            const key = candidate.toLowerCase();
+            if (!lookup.has(key)) {
+                lookup.set(key, record);
+            }
+        });
+    });
+
+    return lookup;
+}
+
+function findRecordByCandidates(
+    lookup: Map<string, ExternalTournamentOverrideRecord>,
+    candidates: string[],
+): ExternalTournamentOverrideRecord | null {
+    for (const candidate of candidates) {
+        const record = lookup.get(candidate.toLowerCase());
+        if (record) return record;
+    }
+
+    return null;
+}
+
+async function getExternalTournamentOverridesFromTable(candidateIds: string[]): Promise<ExternalTournamentOverrideRecord[]> {
+    if (candidateIds.length === 0) return [];
+
+    try {
+        const readClient = await getReadClient();
+        const client = readClient as unknown as MinimalReadClient;
+        const { data, error } = await client
+            .from('external_tournaments')
+            .select(EXTERNAL_TOURNAMENT_SELECT)
+            .in('id', candidateIds);
+
+        if (error || !Array.isArray(data)) return [];
+
+        return data
+            .map((row: Record<string, unknown>) => mapExternalTournamentOverrideRow(row))
+            .filter((record: ExternalTournamentOverrideRecord | null): record is ExternalTournamentOverrideRecord => record !== null);
+    } catch {
+        return [];
+    }
+}
+
+async function getLegacyTournamentOverridesFromTable(candidateIds: string[]): Promise<ExternalTournamentOverrideRecord[]> {
+    if (candidateIds.length === 0) return [];
+
+    try {
+        const readClient = await getReadClient();
+        const client = readClient as unknown as MinimalReadClient;
+        const { data, error } = await client
+            .from('tournaments')
+            .select(LEGACY_TOURNAMENT_SELECT)
+            .in('external_id', candidateIds);
+
+        if (error || !Array.isArray(data)) return [];
+
+        return data
+            .map((row: Record<string, unknown>) => mapLegacyTournamentOverrideRow(row))
+            .filter((record: ExternalTournamentOverrideRecord | null): record is ExternalTournamentOverrideRecord => record !== null);
+    } catch {
+        return [];
+    }
+}
+
+export async function getStoredExternalTournamentOverride(id: string): Promise<ExternalTournamentOverrideRecord | null> {
     const store = await readStore();
+    const candidates = buildExternalTournamentOverrideCandidates(id);
+
+    return findStoredOverrideByCandidates(store, candidates);
+}
+
+export async function getStoredExternalTournamentOverrides(ids: string[]): Promise<Map<string, ExternalTournamentOverrideRecord>> {
+    const normalizedIds = ids
+        .map((id) => normalizeString(id))
+        .filter((id): id is string => Boolean(id));
+
+    if (normalizedIds.length === 0) {
+        return new Map();
+    }
+
+    const allCandidates = uniqueValues(
+        normalizedIds.flatMap((id) => buildExternalTournamentOverrideCandidates(id)),
+    );
+
+    const [store, externalRows, legacyRows] = await Promise.all([
+        readStore(),
+        getExternalTournamentOverridesFromTable(allCandidates),
+        getLegacyTournamentOverridesFromTable(allCandidates),
+    ]);
+
+    const externalLookup = buildRecordCandidateMap(externalRows);
+    const legacyLookup = buildRecordCandidateMap(legacyRows);
     const result = new Map<string, ExternalTournamentOverrideRecord>();
 
-    for (const id of ids) {
-        const rawId = normalizeString(id);
-        if (!rawId) continue;
+    for (const rawId of normalizedIds) {
+        const candidates = buildExternalTournamentOverrideCandidates(rawId);
+        const override =
+            findRecordByCandidates(externalLookup, candidates) ||
+            findStoredOverrideByCandidates(store, candidates) ||
+            findRecordByCandidates(legacyLookup, candidates);
 
-        const override = findStoredOverrideByCandidates(store, buildExternalTournamentOverrideCandidates(rawId));
         if (override) {
             result.set(rawId, override);
             result.set(rawId.toLowerCase(), override);
@@ -145,59 +290,53 @@ export async function getDatabaseExternalTournamentOverride(id: string): Promise
     const candidates = buildExternalTournamentOverrideCandidates(id);
     if (candidates.length === 0) return null;
 
-    try {
-        const readClient = await getReadClient();
-        const { data, error } = await (readClient as any)
-            .from('tournaments')
-            .select('id, external_id, name, display_name, logo_url, sport_id, sport, country, country_id, url')
-            .in('external_id', candidates)
-            .limit(1);
+    const [externalRows, legacyRows] = await Promise.all([
+        getExternalTournamentOverridesFromTable(candidates),
+        getLegacyTournamentOverridesFromTable(candidates),
+    ]);
 
-        if (error) return null;
+    const externalLookup = buildRecordCandidateMap(externalRows);
+    const legacyLookup = buildRecordCandidateMap(legacyRows);
 
-        const row = Array.isArray(data) ? data[0] : null;
-        return mapDbTournamentOverride(row);
-    } catch {
-        return null;
-    }
+    return (
+        findRecordByCandidates(externalLookup, candidates) ||
+        findRecordByCandidates(legacyLookup, candidates)
+    );
 }
 
 export async function getExternalTournamentOverride(id: string): Promise<ExternalTournamentOverrideRecord | null> {
-    const stored = await getStoredExternalTournamentOverride(id);
-    if (stored) return stored;
+    const candidates = buildExternalTournamentOverrideCandidates(id);
+    if (candidates.length === 0) return null;
 
-    return getDatabaseExternalTournamentOverride(id);
+    const [store, externalRows, legacyRows] = await Promise.all([
+        readStore(),
+        getExternalTournamentOverridesFromTable(candidates),
+        getLegacyTournamentOverridesFromTable(candidates),
+    ]);
+
+    const externalLookup = buildRecordCandidateMap(externalRows);
+    const legacyLookup = buildRecordCandidateMap(legacyRows);
+
+    return (
+        findRecordByCandidates(externalLookup, candidates) ||
+        findStoredOverrideByCandidates(store, candidates) ||
+        findRecordByCandidates(legacyLookup, candidates)
+    );
 }
 
 export async function upsertExternalTournamentOverride(
     record: ExternalTournamentOverrideRecord,
 ): Promise<ExternalTournamentOverrideRecord> {
-    const normalizedId = normalizeString(record.id);
-    if (!normalizedId) {
-        throw new Error('Tournament id is required');
-    }
-
-    const normalized: ExternalTournamentOverrideRecord = {
-        ...record,
-        id: normalizedId,
-        name: normalizeString(record.display_name) || normalizeString(record.name),
-        display_name: normalizeString(record.display_name) || normalizeString(record.name),
-        logo_url: normalizeString(record.logo_url),
-        source: normalizeString(record.source) || 'flashscore',
-        sport: normalizeString(record.sport) || 'rugby',
-        country: normalizeString(record.country),
-        country_id: normalizeString(record.country_id),
-        url: normalizeString(record.url),
-        updated_at: new Date().toISOString(),
-    };
-
+    const normalized = normalizeExternalTournamentOverrideRecord(record);
     const store = await readStore();
-    for (const candidate of buildExternalTournamentOverrideCandidates(normalizedId)) {
+
+    for (const candidate of buildExternalTournamentOverrideCandidates(normalized.id)) {
         if (store[candidate]) {
             delete store[candidate];
         }
     }
-    store[normalizedId] = normalized;
+
+    store[normalized.id] = normalized;
     await writeStore(store);
 
     return normalized;

@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { buildExternalTournamentOverrideCandidates } from '@/lib/server/externalTournamentOverrides';
+import { getReadClient } from '@/lib/supabase/read';
 
 export type ExternalTournamentStandingsGroup = {
     id: string;
@@ -34,10 +35,21 @@ export type ExternalTournamentStandingsOverrideRecord = {
 };
 
 type ExternalTournamentStandingsOverrideStore = Record<string, ExternalTournamentStandingsOverrideRecord>;
+type MinimalReadClient = {
+    from: (table: string) => {
+        select: (columns: string) => {
+            in: (
+                column: string,
+                values: string[],
+            ) => Promise<{ data: Record<string, unknown>[] | null; error: { message?: string | null } | null }>;
+        };
+    };
+};
 
 const STORE_DIR = path.join(process.cwd(), 'storage');
 const STORE_PATH = path.join(STORE_DIR, 'external-tournament-standings-overrides.json');
 const UNGROUPED_GROUP_ID = '__external_ungrouped__';
+const STANDINGS_OVERRIDE_SELECT = 'id, source, groups, assignments, labels, updated_at';
 
 function normalizeString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -309,7 +321,7 @@ function normalizeLabels(
     return normalized;
 }
 
-function normalizeRecord(
+export function normalizeExternalTournamentStandingsOverrideRecord(
     record: ExternalTournamentStandingsOverrideRecord,
 ): ExternalTournamentStandingsOverrideRecord {
     const id = normalizeString(record.id);
@@ -332,23 +344,121 @@ function normalizeRecord(
     };
 }
 
-export async function getExternalTournamentStandingsOverride(
-    id: string,
-): Promise<ExternalTournamentStandingsOverrideRecord | null> {
-    const store = await readStore();
+function mapDatabaseStandingsOverride(
+    row: Record<string, unknown> | null | undefined,
+): ExternalTournamentStandingsOverrideRecord | null {
+    if (!row) return null;
 
-    for (const candidate of buildExternalTournamentOverrideCandidates(id)) {
-        const direct = store[candidate];
-        if (direct) return direct;
+    const id = normalizeString(row.id);
+    if (!id) return null;
+
+    const groups = normalizeGroups(row.groups);
+    const validGroupIds = new Set(groups.map((group) => group.id));
+
+    return {
+        id,
+        source: normalizeString(row.source) || 'external-api',
+        groups,
+        assignments: normalizeAssignments(row.assignments, validGroupIds),
+        labels: normalizeLabels(row.labels, validGroupIds),
+        updated_at: normalizeString(row.updated_at),
+    };
+}
+
+function buildDatabaseOverrideLookup(
+    records: ExternalTournamentStandingsOverrideRecord[],
+): Map<string, ExternalTournamentStandingsOverrideRecord> {
+    const lookup = new Map<string, ExternalTournamentStandingsOverrideRecord>();
+
+    records.forEach((record) => {
+        buildExternalTournamentOverrideCandidates(record.id).forEach((candidate) => {
+            const key = candidate.toLowerCase();
+            if (!lookup.has(key)) {
+                lookup.set(key, record);
+            }
+        });
+    });
+
+    return lookup;
+}
+
+function findDatabaseOverrideByCandidates(
+    lookup: Map<string, ExternalTournamentStandingsOverrideRecord>,
+    candidates: string[],
+): ExternalTournamentStandingsOverrideRecord | null {
+    for (const candidate of candidates) {
+        const record = lookup.get(candidate.toLowerCase());
+        if (record) return record;
     }
 
     return null;
 }
 
+function findStoredOverrideByCandidates(
+    store: ExternalTournamentStandingsOverrideStore,
+    candidates: string[],
+): ExternalTournamentStandingsOverrideRecord | null {
+    for (const candidate of candidates) {
+        const direct = store[candidate];
+        if (direct) return direct;
+    }
+
+    const entries = Object.entries(store);
+    for (const candidate of candidates) {
+        const lowered = candidate.toLowerCase();
+        const found = entries.find(([key]) => key.toLowerCase() === lowered);
+        if (found) return found[1];
+    }
+
+    return null;
+}
+
+async function getDatabaseExternalTournamentStandingsOverrides(
+    candidateIds: string[],
+): Promise<ExternalTournamentStandingsOverrideRecord[]> {
+    if (candidateIds.length === 0) return [];
+
+    try {
+        const readClient = await getReadClient();
+        const client = readClient as unknown as MinimalReadClient;
+        const { data, error } = await client
+            .from('external_tournament_standings_overrides')
+            .select(STANDINGS_OVERRIDE_SELECT)
+            .in('id', candidateIds);
+
+        if (error || !Array.isArray(data)) return [];
+
+        return data
+            .map((row: Record<string, unknown>) => mapDatabaseStandingsOverride(row))
+            .filter((record: ExternalTournamentStandingsOverrideRecord | null): record is ExternalTournamentStandingsOverrideRecord => record !== null);
+    } catch {
+        return [];
+    }
+}
+
+export async function getExternalTournamentStandingsOverride(
+    id: string,
+): Promise<ExternalTournamentStandingsOverrideRecord | null> {
+    const candidates = buildExternalTournamentOverrideCandidates(id);
+    if (candidates.length === 0) return null;
+
+    const [store, databaseOverrides] = await Promise.all([
+        readStore(),
+        getDatabaseExternalTournamentStandingsOverrides(candidates),
+    ]);
+
+    const databaseLookup = buildDatabaseOverrideLookup(databaseOverrides);
+
+    return (
+        findDatabaseOverrideByCandidates(databaseLookup, candidates) ||
+        findStoredOverrideByCandidates(store, candidates)
+    );
+}
+
 export async function upsertExternalTournamentStandingsOverride(
     record: ExternalTournamentStandingsOverrideRecord,
 ): Promise<ExternalTournamentStandingsOverrideRecord> {
-    const normalized = normalizeRecord(record);
+    const normalized = normalizeExternalTournamentStandingsOverrideRecord(record);
     const store = await readStore();
 
     for (const candidate of buildExternalTournamentOverrideCandidates(normalized.id)) {
