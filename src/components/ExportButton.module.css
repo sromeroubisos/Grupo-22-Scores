@@ -634,6 +634,56 @@
     color: var(--color-text-secondary, rgba(255, 255, 255, 0.55));
 }
 
+.scoreOverrideCard {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+}
+
+.scoreOverrideHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.scoreOverrideHeader strong {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #fff);
+}
+
+.scoreOverrideHeader span {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.58));
+}
+
+.scoreOverrideGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.scoreOverrideField {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.scoreOverrideField span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.78));
+}
+
 .presetGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
@@ -884,6 +934,14 @@
     }
 
     .toggleGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .scoreOverrideHeader {
+        flex-direction: column;
+    }
+
+    .scoreOverrideGrid {
         grid-template-columns: 1fr;
     }
 

@@ -487,6 +487,16 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const backgroundImage = (data as MatchStatsData).backgroundImage?.trim();
         return backgroundImage ? { name: 'Fondo preconfigurado', src: backgroundImage } : null;
     });
+    const [manualHomeScore, setManualHomeScore] = useState(() => (
+        template === 'matchStats'
+            ? formatExportScoreInput((data as MatchStatsData).homeScore)
+            : ''
+    ));
+    const [manualAwayScore, setManualAwayScore] = useState(() => (
+        template === 'matchStats'
+            ? formatExportScoreInput((data as MatchStatsData).awayScore)
+            : ''
+    ));
     const [selectedMatchIndices, setSelectedMatchIndices] = useState<Set<number>>(() => {
         if (template !== 'dailyMatches') return new Set<number>();
         const matches = (data as DailyMatchesData).matches ?? [];
@@ -532,6 +542,8 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setEditorialShowTopBadge(matchData.editorialShowTopBadge !== false);
         setEditorialShowHeaderArrows(matchData.editorialShowHeaderArrows !== false);
         setEditorialSponsors(buildEditorialSponsorSlots(matchData.sponsors));
+        setManualHomeScore(formatExportScoreInput(matchData.homeScore));
+        setManualAwayScore(formatExportScoreInput(matchData.awayScore));
         const gradientImage = matchData.editorialGradientImage?.trim();
         setEditorialGradientUpload((current) => current ?? (gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null));
     }, [data, template]);
@@ -586,6 +598,15 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as MatchStatsData;
         return buildAutoEditorialContextLabel(applyMatchExportMode(exportData, 'result'));
     }, [customTournamentName, data, selectedTimeZonePreset, template]);
+    const baseMatchScore = useMemo(() => {
+        if (template !== 'matchStats') return null;
+        const matchData = data as MatchStatsData;
+        return {
+            home: formatExportScoreInput(matchData.homeScore),
+            away: formatExportScoreInput(matchData.awayScore),
+        };
+    }, [data, template]);
+    const isResultExport = template === 'matchStats' && (matchExportLayout === 'editorial4x5' || matchExportMode === 'result');
     const exportActionLabel = template === 'standings' && standingsSlides.length > 1
         ? `Exportar ${standingsSlides.length} imagenes`
         : 'Exportar imagen';
@@ -770,6 +791,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setStatus('');
     };
 
+    const resetManualMatchScore = () => {
+        setManualHomeScore(baseMatchScore?.home || '');
+        setManualAwayScore(baseMatchScore?.away || '');
+        setStatus('');
+    };
+
     const handleExport = async () => {
         setIsExporting(true);
         setStatus('Generando...');
@@ -789,7 +816,11 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset);
 
             if (template === 'matchStats') {
-                const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);
+                const matchData = applyManualMatchScore(
+                    applyMatchExportMode(exportData as MatchStatsData, matchExportMode),
+                    manualHomeScore,
+                    manualAwayScore
+                );
                 if (matchExportLayout === 'editorial4x5') {
                     const backgroundImage = matchBackgroundUpload?.src || matchData.backgroundImage || '';
                     if (!backgroundImage) {
@@ -1079,6 +1110,56 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         Exportar en {selectedTimeZonePreset.city}, {selectedTimeZonePreset.country} ({formatUtcOffset(selectedTimeZonePreset.utcOffsetMinutes)}).
                                         {' '}La diferencia se calcula contra la hora detectada en tu navegador.
                                     </p>
+                                </div>
+                            )}
+
+                            {isResultExport && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Resultado para exportar</label>
+                                    <div className={styles.scoreOverrideCard}>
+                                        <div className={styles.scoreOverrideHeader}>
+                                            <div>
+                                                <strong>Marcador editable</strong>
+                                                <span>
+                                                    Base extraida: {(baseMatchScore?.home || '-')}{' '} - {' '}{(baseMatchScore?.away || '-')}
+                                                </span>
+                                            </div>
+                                            <button
+                                                className={styles.ghostBtn}
+                                                onClick={resetManualMatchScore}
+                                                type="button"
+                                            >
+                                                Restaurar base
+                                            </button>
+                                        </div>
+                                        <div className={styles.scoreOverrideGrid}>
+                                            <label className={styles.scoreOverrideField}>
+                                                <span>{template === 'matchStats' ? (data as MatchStatsData).homeTeam : 'Local'}</span>
+                                                <input
+                                                    className={styles.modalInput}
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
+                                                    value={manualHomeScore}
+                                                    onChange={(event) => setManualHomeScore(event.target.value.replace(/[^\d]/g, ''))}
+                                                    placeholder="0"
+                                                />
+                                            </label>
+                                            <label className={styles.scoreOverrideField}>
+                                                <span>{template === 'matchStats' ? (data as MatchStatsData).awayTeam : 'Visitante'}</span>
+                                                <input
+                                                    className={styles.modalInput}
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
+                                                    value={manualAwayScore}
+                                                    onChange={(event) => setManualAwayScore(event.target.value.replace(/[^\d]/g, ''))}
+                                                    placeholder="0"
+                                                />
+                                            </label>
+                                        </div>
+                                        <p className={styles.modalHint}>
+                                            Si la API todavia no actualizo el score, podes corregirlo aca y la exportacion sale con ese marcador.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
 
@@ -1510,6 +1591,10 @@ function getDefaultTournamentName(template: ExportTemplate, data: ExportData): s
     return '';
 }
 
+function formatExportScoreInput(value: number | null | undefined): string {
+    return value === null || value === undefined || Number.isNaN(value) ? '' : String(value);
+}
+
 function getDefaultMatchExportMode(template: ExportTemplate, data: ExportData): MatchExportMode {
     if (template !== 'matchStats') return 'schedule';
     const matchData = data as MatchStatsData;
@@ -1616,6 +1701,23 @@ function applyMatchExportMode(data: MatchStatsData, mode: MatchExportMode): Matc
         status: 'final',
         mainTitle: 'Resultado',
     };
+}
+
+function applyManualMatchScore(data: MatchStatsData, homeScoreInput: string, awayScoreInput: string): MatchStatsData {
+    if (data.status === 'scheduled') return data;
+
+    return {
+        ...data,
+        homeScore: parseManualMatchScore(homeScoreInput),
+        awayScore: parseManualMatchScore(awayScoreInput),
+    };
+}
+
+function parseManualMatchScore(value: string): number | null {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : null;
 }
 
 function getExportableStandingsRows(data: StandingsData): StandingsRowData[] {

@@ -118,6 +118,25 @@ function resolveMatchTeamLogo(primaryTeam: any, fallbackTeam?: any, fallbackLogo
     return resolveTeamLogo(primaryTeam, fallbackTeam, { logo: fallbackLogo || '' });
 }
 
+function resolveTournamentLogo(tournament: any, fallbackLogo?: string | null) {
+    const candidates = [
+        tournament?.logo,
+        tournament?.logo_url,
+        tournament?.image,
+        tournament?.image_path,
+        tournament?.tournament_logo,
+        fallbackLogo,
+    ];
+
+    for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim()) {
+            return candidate.trim();
+        }
+    }
+
+    return null;
+}
+
 function normalizeComparableTeamValue(value: unknown) {
     return String(value || '')
         .trim()
@@ -409,6 +428,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             round: evt.tournament?.stage_id || evt.ROUND_NAME || 'General',
                             category: evt.country?.name || evt.COUNTRY_NAME || baseMatch.category || 'Internacional',
                             tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
+                            tournamentLogo: resolveTournamentLogo(evt.tournament, (baseMatch as any)?.tournamentLogo || null),
                             home: { ...baseMatch.home, logo: resolvedHomeLogo, score: initialHomeScore, teamUrl: evt.home_team?.team_url || '' },
                             away: { ...baseMatch.away, logo: resolvedAwayLogo, score: initialAwayScore, teamUrl: evt.away_team?.team_url || '' },
                             lineups: null,
@@ -574,6 +594,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             matchData: {
                                 ...prev.matchData,
                                 status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
+                                tournamentLogo: resolveTournamentLogo(evt.tournament, prev.matchData.tournamentLogo || null),
                                 home: {
                                     ...prev.matchData.home,
                                     logo: resolveMatchTeamLogo(evt.home_team, prev.matchData.home, prev.matchData.home?.logo),
@@ -645,7 +666,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 phaseId: phaseId || null,
                                 groupId: groupId || null,
                                 tournament: matchData.tournament?.name || 'Partido Local',
-                                tournamentLogo: matchData.tournament?.logo || null,
+                                tournamentLogo: resolveTournamentLogo(matchData.tournament),
                                 tournamentId,
                                 category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
@@ -734,7 +755,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 phaseId: phaseId || null,
                                 groupId: groupId || null,
                                 tournament: matchData.tournament?.name || 'Partido Local',
-                                tournamentLogo: matchData.tournament?.logo || null,
+                                tournamentLogo: resolveTournamentLogo(matchData.tournament),
                                 tournamentId,
                                 category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
