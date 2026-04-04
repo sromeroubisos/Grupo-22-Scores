@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
@@ -38,6 +39,32 @@ interface NoticiasClientProps {
     canManageNews: boolean;
 }
 
+function buildNewsPreview(item: NewsItem) {
+    const summary = item.summary?.trim();
+    if (summary) {
+        return summary;
+    }
+
+    const content = item.content?.trim();
+    if (!content) {
+        return 'Abrir para leer la noticia completa.';
+    }
+
+    return content.length > 120 ? `${content.slice(0, 117)}...` : content;
+}
+
+function formatPublishedAt(value?: string) {
+    if (!value) {
+        return 'Sin fecha';
+    }
+
+    return new Date(value).toLocaleDateString('es-AR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+}
+
 export default function NoticiasClient({ initialNews, canManageNews }: NoticiasClientProps) {
     const router = useRouter();
     const [news, setNews] = useState<NewsItem[]>(
@@ -50,10 +77,8 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
     const [activeFolder, setActiveFolder] = useState<FolderType>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Menu State
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-    // Close menu when clicking outside
     useEffect(() => {
         const handleClickOutside = () => setActiveMenuId(null);
         if (activeMenuId) {
@@ -70,7 +95,7 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (confirm('¿Estás seguro de que quieres eliminar esta noticia?')) {
+        if (confirm('Estas seguro de que quieres eliminar esta noticia?')) {
             try {
                 const response = await fetch(`/api/news?id=${id}`, {
                     method: 'DELETE',
@@ -78,7 +103,7 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
 
                 if (!response.ok) throw new Error('Failed to delete');
 
-                setNews(news.filter(n => n.id !== id));
+                setNews((currentNews) => currentNews.filter((n) => n.id !== id));
             } catch (error) {
                 console.error(error);
                 alert('Error deleting item');
@@ -101,7 +126,9 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
 
             if (!response.ok) throw new Error('Failed to update status');
 
-            setNews(news.map(n => n.id === item.id ? { ...n, status: newStatus } : n));
+            setNews((currentNews) =>
+                currentNews.map((n) => (n.id === item.id ? { ...n, status: newStatus } : n))
+            );
         } catch (error) {
             console.error(error);
             alert('Error updating status');
@@ -114,7 +141,7 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
     };
 
     const filteredNews = useMemo(() => {
-        return news.filter(item => {
+        return news.filter((item) => {
             if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
             if (activeFolder === 'all') return true;
             if (['rugby', 'hockey', 'football'].includes(activeFolder)) return (item.sport || 'rugby') === activeFolder;
@@ -134,11 +161,10 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
 
     return (
         <div className={styles.tectonicPage}>
-            {/* Header Content */}
             <div className={styles.tectonicHeader} style={{ padding: '40px 24px 0' }}>
                 <div className={styles.headerInfo}>
                     <h1>Noticias & Editorial</h1>
-                    <p>Últimas novedades y comunicados oficiales</p>
+                    <p>Ultimas novedades y comunicados oficiales</p>
                 </div>
 
                 {canManageNews && (
@@ -147,25 +173,29 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
                             <span className={styles.statusIndicator}></span>
                             CMR ACTIVE
                         </div>
-                        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => router.push('/admin/editorial')}>
-                            <Plus size={14} /> Creación
+                        <button
+                            type="button"
+                            className={`${styles.btn} ${styles.btnPrimary}`}
+                            onClick={() => router.push('/admin/editorial')}
+                        >
+                            <Plus size={14} /> Creacion
                         </button>
                     </div>
                 )}
             </div>
 
             <div style={{ padding: '0 24px 40px' }}>
-                {/* Category & Search */}
                 <div className={styles.categoryBar}>
                     <div className={styles.categoryScroll}>
-                        {folders.map(f => (
+                        {folders.map((folder) => (
                             <button
-                                key={f.id}
-                                className={`${styles.categoryChip} ${activeFolder === f.id ? styles.categoryChipActive : ''}`}
-                                onClick={() => setActiveFolder(f.id as FolderType)}
+                                key={folder.id}
+                                type="button"
+                                className={`${styles.categoryChip} ${activeFolder === folder.id ? styles.categoryChipActive : ''}`}
+                                onClick={() => setActiveFolder(folder.id as FolderType)}
                             >
-                                {activeFolder === f.id && <f.icon size={12} style={{ marginRight: 4 }} />}
-                                {f.label}
+                                {activeFolder === folder.id && <folder.icon size={12} style={{ marginRight: 4 }} />}
+                                {folder.label}
                             </button>
                         ))}
                     </div>
@@ -180,7 +210,6 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
                     </div>
                 </div>
 
-                {/* Content Grid */}
                 <div className={styles.tectonicGrid}>
                     {filteredNews.length === 0 ? (
                         <div className={`${styles.slab} ${styles.col12}`} style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -188,58 +217,66 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
                         </div>
                     ) : (
                         filteredNews.map((item) => (
-                            <div key={item.id} className={`${styles.slab} ${styles.col4}`} style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div
-                                    className={styles.newsImage}
-                                    style={{
-                                        backgroundImage: `url(${item.image_url || 'https://placehold.co/600x400/1c1c1f/ffffff?text=NEWS'})`,
-                                        backgroundPosition: 'center',
-                                        backgroundSize: 'cover',
-                                        backgroundRepeat: 'no-repeat'
-                                    }}
-                                >
-                                    {canManageNews && (
-                                        <span
-                                            className={`${styles.badge} ${item.status === 'published' ? styles.badgePublished : styles.badgeDraft}`}
-                                            style={{ position: 'absolute', top: 8, left: 8 }}
-                                        >
-                                            {item.status === 'published' ? 'PUBLICADO' : 'BORRADOR'}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className={styles.newsContent}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                        <span className={styles.rowMeta} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <Tag size={12} /> {item.scope || 'global'}
-                                        </span>
-                                        <span className={styles.rowMeta}>{item.published_at ? new Date(item.published_at).toLocaleDateString() : 'N/A'}</span>
-                                    </div>
-                                    <h3 className={styles.newsTitle}>{item.title}</h3>
-                                    <p className={styles.newsBody}>
-                                        {item.summary || (item.content ? item.content.substring(0, 80) + '...' : '')}
-                                    </p>
-
-                                    {canManageNews && (
-                                        <div style={{ display: 'flex', gap: 8, marginTop: 'auto', paddingTop: 16 }}>
-                                            <button
-                                                className={styles.btn}
-                                                style={{ flex: 1, justifyContent: 'center' }}
-                                                onClick={() => handleEdit(item)}
+                            <article
+                                key={item.id}
+                                className={`${styles.slab} ${styles.col4} ${styles.newsCardShell}`}
+                            >
+                                <Link href={`/noticias/${item.id}`} className={styles.newsCardLink}>
+                                    <div
+                                        className={styles.newsImage}
+                                        style={{
+                                            backgroundImage: `url(${item.image_url || 'https://placehold.co/600x400/1c1c1f/ffffff?text=NEWS'})`,
+                                            backgroundPosition: 'center',
+                                            backgroundSize: 'cover',
+                                            backgroundRepeat: 'no-repeat'
+                                        }}
+                                    >
+                                        {canManageNews && (
+                                            <span
+                                                className={`${styles.badge} ${item.status === 'published' ? styles.badgePublished : styles.badgeDraft}`}
+                                                style={{ position: 'absolute', top: 8, left: 8 }}
                                             >
-                                                <Edit size={14} style={{ marginRight: 6 }} /> Editar
-                                            </button>
-                                            <div style={{ position: 'relative' }}>
-                                                <button
-                                                    className={styles.btn}
-                                                    style={{ padding: '10px' }}
-                                                    onClick={(e) => toggleMenu(item.id, e)}
-                                                >
-                                                    <MoreVertical size={16} />
-                                                </button>
+                                                {item.status === 'published' ? 'PUBLICADO' : 'BORRADOR'}
+                                            </span>
+                                        )}
+                                    </div>
 
-                                                {activeMenuId === item.id && (
-                                                    <div style={{
+                                    <div className={styles.newsContent}>
+                                        <div className={styles.newsMetaRow}>
+                                            <span className={styles.rowMeta} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <Tag size={12} /> {item.scope || 'global'}
+                                            </span>
+                                            <span className={styles.rowMeta}>{formatPublishedAt(item.published_at)}</span>
+                                        </div>
+                                        <h3 className={styles.newsTitle}>{item.title}</h3>
+                                        <p className={styles.newsBody}>{buildNewsPreview(item)}</p>
+                                        <span className={styles.readMore}>Leer nota completa</span>
+                                    </div>
+                                </Link>
+
+                                {canManageNews && (
+                                    <div className={styles.newsActions}>
+                                        <button
+                                            type="button"
+                                            className={styles.btn}
+                                            style={{ flex: 1, justifyContent: 'center' }}
+                                            onClick={() => handleEdit(item)}
+                                        >
+                                            <Edit size={14} style={{ marginRight: 6 }} /> Editar
+                                        </button>
+                                        <div style={{ position: 'relative' }}>
+                                            <button
+                                                type="button"
+                                                className={styles.btn}
+                                                style={{ padding: '10px' }}
+                                                onClick={(e) => toggleMenu(item.id, e)}
+                                            >
+                                                <MoreVertical size={16} />
+                                            </button>
+
+                                            {activeMenuId === item.id && (
+                                                <div
+                                                    style={{
                                                         position: 'absolute',
                                                         right: 0,
                                                         bottom: '100%',
@@ -251,34 +288,35 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
                                                         minWidth: 160,
                                                         zIndex: 50,
                                                         boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
-                                                    }}>
-                                                        <button
-                                                            className={styles.btn}
-                                                            style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }}
-                                                            onClick={(e) => handleToggleStatus(item, e)}
-                                                        >
-                                                            {item.status === 'published' ? <EyeOff size={14} /> : <Eye size={14} />}
-                                                            {item.status === 'published' ? 'Despublicar' : 'Publicar'}
-                                                        </button>
-                                                        <button
-                                                            className={styles.btn}
-                                                            style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent', color: '#ff4d4d' }}
-                                                            onClick={(e) => handleDelete(item.id, e)}
-                                                        >
-                                                            <Trash2 size={14} /> Eliminar
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
+                                                    }}
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={styles.btn}
+                                                        style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent' }}
+                                                        onClick={(e) => handleToggleStatus(item, e)}
+                                                    >
+                                                        {item.status === 'published' ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                        {item.status === 'published' ? 'Despublicar' : 'Publicar'}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.btn}
+                                                        style={{ width: '100%', justifyContent: 'flex-start', border: 'none', background: 'transparent', color: '#ff4d4d' }}
+                                                        onClick={(e) => handleDelete(item.id, e)}
+                                                    >
+                                                        <Trash2 size={14} /> Eliminar
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            </div>
+                                    </div>
+                                )}
+                            </article>
                         ))
                     )}
                 </div>
             </div>
-
         </div>
     );
 }

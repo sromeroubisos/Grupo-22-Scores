@@ -3,16 +3,18 @@ import { notFound } from 'next/navigation';
 
 import { hasEditorialAccess } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
 type NewsPageProps = {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 };
 
 export default async function NewsPage({ params }: NewsPageProps) {
+    const { id } = await params;
     const supabase = await createClient();
     const {
         data: { session },
@@ -42,7 +44,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
         );
     }
 
-    let query = supabase.from('news').select('*').eq('id', params.id);
+    let query = supabase.from('news').select('*').eq('id', id);
 
     if (!canManageNews) {
         query = query.eq('status', 'published');
@@ -62,69 +64,96 @@ export default async function NewsPage({ params }: NewsPageProps) {
         })
         : 'Sin fecha de publicacion';
 
+    const paragraphs = (news.content || '')
+        .split(/\n{2,}/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean);
+
+    const readingWords = `${news.summary || ''} ${news.content || ''}`
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
+    const readingMinutes = Math.max(1, Math.ceil(readingWords / 220));
+
     return (
-        <div className="container" style={{ paddingTop: '48px', paddingBottom: '64px' }}>
-            <article
-                className="card"
-                style={{ maxWidth: 920, margin: '0 auto', display: 'grid', gap: '24px' }}
-            >
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <span className="badge">
-                            {(news.scope || 'global').toUpperCase()}
-                        </span>
-                        {news.sport && <span className="badge">{news.sport}</span>}
-                        {canManageNews && news.status !== 'published' && <span className="badge">{news.status}</span>}
-                    </div>
-                    <span style={{ color: 'var(--color-text-tertiary)', fontSize: '0.9rem' }}>{publishedLabel}</span>
-                </div>
-
-                <header style={{ display: 'grid', gap: '12px' }}>
-                    <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)', lineHeight: 1.05 }}>{news.title}</h1>
-                    {news.summary && (
-                        <p style={{ fontSize: '1.05rem', color: 'var(--color-text-secondary)', maxWidth: 720 }}>
-                            {news.summary}
-                        </p>
-                    )}
-                </header>
-
-                {news.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={news.image_url}
-                        alt={news.title}
-                        style={{
-                            width: '100%',
-                            borderRadius: '20px',
-                            objectFit: 'cover',
-                            maxHeight: '520px',
-                            border: '1px solid var(--color-border)',
-                        }}
-                    />
-                )}
-
-                <div
-                    style={{
-                        whiteSpace: 'pre-wrap',
-                        color: 'var(--color-text-primary)',
-                        fontSize: '1rem',
-                        lineHeight: 1.9,
-                    }}
-                >
-                    {news.content || 'Esta noticia todavia no tiene contenido cargado.'}
-                </div>
-
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <Link href="/noticias" className="btn btn-secondary">
+        <div className={styles.readerPage}>
+            <div className={styles.readerShell}>
+                <div className={styles.readerTopBar}>
+                    <Link href="/noticias" className={styles.backLink}>
                         Volver a noticias
                     </Link>
-                    {canManageNews && (
-                        <Link href={`/admin/editorial/edit/${news.id}`} className="btn btn-primary">
-                            Editar noticia
-                        </Link>
-                    )}
+                    <span className={styles.topBarMeta}>{readingMinutes} min de lectura</span>
                 </div>
-            </article>
+
+                <article className={styles.heroCard}>
+                    <div className={styles.metaRow}>
+                        <div className={styles.badgeRow}>
+                            <span className={styles.badge}>{(news.scope || 'global').toUpperCase()}</span>
+                            {news.sport && <span className={styles.badge}>{news.sport}</span>}
+                            {canManageNews && news.status !== 'published' && (
+                                <span className={styles.badge}>{news.status}</span>
+                            )}
+                        </div>
+                        <div className={styles.dateCluster}>
+                            <span className={styles.dateLabel}>{publishedLabel}</span>
+                            <span className={styles.dateDivider}></span>
+                            <span className={styles.dateLabel}>{readingMinutes} min</span>
+                        </div>
+                    </div>
+
+                    <header className={styles.headline}>
+                        <h1>{news.title}</h1>
+                        {news.summary && <p className={styles.summary}>{news.summary}</p>}
+                    </header>
+
+                    {news.image_url && (
+                        <div className={styles.imageWrap}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={news.image_url}
+                                alt={news.title}
+                                className={styles.heroImage}
+                            />
+                        </div>
+                    )}
+                </article>
+
+                <section className={styles.bodyCard}>
+                    <div className={styles.bodyContent}>
+                        {paragraphs.length > 0 ? (
+                            paragraphs.map((paragraph, index) => (
+                                <p
+                                    key={`${news.id}-paragraph-${index}`}
+                                    className={index === 0 ? styles.leadParagraph : undefined}
+                                >
+                                    {paragraph}
+                                </p>
+                            ))
+                        ) : (
+                            <p className={styles.emptyBody}>
+                                Esta noticia todavia no tiene contenido cargado.
+                            </p>
+                        )}
+                    </div>
+
+                    <div className={styles.actionRow}>
+                        <Link
+                            href="/noticias"
+                            className={`${styles.actionLink} ${styles.secondaryLink}`}
+                        >
+                            Ver mas noticias
+                        </Link>
+                        {canManageNews && (
+                            <Link
+                                href={`/admin/editorial/edit/${news.id}`}
+                                className={`${styles.actionLink} ${styles.primaryLink}`}
+                            >
+                                Editar noticia
+                            </Link>
+                        )}
+                    </div>
+                </section>
+            </div>
         </div>
     );
 }

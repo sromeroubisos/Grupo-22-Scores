@@ -1,0 +1,366 @@
+.readerPage {
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+    background:
+        radial-gradient(circle at top, rgba(255, 106, 42, 0.18), transparent 28%),
+        linear-gradient(180deg, #09090b 0%, #111217 42%, #0b0d12 100%);
+    color: #f5f5f5;
+}
+
+.readerShell {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    gap: 24px;
+}
+
+.readerTopBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.backLink {
+    width: fit-content;
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+}
+
+.backLink:hover {
+    color: #ffffff;
+}
+
+.topBarMeta {
+    color: rgba(255, 255, 255, 0.56);
+    font-size: 0.84rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.heroCard {
+    display: grid;
+    gap: 24px;
+    padding: 32px;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(18, 18, 24, 0.96), rgba(12, 14, 19, 0.92));
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+}
+
+.metaRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.badgeRow {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.dateLabel {
+    color: rgba(255, 255, 255, 0.64);
+    font-size: 0.95rem;
+}
+
+.dateCluster {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dateDivider {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.headline {
+    display: grid;
+    gap: 14px;
+}
+
+.headline h1 {
+    margin: 0;
+    font-size: clamp(2.3rem, 5vw, 4.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    max-width: 14ch;
+}
+
+.summary {
+    margin: 0;
+    max-width: 760px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    line-height: 1.7;
+}
+
+.imageWrap {
+    overflow: hidden;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.heroImage {
+    display: block;
+    width: 100%;
+    max-height: 540px;
+    object-fit: cover;
+}
+
+.bodyCard {
+    display: grid;
+    gap: 28px;
+    padding: 32px;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 12, 17, 0.9);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+}
+
+.bodyContent {
+    display: grid;
+    gap: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.05rem;
+    line-height: 1.95;
+}
+
+.bodyContent p {
+    margin: 0;
+    max-width: 68ch;
+}
+
+.leadParagraph {
+    font-size: 1.14rem;
+    line-height: 1.9;
+    color: rgba(255, 255, 255, 0.96);
+}
+
+.emptyBody {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.actionRow {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.actionLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.secondaryLink {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+}
+
+.primaryLink {
+    background: linear-gradient(135deg, #ff6a2a, #ff884d);
+    color: #111111;
+}
+
+.actionLink:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.24);
+}
+
+@media (max-width: 768px) {
+    .readerPage {
+        padding:
+            calc(env(safe-area-inset-top, 0px) + 12px)
+            10px
+            calc(env(safe-area-inset-bottom, 0px) + 30px);
+    }
+
+    .readerShell {
+        gap: 16px;
+    }
+
+    .readerTopBar {
+        position: sticky;
+        top: calc(env(safe-area-inset-top, 0px) + 8px);
+        z-index: 20;
+        padding: 9px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        background: rgba(10, 12, 17, 0.72);
+        backdrop-filter: blur(16px);
+    }
+
+    .backLink {
+        font-size: 0.92rem;
+    }
+
+    .topBarMeta {
+        font-size: 0.72rem;
+    }
+
+    .heroCard,
+    .bodyCard {
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .heroCard {
+        gap: 16px;
+    }
+
+    .metaRow {
+        gap: 10px;
+    }
+
+    .badge {
+        padding: 6px 9px;
+        font-size: 0.68rem;
+    }
+
+    .dateCluster {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .headline h1 {
+        max-width: none;
+        font-size: clamp(1.72rem, 7.2vw, 2.5rem);
+        line-height: 1.04;
+    }
+
+    .summary {
+        max-width: none;
+        font-size: 0.94rem;
+        line-height: 1.68;
+    }
+
+    .imageWrap {
+        width: calc(100% + 32px);
+        margin-inline: -16px;
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
+    }
+
+    .heroImage {
+        max-height: none;
+        aspect-ratio: 16 / 10;
+    }
+
+    .bodyCard {
+        padding-top: 2px;
+        padding-inline: 6px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .bodyContent {
+        gap: 14px;
+        font-size: 0.95rem;
+        line-height: 1.76;
+    }
+
+    .bodyContent p {
+        max-width: none;
+    }
+
+    .leadParagraph {
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+
+    .actionRow {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .actionLink {
+        width: 100%;
+        min-height: 46px;
+        padding-inline: 14px;
+    }
+}
+
+@media (max-width: 430px) {
+    .readerPage {
+        padding:
+            calc(env(safe-area-inset-top, 0px) + 10px)
+            8px
+            calc(env(safe-area-inset-bottom, 0px) + 24px);
+    }
+
+    .readerTopBar {
+        padding: 8px 10px;
+    }
+
+    .backLink {
+        font-size: 0.86rem;
+    }
+
+    .topBarMeta {
+        font-size: 0.68rem;
+    }
+
+    .heroCard {
+        padding: 14px;
+        gap: 14px;
+    }
+
+    .bodyCard {
+        padding-inline: 2px;
+    }
+
+    .headline h1 {
+        font-size: clamp(1.58rem, 7vw, 2.1rem);
+    }
+
+    .summary {
+        font-size: 0.9rem;
+        line-height: 1.64;
+    }
+
+    .imageWrap {
+        width: calc(100% + 28px);
+        margin-inline: -14px;
+    }
+
+    .bodyContent {
+        font-size: 0.93rem;
+        line-height: 1.72;
+    }
+
+    .leadParagraph {
+        font-size: 0.98rem;
+        line-height: 1.76;
+    }
+}
