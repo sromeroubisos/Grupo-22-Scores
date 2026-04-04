@@ -18,6 +18,7 @@ import type { TournamentInitialData } from '@/lib/server/fetchTournamentData';
 import { normalizeTournamentFormat } from '@/lib/utils/tournamentFormat';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 
@@ -58,17 +59,10 @@ function getTeamLogo(team: any): string {
 }
 
 function getTournamentLogo(detailsData: any, localData: any): string {
-    if (detailsData) {
-        return (
-            detailsData.image_path ||
-            detailsData.logo ||
-            detailsData.logo_path ||
-            detailsData.tournament_logo ||
-            detailsData.tournament_image_path ||
-            ''
-        );
-    }
-    return localData?.logoUrl || '';
+    return resolveTournamentLogoSource(
+        detailsData,
+        localData?.logoUrl || localData?.logo_url || null
+    ) || '';
 }
 
 function buildClubHref(

@@ -2111,15 +2111,37 @@ async function ensureExportFonts(): Promise<void> {
 function isImageSource(value?: string | null): boolean {
     if (!value) return false;
     const trimmed = value.trim();
-    return trimmed.startsWith('<svg') || trimmed.startsWith('data:image/') || trimmed.startsWith('blob:') || trimmed.startsWith('/') || /^https?:\/\//.test(trimmed);
+    return trimmed.startsWith('<svg')
+        || trimmed.startsWith('data:image/')
+        || trimmed.startsWith('blob:')
+        || trimmed.startsWith('//')
+        || trimmed.startsWith('/')
+        || trimmed.startsWith('./')
+        || trimmed.startsWith('../')
+        || /^https?:\/\//.test(trimmed)
+        || /\.(svg|png|jpe?g|webp|gif|avif)(\?.*)?$/i.test(trimmed);
 }
 
 function normalizeImageSource(value: string): string {
     const trimmed = value.trim();
     if (trimmed.startsWith('<svg')) return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(trimmed)}`;
+    if (trimmed.startsWith('//')) {
+        try {
+            return new URL(`${window.location.protocol}${trimmed}`).toString();
+        } catch {
+            return trimmed;
+        }
+    }
     if (trimmed.startsWith('/')) {
         try {
             return new URL(trimmed, window.location.origin).toString();
+        } catch {
+            return trimmed;
+        }
+    }
+    if (!trimmed.startsWith('data:') && !trimmed.startsWith('blob:') && !/^https?:\/\//.test(trimmed)) {
+        try {
+            return new URL(trimmed, `${window.location.origin}/`).toString();
         } catch {
             return trimmed;
         }
@@ -3242,7 +3264,7 @@ async function drawMatchEditorialResult(
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'rgba(255,255,255,0.94)';
         ctx.font = `900 40px ${FONT_EDITORIAL}`;
-        ctx.fillText('G22', canvas.width / 2, tournamentLogoY);
+        ctx.fillText(getFallbackLogoText(data.tournamentLogo, data.tournament || 'Torneo'), canvas.width / 2, tournamentLogoY);
         ctx.restore();
     }
 

@@ -16,6 +16,7 @@ import {
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { useAuth } from '@/context/AuthContext';
 
 const USER_TZ = APP_TIMEZONE;
@@ -119,22 +120,7 @@ function resolveMatchTeamLogo(primaryTeam: any, fallbackTeam?: any, fallbackLogo
 }
 
 function resolveTournamentLogo(tournament: any, fallbackLogo?: string | null) {
-    const candidates = [
-        tournament?.logo,
-        tournament?.logo_url,
-        tournament?.image,
-        tournament?.image_path,
-        tournament?.tournament_logo,
-        fallbackLogo,
-    ];
-
-    for (const candidate of candidates) {
-        if (typeof candidate === 'string' && candidate.trim()) {
-            return candidate.trim();
-        }
-    }
-
-    return null;
+    return resolveTournamentLogoSource(tournament, fallbackLogo);
 }
 
 function normalizeComparableTeamValue(value: unknown) {
@@ -428,7 +414,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             round: evt.tournament?.stage_id || evt.ROUND_NAME || 'General',
                             category: evt.country?.name || evt.COUNTRY_NAME || baseMatch.category || 'Internacional',
                             tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
-                            tournamentLogo: resolveTournamentLogo(evt.tournament, (baseMatch as any)?.tournamentLogo || null),
+                            tournamentLogo: resolveTournamentLogo(evt, (baseMatch as any)?.tournamentLogo || null),
                             home: { ...baseMatch.home, logo: resolvedHomeLogo, score: initialHomeScore, teamUrl: evt.home_team?.team_url || '' },
                             away: { ...baseMatch.away, logo: resolvedAwayLogo, score: initialAwayScore, teamUrl: evt.away_team?.team_url || '' },
                             lineups: null,
@@ -594,7 +580,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             matchData: {
                                 ...prev.matchData,
                                 status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
-                                tournamentLogo: resolveTournamentLogo(evt.tournament, prev.matchData.tournamentLogo || null),
+                                tournamentLogo: resolveTournamentLogo(evt, prev.matchData.tournamentLogo || null),
                                 home: {
                                     ...prev.matchData.home,
                                     logo: resolveMatchTeamLogo(evt.home_team, prev.matchData.home, prev.matchData.home?.logo),
