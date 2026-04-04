@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canManageTournamentContext, getTournamentManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
-import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { EDIT_MEMBERSHIP_ROLES, hasFederationAdminAccess } from '@/lib/auth/roles';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
 import { createClient } from '@/lib/supabase/server';
@@ -20,13 +20,15 @@ export async function POST(
             );
         }
 
-        const target = await getTournamentManagementTarget(supabase, tournamentId);
+        if (!hasFederationAdminAccess(context.rawRole, context.memberships)) {
+            const target = await getTournamentManagementTarget(supabase, tournamentId);
 
-        if (!target || !canManageTournamentContext(context, target, EDIT_MEMBERSHIP_ROLES)) {
-            return NextResponse.json(
-                { error: 'Forbidden' },
-                { status: 403 }
-            );
+            if (!target || !canManageTournamentContext(context, target, EDIT_MEMBERSHIP_ROLES)) {
+                return NextResponse.json(
+                    { error: 'Forbidden' },
+                    { status: 403 }
+                );
+            }
         }
 
         const body = await request.json();

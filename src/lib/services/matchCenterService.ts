@@ -3,7 +3,7 @@ import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
 } from '@/lib/server/externalTournamentOverrides';
-import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 type SupabaseLike = {
   from: (table: string) => any;
@@ -102,6 +102,10 @@ function isMissingMatchEventsTableError(error: SupabaseLikeError) {
     haystack.includes('does not exist') ||
     haystack.includes('schema cache')
   );
+}
+
+function isMissingAnyTableError(error: SupabaseLikeError, tables: string[]) {
+  return tables.some((table) => isMissingTableError(error, table));
 }
 
 async function supportsMatchesColumn(client: SupabaseLike, column: string) {
@@ -356,26 +360,26 @@ async function fetchClubRosterCache(
       : Promise.resolve({ data: [], error: null }),
   ]);
 
-  if (rolesRes.error) {
+  if (rolesRes.error && !isMissingAnyTableError(rolesRes.error, ['club_person_roles', 'people'])) {
     throw new Error(rolesRes.error.message || 'No se pudo cargar el plantel del club.');
   }
 
-  if (peopleRes.error) {
+  if (peopleRes.error && !isMissingTableError(peopleRes.error, 'people')) {
     throw new Error(peopleRes.error.message || 'No se pudieron cargar las personas del club.');
   }
 
-  if (squadRes.error) {
+  if (squadRes.error && !isMissingTableError(squadRes.error, 'squad_members')) {
     throw new Error(squadRes.error.message || 'No se pudo cargar la composicion del plantel.');
   }
 
   const squadByPerson = new Map<string, any>(
-    (squadRes.data || []).map((row: any) => [String(row.person_id), row]),
+    ((isMissingTableError(squadRes.error, 'squad_members') ? [] : squadRes.data) || []).map((row: any) => [String(row.person_id), row]),
   );
 
   const entries: ClubRosterEntry[] = [];
   const seen = new Set<string>();
 
-  for (const row of rolesRes.data || []) {
+  for (const row of (isMissingAnyTableError(rolesRes.error, ['club_person_roles', 'people']) ? [] : rolesRes.data) || []) {
     const person = row?.people;
     if (!person?.id) continue;
 
@@ -404,7 +408,7 @@ async function fetchClubRosterCache(
     seen.add(entry.personId);
   }
 
-  for (const person of peopleRes.data || []) {
+  for (const person of (isMissingTableError(peopleRes.error, 'people') ? [] : peopleRes.data) || []) {
     const personId = normalizeText(person.id);
     if (!personId || seen.has(personId)) continue;
 
@@ -458,12 +462,24 @@ async function fetchDivisionCandidates(
   };
 
   const scoped = await buildQuery(season);
-  if (!scoped.error && Array.isArray(scoped.data) && scoped.data.length > 0) {
+  if (scoped.error) {
+    if (isMissingTableError(scoped.error, 'club_divisions')) {
+      return [];
+    }
+
+    throw new Error(scoped.error.message || 'No se pudieron cargar las categorias del club.');
+  }
+
+  if (Array.isArray(scoped.data) && scoped.data.length > 0) {
     return scoped.data as DivisionRow[];
   }
 
   const fallback = await buildQuery(null);
   if (fallback.error) {
+    if (isMissingTableError(fallback.error, 'club_divisions')) {
+      return [];
+    }
+
     throw new Error(fallback.error.message || 'No se pudieron cargar las categorias del club.');
   }
 
@@ -523,6 +539,10 @@ async function ensureClubPlayerRole(
     .eq('role', 'player');
 
   if (existingError) {
+    if (isMissingTableError(existingError, 'club_person_roles')) {
+      return null;
+    }
+
     throw new Error(existingError.message || 'No se pudo verificar el vinculo del jugador con el club.');
   }
 
@@ -542,6 +562,10 @@ async function ensureClubPlayerRole(
         .eq('id', sameDivision.id);
 
       if (error) {
+        if (isMissingTableError(error, 'club_person_roles')) {
+          return null;
+        }
+
         throw new Error(error.message || 'No se pudo actualizar la ficha del jugador en el club.');
       }
     }
@@ -561,6 +585,10 @@ async function ensureClubPlayerRole(
       .eq('id', existing.id);
 
     if (error) {
+      if (isMissingTableError(error, 'club_person_roles')) {
+        return null;
+      }
+
       throw new Error(error.message || 'No se pudo reasignar el jugador al plantel del partido.');
     }
 
@@ -581,6 +609,10 @@ async function ensureClubPlayerRole(
     .single();
 
   if (insertError) {
+    if (isMissingTableError(insertError, 'club_person_roles')) {
+      return null;
+    }
+
     throw new Error(insertError.message || 'No se pudo registrar el jugador en el club.');
   }
 
@@ -608,6 +640,10 @@ async function ensureSquadMember(
     .maybeSingle();
 
   if (existingError) {
+    if (isMissingTableError(existingError, 'squad_members')) {
+      return null;
+    }
+
     throw new Error(existingError.message || 'No se pudo verificar la pertenencia del jugador al plantel.');
   }
 
@@ -625,6 +661,10 @@ async function ensureSquadMember(
       .eq('id', existing.id);
 
     if (error) {
+      if (isMissingTableError(error, 'squad_members')) {
+        return null;
+      }
+
       throw new Error(error.message || 'No se pudo actualizar el jugador dentro del plantel.');
     }
 
@@ -647,6 +687,10 @@ async function ensureSquadMember(
     .single();
 
   if (insertError) {
+    if (isMissingTableError(insertError, 'squad_members')) {
+      return null;
+    }
+
     throw new Error(insertError.message || 'No se pudo agregar el jugador al plantel correspondiente.');
   }
 
@@ -667,6 +711,10 @@ async function maybeUpdatePersonMetadata(
     .eq('id', personId);
 
   if (error) {
+    if (isMissingTableError(error, 'people')) {
+      return;
+    }
+
     throw new Error(error.message || 'No se pudo actualizar la ficha del jugador.');
   }
 }
@@ -714,6 +762,10 @@ async function ensurePlayerInContext(
       .single();
 
     if (insertPersonError) {
+      if (isMissingTableError(insertPersonError, 'people')) {
+        return null;
+      }
+
       throw new Error(insertPersonError.message || 'No se pudo crear el jugador en la base de datos.');
     }
 
@@ -816,9 +868,9 @@ async function resolvePersistedLineups(
       if (!cleanedName) {
         resolved[team].push({
           ...player,
-          id: undefined,
-          squadMemberId: null,
-          divisionId: context.divisionId,
+          id: normalizeText(player.id) || undefined,
+          squadMemberId: normalizeText(player.squadMemberId) || null,
+          divisionId: context.divisionId || normalizeText(player.divisionId) || null,
         });
         continue;
       }
@@ -826,11 +878,11 @@ async function resolvePersistedLineups(
       const rosterEntry = await ensurePlayerInContext(client, context, player, index);
       resolved[team].push({
         ...player,
-        id: rosterEntry?.personId || undefined,
+        id: rosterEntry?.personId || normalizeText(player.id) || undefined,
         name: rosterEntry?.name || cleanedName,
         position: normalizeText(player.position) || rosterEntry?.position || '',
-        squadMemberId: rosterEntry?.squadMemberId || null,
-        divisionId: context.divisionId,
+        squadMemberId: rosterEntry?.squadMemberId || normalizeText(player.squadMemberId) || null,
+        divisionId: context.divisionId || normalizeText(player.divisionId) || null,
       });
     }
   }
@@ -886,7 +938,7 @@ async function resolvePersistedEvents(
 
     resolved.push({
       ...event,
-      playerId: created?.personId || null,
+      playerId: created?.personId || normalizeText(event.playerId) || null,
       playerName: created?.name || event.playerName,
     });
   }
@@ -999,21 +1051,25 @@ export async function persistMatchCenterSupplementalData(
     payload.events !== undefined ? supportsMatchEventsTable(client) : Promise.resolve(false),
   ]);
 
-  if (payload.lineups !== undefined && !supportsLineupsColumn) {
-    throw new Error('No hay almacenamiento disponible para las alineaciones del partido. Ejecuta la migracion que restaura la columna "lineups".');
-  }
-
   if (payload.events !== undefined && !supportsRelationalEvents && !supportsEventsColumn) {
     throw new Error('No hay almacenamiento disponible para los eventos del partido.');
   }
 
   const normalizedExistingLineups = normalizeLineups((match as any).lineups);
-  const baseLineups = payload.lineups !== undefined ? normalizeLineups(payload.lineups) : normalizedExistingLineups;
+  const normalizedIncomingLineups =
+    payload.lineups !== undefined
+      ? normalizeLineups(payload.lineups)
+      : normalizedExistingLineups;
+  const baseLineups = normalizedIncomingLineups;
   const contexts = await buildTeamContexts(client, match as MatchContextRow, baseLineups);
 
   const resolvedLineups =
     payload.lineups !== undefined
-      ? await resolvePersistedLineups(client, contexts, payload.lineups)
+      ? (
+        supportsLineupsColumn
+          ? await resolvePersistedLineups(client, contexts, payload.lineups)
+          : normalizedIncomingLineups
+      )
       : normalizedExistingLineups;
 
   const resolvedEvents =
@@ -1116,3 +1172,4 @@ export async function persistMatchCenterSupplementalData(
 export function getEmptyMatchCenterLineups() {
   return { ...EMPTY_LINEUPS };
 }
+

@@ -5,6 +5,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 
 export async function recalculateAndPersistStandings(
     tournamentId: string,
@@ -51,15 +52,24 @@ export async function recalculateAndPersistStandings(
     }
 
     // 3. Fetch final matches for this phase
-    let mQuery = supabase
-        .from('matches')
-        .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
-        .eq('tournament_id', tournamentId)
-        .eq('phase_id', phaseId)
-        .eq('status', 'final');
+    const buildMatchesQuery = (includeEvents: boolean) => {
+        let query = supabase
+            .from('matches')
+            .select(includeEvents
+                ? 'id, home_club_id, away_club_id, score, events, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason'
+                : 'id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
+            .eq('tournament_id', tournamentId)
+            .eq('phase_id', phaseId)
+            .eq('status', 'final');
 
-    if (groupId) mQuery = mQuery.eq('group_id', groupId);
-    const { data: matches, error: mError } = await mQuery;
+        if (groupId) query = query.eq('group_id', groupId);
+        return query;
+    };
+
+    const { data: matches, error: mError } = await queryMatchesWithOptionalEvents(
+        () => buildMatchesQuery(true),
+        () => buildMatchesQuery(false),
+    );
     if (mError) {
         console.error('[recalculateStandings] Error fetching matches', mError);
         return { ok: false, rows_calculated: 0 };

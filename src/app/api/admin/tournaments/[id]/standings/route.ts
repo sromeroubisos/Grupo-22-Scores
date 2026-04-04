@@ -2,10 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { CIRCUIT_GLOBAL_SENTINEL } from '@/components/admin/entities/tournament/standings/types';
+import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 
 // --- Circuit placement points helpers ---
 
 const DEFAULT_CIRCUIT_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+
+type QueryError = {
+    code?: string | null;
+    message?: string | null;
+    details?: string | null;
+} | null;
+
+type StandingMatchRow = {
+    id: string | null;
+    home_club_id: string | null;
+    away_club_id: string | null;
+    score: Record<string, unknown> | null;
+    events: unknown[] | null;
+    status: string | null;
+    date_time: string | null;
+    phase_id: string | null;
+    group_id: string | null;
+    home_base_points: number | null;
+    away_base_points: number | null;
+    home_bonus_points: number | null;
+    away_bonus_points: number | null;
+    points_autocalculated: boolean | null;
+    points_override_reason: string | null;
+};
+
+type StandingMatchRowWithoutEvents = Omit<StandingMatchRow, 'events'>;
 
 function getDefaultCircuitPlacementPoints(): Array<{ position: number; points: number }> {
     return DEFAULT_CIRCUIT_POINTS.map((pts, i) => ({ position: i + 1, points: pts }));
@@ -345,15 +372,42 @@ export async function GET(
         if (pError) throw pError;
 
         // 3. Fetch final matches for this phase
-        let mQuery = supabase
-            .from('matches')
-            .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
-            .eq('tournament_id', tournamentId)
-            .eq('phase_id', phaseId)
-            .eq('status', 'final');
+        const fetchMatchesWithEvents = async (): Promise<{ data: StandingMatchRow[] | null; error: QueryError }> => {
+            let query = supabase
+                .from('matches')
+                .select('id, home_club_id, away_club_id, score, events, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
+                .eq('tournament_id', tournamentId)
+                .eq('phase_id', phaseId)
+                .eq('status', 'final');
 
-        if (groupId) mQuery = mQuery.eq('group_id', groupId);
-        const { data: matches, error: mError } = await mQuery;
+            if (groupId) query = query.eq('group_id', groupId);
+            const { data, error } = await query;
+            return {
+                data: data as StandingMatchRow[] | null,
+                error,
+            };
+        };
+
+        const fetchMatchesWithoutEvents = async (): Promise<{ data: StandingMatchRowWithoutEvents[] | null; error: QueryError }> => {
+            let query = supabase
+                .from('matches')
+                .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
+                .eq('tournament_id', tournamentId)
+                .eq('phase_id', phaseId)
+                .eq('status', 'final');
+
+            if (groupId) query = query.eq('group_id', groupId);
+            const { data, error } = await query;
+            return {
+                data: data as StandingMatchRowWithoutEvents[] | null,
+                error,
+            };
+        };
+
+        const { data: matches, error: mError } = await queryMatchesWithOptionalEvents(
+            fetchMatchesWithEvents,
+            fetchMatchesWithoutEvents,
+        );
         if (mError) throw mError;
 
         // 4. Compute standings

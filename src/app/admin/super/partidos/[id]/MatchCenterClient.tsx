@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Save, Share2, ChevronLeft, Layout, Users, Clock,
@@ -13,6 +13,11 @@ import {
     resolveMatchEventDefinitions,
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
+import {
+    countTeamOffensiveMetric,
+    resolveOffensiveBonusRule,
+    type NormalizedOffensiveBonusRule,
+} from '@/lib/bonusRuleMetrics';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import {
     APP_TIMEZONE,
@@ -115,6 +120,113 @@ export interface MatchRow {
     points_override_reason: string | null;
 }
 
+type ApplyMatchResponseOptions = {
+    preserveLineupsIfIncomingEmpty?: boolean;
+    preserveUnsavedEvents?: boolean;
+    preserveUnsavedLineups?: boolean;
+};
+
+type PersistMatchPatchOptions = {
+    includePoints?: boolean;
+    preserveLineupsIfIncomingEmpty?: boolean;
+    preserveUnsavedEvents?: boolean;
+    preserveUnsavedLineups?: boolean;
+    syncDirtyEvents?: boolean;
+};
+
+type PersistMatchWarnings = {
+    lineupsNotPersisted?: boolean;
+};
+
+function normalizeMatchEvents(events: MatchRow['events']): MatchEvent[] {
+    return Array.isArray(events) ? events : [];
+}
+
+function normalizeMatchLineups(lineups: MatchRow['lineups']): MatchLineups {
+    return lineups || { home: [], away: [] };
+}
+
+function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
+    const normalizedHomeTries = Number(score?.homeTries);
+    const normalizedAwayTries = Number(score?.awayTries);
+
+    return {
+        home: Math.max(0, Number(score?.home) || 0),
+        away: Math.max(0, Number(score?.away) || 0),
+        homeTries: Number.isFinite(normalizedHomeTries) ? normalizedHomeTries : undefined,
+        awayTries: Number.isFinite(normalizedAwayTries) ? normalizedAwayTries : undefined,
+        notes: typeof score?.notes === 'string' ? score.notes : undefined,
+    };
+}
+
+function areMatchScoresEqual(left: MatchScore | null | undefined, right: MatchScore | null | undefined) {
+    const normalizedLeft = normalizeMatchScore(left);
+    const normalizedRight = normalizeMatchScore(right);
+
+    return (
+        normalizedLeft.home === normalizedRight.home
+        && normalizedLeft.away === normalizedRight.away
+        && (normalizedLeft.homeTries ?? null) === (normalizedRight.homeTries ?? null)
+        && (normalizedLeft.awayTries ?? null) === (normalizedRight.awayTries ?? null)
+        && (normalizedLeft.notes ?? '') === (normalizedRight.notes ?? '')
+    );
+}
+
+function buildScoreFromEvents(
+    events: MatchEvent[],
+    definitionMap: Record<string, MatchEventDefinition>,
+    fallbackScore: MatchScore | null | undefined,
+): MatchScore {
+    const baseScore = normalizeMatchScore(fallbackScore);
+    let home = 0;
+    let away = 0;
+    let homeTries = 0;
+    let awayTries = 0;
+    let hasScoringEvents = false;
+    let hasTryEvents = false;
+
+    events.forEach((event) => {
+        const points = getConfiguredEventPoints(event.type, definitionMap);
+        if (points > 0 && event.team === 'home') {
+            home += points;
+            hasScoringEvents = true;
+        }
+        if (points > 0 && event.team === 'away') {
+            away += points;
+            hasScoringEvents = true;
+        }
+
+        if (event.type === 'try' && event.team === 'home') {
+            homeTries += 1;
+            hasTryEvents = true;
+        }
+        if (event.type === 'try' && event.team === 'away') {
+            awayTries += 1;
+            hasTryEvents = true;
+        }
+    });
+
+    if (!hasScoringEvents) {
+        return baseScore;
+    }
+
+    return {
+        ...baseScore,
+        home,
+        away,
+        homeTries: hasTryEvents ? homeTries : baseScore.homeTries,
+        awayTries: hasTryEvents ? awayTries : baseScore.awayTries,
+    };
+}
+
+function hasAnyLineupPlayers(lineups: MatchLineups | null | undefined) {
+    return (lineups?.home.length ?? 0) > 0 || (lineups?.away.length ?? 0) > 0;
+}
+
+function areDraftValuesEqual(left: unknown, right: unknown) {
+    return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+}
+
 export interface MatchPoints {
     home_base_points: number | null;
     away_base_points: number | null;
@@ -193,10 +305,6 @@ function eventTypeColor(t: string, definitions: MatchEventDefinition[]): string 
     return '#fff';
 }
 
-function countTries(events: MatchEvent[], team: 'home' | 'away'): number {
-    return events.filter(e => e.type === 'try' && e.team === team).length;
-}
-
 function getConfiguredEventPoints(
     eventType: string,
     definitionMap: Record<string, MatchEventDefinition>,
@@ -213,10 +321,7 @@ interface PointsRules {
     win: number;
     draw: number;
     loss: number;
-    offensive: {
-        threshold: number;
-        points: number;
-    } | null;
+    offensive: NormalizedOffensiveBonusRule | null;
     defensive: {
         margin: number;
         points: number;
@@ -243,16 +348,7 @@ function getPositiveInteger(value: string, fallback: number) {
 function normalizePointsRules(rawRules: ReturnType<typeof StandingsEngine.resolveRules> | null | undefined): PointsRules {
     const offensiveRule = rawRules?.offensive_bonus_rule;
     const defensiveRule = rawRules?.defensive_bonus_rule;
-
-    const offensive =
-        offensiveRule === true
-            ? { threshold: 4, points: 1 }
-            : offensiveRule && typeof offensiveRule === 'object'
-                ? {
-                    threshold: Number(offensiveRule.tries ?? offensiveRule.threshold ?? 4),
-                    points: Number(offensiveRule.points ?? offensiveRule.value ?? 1),
-                }
-                : null;
+    const offensive = resolveOffensiveBonusRule(offensiveRule);
 
     const defensive =
         defensiveRule === true
@@ -309,14 +405,6 @@ function isSubstituteLineupPlayer(player: LineupPlayer) {
     return role === 'substitute' || role === 'suplente' || (!role && player.number > 15);
 }
 
-function countTeamTries(score: MatchScore, events: MatchEvent[], team: 'home' | 'away') {
-    const scoreValue = team === 'home' ? score.homeTries : score.awayTries;
-    if (typeof scoreValue === 'number' && Number.isFinite(scoreValue)) {
-        return scoreValue;
-    }
-    return countTries(events, team);
-}
-
 function calculateAutocalculatedPoints(
     matchStatus: string,
     score: MatchScore,
@@ -347,12 +435,12 @@ function calculateAutocalculatedPoints(
         awayBase = rules.win;
     }
 
-    const homeTries = countTeamTries(score, events, 'home');
-    const awayTries = countTeamTries(score, events, 'away');
+    const homeOffensiveMetric = countTeamOffensiveMetric(score, events, 'home', rules.offensive);
+    const awayOffensiveMetric = countTeamOffensiveMetric(score, events, 'away', rules.offensive);
 
     if (rules.offensive) {
-        if (homeTries >= rules.offensive.threshold) homeBonus += rules.offensive.points;
-        if (awayTries >= rules.offensive.threshold) awayBonus += rules.offensive.points;
+        if (homeOffensiveMetric >= rules.offensive.threshold) homeBonus += rules.offensive.points;
+        if (awayOffensiveMetric >= rules.offensive.threshold) awayBonus += rules.offensive.points;
     }
 
     if (rules.defensive) {
@@ -460,15 +548,23 @@ function toLocalPoints(match: MatchRow): MatchPoints {
 export default function MatchCenterClient({ initialMatch, matchId, onClose }: MatchCenterClientProps) {
     const router = useRouter();
     const supabase = createClient();
+    const initialEvents = normalizeMatchEvents(initialMatch.events);
+    const initialLineups = normalizeMatchLineups(initialMatch.lineups);
+    const initialScore = normalizeMatchScore(initialMatch.score);
 
     const [match, setMatch] = useState<MatchRow>(initialMatch);
     const [activeTab, setActiveTab] = useState('resumen');
     const [saving, setSaving] = useState(false);
-    const [saveMsg, setSaveMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+    const [saveMsg, setSaveMsg] = useState<{ type: 'ok' | 'warn' | 'err'; text: string } | null>(null);
 
     // Editable state for events & lineups (local mirrors of DB JSONB)
-    const [localEvents, setLocalEvents] = useState<MatchEvent[]>(Array.isArray(initialMatch.events) ? initialMatch.events : []);
-    const [localLineups, setLocalLineups] = useState<MatchLineups>(initialMatch.lineups || { home: [], away: [] });
+    const [localEvents, setLocalEvents] = useState<MatchEvent[]>(initialEvents);
+    const [localLineups, setLocalLineups] = useState<MatchLineups>(initialLineups);
+    const persistedEventsRef = useRef<MatchEvent[]>(initialEvents);
+    const persistedLineupsRef = useRef<MatchLineups>(initialLineups);
+    const persistedScoreRef = useRef<MatchScore>(initialScore);
+    const localEventsRef = useRef<MatchEvent[]>(initialEvents);
+    const localLineupsRef = useRef<MatchLineups>(initialLineups);
 
     // Editable state for per-match points
     const [localPoints, setLocalPoints] = useState<MatchPoints>(() => toLocalPoints(initialMatch));
@@ -479,26 +575,82 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     );
     const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(initialMatch.lineups)));
     const [dateTimeDraft, setDateTimeDraft] = useState(() => toDateTimeLocalInput(initialMatch.date_time));
+    const eventDefinitionMap = buildMatchEventDefinitionMap(eventDefinitions);
 
-    const applyMatchResponse = useCallback((nextMatch: MatchRow, preserveLineupsIfIncomingEmpty = false) => {
+    useEffect(() => {
+        persistedEventsRef.current = normalizeMatchEvents(match.events);
+    }, [match.events]);
+
+    useEffect(() => {
+        persistedLineupsRef.current = normalizeMatchLineups(match.lineups);
+    }, [match.lineups]);
+
+    useEffect(() => {
+        localEventsRef.current = localEvents;
+    }, [localEvents]);
+
+    useEffect(() => {
+        localLineupsRef.current = localLineups;
+    }, [localLineups]);
+
+    const applyMatchResponse = useCallback((nextMatch: MatchRow, options?: ApplyMatchResponseOptions) => {
+        const nextEvents = normalizeMatchEvents(nextMatch.events);
+        const nextLineups = normalizeMatchLineups(nextMatch.lineups);
+        const currentLocalEvents = localEventsRef.current;
+        const currentLocalLineups = localLineupsRef.current;
+        const hasUnsavedEvents =
+            options?.preserveUnsavedEvents === true &&
+            !areDraftValuesEqual(currentLocalEvents, persistedEventsRef.current);
+        const hasUnsavedLineups =
+            options?.preserveUnsavedLineups === true &&
+            !areDraftValuesEqual(currentLocalLineups, persistedLineupsRef.current);
+        const shouldKeepExistingLineups =
+            options?.preserveLineupsIfIncomingEmpty === true &&
+            !hasAnyLineupPlayers(nextLineups) &&
+            hasAnyLineupPlayers(currentLocalLineups);
+        const resolvedEvents = hasUnsavedEvents ? currentLocalEvents : nextEvents;
+        const resolvedLineups =
+            hasUnsavedLineups || shouldKeepExistingLineups
+                ? currentLocalLineups
+                : nextLineups;
+
+        persistedEventsRef.current = nextEvents;
+        persistedLineupsRef.current = nextLineups;
+        persistedScoreRef.current = normalizeMatchScore(nextMatch.score);
+        localEventsRef.current = resolvedEvents;
+        localLineupsRef.current = resolvedLineups;
         setMatch(nextMatch);
-        setLocalEvents(Array.isArray(nextMatch.events) ? nextMatch.events : []);
-        setLocalLineups((prev) => {
-            const next = nextMatch.lineups || { home: [], away: [] };
-            const hasNext = next.home.length > 0 || next.away.length > 0;
-            const hasPrev = prev.home.length > 0 || prev.away.length > 0;
-            return preserveLineupsIfIncomingEmpty && !hasNext && hasPrev ? prev : next;
-        });
+        setLocalEvents(resolvedEvents);
+        setLocalLineups(resolvedLineups);
         setLocalPoints(toLocalPoints(nextMatch));
-        setLineupSizeInput(String(getLineupSize(nextMatch.lineups)));
+        setLineupSizeInput(String(getLineupSize(resolvedLineups)));
         setDateTimeDraft(toDateTimeLocalInput(nextMatch.date_time));
     }, []);
 
+    const resolveMatchScore = useCallback((
+        nextScore?: MatchScore | null,
+        nextEvents?: MatchEvent[],
+    ) => {
+        const manualScore = normalizeMatchScore(nextScore ?? match.score);
+        const effectiveEvents = nextEvents ?? localEvents;
+        const hasUnsavedManualScore = !areMatchScoresEqual(manualScore, persistedScoreRef.current);
+        const hasUnsavedEventDraft = !areDraftValuesEqual(effectiveEvents, persistedEventsRef.current);
+
+        return hasUnsavedManualScore || !hasUnsavedEventDraft
+            ? manualScore
+            : buildScoreFromEvents(effectiveEvents, eventDefinitionMap, manualScore);
+    }, [eventDefinitionMap, localEvents, match.score]);
+
     const getAutoPointsSnapshot = useCallback((
-        nextScore: MatchScore = match.score || { home: 0, away: 0 },
+        nextScore?: MatchScore,
         nextEvents: MatchEvent[] = localEvents,
         nextStatus: string = match.status,
-    ) => calculateAutocalculatedPoints(nextStatus, nextScore, nextEvents, pointsRules), [localEvents, match.score, match.status, pointsRules]);
+    ) => calculateAutocalculatedPoints(
+        nextStatus,
+        resolveMatchScore(nextScore, nextEvents),
+        nextEvents,
+        pointsRules,
+    ), [localEvents, match.status, pointsRules, resolveMatchScore]);
 
     const buildPointsPatchPayload = useCallback((overrides?: {
         score?: MatchScore;
@@ -522,7 +674,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const buildPersistableMatchPayload = useCallback(() => {
         const payload: Record<string, unknown> = {
             status: match.status,
-            score: match.score || { home: 0, away: 0 },
+            score: resolveMatchScore(),
             venue: match.venue || '',
             notes: match.notes?.trim() || null,
         };
@@ -538,35 +690,64 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         }
 
         return payload;
-    }, [dateTimeDraft, match.date_time, match.notes, match.score, match.status, match.venue]);
+    }, [dateTimeDraft, match.date_time, match.notes, match.status, match.venue, resolveMatchScore]);
 
     const persistMatchPatch = useCallback(async (
         payload: Record<string, unknown>,
-        options?: { includePoints?: boolean; preserveLineupsIfIncomingEmpty?: boolean },
+        options?: PersistMatchPatchOptions,
     ) => {
+        const hasUnsavedEvents = !areDraftValuesEqual(localEventsRef.current, persistedEventsRef.current);
+        const shouldSyncDirtyEvents =
+            options?.syncDirtyEvents === true &&
+            !Object.prototype.hasOwnProperty.call(payload, 'events') &&
+            hasUnsavedEvents;
+        const effectivePayload = shouldSyncDirtyEvents
+            ? {
+                ...payload,
+                events: localEventsRef.current,
+            }
+            : payload;
+        const effectiveEvents = Array.isArray(effectivePayload.events)
+            ? effectivePayload.events as MatchEvent[]
+            : localEventsRef.current;
+        const payloadIncludesEvents = Object.prototype.hasOwnProperty.call(effectivePayload, 'events');
+        const payloadIncludesLineups = Object.prototype.hasOwnProperty.call(effectivePayload, 'lineups');
+        const payloadIncludesScore = Object.prototype.hasOwnProperty.call(effectivePayload, 'score');
+        const effectiveScore = resolveMatchScore(
+            payloadIncludesScore ? effectivePayload.score as MatchScore : undefined,
+            effectiveEvents,
+        );
+        const payloadWithScore =
+            payloadIncludesScore || payloadIncludesEvents
+                ? {
+                    ...effectivePayload,
+                    score: effectiveScore,
+                }
+                : effectivePayload;
+
         let pointsPayload: Record<string, unknown> = {};
         if (options?.includePoints !== false) {
             if (localPoints.points_autocalculated === false) {
                 pointsPayload = buildPointsPatchPayload({
-                    score: payload.score as MatchScore | undefined,
-                    events: payload.events as MatchEvent[] | undefined,
-                    status: typeof payload.status === 'string' ? payload.status : undefined,
+                    score: effectiveScore,
+                    events: effectiveEvents,
+                    status: typeof payloadWithScore.status === 'string' ? payloadWithScore.status : undefined,
                 });
             } else {
                 const configuration = await fetchMatchConfiguration(match);
                 pointsPayload = toPointPatchPayload(calculateAutocalculatedPoints(
-                    typeof payload.status === 'string' ? payload.status : match.status,
-                    (payload.score as MatchScore | undefined) ?? (match.score || { home: 0, away: 0 }),
-                    (payload.events as MatchEvent[] | undefined) ?? localEvents,
+                    typeof payloadWithScore.status === 'string' ? payloadWithScore.status : match.status,
+                    effectiveScore,
+                    effectiveEvents,
                     configuration.pointsRules,
                 ));
             }
         }
 
         const finalPayload = options?.includePoints === false
-            ? payload
+            ? payloadWithScore
             : {
-                ...payload,
+                ...payloadWithScore,
                 ...pointsPayload,
             };
 
@@ -581,10 +762,24 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             throw new Error(result?.error || `HTTP ${res.status}`);
         }
 
+        const warnings = (result as { matchCenterWarnings?: PersistMatchWarnings } | null)?.matchCenterWarnings || {};
         const updatedMatch = result as MatchRow;
-        applyMatchResponse(updatedMatch, options?.preserveLineupsIfIncomingEmpty ?? false);
-        return updatedMatch;
-    }, [applyMatchResponse, buildPointsPatchPayload, localEvents, localPoints.points_autocalculated, match, matchId]);
+        applyMatchResponse(updatedMatch, {
+            preserveLineupsIfIncomingEmpty:
+                options?.preserveLineupsIfIncomingEmpty
+                ?? warnings.lineupsNotPersisted
+                ?? false,
+            preserveUnsavedEvents: options?.preserveUnsavedEvents ?? !payloadIncludesEvents,
+            preserveUnsavedLineups:
+                options?.preserveUnsavedLineups
+                ?? warnings.lineupsNotPersisted
+                ?? !payloadIncludesLineups,
+        });
+        return {
+            match: updatedMatch,
+            warnings,
+        };
+    }, [applyMatchResponse, buildPointsPatchPayload, localPoints.points_autocalculated, match, matchId, resolveMatchScore]);
 
     /* â”€â”€â”€ REFRESH (for after saves / config changes) â”€â”€â”€ */
     const refreshMatchConfiguration = useCallback(async () => {
@@ -607,7 +802,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 throw new Error(payload?.error || `HTTP ${res.status}`);
             }
 
-            applyMatchResponse(payload as MatchRow, true);
+            applyMatchResponse(payload as MatchRow, {
+                preserveLineupsIfIncomingEmpty: true,
+                preserveUnsavedEvents: true,
+                preserveUnsavedLineups: true,
+            });
         } catch (err: unknown) {
             console.error('Error refreshing match:', err);
         }
@@ -674,9 +873,30 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 filter: `id=eq.${matchId}`,
             }, (payload) => {
                 const updated = payload.new as Record<string, unknown>;
+                const incomingEvents = Array.isArray(updated.events) ? updated.events as MatchEvent[] : null;
+                const incomingLineups = updated.lineups ? updated.lineups as MatchLineups : null;
+                const hasUnsavedEvents = !areDraftValuesEqual(localEventsRef.current, persistedEventsRef.current);
+                const hasUnsavedLineups = !areDraftValuesEqual(localLineupsRef.current, persistedLineupsRef.current);
+                const incomingScore = updated.score as MatchScore | undefined;
+
                 setMatch(prev => ({ ...prev, ...updated } as unknown as MatchRow));
-                if (Array.isArray(updated.events)) setLocalEvents(updated.events as MatchEvent[]);
-                if (updated.lineups) setLocalLineups(updated.lineups as MatchLineups);
+                if (incomingScore) {
+                    persistedScoreRef.current = normalizeMatchScore(incomingScore);
+                }
+                if (incomingEvents) {
+                    persistedEventsRef.current = incomingEvents;
+                    if (!hasUnsavedEvents) {
+                        localEventsRef.current = incomingEvents;
+                        setLocalEvents(incomingEvents);
+                    }
+                }
+                if (incomingLineups) {
+                    persistedLineupsRef.current = incomingLineups;
+                    if (!hasUnsavedLineups) {
+                        localLineupsRef.current = incomingLineups;
+                        setLocalLineups(incomingLineups);
+                    }
+                }
                 if (
                     updated.home_base_points !== undefined ||
                     updated.away_base_points !== undefined ||
@@ -708,12 +928,16 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         try {
             console.log('[MatchCenter] Saving via API - events:', localEvents.length, 'lineups home:', localLineups.home.length, 'away:', localLineups.away.length);
 
-            await persistMatchPatch({
+            const saveResult = await persistMatchPatch({
                 ...buildPersistableMatchPayload(),
                 events: localEvents,
                 lineups: localLineups,
             });
-            setSaveMsg({ type: 'ok', text: 'Guardado correctamente' });
+            setSaveMsg(
+                saveResult.warnings.lineupsNotPersisted
+                    ? { type: 'warn', text: 'Se guardó el partido, pero este entorno no tiene almacenamiento para alineaciones.' }
+                    : { type: 'ok', text: 'Guardado correctamente' },
+            );
             setTimeout(() => setSaveMsg(null), 3000);
         } catch (err: unknown) {
             console.error('[MatchCenter] Save error:', err);
@@ -724,9 +948,12 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     };
 
     /* â”€â”€â”€ DERIVED DATA (all computed, zero hardcode) â”€â”€â”€ */
-    const commitConfigPatch = useCallback(async (payload: Record<string, unknown>) => {
+    const commitConfigPatch = useCallback(async (
+        payload: Record<string, unknown>,
+        options?: PersistMatchPatchOptions,
+    ) => {
         try {
-            await persistMatchPatch(payload);
+            await persistMatchPatch(payload, options);
         } catch (err: unknown) {
             console.error('[MatchCenter] Config save error:', err);
             setSaveMsg({ type: 'err', text: `Error de red: ${err instanceof Error ? err.message : String(err)}` });
@@ -764,10 +991,9 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         }));
     }, [lineupSizeInput, localLineups]);
 
-    const score = match.score || { home: 0, away: 0 };
+    const score = resolveMatchScore();
     const events = localEvents;
     const lineups = localLineups;
-    const eventDefinitionMap = buildMatchEventDefinitionMap(eventDefinitions);
 
     useEffect(() => {
         const definitionMap = buildMatchEventDefinitionMap(eventDefinitions);
@@ -849,20 +1075,21 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     // Winner
     const winner = score.home > score.away ? 'LOCAL' : score.away > score.home ? 'VISITANTE' : score.home === score.away && score.home === 0 ? '--' : 'EMPATE';
 
-    // Bonus ofensivo (4+ tries)
-    const homeTriesCount = countTeamTries(score, events, 'home');
-    const awayTriesCount = countTeamTries(score, events, 'away');
-    const homeBonusOff = pointsRules.offensive ? homeTriesCount >= pointsRules.offensive.threshold : false;
-    const awayBonusOff = pointsRules.offensive ? awayTriesCount >= pointsRules.offensive.threshold : false;
+    // Bonus ofensivo segun la regla configurada
+    const offensiveMetricLabel = pointsRules.offensive?.label || 'eventos';
+    const homeOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'home', pointsRules.offensive);
+    const awayOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'away', pointsRules.offensive);
+    const homeBonusOff = pointsRules.offensive ? homeOffensiveMetricCount >= pointsRules.offensive.threshold : false;
+    const awayBonusOff = pointsRules.offensive ? awayOffensiveMetricCount >= pointsRules.offensive.threshold : false;
     const offensiveThresholdLabel = pointsRules.offensive?.threshold ?? 0;
     const bonusOffText = !pointsRules.offensive
         ? 'No aplica'
         : homeBonusOff && awayBonusOff
-            ? `${homeName} y ${awayName} (${offensiveThresholdLabel}+ tries)`
+            ? `${homeName} y ${awayName} (${offensiveThresholdLabel}+ ${offensiveMetricLabel})`
             : homeBonusOff
-                ? `${homeName} (${homeTriesCount} tries)`
+                ? `${homeName} (${homeOffensiveMetricCount} ${offensiveMetricLabel})`
                 : awayBonusOff
-                    ? `${awayName} (${awayTriesCount} tries)`
+                    ? `${awayName} (${awayOffensiveMetricCount} ${offensiveMetricLabel})`
                     : 'No';
 
     // Bonus defensivo (lose by <=7)
@@ -942,9 +1169,9 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             fontWeight: 700,
                             whiteSpace: 'nowrap',
                             zIndex: 100,
-                            background: saveMsg.type === 'ok' ? '#052e16' : '#450a0a',
-                            color: saveMsg.type === 'ok' ? '#4ade80' : '#fca5a5',
-                            border: `1px solid ${saveMsg.type === 'ok' ? '#166534' : '#991b1b'}`,
+                            background: saveMsg.type === 'ok' ? '#052e16' : saveMsg.type === 'warn' ? '#3a2205' : '#450a0a',
+                            color: saveMsg.type === 'ok' ? '#4ade80' : saveMsg.type === 'warn' ? '#fbbf24' : '#fca5a5',
+                            border: `1px solid ${saveMsg.type === 'ok' ? '#166534' : saveMsg.type === 'warn' ? '#92400e' : '#991b1b'}`,
                             boxShadow: '0 4px 12px rgba(0,0,0,.4)',
                             display: 'flex',
                             alignItems: 'center',
@@ -1505,7 +1732,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     onChange={async (e) => {
                                         const nextStatus = e.target.value;
                                         setMatch((prev) => ({ ...prev, status: nextStatus }));
-                                        await commitConfigPatch({ status: nextStatus });
+                                        await commitConfigPatch(
+                                            { status: nextStatus },
+                                            { syncDirtyEvents: true },
+                                        );
                                     }}
                                 >
                                     <option value="scheduled">Programado</option>
@@ -1526,7 +1756,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     onChange={(e) => handleScoreInputChange('home', e.target.value)}
                                     onBlur={async (e) => {
                                         const newScore = { ...score, home: parseInt(e.target.value) || 0 };
-                                        await commitConfigPatch({ score: newScore });
+                                        await commitConfigPatch(
+                                            { score: newScore },
+                                            { syncDirtyEvents: true },
+                                        );
                                     }}
                                 />
                             </div>
@@ -1540,7 +1773,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     onChange={(e) => handleScoreInputChange('away', e.target.value)}
                                     onBlur={async (e) => {
                                         const newScore = { ...score, away: parseInt(e.target.value) || 0 };
-                                        await commitConfigPatch({ score: newScore });
+                                        await commitConfigPatch(
+                                            { score: newScore },
+                                            { syncDirtyEvents: true },
+                                        );
                                     }}
                                 />
                             </div>
@@ -1552,7 +1788,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     style={{ borderRadius: 4 }}
                                     onChange={(e) => setMatch((prev) => ({ ...prev, venue: e.target.value }))}
                                     onBlur={async (e) => {
-                                        await commitConfigPatch({ venue: e.target.value });
+                                        await commitConfigPatch(
+                                            { venue: e.target.value },
+                                            { includePoints: false },
+                                        );
                                     }}
                                 />
                             </div>
@@ -1568,7 +1807,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                             const [date, time] = e.target.value.split('T');
                                             const nextDateTime = combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
                                             if (!nextDateTime) return;
-                                            await commitConfigPatch({ dateTime: nextDateTime });
+                                            await commitConfigPatch(
+                                                { dateTime: nextDateTime },
+                                                { includePoints: false },
+                                            );
                                         }
                                     }}
                                 />

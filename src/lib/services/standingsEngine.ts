@@ -1,3 +1,9 @@
+import {
+  countTeamEventMetric,
+  countTeamOffensiveMetric,
+  resolveOffensiveBonusRule,
+} from '@/lib/bonusRuleMetrics';
+
 export interface PhaseSettings {
   standings?: {
     mode?: 'automatic' | 'assisted_manual' | 'fully_manual';
@@ -15,9 +21,9 @@ export interface PhaseSettings {
   };
   tiebreakers?: (string | { key: string; label?: string; enabled?: boolean; priority?: number })[];
   qualification?: {
-    promoted?: number;      // top N qualify / are promoted
-    zone?: number;          // next M go to repechaje / playoff zone
-    relegated?: number;     // bottom K are relegated / eliminated
+    promoted?: number;
+    zone?: number;
+    relegated?: number;
   };
 }
 
@@ -76,20 +82,24 @@ export class StandingsEngine {
       tournamentRuleset?.pointsBonusLoss != null,
     );
     const resolvedOffensiveBonusRule =
-      phaseSettings?.bonus?.offensive ??
-      tournamentRuleset?.bonus?.offensive ??
-      this.buildLegacyBonusRule(
-        phaseBonusEnabled,
-        phasePointsSystem?.bonusTry ??
-          phasePointsSystem?.behavior?.bonusTry ??
-          tournamentPointsSystem?.bonusTry ??
-          tournamentRuleset?.pointsBonusTry,
-        'offensive',
+      resolveOffensiveBonusRule(phaseSettings?.bonus?.offensive) ??
+      resolveOffensiveBonusRule(tournamentRuleset?.bonus?.offensive) ??
+      resolveOffensiveBonusRule(
+        this.buildLegacyBonusRule(
+          phaseBonusEnabled,
+          phasePointsSystem?.bonusTry ??
+            phasePointsSystem?.behavior?.bonusTry ??
+            tournamentPointsSystem?.bonusTry ??
+            tournamentRuleset?.pointsBonusTry,
+          'offensive',
+        ),
       ) ??
-      this.buildLegacyBonusRule(
-        tournamentBonusEnabled,
-        tournamentPointsSystem?.bonusTry ?? tournamentRuleset?.pointsBonusTry,
-        'offensive',
+      resolveOffensiveBonusRule(
+        this.buildLegacyBonusRule(
+          tournamentBonusEnabled,
+          tournamentPointsSystem?.bonusTry ?? tournamentRuleset?.pointsBonusTry,
+          'offensive',
+        ),
       );
     const resolvedDefensiveBonusRule =
       phaseSettings?.bonus?.defensive ??
@@ -110,8 +120,6 @@ export class StandingsEngine {
     const rawTiebreakers =
       phaseSettings?.tiebreakers ?? tournamentRuleset?.tiebreakers ?? ['points_difference'];
 
-    // Normalise tiebreakers – only keep non-null entries with a valid key,
-    // filter disabled ones, and sort by priority (ascending).
     const tiebreakers = Array.isArray(rawTiebreakers)
       ? rawTiebreakers
           .filter((t) => {
@@ -205,16 +213,124 @@ export class StandingsEngine {
     return { home: 0, away: 0 };
   }
 
-  /**
-   * Calculate standings given participants, matches and resolved rules.
-   */
-  static generateTable(
+  private static normalizeTiebreakerMetricKey(rawKey: string): string {
+    const key = String(rawKey || '').trim();
+    if (!key) return '';
+
+    const compact = key.replace(/[\s_-]/g, '').toLowerCase();
+
+    if (['points', 'pointstable', 'totalpoints', 'competitionpoints'].includes(compact)) {
+      return 'points';
+    }
+    if (['headtohead', 'h2h'].includes(compact)) {
+      return 'headToHead';
+    }
+    if (['pointsdiff', 'pointsdifference', 'pointsdifferential'].includes(compact)) {
+      return 'points_difference';
+    }
+    if (['pointsfor', 'scored', 'goalsfor'].includes(compact)) {
+      return 'points_for';
+    }
+    if (['pointsagainst', 'conceded', 'goalsagainst'].includes(compact)) {
+      return 'points_against';
+    }
+    if (['triesfor'].includes(compact)) return 'tries_for';
+    if (['triesagainst', 'triesconceded'].includes(compact)) return 'tries_against';
+    if (['triesdiff', 'triesdifference', 'triesdifferential'].includes(compact)) {
+      return 'tries_difference';
+    }
+    if (['won', 'wins'].includes(compact)) return 'won';
+    if (['lost', 'losses'].includes(compact)) return 'lost';
+    if (['drawn', 'draws'].includes(compact)) return 'drawn';
+    if (['bonusoffensive', 'offensivebonus'].includes(compact)) return 'bonus_offensive';
+    if (['bonusdefensive', 'defensivebonus'].includes(compact)) return 'bonus_defensive';
+
+    return key;
+  }
+
+  private static getMetricValue(row: any, rawKey: string): number | undefined {
+    const key = this.normalizeTiebreakerMetricKey(rawKey);
+
+    if (key === 'points') return Number(row.total_points ?? 0);
+    if (key === 'points_difference') return Number(row.difference ?? 0);
+    if (key === 'points_for') return Number(row.points_for ?? 0);
+    if (key === 'points_against') return Number(row.points_against ?? 0);
+    if (key === 'tries_for') return Number(row.tries_for ?? 0);
+    if (key === 'tries_against') return Number(row.tries_against ?? 0);
+    if (key === 'tries_difference') return Number(row.tries_difference ?? 0);
+    if (key === 'won') return Number(row.won ?? 0);
+    if (key === 'lost') return Number(row.lost ?? 0);
+    if (key === 'drawn') return Number(row.drawn ?? 0);
+    if (key === 'bonus_offensive') return Number(row.bonus_offensive ?? 0);
+    if (key === 'bonus_defensive') return Number(row.bonus_defensive ?? 0);
+
+    return undefined;
+  }
+
+  private static compareStableRows(a: any, b: any): number {
+    const aKey = String(a.teamId ?? a.participantId ?? a.team?.id ?? a.team?.name ?? '');
+    const bKey = String(b.teamId ?? b.participantId ?? b.team?.id ?? b.team?.name ?? '');
+    return aKey.localeCompare(bKey);
+  }
+
+  private static sortRowsStable(rows: any[]): any[] {
+    return [...rows].sort((a, b) => this.compareStableRows(a, b));
+  }
+
+  private static groupRowsByMetric(
+    rows: any[],
+    rawKey: string,
+    direction: 'asc' | 'desc',
+    metricSource?: Map<string, any> | null,
+  ): any[][] {
+    const ranked = rows.map((row) => {
+      const sourceRow = metricSource?.get(row.teamId) ?? row;
+      return {
+        row,
+        value: this.getMetricValue(sourceRow, rawKey),
+      };
+    });
+
+    if (ranked.every((entry) => entry.value === undefined)) {
+      return [this.sortRowsStable(rows)];
+    }
+
+    ranked.sort((left, right) => {
+      const leftMissing = left.value === undefined;
+      const rightMissing = right.value === undefined;
+
+      if (leftMissing && rightMissing) {
+        return this.compareStableRows(left.row, right.row);
+      }
+      if (leftMissing) return 1;
+      if (rightMissing) return -1;
+      if (left.value !== right.value) {
+        return direction === 'asc'
+          ? Number(left.value) - Number(right.value)
+          : Number(right.value) - Number(left.value);
+      }
+      return this.compareStableRows(left.row, right.row);
+    });
+
+    const groups: Array<Array<{ row: any; value: number | undefined }>> = [];
+    ranked.forEach((entry) => {
+      const lastGroup = groups[groups.length - 1];
+      if (!lastGroup || lastGroup[0]?.value !== entry.value) {
+        groups.push([entry]);
+        return;
+      }
+      lastGroup.push(entry);
+    });
+
+    return groups.map((group) => group.map((entry) => entry.row));
+  }
+
+  private static buildTableRows(
     participants: any[],
     matches: any[],
     rules: any,
-    tableType: string = 'general',
+    tableType: string,
   ) {
-    // 1. Initialise stat map
     const statsMap = new Map<string, any>();
 
     participants.forEach((p) => {
@@ -233,6 +349,9 @@ export class StandingsEngine {
         lost: 0,
         points_for: 0,
         points_against: 0,
+        tries_for: 0,
+        tries_against: 0,
+        tries_difference: 0,
         difference: 0,
         base_points: 0,
         bonus_offensive: 0,
@@ -241,11 +360,10 @@ export class StandingsEngine {
         total_points: 0,
         form: [] as string[],
         status: null as string | null,
-        _matchIds: [] as string[], // for head-to-head lookups
+        _matchIds: [] as string[],
       });
     });
 
-    // 2. Process final matches (route already filters, but be defensive)
     const finalMatches = matches.filter((m) => m.status === 'final');
     finalMatches.sort(
       (a, b) =>
@@ -259,12 +377,11 @@ export class StandingsEngine {
       const homeStats = statsMap.get(homeId);
       const awayStats = statsMap.get(awayId);
 
-      // Skip if either side is not a tracked participant
       if (!homeStats || !awayStats) return;
 
       const { home: homeScore, away: awayScore } = this.parseScore(m.score);
-      const homeTries: number = Number(m.score?.homeTries ?? 0);
-      const awayTries: number = Number(m.score?.awayTries ?? 0);
+      const homeTries = countTeamEventMetric(m.score, m.events, 'home', 'try');
+      const awayTries = countTeamEventMetric(m.score, m.events, 'away', 'try');
       const hasManualPoints = m.points_autocalculated === false;
       let homeBasePoints = rules.points_for_draw;
       let awayBasePoints = rules.points_for_draw;
@@ -283,19 +400,19 @@ export class StandingsEngine {
         awayResult = 'W';
       }
 
-      // HOME side stats
       if (tableType === 'general' || tableType === 'home') {
         homeStats.played += 1;
         homeStats.points_for += homeScore;
         homeStats.points_against += awayScore;
+        homeStats.tries_for += homeTries;
+        homeStats.tries_against += awayTries;
         homeStats._matchIds.push(m.id);
 
         if (homeResult === 'W') {
           homeStats.won += 1;
         } else if (homeResult === 'L') {
           homeStats.lost += 1;
-          // Defensive bonus: lost by ≤ threshold (default 7 pts)
-          if (!hasManualPoints && rules.defensive_bonus_rule && homeResult === 'L') {
+          if (!hasManualPoints && rules.defensive_bonus_rule) {
             const margin = rules.defensive_bonus_rule?.margin ?? 7;
             const points = Number(rules.defensive_bonus_rule?.points ?? rules.defensive_bonus_rule?.value ?? 1);
             if (awayScore - homeScore <= margin) homeStats.bonus_defensive += Number.isFinite(points) ? points : 1;
@@ -309,29 +426,30 @@ export class StandingsEngine {
           : homeBasePoints;
         homeStats.form.push(homeResult);
 
-        // Offensive bonus: scored ≥ threshold tries (default 4)
         if (!hasManualPoints && rules.offensive_bonus_rule) {
-          const threshold = rules.offensive_bonus_rule?.tries ?? rules.offensive_bonus_rule?.threshold ?? 4;
-          const points = Number(rules.offensive_bonus_rule?.points ?? rules.offensive_bonus_rule?.value ?? 1);
-          if (homeTries >= threshold) homeStats.bonus_offensive += Number.isFinite(points) ? points : 1;
+          const threshold = Number(rules.offensive_bonus_rule.threshold ?? 4);
+          const points = Number(rules.offensive_bonus_rule.points ?? 1);
+          const offensiveMetric = countTeamOffensiveMetric(m.score, m.events, 'home', rules.offensive_bonus_rule);
+          if (offensiveMetric >= threshold) homeStats.bonus_offensive += Number.isFinite(points) ? points : 1;
         }
         if (hasManualPoints) {
           homeStats.adjustments += Number(m.home_bonus_points ?? 0);
         }
       }
 
-      // AWAY side stats
       if (tableType === 'general' || tableType === 'away') {
         awayStats.played += 1;
         awayStats.points_for += awayScore;
         awayStats.points_against += homeScore;
+        awayStats.tries_for += awayTries;
+        awayStats.tries_against += homeTries;
         awayStats._matchIds.push(m.id);
 
         if (awayResult === 'W') {
           awayStats.won += 1;
         } else if (awayResult === 'L') {
           awayStats.lost += 1;
-          if (!hasManualPoints && rules.defensive_bonus_rule && awayResult === 'L') {
+          if (!hasManualPoints && rules.defensive_bonus_rule) {
             const margin = rules.defensive_bonus_rule?.margin ?? 7;
             const points = Number(rules.defensive_bonus_rule?.points ?? rules.defensive_bonus_rule?.value ?? 1);
             if (homeScore - awayScore <= margin) awayStats.bonus_defensive += Number.isFinite(points) ? points : 1;
@@ -346,9 +464,10 @@ export class StandingsEngine {
         awayStats.form.push(awayResult);
 
         if (!hasManualPoints && rules.offensive_bonus_rule) {
-          const threshold = rules.offensive_bonus_rule?.tries ?? rules.offensive_bonus_rule?.threshold ?? 4;
-          const points = Number(rules.offensive_bonus_rule?.points ?? rules.offensive_bonus_rule?.value ?? 1);
-          if (awayTries >= threshold) awayStats.bonus_offensive += Number.isFinite(points) ? points : 1;
+          const threshold = Number(rules.offensive_bonus_rule.threshold ?? 4);
+          const points = Number(rules.offensive_bonus_rule.points ?? 1);
+          const offensiveMetric = countTeamOffensiveMetric(m.score, m.events, 'away', rules.offensive_bonus_rule);
+          if (offensiveMetric >= threshold) awayStats.bonus_offensive += Number.isFinite(points) ? points : 1;
         }
         if (hasManualPoints) {
           awayStats.adjustments += Number(m.away_bonus_points ?? 0);
@@ -356,7 +475,6 @@ export class StandingsEngine {
       }
     });
 
-    // 3. Apply manual adjustments
     if (Array.isArray(rules.adjustments)) {
       rules.adjustments.forEach((a: any) => {
         const stats = statsMap.get(a.team_id) || statsMap.get(a.club_id);
@@ -364,61 +482,169 @@ export class StandingsEngine {
       });
     }
 
-    // 4. Compute derived fields
-    const table = Array.from(statsMap.values()).map((stats) => {
+    return Array.from(statsMap.values()).map((stats) => {
       stats.difference = stats.points_for - stats.points_against;
+      stats.tries_difference = stats.tries_for - stats.tries_against;
       stats.total_points =
         stats.base_points + stats.bonus_offensive + stats.bonus_defensive + stats.adjustments;
       if (stats.form.length > 5) stats.form = stats.form.slice(-5);
       return stats;
     });
+  }
 
-    // 5. Sort by total_points + tiebreakers
-    table.sort((a, b) => {
-      if (b.total_points !== a.total_points) return b.total_points - a.total_points;
-
-      for (const tb of rules.tiebreakers) {
-        const key = this.tiebreakerKey(tb);
-        // direction: -1 = desc (default, higher wins), 1 = asc (lower wins)
-        const dir = (typeof tb === 'object' && tb !== null && (tb as any).order === 'asc') ? 1 : -1;
-
-        let aVal: number | undefined;
-        let bVal: number | undefined;
-
-        if (['pointsDiff', 'pointsDifference', 'points_difference', 'points_diff'].includes(key)) {
-          aVal = a.difference; bVal = b.difference;
-        } else if (['pointsFor', 'scored', 'points_for'].includes(key)) {
-          aVal = a.points_for; bVal = b.points_for;
-        } else if (['pointsAgainst', 'points_against'].includes(key)) {
-          aVal = a.points_against; bVal = b.points_against;
-        } else if (['won', 'wins'].includes(key)) {
-          aVal = a.won; bVal = b.won;
-        } else if (['lost', 'losses'].includes(key)) {
-          aVal = a.lost; bVal = b.lost;
-        } else if (['drawn', 'draws'].includes(key)) {
-          aVal = a.drawn; bVal = b.drawn;
-        } else if (['bonusOffensive', 'bonus_offensive'].includes(key)) {
-          aVal = a.bonus_offensive; bVal = b.bonus_offensive;
-        } else if (['bonusDefensive', 'bonus_defensive'].includes(key)) {
-          aVal = a.bonus_defensive; bVal = b.bonus_defensive;
-        }
-        // 'points' / 'total_points' already handled above as primary sort
-        // 'headToHead' deferred – requires match-level filtering
-
-        if (aVal !== undefined && bVal !== undefined && bVal !== aVal) {
-          return dir === -1 ? bVal - aVal : aVal - bVal;
-        }
-      }
-      return 0;
+  private static buildHeadToHeadMetricSource(
+    rows: any[],
+    matches: any[],
+    rules: any,
+    tableType: string,
+  ): { hasMatches: boolean; statsByTeamId: Map<string, any> } {
+    const tiedTeamIds = new Set(rows.map((row) => String(row.teamId ?? '')));
+    const relevantMatches = matches.filter((match) => {
+      const homeId = String(match.home_club_id || match.home_participant_id || '');
+      const awayId = String(match.away_club_id || match.away_participant_id || '');
+      return tiedTeamIds.has(homeId) && tiedTeamIds.has(awayId);
     });
 
-    // 6. Assign position + status
-    const totalTeams = table.length;
-    table.forEach((row, index) => {
+    if (relevantMatches.length === 0) {
+      return {
+        hasMatches: false,
+        statsByTeamId: new Map<string, any>(),
+      };
+    }
+
+    const headToHeadParticipants = rows.map((row) => ({
+      id: row.participantId ?? row.teamId,
+      club_id: row.teamId,
+      name: row.team?.name ?? 'Equipo',
+      clubs: {
+        name: row.team?.name ?? 'Equipo',
+        logo_url: row.team?.logo ?? null,
+      },
+    }));
+
+    const headToHeadRows = this.buildTableRows(
+      headToHeadParticipants,
+      relevantMatches,
+      {
+        ...rules,
+        adjustments: [],
+      },
+      tableType,
+    );
+
+    return {
+      hasMatches: true,
+      statsByTeamId: new Map(headToHeadRows.map((row) => [row.teamId, row])),
+    };
+  }
+
+  private static resolveTieGroup(
+    rows: any[],
+    tiebreakers: any[],
+    matches: any[],
+    rules: any,
+    tableType: string,
+    metricSource: Map<string, any> | null = null,
+    startAt: number = 0,
+  ): any[] {
+    if (rows.length <= 1) return rows;
+
+    for (let index = startAt; index < tiebreakers.length; index += 1) {
+      const tb = tiebreakers[index];
+      const key = this.normalizeTiebreakerMetricKey(this.tiebreakerKey(tb));
+      if (!key) continue;
+
+      const direction: 'asc' | 'desc' =
+        typeof tb === 'object' && tb !== null && (tb as any).order === 'asc'
+          ? 'asc'
+          : 'desc';
+
+      if (key === 'headToHead') {
+        const headToHeadSource = this.buildHeadToHeadMetricSource(rows, matches, rules, tableType);
+        if (!headToHeadSource.hasMatches) continue;
+
+        const groupedByHeadToHead = this.groupRowsByMetric(
+          rows,
+          'points',
+          direction,
+          headToHeadSource.statsByTeamId,
+        );
+
+        return groupedByHeadToHead.flatMap((group) =>
+          group.length > 1
+            ? this.resolveTieGroup(
+                group,
+                tiebreakers,
+                matches,
+                rules,
+                tableType,
+                headToHeadSource.statsByTeamId,
+                index + 1,
+              )
+            : group,
+        );
+      }
+
+      const grouped = this.groupRowsByMetric(rows, key, direction, metricSource);
+      if (grouped.length === 1) continue;
+
+      return grouped.flatMap((group) =>
+        group.length > 1
+          ? this.resolveTieGroup(group, tiebreakers, matches, rules, tableType, metricSource, index + 1)
+          : group,
+      );
+    }
+
+    return this.sortRowsStable(rows);
+  }
+
+  private static sortTable(
+    rows: any[],
+    matches: any[],
+    rules: any,
+    tableType: string,
+  ): any[] {
+    const base = [...rows].sort((a, b) => {
+      if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+      return this.compareStableRows(a, b);
+    });
+
+    const groupedByPoints: any[][] = [];
+    base.forEach((row) => {
+      const lastGroup = groupedByPoints[groupedByPoints.length - 1];
+      if (!lastGroup || Number(lastGroup[0]?.total_points ?? 0) !== Number(row.total_points ?? 0)) {
+        groupedByPoints.push([row]);
+        return;
+      }
+      lastGroup.push(row);
+    });
+
+    const tiebreakers = Array.isArray(rules?.tiebreakers) ? rules.tiebreakers : [];
+    return groupedByPoints.flatMap((group) =>
+      group.length > 1
+        ? this.resolveTieGroup(group, tiebreakers, matches, rules, tableType)
+        : group,
+    );
+  }
+
+  /**
+   * Calculate standings given participants, matches and resolved rules.
+   */
+  static generateTable(
+    participants: any[],
+    matches: any[],
+    rules: any,
+    tableType: string = 'general',
+  ) {
+    const table = this.buildTableRows(participants, matches, rules, tableType);
+    const sortedTable = this.sortTable(table, matches, rules, tableType);
+
+    const totalTeams = sortedTable.length;
+    sortedTable.forEach((row, index) => {
       row.position = index + 1;
       row.status = this.resolveStatus(row.position, totalTeams, rules.qualification_rules);
     });
 
-    return table;
+    return sortedTable;
   }
 }

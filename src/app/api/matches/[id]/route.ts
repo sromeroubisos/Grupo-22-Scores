@@ -101,7 +101,6 @@ function applyFlashScoreTournamentOverrideToDetails(
   return details;
 }
 
-
 function isFlashScoreMatchId(matchId: string) {
   return /^[A-Za-z0-9]{8}$/.test(matchId);
 }
@@ -355,11 +354,16 @@ export async function PATCH(
       );
     }
 
-    if (lineups !== undefined && !supplemental.persistedLineups) {
-      match.lineups = supplemental.lineups;
-    }
+    const matchCenterWarnings =
+      lineups !== undefined && !supplemental.persistedLineups
+        ? { lineupsNotPersisted: true }
+        : null;
 
-    return NextResponse.json(match);
+    return NextResponse.json(
+      matchCenterWarnings
+        ? { ...match, matchCenterWarnings }
+        : match
+    );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in PATCH /api/matches/[id]:', error);

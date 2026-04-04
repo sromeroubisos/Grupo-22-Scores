@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 
 const FINAL_STATUSES = ['final', 'finished', 'ft'] as const;
 
@@ -51,6 +52,7 @@ type FinalMatchRow = {
     home_club_id: string | null;
     away_club_id: string | null;
     score: Record<string, unknown> | null;
+    events?: Array<Record<string, unknown>> | null;
     status: string | null;
     date_time: string | null;
     phase_id: string | null;
@@ -226,22 +228,40 @@ export async function GET(req: NextRequest) {
             if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
             return query;
         })(),
-        (() => {
-            let query = supabase
-                .from('matches')
-                .select(`
-                    id, home_club_id, away_club_id, score, status, date_time,
-                    phase_id, group_id, home_base_points, away_base_points,
-                    home_bonus_points, away_bonus_points, points_autocalculated,
-                    points_override_reason
-                `)
-                .eq('tournament_id', tournamentId)
-                .in('status', [...FINAL_STATUSES]);
+        queryMatchesWithOptionalEvents<FinalMatchRow>(
+            () => {
+                let query = supabase
+                    .from('matches')
+                    .select(`
+                        id, home_club_id, away_club_id, score, events, status, date_time,
+                        phase_id, group_id, home_base_points, away_base_points,
+                        home_bonus_points, away_bonus_points, points_autocalculated,
+                        points_override_reason
+                    `)
+                    .eq('tournament_id', tournamentId)
+                    .in('status', [...FINAL_STATUSES]);
 
-            if (fallbackPhaseId) query = query.eq('phase_id', fallbackPhaseId);
-            if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
-            return query;
-        })(),
+                if (fallbackPhaseId) query = query.eq('phase_id', fallbackPhaseId);
+                if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
+                return query;
+            },
+            () => {
+                let query = supabase
+                    .from('matches')
+                    .select(`
+                        id, home_club_id, away_club_id, score, status, date_time,
+                        phase_id, group_id, home_base_points, away_base_points,
+                        home_bonus_points, away_bonus_points, points_autocalculated,
+                        points_override_reason
+                    `)
+                    .eq('tournament_id', tournamentId)
+                    .in('status', [...FINAL_STATUSES]);
+
+                if (fallbackPhaseId) query = query.eq('phase_id', fallbackPhaseId);
+                if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
+                return query;
+            },
+        ),
     ]);
 
     if (participantsRes.error) {

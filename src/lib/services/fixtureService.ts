@@ -537,11 +537,15 @@ export class FixtureService {
       supportsHomeDivision,
       supportsAwayDivision,
       supportsCategory,
+      supportsBroadcastUrl,
+      supportsReplayUrl,
     ] = await Promise.all([
       this.checkRoundLabelSupport(),
       data.homeSquadId ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
       data.awaySquadId ? this.checkMatchColumnSupport('away_division_id') : Promise.resolve(false),
       data.category ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
+      data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url') : Promise.resolve(false),
+      data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url') : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] createMatch - round_label: ${supportsRoundLabel}`);
 
@@ -572,7 +576,6 @@ export class FixtureService {
       venue: data.venue,
       status: data.status,
       notes: data.notes || null,
-      broadcast_url: data.streamUrl || null,
       score: data.score || { home: 0, away: 0 },
     };
 
@@ -597,6 +600,14 @@ export class FixtureService {
 
     if (supportsCategory) {
       insertData.category = data.category || null;
+    }
+
+    if (supportsBroadcastUrl && data.streamUrl !== undefined) {
+      insertData.broadcast_url = data.streamUrl || null;
+    }
+
+    if (supportsReplayUrl && data.replayUrl !== undefined) {
+      insertData.replay_url = data.replayUrl || null;
     }
 
     const { data: match, error } = await supabase
@@ -629,11 +640,15 @@ export class FixtureService {
       supportsHomeDivision,
       supportsAwayDivision,
       supportsCategory,
+      supportsBroadcastUrl,
+      supportsReplayUrl,
     ] = await Promise.all([
       this.checkRoundLabelSupport(),
       data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
       data.awaySquadId !== undefined ? this.checkMatchColumnSupport('away_division_id') : Promise.resolve(false),
       data.category !== undefined ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
+      data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url') : Promise.resolve(false),
+      data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url') : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] updateMatch - round_label: ${supportsRoundLabel}`);
 
@@ -719,7 +734,8 @@ export class FixtureService {
     if (data.phaseId) updateData.phase_id = data.phaseId;
     if (data.groupId !== undefined) updateData.group_id = data.groupId;
     if (data.notes !== undefined) updateData.notes = data.notes;
-    if (data.streamUrl !== undefined) updateData.broadcast_url = data.streamUrl || null;
+    if (supportsBroadcastUrl && data.streamUrl !== undefined) updateData.broadcast_url = data.streamUrl || null;
+    if (supportsReplayUrl && data.replayUrl !== undefined) updateData.replay_url = data.replayUrl || null;
     if (data.score !== undefined) updateData.score = data.score;
     if (data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
     if (data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;

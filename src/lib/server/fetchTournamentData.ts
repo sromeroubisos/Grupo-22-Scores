@@ -1,5 +1,6 @@
 import { getReadClient } from '@/lib/supabase/read';
 import { normalizeTeamLabelAssignments } from '@/lib/teamLabels';
+import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -118,6 +119,7 @@ type TournamentMatchRow = Record<string, unknown> & {
     date_time: string | null;
     status: string | null;
     score: unknown;
+    events: unknown[] | null;
     venue: string | null;
     round_label: string | null;
     notes: string | null;
@@ -383,18 +385,32 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             ),
             settleSupabaseQuery(
                 'matches',
-                supabase
-                    .from('matches')
-                    .select(`
-                        id, date_time, status, score, venue, round_label, notes,
-                        home_club_id, away_club_id,
-                        phase_id, group_id, round_uuid,
-                        home_base_points, away_base_points,
-                        home_bonus_points, away_bonus_points,
-                        points_autocalculated, points_override_reason
-                    `)
-                    .eq('tournament_id', tournamentId)
-                    .order('date_time', { ascending: true }),
+                queryMatchesWithOptionalEvents<TournamentMatchRow>(
+                    () => supabase
+                        .from('matches')
+                        .select(`
+                            id, date_time, status, score, events, venue, round_label, notes,
+                            home_club_id, away_club_id,
+                            phase_id, group_id, round_uuid,
+                            home_base_points, away_base_points,
+                            home_bonus_points, away_bonus_points,
+                            points_autocalculated, points_override_reason
+                        `)
+                        .eq('tournament_id', tournamentId)
+                        .order('date_time', { ascending: true }),
+                    () => supabase
+                        .from('matches')
+                        .select(`
+                            id, date_time, status, score, venue, round_label, notes,
+                            home_club_id, away_club_id,
+                            phase_id, group_id, round_uuid,
+                            home_base_points, away_base_points,
+                            home_bonus_points, away_bonus_points,
+                            points_autocalculated, points_override_reason
+                        `)
+                        .eq('tournament_id', tournamentId)
+                        .order('date_time', { ascending: true }),
+                ),
                 [] as TournamentMatchRow[],
                 MATCHES_TIMEOUT_MS,
             ),
