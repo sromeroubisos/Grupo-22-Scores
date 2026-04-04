@@ -28,12 +28,79 @@ import {
   getRugbyApiSportsGamesH2H,
   getRugbyApiSportsStandings,
   parseRugbyApiSportsMatchId,
+  toRugbyApiSportsTournamentId,
 } from '@/lib/services/rugbyApiSports';
 import {
   normalizeRugbyGameForMatchDetail,
   normalizeRugbyGameForTournamentViews,
   normalizeRugbyStandingsRows,
 } from '@/lib/services/rugbyApiSportsTransforms';
+import {
+  applyExternalTournamentOverride,
+  getExternalTournamentOverride,
+  type ExternalTournamentOverrideRecord,
+} from '@/lib/server/externalTournamentOverrides';
+
+function normalizeString(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed || null;
+}
+
+function getExternalTournamentIdFromEvent(event: Record<string, unknown> | null | undefined) {
+  return normalizeString(
+    event?.tournament && typeof event.tournament === 'object'
+      ? (event.tournament as Record<string, unknown>).tournament_stage_id
+        || (event.tournament as Record<string, unknown>).tournament_id
+      : null
+  ) || normalizeString(event?.TOURNAMENT_STAGE_ID) || normalizeString(event?.TOURNAMENT_ID);
+}
+
+function applyFlashScoreTournamentOverrideToDetails(
+  details: Record<string, unknown>,
+  override: ExternalTournamentOverrideRecord | null,
+) {
+  if (!override) return details;
+
+  const detailsData = details.DATA;
+  if (detailsData && typeof detailsData === 'object') {
+    const dataRecord = detailsData as Record<string, unknown>;
+    const eventRecord = dataRecord.EVENT;
+    if (eventRecord && typeof eventRecord === 'object') {
+      const event = eventRecord as Record<string, unknown>;
+      const rawTournament = event.tournament;
+      if (rawTournament && typeof rawTournament === 'object') {
+        return {
+          ...details,
+          DATA: {
+            ...dataRecord,
+            EVENT: {
+              ...event,
+              tournament: applyExternalTournamentOverride(
+                rawTournament as Record<string, unknown>,
+                override,
+              ),
+            },
+          },
+        };
+      }
+    }
+  }
+
+  const rawTournament = details.tournament;
+  if (rawTournament && typeof rawTournament === 'object') {
+    return {
+      ...details,
+      tournament: applyExternalTournamentOverride(
+        rawTournament as Record<string, unknown>,
+        override,
+      ),
+    };
+  }
+
+  return details;
+}
+
 
 function isFlashScoreMatchId(matchId: string) {
   return /^[A-Za-z0-9]{8}$/.test(matchId);
@@ -54,6 +121,14 @@ async function getFlashScoreMatchBundle(matchId: string) {
   if (!evt || !(evt.match_id || evt.EVENT_ID)) {
     return null;
   }
+
+  const tournamentOverride = await getExternalTournamentOverride(
+    getExternalTournamentIdFromEvent(evt as Record<string, unknown>) || '',
+  ).catch(() => null);
+  const resolvedDetails = applyFlashScoreTournamentOverrideToDetails(
+    details as Record<string, unknown>,
+    tournamentOverride,
+  );
 
   const sportId = evt.sport?.sport_id || evt.SPORT_ID || 1;
   const tsTotal = evt.timestamp || evt.start_time || evt.START_TIME || evt.time || evt.event_timestamp || 0;
@@ -92,7 +167,7 @@ async function getFlashScoreMatchBundle(matchId: string) {
 
   return {
     source: 'flashscore' as const,
-    details,
+    details: resolvedDetails,
     summary,
     stats,
     h2h,
@@ -132,7 +207,19 @@ async function getRugbyApiSportsMatchBundle(matchId: string) {
       : Promise.resolve([]),
   ]);
 
-  const match = normalizeRugbyGameForMatchDetail(game);
+  const tournamentOverride = game.league?.id
+    ? await getExternalTournamentOverride(toRugbyApiSportsTournamentId(game.league.id)).catch(() => null)
+    : null;
+  const resolvedGame = game.league && tournamentOverride
+    ? {
+      ...game,
+      league: applyExternalTournamentOverride(
+        game.league as Record<string, unknown>,
+        tournamentOverride,
+      ),
+    }
+    : game;
+  const match = normalizeRugbyGameForMatchDetail(resolvedGame);
   const h2h = h2hResult.status === 'fulfilled'
     ? h2hResult.value.map((item) => normalizeRugbyGameForTournamentViews(item))
     : [];

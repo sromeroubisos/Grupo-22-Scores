@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  applyExternalTournamentOverride,
+  getExternalTournamentOverride,
+} from '@/lib/server/externalTournamentOverrides';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 type SupabaseLike = {
@@ -897,7 +901,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
       *,
       homeClub:home_club_id (id, name, short_name, logo_url, primary_color),
       awayClub:away_club_id (id, name, short_name, logo_url, primary_color),
-      tournament:tournament_id (id, name, logo_url, sport_id)
+      tournament:tournament_id (id, name, logo_url, sport_id, external_id)
     `)
     .eq('id', matchId)
     .single();
@@ -929,6 +933,15 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
   const homeClubRaw = (data as any).homeClub;
   const awayClubRaw = (data as any).awayClub;
   const tournamentRaw = (data as any).tournament;
+  const tournamentOverrideId =
+    normalizeText(tournamentRaw?.external_id) ||
+    normalizeText(tournamentRaw?.id);
+  const tournamentOverride = tournamentOverrideId
+    ? await getExternalTournamentOverride(tournamentOverrideId).catch(() => null)
+    : null;
+  const resolvedTournament = tournamentRaw
+    ? applyExternalTournamentOverride(tournamentRaw, tournamentOverride)
+    : null;
 
   return {
     data: {
@@ -945,11 +958,11 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
       roundId: (data as any).round_id ?? null,
       homeClub: homeClubRaw ? { ...homeClubRaw, logo: homeClubRaw.logo_url ?? null } : null,
       awayClub: awayClubRaw ? { ...awayClubRaw, logo: awayClubRaw.logo_url ?? null } : null,
-      tournament: tournamentRaw
+      tournament: resolvedTournament
         ? {
-            ...tournamentRaw,
-            logo: tournamentRaw.logo_url ?? null,
-            sportId: tournamentRaw.sport_id ?? null,
+            ...resolvedTournament,
+            logo: resolvedTournament.logo_url ?? resolvedTournament.logo ?? null,
+            sportId: resolvedTournament.sport_id ?? null,
           }
         : null,
       events,
@@ -1103,4 +1116,3 @@ export async function persistMatchCenterSupplementalData(
 export function getEmptyMatchCenterLineups() {
   return { ...EMPTY_LINEUPS };
 }
-
