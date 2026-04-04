@@ -23,7 +23,7 @@ import {
 } from '@/lib/timezone';
 import './match-center.css';
 
-/* ─────────────────── TYPES ─────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 interface ClubInfo {
     id: string;
     name: string;
@@ -90,6 +90,7 @@ export interface MatchRow {
     round_id: string | null;
     date_time: string | null;
     venue: string | null;
+    notes?: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
     status: string;
@@ -129,24 +130,25 @@ interface MatchCenterClientProps {
     onClose?: () => void;
 }
 
-/* ─────────────────── TABS ─────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const TABS = [
     { id: 'resumen', label: 'Resumen', icon: Layout },
     { id: 'alineaciones', label: 'Alineaciones', icon: Users },
     { id: 'eventos', label: 'Eventos', icon: Clock },
-    { id: 'estadisticas', label: 'Estadísticas', icon: BarChart2 },
+    { id: 'estadisticas', label: 'Estadisticas', icon: BarChart2 },
     { id: 'contenido', label: 'Contenido', icon: ImageIcon },
     { id: 'oficiales', label: 'Oficiales', icon: Users },
-    { id: 'configuracion', label: 'Configuración', icon: Settings },
+    { id: 'configuracion', label: 'Configuracion', icon: Settings },
 ];
 
-/* ─────────────────── HELPERS ─────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function statusLabel(s: string): string {
     switch (s) {
         case 'final': return 'FINAL';
         case 'live': return 'EN VIVO';
         case 'scheduled': return 'PROGRAMADO';
         case 'postponed': return 'APLAZADO';
+        case 'suspended': return 'SUSPENDIDO';
         case 'cancelled': return 'CANCELADO';
         default: return s.toUpperCase();
     }
@@ -157,6 +159,7 @@ function statusColor(s: string): string {
         case 'final': return '#888';
         case 'live': return '#ef4444';
         case 'scheduled': return 'var(--accent)';
+        case 'suspended': return '#f97316';
         default: return '#f59e0b';
     }
 }
@@ -205,7 +208,7 @@ function getConfiguredEventPoints(
     return Number(definition.points) || 0;
 }
 
-/* ─── POINTS HELPERS ─── */
+/* â”€â”€â”€ POINTS HELPERS â”€â”€â”€ */
 interface PointsRules {
     win: number;
     draw: number;
@@ -294,6 +297,16 @@ function buildLineupTemplate(count: number, existing: LineupPlayer[] = []): Line
             divisionId: current?.divisionId ?? null,
         };
     });
+}
+
+function isStarterLineupPlayer(player: LineupPlayer) {
+    const role = String(player.role || '').trim().toLowerCase();
+    return role === 'starter' || role === 'titular' || (!role && player.number <= 15);
+}
+
+function isSubstituteLineupPlayer(player: LineupPlayer) {
+    const role = String(player.role || '').trim().toLowerCase();
+    return role === 'substitute' || role === 'suplente' || (!role && player.number > 15);
 }
 
 function countTeamTries(score: MatchScore, events: MatchEvent[], team: 'home' | 'away') {
@@ -443,7 +456,7 @@ function toLocalPoints(match: MatchRow): MatchPoints {
     };
 }
 
-/* ─────────────────── CLIENT COMPONENT ─────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ CLIENT COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function MatchCenterClient({ initialMatch, matchId, onClose }: MatchCenterClientProps) {
     const router = useRouter();
     const supabase = createClient();
@@ -506,6 +519,27 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         ));
     }, [getAutoPointsSnapshot, localPoints]);
 
+    const buildPersistableMatchPayload = useCallback(() => {
+        const payload: Record<string, unknown> = {
+            status: match.status,
+            score: match.score || { home: 0, away: 0 },
+            venue: match.venue || '',
+            notes: match.notes?.trim() || null,
+        };
+
+        if (dateTimeDraft) {
+            const [date, time] = dateTimeDraft.split('T');
+            const nextDateTime = combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
+            if (nextDateTime) {
+                payload.dateTime = nextDateTime;
+            }
+        } else if (match.date_time) {
+            payload.dateTime = match.date_time;
+        }
+
+        return payload;
+    }, [dateTimeDraft, match.date_time, match.notes, match.score, match.status, match.venue]);
+
     const persistMatchPatch = useCallback(async (
         payload: Record<string, unknown>,
         options?: { includePoints?: boolean; preserveLineupsIfIncomingEmpty?: boolean },
@@ -552,7 +586,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         return updatedMatch;
     }, [applyMatchResponse, buildPointsPatchPayload, localEvents, localPoints.points_autocalculated, match, matchId]);
 
-    /* ─── REFRESH (for after saves / config changes) ─── */
+    /* â”€â”€â”€ REFRESH (for after saves / config changes) â”€â”€â”€ */
     const refreshMatchConfiguration = useCallback(async () => {
         const configuration = await fetchMatchConfiguration({
             phase_id: match.phase_id,
@@ -579,7 +613,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         }
     }, [applyMatchResponse, matchId]);
 
-    /* ─── POINTS: RECALCULATE & SAVE ─── */
+    /* â”€â”€â”€ POINTS: RECALCULATE & SAVE â”€â”€â”€ */
     useEffect(() => {
         void refreshMatchConfiguration();
     }, [refreshMatchConfiguration]);
@@ -612,12 +646,15 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     { includePoints: false },
                 );
             } else {
-                await persistMatchPatch({});
+                await persistMatchPatch({
+                    ...buildPersistableMatchPayload(),
+                    events: localEvents,
+                });
             }
         } finally {
             setSavingPoints(false);
         }
-    }, [localPoints, persistMatchPatch]);
+    }, [buildPersistableMatchPayload, localEvents, localPoints, persistMatchPatch]);
 
     // Reactive: recalculate whenever score/status/events change, only while in auto mode
     useEffect(() => {
@@ -625,7 +662,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         setLocalPoints(getAutoPointsSnapshot());
     }, [getAutoPointsSnapshot, localPoints.points_autocalculated]);
 
-    /* ─── REALTIME (live matches) ─── */
+    /* â”€â”€â”€ REALTIME (live matches) â”€â”€â”€ */
     useEffect(() => {
         if (match?.status !== 'live') return;
         const channel = supabase
@@ -663,19 +700,20 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         return () => { supabase.removeChannel(channel); };
     }, [match?.status, matchId, supabase]);
 
-    /* ─── SAVE ─── */
+    /* â”€â”€â”€ SAVE â”€â”€â”€ */
     const handleSave = async () => {
         if (!match) return;
         setSaving(true);
         setSaveMsg(null);
         try {
-            console.log('[MatchCenter] Saving via API — events:', localEvents.length, 'lineups home:', localLineups.home.length, 'away:', localLineups.away.length);
+            console.log('[MatchCenter] Saving via API - events:', localEvents.length, 'lineups home:', localLineups.home.length, 'away:', localLineups.away.length);
 
             await persistMatchPatch({
+                ...buildPersistableMatchPayload(),
                 events: localEvents,
                 lineups: localLineups,
             });
-            setSaveMsg({ type: 'ok', text: '✓ Guardado correctamente' });
+            setSaveMsg({ type: 'ok', text: 'Guardado correctamente' });
             setTimeout(() => setSaveMsg(null), 3000);
         } catch (err: unknown) {
             console.error('[MatchCenter] Save error:', err);
@@ -685,7 +723,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         }
     };
 
-    /* ─── DERIVED DATA (all computed, zero hardcode) ─── */
+    /* â”€â”€â”€ DERIVED DATA (all computed, zero hardcode) â”€â”€â”€ */
     const commitConfigPatch = useCallback(async (payload: Record<string, unknown>) => {
         try {
             await persistMatchPatch(payload);
@@ -809,7 +847,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         .filter((definition) => definition.homeCount > 0 || definition.awayCount > 0);
 
     // Winner
-    const winner = score.home > score.away ? 'LOCAL' : score.away > score.home ? 'VISITANTE' : score.home === score.away && score.home === 0 ? '—' : 'EMPATE';
+    const winner = score.home > score.away ? 'LOCAL' : score.away > score.home ? 'VISITANTE' : score.home === score.away && score.home === 0 ? '--' : 'EMPATE';
 
     // Bonus ofensivo (4+ tries)
     const homeTriesCount = countTeamTries(score, events, 'home');
@@ -827,7 +865,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     ? `${awayName} (${awayTriesCount} tries)`
                     : 'No';
 
-    // Bonus defensivo (lose by ≤7)
+    // Bonus defensivo (lose by <=7)
     const diff = Math.abs(score.home - score.away);
     const loser = score.home < score.away ? 'home' : score.home > score.away ? 'away' : null;
     const bonusDefText = !pointsRules.defensive
@@ -843,10 +881,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const recentEvents = [...events].sort((a, b) => b.minute - a.minute).slice(0, 8);
 
 
-    /* ─────────────────── RENDER ─────────────────── */
+    /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     return (
         <main className="match-center-container">
-            {/* ═══════════ 1. HEADER ═══════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â• 1. HEADER â•â•â•â•â•â•â•â•â•â•â• */}
             <header className="match-center-header">
                 <div className="header-left">
                     <button onClick={() => onClose ? onClose() : router.back()} className="mc-btn mc-btn-outline" style={{ border: 'none' }}>
@@ -864,7 +902,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                         </div>
                         <div className="score-center">
                             <span className="score-val">{score.home}</span>
-                            <span className="score-sep">—</span>
+                            <span className="score-sep">-</span>
                             <span className="score-val">{score.away}</span>
                         </div>
                         <div className="team-entry away">
@@ -919,7 +957,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 </div>
             </header>
 
-            {/* ═══════════ 2. TABS ═══════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â• 2. TABS â•â•â•â•â•â•â•â•â•â•â• */}
             <nav className="match-tabs-nav">
                 {TABS.map(tab => (
                     <button
@@ -933,10 +971,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 ))}
             </nav>
 
-            {/* ═══════════ 3. CONTENT ═══════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â• 3. CONTENT â•â•â•â•â•â•â•â•â•â•â• */}
             <section className="match-content-grid">
 
-                {/* ── TAB: RESUMEN ── */}
+                {/* â”€â”€ TAB: RESUMEN â”€â”€ */}
                 {activeTab === 'resumen' && (
                     <div className="mc-grid-2" style={{ gap: 32 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -951,7 +989,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     </div>
                                     <div style={{ padding: 16, background: '#111', borderRadius: 8 }}>
                                         <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Ganador</div>
-                                        <div style={{ fontWeight: 800, color: winner === 'EMPATE' || winner === '—' ? '#666' : 'var(--accent)' }}>{winner}</div>
+                                        <div style={{ fontWeight: 800, color: winner === 'EMPATE' || winner === '--' ? '#666' : 'var(--accent)' }}>{winner}</div>
                                     </div>
                                     <div style={{ padding: 16, background: '#111', borderRadius: 8 }}>
                                         <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Bonus Ofensivo</div>
@@ -964,12 +1002,12 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 </div>
                             </article>
 
-                            {/* Métricas derivadas de eventos */}
+                            {/* Metricas derivadas de eventos */}
                             <article className="mc-partition">
-                                <div className="mc-card-header"><h4>Métricas Clave</h4></div>
+                                <div className="mc-card-header"><h4>Metricas Clave</h4></div>
                                 <div className="mc-card-body">
                                     {totalEvents === 0 ? (
-                                        <p className="empty-msg">No hay eventos registrados aún. Carga eventos en la pestaña &quot;Eventos&quot;.</p>
+                                        <p className="empty-msg">No hay eventos registrados aun. Carga eventos en la pestana &quot;Eventos&quot;.</p>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                                             {(() => {
@@ -998,10 +1036,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-                            {/* Últimos Eventos */}
+                            {/* Ultimos Eventos */}
                             <article className="mc-partition" style={{ flex: 1 }}>
                                 <div className="mc-card-header">
-                                    <h4>Últimos Eventos</h4>
+                                    <h4>Ultimos Eventos</h4>
                                     {events.length > 0 && (
                                         <button onClick={() => setActiveTab('eventos')} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>VER TODOS</button>
                                     )}
@@ -1037,7 +1075,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                         disabled={!watchUrl}
                                         onClick={() => watchUrl && window.open(watchUrl, '_blank')}
                                     >
-                                        <Video size={16} /> Transmisión
+                                        <Video size={16} /> Transmision
                                     </button>
                                     <button
                                         className="mc-btn mc-btn-outline"
@@ -1053,7 +1091,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     </div>
                 )}
 
-                {/* ── TAB: ALINEACIONES ── */}
+                {/* â”€â”€ TAB: ALINEACIONES â”€â”€ */}
                 {activeTab === 'alineaciones' && (
                     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
                         <article className="mc-partition" style={{ marginBottom: 24 }}>
@@ -1094,8 +1132,8 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 {(['home', 'away'] as const).map(team => {
                                     const club = team === 'home' ? match.homeClub : match.awayClub;
                                     const players = lineups[team];
-                                    const starters = players.filter(p => p.role === 'starter' || (!p.role && p.number <= 15));
-                                    const subs = players.filter(p => p.role === 'substitute' || (!p.role && p.number > 15));
+                                    const starters = players.filter(isStarterLineupPlayer);
+                                    const subs = players.filter(isSubstituteLineupPlayer);
 
                                     return (
                                         <article key={team} className="mc-partition" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
@@ -1173,7 +1211,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     </div>
                 )}
 
-                {/* ── TAB: EVENTOS ── */}
+                {/* â”€â”€ TAB: EVENTOS â”€â”€ */}
                 {activeTab === 'eventos' && (
                     <article className="mc-partition" style={{ maxWidth: 900, margin: '0 auto' }}>
                         <div className="mc-card-header">
@@ -1207,7 +1245,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             ) : (
                                 <>
                                     <div style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
-                                        <div>MIN</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCIÓN</div>
+                                        <div>MIN</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCION</div>
                                     </div>
                                     {[...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)).map((ev) => {
                                         const selectedDefinition = eventDefinitionMap[ev.type] || {
@@ -1263,7 +1301,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                         playerId: null,
                                                     })}
                                                 >
-                                                    <option value="">—</option>
+                                                    <option value="">-</option>
                                                     <option value="home">{homeName}</option>
                                                     <option value="away">{awayName}</option>
                                                 </select>
@@ -1301,13 +1339,13 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     </article>
                 )}
 
-                {/* ── TAB: ESTADÍSTICAS ── */}
+                {/* Stats */}
                 {activeTab === 'estadisticas' && (
                     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
                         {events.length === 0 ? (
                             <article className="mc-partition">
                                 <div className="mc-card-body">
-                                    <p className="empty-msg">Las estadísticas se generan automáticamente a partir de los eventos. Carga eventos primero.</p>
+                                    <p className="empty-msg">Las estadisticas se generan automaticamente a partir de los eventos. Carga eventos primero.</p>
                                 </div>
                             </article>
                         ) : (
@@ -1351,19 +1389,19 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                 })
                                                 .filter((row) => row.count > 0);
                                             const total = rows.reduce((sum, row) => sum + row.subtotal, 0);
-                                            const tries = rows[0]?.subtotal ?? 0;
-                                            const convs = rows[1]?.subtotal ?? 0;
-                                            const pens = rows[2]?.subtotal ?? 0;
-                                            const drops = rows[3]?.subtotal ?? 0;
                                             const clubName = team === 'home' ? homeName : awayName;
                                             return (
                                                 <div key={team} style={{ padding: 16, background: '#1a1a1a', borderRadius: 8 }}>
                                                     <div style={{ fontWeight: 900, marginBottom: 12, fontSize: '0.85rem' }}>{clubName}</div>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.8rem' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Tries ({countTries(events, team)}×5)</span><span style={{ fontWeight: 800 }}>{tries}</span></div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Conversiones (×2)</span><span style={{ fontWeight: 800 }}>{convs}</span></div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Penales (×3)</span><span style={{ fontWeight: 800 }}>{pens}</span></div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Drop Goals (×3)</span><span style={{ fontWeight: 800 }}>{drops}</span></div>
+                                                        {rows.length === 0 ? (
+                                                            <div style={{ color: '#666' }}>Sin eventos de puntuacion.</div>
+                                                        ) : rows.map((row) => (
+                                                            <div key={row.key} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                                <span style={{ color: '#888' }}>{row.label} ({row.count} x {row.points})</span>
+                                                                <span style={{ fontWeight: 800 }}>{row.subtotal}</span>
+                                                            </div>
+                                                        ))}
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #333', paddingTop: 6, marginTop: 4 }}><span style={{ fontWeight: 900 }}>TOTAL</span><span style={{ fontWeight: 900, color: 'var(--accent)', fontSize: '1.1rem' }}>{total}</span></div>
                                                     </div>
                                                 </div>
@@ -1376,70 +1414,88 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     </div>
                 )}
 
-                {/* ── TAB: CONTENIDO ── */}
+                {/* Contenido */}
                 {activeTab === 'contenido' && (
                     <article className="mc-partition" style={{ maxWidth: 800, margin: '0 auto', background: 'transparent', border: 'none', boxShadow: 'none' }}>
                         <div className="mc-grid-2">
                             <div style={{ background: '#111', padding: 24, borderRadius: 12, border: '1px solid #222' }}>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Transmisión en Vivo (URL)</label>
-                                <input
-                                    type="text"
-                                    defaultValue={watchUrl || ''}
-                                    placeholder="https://youtube.com/..."
-                                    style={{ width: '100%', background: '#000', border: '1px solid #333', padding: 12, color: '#fff', borderRadius: 4, outline: 'none', boxSizing: 'border-box' }}
-                                />
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Transmision disponible</label>
+                                {watchUrl ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        <div style={{ width: '100%', background: '#000', border: '1px solid #333', padding: 12, color: '#fff', borderRadius: 4, boxSizing: 'border-box', wordBreak: 'break-all' }}>
+                                            {watchUrl}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="mc-btn mc-btn-outline"
+                                            style={{ alignSelf: 'flex-start' }}
+                                            onClick={() => window.open(watchUrl, '_blank')}
+                                        >
+                                            <Video size={14} /> Abrir enlace
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="empty-msg" style={{ margin: 0 }}>No hay URL de transmision cargada para este partido.</p>
+                                )}
                             </div>
                             <div style={{ background: '#111', padding: 24, borderRadius: 12, border: '1px solid #222' }}>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Replay Completo (URL)</label>
-                                <input
-                                    type="text"
-                                    defaultValue={match.replay_url || ''}
-                                    placeholder="https://youtube.com/..."
-                                    style={{ width: '100%', background: '#000', border: '1px solid #333', padding: 12, color: '#fff', borderRadius: 4, outline: 'none', boxSizing: 'border-box' }}
-                                />
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Replay disponible</label>
+                                {match.replay_url ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        <div style={{ width: '100%', background: '#000', border: '1px solid #333', padding: 12, color: '#fff', borderRadius: 4, boxSizing: 'border-box', wordBreak: 'break-all' }}>
+                                            {match.replay_url}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="mc-btn mc-btn-outline"
+                                            style={{ alignSelf: 'flex-start' }}
+                                            onClick={() => window.open(match.replay_url!, '_blank')}
+                                        >
+                                            <Search size={14} /> Abrir replay
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="empty-msg" style={{ margin: 0 }}>No hay replay cargado para este partido.</p>
+                                )}
                             </div>
                             <div style={{ background: '#111', padding: 24, borderRadius: 12, border: '1px solid #222', gridColumn: '1 / -1' }}>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Crónica del Partido</label>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Cronica del Partido</label>
                                 <textarea
-                                    placeholder="Redactar la crónica oficial..."
+                                    value={match.notes || ''}
+                                    placeholder="Redactar la cronica oficial..."
                                     rows={6}
                                     style={{ width: '100%', background: '#000', border: '1px solid #333', padding: 16, color: '#fff', borderRadius: 4, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
+                                    onChange={(e) => setMatch((prev) => ({ ...prev, notes: e.target.value }))}
                                 />
-                            </div>
-                            <div style={{ background: '#111', padding: 24, borderRadius: 12, border: '1px solid #222', gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', borderStyle: 'dashed', minHeight: 120 }}>
-                                <div style={{ textAlign: 'center', color: '#666' }}>
-                                    <ImageIcon size={32} style={{ margin: '0 auto 12px' }} />
-                                    <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Subir Galería de Fotos / Highlights</div>
-                                    <div style={{ fontSize: '0.75rem', marginTop: 4 }}>Arrastra y suelta aquí</div>
-                                </div>
+                                <p style={{ marginTop: 10, marginBottom: 0, fontSize: '0.75rem', color: '#666' }}>
+                                    Esta cronica se guarda con el boton Guardar del encabezado.
+                                </p>
                             </div>
                         </div>
                     </article>
                 )}
 
-                {/* ── TAB: OFICIALES ── */}
+                {/* Oficiales */}
                 {activeTab === 'oficiales' && (
                     <article className="mc-partition" style={{ maxWidth: 600, margin: '0 auto' }}>
                         <div className="mc-card-header"><h4>Autoridades del Partido</h4></div>
                         <div className="mc-card-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            {['Árbitro Principal', 'Asistente 1 (AR1)', 'Asistente 2 (AR2)', 'TMO', 'Médico Jefe', 'Comisionado Deportivo'].map(role => (
-                                <div key={role} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                    <label style={{ width: 200, fontSize: '0.8rem', fontWeight: 800, color: '#888', textTransform: 'uppercase' }}>{role}</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Nombre del oficial"
-                                        style={{ flex: 1, background: '#111', border: '1px solid #333', padding: '10px 14px', color: '#fff', borderRadius: 4, outline: 'none' }}
-                                    />
-                                </div>
-                            ))}
+                            <div style={{ background: '#111', border: '1px solid #222', borderRadius: 8, padding: 16 }}>
+                                <p style={{ marginTop: 0, marginBottom: 12, color: '#ddd', lineHeight: 1.6 }}>
+                                    Esta vista ya no muestra campos editables sin respaldo real. El esquema actual no soporta persistencia detallada de oficiales desde esta consola.
+                                </p>
+                                <p style={{ margin: 0, color: '#666', fontSize: '0.8rem' }}>
+                                    Si el modulo vuelve a tener soporte de datos, conviene modelar arbitro principal, asistentes y staff medico como estructura dedicada.
+                                </p>
+                            </div>
                         </div>
                     </article>
                 )}
 
-                {/* ── TAB: CONFIGURACIÓN ── */}
+                {/* Configuracion */}
                 {activeTab === 'configuracion' && (
                     <article className="mc-partition" style={{ maxWidth: 600, margin: '0 auto' }}>
-                        <div className="mc-card-header"><h4>Parámetros del Partido</h4></div>
+                        <div className="mc-card-header"><h4>Parametros del Partido</h4></div>
                         <div className="mc-card-body" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             <div className="form-group">
                                 <label>Estado Actual</label>
@@ -1456,6 +1512,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <option value="live">En Vivo</option>
                                     <option value="final">Finalizado</option>
                                     <option value="postponed">Aplazado</option>
+                                    <option value="suspended">Suspendido</option>
                                     <option value="cancelled">Cancelado</option>
                                 </select>
                             </div>
@@ -1518,7 +1575,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             </div>
                         </div>
 
-                        {/* ── PUNTOS DEL PARTIDO ── */}
+                        {/* â”€â”€ PUNTOS DEL PARTIDO â”€â”€ */}
                         <div style={{ marginTop: 32, borderTop: '1px solid #222', paddingTop: 24 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                                 <h4 style={{ margin: 0 }}>Puntos del Partido</h4>
@@ -1532,7 +1589,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 </span>
                             </div>
                             <p style={{ fontSize: 13, color: '#888', marginBottom: 20, marginTop: 0 }}>
-                                Los puntos base se completan automáticamente según las reglas del partido. Podés agregar bonus o penalizaciones manuales.
+                                Los puntos base se completan automaticamente segun las reglas del partido. Podes agregar bonus o penalizaciones manuales.
                             </p>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -1610,7 +1667,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <textarea
                                         rows={2}
                                         value={localPoints.points_override_reason ?? ''}
-                                        placeholder="Ej: Sanción disciplinaria, corrección de resultado..."
+                                        placeholder="Ej: Sancion disciplinaria, correccion de resultado..."
                                         style={{ borderRadius: 4, resize: 'vertical' }}
                                         onChange={(e) => setLocalPoints(prev => ({ ...prev, points_override_reason: e.target.value }))}
                                     />
@@ -1627,7 +1684,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                         borderRadius: 4, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
                                     }}
                                 >
-                                    Recalcular automáticamente
+                                    Recalcular automaticamente
                                 </button>
                                 <button
                                     type="button"
@@ -1650,4 +1707,5 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         </main>
     );
 }
+
 
