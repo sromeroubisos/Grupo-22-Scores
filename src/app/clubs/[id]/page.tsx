@@ -351,15 +351,6 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 if (rawId.startsWith('fs-team-')) params.set('source', 'flashscore');
                 if (isRugbyApiSportsTeamId(rawId)) params.set('source', 'rugby-api-sports');
 
-                const originalLogo =
-                    details?.image_path ||
-                    details?.logo ||
-                    details?.small_image_path ||
-                    details?.team?.image_path ||
-                    details?.team?.logo ||
-                    '';
-
-                if (originalLogo) params.set('logo_url', originalLogo);
                 return `/admin/super/clubes/externos/${externalTeamId}/logo?${params.toString()}`;
             })()
             : null;

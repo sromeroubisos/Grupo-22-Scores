@@ -1783,7 +1783,6 @@ export default function TournamentDetailPage({
         if (countryName) query.set('country', countryName);
         if (tournamentData?.countryId) query.set('country_id', tournamentData.countryId);
         if (tournamentName) query.set('name', tournamentName);
-        if (tournamentLogo) query.set('logo_url', tournamentLogo);
 
         query.set('returnTo', `/tournaments/${id}${returnParams.toString() ? `?${returnParams.toString()}` : ''}`);
         return `/admin/super/torneos/externos/${encodeURIComponent(id)}?${query.toString()}`;
