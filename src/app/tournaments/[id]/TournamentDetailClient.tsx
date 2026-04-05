@@ -19,6 +19,7 @@ import { normalizeTournamentFormat } from '@/lib/utils/tournamentFormat';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
+import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 
@@ -1107,6 +1108,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             sportId: tournament.sport_id || 'rugby',
             countryId: tournament.country_id || 'international',
             logoUrl: tournament.logo_url || tournament.banner_url || '',
+            externalId: tournament.external_id || null,
             ruleset: tournamentRuleset,
             url: tournament.url || '',
             type: isCircuitCompetition ? 'circuit' : 'league',
@@ -1367,6 +1369,7 @@ export default function TournamentDetailPage({
                                             sportId: (t as any).sport_id || tournamentMeta?.sportId || 'rugby',
                                             countryId: (t as any).country_id || tournamentMeta?.countryId || 'international',
                                             logoUrl: resolvedLogo,
+                                            externalId: (t as any).external_id || tournamentMeta?.externalId || null,
                                             ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
                                             url: dbStoredUrl,
                                             type: isCircuitTournamentRuleset((t as any).ruleset ?? tournamentMeta?.ruleset ?? null)
@@ -1430,6 +1433,8 @@ export default function TournamentDetailPage({
                                     logoUrl: nextLogo || prev?.logoUrl || '',
                                     sportId: (t as any).sport_id || prev?.sportId || 'rugby',
                                     countryId: (t as any).country_id || prev?.countryId || 'international',
+                                    externalId: (t as any).external_id || prev?.externalId || null,
+                                    ruleset: (t as any).ruleset ?? prev?.ruleset ?? null,
                                 }));
                             }
                         }
@@ -1492,6 +1497,18 @@ export default function TournamentDetailPage({
 
                 setResults(sortMatchesByDate(payload.results || [], 'desc'));
                 setFixtures(sortMatchesByDate(payload.fixtures || [], 'asc'));
+                if (payload?.ids) {
+                    setTournamentData((prev: any) => ({
+                        ...(prev || {}),
+                        flashScoreIds: {
+                            ...(prev?.flashScoreIds || {}),
+                            tournamentId: payload.ids?.tournamentId || prev?.flashScoreIds?.tournamentId,
+                            tournamentStageId: payload.ids?.stageId || prev?.flashScoreIds?.tournamentStageId,
+                            tournamentTemplateId: payload.ids?.templateId || prev?.flashScoreIds?.tournamentTemplateId,
+                            seasonId: payload.ids?.seasonId || prev?.flashScoreIds?.seasonId,
+                        },
+                    }));
+                }
                 if (!shouldKeepDbCircuitStandings) {
                     setStandings(payload.standings || []);
                     setStandingsForm(payload.standingsForm || []);
@@ -1762,13 +1779,19 @@ export default function TournamentDetailPage({
     const sportLabel = tournamentData?.sportId ? tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1) : '';
     const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
     const isExactSuperAdmin = user?.role === 'super_admin';
-    const isExternalTournamentPage = id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id);
+    const externalTournamentOverrideId = resolveExternalTournamentId({
+        routeId: id,
+        externalId: tournamentData?.externalId ?? tournamentData?.external_id,
+        sportId: tournamentData?.sportId ?? tournamentData?.sport_id,
+        ruleset: tournamentData?.ruleset,
+        flashScoreIds: tournamentData?.flashScoreIds,
+    });
     const adminTournamentId = (() => {
         const candidate = String((initialData?.tournament as any)?.id || tournamentData?.id || '').trim();
         return UUID_RE.test(candidate) ? candidate : null;
     })();
     const externalTournamentEditorHref = (() => {
-        if (!isExternalTournamentPage) return null;
+        if (!externalTournamentOverrideId) return null;
 
         const query = new URLSearchParams();
         const returnParams = new URLSearchParams();
@@ -1785,7 +1808,7 @@ export default function TournamentDetailPage({
         if (tournamentName) query.set('name', tournamentName);
 
         query.set('returnTo', `/tournaments/${id}${returnParams.toString() ? `?${returnParams.toString()}` : ''}`);
-        return `/admin/super/torneos/externos/${encodeURIComponent(id)}?${query.toString()}`;
+        return `/admin/super/torneos/externos/${encodeURIComponent(externalTournamentOverrideId)}?${query.toString()}`;
     })();
     const bracketPhase = preferredKnockoutPhase ?? activeDbPhase;
     const bracketTitle = `${getKnockoutPhaseDisplayTitle(bracketPhase)} - ${tournamentName}`;

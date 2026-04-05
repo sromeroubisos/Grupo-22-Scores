@@ -6,6 +6,7 @@ type TournamentLookupRow = {
     id: string;
     name: string | null;
     display_name: string | null;
+    external_id?: string | null;
     logo_url: string | null;
     banner_url?: string | null;
     sport_id: string | null;
@@ -18,8 +19,8 @@ type TournamentLookupRow = {
     status: string | null;
 };
 
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, format, ruleset, is_visible, status';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, format, ruleset, is_visible, status';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, format, ruleset, is_visible, status';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, country_id, slug, format, ruleset, is_visible, status';
 
 export async function GET(
     _req: NextRequest,

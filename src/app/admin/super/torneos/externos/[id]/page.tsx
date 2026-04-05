@@ -620,6 +620,21 @@ export default function ExternalTournamentOverridePage() {
         return typeof points === 'number' && Number.isFinite(points) ? points : '';
     }
 
+    function getRowAdjustedPoints(row: StandingsPreviewRow) {
+        const adjustment = standingsForm.assignments.find((assignment) => assignment.id === row.id)?.points;
+        const basePoints = row.points ?? 0;
+        const normalizedAdjustment =
+            typeof adjustment === 'number' && Number.isFinite(adjustment)
+                ? adjustment
+                : 0;
+
+        return {
+            basePoints,
+            adjustment: normalizedAdjustment,
+            total: basePoints + normalizedAdjustment,
+        };
+    }
+
     function updateRowAssignment(row: StandingsPreviewRow, patch: Partial<ExternalStandingsAssignment>) {
         setStandingsForm((current) => {
             const existing = current.assignments.find((assignment) => assignment.id === row.id);
@@ -881,7 +896,7 @@ export default function ExternalTournamentOverridePage() {
                             <div>
                                 <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Grupos de standings</div>
                                 <div style={{ color: '#9aa4b2', maxWidth: 620 }}>
-                                    Reordena publicamente la tabla externa y corregi los puntos visibles sin tocar el dato crudo.
+                                    Reordena publicamente la tabla externa y ajusta puntos sumando o restando sobre lo que ya trae la API.
                                 </div>
                             </div>
                             <button
@@ -944,94 +959,98 @@ export default function ExternalTournamentOverridePage() {
                         <div style={{ display: 'grid', gap: 10 }}>
                             {standingsRows.length === 0 ? (
                                 <div style={{ color: '#9aa4b2' }}>No se pudieron cargar filas de la tabla externa.</div>
-                            ) : standingsRows.map((row) => (
-                                <div
-                                    key={row.id}
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 360px)',
-                                        gap: 12,
-                                        alignItems: 'center',
-                                        borderRadius: 16,
-                                        border: '1px solid rgba(255,255,255,0.06)',
-                                        background: '#0d1016',
-                                        padding: 12,
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-                                        <div style={{
-                                            width: 34,
-                                            height: 34,
-                                            borderRadius: 10,
-                                            background: 'rgba(255,255,255,0.04)',
-                                            border: '1px solid rgba(255,255,255,0.06)',
+                            ) : standingsRows.map((row) => {
+                                const pointsPreview = getRowAdjustedPoints(row);
+
+                                return (
+                                    <div
+                                        key={row.id}
+                                        style={{
                                             display: 'grid',
-                                            placeItems: 'center',
-                                            overflow: 'hidden',
-                                            flexShrink: 0,
-                                        }}>
-                                            {row.logo
-                                                ? <img src={row.logo} alt={row.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
-                                                : <span style={{ color: '#6b7280', fontSize: 11, fontWeight: 800 }}>SIN</span>}
+                                            gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 360px)',
+                                            gap: 12,
+                                            alignItems: 'center',
+                                            borderRadius: 16,
+                                            border: '1px solid rgba(255,255,255,0.06)',
+                                            background: '#0d1016',
+                                            padding: 12,
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                                            <div style={{
+                                                width: 34,
+                                                height: 34,
+                                                borderRadius: 10,
+                                                background: 'rgba(255,255,255,0.04)',
+                                                border: '1px solid rgba(255,255,255,0.06)',
+                                                display: 'grid',
+                                                placeItems: 'center',
+                                                overflow: 'hidden',
+                                                flexShrink: 0,
+                                            }}>
+                                                {row.logo
+                                                    ? <img src={row.logo} alt={row.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                                                    : <span style={{ color: '#6b7280', fontSize: 11, fontWeight: 800 }}>SIN</span>}
+                                            </div>
+                                            <div style={{ minWidth: 0 }}>
+                                                <div style={{ fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {row.position ? `${row.position}. ` : ''}{row.name}
+                                                </div>
+                                                <div style={{ color: '#9aa4b2', fontSize: 12 }}>
+                                                    {row.groupName ? `Origen: ${row.groupName}` : 'Tabla general'} · API: {pointsPreview.basePoints} pts · ajuste: {pointsPreview.adjustment >= 0 ? '+' : ''}{pointsPreview.adjustment} · total: {pointsPreview.total}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div style={{ minWidth: 0 }}>
-                                            <div style={{ fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {row.position ? `${row.position}. ` : ''}{row.name}
-                                            </div>
-                                            <div style={{ color: '#9aa4b2', fontSize: 12 }}>
-                                                {row.groupName ? `Origen: ${row.groupName}` : 'Tabla general'} · API: {row.points ?? '—'} pts
-                                            </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))', gap: 12 }}>
+                                            <label style={{ display: 'grid', gap: 6 }}>
+                                                <span style={{ color: '#9aa4b2', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                                    Ajuste pts
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    value={getRowPointsValue(row)}
+                                                    onChange={(event) => handleRowPointsChange(row, event.target.value)}
+                                                    placeholder="0"
+                                                    style={{
+                                                        height: 42,
+                                                        borderRadius: 12,
+                                                        border: '1px solid rgba(255,255,255,0.1)',
+                                                        background: '#0d1016',
+                                                        color: '#fff',
+                                                        padding: '0 14px',
+                                                    }}
+                                                />
+                                            </label>
+
+                                            <label style={{ display: 'grid', gap: 6 }}>
+                                                <span style={{ color: '#9aa4b2', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                                    Grupo
+                                                </span>
+                                                <select
+                                                    value={getRowGroupValue(row)}
+                                                    onChange={(event) => handleRowGroupChange(row, event.target.value)}
+                                                    style={{
+                                                        height: 42,
+                                                        borderRadius: 12,
+                                                        border: '1px solid rgba(255,255,255,0.1)',
+                                                        background: '#111723',
+                                                        color: '#fff',
+                                                        padding: '0 12px',
+                                                    }}
+                                                >
+                                                    <option value="">Sin grupo custom</option>
+                                                    {standingsForm.groups.map((group) => (
+                                                        <option key={group.id} value={group.id}>
+                                                            {group.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </label>
                                         </div>
                                     </div>
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))', gap: 12 }}>
-                                        <label style={{ display: 'grid', gap: 6 }}>
-                                            <span style={{ color: '#9aa4b2', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                                                Pts override
-                                            </span>
-                                            <input
-                                                type="number"
-                                                value={getRowPointsValue(row)}
-                                                onChange={(event) => handleRowPointsChange(row, event.target.value)}
-                                                placeholder={row.points !== null ? String(row.points) : '0'}
-                                                style={{
-                                                    height: 42,
-                                                    borderRadius: 12,
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    background: '#0d1016',
-                                                    color: '#fff',
-                                                    padding: '0 14px',
-                                                }}
-                                            />
-                                        </label>
-
-                                        <label style={{ display: 'grid', gap: 6 }}>
-                                            <span style={{ color: '#9aa4b2', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                                                Grupo
-                                            </span>
-                                            <select
-                                                value={getRowGroupValue(row)}
-                                                onChange={(event) => handleRowGroupChange(row, event.target.value)}
-                                                style={{
-                                                    height: 42,
-                                                    borderRadius: 12,
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    background: '#111723',
-                                                    color: '#fff',
-                                                    padding: '0 12px',
-                                                }}
-                                            >
-                                                <option value="">Sin grupo custom</option>
-                                                {standingsForm.groups.map((group) => (
-                                                    <option key={group.id} value={group.id}>
-                                                        {group.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </label>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </section>
 

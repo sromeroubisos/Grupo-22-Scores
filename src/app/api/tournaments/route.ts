@@ -26,6 +26,7 @@ import {
 import {
     isBlockedTournamentId,
 } from '@/lib/utils/blockedTournaments';
+import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import {
     applyExternalTournamentOverride,
@@ -577,7 +578,6 @@ export async function GET(request: Request) {
 
     const hasFsPrefix = id.toLowerCase().startsWith('fs-');
     const hasRugbyApiSportsPrefix = isRugbyApiSportsTournamentId(id);
-    const isExternalTournamentRequest = hasFsPrefix || hasRugbyApiSportsPrefix;
     const rawId = hasFsPrefix ? id.slice(3) : id;
     console.log('ID Parsing:', { hasFsPrefix, rawId });
 
@@ -766,6 +766,18 @@ export async function GET(request: Request) {
         const canFetchStandings = flashScoreEnabledForSport && !!(tournamentId && stageId);
         const canFetchDraw = flashScoreEnabledForSport && !!(tournamentId && stageId); // Use stageId instead of drawStageId
         const canFetchArchives = flashScoreEnabledForSport && !!stageId;
+        const externalOverrideId = resolveExternalTournamentId({
+            routeId: id,
+            externalId: dbTournamentMeta?.external_id,
+            sportId: dbTournamentMeta?.sport_id || localTournament?.sportId || sport,
+            ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
+            flashScoreIds: {
+                tournamentId,
+                tournamentStageId: stageId,
+                tournamentTemplateId: templateId,
+                seasonId,
+            },
+        });
         const detailsPromise = flashScoreEnabledForSport && stageId && !details
             ? getTournamentDetails(stageId)
             : Promise.resolve(details);
@@ -866,8 +878,8 @@ export async function GET(request: Request) {
         const finalStandingsOverUnder = enrichStandingsRowsWithTeamAssets(standingsOverUnderPayload, teamAssets);
         let externalStandingsTeamLabels: any[] = [];
 
-        if (isExternalTournamentRequest) {
-            const externalTournamentOverride = await getExternalTournamentOverride(id);
+        if (externalOverrideId) {
+            const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
             if (externalTournamentOverride) {
                 detailsPayload = applyExternalTournamentOverride(
                     (detailsPayload && typeof detailsPayload === 'object')
@@ -877,7 +889,7 @@ export async function GET(request: Request) {
                 );
             }
 
-            const externalStandingsOverride = await getExternalTournamentStandingsOverride(id);
+            const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
             if (externalStandingsOverride) {
                 const overriddenStandings = applyExternalTournamentStandingsOverride(preparedStandings, externalStandingsOverride);
                 finalStandings = overriddenStandings.standings;
@@ -974,6 +986,7 @@ export async function GET(request: Request) {
             _debug: {
                 query: { id, url, sport, tournamentId, stageId, templateId, seasonId },
                 resolvedIds: { tournamentId, stageId, templateId, seasonId },
+                externalOverrideId,
                 counts: {
                     results: Array.isArray(resultsPayload) ? resultsPayload.length : 0,
                     fixtures: Array.isArray(fixturesPayload) ? fixturesPayload.length : 0,
@@ -1041,8 +1054,8 @@ export async function GET(request: Request) {
             let fallbackStandingsPayload = fallbackStandings;
             let fallbackTeamLabels: any[] = [];
 
-            if (isExternalTournamentRequest) {
-                const externalTournamentOverride = await getExternalTournamentOverride(id);
+            if (externalOverrideId) {
+                const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
                 if (externalTournamentOverride) {
                     fallbackDetailsPayload = applyExternalTournamentOverride(
                         (fallbackDetailsPayload && typeof fallbackDetailsPayload === 'object')
@@ -1052,7 +1065,7 @@ export async function GET(request: Request) {
                     );
                 }
 
-                const externalStandingsOverride = await getExternalTournamentStandingsOverride(id);
+                const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
                 if (externalStandingsOverride) {
                     const overriddenStandings = applyExternalTournamentStandingsOverride(fallbackStandings, externalStandingsOverride);
                     fallbackStandingsPayload = overriddenStandings.standings;

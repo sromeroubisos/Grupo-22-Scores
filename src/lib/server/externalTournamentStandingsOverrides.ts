@@ -529,16 +529,23 @@ function applyRowAssignmentOverrides(
     assignmentLookup: Map<string, ExternalTournamentStandingsAssignment>,
 ) {
     const assignment = resolveAssignmentForRow(row, assignmentLookup);
-    const points = normalizeInteger(assignment?.points);
+    const pointsAdjustment = normalizeInteger(assignment?.points);
 
-    if (points === null) return row;
+    if (pointsAdjustment === null) return row;
+
+    const basePoints =
+        normalizeInteger(row?.points_total ?? row?.total_points ?? row?.points ?? row?.pts) ?? 0;
+    const nextPoints = basePoints + pointsAdjustment;
 
     return {
         ...row,
-        points,
-        pts: points,
-        points_total: points,
-        total_points: points,
+        points: nextPoints,
+        pts: nextPoints,
+        points_total: nextPoints,
+        total_points: nextPoints,
+        points_adjustment: pointsAdjustment,
+        points_delta: pointsAdjustment,
+        points_original: basePoints,
     };
 }
 
@@ -549,15 +556,85 @@ function applyAssignmentsToPreparedStandings(
     if (!Array.isArray(rows) || rows.length === 0) return [];
 
     if (!isGroupedStandings(rows)) {
-        return rows.map((row: any) => applyRowAssignmentOverrides(row, assignmentLookup));
+        return rankStandingsRows(
+            rows.map((row: any, index: number) => ({
+                ...applyRowAssignmentOverrides(row, assignmentLookup),
+                __original_position: normalizeInteger(row?.__original_position ?? row?.position) ?? index + 1,
+            })),
+        );
     }
 
     return rows.map((group: any) => ({
         ...group,
-        rows: Array.isArray(group?.rows)
-            ? group.rows.map((row: any) => applyRowAssignmentOverrides(row, assignmentLookup))
-            : [],
+        rows: rankStandingsRows(
+            Array.isArray(group?.rows)
+                ? group.rows.map((row: any, rowIndex: number) => ({
+                    ...applyRowAssignmentOverrides(row, assignmentLookup),
+                    __original_position: normalizeInteger(row?.__original_position ?? row?.position) ?? rowIndex + 1,
+                }))
+                : [],
+        ),
     }));
+}
+
+function parseGoalsPair(value: unknown) {
+    const raw = normalizeString(value);
+    if (!raw) return null;
+
+    const match = raw.match(/(-?\d+)\s*[:\-]\s*(-?\d+)/);
+    if (!match) return null;
+
+    return {
+        scored: Number(match[1]),
+        conceded: Number(match[2]),
+    };
+}
+
+function getRowPoints(row: any) {
+    return normalizeInteger(row?.points_total ?? row?.total_points ?? row?.points ?? row?.pts) ?? 0;
+}
+
+function getRowGoalsFor(row: any) {
+    const direct =
+        normalizeInteger(row?.goals_for ?? row?.scored ?? row?.for) ??
+        parseGoalsPair(row?.goals)?.scored;
+
+    return direct ?? 0;
+}
+
+function getRowGoalsAgainst(row: any) {
+    const direct =
+        normalizeInteger(row?.goals_against ?? row?.conceded ?? row?.against) ??
+        parseGoalsPair(row?.goals)?.conceded;
+
+    return direct ?? 0;
+}
+
+function getRowGoalDifference(row: any) {
+    const direct = normalizeInteger(row?.goal_difference ?? row?.difference ?? row?.goalDiff);
+    if (direct !== null) return direct;
+
+    return getRowGoalsFor(row) - getRowGoalsAgainst(row);
+}
+
+function rankStandingsRows(rows: any[]) {
+    return [...rows]
+        .sort((left, right) => {
+            const pointsDiff = getRowPoints(right) - getRowPoints(left);
+            if (pointsDiff !== 0) return pointsDiff;
+
+            const goalDifferenceDiff = getRowGoalDifference(right) - getRowGoalDifference(left);
+            if (goalDifferenceDiff !== 0) return goalDifferenceDiff;
+
+            const goalsForDiff = getRowGoalsFor(right) - getRowGoalsFor(left);
+            if (goalsForDiff !== 0) return goalsForDiff;
+
+            return (left.__original_position || 0) - (right.__original_position || 0);
+        })
+        .map((row, index) => ({
+            ...row,
+            position: index + 1,
+        }));
 }
 
 function buildSyntheticTeamLabels(
@@ -644,11 +721,9 @@ export function applyExternalTournamentStandingsOverride(
         .map((group) => ({
             group_id: group.id,
             group_name: group.name,
-            rows: (groupedRows.get(group.id) || [])
-                .sort((left, right) => (left.__original_position || 0) - (right.__original_position || 0))
-                .map((row, rowIndex) => ({
+            rows: rankStandingsRows(groupedRows.get(group.id) || [])
+                .map((row) => ({
                     ...row,
-                    position: rowIndex + 1,
                     group_id: group.id,
                 })),
         }))
@@ -658,11 +733,9 @@ export function applyExternalTournamentStandingsOverride(
         groupedStandings.push({
             group_id: UNGROUPED_GROUP_ID,
             group_name: 'Sin grupo',
-            rows: leftovers
-                .sort((left, right) => (left.__original_position || 0) - (right.__original_position || 0))
-                .map((row, rowIndex) => ({
+            rows: rankStandingsRows(leftovers)
+                .map((row) => ({
                     ...row,
-                    position: rowIndex + 1,
                     group_id: UNGROUPED_GROUP_ID,
                 })),
         });

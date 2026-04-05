@@ -58,16 +58,20 @@ export function buildExternalTournamentOverrideCandidates(id: string | null | un
     if (!raw) return [];
 
     const lower = raw.toLowerCase();
-    const withoutPrefix = lower.startsWith('fs-') ? raw.slice(3) : raw;
-    const withoutPrefixLower = withoutPrefix.toLowerCase();
+    const withoutFsPrefix = lower.startsWith('fs-') ? raw.slice(3) : raw;
+    const withoutFsPrefixLower = withoutFsPrefix.toLowerCase();
+    const rugbyMatch = /^ras-league-(\d+)$/i.exec(raw);
+    const numericLeagueId = rugbyMatch?.[1] ?? (/^\d+$/i.test(raw) ? raw : null);
 
     return uniqueValues([
         raw,
         lower,
-        withoutPrefix,
-        withoutPrefixLower,
-        `fs-${withoutPrefix}`,
-        `fs-${withoutPrefixLower}`,
+        withoutFsPrefix,
+        withoutFsPrefixLower,
+        `fs-${withoutFsPrefix}`,
+        `fs-${withoutFsPrefixLower}`,
+        numericLeagueId,
+        numericLeagueId ? `ras-league-${numericLeagueId}` : null,
     ]);
 }
 
