@@ -32,6 +32,7 @@ type ExternalStandingsAssignment = {
     team_name?: string | null;
     team_url?: string | null;
     group_id?: string | null;
+    points?: number | null;
 };
 
 type ExternalStandingsLabel = {
@@ -64,6 +65,7 @@ type StandingsPreviewRow = {
     teamUrl: string | null;
     logo: string | null;
     position: number | null;
+    points: number | null;
     groupId: string | null;
     groupName: string | null;
 };
@@ -233,6 +235,7 @@ function extractPreviewRows(standings: any[]): StandingsPreviewRow[] {
             teamUrl: getStandingsTeamUrl(row),
             logo: getStandingsTeamLogo(row),
             position: normalizeInteger(row?.position),
+            points: normalizeInteger(row?.points_total ?? row?.total_points ?? row?.points ?? row?.pts),
             groupId: normalizeString(row?.group_id),
             groupName: null,
         }));
@@ -250,6 +253,7 @@ function extractPreviewRows(standings: any[]): StandingsPreviewRow[] {
                 teamUrl: getStandingsTeamUrl(row),
                 logo: getStandingsTeamLogo(row),
                 position: normalizeInteger(row?.position),
+                points: normalizeInteger(row?.points_total ?? row?.total_points ?? row?.points ?? row?.pts),
                 groupId: normalizeString(row?.group_id) || groupId,
                 groupName,
             }))
@@ -611,26 +615,45 @@ export default function ExternalTournamentOverridePage() {
         return standingsForm.assignments.find((assignment) => assignment.id === row.id)?.group_id || '';
     }
 
-    function handleRowGroupChange(row: StandingsPreviewRow, groupId: string) {
+    function getRowPointsValue(row: StandingsPreviewRow) {
+        const points = standingsForm.assignments.find((assignment) => assignment.id === row.id)?.points;
+        return typeof points === 'number' && Number.isFinite(points) ? points : '';
+    }
+
+    function updateRowAssignment(row: StandingsPreviewRow, patch: Partial<ExternalStandingsAssignment>) {
         setStandingsForm((current) => {
+            const existing = current.assignments.find((assignment) => assignment.id === row.id);
+            const nextAssignment: ExternalStandingsAssignment = {
+                id: row.id,
+                team_id: row.teamId,
+                team_name: row.name,
+                team_url: row.teamUrl,
+                group_id: existing?.group_id ?? null,
+                points: typeof existing?.points === 'number' && Number.isFinite(existing.points) ? existing.points : null,
+                ...patch,
+            };
             const assignments = current.assignments.filter((assignment) => assignment.id !== row.id);
-            if (!groupId) {
+            const hasGroup = Boolean(nextAssignment.group_id);
+            const hasPoints = typeof nextAssignment.points === 'number' && Number.isFinite(nextAssignment.points);
+
+            if (!hasGroup && !hasPoints) {
                 return { ...current, assignments };
             }
 
             return {
                 ...current,
-                assignments: [
-                    ...assignments,
-                    {
-                        id: row.id,
-                        team_id: row.teamId,
-                        team_name: row.name,
-                        team_url: row.teamUrl,
-                        group_id: groupId,
-                    },
-                ],
+                assignments: [...assignments, nextAssignment],
             };
+        });
+    }
+
+    function handleRowGroupChange(row: StandingsPreviewRow, groupId: string) {
+        updateRowAssignment(row, { group_id: groupId || null });
+    }
+
+    function handleRowPointsChange(row: StandingsPreviewRow, rawValue: string) {
+        updateRowAssignment(row, {
+            points: rawValue.trim() ? normalizeInteger(rawValue) : null,
         });
     }
 
@@ -858,7 +881,7 @@ export default function ExternalTournamentOverridePage() {
                             <div>
                                 <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Grupos de standings</div>
                                 <div style={{ color: '#9aa4b2', maxWidth: 620 }}>
-                                    Reordena publicamente la tabla externa sin tocar el dato crudo.
+                                    Reordena publicamente la tabla externa y corregi los puntos visibles sin tocar el dato crudo.
                                 </div>
                             </div>
                             <button
@@ -926,7 +949,7 @@ export default function ExternalTournamentOverridePage() {
                                     key={row.id}
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'minmax(0, 1fr) minmax(180px, 220px)',
+                                        gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 360px)',
                                         gap: 12,
                                         alignItems: 'center',
                                         borderRadius: 16,
@@ -956,30 +979,57 @@ export default function ExternalTournamentOverridePage() {
                                                 {row.position ? `${row.position}. ` : ''}{row.name}
                                             </div>
                                             <div style={{ color: '#9aa4b2', fontSize: 12 }}>
-                                                {row.groupName ? `Origen: ${row.groupName}` : 'Tabla general'}
+                                                {row.groupName ? `Origen: ${row.groupName}` : 'Tabla general'} · API: {row.points ?? '—'} pts
                                             </div>
                                         </div>
                                     </div>
 
-                                    <select
-                                        value={getRowGroupValue(row)}
-                                        onChange={(event) => handleRowGroupChange(row, event.target.value)}
-                                        style={{
-                                            height: 42,
-                                            borderRadius: 12,
-                                            border: '1px solid rgba(255,255,255,0.1)',
-                                            background: '#111723',
-                                            color: '#fff',
-                                            padding: '0 12px',
-                                        }}
-                                    >
-                                        <option value="">Sin grupo custom</option>
-                                        {standingsForm.groups.map((group) => (
-                                            <option key={group.id} value={group.id}>
-                                                {group.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))', gap: 12 }}>
+                                        <label style={{ display: 'grid', gap: 6 }}>
+                                            <span style={{ color: '#9aa4b2', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                                Pts override
+                                            </span>
+                                            <input
+                                                type="number"
+                                                value={getRowPointsValue(row)}
+                                                onChange={(event) => handleRowPointsChange(row, event.target.value)}
+                                                placeholder={row.points !== null ? String(row.points) : '0'}
+                                                style={{
+                                                    height: 42,
+                                                    borderRadius: 12,
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    background: '#0d1016',
+                                                    color: '#fff',
+                                                    padding: '0 14px',
+                                                }}
+                                            />
+                                        </label>
+
+                                        <label style={{ display: 'grid', gap: 6 }}>
+                                            <span style={{ color: '#9aa4b2', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                                Grupo
+                                            </span>
+                                            <select
+                                                value={getRowGroupValue(row)}
+                                                onChange={(event) => handleRowGroupChange(row, event.target.value)}
+                                                style={{
+                                                    height: 42,
+                                                    borderRadius: 12,
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    background: '#111723',
+                                                    color: '#fff',
+                                                    padding: '0 12px',
+                                                }}
+                                            >
+                                                <option value="">Sin grupo custom</option>
+                                                {standingsForm.groups.map((group) => (
+                                                    <option key={group.id} value={group.id}>
+                                                        {group.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                    </div>
                                 </div>
                             ))}
                         </div>

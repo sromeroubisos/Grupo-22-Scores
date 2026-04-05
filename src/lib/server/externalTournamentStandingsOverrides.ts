@@ -15,6 +15,7 @@ export type ExternalTournamentStandingsAssignment = {
     team_name?: string | null;
     team_url?: string | null;
     group_id?: string | null;
+    points?: number | null;
 };
 
 export type ExternalTournamentStandingsLabel = {
@@ -270,13 +271,15 @@ function normalizeAssignments(
     rawAssignments.forEach((rawAssignment, index) => {
         if (!rawAssignment || typeof rawAssignment !== 'object') return;
 
-        const groupId = normalizeString((rawAssignment as any).group_id);
-        if (!groupId || !validGroupIds.has(groupId)) return;
+        const rawGroupId = normalizeString((rawAssignment as any).group_id);
+        const groupId = rawGroupId && validGroupIds.has(rawGroupId) ? rawGroupId : null;
+        const points = normalizeInteger((rawAssignment as any).points);
 
         const teamId = normalizeString((rawAssignment as any).team_id);
         const teamName = normalizeString((rawAssignment as any).team_name);
         const teamUrl = normalizeTeamUrl((rawAssignment as any).team_url);
         if (!teamId && !teamName && !teamUrl) return;
+        if (!groupId && points === null) return;
 
         normalized.push({
             id: normalizeString((rawAssignment as any).id) || `assignment-${index + 1}`,
@@ -284,6 +287,7 @@ function normalizeAssignments(
             team_name: teamName,
             team_url: teamUrl,
             group_id: groupId,
+            points,
         });
     });
 
@@ -487,11 +491,10 @@ function buildAssignmentLookup(
     return lookup;
 }
 
-function resolveAssignedGroupId(
+function resolveAssignmentForRow(
     row: any,
     assignmentLookup: Map<string, ExternalTournamentStandingsAssignment>,
-    validGroupIds: Set<string>,
-): string | null {
+): ExternalTournamentStandingsAssignment | null {
     const keys = buildTeamIdentityKeys({
         team_id: getStandingsTeamId(row),
         team_name: getStandingsTeamName(row),
@@ -500,14 +503,61 @@ function resolveAssignedGroupId(
 
     for (const key of keys) {
         const assignment = assignmentLookup.get(key);
-        const groupId = normalizeString(assignment?.group_id);
-        if (groupId && validGroupIds.has(groupId)) return groupId;
+        if (assignment) return assignment;
     }
+
+    return null;
+}
+
+function resolveAssignedGroupId(
+    row: any,
+    assignmentLookup: Map<string, ExternalTournamentStandingsAssignment>,
+    validGroupIds: Set<string>,
+): string | null {
+    const assignment = resolveAssignmentForRow(row, assignmentLookup);
+    const groupId = normalizeString(assignment?.group_id);
+    if (groupId && validGroupIds.has(groupId)) return groupId;
 
     const existingGroupId = normalizeString(row?.group_id);
     if (existingGroupId && validGroupIds.has(existingGroupId)) return existingGroupId;
 
     return null;
+}
+
+function applyRowAssignmentOverrides(
+    row: any,
+    assignmentLookup: Map<string, ExternalTournamentStandingsAssignment>,
+) {
+    const assignment = resolveAssignmentForRow(row, assignmentLookup);
+    const points = normalizeInteger(assignment?.points);
+
+    if (points === null) return row;
+
+    return {
+        ...row,
+        points,
+        pts: points,
+        points_total: points,
+        total_points: points,
+    };
+}
+
+function applyAssignmentsToPreparedStandings(
+    rows: any[],
+    assignmentLookup: Map<string, ExternalTournamentStandingsAssignment>,
+): any[] {
+    if (!Array.isArray(rows) || rows.length === 0) return [];
+
+    if (!isGroupedStandings(rows)) {
+        return rows.map((row: any) => applyRowAssignmentOverrides(row, assignmentLookup));
+    }
+
+    return rows.map((group: any) => ({
+        ...group,
+        rows: Array.isArray(group?.rows)
+            ? group.rows.map((row: any) => applyRowAssignmentOverrides(row, assignmentLookup))
+            : [],
+    }));
 }
 
 function buildSyntheticTeamLabels(
@@ -549,16 +599,16 @@ export function applyExternalTournamentStandingsOverride(
     const labels = Array.isArray(override.labels) ? override.labels : [];
     const assignments = Array.isArray(override.assignments) ? override.assignments : [];
     const teamLabels = buildSyntheticTeamLabels(override.id, labels, override.updated_at);
+    const assignmentLookup = buildAssignmentLookup(assignments);
 
     if (groups.length === 0) {
         return {
-            standings: preparedStandings,
+            standings: applyAssignmentsToPreparedStandings(preparedStandings, assignmentLookup),
             teamLabels,
         };
     }
 
     const validGroupIds = new Set(groups.map((group) => group.id));
-    const assignmentLookup = buildAssignmentLookup(assignments);
     const flatRows = flattenPreparedStandings(preparedStandings);
     if (flatRows.length === 0) {
         return {
@@ -577,7 +627,7 @@ export function applyExternalTournamentStandingsOverride(
     flatRows.forEach((row: any, index: number) => {
         const groupId = resolveAssignedGroupId(row, assignmentLookup, validGroupIds);
         const normalizedRow = {
-            ...row,
+            ...applyRowAssignmentOverrides(row, assignmentLookup),
             __original_position: normalizeInteger(row?.__original_position ?? row?.position) ?? index + 1,
             group_id: groupId,
         };
