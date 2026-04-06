@@ -140,6 +140,14 @@ export const superNavGroups: SuperNavGroup[] = [
                     'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10',
                 description: 'Importacion masiva y control de datos desde providers.',
             },
+            {
+                id: 'rankings',
+                label: 'Ranking Clubes',
+                href: '/admin/super/rankings',
+                iconPath:
+                    'M8 21h8M12 17v4M7 4h10v3a5 5 0 01-10 0V4zM5 4H3a1 1 0 00-1 1v1a5 5 0 005 5M19 4h2a1 1 0 011 1v1a5 5 0 01-5 5',
+                description: 'Carga por Excel y base inicial del ranking de clubes.',
+            },
         ],
     },
 ];

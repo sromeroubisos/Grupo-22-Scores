@@ -22,6 +22,8 @@ interface StandingsRowData {
     lost: number | string;
     diff: string;
     points: number | string;
+    pointsDeltaLabel?: string;
+    pointsDeltaTone?: 'positive' | 'negative' | 'neutral';
 }
 
 interface StandingsGroupData {
@@ -3529,6 +3531,22 @@ async function drawStandings(
     const panelY = isStory ? 252 : (isDenseStandingsSlide ? 216 : 224);
     const panelWidth = canvas.width - panelX * 2;
     const panelHeight = safe.bottom - panelY - (isStory ? 22 : (isDenseStandingsSlide ? 6 : 10));
+    const tableRight = panelX + panelWidth - 24;
+    const pointsWidth = isStory ? 116 : (isDenseStandingsSlide ? 112 : 118);
+    const diffWidth = isStory ? 132 : (isDenseStandingsSlide ? 124 : 132);
+    const lostWidth = isStory ? 72 : 70;
+    const wonWidth = isStory ? 80 : 78;
+    const playedWidth = isStory ? 74 : 72;
+    const colPointsLeft = tableRight - pointsWidth;
+    const colDiffLeft = colPointsLeft - diffWidth;
+    const colLostLeft = colDiffLeft - lostWidth;
+    const colWonLeft = colLostLeft - wonWidth;
+    const colPlayedLeft = colWonLeft - playedWidth;
+    const colPlayedX = colPlayedLeft + playedWidth / 2;
+    const colWonX = colWonLeft + wonWidth / 2;
+    const colLostX = colLostLeft + lostWidth / 2;
+    const colDiffX = colDiffLeft + diffWidth / 2;
+    const colPointsX = colPointsLeft + pointsWidth / 2;
     drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
 
     const headerFontSize = isStory ? 18 : (isDenseStandingsSlide ? 15 : 16);
@@ -3541,11 +3559,11 @@ async function drawStandings(
     ctx.textAlign = 'left';
     ctx.fillText('EQUIPO', panelX + 118, headerY);
     ctx.textAlign = 'center';
-    ctx.fillText(playedLabel.toUpperCase(), panelX + panelWidth - 292, headerY);
-    ctx.fillText(wonLabel.toUpperCase(), panelX + panelWidth - 226, headerY);
-    ctx.fillText(lostLabel.toUpperCase(), panelX + panelWidth - 160, headerY);
-    ctx.fillText(diffLabel.toUpperCase(), panelX + panelWidth - 94, headerY);
-    ctx.fillText(pointsLabel.toUpperCase(), panelX + panelWidth - 38, headerY);
+    ctx.fillText(playedLabel.toUpperCase(), colPlayedX, headerY);
+    ctx.fillText(wonLabel.toUpperCase(), colWonX, headerY);
+    ctx.fillText(lostLabel.toUpperCase(), colLostX, headerY);
+    ctx.fillText(diffLabel.toUpperCase(), colDiffX, headerY);
+    ctx.fillText(pointsLabel.toUpperCase(), colPointsX, headerY);
     ctx.restore();
 
     ctx.save();
@@ -3577,15 +3595,10 @@ async function drawStandings(
     const pointsFontSize = Math.max(isStory ? 20 : (isDenseStandingsSlide ? 18 : 20), Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.42)));
     const colPosX = panelX + 58;
     const colTeamX = panelX + 118;
-    const colPlayedX = panelX + panelWidth - 292;
-    const colWonX = panelX + panelWidth - 226;
-    const colLostX = panelX + panelWidth - 160;
-    const colDiffX = panelX + panelWidth - 94;
-    const colPointsX = panelX + panelWidth - 38;
     const crestLeft = colTeamX - Math.round(crestWidth * 0.18);
     const crestCenterX = crestLeft + crestWidth / 2;
     const teamTextX = crestLeft + crestWidth + 14;
-    const teamMaxWidth = colPlayedX - teamTextX - 26;
+    const teamMaxWidth = colPlayedLeft - teamTextX - 22;
     let logoIndex = 0;
     let rowIndex = 0;
     let cursorY = bodyTop;
@@ -3668,12 +3681,43 @@ async function drawStandings(
 
             const diffText = data.plainDiff ? String(row.diff).trim() : formatDiff(row.diff);
             ctx.fillStyle = !data.plainDiff && diffText.startsWith('-') ? '#ef4444' : rowAccentColor;
-            ctx.font = `800 ${statFontSize}px ${FONT_MONO}`;
-            ctx.fillText(diffText, colDiffX, centerY + 1);
+            if (data.plainDiff) {
+                const diffMinFontSize = Math.max(11, statFontSize - 3);
+                setFittedFont(
+                    ctx,
+                    diffText || '-',
+                    diffWidth - 12,
+                    '800',
+                    statFontSize,
+                    FONT_BODY,
+                    diffMinFontSize,
+                );
+                const safeDiff = truncateTextToWidth(ctx, diffText || '-', diffWidth - 12);
+                ctx.fillText(safeDiff, colDiffX, centerY + 1);
+            } else {
+                ctx.font = `800 ${statFontSize}px ${FONT_MONO}`;
+                ctx.fillText(diffText, colDiffX, centerY + 1);
+            }
 
-            ctx.fillStyle = textColor;
+            const previousPositionLabel = String(row.points ?? '-').trim() || '-';
+            const positionDeltaLabel = (row.pointsDeltaLabel || '').trim();
+            const positionDeltaColor =
+                row.pointsDeltaTone === 'positive'
+                    ? '#10b981'
+                    : row.pointsDeltaTone === 'negative'
+                        ? '#ef4444'
+                        : mutedColor;
+
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = mutedColor;
+            ctx.font = `700 ${Math.max(11, statFontSize - 2)}px ${FONT_MONO}`;
+            ctx.fillText(previousPositionLabel, colPointsLeft + 10, centerY + 1);
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = positionDeltaColor;
             ctx.font = `800 ${pointsFontSize}px ${FONT_MONO}`;
-            ctx.fillText(String(row.points), colPointsX, centerY + 1);
+            ctx.fillText(positionDeltaLabel || '-', tableRight - 6, centerY + 1);
             ctx.restore();
 
             rowIndex += 1;
