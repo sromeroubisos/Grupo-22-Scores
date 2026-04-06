@@ -37,19 +37,19 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 1rem;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
 .iconButton:hover:not(:disabled) {
-    background: var(--color-bg-elevated);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #fff;
 }
 
 .iconButton:disabled {
@@ -71,90 +71,164 @@
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
+    background:
+        linear-gradient(180deg, rgba(6, 8, 13, 0.72), rgba(5, 7, 11, 0.88)),
+        radial-gradient(circle at 12% 10%, rgba(59, 130, 246, 0.08), transparent 26%);
+    backdrop-filter: blur(10px);
     display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    z-index: 1000;
-    padding: 16px;
-    overflow-y: auto;
+    align-items: stretch;
+    justify-content: stretch;
+    z-index: 100000;
+    overflow: hidden;
 }
 
 .modal {
-    width: 100%;
-    max-width: min(820px, calc(100vw - 32px));
-    background: linear-gradient(180deg, #18181f 0%, #0f0f14 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    max-height: calc(100dvh - 32px);
+    width: 100vw;
+    height: 100dvh;
+    background:
+        linear-gradient(180deg, rgba(20, 20, 23, 0.88), rgba(12, 12, 16, 0.96)),
+        radial-gradient(circle at 0% 20%, rgba(59, 130, 246, 0.08), transparent 28%);
+    border-left: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .modalHeader {
-    padding-bottom: 16px;
+    padding: 26px clamp(24px, 4vw, 52px) 18px;
     flex-shrink: 0;
+    background: rgba(20, 20, 23, 0.46);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modalHeaderTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.modalTitleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .modalBody {
+    flex: 1;
     overflow-y: auto;
-    padding-right: 6px;
-    padding-bottom: 4px;
+    padding: 28px clamp(24px, 4vw, 52px) 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    scroll-behavior: smooth;
 }
 
 .modalTitle {
-    font-size: 1.5rem;
+    margin: 0;
+    font-size: 1.32rem;
     font-weight: 700;
-    margin-bottom: 10px;
-    text-align: center;
-    background: linear-gradient(135deg, #fff, #a1a1aa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    letter-spacing: -0.03em;
+    color: #f4f4f5;
+}
+
+.modalSubtitle {
+    margin: 0;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.modalSummaryStrip {
+    display: flex;
+    gap: 8px;
+    padding: 12px clamp(24px, 4vw, 52px);
+    background: rgba(0, 0, 0, 0.18);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.modalSummaryStrip::-webkit-scrollbar {
+    display: none;
+}
+
+.modalChip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    background: rgba(59, 130, 246, 0.1);
+    color: #93c5fd;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.63rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.06em;
 }
 
 .modalSection {
-    margin-bottom: 20px;
+    margin: 0;
+    width: 100%;
+    padding: 20px 22px;
+    background: rgba(18, 18, 24, 0.48);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
 }
 
 .modalLabel {
-    display: block;
-    font-size: 0.8125rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.68rem;
     font-weight: 600;
-    color: var(--color-text-secondary);
-    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.44);
+    margin-bottom: 16px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.12em;
+}
+
+.modalLabel::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .formatOptions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
+    padding: 4px;
+    background: rgba(5, 5, 8, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
 }
 
 .formatBtn {
     flex: 1;
     min-width: 90px;
-    padding: 10px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    color: var(--color-text-secondary);
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.58);
     font-family: var(--font-primary);
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .formatBtn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.88);
 }
 
 .formatBtn:disabled {
@@ -168,9 +242,47 @@
 }
 
 .formatBtn.active {
-    background: rgba(0, 163, 101, 0.2);
-    border-color: #00a365;
-    color: white;
+    background: rgba(39, 39, 42, 0.96);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.compactPresetPanel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+    gap: 8px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+}
+
+.compactPresetBtn {
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
+}
+
+.compactPresetBtn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.compactPresetBtnActive {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.72);
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.24);
 }
 
 .columnOptions {
@@ -218,19 +330,55 @@
 .modalActions {
     display: flex;
     gap: 12px;
-    margin-top: 28px;
-    padding-top: 20px;
+    flex-shrink: 0;
+}
+
+.modalFooter {
+    padding: 18px clamp(24px, 4vw, 52px) 28px;
+    background: rgba(20, 20, 23, 0.9);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modalFooterMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modalMetaGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.modalMetaGroup:last-child {
+    text-align: right;
+}
+
+.modalMetaGroup span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #f4f4f5;
+}
+
+.modalMetaGroup small {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.46);
 }
 
 .cancelBtn {
     flex: 1;
-    padding: 14px 20px;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    color: var(--color-text-secondary);
+    color: rgba(255, 255, 255, 0.72);
     font-family: var(--font-primary);
     font-size: 0.9375rem;
     font-weight: 600;
@@ -240,12 +388,13 @@
 
 .cancelBtn:hover {
     background: rgba(255, 255, 255, 0.08);
+    color: #fff;
 }
 
 .exportBtn {
     flex: 1;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, #00a365, #22c55e);
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     border: none;
     border-radius: 12px;
     color: white;
@@ -258,7 +407,7 @@
 
 .exportBtn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 163, 101, 0.3);
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
 }
 
 .exportBtn:disabled {
@@ -268,9 +417,9 @@
 
 .modalInput {
     width: 100%;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 14px;
+    background: rgba(24, 24, 27, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     color: white;
     font-family: var(--font-primary);
@@ -280,9 +429,9 @@
 }
 
 .modalInput:focus {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: #00a365;
-    box-shadow: 0 0 0 4px rgba(0, 163, 101, 0.1);
+    background: rgba(24, 24, 27, 1);
+    border-color: rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
 }
 
 .modalInput::placeholder {
@@ -292,8 +441,8 @@
 .modalSelect {
     width: 100%;
     padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(24, 24, 27, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     color: white;
     font-family: var(--font-primary);
@@ -304,9 +453,9 @@
 }
 
 .modalSelect:focus {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: #00a365;
-    box-shadow: 0 0 0 4px rgba(0, 163, 101, 0.1);
+    background: rgba(24, 24, 27, 1);
+    border-color: rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
 }
 
 .dropdown {
@@ -320,8 +469,8 @@
     justify-content: space-between;
     gap: 14px;
     padding: 14px 16px;
-    background: linear-gradient(180deg, rgba(21, 24, 34, 0.96), rgba(13, 15, 22, 0.98));
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(24, 24, 27, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     color: var(--color-text-primary, #fff);
     text-align: left;
@@ -330,13 +479,13 @@
 }
 
 .dropdownTrigger:hover {
-    border-color: rgba(0, 163, 101, 0.45);
-    background: linear-gradient(180deg, rgba(24, 28, 40, 0.98), rgba(14, 17, 25, 1));
+    border-color: rgba(59, 130, 246, 0.45);
+    background: rgba(30, 30, 35, 0.98);
 }
 
 .dropdownTriggerOpen {
-    border-color: rgba(0, 163, 101, 0.75);
-    box-shadow: 0 0 0 4px rgba(0, 163, 101, 0.12);
+    border-color: rgba(59, 130, 246, 0.75);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
 }
 
 .dropdownTriggerText {
@@ -367,7 +516,7 @@
 .dropdownChevron {
     flex-shrink: 0;
     font-size: 0;
-    color: #00a365;
+    color: #60a5fa;
     transition: transform 0.2s ease;
 }
 
@@ -392,8 +541,8 @@
     max-height: 280px;
     overflow-y: auto;
     padding: 10px;
-    background: linear-gradient(180deg, rgba(14, 17, 24, 0.99), rgba(10, 12, 18, 0.99));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(14, 17, 24, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
@@ -420,8 +569,8 @@
 }
 
 .dropdownOptionActive {
-    background: linear-gradient(180deg, rgba(0, 163, 101, 0.18), rgba(0, 163, 101, 0.11));
-    border-color: rgba(0, 163, 101, 0.45);
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.1));
+    border-color: rgba(59, 130, 246, 0.45);
 }
 
 .dropdownOptionTitle {
@@ -442,7 +591,7 @@
     gap: 4px;
     padding: 12px 14px;
     margin-bottom: 10px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(24, 24, 27, 0.82);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     color: var(--color-text-primary, #fff);
@@ -462,7 +611,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(24, 24, 27, 0.76);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
 }
@@ -493,6 +642,19 @@
     flex-shrink: 0;
 }
 
+.inlineActionRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.inlineActionInput {
+    flex: 1 1 220px;
+    min-width: 200px;
+}
+
 .uploadBtn,
 .ghostBtn {
     display: inline-flex;
@@ -509,7 +671,7 @@
 
 .uploadBtn {
     position: relative;
-    background: linear-gradient(135deg, #00a365, #22c55e);
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #fff;
     border: none;
     overflow: hidden;
@@ -545,7 +707,7 @@
     gap: 14px;
     margin-top: 12px;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
 }
@@ -583,7 +745,7 @@
     flex-direction: column;
     gap: 10px;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(24, 24, 27, 0.76);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     color: inherit;
@@ -594,14 +756,14 @@
 
 .paletteBtn:hover {
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(33, 33, 36, 0.92);
+    border-color: rgba(59, 130, 246, 0.4);
 }
 
 .paletteBtnActive {
-    border-color: rgba(0, 163, 101, 0.7);
-    background: rgba(0, 163, 101, 0.1);
-    box-shadow: 0 0 0 1px rgba(0, 163, 101, 0.24);
+    border-color: rgba(59, 130, 246, 0.7);
+    background: rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.24);
 }
 
 .paletteSwatch {
@@ -628,20 +790,275 @@
 }
 
 .modalHint {
-    margin: 0 0 14px;
-    font-size: 0.75rem;
+    margin: 10px 0 0;
+    font-size: 0.74rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.52);
+}
+
+.presetLibraryCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+}
+
+.presetLibrarySection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.presetLibraryHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.presetLibraryTitle {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.presetLibraryMeta {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.gradientPresetGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.gradientPresetBtn {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    overflow: hidden;
+}
+
+.gradientPresetBtn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.gradientPresetBtnActive {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.72);
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.22);
+}
+
+.gradientPresetSwatch {
+    display: block;
+    width: 100%;
+    height: 24px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.gradientPresetName {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.emptyPresetState {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    font-size: 0.76rem;
     line-height: 1.4;
-    color: var(--color-text-secondary, rgba(255, 255, 255, 0.55));
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.gradientUploadRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.gradientUploadPreview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+.gradientUploadSwatch {
+    width: 88px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: rgba(255, 255, 255, 0.04);
+    flex-shrink: 0;
+}
+
+.sponsorCompactGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.sponsorCompactCard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    min-width: 0;
+}
+
+.sponsorCompactCardActive {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.sponsorCompactHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sponsorCompactTitle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #fff);
+}
+
+.sponsorCompactRemove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sponsorCompactRemove:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.sponsorCompactDropzone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 94px;
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.sponsorCompactDropzone:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.sponsorCompactThumb {
+    width: 100%;
+    height: 100%;
+    min-height: 94px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.sponsorCompactEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+
+.sponsorCompactInput {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    min-width: 0;
+}
+
+.sponsorCompactHint {
+    font-size: 0.64rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.46);
 }
 
 .scoreOverrideCard {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.04);
+    gap: 16px;
+    padding: 18px;
+    background: rgba(24, 24, 27, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.scoreOverrideCard::after {
+    content: "Editable";
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .scoreOverrideHeader {
@@ -679,9 +1096,18 @@
 }
 
 .scoreOverrideField span {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     font-weight: 700;
-    color: var(--color-text-secondary, rgba(255, 255, 255, 0.78));
+    color: rgba(255, 255, 255, 0.64);
+}
+
+.scoreOverrideField .modalInput {
+    min-height: 74px;
+    padding: 10px 14px;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-align: center;
 }
 
 .presetGrid {
@@ -705,8 +1131,8 @@
 }
 
 .customColors {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -738,7 +1164,7 @@
     width: 18px;
     height: 18px;
     margin-top: 2px;
-    accent-color: #00a365;
+    accent-color: #3b82f6;
     flex-shrink: 0;
 }
 
@@ -765,7 +1191,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
+    padding: 9px 12px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -915,34 +1341,318 @@
 
 @media (max-width: 640px) {
     .modalOverlay {
-        padding: 8px;
+        align-items: stretch;
     }
 
     .modal {
-        max-width: calc(100vw - 16px);
-        max-height: calc(100dvh - 16px);
-        border-radius: 18px;
-        padding: 16px;
+        width: 100vw;
+        height: 100dvh;
+        border-left: none;
+        border-top: none;
+        border-radius: 0;
     }
 
     .modalBody {
-        padding-right: 2px;
+        padding: 14px 14px 10px;
+        gap: 12px;
+    }
+
+    .modalHeader {
+        padding: 16px 14px 12px;
+    }
+
+    .modalSummaryStrip {
+        padding: 8px 14px;
+    }
+
+    .modalFooter {
+        padding: 12px 14px 14px;
+    }
+
+    .modalSection {
+        padding: 12px 12px;
+        border-radius: 14px;
     }
 
     .paletteGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
     }
 
     .toggleGrid {
         grid-template-columns: 1fr;
+        gap: 8px;
     }
 
-    .scoreOverrideHeader {
-        flex-direction: column;
+    .modalTitle {
+        font-size: 1rem;
+    }
+
+    .modalSubtitle {
+        font-size: 0.66rem;
+    }
+
+    .iconButton {
+        width: 30px;
+        height: 30px;
+    }
+
+    .modalChip {
+        padding: 2px 7px;
+        font-size: 0.5rem;
+    }
+
+    .modalLabel {
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: 0.54rem;
+    }
+
+    .formatOptions {
+        gap: 4px;
+        padding: 3px;
+    }
+
+    .formatBtn {
+        min-width: 0;
+        padding: 7px 8px;
+        font-size: 0.7rem;
+        border-radius: 7px;
+    }
+
+    .modalInput,
+    .modalSelect {
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        border-radius: 10px;
+    }
+
+    .dropdownTrigger {
+        padding: 9px 10px;
+        border-radius: 10px;
+    }
+
+    .dropdownTriggerText strong {
+        font-size: 0.76rem;
+    }
+
+    .dropdownTriggerMeta {
+        font-size: 0.62rem;
+    }
+
+    .dropdownMenu {
+        gap: 4px;
+        padding: 8px;
+        max-height: 240px;
+    }
+
+    .dropdownOption {
+        padding: 8px 10px;
+        border-radius: 10px;
+    }
+
+    .dropdownOptionTitle {
+        font-size: 0.74rem;
+    }
+
+    .dropdownOptionMeta {
+        font-size: 0.62rem;
+    }
+
+    .timeZoneSummary {
+        padding: 8px 10px;
+        border-radius: 10px;
+    }
+
+    .timeZoneSummaryLabel {
+        font-size: 0.58rem;
+    }
+
+    .timeZoneSummary strong {
+        font-size: 0.88rem;
+        line-height: 1.2;
+    }
+
+    .scoreOverrideCard {
+        gap: 10px;
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    .scoreOverrideCard::after {
+        padding: 2px 6px;
+        font-size: 0.44rem;
+    }
+
+    .scoreOverrideHeader strong {
+        font-size: 0.74rem;
+    }
+
+    .scoreOverrideHeader span,
+    .scoreOverrideField span,
+    .toggleHint,
+    .uploadSubtitle,
+    .paletteDesc,
+    .modalHint,
+    .emptyPresetState,
+    .matchSelectDate,
+    .presetLibraryMeta {
+        font-size: 0.66rem;
+    }
+
+    .scoreOverrideField .modalInput {
+        min-height: 42px;
+        padding: 6px 8px;
+        font-size: 1.15rem;
+        border-radius: 10px;
+    }
+
+    .uploadCard {
+        gap: 10px;
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    .uploadTitle,
+    .paletteName,
+    .toggleLabel {
+        font-size: 0.72rem;
+    }
+
+    .uploadActions {
+        gap: 8px;
+    }
+
+    .inlineActionRow {
+        gap: 8px;
+    }
+
+    .inlineActionInput {
+        min-width: 0;
+    }
+
+    .uploadBtn,
+    .ghostBtn {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 0.76rem;
+        border-radius: 10px;
+    }
+
+    .uploadPreview {
+        gap: 10px;
+        padding: 10px;
+        border-radius: 14px;
+    }
+
+    .uploadThumb {
+        width: 58px;
+        height: 72px;
+        border-radius: 10px;
+    }
+
+    .uploadThumbWide {
+        width: 108px;
+        height: 56px;
+    }
+
+    .paletteBtn {
+        gap: 8px;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .paletteSwatch {
+        height: 34px;
+        border-radius: 10px;
+    }
+
+    .presetLibraryCard {
+        gap: 10px;
+        padding: 10px;
+        border-radius: 14px;
+    }
+
+    .presetLibraryTitle {
+        font-size: 0.62rem;
+    }
+
+    .gradientPresetGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .gradientPresetBtn {
+        gap: 6px;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    .gradientPresetSwatch {
+        height: 22px;
+    }
+
+    .gradientPresetName {
+        font-size: 0.68rem;
+    }
+
+    .gradientUploadRow {
+        gap: 8px;
+    }
+
+    .gradientUploadPreview {
+        gap: 8px;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    .gradientUploadSwatch {
+        width: 72px;
+        height: 34px;
+        border-radius: 8px;
+    }
+
+    .compactPresetPanel {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        padding: 8px;
+    }
+
+    .compactPresetBtn {
+        min-height: 28px;
+        padding: 6px 7px;
+        font-size: 0.66rem;
+        border-radius: 9px;
+    }
+
+    .toggleCard {
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+    }
+
+    .toggleCard input {
+        width: 16px;
+        height: 16px;
+    }
+
+    .colorInp {
+        padding: 8px 10px;
+        border-radius: 10px;
+    }
+
+    .colorInp span {
+        font-size: 0.68rem;
+    }
+
+    .colorInp input[type="color"] {
+        width: 26px;
+        height: 26px;
     }
 
     .scoreOverrideGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
     }
 
     .uploadCard,
@@ -953,6 +1663,125 @@
     }
 
     .modalActions {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .modalFooterMeta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 8px;
+    }
+
+    .modalMetaGroup:last-child {
+        text-align: right;
+    }
+
+    .modalMetaGroup span {
+        font-size: 0.6rem;
+    }
+
+    .modalMetaGroup small {
+        font-size: 0.56rem;
+    }
+
+    .cancelBtn,
+    .exportBtn {
+        padding: 10px 10px;
+        font-size: 0.76rem;
+        border-radius: 10px;
+    }
+
+    .matchCounter {
+        padding: 2px 8px;
+        font-size: 0.64rem;
+    }
+
+    .matchSelectList {
+        gap: 4px;
+        max-height: 180px;
+    }
+
+    .matchSelectRow {
+        gap: 8px;
+        padding: 6px 9px;
+        border-radius: 9px;
+    }
+
+    .matchSelectTeams {
+        font-size: 0.7rem;
+    }
+
+    .sponsorCompactGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .sponsorCompactCard {
+        gap: 6px;
+        padding: 8px;
+        border-radius: 12px;
+    }
+
+    .sponsorCompactTitle {
+        font-size: 0.66rem;
+    }
+
+    .sponsorCompactRemove {
+        width: 20px;
+        height: 20px;
+    }
+
+    .sponsorCompactDropzone,
+    .sponsorCompactThumb {
+        min-height: 72px;
+        border-radius: 10px;
+    }
+
+    .sponsorCompactEmpty {
+        gap: 4px;
+        font-size: 0.62rem;
+    }
+
+    .sponsorCompactInput {
+        padding: 7px 8px;
+        font-size: 0.72rem;
+    }
+
+    .sponsorCompactHint {
+        font-size: 0.58rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .paletteGrid,
+    .gradientPresetGrid,
+    .sponsorCompactGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .customColors {
+        grid-template-columns: 1fr;
+    }
+
+    .compactPresetPanel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .scoreOverrideGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .modalActions {
         flex-direction: column;
+    }
+
+    .modalFooterMeta {
+        grid-template-columns: 1fr;
+    }
+
+    .modalMetaGroup:last-child {
+        text-align: left;
     }
 }

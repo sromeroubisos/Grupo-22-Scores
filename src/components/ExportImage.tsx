@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { JetBrains_Mono, Outfit } from 'next/font/google';
+import { Plus, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
@@ -202,6 +204,13 @@ type SavedMatchEditorialPreset = {
     gradientImage: MatchBackgroundUpload | null;
     sponsors: MatchSponsorData[];
 };
+type SavedMatchGradientPreset = {
+    id: string;
+    name: string;
+    gradientLeftColor: string;
+    gradientRightColor: string;
+    gradientImage: MatchBackgroundUpload | null;
+};
 
 interface ExportImageProps {
     template: ExportTemplate;
@@ -277,6 +286,14 @@ const FONT_CLASSIC_MATCH_SCORE = '"dharma-gothic-m", "dharma-gothic-c", "dharma-
 const FONT_EDITORIAL_SCORE = '"dharma-gothic-e", "dharma-gothic-c", "G22 Dharma Gothic", "Dharma Gothic Expanded Heavy", "Dharma Gothic E Heavy", "Dharma Gothic Expanded", "Dharma Gothic E", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
 const BRAND_ACCENT = '#00a365';
 const EDITORIAL_PRESET_STORAGE_KEY = 'g22-export-editorial-presets-v1';
+const EDITORIAL_GRADIENT_PRESET_STORAGE_KEY = 'g22-export-editorial-gradient-presets-v1';
+const EXPORT_STORAGE_DB_NAME = 'g22-export-storage';
+const EXPORT_STORAGE_DB_VERSION = 1;
+const EXPORT_STORAGE_STORE_NAME = 'kv';
+const EXPORT_STORAGE_EDITORIAL_PRESETS_KEY = 'editorial-presets';
+const EXPORT_STORAGE_EDITORIAL_GRADIENTS_KEY = 'editorial-gradient-presets';
+const MAX_SAVED_EDITORIAL_PRESETS = 24;
+const MAX_SAVED_EDITORIAL_GRADIENT_PRESETS = 24;
 const EDITORIAL_SPONSOR_SLOTS = 6;
 const EDITORIAL_TEXTURE_SOURCE = '/textures/vecteezy_grey-distressed-grunge-background_154365.svg';
 const LOCAL_EXPORT_FONTS: LocalExportFont[] = [
@@ -383,6 +400,14 @@ const EDITORIAL_LAYOUT_PRESETS: MatchEditorialLayoutPreset[] = [
     },
 ];
 const DEFAULT_EDITORIAL_LAYOUT_PRESET_ID: MatchEditorialPresetId = 'balanced';
+const DEFAULT_EDITORIAL_GRADIENT_PRESETS: SavedMatchGradientPreset[] = [
+    { id: 'app-signature', name: 'Signature', gradientLeftColor: '#df255c', gradientRightColor: '#00a365', gradientImage: null },
+    { id: 'app-broadcast', name: 'Broadcast', gradientLeftColor: '#1d4ed8', gradientRightColor: '#38bdf8', gradientImage: null },
+    { id: 'app-inferno', name: 'Inferno', gradientLeftColor: '#7f1d1d', gradientRightColor: '#ef4444', gradientImage: null },
+    { id: 'app-gold', name: 'Gold', gradientLeftColor: '#5b3b09', gradientRightColor: '#eab308', gradientImage: null },
+    { id: 'app-frost', name: 'Frost', gradientLeftColor: '#4338ca', gradientRightColor: '#7dd3fc', gradientImage: null },
+    { id: 'app-carbon', name: 'Carbon', gradientLeftColor: '#111827', gradientRightColor: '#22c55e', gradientImage: null },
+];
 const EXPORT_TIMEZONE_PRESETS: ExportTimeZonePreset[] = [
     { id: 'baker-island-us', city: 'Baker Island', country: 'Estados Unidos', utcOffsetMinutes: -720 },
     { id: 'pago-pago-as', city: 'Pago Pago', country: 'Samoa Americana', utcOffsetMinutes: -660 },
@@ -428,6 +453,7 @@ let localExportFontsPromise: Promise<void> | null = null;
 export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
     const defaultTournamentName = getDefaultTournamentName(template, data);
@@ -472,7 +498,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             : true
     ));
     const [savedEditorialPresets, setSavedEditorialPresets] = useState<SavedMatchEditorialPreset[]>([]);
+    const [savedGradientPresets, setSavedGradientPresets] = useState<SavedMatchGradientPreset[]>([]);
     const [editorialPresetName, setEditorialPresetName] = useState('');
+    const [gradientPresetName, setGradientPresetName] = useState('');
     const [editorialSponsors, setEditorialSponsors] = useState<MatchSponsorData[]>(() => (
         template === 'matchStats'
             ? buildEditorialSponsorSlots((data as MatchStatsData).sponsors)
@@ -526,6 +554,21 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     }, [showModal]);
 
     useEffect(() => {
+        setIsPortalReady(true);
+    }, []);
+
+    useEffect(() => {
+        if (!showModal || typeof document === 'undefined') return undefined;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [showModal]);
+
+    useEffect(() => {
         if (template !== 'matchStats') return;
         const backgroundImage = (data as MatchStatsData).backgroundImage?.trim();
         if (!backgroundImage) return;
@@ -533,7 +576,24 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     }, [data, template]);
 
     useEffect(() => {
-        setSavedEditorialPresets(readSavedEditorialPresets());
+        let isMounted = true;
+
+        const hydrateSavedPresets = async () => {
+            const [editorialPresets, gradientPresets] = await Promise.all([
+                readSavedEditorialPresets(),
+                readSavedGradientPresets(),
+            ]);
+
+            if (!isMounted) return;
+            setSavedEditorialPresets(editorialPresets);
+            setSavedGradientPresets(gradientPresets);
+        };
+
+        void hydrateSavedPresets();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     useEffect(() => {
@@ -612,6 +672,49 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const exportActionLabel = template === 'standings' && standingsSlides.length > 1
         ? `Exportar ${standingsSlides.length} imagenes`
         : 'Exportar imagen';
+    const selectedFormatConfig = useMemo(
+        () => FORMATS.find((item) => item.value === format) || FORMATS[0],
+        [format]
+    );
+    const selectedPaletteName = useMemo(
+        () => EXPORT_PALETTES.find((palette) => palette.id === selectedPaletteId)?.name || 'Custom',
+        [selectedPaletteId]
+    );
+    const exportModalSubtitle = useMemo(() => {
+        if (template === 'matchStats') {
+            return `${getMatchExportModeLabel(matchExportMode)} · ${getMatchExportLayoutLabel(matchExportLayout)}`;
+        }
+        if (template === 'dailyMatches') return 'Agenda del dia · Seleccion multiple';
+        if (template === 'standings') return standingsExportMode === 'groups' ? 'Tabla por grupos' : 'Tabla corrida';
+        if (template === 'playoffBracket') return 'Cuadro eliminatorio';
+        return 'Configuracion de exportacion';
+    }, [matchExportLayout, matchExportMode, standingsExportMode, template]);
+    const exportSummaryChips = useMemo(() => {
+        const chips = [selectedFormatConfig.label];
+        if (template === 'matchStats') {
+            chips.push(getMatchExportLayoutLabel(matchExportLayout));
+        } else if (template === 'standings') {
+            chips.push(standingsExportMode === 'groups' ? 'Grupos' : 'Tabla');
+        } else if (template === 'dailyMatches') {
+            chips.push(`Partidos ${selectedMatchIndices.size}/10`);
+        }
+        chips.push(selectedPaletteName);
+
+        const trimmedTournament = customTournamentName.trim();
+        if (trimmedTournament) {
+            chips.push(trimmedTournament.length > 22 ? `${trimmedTournament.slice(0, 22)}...` : trimmedTournament);
+        }
+
+        return chips.slice(0, 4);
+    }, [
+        customTournamentName,
+        matchExportLayout,
+        selectedFormatConfig.label,
+        selectedMatchIndices.size,
+        selectedPaletteName,
+        standingsExportMode,
+        template,
+    ]);
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -642,10 +745,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const handleEditorialGradientLeftColorChange = (value: string) => {
+        setSelectedPaletteId('custom');
         setEditorialGradientLeftColor(value);
     };
 
     const handleEditorialGradientRightColorChange = (value: string) => {
+        setSelectedPaletteId('custom');
         setEditorialGradientRightColor(value);
     };
 
@@ -682,7 +787,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setStatus('');
     };
 
-    const handleSaveEditorialPreset = () => {
+    const handleSaveEditorialPreset = async () => {
         const name = editorialPresetName.trim();
         if (!name) {
             setStatus('Dale un nombre al preset antes de guardarlo');
@@ -690,7 +795,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         }
 
         const nextPreset: SavedMatchEditorialPreset = {
-            id: `${Date.now()}`,
+            id: buildPresetId('editorial'),
             name,
             layoutPresetId: editorialLayoutPresetId,
             gradientLeftColor: editorialGradientLeftColor,
@@ -699,12 +804,17 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             sponsors: activeEditorialSponsors,
         };
 
-        const nextPresets = [nextPreset, ...savedEditorialPresets].slice(0, 12);
+        const nextPresets = upsertSavedEditorialPreset(savedEditorialPresets, nextPreset);
         setSavedEditorialPresets(nextPresets);
-        persistSavedEditorialPresets(nextPresets);
-        setEditorialPresetName('');
-        setStatus(`Preset "${name}" guardado`);
-        window.setTimeout(() => setStatus(''), 2200);
+        try {
+            await persistSavedEditorialPresets(nextPresets);
+            setEditorialPresetName('');
+            setStatus(`Preset "${name}" guardado`);
+            window.setTimeout(() => setStatus(''), 2200);
+        } catch (error) {
+            console.error('Editorial preset save error:', error);
+            setStatus('No se pudo guardar el preset. Reintenta en unos segundos.');
+        }
     };
 
     const applySavedEditorialPreset = (preset: SavedMatchEditorialPreset) => {
@@ -715,6 +825,43 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setEditorialSponsors(buildEditorialSponsorSlots(preset.sponsors));
         setSelectedPaletteId('custom');
         setStatus(`Preset "${preset.name}" aplicado`);
+        window.setTimeout(() => setStatus(''), 2200);
+    };
+
+    const handleSaveGradientPreset = async () => {
+        const name = gradientPresetName.trim();
+        if (!name) {
+            setStatus('Ponle un nombre al gradiente antes de guardarlo');
+            return;
+        }
+
+        const nextPreset: SavedMatchGradientPreset = {
+            id: buildPresetId('gradient'),
+            name,
+            gradientLeftColor: editorialGradientLeftColor,
+            gradientRightColor: editorialGradientRightColor,
+            gradientImage: editorialGradientUpload ? { ...editorialGradientUpload } : null,
+        };
+
+        const nextPresets = upsertSavedGradientPreset(savedGradientPresets, nextPreset);
+        setSavedGradientPresets(nextPresets);
+        try {
+            await persistSavedGradientPresets(nextPresets);
+            setGradientPresetName('');
+            setStatus(`Gradiente "${name}" guardado`);
+            window.setTimeout(() => setStatus(''), 2200);
+        } catch (error) {
+            console.error('Gradient preset save error:', error);
+            setStatus('No se pudo guardar el gradiente. Reintenta en unos segundos.');
+        }
+    };
+
+    const applySavedGradientPreset = (preset: SavedMatchGradientPreset) => {
+        setEditorialGradientLeftColor(preset.gradientLeftColor);
+        setEditorialGradientRightColor(preset.gradientRightColor);
+        setEditorialGradientUpload(preset.gradientImage ? { ...preset.gradientImage } : null);
+        setSelectedPaletteId('custom');
+        setStatus(`Gradiente "${preset.name}" aplicado`);
         window.setTimeout(() => setStatus(''), 2200);
     };
 
@@ -755,6 +902,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 
         try {
             const src = await readFileAsDataUrl(file);
+            setSelectedPaletteId('custom');
             setEditorialGradientUpload({ name: file.name, src });
             setStatus('');
         } catch (error) {
@@ -764,6 +912,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const clearEditorialGradientUpload = () => {
+        setSelectedPaletteId('custom');
         setEditorialGradientUpload(null);
         setStatus('');
     };
@@ -915,12 +1064,25 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             </button>
             {status && <div className={styles.status}>{status}</div>}
 
-            {showModal && (
+            {showModal && isPortalReady ? createPortal(
                 <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
                     <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
                         <div className={styles.modalHeader}>
-                            <h3 className={styles.modalTitle}>Exportar imagen</h3>
-                            <p className={styles.modalHint}>El panel se adapta a tu pantalla y mantiene intacto el diseno de la imagen exportada.</p>
+                            <div className={styles.modalHeaderTop}>
+                                <div className={styles.modalTitleGroup}>
+                                    <h3 className={styles.modalTitle}>Exportar imagen</h3>
+                                    <p className={styles.modalSubtitle}>{exportModalSubtitle}</p>
+                                </div>
+                                <button className={styles.iconButton} onClick={() => setShowModal(false)} type="button" aria-label="Cerrar exportacion">
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className={styles.modalSummaryStrip}>
+                            {exportSummaryChips.map((chip) => (
+                                <span key={chip} className={styles.modalChip}>{chip}</span>
+                            ))}
                         </div>
 
                         <div className={styles.modalBody}>
@@ -1254,12 +1416,13 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                     </div>
                                     <div style={{ marginTop: 16 }}>
                                         <label className={styles.modalLabel}>Preset de layout</label>
-                                        <div className={styles.formatOptions}>
+                                        <div className={styles.compactPresetPanel}>
                                             {EDITORIAL_LAYOUT_PRESETS.map((preset) => (
                                                 <button
                                                     key={preset.id}
-                                                    className={`${styles.formatBtn} ${editorialLayoutPresetId === preset.id ? styles.active : ''}`}
+                                                    className={`${styles.compactPresetBtn} ${editorialLayoutPresetId === preset.id ? styles.compactPresetBtnActive : ''}`}
                                                     onClick={() => setEditorialLayoutPresetId(preset.id)}
+                                                    title={preset.description}
                                                     type="button"
                                                 >
                                                     {preset.label}
@@ -1309,80 +1472,157 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             </label>
                                         </div>
                                     </div>
-                                    <div className={styles.customColors} style={{ marginTop: 14 }}>
-                                        <div className={styles.colorInp}>
-                                            <span>Gradiente izq.</span>
-                                            <input
-                                                type="color"
-                                                value={editorialGradientLeftColor}
-                                                onChange={(event) => handleEditorialGradientLeftColorChange(event.target.value)}
-                                            />
-                                        </div>
-                                        <div className={styles.colorInp}>
-                                            <span>Gradiente der.</span>
-                                            <input
-                                                type="color"
-                                                value={editorialGradientRightColor}
-                                                onChange={(event) => handleEditorialGradientRightColorChange(event.target.value)}
-                                            />
-                                        </div>
-                                    </div>
                                     <div style={{ marginTop: 16 }}>
-                                        <label className={styles.modalLabel}>Degradado PNG opcional</label>
-                                        <div className={styles.uploadCard}>
-                                            <div className={styles.uploadMeta}>
-                                                <span className={styles.uploadTitle}>Override del degradado</span>
-                                                <span className={styles.uploadSubtitle}>
-                                                    Si subes un PNG, reemplaza el degradado generado por colores. Si no, el export usa el degradado actual configurado arriba.
-                                                </span>
-                                            </div>
-                                            <div className={styles.uploadActions}>
-                                                <label className={styles.uploadBtn}>
-                                                    Subir PNG
+                                        <label className={styles.modalLabel}>Gradiente editorial</label>
+                                        <div className={styles.presetLibraryCard}>
+                                            <div className={styles.customColors}>
+                                                <div className={styles.colorInp}>
+                                                    <span>Gradiente izq.</span>
                                                     <input
-                                                        className={styles.fileInput}
-                                                        type="file"
-                                                        accept="image/png,image/*"
-                                                        onChange={handleEditorialGradientUpload}
+                                                        type="color"
+                                                        value={editorialGradientLeftColor}
+                                                        onChange={(event) => handleEditorialGradientLeftColorChange(event.target.value)}
                                                     />
-                                                </label>
-                                                <button
-                                                    className={styles.ghostBtn}
-                                                    onClick={clearEditorialGradientUpload}
-                                                    disabled={!editorialGradientUpload}
-                                                    type="button"
-                                                >
-                                                    Usar degradado actual
-                                                </button>
-                                            </div>
-                                        </div>
-                                        {editorialGradientUpload && (
-                                            <div className={styles.uploadPreview}>
-                                                <div
-                                                    className={`${styles.uploadThumb} ${styles.uploadThumbWide}`}
-                                                    style={{ backgroundImage: `url(${editorialGradientUpload.src})` }}
-                                                />
-                                                <div className={styles.uploadMeta}>
-                                                    <span className={styles.uploadTitle}>{editorialGradientUpload.name}</span>
-                                                    <span className={styles.uploadSubtitle}>Se aplicara solo sobre la zona del degradado editorial.</span>
+                                                </div>
+                                                <div className={styles.colorInp}>
+                                                    <span>Gradiente der.</span>
+                                                    <input
+                                                        type="color"
+                                                        value={editorialGradientRightColor}
+                                                        onChange={(event) => handleEditorialGradientRightColorChange(event.target.value)}
+                                                    />
                                                 </div>
                                             </div>
-                                        )}
+                                            <div className={styles.presetLibrarySection}>
+                                                <div className={styles.presetLibraryHeader}>
+                                                    <span className={styles.presetLibraryTitle}>App</span>
+                                                    <span className={styles.presetLibraryMeta}>Compactos para aplicar rapido</span>
+                                                </div>
+                                                <div className={styles.gradientPresetGrid}>
+                                                    {DEFAULT_EDITORIAL_GRADIENT_PRESETS.map((preset) => {
+                                                        const isActive = editorialGradientLeftColor === preset.gradientLeftColor
+                                                            && editorialGradientRightColor === preset.gradientRightColor
+                                                            && (editorialGradientUpload?.src || '') === (preset.gradientImage?.src || '');
+                                                        return (
+                                                            <button
+                                                                key={preset.id}
+                                                                className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
+                                                                onClick={() => applySavedGradientPreset(preset)}
+                                                                title={`Aplicar ${preset.name}`}
+                                                                type="button"
+                                                            >
+                                                                <span
+                                                                    className={styles.gradientPresetSwatch}
+                                                                    style={{ background: `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
+                                                                />
+                                                                <span className={styles.gradientPresetName}>{preset.name}</span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className={styles.presetLibrarySection}>
+                                                <div className={styles.presetLibraryHeader}>
+                                                    <span className={styles.presetLibraryTitle}>Tus gradientes</span>
+                                                    <span className={styles.presetLibraryMeta}>Se guardan en este navegador</span>
+                                                </div>
+                                                <div className={styles.inlineActionRow}>
+                                                    <input
+                                                        className={`${styles.modalInput} ${styles.inlineActionInput}`}
+                                                        value={gradientPresetName}
+                                                        onChange={(event) => setGradientPresetName(event.target.value)}
+                                                        placeholder="Ej: Fucsia vs verde"
+                                                    />
+                                                    <button className={styles.uploadBtn} onClick={handleSaveGradientPreset} type="button">
+                                                        Guardar gradiente
+                                                    </button>
+                                                </div>
+                                                {savedGradientPresets.length > 0 ? (
+                                                    <div className={styles.gradientPresetGrid}>
+                                                        {savedGradientPresets.map((preset) => {
+                                                            const isActive = editorialGradientLeftColor === preset.gradientLeftColor
+                                                                && editorialGradientRightColor === preset.gradientRightColor
+                                                                && (editorialGradientUpload?.src || '') === (preset.gradientImage?.src || '');
+                                                            return (
+                                                                <button
+                                                                    key={preset.id}
+                                                                    className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
+                                                                    onClick={() => applySavedGradientPreset(preset)}
+                                                                    title={`Aplicar ${preset.name}`}
+                                                                    type="button"
+                                                                >
+                                                                    <span
+                                                                        className={styles.gradientPresetSwatch}
+                                                                        style={{ background: preset.gradientImage?.src
+                                                                            ? `center / cover no-repeat url(${preset.gradientImage.src})`
+                                                                            : `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
+                                                                    />
+                                                                    <span className={styles.gradientPresetName}>{preset.name}</span>
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <div className={styles.emptyPresetState}>
+                                                        Todavia no guardaste gradientes. El preset conserva colores y tambien el PNG, si hay uno cargado.
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className={styles.presetLibrarySection}>
+                                                <div className={styles.presetLibraryHeader}>
+                                                    <span className={styles.presetLibraryTitle}>PNG opcional</span>
+                                                    <span className={styles.presetLibraryMeta}>Solo si quieres reemplazar el degradado por una textura</span>
+                                                </div>
+                                                <div className={styles.gradientUploadRow}>
+                                                    <label className={styles.uploadBtn}>
+                                                        Subir PNG
+                                                        <input
+                                                            className={styles.fileInput}
+                                                            type="file"
+                                                            accept="image/png,image/*"
+                                                            onChange={handleEditorialGradientUpload}
+                                                        />
+                                                    </label>
+                                                    <button
+                                                        className={styles.ghostBtn}
+                                                        onClick={clearEditorialGradientUpload}
+                                                        disabled={!editorialGradientUpload}
+                                                        type="button"
+                                                    >
+                                                        Usar colores
+                                                    </button>
+                                                </div>
+                                                {editorialGradientUpload && (
+                                                    <div className={styles.gradientUploadPreview}>
+                                                        <div
+                                                            className={styles.gradientUploadSwatch}
+                                                            style={{ backgroundImage: `url(${editorialGradientUpload.src})` }}
+                                                        />
+                                                        <div className={styles.uploadMeta}>
+                                                            <span className={styles.uploadTitle}>{editorialGradientUpload.name}</span>
+                                                            <span className={styles.uploadSubtitle}>Se aplica sobre la zona del degradado editorial.</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <p className={styles.modalHint}>
+                                            Los presets de la app ahora quedan en un solo bloque compacto y puedes sumar tus propios degradados sin rehacerlos cada vez.
+                                        </p>
                                     </div>
                                     <div className={styles.uploadCard} style={{ marginTop: 16 }}>
                                         <div className={styles.uploadMeta}>
                                             <span className={styles.uploadTitle}>Guardar preset reusable</span>
                                             <span className={styles.uploadSubtitle}>
-                                                Guarda layout + gradientes + sponsors para reutilizar la configuracion en otros torneos sin redisenar la pieza.
+                                                Guarda layout + gradientes + sponsors para reutilizar la configuracion en otros torneos sin redisenar la pieza. Si repites el nombre, se sobrescribe.
                                             </span>
                                         </div>
-                                        <div className={styles.uploadActions} style={{ width: '100%', justifyContent: 'flex-end' }}>
+                                        <div className={styles.inlineActionRow}>
                                             <input
-                                                className={styles.modalInput}
+                                                className={`${styles.modalInput} ${styles.inlineActionInput}`}
                                                 value={editorialPresetName}
                                                 onChange={(event) => setEditorialPresetName(event.target.value)}
                                                 placeholder="Ej: SRA resultado final"
-                                                style={{ minWidth: 220, flex: '1 1 220px' }}
                                             />
                                             <button className={styles.uploadBtn} onClick={handleSaveEditorialPreset} type="button">
                                                 Guardar preset
@@ -1392,11 +1632,11 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                     {savedEditorialPresets.length > 0 && (
                                         <div style={{ marginTop: 12 }}>
                                             <label className={styles.modalLabel}>Presets guardados</label>
-                                            <div className={styles.formatOptions}>
+                                            <div className={styles.compactPresetPanel}>
                                                 {savedEditorialPresets.map((preset) => (
                                                     <button
                                                         key={preset.id}
-                                                        className={styles.formatBtn}
+                                                        className={styles.compactPresetBtn}
                                                         onClick={() => applySavedEditorialPreset(preset)}
                                                         type="button"
                                                         title={`Aplicar ${preset.name}`}
@@ -1412,53 +1652,50 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         <p className={styles.modalHint}>
                                             Los escudos de equipos ya se toman dinamicamente desde el partido. Aca podes cargar sponsors para el footer editorial.
                                         </p>
-                                        <div style={{ display: 'grid', gap: 12 }}>
+                                        <div className={styles.sponsorCompactGrid}>
                                             {editorialSponsors.map((sponsor, index) => (
-                                                <div key={sponsor.id || index}>
-                                                    <div className={styles.uploadCard}>
-                                                        <div className={styles.uploadMeta}>
-                                                            <span className={styles.uploadTitle}>Sponsor {index + 1}</span>
-                                                            <span className={styles.uploadSubtitle}>Carga opcional para branding comercial del template.</span>
-                                                        </div>
-                                                        <div className={styles.uploadActions} style={{ width: '100%', justifyContent: 'flex-end' }}>
-                                                            <input
-                                                                className={styles.modalInput}
-                                                                value={sponsor.name || ''}
-                                                                onChange={(event) => updateEditorialSponsor(index, { name: event.target.value })}
-                                                                placeholder="Nombre del sponsor"
-                                                                style={{ minWidth: 220, flex: '1 1 220px' }}
-                                                            />
-                                                            <label className={styles.uploadBtn}>
-                                                                Subir logo
-                                                                <input
-                                                                    className={styles.fileInput}
-                                                                    type="file"
-                                                                    accept="image/*"
-                                                                    onChange={(event) => handleEditorialSponsorUpload(index, event)}
-                                                                />
-                                                            </label>
+                                                <div key={sponsor.id || index} className={`${styles.sponsorCompactCard} ${sponsor.logo ? styles.sponsorCompactCardActive : ''}`}>
+                                                    <div className={styles.sponsorCompactHeader}>
+                                                        <span className={styles.sponsorCompactTitle}>Sponsor {index + 1}</span>
+                                                        {sponsor.logo ? (
                                                             <button
-                                                                className={styles.ghostBtn}
+                                                                className={styles.sponsorCompactRemove}
                                                                 onClick={() => clearEditorialSponsor(index)}
-                                                                disabled={!sponsor.logo}
                                                                 type="button"
+                                                                aria-label={`Quitar sponsor ${index + 1}`}
                                                             >
-                                                                Quitar
+                                                                <X size={12} />
                                                             </button>
-                                                        </div>
+                                                        ) : null}
                                                     </div>
-                                                    {sponsor.logo && (
-                                                        <div className={styles.uploadPreview}>
+                                                    <label className={styles.sponsorCompactDropzone}>
+                                                        {sponsor.logo ? (
                                                             <div
-                                                                className={styles.uploadThumb}
+                                                                className={styles.sponsorCompactThumb}
                                                                 style={{ backgroundImage: `url(${sponsor.logo})` }}
                                                             />
-                                                            <div className={styles.uploadMeta}>
-                                                                <span className={styles.uploadTitle}>{sponsor.name || `Sponsor ${index + 1}`}</span>
-                                                                <span className={styles.uploadSubtitle}>Se integrara de forma dinamica en el footer del template.</span>
+                                                        ) : (
+                                                            <div className={styles.sponsorCompactEmpty}>
+                                                                <Plus size={14} />
+                                                                <span>Subir logo</span>
                                                             </div>
-                                                        </div>
-                                                    )}
+                                                        )}
+                                                        <input
+                                                            className={styles.fileInput}
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(event) => handleEditorialSponsorUpload(index, event)}
+                                                        />
+                                                    </label>
+                                                    <input
+                                                        className={`${styles.modalInput} ${styles.sponsorCompactInput}`}
+                                                        value={sponsor.name || ''}
+                                                        onChange={(event) => updateEditorialSponsor(index, { name: event.target.value })}
+                                                        placeholder="Nombre"
+                                                    />
+                                                    <span className={styles.sponsorCompactHint}>
+                                                        {sponsor.logo ? 'Toca el recuadro para cambiar el logo.' : 'Slot opcional para branding editorial.'}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
@@ -1563,25 +1800,37 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                             </div>
                         </div>
 
-                        <div className={styles.modalActions}>
-                            <button className={styles.cancelBtn} onClick={() => setShowModal(false)} type="button">
-                                Cancelar
-                            </button>
-                            <button
-                                className={styles.exportBtn}
-                                onClick={handleExport}
-                                disabled={
-                                    (template === 'dailyMatches' && selectedMatchIndices.size === 0)
-                                    || (template === 'matchStats' && matchExportLayout === 'editorial4x5' && !matchBackgroundUpload)
-                                }
-                                type="button"
-                            >
-                                {exportActionLabel}
-                            </button>
+                        <div className={styles.modalFooter}>
+                            <div className={styles.modalFooterMeta}>
+                                <div className={styles.modalMetaGroup}>
+                                    <span>{selectedFormatConfig.width} x {selectedFormatConfig.height} px</span>
+                                    <small>Dimensiones finales</small>
+                                </div>
+                                <div className={styles.modalMetaGroup}>
+                                    <span>PNG High-Res</span>
+                                    <small>Formato de salida</small>
+                                </div>
+                            </div>
+                            <div className={styles.modalActions}>
+                                <button className={styles.cancelBtn} onClick={() => setShowModal(false)} type="button">
+                                    Cancelar
+                                </button>
+                                <button
+                                    className={styles.exportBtn}
+                                    onClick={handleExport}
+                                    disabled={
+                                        (template === 'dailyMatches' && selectedMatchIndices.size === 0)
+                                        || (template === 'matchStats' && matchExportLayout === 'editorial4x5' && !matchBackgroundUpload)
+                                    }
+                                    type="button"
+                                >
+                                    {exportActionLabel}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            )}
+            , document.body) : null}
         </div>
     );
 }
@@ -1652,41 +1901,204 @@ function getActiveEditorialSponsors(sponsors: MatchSponsorData[]): MatchSponsorD
         .filter((sponsor) => Boolean(sponsor.logo || sponsor.name));
 }
 
-function readSavedEditorialPresets(): SavedMatchEditorialPreset[] {
-    if (typeof window === 'undefined') return [];
+function buildPresetId(prefix: 'editorial' | 'gradient'): string {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function normalizePresetName(name: string): string {
+    return name.trim().toLocaleLowerCase('es-AR');
+}
+
+function upsertSavedEditorialPreset(
+    presets: SavedMatchEditorialPreset[],
+    preset: SavedMatchEditorialPreset,
+): SavedMatchEditorialPreset[] {
+    const normalizedName = normalizePresetName(preset.name);
+    return [
+        preset,
+        ...presets.filter((current) => normalizePresetName(current.name) !== normalizedName),
+    ].slice(0, MAX_SAVED_EDITORIAL_PRESETS);
+}
+
+function upsertSavedGradientPreset(
+    presets: SavedMatchGradientPreset[],
+    preset: SavedMatchGradientPreset,
+): SavedMatchGradientPreset[] {
+    const normalizedName = normalizePresetName(preset.name);
+    return [
+        preset,
+        ...presets.filter((current) => normalizePresetName(current.name) !== normalizedName),
+    ].slice(0, MAX_SAVED_EDITORIAL_GRADIENT_PRESETS);
+}
+
+function normalizeSavedEditorialPresets(raw: unknown): SavedMatchEditorialPreset[] {
+    if (!Array.isArray(raw)) return [];
+
+    return raw
+        .map((item, index) => ({
+            id: typeof item?.id === 'string' && item.id ? item.id : `preset-${index + 1}`,
+            name: typeof item?.name === 'string' && item.name.trim() ? item.name.trim() : `Preset ${index + 1}`,
+            layoutPresetId: getEditorialLayoutPreset(item?.layoutPresetId).id,
+            gradientLeftColor: typeof item?.gradientLeftColor === 'string' && item.gradientLeftColor ? item.gradientLeftColor : '#df255c',
+            gradientRightColor: typeof item?.gradientRightColor === 'string' && item.gradientRightColor ? item.gradientRightColor : DEFAULT_PALETTE.accent,
+            gradientImage: typeof item?.gradientImage?.src === 'string' && item.gradientImage.src
+                ? {
+                    name: typeof item?.gradientImage?.name === 'string' && item.gradientImage.name.trim()
+                        ? item.gradientImage.name.trim()
+                        : 'Degradado guardado',
+                    src: item.gradientImage.src,
+                }
+                : null,
+            sponsors: getActiveEditorialSponsors(buildEditorialSponsorSlots(item?.sponsors)),
+        }))
+        .slice(0, MAX_SAVED_EDITORIAL_PRESETS);
+}
+
+function normalizeSavedGradientPresets(raw: unknown): SavedMatchGradientPreset[] {
+    if (!Array.isArray(raw)) return [];
+
+    return raw
+        .map((item, index) => ({
+            id: typeof item?.id === 'string' && item.id ? item.id : `gradient-${index + 1}`,
+            name: typeof item?.name === 'string' && item.name.trim() ? item.name.trim() : `Gradiente ${index + 1}`,
+            gradientLeftColor: typeof item?.gradientLeftColor === 'string' && item.gradientLeftColor ? item.gradientLeftColor : '#df255c',
+            gradientRightColor: typeof item?.gradientRightColor === 'string' && item.gradientRightColor ? item.gradientRightColor : DEFAULT_PALETTE.accent,
+            gradientImage: typeof item?.gradientImage?.src === 'string' && item.gradientImage.src
+                ? {
+                    name: typeof item?.gradientImage?.name === 'string' && item.gradientImage.name.trim()
+                        ? item.gradientImage.name.trim()
+                        : 'Degradado guardado',
+                    src: item.gradientImage.src,
+                }
+                : null,
+        }))
+        .slice(0, MAX_SAVED_EDITORIAL_GRADIENT_PRESETS);
+}
+
+function readStorageJson(legacyKey: string): unknown {
+    if (typeof window === 'undefined') return undefined;
 
     try {
-        const raw = window.localStorage.getItem(EDITORIAL_PRESET_STORAGE_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return [];
-
-        return parsed
-            .map((item, index) => ({
-                id: typeof item?.id === 'string' && item.id ? item.id : `preset-${index + 1}`,
-                name: typeof item?.name === 'string' && item.name.trim() ? item.name.trim() : `Preset ${index + 1}`,
-                layoutPresetId: getEditorialLayoutPreset(item?.layoutPresetId).id,
-                gradientLeftColor: typeof item?.gradientLeftColor === 'string' && item.gradientLeftColor ? item.gradientLeftColor : '#df255c',
-                gradientRightColor: typeof item?.gradientRightColor === 'string' && item.gradientRightColor ? item.gradientRightColor : DEFAULT_PALETTE.accent,
-                gradientImage: typeof item?.gradientImage?.src === 'string' && item.gradientImage.src
-                    ? {
-                        name: typeof item?.gradientImage?.name === 'string' && item.gradientImage.name.trim()
-                            ? item.gradientImage.name.trim()
-                            : 'Degradado guardado',
-                        src: item.gradientImage.src,
-                    }
-                    : null,
-                sponsors: getActiveEditorialSponsors(buildEditorialSponsorSlots(item?.sponsors)),
-            }))
-            .slice(0, 12);
+        const raw = globalThis.localStorage.getItem(legacyKey);
+        return raw ? JSON.parse(raw) : undefined;
     } catch {
-        return [];
+        return undefined;
     }
 }
 
-function persistSavedEditorialPresets(presets: SavedMatchEditorialPreset[]) {
+function openExportStorageDatabase(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+        if (typeof window === 'undefined' || !('indexedDB' in window)) {
+            reject(new Error('IndexedDB no disponible'));
+            return;
+        }
+
+        const request = window.indexedDB.open(EXPORT_STORAGE_DB_NAME, EXPORT_STORAGE_DB_VERSION);
+        request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(EXPORT_STORAGE_STORE_NAME)) {
+                db.createObjectStore(EXPORT_STORAGE_STORE_NAME, { keyPath: 'key' });
+            }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('No se pudo abrir el storage de exportacion'));
+    });
+}
+
+async function readPersistedCollection<T>(
+    storageKey: string,
+    legacyKey: string,
+    normalize: (raw: unknown) => T,
+): Promise<T> {
+    if (typeof window === 'undefined') return normalize(undefined);
+
+    if (!('indexedDB' in window)) {
+        return normalize(readStorageJson(legacyKey));
+    }
+
+    try {
+        const db = await openExportStorageDatabase();
+        const value = await new Promise<unknown>((resolve, reject) => {
+            const transaction = db.transaction(EXPORT_STORAGE_STORE_NAME, 'readonly');
+            const store = transaction.objectStore(EXPORT_STORAGE_STORE_NAME);
+            const request = store.get(storageKey);
+            request.onsuccess = () => resolve(request.result?.value);
+            request.onerror = () => reject(request.error || new Error('No se pudo leer el storage'));
+        });
+        db.close();
+
+        if (value !== undefined) {
+            return normalize(value);
+        }
+
+        const legacyValue = readStorageJson(legacyKey);
+        const normalizedLegacy = normalize(legacyValue);
+        if (legacyValue !== undefined) {
+            await persistCollection(storageKey, legacyKey, normalizedLegacy);
+        }
+        return normalizedLegacy;
+    } catch {
+        return normalize(readStorageJson(legacyKey));
+    }
+}
+
+async function persistCollection<T>(storageKey: string, legacyKey: string, value: T): Promise<void> {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(EDITORIAL_PRESET_STORAGE_KEY, JSON.stringify(presets));
+
+    if (!('indexedDB' in window)) {
+        globalThis.localStorage.setItem(legacyKey, JSON.stringify(value));
+        return;
+    }
+
+    const db = await openExportStorageDatabase();
+    try {
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(EXPORT_STORAGE_STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(EXPORT_STORAGE_STORE_NAME);
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error || new Error('No se pudo persistir el storage'));
+            store.put({ key: storageKey, value });
+        });
+        try {
+            globalThis.localStorage.removeItem(legacyKey);
+        } catch {
+            // Best effort cleanup to avoid volver al limite de localStorage.
+        }
+    } finally {
+        db.close();
+    }
+}
+
+async function readSavedEditorialPresets(): Promise<SavedMatchEditorialPreset[]> {
+    return readPersistedCollection(
+        EXPORT_STORAGE_EDITORIAL_PRESETS_KEY,
+        EDITORIAL_PRESET_STORAGE_KEY,
+        normalizeSavedEditorialPresets,
+    );
+}
+
+async function readSavedGradientPresets(): Promise<SavedMatchGradientPreset[]> {
+    return readPersistedCollection(
+        EXPORT_STORAGE_EDITORIAL_GRADIENTS_KEY,
+        EDITORIAL_GRADIENT_PRESET_STORAGE_KEY,
+        normalizeSavedGradientPresets,
+    );
+}
+
+async function persistSavedEditorialPresets(presets: SavedMatchEditorialPreset[]): Promise<void> {
+    await persistCollection(
+        EXPORT_STORAGE_EDITORIAL_PRESETS_KEY,
+        EDITORIAL_PRESET_STORAGE_KEY,
+        presets,
+    );
+}
+
+async function persistSavedGradientPresets(presets: SavedMatchGradientPreset[]): Promise<void> {
+    await persistCollection(
+        EXPORT_STORAGE_EDITORIAL_GRADIENTS_KEY,
+        EDITORIAL_GRADIENT_PRESET_STORAGE_KEY,
+        presets,
+    );
 }
 
 function applyMatchExportMode(data: MatchStatsData, mode: MatchExportMode): MatchStatsData {
