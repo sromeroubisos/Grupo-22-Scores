@@ -44,15 +44,19 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
 
     // Onboarding pages get a blank layout (no header/footer/nav)
     if (isOnboardingPage) {
-        return <>{children}</>;
+        return (
+            <SportProvider>
+                {children}
+            </SportProvider>
+        );
     }
 
     if (isManagementPage) {
         return (
-            <>
+            <SportProvider>
                 {!isCoachPanel && <Header />}
                 {children}
-            </>
+            </SportProvider>
         );
     }
 

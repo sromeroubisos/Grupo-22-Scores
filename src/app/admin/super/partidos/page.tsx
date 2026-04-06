@@ -6,7 +6,6 @@ import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { RefreshCw, Plus, Radio, CheckCircle, Clock, AlertTriangle, CalendarDays, Trash2 } from 'lucide-react';
 import type { MatchRow } from '@/lib/cache/superAdminCache';
-import { createClient } from '@/lib/supabase/client';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 
@@ -77,7 +76,6 @@ function StatusBadge({ status }: { status: string }) {
 export default function SuperadminPartidosPage() {
     // ─── Read from shared context (already prefetched by layout) ─────────────────
     const { filters } = useSuperConsole();
-    const supabase = createClient();
 
     const [statusFilter, setStatusFilter] = useState<MatchStatus | 'all'>('all');
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
@@ -195,10 +193,13 @@ export default function SuperadminPartidosPage() {
     const handleDelete = async (id: string) => {
         if (!confirm('¿Seguro que deseas eliminar este partido?')) return;
         setDeletedIds(prev => new Set([...prev, id]));
-        const { error } = await supabase.from('matches').delete().eq('id', id);
-        if (error) {
+        const response = await fetch(`/api/matches/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
             setDeletedIds(prev => { const s = new Set(prev); s.delete(id); return s; });
-            alert('Error al eliminar: ' + error.message);
+            alert('Error al eliminar: ' + (payload?.error || 'No se pudo eliminar el partido.'));
             return;
         }
         invalidateCache('matches_list');
@@ -207,10 +208,17 @@ export default function SuperadminPartidosPage() {
 
     const handleStatusChange = async (id: string, newStatus: string) => {
         setStatusOverrides(prev => new Map([...prev, [id, newStatus]]));
-        const { error } = await supabase.from('matches').update({ status: newStatus }).eq('id', id);
-        if (error) {
+        const response = await fetch(`/api/matches/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus }),
+        });
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
             setStatusOverrides(prev => { const m = new Map(prev); m.delete(id); return m; });
-            alert('Error al actualizar estado: ' + error.message);
+            alert('Error al actualizar estado: ' + (payload?.error || 'No se pudo actualizar el partido.'));
             return;
         }
         invalidateCache('matches_list');

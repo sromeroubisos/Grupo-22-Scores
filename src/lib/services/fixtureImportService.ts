@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { FixtureService } from '@/lib/services/fixtureService';
+import { syncClubRankingsForMatches } from '@/lib/server/clubRankings';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { isMissingRelationError } from '@/lib/utils/fixtureImportErrors';
 import type {
@@ -188,6 +189,7 @@ export class FixtureImportService {
     let skipped = 0;
     let rejected = 0;
     const issues: FixtureImportIssue[] = [];
+    const touchedMatchIds: string[] = [];
 
     for (const preview of previews as any[]) {
       const decision = decisions.get(preview.id);
@@ -265,6 +267,7 @@ export class FixtureImportService {
           continue;
         }
         updated += 1;
+        touchedMatchIds.push(existingMatchId);
         await this.learnAliases(supabase, params.tournamentId, normalized, matched, context);
         await this.markPreview(supabase, preview.id, 'updated', existingMatchId);
         continue;
@@ -279,6 +282,7 @@ export class FixtureImportService {
       }
 
       created += 1;
+      touchedMatchIds.push(inserted.id);
       await this.learnAliases(supabase, params.tournamentId, normalized, matched, context);
       await this.markPreview(supabase, preview.id, 'imported', inserted.id);
     }
@@ -291,6 +295,12 @@ export class FixtureImportService {
       event_type: 'import_confirmed',
       payload: { created, updated, skipped, rejected },
     });
+
+    if (touchedMatchIds.length > 0) {
+      syncClubRankingsForMatches(touchedMatchIds).catch((error) => {
+        console.error('[FixtureImportService] Club ranking sync failed:', error);
+      });
+    }
 
     return { ok: rejected === 0, jobId: params.jobId, created, updated, skipped, rejected, issues };
   }

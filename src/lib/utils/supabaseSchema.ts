@@ -61,7 +61,7 @@ export function isMissingTableError(error: SupabaseSchemaError, table: string): 
   }
 
   return (
-    (error.code === 'PGRST205' || error.code === 'PGRST200' || error.code === '42P01') &&
+    (error.code === 'PGRST205' || error.code === '42P01') &&
     (haystack.includes(normalizedTable) || haystack.includes('table') || haystack.includes('relation'))
   );
 }

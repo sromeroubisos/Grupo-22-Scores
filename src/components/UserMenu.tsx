@@ -2,35 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { User, Settings, Star, LogOut, Shield } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { User as UserType, isSuperAdmin } from '@/lib/types/user'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
 import styles from './UserMenu.module.css'
 
 export default function UserMenu() {
-    const [user, setUser] = useState<UserType | null>(null)
+    const { user, logout, isLoading } = useAuth()
     const [isOpen, setIsOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const supabase = createClient()
+    const isSuperAdmin = user?.role === 'super_admin' || user?.role === 'admin_general'
 
-    useEffect(() => {
-        loadUser()
-
-        // Subscribe to auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
-            if (event === 'SIGNED_OUT') {
-                setUser(null)
-            } else if (event === 'SIGNED_IN' && session) {
-                loadUser()
-            }
-        })
-
-        return () => subscription.unsubscribe()
-    }, [])
-
-    // Close menu when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -47,33 +30,24 @@ export default function UserMenu() {
         }
     }, [isOpen])
 
-    async function loadUser() {
-        const { data: { session } } = await supabase.auth.getSession()
-
-        if (!session) return
-
-        const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-
-        if (userData) {
-            setUser(userData)
+    async function handleSignOut() {
+        try {
+            await logout()
+        } finally {
+            setIsOpen(false)
+            router.push('/')
+            router.refresh()
         }
     }
 
-    async function handleSignOut() {
-        await supabase.auth.signOut()
-        setIsOpen(false)
-        router.push('/')
-        router.refresh()
+    if (isLoading) {
+        return null
     }
 
     if (!user) {
         return (
             <Link href="/login" className={styles.loginButton}>
-                Iniciar Sesión
+                Iniciar SesiÃ³n
             </Link>
         )
     }
@@ -85,14 +59,14 @@ export default function UserMenu() {
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="User menu"
             >
-                {user.avatar_url ? (
-                    <img src={user.avatar_url} alt={user.name || 'User'} className={styles.avatar} />
+                {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name || 'User'} className={styles.avatar} />
                 ) : (
                     <div className={styles.avatarPlaceholder}>
                         {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
                     </div>
                 )}
-                {isSuperAdmin(user) && (
+                {isSuperAdmin && (
                     <div className={styles.adminBadge}>
                         <Shield size={12} />
                     </div>
@@ -106,7 +80,7 @@ export default function UserMenu() {
                             <div className={styles.userName}>{user.name || user.email}</div>
                             <div className={styles.userEmail}>{user.email}</div>
                         </div>
-                        {isSuperAdmin(user) && (
+                        {isSuperAdmin && (
                             <span className={styles.superAdminTag}>
                                 Super Admin
                             </span>
@@ -125,7 +99,7 @@ export default function UserMenu() {
                         Favoritos
                     </Link>
 
-                    {isSuperAdmin(user) && (
+                    {isSuperAdmin && (
                         <>
                             <div className={styles.dropdownDivider} />
                             <Link href="/admin/super" className={styles.menuItemAdmin} onClick={() => setIsOpen(false)}>
@@ -139,12 +113,12 @@ export default function UserMenu() {
 
                     <Link href="/profile/settings" className={styles.menuItem} onClick={() => setIsOpen(false)}>
                         <Settings size={16} />
-                        Configuración
+                        ConfiguraciÃ³n
                     </Link>
 
                     <button className={styles.menuItemDanger} onClick={handleSignOut}>
                         <LogOut size={16} />
-                        Cerrar Sesión
+                        Cerrar SesiÃ³n
                     </button>
                 </div>
             )}

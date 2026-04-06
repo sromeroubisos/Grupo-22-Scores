@@ -7,6 +7,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
 import {
+  getMatchRankingSnapshot,
+  syncClubRankingsForMatchUpdate,
+} from '@/lib/server/clubRankings';
+import {
   APP_TIMEZONE,
   addDaysToIsoDate,
   combineLocalDateTimeToUtcIso,
@@ -49,6 +53,17 @@ export class FixtureService {
     }
 
     return createClient();
+  }
+
+  private static async syncClubRankingsAfterMatchChange(
+    matchId: string,
+    previousMatch?: Awaited<ReturnType<typeof getMatchRankingSnapshot>>,
+  ) {
+    try {
+      await syncClubRankingsForMatchUpdate(matchId, previousMatch ?? null);
+    } catch (error) {
+      console.error('[FixtureService] Club ranking sync failed:', { matchId, error });
+    }
   }
 
   private static async assertPhaseBelongsToTournament(
@@ -626,6 +641,7 @@ export class FixtureService {
       throw new Error('El partido se creó con datos incompletos. Revisá la configuración de la base.');
     }
 
+    await this.syncClubRankingsAfterMatchChange(match.id);
     return this.mapMatch(match);
   }
 
@@ -634,6 +650,7 @@ export class FixtureService {
    */
   static async updateMatch(matchId: string, data: Partial<MatchFormData>): Promise<Match | null> {
     const supabase = await this.getWriteClient();
+    const previousRankingSnapshot = await getMatchRankingSnapshot(matchId);
 
     const [
       supportsRoundLabel,
@@ -769,6 +786,7 @@ export class FixtureService {
       throw new Error(error.message);
     }
 
+    await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
     return this.mapMatch(match);
   }
 
@@ -777,6 +795,7 @@ export class FixtureService {
    */
   static async deleteMatch(matchId: string): Promise<boolean> {
     const supabase = await this.getWriteClient();
+    const previousRankingSnapshot = await getMatchRankingSnapshot(matchId);
 
     const { error } = await supabase.from('matches').delete().eq('id', matchId);
 
@@ -785,6 +804,7 @@ export class FixtureService {
       return false;
     }
 
+    await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
     return true;
   }
 

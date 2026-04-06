@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
+import { useSport } from '@/context/SportContext';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
@@ -11,6 +12,7 @@ import { resolveAdminPanel } from '@/lib/auth/roles';
 
 export default function Header() {
     const { user, logout } = useAuth();
+    const { selectedSport } = useSport();
     const router = useRouter();
     const pathname = usePathname();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -71,6 +73,7 @@ export default function Header() {
             'users': 'Usuarios',
             'settings': 'Ajustes',
             'club-admin': 'Club Admin',
+            'rankings': 'Rankings',
             'identidad': 'Identidad',
             'divisiones': 'Divisiones',
             'planteles': 'Planteles',
@@ -111,6 +114,8 @@ export default function Header() {
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
+    const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
+    const rankingsHref = `/rankings?sport=${encodeURIComponent(selectedSport.id)}`;
 
     return (
         <header className="g22-header">
@@ -140,6 +145,22 @@ export default function Header() {
                             <path d="M19 5v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5" />
                         </svg>
                         <span>Noticias</span>
+                    </Link>
+
+                    <Link
+                        href={rankingsHref}
+                        className={`g22-desktop-link ${isRankingsRoute ? 'active' : ''}`}
+                        aria-current={isRankingsRoute ? 'page' : undefined}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M6 21h12" />
+                            <path d="M8 18h8" />
+                            <path d="M8 3h8v4a4 4 0 0 1-8 0V3z" />
+                            <path d="M6 3H4a2 2 0 0 0-2 2v1a5 5 0 0 0 5 5" />
+                            <path d="M18 3h2a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5" />
+                            <path d="M12 12v6" />
+                        </svg>
+                        <span>Rankings</span>
                     </Link>
 
                     <button 

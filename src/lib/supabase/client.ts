@@ -48,6 +48,21 @@ function clearBrokenSupabaseSessionOnce() {
     clearSupabaseBrowserSession()
 }
 
+function buildAuthFailureResponse() {
+    return new Response(
+        JSON.stringify({
+            error: 'supabase_auth_unreachable',
+            message: 'Supabase auth request failed',
+        }),
+        {
+            status: 503,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+    )
+}
+
 export function createClient() {
     if (client) return client
 
@@ -60,6 +75,7 @@ export function createClient() {
         } catch (error) {
             if (url && isSupabaseAuthRequest(input, url)) {
                 clearBrokenSupabaseSessionOnce()
+                return buildAuthFailureResponse()
             }
             throw error
         }
