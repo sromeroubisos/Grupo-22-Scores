@@ -7,6 +7,7 @@ const EXTERNAL_TEAM_LOGO_OVERRIDES: Record<string, string> = {
     // '12345': '/logos/clubs/my-club.png',
     // 'fs-team-12345': '/logos/clubs/my-club.png',
     // 'ras-team-12345': '/logos/clubs/my-club.png',
+    // 'espn-team-12345': '/logos/clubs/my-club.png',
 };
 
 const OVERRIDE_LOOKUP = Object.fromEntries(
@@ -109,10 +110,19 @@ function addCandidate(candidates: Set<string>, value: unknown) {
         return;
     }
 
+    if (normalized.startsWith('espn-team-')) {
+        const stripped = normalized.slice(10);
+        if (stripped) {
+            candidates.add(stripped);
+        }
+        return;
+    }
+
     if (/^[a-z0-9]+$/i.test(raw)) {
         candidates.add(`fs-team-${normalized}`);
         candidates.add(`fs-${normalized}`);
         candidates.add(`ras-team-${normalized}`);
+        candidates.add(`espn-team-${normalized}`);
     }
 }
 
@@ -201,7 +211,7 @@ function getSourceLogo(source: TeamLogoSource): string {
 function hasExternalKeyPrefix(value: string): boolean {
     const normalized = value.trim().toLowerCase();
     if (!normalized) return false;
-    return normalized.startsWith('fs-team-') || normalized.startsWith('fs-') || normalized.startsWith('ras-team-');
+    return normalized.startsWith('fs-team-') || normalized.startsWith('fs-') || normalized.startsWith('ras-team-') || normalized.startsWith('espn-team-');
 }
 
 function hasExternalContext(...sources: TeamLogoSource[]): boolean {
@@ -225,6 +235,7 @@ function hasExternalContext(...sources: TeamLogoSource[]): boolean {
             if (
                 normalized === 'api' ||
                 normalized === 'external' ||
+                normalized.includes('espn') ||
                 normalized.includes('flashscore') ||
                 normalized.includes('rugby-api-sports')
             ) {
@@ -250,6 +261,7 @@ function hasExternalContext(...sources: TeamLogoSource[]): boolean {
 
             if (
                 normalized.includes('flashscore') ||
+                normalized.includes('espncdn') ||
                 normalized.includes('api-sports') ||
                 normalized.includes('rapidapi')
             ) {

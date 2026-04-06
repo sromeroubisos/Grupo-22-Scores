@@ -117,11 +117,38 @@ type RankingManualAdjustment = {
     reason: string;
     created_at?: string | null;
 };
+type RankingLeadershipPeriod = {
+    id: string;
+    club_id: string;
+    started_at: string;
+    ended_at?: string | null;
+    days_as_leader: number;
+    started_reason: 'initial' | 'match' | 'manual';
+    ended_reason?: 'match' | 'manual' | null;
+    started_match_id?: string | null;
+    ended_match_id?: string | null;
+    started_adjustment_id?: string | null;
+    ended_adjustment_id?: string | null;
+    club?: { name?: string | null; short_name?: string | null; logo_url?: string | null } | null;
+};
+type RankingLeadershipSummary = {
+    club_id: string;
+    club?: { name?: string | null; short_name?: string | null; logo_url?: string | null } | null;
+    total_days_as_leader: number;
+    times_as_leader: number;
+    current_streak_days: number;
+    current_streak_started_at?: string | null;
+    last_reached_at?: string | null;
+    is_current_leader: boolean;
+};
 type RankingDetail = {
     ranking: RankingSummary;
     entries: RankingEntry[];
     recentApplications: RankingApplication[];
     manualAdjustments: RankingManualAdjustment[];
+    leadershipPeriods: RankingLeadershipPeriod[];
+    leadershipSummary: RankingLeadershipSummary[];
+    currentLeaderClubId?: string | null;
 };
 type Feedback = { tone: 'success' | 'error' | 'info'; text: string } | null;
 type EntryEditorState = {
@@ -208,6 +235,21 @@ function formatDateTime(value: string | null | undefined) {
     } catch {
         return value;
     }
+}
+function formatDayCount(value: number | null | undefined) {
+    const safeValue = Number(value);
+    if (!Number.isFinite(safeValue) || safeValue <= 0) {
+        return '0 dias';
+    }
+    const rounded = Math.round(safeValue);
+    return `${rounded} ${rounded === 1 ? 'dia' : 'dias'}`;
+}
+function formatLeadershipWindow(startedAt: string | null | undefined, endedAt: string | null | undefined) {
+    const start = formatDateTime(startedAt);
+    if (!endedAt) {
+        return `${start} -> hoy`;
+    }
+    return `${start} -> ${formatDateTime(endedAt)}`;
 }
 function createEntryEditorState(entry?: RankingEntry | null): EntryEditorState {
     return {
@@ -323,7 +365,10 @@ function mergeWorkspaces(current: RankingWorkspace[], summaries: RankingSummary[
         sport: summary.sport || currentMap.get(summary.id)?.sport || 'rugby',
         season: summary.season || currentMap.get(summary.id)?.season || String((summary.results_season || 0) - 1),
         scope: summary.scope || currentMap.get(summary.id)?.scope || 'clubes-designados',
-        description: summary.description || currentMap.get(summary.id)?.description || '',
+        description:
+            summary.description === undefined
+                ? currentMap.get(summary.id)?.description ?? ''
+                : summary.description ?? '',
         preview: currentMap.get(summary.id)?.preview || null,
         selectedSheet: currentMap.get(summary.id)?.selectedSheet || '',
         selectedClubHeader: currentMap.get(summary.id)?.selectedClubHeader || '',
@@ -350,6 +395,7 @@ export default function SuperRankingsPage() {
     const [feedback, setFeedback] = useState<Feedback>(null);
     const [loadingList, setLoadingList] = useState(false);
     const [loadingDetailId, setLoadingDetailId] = useState<string | null>(null);
+    const [savingMetadata, setSavingMetadata] = useState(false);
     const [savingBase, setSavingBase] = useState(false);
     const [backfilling, setBackfilling] = useState(false);
     const [recalculatingMatchId, setRecalculatingMatchId] = useState<string | null>(null);
@@ -419,9 +465,92 @@ export default function SuperRankingsPage() {
         [entryPage, filteredEntries],
     );
     const visibleEntries = paginatedEntries.items;
+    const leadershipSummary = selectedDetail?.leadershipSummary ?? [];
+    const leadershipPeriods = selectedDetail?.leadershipPeriods ?? [];
+    const currentLeader = leadershipSummary.find((item) => item.is_current_leader) ?? null;
     const rankingExportRows = useMemo(
         () => buildRankingExportRows(filteredEntries),
         [filteredEntries],
+    );
+    const leadershipHistoryCard = (
+        <div className={baseStyles.card}>
+            <div className={baseStyles.cardHeader}>
+                <h2 className={baseStyles.cardTitle}>Historial de punteros</h2>
+                <span className={`${baseStyles.pill} ${currentLeader ? baseStyles.pillSuccess : baseStyles.pillNeutral}`}>
+                    {currentLeader ? 'Activo' : 'Sin datos'}
+                </span>
+            </div>
+            {selectedDetail ? (
+                <>
+                    <div className={styles.analysisPanel}>
+                        <div className={styles.analysisGridCompact}>
+                            <div className={styles.analysisMetric}>
+                                <span>Puntero actual</span>
+                                <strong>{currentLeader?.club?.short_name || currentLeader?.club?.name || '-'}</strong>
+                            </div>
+                            <div className={styles.analysisMetric}>
+                                <span>Racha actual</span>
+                                <strong>{formatDayCount(currentLeader?.current_streak_days)}</strong>
+                            </div>
+                            <div className={styles.analysisMetric}>
+                                <span>Clubes que lideraron</span>
+                                <strong>{leadershipSummary.length}</strong>
+                            </div>
+                            <div className={styles.analysisMetric}>
+                                <span>Lapsos guardados</span>
+                                <strong>{leadershipPeriods.length}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    {leadershipSummary.length ? (
+                        <div className={styles.activityList}>
+                            {leadershipSummary.map((item) => (
+                                <div key={`leader-summary-${item.club_id}`} className={styles.activityItem}>
+                                    <div className={styles.activityTop}>
+                                        <strong>{item.club?.name || item.club_id}</strong>
+                                        <span className={`${baseStyles.pill} ${item.is_current_leader ? baseStyles.pillSuccess : baseStyles.pillNeutral}`}>
+                                            {item.is_current_leader ? 'Puntero actual' : `${item.times_as_leader} veces`}
+                                        </span>
+                                    </div>
+                                    <span className={styles.columnMeta}>{formatDayCount(item.total_days_as_leader)} acumulados / {item.times_as_leader} llegadas al #1</span>
+                                    <span className={styles.columnMeta}>
+                                        {item.is_current_leader && item.current_streak_started_at
+                                            ? `Racha actual desde ${formatDateTime(item.current_streak_started_at)}`
+                                            : `Ultima vez puntero ${formatDateTime(item.last_reached_at)}`}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={styles.emptyPreview}>Todavia no hay historial de punteros para este ranking.</div>
+                    )}
+                    {leadershipPeriods.length ? (
+                        <div className={styles.activityList}>
+                            {leadershipPeriods.slice(0, 8).map((period) => (
+                                <div key={`leader-period-${period.id}`} className={styles.activityItem}>
+                                    <div className={styles.activityTop}>
+                                        <strong>{period.club?.name || period.club_id}</strong>
+                                        <span className={`${baseStyles.pill} ${period.ended_at ? baseStyles.pillInfo : baseStyles.pillSuccess}`}>
+                                            {formatDayCount(period.days_as_leader)}
+                                        </span>
+                                    </div>
+                                    <span className={styles.columnMeta}>{formatLeadershipWindow(period.started_at, period.ended_at)}</span>
+                                    <span className={styles.columnMeta}>
+                                        {period.started_reason === 'initial'
+                                            ? 'Tomó la punta desde la base inicial.'
+                                            : period.started_reason === 'manual'
+                                                ? 'Llegó al #1 por override manual.'
+                                                : 'Llegó al #1 por resultados aplicados.'}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : null}
+                </>
+            ) : (
+                <div className={styles.emptyPreview}>Guarda la base primero para generar el historial de punteros.</div>
+            )}
+        </div>
     );
 
     const importPlan = useMemo<ImportPlan>(() => {
@@ -650,6 +779,8 @@ export default function SuperRankingsPage() {
     }, [currentRows.length, previewRows.length, unresolvedRowDetails.length]);
     const clubSelectValue = selectedRanking?.selectedClubHeader && currentHeaders.includes(selectedRanking.selectedClubHeader) ? selectedRanking.selectedClubHeader : '__auto__';
     const selectedResultsSeason = selectedSummary?.results_season ?? (Number.isFinite(Number(selectedRanking?.season)) ? Number(selectedRanking?.season) + 1 : null);
+    const rankingExportSubtitle = selectedRanking?.description.trim()
+        || `Base ${selectedRanking?.season || '-'} / resultados ${selectedResultsSeason || '-'}`;
     const publicRankingHref = selectedRanking ? `/rankings?sport=${encodeURIComponent(selectedRanking.sport)}&ranking=${encodeURIComponent(selectedRanking.id)}` : '/rankings';
     const selectedInspectorEntry = selectedDetail?.entries.find((entry) => entry.id === entryEditor.entryId) ?? null;
     const selectedInspectorClub = selectedInspectorEntry?.clubs ?? catalogClubMap.get(entryEditor.clubId) ?? null;
@@ -658,6 +789,16 @@ export default function SuperRankingsPage() {
         : entryEditor.sourceName || selectedInspectorClub?.name || 'Nuevo club';
     const activeEntriesCount = selectedDetail?.entries.filter((entry) => entry.is_active !== false).length ?? 0;
     const hasSeasonBootstrap = Boolean(selectedSummary?.backfill_completed_at);
+    const persistedRankingName = selectedSummary?.name.trim() ?? '';
+    const persistedRankingDescription = (selectedSummary?.description ?? '').trim();
+    const draftRankingName = selectedRanking?.name.trim() ?? '';
+    const draftRankingDescription = selectedRanking?.description.trim() ?? '';
+    const canPersistMetadata = Boolean(selectedRanking && selectedSummary);
+    const metadataDirty = canPersistMetadata
+        && (
+            draftRankingName !== persistedRankingName
+            || draftRankingDescription !== persistedRankingDescription
+        );
 
     const handleCreateRanking = () => {
         if (!draft.name.trim()) return;
@@ -692,6 +833,43 @@ export default function SuperRankingsPage() {
             patchRanking(selectedRanking.id, (ranking) => ({ ...ranking, preview: null, selectedSheet: '', selectedClubHeader: '', manualClubLinksBySheet: {}, error: error instanceof Error ? error.message : 'No se pudo leer el Excel.', isParsing: false }));
         } finally {
             event.target.value = '';
+        }
+    };
+    const handleSaveRankingMetadata = async () => {
+        if (!selectedRanking) return;
+
+        const nextName = selectedRanking.name.trim();
+        if (!nextName) {
+            setFeedback({ tone: 'error', text: 'El ranking necesita un titulo.' });
+            return;
+        }
+
+        if (!selectedSummary) {
+            setFeedback({ tone: 'info', text: 'El titulo y la descripcion se van a guardar junto con la base inicial.' });
+            return;
+        }
+
+        if (!metadataDirty) {
+            setFeedback({ tone: 'info', text: 'No hay cambios en el titulo o la descripcion para guardar.' });
+            return;
+        }
+
+        setSavingMetadata(true);
+        try {
+            const payload = await readJson(await fetch(`/api/admin/super/rankings/${encodeURIComponent(selectedRanking.id)}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: nextName,
+                    description: selectedRanking.description.trim() || null,
+                }),
+            }));
+            applyDetail(payload.data as RankingDetail);
+            setFeedback({ tone: 'success', text: 'Titulo y descripcion del ranking actualizados.' });
+        } catch (error) {
+            setFeedback({ tone: 'error', text: error instanceof Error ? error.message : 'No se pudieron actualizar los datos del ranking.' });
+        } finally {
+            setSavingMetadata(false);
         }
     };
     const handleSaveBase = async () => {
@@ -904,6 +1082,7 @@ export default function SuperRankingsPage() {
                                 <div className={styles.metricBadge}><span>Clubes</span><strong>{selectedDetail?.entries.length ?? 0}</strong></div>
                                 <div className={styles.metricBadge}><span>Activos</span><strong>{activeEntriesCount}</strong></div>
                                 <div className={styles.metricBadge}><span>Overrides</span><strong>{selectedDetail?.manualAdjustments.length ?? 0}</strong></div>
+                                <div className={styles.metricBadge}><span>Puntero</span><strong>{currentLeader?.club?.short_name || currentLeader?.club?.name || '-'}</strong></div>
                                 <div className={styles.metricBadge}><span>Ultima sync</span><strong>{formatDateTime(selectedSummary?.updated_at || selectedSummary?.backfill_completed_at)}</strong></div>
                             </div>
                             <div className={styles.toolbarActions}>
@@ -959,12 +1138,36 @@ export default function SuperRankingsPage() {
 
                         <div className={styles.workspaceSurface}>
                             <div className={styles.surfaceHeader}>
-                                <div>
+                                <div className={styles.surfaceHeaderMain}>
                                     <span className={styles.panelEyebrow}>Tabla operativa</span>
-                                    <h2 className={styles.surfaceTitle}>{selectedRanking?.name || 'Selecciona un ranking'}</h2>
+                                    <input
+                                        className={`${styles.formInput} ${styles.surfaceTitleInput}`}
+                                        value={selectedRanking?.name || ''}
+                                        onChange={(event) => selectedRanking ? patchRanking(selectedRanking.id, (ranking) => ({ ...ranking, name: event.target.value })) : undefined}
+                                        placeholder="Titulo del ranking"
+                                        aria-label="Titulo del ranking"
+                                    />
+                                    <textarea
+                                        className={`${styles.formTextarea} ${styles.surfaceDescriptionInput}`}
+                                        value={selectedRanking?.description || ''}
+                                        onChange={(event) => selectedRanking ? patchRanking(selectedRanking.id, (ranking) => ({ ...ranking, description: event.target.value })) : undefined}
+                                        placeholder="Descripcion del ranking"
+                                        aria-label="Descripcion del ranking"
+                                    />
                                     <p className={styles.workspaceSubtitle}>Base {selectedRanking?.season || '-'} / resultados {selectedResultsSeason || '-'}</p>
                                 </div>
-                                <span className={`${styles.statusChip} ${selectedSummary ? selectedSummary.stale_from_match_id ? styles.statusChipWarning : styles.statusChipSuccess : styles.statusChipNeutral}`}>{selectedSummary ? selectedSummary.stale_from_match_id ? 'Requiere recalc' : 'OK' : 'Sin guardar'}</span>
+                                <div className={styles.surfaceHeaderActions}>
+                                    <span className={`${styles.statusChip} ${selectedSummary ? selectedSummary.stale_from_match_id ? styles.statusChipWarning : styles.statusChipSuccess : styles.statusChipNeutral}`}>{selectedSummary ? selectedSummary.stale_from_match_id ? 'Requiere recalc' : 'OK' : 'Sin guardar'}</span>
+                                    <button
+                                        type="button"
+                                        className={styles.createBtn}
+                                        onClick={handleSaveRankingMetadata}
+                                        disabled={!selectedRanking || savingMetadata || (!selectedSummary ? !draftRankingName : !metadataDirty)}
+                                    >
+                                        {savingMetadata ? <RefreshCw size={14} className={styles.spin} /> : <Save size={14} />}
+                                        {selectedSummary ? 'Guardar encabezado' : 'Guardar con base'}
+                                    </button>
+                                </div>
                             </div>
                             {loadingDetailId === selectedRanking?.id && !selectedDetail ? <div className={styles.emptyPreview}>Cargando detalle...</div> : selectedDetail ? <>
                                 <div className={styles.tableToolbar}>
@@ -977,7 +1180,7 @@ export default function SuperRankingsPage() {
                                         <span>{selectedDetail.ranking.last_incremental_match_id ? `Ultimo match ${selectedDetail.ranking.last_incremental_match_id}` : 'Sin incremental aplicado'}</span>
                                     </div>
                                     <div className={styles.tableToolbarActions}>
-                                        <ExportImage className={styles.exportAction} template="standings" filename={`ranking-${selectedRanking?.name || 'clubes'}`} data={{ title: selectedRanking?.name || 'Ranking de Clubes', subtitle: `Base ${selectedRanking?.season || '-'} / resultados ${selectedResultsSeason || '-'}`, rows: rankingExportRows, columnLabels: RANKING_EXPORT_COLUMN_LABELS, plainDiff: true }} />
+                                        <ExportImage className={styles.exportAction} template="standings" filename={`ranking-${selectedRanking?.name || 'clubes'}`} data={{ title: selectedRanking?.name || 'Ranking de Clubes', subtitle: rankingExportSubtitle, rows: rankingExportRows, columnLabels: RANKING_EXPORT_COLUMN_LABELS, plainDiff: true }} />
                                     </div>
                                 </div>
                                 <div className={styles.standingsTableWrap}>
@@ -1064,6 +1267,7 @@ export default function SuperRankingsPage() {
                                 <div className={baseStyles.card}><div className={baseStyles.cardHeader}><h2 className={baseStyles.cardTitle}>Importacion del Excel</h2><span className={`${baseStyles.pill} ${importPlan.blockedReason ? baseStyles.pillWarning : baseStyles.pillSuccess}`}>{importPlan.blockedReason ? 'Revisar' : 'Lista'}</span></div><div className={styles.analysisPanel}><div className={styles.analysisGridCompact}><div className={styles.analysisMetric}><span>Catalogo</span><strong>{catalogState.loading ? 'Cargando...' : `${catalogClubs.length} clubes`}</strong></div><div className={styles.analysisMetric}><span>Rating</span><strong>{importPlan.ratingHeader || 'Pendiente'}</strong></div><div className={styles.analysisMetric}><span>Sin match</span><strong>{importPlan.unresolvedRows}</strong></div><div className={styles.analysisMetric}><span>Sin rating</span><strong>{importPlan.missingRatingRows}</strong></div></div>{importPlan.blockedReason ? <div className={styles.alertError}><AlertCircle size={16} /><span>{importPlan.blockedReason}</span></div> : <div className={styles.inlineHint}><CheckCircle2 size={16} /><span>La base esta lista para guardarse.</span></div>}{importPlan.duplicateRows > 0 ? <div className={`${styles.inlineHint} ${styles.inlineNoticeInfo}`}><CheckCircle2 size={16} /><span>Se ignoraran {importPlan.duplicateRows} filas duplicadas y se tomara la primera valida de cada club.</span></div> : null}{catalogState.error && catalogState.sport === selectedRanking?.sport ? <div className={styles.alertError}><AlertCircle size={16} /><span>{catalogState.error}</span></div> : null}</div></div>
                                 {unresolvedRowDetails.length ? <div className={baseStyles.card}><div className={baseStyles.cardHeader}><h2 className={baseStyles.cardTitle}>Filas sin club resuelto</h2><span className={`${baseStyles.pill} ${baseStyles.pillWarning}`}>{unresolvedRowDetails.length}</span></div><div className={styles.blockingPanel}><div className={styles.blockingHint}><AlertCircle size={16} /><span>Estas filas bloquean el guardado. Puedes vincularlas manualmente desde aca.</span></div><div className={styles.blockingList}>{unresolvedRowDetails.map((row) => <div key={`unresolved-${row.rowIndex}`} className={styles.blockingItem}><div className={styles.blockingTop}><strong>Fila {row.excelRowNumber}</strong><span className={`${baseStyles.pill} ${baseStyles.pillWarning}`}>Sin match</span></div><span className={styles.blockingValue}>{row.sourceValue}</span><div className={styles.blockingControl}><label className={styles.selectorLabel}>Vincular con</label><select className={`${styles.formSelect} ${styles.blockingSelect}`} value={manualClubLinks[row.sourceValue] || ''} onChange={(event) => setManualClubLink(row.sourceValue, event.target.value)}><option value="">Elegir club...</option>{catalogClubs.map((club) => <option key={`${row.rowIndex}-${club.id}`} value={club.id}>{club.shortName ? `${club.name} (${club.shortName})` : club.name}</option>)}</select></div></div>)}</div></div></div> : null}
                                 {manualLinkDetails.length ? <div className={baseStyles.card}><div className={baseStyles.cardHeader}><h2 className={baseStyles.cardTitle}>Vinculaciones manuales</h2><span className={`${baseStyles.pill} ${baseStyles.pillInfo}`}>{manualLinkDetails.length}</span></div><div className={styles.blockingPanel}><div className={styles.blockingList}>{manualLinkDetails.map((item) => <div key={`manual-link-${item.sourceValue}`} className={styles.blockingItem}><div className={styles.blockingTop}><strong>{item.sourceValue}</strong><span className={`${baseStyles.pill} ${baseStyles.pillInfo}`}>Manual</span></div><span className={styles.matchMeta}>{item.clubShortName ? `${item.clubName} (${item.clubShortName})` : item.clubName}</span><button type="button" className={styles.linkBtn} onClick={() => setManualClubLink(item.sourceValue, '')}>Quitar vinculo</button></div>)}</div></div></div> : null}
+                                {leadershipHistoryCard}
                             </div>
                         </div>
                     </aside>
@@ -1375,6 +1579,7 @@ export default function SuperRankingsPage() {
                                     <div className={styles.analysisMetric}><span>Visibles</span><strong>{filteredEntries.length}</strong></div>
                                     <div className={styles.analysisMetric}><span>Backfill</span><strong>{formatDateTime(selectedDetail.ranking.backfill_completed_at || selectedDetail.ranking.updated_at)}</strong></div>
                                     <div className={styles.analysisMetric}><span>Overrides</span><strong>{selectedDetail.manualAdjustments.length}</strong></div>
+                                    <div className={styles.analysisMetric}><span>Puntero actual</span><strong>{currentLeader?.club?.short_name || currentLeader?.club?.name || '-'}</strong></div>
                                 </div>
                                 <div className={styles.tableToolbar}>
                                     <div className={styles.searchGroup}>
@@ -1397,7 +1602,7 @@ export default function SuperRankingsPage() {
                                             filename={`ranking-${selectedRanking?.name || 'clubes'}`}
                                             data={{
                                                 title: selectedRanking?.name || 'Ranking de Clubes',
-                                                subtitle: `Base ${selectedRanking?.season || '-'} / resultados ${selectedResultsSeason || '-'}`,
+                                                subtitle: rankingExportSubtitle,
                                                 rows: rankingExportRows,
                                                 columnLabels: RANKING_EXPORT_COLUMN_LABELS,
                                                 plainDiff: true,
@@ -1523,6 +1728,7 @@ export default function SuperRankingsPage() {
                         <div className={baseStyles.card}><div className={baseStyles.cardHeader}><h2 className={baseStyles.cardTitle}>Campos esperados</h2><span className={`${baseStyles.pill} ${recognizedCount > 0 ? baseStyles.pillInfo : baseStyles.pillNeutral}`}>{recognizedCount} detectados</span></div><div className={styles.fieldList}>{detectedFields.map((field) => <div key={field.key} className={styles.fieldItem}><div><strong>{field.label}</strong><span>{field.aliases.join(' / ')}</span></div><span className={`${baseStyles.pill} ${field.matchedHeader ? baseStyles.pillSuccess : baseStyles.pillNeutral}`}>{field.matchedHeader || 'Pendiente'}</span></div>)}</div></div>
                         <div className={baseStyles.card}><div className={baseStyles.cardHeader}><h2 className={baseStyles.cardTitle}>Recientes y recalculo</h2><span className={`${baseStyles.pill} ${baseStyles.pillNeutral}`}>{selectedDetail?.recentApplications.length ?? 0}</span></div>{selectedDetail?.recentApplications.length ? <div className={styles.activityList}>{selectedDetail.recentApplications.map((application) => <div key={application.id} className={styles.activityItem}><div className={styles.activityTop}><strong>{entryNameMap.get(application.home_club_id) || application.home_club_id} {application.home_score} - {application.away_score} {entryNameMap.get(application.away_club_id) || application.away_club_id}</strong><span className={`${baseStyles.pill} ${application.applied_mode === 'incremental' ? baseStyles.pillInfo : baseStyles.pillNeutral}`}>{application.applied_mode}</span></div><span className={styles.columnMeta}>{formatDateTime(application.match_date_time)} / {application.match_id}</span><button type="button" className={styles.linkBtn} onClick={() => handleRecalculateFromMatch(application.match_id)} disabled={recalculatingMatchId === application.match_id}>{recalculatingMatchId === application.match_id ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular desde este partido</button></div>)}</div> : <div className={styles.emptyPreview}>Todavia no hay partidos aplicados.</div>}</div>
                         <div className={baseStyles.card}><div className={baseStyles.cardHeader}><h2 className={baseStyles.cardTitle}>Ajuste manual</h2><span className={`${baseStyles.pill} ${baseStyles.pillWarning}`}>Override</span></div>{selectedDetail ? <form className={styles.manualForm} onSubmit={handleManualAdjustment}><div className={styles.formGroup}><label className={styles.formLabel}>Club</label><select className={styles.formSelect} value={manualForm.clubId} onChange={(event) => setManualForm((current) => ({ ...current, clubId: event.target.value }))}>{selectedDetail.entries.map((entry) => <option key={entry.club_id} value={entry.club_id}>{entry.clubs?.name || entry.source_name}</option>)}</select></div><div className={styles.formRow}><div className={styles.formGroup}><label className={styles.formLabel}>Modo</label><select className={styles.formSelect} value={manualForm.mode} onChange={(event) => setManualForm((current) => ({ ...current, mode: event.target.value === 'set' ? 'set' : 'delta' }))}><option value="delta">Sumar / restar</option><option value="set">Fijar valor</option></select></div><div className={styles.formGroup}><label className={styles.formLabel}>Valor</label><input className={styles.formInput} value={manualForm.value} onChange={(event) => setManualForm((current) => ({ ...current, value: event.target.value }))} placeholder={manualForm.mode === 'set' ? '81.25' : '+0.50'} /></div></div><div className={styles.formGroup}><label className={styles.formLabel}>Motivo</label><textarea className={styles.formTextarea} value={manualForm.reason} onChange={(event) => setManualForm((current) => ({ ...current, reason: event.target.value }))} /></div><button type="submit" className={styles.createBtn} disabled={manualBusy}>{manualBusy ? <RefreshCw size={16} className={styles.spin} /> : <Save size={16} />}Aplicar override</button></form> : <div className={styles.emptyPreview}>Guarda la base primero.</div>}{selectedDetail?.manualAdjustments.length ? <div className={styles.activityList}>{selectedDetail.manualAdjustments.map((adjustment) => <div key={adjustment.id} className={styles.activityItem}><div className={styles.activityTop}><strong>{entryNameMap.get(adjustment.club_id) || adjustment.club_id}</strong><span className={`${baseStyles.pill} ${baseStyles.pillWarning}`}>{adjustment.mode}</span></div><span className={styles.columnMeta}>Valor {Number(adjustment.value) >= 0 ? '+' : ''}{formatRankingRating(Number(adjustment.value))} / Resultado {formatRankingRating(adjustment.resulting_rating === null ? null : Number(adjustment.resulting_rating))}</span><span className={styles.columnMeta}>{adjustment.reason} / {formatDateTime(adjustment.created_at)}</span></div>)}</div> : null}</div>
+                        {leadershipHistoryCard}
                         <div className={baseStyles.card}><div className={baseStyles.cardHeader}><h2 className={baseStyles.cardTitle}>Plantilla rapida</h2><button className={styles.linkBtn} onClick={downloadTemplate} type="button"><Download size={14} />Descargar</button></div><div className={styles.templatePreview}>{TEMPLATE_ROWS.map((row, index) => <div key={`${row.Equipo}-${index}`} className={styles.templateRow}><strong>{row.Pos}. {row.Equipo}</strong><span>{row.OVR} OVR / {row.TR}</span></div>)}</div></div>
                     </aside>
                 </section>

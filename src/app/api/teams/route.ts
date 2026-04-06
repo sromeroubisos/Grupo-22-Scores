@@ -2,6 +2,10 @@ import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/database.types';
 import {
+    getEspnAmericanFootballTeamBundle,
+    parseEspnAmericanFootballTeamId,
+} from '@/lib/services/espnAmericanFootball';
+import {
     getTeamDetails,
     getTeamSquad,
     getTeamResults,
@@ -411,11 +415,39 @@ export async function GET(request: Request) {
     const teamName = searchParams.get('team_name') || '';
     const teamUrlParam = searchParams.get('team_url') || '';
     const preferredSport = searchParams.get('preferred_sport') || searchParams.get('sport') || '';
+    const leagueHint = searchParams.get('league') || '';
     const skipSquad = searchParams.get('skip_squad') === 'true';
     const debugMode = searchParams.get('_debug') === '1';
 
     if (!rawTeamId) {
         return Response.json({ ok: false, error: 'team_id is required' }, { status: 400 });
+    }
+
+    const espnTeamId = parseEspnAmericanFootballTeamId(rawTeamId);
+    if (espnTeamId) {
+        try {
+            const bundle = await getEspnAmericanFootballTeamBundle(espnTeamId, leagueHint || null);
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
+            }
+
+            return Response.json({
+                ok: true,
+                resolvedClubId: null,
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                squad: skipSquad ? [] : bundle.squad,
+                transfers: bundle.transfers,
+            });
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error('Teams API ESPN error', e);
+            return Response.json(
+                { ok: false, error: 'Failed to load ESPN team data', details: message },
+                { status: 500 }
+            );
+        }
     }
 
     const rugbyTeamId =

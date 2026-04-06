@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Upload, Check, Loader2, Image as ImageIcon } from 'lucide-react';
 import styles from './LogoUploader.module.css';
+import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 
 interface LogoUploaderProps {
     onUpload: (logoData: string) => void;
@@ -11,23 +12,12 @@ interface LogoUploaderProps {
     accentColor?: string;
 }
 
-declare global {
-    interface Window {
-        ImageTracer: any;
-    }
-}
-
 export default function LogoUploader({
     onUpload,
     currentLogo,
     label = "Logo o Escudo",
     accentColor = "#00ccff"
 }: LogoUploaderProps) {
-    const [preview, setPreview] = useState<string | undefined>(currentLogo);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
     const toBase64 = (value: string) => {
         try {
             return window.btoa(unescape(encodeURIComponent(value)));
@@ -63,12 +53,21 @@ export default function LogoUploader({
 
     const normalizeLogoInput = (value?: string) => {
         if (!value) return value;
+
         const trimmed = value.trim();
         if (trimmed.startsWith('<svg')) {
             return svgToDataUrl(normalizeSvg(trimmed));
         }
-        return trimmed;
+
+        return resolveLogoPreviewSrc(trimmed) || trimmed;
     };
+
+    const normalizedCurrentLogo = normalizeLogoInput(currentLogo);
+    const [preview, setPreview] = useState<string | undefined>(normalizedCurrentLogo);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const displayedPreview = normalizedCurrentLogo || preview;
 
     const readAsDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -98,10 +97,6 @@ export default function LogoUploader({
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         return canvas.toDataURL('image/png');
     };
-
-    useEffect(() => {
-        setPreview(normalizeLogoInput(currentLogo));
-    }, [currentLogo]);
 
     const handleFile = async (file: File) => {
         if (!file) return;
@@ -158,7 +153,7 @@ export default function LogoUploader({
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={onDrop}
                 onClick={() => fileInputRef.current?.click()}
-                style={{ '--accent': accentColor } as any}
+                style={{ ['--accent' as string]: accentColor } as React.CSSProperties}
             >
                 <input
                     type="file"
@@ -173,9 +168,9 @@ export default function LogoUploader({
                         <Loader2 className={styles.spinner} />
                         <span>Procesando imagen...</span>
                     </div>
-                ) : preview ? (
+                ) : displayedPreview ? (
                     <div className={styles.previewContainer}>
-                        <img src={preview} alt="Logo preview" className={styles.preview} />
+                        <img src={displayedPreview} alt="Logo preview" className={styles.preview} />
                         <div className={styles.changeOverlay}>
                             <Upload size={20} />
                             <span>Cambiar</span>
@@ -192,7 +187,7 @@ export default function LogoUploader({
                 )}
             </div>
 
-            {preview && !isAnalyzing && (
+            {displayedPreview && !isAnalyzing && (
                 <div className={styles.successTag}>
                     <Check size={14} />
                     <span>Imagen optimizada</span>

@@ -7,6 +7,7 @@ import styles from '../page.module.css';
 import LogoUploader from '@/components/LogoUploader';
 import { useManagedClubData } from '@/hooks/useManagedClubData';
 import type { ClubFull, ClubUpdateInput } from '@/lib/types/clubs';
+import { normalizeLogoUrl } from '@/lib/utils/logoUrl';
 
 interface IdentityFormState {
     name: string;
@@ -38,19 +39,6 @@ function buildIdentityForm(club: ClubFull): IdentityFormState {
     };
 }
 
-function normalizeShieldUrl(value: string) {
-    const trimmed = value.trim();
-    if (!trimmed.startsWith('<svg')) {
-        return value;
-    }
-
-    try {
-        return `data:image/svg+xml;base64,${window.btoa(unescape(encodeURIComponent(trimmed)))}`;
-    } catch {
-        return `data:image/svg+xml;base64,${window.btoa(trimmed)}`;
-    }
-}
-
 interface ClubIdentityEditorProps {
     club: ClubFull;
     saving: boolean;
@@ -59,11 +47,7 @@ interface ClubIdentityEditorProps {
 }
 
 function ClubIdentityEditor({ club, saving, error, saveClub }: ClubIdentityEditorProps) {
-    const [form, setForm] = useState<IdentityFormState>(() => {
-        const next = buildIdentityForm(club);
-        next.shieldUrl = normalizeShieldUrl(next.shieldUrl || '');
-        return next;
-    });
+    const [form, setForm] = useState<IdentityFormState>(() => buildIdentityForm(club));
     const [saved, setSaved] = useState(false);
 
     const saveLabel = useMemo(() => {
@@ -73,13 +57,12 @@ function ClubIdentityEditor({ club, saving, error, saveClub }: ClubIdentityEdito
     }, [saved, saving]);
 
     const handleChange = (field: keyof IdentityFormState, value: string) => {
-        const nextValue = field === 'shieldUrl' ? normalizeShieldUrl(value) : value;
-        setForm((prev) => ({ ...prev, [field]: nextValue }));
+        setForm((prev) => ({ ...prev, [field]: value }));
         setSaved(false);
     };
 
     const handleSave = async () => {
-        const normalizedShield = normalizeShieldUrl(form.shieldUrl);
+        const normalizedShield = normalizeLogoUrl(form.shieldUrl);
         const payload: ClubUpdateInput = {
             core: {
                 name: form.name,
@@ -103,9 +86,7 @@ function ClubIdentityEditor({ club, saving, error, saveClub }: ClubIdentityEdito
             return;
         }
 
-        const next = buildIdentityForm(updatedClub);
-        next.shieldUrl = normalizeShieldUrl(next.shieldUrl || '');
-        setForm(next);
+        setForm(buildIdentityForm(updatedClub));
         setSaved(true);
         window.setTimeout(() => setSaved(false), 1500);
     };
@@ -172,8 +153,8 @@ function ClubIdentityEditor({ club, saving, error, saveClub }: ClubIdentityEdito
                         <label className={styles.formLabel}>Escudo (URL)</label>
                         <input
                             className={styles.formInput}
-                            type="url"
-                            placeholder="https://"
+                            type="text"
+                            placeholder="https://.../logo.png o pega el snippet de Flaticon"
                             value={form.shieldUrl}
                             onChange={(e) => handleChange('shieldUrl', e.target.value)}
                         />

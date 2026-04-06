@@ -29,15 +29,23 @@ function isRugbyApiSportsMatchId(value: string) {
     return /^ras-game-\d+$/i.test(value);
 }
 
-function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }, preferredSport?: string | number | null) {
+function isEspnAmericanFootballMatchId(value: string) {
+    return /^espn-game-\d+$/i.test(value);
+}
+
+function buildTeamHref(
+    team: { id?: string; name?: string; teamUrl?: string; league?: string | null },
+    preferredSport?: string | number | null,
+) {
     if (!team.id) return '/clubs';
 
     const params = new URLSearchParams();
     if (team.name) params.set('name', team.name);
     if (team.teamUrl) params.set('team_url', team.teamUrl);
+    if (team.league) params.set('league', team.league);
     if (preferredSport) params.set('sport', String(preferredSport));
     const qs = params.toString();
-    const id = team.id.startsWith('fs-team-') || team.id.startsWith('ras-team-')
+    const id = team.id.startsWith('fs-team-') || team.id.startsWith('ras-team-') || team.id.startsWith('espn-team-')
         ? team.id
         : team.id.startsWith('fs-')
             ? `fs-team-${team.id.slice(3)}`
@@ -49,7 +57,7 @@ function buildTeamHref(team: { id?: string; name?: string; teamUrl?: string }, p
 function buildTournamentHref(tournamentId?: string, season?: string | number | null) {
     if (!tournamentId) return null;
 
-    const id = tournamentId.startsWith('fs-') || tournamentId.startsWith('ras-league-')
+    const id = tournamentId.startsWith('fs-') || tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-')
         ? tournamentId
         : isExternalEntityId(tournamentId)
             ? `fs-${tournamentId}`
@@ -58,9 +66,11 @@ function buildTournamentHref(tournamentId?: string, season?: string | number | n
     const params = new URLSearchParams();
     if (tournamentId.startsWith('ras-league-')) {
         params.set('sport', 'rugby');
-        if (season != null && season !== '') {
-            params.set('season', String(season));
-        }
+    } else if (tournamentId.startsWith('espn-league-')) {
+        params.set('sport', 'american-football');
+    }
+    if ((tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-')) && season != null && season !== '') {
+        params.set('season', String(season));
     }
 
     const qs = params.toString();
@@ -284,11 +294,14 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const [showAllEvents, setShowAllEvents] = useState(false);
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
     const isRugbyExternal = isRugbyApiSportsMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal;
+    const isEspnExternal = isEspnAmericanFootballMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal;
     const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
     const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';
+    const isEspnSource = state.matchData?.externalProvider === 'espn';
+    const isLimitedExternalSource = isRugbyApiSportsSource || isEspnSource;
     const visibleTabs = useMemo(() => (
-        isRugbyApiSportsSource
+        isLimitedExternalSource
             ? [
                 { id: 'summary', label: 'Resumen' },
                 { id: 'h2h', label: 'H2H' },
@@ -304,7 +317,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                 { id: 'standings', label: 'Clasificacion' },
                 { id: 'commentary', label: 'Comentarios' },
             ]
-    ), [isRugbyApiSportsSource]);
+    ), [isLimitedExternalSource]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -343,6 +356,33 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         setState({
                             kind: 'ok',
                             matchData: rugbyMatch,
+                            eventsData: [],
+                            statsData: [],
+                            playerStats: null,
+                            localPlayerRows: [],
+                            commentaryData: [],
+                            issues: [],
+                            debug: {},
+                        });
+                        return;
+                    }
+
+                    if (payload?.source === 'espn' && payload?.match) {
+                        statusRef.current = payload.match.status || 'scheduled';
+                        const espnMatch = {
+                            ...payload.match,
+                            home: {
+                                ...payload.match.home,
+                                logo: resolveMatchTeamLogo(payload.match.home, null, payload.match.home?.logo),
+                            },
+                            away: {
+                                ...payload.match.away,
+                                logo: resolveMatchTeamLogo(payload.match.away, null, payload.match.away?.logo),
+                            },
+                        };
+                        setState({
+                            kind: 'ok',
+                            matchData: espnMatch,
                             eventsData: [],
                             statsData: [],
                             playerStats: null,
@@ -1049,7 +1089,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                 </section>
 
                 {/* Layer 4: Tabs */}
-                {isRugbyApiSportsSource && (
+                {isLimitedExternalSource && (
                     <nav className={styles.tabsNav}>
                         {visibleTabs.map((tab) => (
                             <div
@@ -1062,7 +1102,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         ))}
                     </nav>
                 )}
-                {!isRugbyApiSportsSource && (
+                {!isLimitedExternalSource && (
                 <nav className={styles.tabsNav}>
                     <div className={`${styles.tabItem} ${activeTab === 'summary' ? styles.active : ''}`} onClick={() => setActiveTab('summary')}>Resumen</div>
                     <div className={`${styles.tabItem} ${activeTab === 'timeline' ? styles.active : ''}`} onClick={() => setActiveTab('timeline')}>Cronología</div>
@@ -1472,7 +1512,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                     const rowId = row.team_id || row.team?.id || row.team?.team_id || null;
                                                     const rowLogo = row.logo || row.team?.logo || row.team_logo || '';
                                                     const teamHref = rowId
-                                                        ? buildTeamHref({ id: rowId, name: rowName }, matchData.sportId)
+                                                        ? buildTeamHref({ id: rowId, name: rowName, league: row.team?.league || row.participant?.league || null }, matchData.sportId)
                                                         : null;
                                                     const isCurrent = rowName === matchData.home.name || rowName === matchData.away.name ||
                                                         rowId === matchData.home.id || rowId === matchData.away.id;
@@ -1631,7 +1671,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             </section>
                         )}
 
-                        {!isRugbyApiSportsSource && matchData.topScorers && Array.isArray(matchData.topScorers) && matchData.topScorers.length > 0 && (
+                        {!isLimitedExternalSource && matchData.topScorers && Array.isArray(matchData.topScorers) && matchData.topScorers.length > 0 && (
                             <section className={styles.panelBlock}>
                                 <div className={styles.panelTitle}>Goleadores</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

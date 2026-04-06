@@ -19,9 +19,11 @@ import {
 } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import {
+    getEspnAmericanFootballLinkStatus,
     getLinkStatus,
     getRugbyApiSportsLinkStatus,
     type ExternalMatchWithMapping,
+    type EspnAmericanFootballConfig,
     type ExternalStandingsRow,
     type FlashScoreConfig,
     type MatchConfidence,
@@ -29,8 +31,10 @@ import {
     type SyncResponse,
 } from '@/lib/types/flashscore-integration';
 import {
+    getRulesetEspnAmericanFootballConfig,
     getRulesetFlashScoreConfig,
     getRulesetRugbyApiSportsConfig,
+    isAmericanFootballSport,
     isRugbySport,
 } from '@/lib/externalProviderPolicy';
 
@@ -66,13 +70,18 @@ function getExternalMatchId(match: ExternalMatchWithMapping) {
 export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Props) {
     const router = useRouter();
     const isRugby = isRugbySport((data as any).sport_id ?? (data as any).sport ?? null);
+    const isAmericanFootball = isAmericanFootballSport((data as any).sport_id ?? (data as any).sport ?? null);
     const flashScoreConfig: FlashScoreConfig | null = getRulesetFlashScoreConfig((data as any).ruleset);
     const rugbyConfig: RugbyApiSportsConfig | null = getRulesetRugbyApiSportsConfig((data as any).ruleset);
+    const espnConfig: EspnAmericanFootballConfig | null = getRulesetEspnAmericanFootballConfig((data as any).ruleset);
 
-    const provider = isRugby ? 'rugby-api-sports' : 'flashscore';
-    const providerLabel = isRugby ? 'Rugby API-Sports' : 'FlashScore';
-    const providerConfig = isRugby ? rugbyConfig : flashScoreConfig;
-    const linkStatus = isRugby ? getRugbyApiSportsLinkStatus(rugbyConfig) : getLinkStatus(flashScoreConfig);
+    const provider = isRugby ? 'rugby-api-sports' : isAmericanFootball ? 'espn' : 'flashscore';
+    const providerLabel = isRugby ? 'Rugby API-Sports' : isAmericanFootball ? 'ESPN' : 'FlashScore';
+    const linkStatus = isRugby
+        ? getRugbyApiSportsLinkStatus(rugbyConfig)
+        : isAmericanFootball
+            ? getEspnAmericanFootballLinkStatus(espnConfig)
+            : getLinkStatus(flashScoreConfig);
     const isLinked = linkStatus === 'ids_resolved' || linkStatus === 'synced';
 
     const [view, setView] = useState<SyncView>('idle');
@@ -157,7 +166,7 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
             .map((match) => {
                 const externalId = getExternalMatchId(match);
                 return {
-                    external_match_id: match.external_match_id ?? (provider === 'rugby-api-sports' ? externalId : undefined),
+                    external_match_id: match.external_match_id ?? (provider !== 'flashscore' ? externalId : undefined),
                     flashscore_match_id: match.flashscore_match_id ?? (provider === 'flashscore' ? externalId : undefined),
                     home_club_id: clubOverrides.get(`${externalId}-home`) ?? match.home_club_id ?? '',
                     away_club_id: clubOverrides.get(`${externalId}-away`) ?? match.away_club_id ?? '',
@@ -240,9 +249,11 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
 
     const providerSummary = isRugby
         ? `${rugbyConfig?.league_name || 'Liga'} · ${rugbyConfig?.season || '-'}`
-        : flashScoreConfig?.tournament_url || 'Sin URL';
+        : isAmericanFootball
+            ? `${espnConfig?.league_name || 'Liga'} · ${espnConfig?.country_name || '-'}`
+            : flashScoreConfig?.tournament_url || 'Sin URL';
 
-    const lastSync = isRugby ? rugbyConfig?.last_sync_at : flashScoreConfig?.last_sync;
+    const lastSync = isRugby ? rugbyConfig?.last_sync_at : isAmericanFootball ? espnConfig?.last_sync_at : flashScoreConfig?.last_sync;
 
     if (!isLinked) {
         return (

@@ -22,7 +22,8 @@ export default async function TournamentPage({
     // Only prefetch for DB tournaments (UUID or slug, not external provider ids)
     const isExternalTournament =
         id.toLowerCase().startsWith('fs-') ||
-        id.toLowerCase().startsWith('ras-league-');
+        id.toLowerCase().startsWith('ras-league-') ||
+        id.toLowerCase().startsWith('espn-league-');
     const isDbTournament = !isExternalTournament;
     let initialData = undefined;
 

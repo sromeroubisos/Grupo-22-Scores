@@ -7,6 +7,7 @@ import { Shield, MapPin, Palette, Plus, X, Image as ImageIcon, ChevronRight } fr
 import { clsx } from 'clsx';
 import LogoUploader from '@/components/LogoUploader';
 import { fetchDivisions, type Division } from '@/lib/services/divisionService';
+import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 
@@ -55,6 +56,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
     const linkedDivisionCategoryKeys = new Set(
         linkedDivisions.map((division) => normalizeSegmentValue(division.category || division.name))
     );
+    const previewLogo = resolveLogoPreviewSrc(form.logo_url);
 
     const updateField = (field: Partial<ClubRow>) => {
         const newForm = { ...form, ...field };
@@ -163,8 +165,8 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                 <div className="manager-main-layout">
                     <aside className="manager-preview-zone">
                         <div className="manager-preview-frame group">
-                            {form.logo_url ? (
-                                <img src={form.logo_url} alt="Logo" />
+                            {previewLogo ? (
+                                <img src={previewLogo} alt="Logo" />
                             ) : (
                                 <div className="flex flex-col items-center gap-3 text-muted text-xs uppercase tracking-widest opacity-50">
                                     <ImageIcon size={48} strokeWidth={1} />
@@ -177,8 +179,8 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                         </div>
 
                         <div className="manager-metadata-box">
-                            ORIGIN: {form.logo_url ? (form.logo_url.startsWith('data:') ? 'BASE64' : 'CDN/WEB') : 'NULL'}<br />
-                            FORMAT: {form.logo_url ? (form.logo_url.startsWith('data:') ? 'DATA_URI' : form.logo_url.split('.').pop()?.substring(0, 4).toUpperCase() || 'IMG') : '--'}<br />
+                            ORIGIN: {previewLogo ? (previewLogo.startsWith('data:') ? 'BASE64' : 'CDN/WEB') : 'NULL'}<br />
+                            FORMAT: {previewLogo ? (previewLogo.startsWith('data:') ? 'DATA_URI' : previewLogo.split('.').pop()?.substring(0, 4).toUpperCase() || 'IMG') : '--'}<br />
                             COLOR: {form.primary_color?.toUpperCase() || '--'}
                         </div>
                     </aside>
@@ -197,7 +199,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                     <input
                                         type="text"
                                         className="manager-url-input pr-24"
-                                        placeholder="https://.../logo.png"
+                                        placeholder="https://.../logo.png o pega el snippet de Flaticon"
                                         value={form.logo_url || ''}
                                         onChange={(e) => updateField({ logo_url: e.target.value })}
                                     />
@@ -206,7 +208,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                     </div>
                                 </div>
                                 <p className="text-xs text-[#888] mt-2 leading-relaxed">
-                                    Acepta: <strong>HTTPS</strong> (png, jpg, webp, svg).
+                                    Acepta URLs directas, snippets HTML y enlaces de Flaticon de paises para convertirlos en banderas al guardar.
                                 </p>
                             </div>
                         ) : (

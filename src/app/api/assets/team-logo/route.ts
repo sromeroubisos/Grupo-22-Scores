@@ -93,12 +93,24 @@ function addCandidate(candidates: Set<string>, value: string) {
         return;
     }
 
+    if (normalized.startsWith('espn-team-')) {
+        const stripped = raw.slice(10);
+        const strippedLower = normalized.slice(10);
+        if (stripped) {
+            candidates.add(stripped);
+            candidates.add(strippedLower);
+        }
+        return;
+    }
+
     candidates.add(`fs-team-${raw}`);
     candidates.add(`fs-team-${normalized}`);
     candidates.add(`fs-${raw}`);
     candidates.add(`fs-${normalized}`);
     candidates.add(`ras-team-${raw}`);
     candidates.add(`ras-team-${normalized}`);
+    candidates.add(`espn-team-${raw}`);
+    candidates.add(`espn-team-${normalized}`);
 }
 
 function firstNonEmptyString(...values: unknown[]): string {

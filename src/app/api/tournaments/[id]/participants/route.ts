@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClub, linkDerivedClub } from '@/lib/services/clubService';
 import { getTournamentStandings } from '@/lib/services/flashscore';
+import {
+  getEspnAmericanFootballLeagueStandings,
+  parseEspnAmericanFootballTournamentId,
+} from '@/lib/services/espnAmericanFootball';
 import { resolveParticipantClubForTournament as resolveParticipantClubForTournamentViaService } from '@/lib/services/tournamentClubDerivationService';
 import {
   canonicalizeSportId,
@@ -642,6 +646,52 @@ export async function GET(
     const full = searchParams.get('full') === 'true';
 
     // ─── FLASH SCORE SUPPORT ──────────────────────────────────────────────────
+    const espnLeagueSlug = parseEspnAmericanFootballTournamentId(tournamentId);
+    if (espnLeagueSlug) {
+      const standings = await getEspnAmericanFootballLeagueStandings(espnLeagueSlug);
+      const teamNames = standings.rows.map((row) => row.team_name).filter(Boolean);
+
+      if (teamNames.length === 0) {
+        return NextResponse.json([]);
+      }
+
+      const { data: dbClubs, error: dbError } = await supabase
+        .from('clubs')
+        .select('id, name, short_name, logo_url')
+        .or(`name.in.(${teamNames.map(n => `"${n.replace(/"/g, '""')}"`).join(',')})`);
+
+      if (dbError) {
+        console.error('[Participants API] Error searching clubs for ESPN:', dbError);
+        return NextResponse.json({ error: 'Database search failed' }, { status: 500 });
+      }
+
+      const clubs = (dbClubs || []).map(club => ({
+        id: club.id,
+        name: club.name,
+        short_name: club.short_name,
+        logo: club.logo_url,
+        externalId: null,
+      }));
+
+      if (full) {
+        return NextResponse.json(clubs.map(c => ({
+          id: `espn-link-${c.id}`,
+          club_id: c.id,
+          division_id: null,
+          status: 'active',
+          clubs: {
+            id: c.id,
+            name: c.name,
+            short_name: c.short_name,
+            logo: c.logo,
+          },
+          division: null,
+        })));
+      }
+
+      return NextResponse.json(clubs);
+    }
+
     if (tournamentId.toLowerCase().startsWith('fs-')) {
       const fsId = tournamentId.slice(3); // Remove 'fs-' prefix
       // Use the ID as stageId, which is commonly what's stored

@@ -24,11 +24,16 @@ import {
   getFlashScoreTopScorers,
 } from '@/lib/services/flashscore';
 import {
+  getEspnAmericanFootballMatchBundle,
+  parseEspnAmericanFootballMatchId,
+} from '@/lib/services/espnAmericanFootball';
+import {
   getRugbyApiSportsGame,
   getRugbyApiSportsGamesH2H,
   getRugbyApiSportsStandings,
   parseRugbyApiSportsMatchId,
   toRugbyApiSportsTournamentId,
+  type RugbyApiSportsGame,
 } from '@/lib/services/rugbyApiSports';
 import {
   normalizeRugbyGameForMatchDetail,
@@ -209,13 +214,13 @@ async function getRugbyApiSportsMatchBundle(matchId: string) {
   const tournamentOverride = game.league?.id
     ? await getExternalTournamentOverride(toRugbyApiSportsTournamentId(game.league.id)).catch(() => null)
     : null;
-  const resolvedGame = game.league && tournamentOverride
+  const resolvedGame: RugbyApiSportsGame = game.league && tournamentOverride
     ? {
       ...game,
       league: applyExternalTournamentOverride(
         game.league as Record<string, unknown>,
         tournamentOverride,
-      ),
+      ) as RugbyApiSportsGame['league'],
     }
     : game;
   const match = normalizeRugbyGameForMatchDetail(resolvedGame);
@@ -275,9 +280,22 @@ export async function GET(
   try {
     const matchId = (await params).id;
     const rugbyMatchId = parseRugbyApiSportsMatchId(matchId);
+    const espnMatchId = parseEspnAmericanFootballMatchId(matchId);
 
     if (rugbyMatchId) {
       const bundle = await getRugbyApiSportsMatchBundle(rugbyMatchId);
+      if (!bundle) {
+        return NextResponse.json(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(bundle);
+    }
+
+    if (espnMatchId) {
+      const bundle = await getEspnAmericanFootballMatchBundle(espnMatchId);
       if (!bundle) {
         return NextResponse.json(
           { error: 'Match not found' },

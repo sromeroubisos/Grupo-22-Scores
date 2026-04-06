@@ -327,6 +327,8 @@ export default function RankingsPage() {
         () => buildRankingExportRows(activeRankingDetail?.entries ?? []),
         [activeRankingDetail?.entries],
     );
+    const rankingExportSubtitle = selectedRanking?.description?.trim()
+        || `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`;
     const canExportPublicRanking = user?.role === 'super_admin' || user?.role === 'admin_general';
 
     const rankingStatusLabel = loadingList || loadingDetail
@@ -766,7 +768,7 @@ export default function RankingsPage() {
                                 filename={`ranking-${selectedRanking?.name || selectedSport.id}`}
                                 data={{
                                     title: selectedRanking?.name || 'Ranking de Clubes',
-                                    subtitle: `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`,
+                                    subtitle: rankingExportSubtitle,
                                     rows: rankingExportRows,
                                     columnLabels: RANKING_EXPORT_COLUMN_LABELS,
                                     plainDiff: true,

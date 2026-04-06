@@ -3,6 +3,10 @@ import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
 import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
+import {
+    getEspnAmericanFootballLiveMatches,
+    getEspnAmericanFootballMatches,
+} from '@/lib/services/espnAmericanFootball';
 
 const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
 const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
@@ -163,6 +167,10 @@ export async function getFlashScoreMatches(
     sportId: string,
     options?: { timeZone?: string; targetDateKey?: string }
 ): Promise<Match[]> {
+    if (sportId === 'american-football') {
+        return getEspnAmericanFootballMatches(date, options);
+    }
+
     const timeZone = options?.timeZone;
     const targetDateKey = options?.targetDateKey || formatDateKey(date, timeZone);
 
@@ -253,6 +261,10 @@ function getAdjacentDayOffset(timeZone?: string): number {
 }
 
 export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]> {
+    if (sportId === 'american-football') {
+        return getEspnAmericanFootballLiveMatches();
+    }
+
     if (!isFlashScoreEnabledForSport(sportId)) {
         return [];
     }

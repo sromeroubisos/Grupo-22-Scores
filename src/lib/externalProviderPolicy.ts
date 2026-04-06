@@ -1,4 +1,5 @@
 import type {
+    EspnAmericanFootballConfig,
     FlashScoreConfig,
     RugbyApiSportsConfig,
 } from '@/lib/types/flashscore-integration';
@@ -13,9 +14,16 @@ const RUGBY_SPORT_KEYS = new Set([
     '/rugby-league/',
 ]);
 
+const AMERICAN_FOOTBALL_SPORT_KEYS = new Set([
+    'american-football',
+    '5',
+    '/american-football/',
+]);
+
 export const FLASHSCORE_PROVIDER = 'flashscore';
 export const RUGBY_API_SPORTS_PROVIDER = 'rugby-api-sports';
-export const RUGBY_FLASHSCORE_DISABLED_MESSAGE = 'FlashScore está deshabilitado para este torneo de rugby.';
+export const ESPN_PROVIDER = 'espn';
+export const RUGBY_FLASHSCORE_DISABLED_MESSAGE = 'FlashScore estÃ¡ deshabilitado para este torneo de rugby.';
 
 export function normalizeSportKey(value: unknown): string | null {
     if (value === null || value === undefined) return null;
@@ -36,11 +44,19 @@ export function isRugbySport(value: unknown): boolean {
     return RUGBY_SPORT_KEYS.has(normalized);
 }
 
+export function isAmericanFootballSport(value: unknown): boolean {
+    const normalized = normalizeSportKey(value);
+    if (!normalized) return false;
+    return AMERICAN_FOOTBALL_SPORT_KEYS.has(normalized);
+}
+
 export function isFlashScoreEnabledForSport(_value: unknown): boolean {
     return true;
 }
 
-export function getPreferredExternalProviderForSport(_value: unknown) {
+export function getPreferredExternalProviderForSport(value: unknown) {
+    if (isRugbySport(value)) return RUGBY_API_SPORTS_PROVIDER;
+    if (isAmericanFootballSport(value)) return ESPN_PROVIDER;
     return FLASHSCORE_PROVIDER;
 }
 
@@ -99,6 +115,36 @@ export function getTournamentRugbyApiSportsConfig(
     return getRulesetRugbyApiSportsConfig(tournament.ruleset);
 }
 
+export function getRulesetEspnAmericanFootballConfig(ruleset: unknown): EspnAmericanFootballConfig | null {
+    if (!ruleset || typeof ruleset !== 'object') return null;
+
+    const rawRuleset = ruleset as Record<string, unknown>;
+    const external = rawRuleset.external && typeof rawRuleset.external === 'object'
+        ? rawRuleset.external as Record<string, unknown>
+        : null;
+
+    const rawConfig =
+        external?.espn ??
+        external?.espnAmericanFootball ??
+        rawRuleset.espn ??
+        rawRuleset.espnAmericanFootball ??
+        null;
+
+    if (!rawConfig || typeof rawConfig !== 'object') return null;
+    return rawConfig as EspnAmericanFootballConfig;
+}
+
+export function getTournamentEspnAmericanFootballConfig(
+    tournament: { sport_id?: unknown; sport?: unknown; ruleset?: unknown } | null | undefined
+): EspnAmericanFootballConfig | null {
+    if (!tournament) return null;
+
+    const sportKey = tournament.sport_id ?? tournament.sport ?? null;
+    if (!isAmericanFootballSport(sportKey)) return null;
+
+    return getRulesetEspnAmericanFootballConfig(tournament.ruleset);
+}
+
 export function withFlashScoreRuleset(ruleset: unknown, config: Partial<FlashScoreConfig>) {
     const currentRuleset = (ruleset && typeof ruleset === 'object')
         ? ruleset as Record<string, unknown>
@@ -147,6 +193,33 @@ export function withRugbyApiSportsRuleset(ruleset: unknown, config: Partial<Rugb
             },
         },
         rugbyApiSports: {
+            ...currentConfig,
+            ...config,
+        },
+    };
+}
+
+export function withEspnAmericanFootballRuleset(ruleset: unknown, config: Partial<EspnAmericanFootballConfig>) {
+    const currentRuleset = (ruleset && typeof ruleset === 'object')
+        ? ruleset as Record<string, unknown>
+        : {};
+
+    const currentExternal = currentRuleset.external && typeof currentRuleset.external === 'object'
+        ? currentRuleset.external as Record<string, unknown>
+        : {};
+
+    const currentConfig = getRulesetEspnAmericanFootballConfig(currentRuleset) ?? {};
+
+    return {
+        ...currentRuleset,
+        external: {
+            ...currentExternal,
+            espn: {
+                ...currentConfig,
+                ...config,
+            },
+        },
+        espn: {
             ...currentConfig,
             ...config,
         },

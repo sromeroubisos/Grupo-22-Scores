@@ -13,6 +13,11 @@ import {
     getTournamentDraw,
     getTournamentArchives
 } from '@/lib/services/flashscore';
+import {
+    getEspnAmericanFootballTournamentBundle,
+    inferEspnAmericanFootballLeague,
+    parseEspnAmericanFootballTournamentId,
+} from '@/lib/services/espnAmericanFootball';
 import { getReadClient } from '@/lib/supabase/read';
 import { db } from '@/lib/mock-db';
 import {
@@ -21,6 +26,7 @@ import {
 import { getTabSnapshot, hasMeaningfulPayload, upsertTabSnapshot } from '@/lib/sync/tabSnapshots';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import {
+    isAmericanFootballSport,
     isFlashScoreEnabledForSport,
 } from '@/lib/externalProviderPolicy';
 import {
@@ -68,6 +74,10 @@ function normalizeTournamentUrl(raw?: string): string | undefined {
 
 function isRugbyApiSportsTournamentId(value: string): boolean {
     return /^ras-league-\d+$/i.test(value.trim());
+}
+
+function isEspnAmericanFootballTournamentId(value: string): boolean {
+    return Boolean(parseEspnAmericanFootballTournamentId(value));
 }
 
 function getFlashScoreSportCandidates(sportId: string, tournamentUrl?: string): string[] {
@@ -368,7 +378,12 @@ function timedTab<T>(label: string, promise: Promise<T>, ms: number = TAB_TIMEOU
 
 
 async function findDbTournamentMeta(id: string) {
-    if (!id || id.toLowerCase().startsWith('fs-')) {
+    if (
+        !id ||
+        id.toLowerCase().startsWith('fs-') ||
+        isRugbyApiSportsTournamentId(id) ||
+        isEspnAmericanFootballTournamentId(id)
+    ) {
         return null;
     }
 
@@ -577,7 +592,6 @@ export async function GET(request: Request) {
     });
 
     const hasFsPrefix = id.toLowerCase().startsWith('fs-');
-    const hasRugbyApiSportsPrefix = isRugbyApiSportsTournamentId(id);
     const rawId = hasFsPrefix ? id.slice(3) : id;
     console.log('ID Parsing:', { hasFsPrefix, rawId });
 
@@ -600,8 +614,124 @@ export async function GET(request: Request) {
     }
 
     let details: any = null;
+    let externalOverrideId: string | null = null;
+    const resolvedSportId = dbTournamentMeta?.sport_id || localTournament?.sportId || sport;
+    const espnLeague = isAmericanFootballSport(resolvedSportId)
+        ? inferEspnAmericanFootballLeague({
+            id,
+            externalId: dbTournamentMeta?.external_id,
+            tournamentUrl: url || dbTournamentMeta?.url || localTournament?.url,
+            name: dbTournamentMeta?.display_name || dbTournamentMeta?.name || localTournament?.name,
+            ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
+        })
+        : null;
 
     try {
+        if (espnLeague) {
+            const bundle = await getEspnAmericanFootballTournamentBundle(espnLeague);
+            externalOverrideId = resolveExternalTournamentId({
+                routeId: id,
+                externalId: dbTournamentMeta?.external_id,
+                sportId: resolvedSportId,
+                ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
+                flashScoreIds: {
+                    tournamentId: bundle.ids?.tournamentId,
+                    tournamentStageId: bundle.ids?.stageId,
+                    tournamentTemplateId: bundle.ids?.templateId,
+                    seasonId: bundle.ids?.seasonId,
+                },
+            });
+
+            let detailsPayload: any = bundle.details;
+            let standingsPayload: any = bundle.standings;
+            let externalStandingsTeamLabels: any[] = [];
+
+            if (externalOverrideId) {
+                const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
+                if (externalTournamentOverride) {
+                    detailsPayload = applyExternalTournamentOverride(
+                        (detailsPayload && typeof detailsPayload === 'object')
+                            ? detailsPayload
+                            : {},
+                        externalTournamentOverride,
+                    );
+                }
+
+                const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
+                if (externalStandingsOverride) {
+                    const overriddenStandings = applyExternalTournamentStandingsOverride(standingsPayload, externalStandingsOverride);
+                    standingsPayload = overriddenStandings.standings;
+                    externalStandingsTeamLabels = overriddenStandings.teamLabels;
+                }
+            }
+
+            try {
+                persistFromTournamentPayload({
+                    ids: {
+                        tournamentId: bundle.ids?.tournamentId,
+                        seasonId: bundle.ids?.seasonId != null ? String(bundle.ids.seasonId) : undefined,
+                    },
+                    sport,
+                    details: detailsPayload,
+                    standings: standingsPayload,
+                    fixtures: bundle.fixtures,
+                    results: bundle.results,
+                    topScorers: bundle.topScorers,
+                });
+            } catch (persistError) {
+                console.warn('Catalog persist failed:', persistError);
+            }
+
+            const snapshotEntityId = bundle.ids?.tournamentId || id || url || 'unknown';
+
+            return Response.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    externalOverrideId,
+                    provider: 'espn',
+                    league: espnLeague,
+                    counts: {
+                        results: Array.isArray(bundle.results) ? bundle.results.length : 0,
+                        fixtures: Array.isArray(bundle.fixtures) ? bundle.fixtures.length : 0,
+                        standings: Array.isArray(standingsPayload) ? standingsPayload.length : 0,
+                        topScorers: Array.isArray(bundle.topScorers) ? bundle.topScorers.length : 0,
+                    },
+                },
+                _cache: {
+                    entityId: snapshotEntityId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                        standingsForm: 'api',
+                        standingsHtFt: 'api',
+                        standingsOverUnder: 'api',
+                        topScorers: 'api',
+                        draw: 'api',
+                        archives: 'api',
+                    },
+                },
+                ids: {
+                    ...bundle.ids,
+                    drawStageId: bundle.ids?.stageId,
+                },
+                details: detailsPayload,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: standingsPayload,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: externalStandingsTeamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                archives: bundle.archives,
+            });
+        }
+
         if (flashScoreEnabledForSport && hasFsPrefix && rawId && !stageId) {
             console.log('Attempting details with rawId as stageId:', rawId);
             const detailsAttemptRes = await getTournamentDetails(rawId);
@@ -766,7 +896,7 @@ export async function GET(request: Request) {
         const canFetchStandings = flashScoreEnabledForSport && !!(tournamentId && stageId);
         const canFetchDraw = flashScoreEnabledForSport && !!(tournamentId && stageId); // Use stageId instead of drawStageId
         const canFetchArchives = flashScoreEnabledForSport && !!stageId;
-        const externalOverrideId = resolveExternalTournamentId({
+        externalOverrideId = resolveExternalTournamentId({
             routeId: id,
             externalId: dbTournamentMeta?.external_id,
             sportId: dbTournamentMeta?.sport_id || localTournament?.sportId || sport,

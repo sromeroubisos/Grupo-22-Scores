@@ -11,6 +11,7 @@ import { createUnion } from '@/lib/services/unionService';
 import type { ClubCreateInput } from '@/lib/types/clubs';
 import { slugifyUnion } from '@/lib/unions';
 import { normalizeSlug } from '@/lib/utils/normalize';
+import { normalizeLogoUrl, resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
 import {
   CLUB_DERIVATIVE_LABELS,
@@ -204,6 +205,7 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
   // Estado para URL de logo
   const [logoUrlInput, setLogoUrlInput] = useState('');
   const [useUrlForLogo, setUseUrlForLogo] = useState(false);
+  const logoPreviewSrc = resolveLogoPreviewSrc(form.logo_url);
 
   // Dirty tracking
   const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm);
@@ -464,8 +466,9 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
 
   // Handler para logo URL
   const handleLogoUrlSubmit = () => {
-    if (logoUrlInput.trim()) {
-      updateField('logo_url', logoUrlInput.trim());
+    const normalizedLogoUrl = normalizeLogoUrl(logoUrlInput);
+    if (normalizedLogoUrl) {
+      updateField('logo_url', normalizedLogoUrl);
       setLogoUrlInput('');
     }
   };
@@ -743,9 +746,9 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
             </div>
 
             {/* Preview del logo si existe */}
-            {form.logo_url && (
+            {logoPreviewSrc && (
               <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-                <img src={form.logo_url} className={styles.logoPreview} alt="Logo preview" style={{ display: 'block', margin: '0 auto' }} />
+                <img src={logoPreviewSrc} className={styles.logoPreview} alt="Logo preview" style={{ display: 'block', margin: '0 auto' }} />
                 <button type="button" onClick={() => updateField('logo_url', null)} className={styles.logoRemoveBtn} style={{ marginTop: '0.5rem' }}>QUITAR</button>
               </div>
             )}
@@ -761,11 +764,11 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
             ) : (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
-                  type="url"
+                  type="text"
                   className={styles.input}
                   value={logoUrlInput}
                   onChange={(e) => setLogoUrlInput(e.target.value)}
-                  placeholder="https://ejemplo.com/logo.png"
+                  placeholder="https://ejemplo.com/logo.png o pega el snippet de Flaticon"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -783,6 +786,9 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
                 </button>
               </div>
             )}
+            <span className={styles.helper}>
+              Acepta URLs directas, snippets HTML con <code>&lt;a&gt;</code>/<code>&lt;img&gt;</code> y enlaces de Flaticon de paises para convertirlos en banderas.
+            </span>
           </div>
 
           {/* Selector de Color Predominante */}

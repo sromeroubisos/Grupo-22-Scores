@@ -105,6 +105,38 @@ type RankingManualAdjustmentRow = {
     metadata: Record<string, unknown> | null;
 };
 
+type RankingLeadershipPeriodRow = {
+    id: string;
+    ranking_id: string;
+    club_id: string;
+    started_at: string;
+    ended_at: string | null;
+    days_as_leader: number;
+    started_reason: 'initial' | 'match' | 'manual';
+    ended_reason: 'match' | 'manual' | null;
+    started_match_id: string | null;
+    ended_match_id: string | null;
+    started_adjustment_id: string | null;
+    ended_adjustment_id: string | null;
+    metadata: Record<string, unknown> | null;
+    created_at: string;
+};
+
+type RankingLeadershipPeriod = RankingLeadershipPeriodRow & {
+    club: RankingClubRow | null;
+};
+
+type RankingLeadershipSummary = {
+    club_id: string;
+    club: RankingClubRow | null;
+    total_days_as_leader: number;
+    times_as_leader: number;
+    current_streak_days: number;
+    current_streak_started_at: string | null;
+    last_reached_at: string | null;
+    is_current_leader: boolean;
+};
+
 type MatchSnapshot = {
     id: string;
     home_club_id: string | null;
@@ -171,12 +203,15 @@ type RankingDetail = {
     entries: RankingEntryRow[];
     recentApplications: RankingApplicationRow[];
     manualAdjustments: RankingManualAdjustmentRow[];
+    leadershipPeriods: RankingLeadershipPeriod[];
+    leadershipSummary: RankingLeadershipSummary[];
+    currentLeaderClubId: string | null;
 };
 
 const MATCH_SELECT =
     'id, home_club_id, away_club_id, score, status, date_time, tournament_id, phase_id, group_id, round_uuid, updated_at';
 const CLUB_RANKING_SCHEMA_MESSAGE =
-    "El sistema de rankings no esta disponible en el schema cache de Supabase. Si ya aplicaste `20260405170000_club_rankings_world_rugby.sql`, recarga el schema cache de PostgREST con `NOTIFY pgrst, 'reload schema';` y vuelve a probar.";
+    "El sistema de rankings no esta disponible en el schema cache de Supabase. Si ya aplicaste las migraciones de rankings, recarga el schema cache de PostgREST con `NOTIFY pgrst, 'reload schema';` y vuelve a probar.";
 
 function getAdminClient() {
     return createAdminClient() as AdminClient;
@@ -189,6 +224,13 @@ function isMissingClubRankingSchemaError(error: unknown) {
         'club_ranking_match_applications',
         'club_ranking_manual_adjustments',
     ].some((tableName) => isMissingTableError(error as { code?: string | null; message?: string | null; details?: string | null }, tableName));
+}
+
+function isMissingLeadershipHistorySchemaError(error: unknown) {
+    return isMissingTableError(
+        error as { code?: string | null; message?: string | null; details?: string | null },
+        'club_ranking_leadership_periods',
+    );
 }
 
 function createClubRankingQueryError(error: unknown, fallbackMessage: string) {
@@ -212,6 +254,56 @@ function toNumber(value: unknown, fallback = 0) {
 
 function roundRating(value: number) {
     return Number(value.toFixed(4));
+}
+
+function getRankingEntryClub(entry: Pick<RankingEntryRow, 'clubs'>) {
+    if (Array.isArray(entry.clubs)) {
+        return entry.clubs[0] ?? null;
+    }
+
+    return entry.clubs ?? null;
+}
+
+function compareRankingEntries(left: RankingEntryRow, right: RankingEntryRow) {
+    const ratingDelta = toNumber(right.current_rating) - toNumber(left.current_rating);
+    if (ratingDelta !== 0) return ratingDelta;
+    const leftName = getRankingEntryClub(left)?.name || left.source_name;
+    const rightName = getRankingEntryClub(right)?.name || right.source_name;
+    return leftName.localeCompare(rightName, 'es');
+}
+
+function getRankingLeader(entries: Iterable<RankingEntryRow>) {
+    return Array.from(entries)
+        .filter((entry) => entry.is_active !== false)
+        .sort(compareRankingEntries)[0] ?? null;
+}
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+function calculateInclusiveDaySpan(
+    startedAt: string | null | undefined,
+    endedAt: string | null | undefined,
+) {
+    if (!startedAt || !endedAt) return 0;
+    const startDate = new Date(startedAt);
+    const endDate = new Date(endedAt);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+        return 0;
+    }
+
+    const startUtc = Date.UTC(
+        startDate.getUTCFullYear(),
+        startDate.getUTCMonth(),
+        startDate.getUTCDate(),
+    );
+    const endUtc = Date.UTC(
+        endDate.getUTCFullYear(),
+        endDate.getUTCMonth(),
+        endDate.getUTCDate(),
+    );
+
+    return Math.max(1, Math.floor((endUtc - startUtc) / DAY_IN_MS) + 1);
 }
 
 function readText(value: unknown) {
@@ -485,7 +577,7 @@ async function getTournamentSportMap(
 
         if (!error) {
             return new Map(
-                ((data || []) as Array<{ id: string; sport_id?: string | null; sport?: string | null }>)
+                ((data || []) as unknown as Array<{ id: string; sport_id?: string | null; sport?: string | null }>)
                     .map((row) => [row.id, canonicalizeSportId(row.sport_id || row.sport || null)]),
             );
         }
@@ -629,18 +721,391 @@ async function getRankingEntries(
     }));
 }
 
+type LeadershipTimelineEvent =
+    | {
+        id: string;
+        at: string;
+        recorded_at: string;
+        reason: 'match';
+        match_id: string;
+        home_club_id: string;
+        away_club_id: string;
+        home_rating_after: number;
+        away_rating_after: number;
+    }
+    | {
+        id: string;
+        at: string;
+        recorded_at: string;
+        reason: 'manual';
+        adjustment_id: string;
+        club_id: string;
+        resulting_rating: number | null;
+        mode: 'delta' | 'set';
+        value: number;
+    };
+
+type PendingLeadershipPeriod = Omit<RankingLeadershipPeriodRow, 'id' | 'created_at'>;
+
+function cloneRankingEntryForHistory(entry: RankingEntryRow): RankingEntryRow {
+    const initialRating = roundRating(toNumber(entry.initial_rating));
+    return {
+        ...entry,
+        current_rating: initialRating,
+        previous_rating: initialRating,
+        current_position: null,
+        source_previous_position: null,
+        source_payload: withPreviousRating(entry.source_payload, initialRating),
+    };
+}
+
+function buildLeadershipTimeline(
+    applications: RankingApplicationRow[],
+    manualAdjustments: RankingManualAdjustmentRow[],
+) {
+    const matchEvents: LeadershipTimelineEvent[] = [];
+    applications.forEach((application) => {
+        const at = application.match_date_time || application.applied_at;
+        if (!at) return;
+
+        matchEvents.push({
+            id: application.id,
+            at,
+            recorded_at: application.applied_at || at,
+            reason: 'match',
+            match_id: application.match_id,
+            home_club_id: application.home_club_id,
+            away_club_id: application.away_club_id,
+            home_rating_after: roundRating(toNumber(application.home_rating_after)),
+            away_rating_after: roundRating(toNumber(application.away_rating_after)),
+        });
+    });
+
+    const adjustmentEvents: LeadershipTimelineEvent[] = [];
+    manualAdjustments.forEach((adjustment) => {
+        const at = adjustment.created_at;
+        if (!at) return;
+
+        adjustmentEvents.push({
+            id: adjustment.id,
+            at,
+            recorded_at: adjustment.created_at,
+            reason: 'manual',
+            adjustment_id: adjustment.id,
+            club_id: adjustment.club_id,
+            resulting_rating:
+                adjustment.resulting_rating === null
+                    ? null
+                    : roundRating(toNumber(adjustment.resulting_rating)),
+            mode: adjustment.mode,
+            value: roundRating(toNumber(adjustment.value)),
+        });
+    });
+
+    return [...matchEvents, ...adjustmentEvents].sort((left, right) => {
+        const leftAt = new Date(left.at).getTime();
+        const rightAt = new Date(right.at).getTime();
+        const safeLeftAt = Number.isFinite(leftAt) ? leftAt : 0;
+        const safeRightAt = Number.isFinite(rightAt) ? rightAt : 0;
+
+        if (safeLeftAt !== safeRightAt) {
+            return safeLeftAt - safeRightAt;
+        }
+
+        const leftRecorded = new Date(left.recorded_at).getTime();
+        const rightRecorded = new Date(right.recorded_at).getTime();
+        const safeLeftRecorded = Number.isFinite(leftRecorded) ? leftRecorded : safeLeftAt;
+        const safeRightRecorded = Number.isFinite(rightRecorded) ? rightRecorded : safeRightAt;
+
+        if (safeLeftRecorded !== safeRightRecorded) {
+            return safeLeftRecorded - safeRightRecorded;
+        }
+
+        if (left.reason !== right.reason) {
+            return left.reason === 'match' ? -1 : 1;
+        }
+
+        return left.id.localeCompare(right.id, 'en');
+    });
+}
+
+async function rebuildLeadershipHistory(
+    supabase: ReturnType<typeof getAdminClient>,
+    rankingId: string,
+    options?: {
+        ranking?: RankingRow;
+        entries?: RankingEntryRow[];
+    },
+) {
+    const ranking = options?.ranking ?? await getRankingRow(supabase, rankingId);
+    const entries = options?.entries ?? await getRankingEntries(supabase, rankingId);
+    const activeEntries = entries.filter((entry) => entry.is_active !== false);
+    const { error: clearError } = await supabase
+        .from('club_ranking_leadership_periods')
+        .delete()
+        .eq('ranking_id', rankingId);
+
+    if (clearError) {
+        if (isMissingLeadershipHistorySchemaError(clearError)) {
+            return {
+                periods: [] as PendingLeadershipPeriod[],
+                currentLeaderClubId: null,
+            };
+        }
+
+        throw createClubRankingQueryError(
+            clearError,
+            'No se pudo limpiar el historial de punteros del ranking.',
+        );
+    }
+
+    if (activeEntries.length === 0) {
+        return {
+            periods: [] as PendingLeadershipPeriod[],
+            currentLeaderClubId: null,
+        };
+    }
+
+    const [applicationsRes, manualAdjustmentsRes] = await Promise.all([
+        supabase
+            .from('club_ranking_match_applications')
+            .select('*')
+            .eq('ranking_id', rankingId),
+        supabase
+            .from('club_ranking_manual_adjustments')
+            .select('*')
+            .eq('ranking_id', rankingId),
+    ]);
+
+    if (applicationsRes.error) {
+        throw createClubRankingQueryError(
+            applicationsRes.error,
+            'No se pudo reconstruir el historial de punteros del ranking.',
+        );
+    }
+
+    if (manualAdjustmentsRes.error) {
+        throw createClubRankingQueryError(
+            manualAdjustmentsRes.error,
+            'No se pudo reconstruir el historial de punteros del ranking.',
+        );
+    }
+
+    const simulationEntries = new Map(
+        activeEntries.map((entry) => [entry.club_id, cloneRankingEntryForHistory(entry)]),
+    );
+    const timeline = buildLeadershipTimeline(
+        (applicationsRes.data || []) as RankingApplicationRow[],
+        (manualAdjustmentsRes.data || []) as RankingManualAdjustmentRow[],
+    );
+    const periods: PendingLeadershipPeriod[] = [];
+    const initialLeader = getRankingLeader(simulationEntries.values());
+    const historyStartAt = ranking.initial_imported_at || ranking.created_at || new Date().toISOString();
+    const now = new Date().toISOString();
+
+    let openPeriod: PendingLeadershipPeriod | null = initialLeader
+        ? {
+            ranking_id: rankingId,
+            club_id: initialLeader.club_id,
+            started_at: historyStartAt,
+            ended_at: null,
+            days_as_leader: calculateInclusiveDaySpan(historyStartAt, now),
+            started_reason: 'initial',
+            ended_reason: null,
+            started_match_id: null,
+            ended_match_id: null,
+            started_adjustment_id: null,
+            ended_adjustment_id: null,
+            metadata: {},
+        }
+        : null;
+
+    for (const event of timeline) {
+        if (event.reason === 'match') {
+            const homeEntry = simulationEntries.get(event.home_club_id);
+            const awayEntry = simulationEntries.get(event.away_club_id);
+            if (homeEntry) homeEntry.current_rating = event.home_rating_after;
+            if (awayEntry) awayEntry.current_rating = event.away_rating_after;
+        } else {
+            const entry = simulationEntries.get(event.club_id);
+            if (entry) {
+                const fallbackRating =
+                    event.mode === 'set'
+                        ? event.value
+                        : roundRating(toNumber(entry.current_rating) + event.value);
+                entry.current_rating = roundRating(event.resulting_rating ?? fallbackRating);
+            }
+        }
+
+        const nextLeader = getRankingLeader(simulationEntries.values());
+        const nextLeaderClubId = nextLeader?.club_id ?? null;
+        const currentLeaderClubId = openPeriod?.club_id ?? null;
+
+        if (nextLeaderClubId === currentLeaderClubId) {
+            continue;
+        }
+
+        if (openPeriod) {
+            openPeriod.ended_at = event.at;
+            openPeriod.ended_reason = event.reason;
+            openPeriod.ended_match_id = event.reason === 'match' ? event.match_id : null;
+            openPeriod.ended_adjustment_id = event.reason === 'manual' ? event.adjustment_id : null;
+            openPeriod.days_as_leader = calculateInclusiveDaySpan(openPeriod.started_at, event.at);
+            periods.push(openPeriod);
+        }
+
+        openPeriod = nextLeader
+            ? {
+                ranking_id: rankingId,
+                club_id: nextLeader.club_id,
+                started_at: event.at,
+                ended_at: null,
+                days_as_leader: calculateInclusiveDaySpan(event.at, now),
+                started_reason: event.reason,
+                ended_reason: null,
+                started_match_id: event.reason === 'match' ? event.match_id : null,
+                ended_match_id: null,
+                started_adjustment_id: event.reason === 'manual' ? event.adjustment_id : null,
+                ended_adjustment_id: null,
+                metadata: {},
+            }
+            : null;
+    }
+
+    if (openPeriod) {
+        openPeriod.days_as_leader = calculateInclusiveDaySpan(openPeriod.started_at, now);
+        periods.push(openPeriod);
+    }
+
+    if (periods.length > 0) {
+        const { error: insertError } = await supabase
+            .from('club_ranking_leadership_periods')
+            .insert(periods);
+
+        if (insertError) {
+            if (isMissingLeadershipHistorySchemaError(insertError)) {
+                return {
+                    periods: [] as PendingLeadershipPeriod[],
+                    currentLeaderClubId: null,
+                };
+            }
+
+            throw createClubRankingQueryError(
+                insertError,
+                'No se pudo guardar el historial de punteros del ranking.',
+            );
+        }
+    }
+
+    return {
+        periods,
+        currentLeaderClubId: openPeriod?.club_id ?? periods[periods.length - 1]?.club_id ?? null,
+    };
+}
+
+async function getLeadershipHistory(
+    supabase: ReturnType<typeof getAdminClient>,
+    rankingId: string,
+) {
+    const { data, error } = await supabase
+        .from('club_ranking_leadership_periods')
+        .select('*')
+        .eq('ranking_id', rankingId)
+        .order('started_at', { ascending: false });
+
+    if (error) {
+        if (isMissingLeadershipHistorySchemaError(error)) {
+            return {
+                leadershipPeriods: [] as RankingLeadershipPeriod[],
+                leadershipSummary: [] as RankingLeadershipSummary[],
+                currentLeaderClubId: null,
+            };
+        }
+
+        throw createClubRankingQueryError(
+            error,
+            'No se pudo cargar el historial de punteros del ranking.',
+        );
+    }
+
+    const rows = (data || []) as RankingLeadershipPeriodRow[];
+    const now = new Date().toISOString();
+    const clubsById = await getClubsByIds(
+        supabase,
+        rows.map((row) => row.club_id),
+    );
+    const periods: RankingLeadershipPeriod[] = rows.map((row) => ({
+        ...row,
+        days_as_leader: row.ended_at
+            ? Number(row.days_as_leader)
+            : calculateInclusiveDaySpan(row.started_at, now),
+        club: clubsById.get(row.club_id) ?? null,
+    }));
+
+    const summaryMap = new Map<string, RankingLeadershipSummary>();
+    periods.forEach((period) => {
+        const current = summaryMap.get(period.club_id) ?? {
+            club_id: period.club_id,
+            club: period.club,
+            total_days_as_leader: 0,
+            times_as_leader: 0,
+            current_streak_days: 0,
+            current_streak_started_at: null,
+            last_reached_at: null,
+            is_current_leader: false,
+        };
+
+        current.club = current.club ?? period.club;
+        current.total_days_as_leader += Number(period.days_as_leader) || 0;
+        current.times_as_leader += 1;
+
+        if (!current.last_reached_at || period.started_at > current.last_reached_at) {
+            current.last_reached_at = period.started_at;
+        }
+
+        if (period.ended_at === null) {
+            current.is_current_leader = true;
+            current.current_streak_days = Number(period.days_as_leader) || 0;
+            current.current_streak_started_at = period.started_at;
+        }
+
+        summaryMap.set(period.club_id, current);
+    });
+
+    const leadershipSummary = Array.from(summaryMap.values()).sort((left, right) => {
+        if (left.is_current_leader !== right.is_current_leader) {
+            return left.is_current_leader ? -1 : 1;
+        }
+
+        if (right.total_days_as_leader !== left.total_days_as_leader) {
+            return right.total_days_as_leader - left.total_days_as_leader;
+        }
+
+        if (right.times_as_leader !== left.times_as_leader) {
+            return right.times_as_leader - left.times_as_leader;
+        }
+
+        const leftName = left.club?.name || left.club_id;
+        const rightName = right.club?.name || right.club_id;
+        return leftName.localeCompare(rightName, 'es');
+    });
+
+    const currentLeaderClubId =
+        leadershipSummary.find((item) => item.is_current_leader)?.club_id ?? null;
+
+    return {
+        leadershipPeriods: periods,
+        leadershipSummary,
+        currentLeaderClubId,
+    };
+}
+
 async function recomputeEntryPositions(
     supabase: ReturnType<typeof getAdminClient>,
     rankingId: string,
 ) {
     const entries = await getRankingEntries(supabase, rankingId);
-    const sorted = [...entries].sort((left, right) => {
-        const ratingDelta = toNumber(right.current_rating) - toNumber(left.current_rating);
-        if (ratingDelta !== 0) return ratingDelta;
-        const leftName = left.clubs?.name || left.source_name;
-        const rightName = right.clubs?.name || right.source_name;
-        return leftName.localeCompare(rightName, 'es');
-    });
+    const sorted = [...entries].sort(compareRankingEntries);
 
     for (let index = 0; index < sorted.length; index += 1) {
         const entry = sorted[index];
@@ -709,6 +1174,7 @@ async function finalizeEntryMutation(
     void _actorUserId;
     const supabase = getAdminClient();
     await recomputeEntryPositions(supabase, rankingId);
+    await rebuildLeadershipHistory(supabase, rankingId);
     return getClubRankingDetail(rankingId);
 }
 
@@ -1019,6 +1485,8 @@ async function rebuildRankingInternal(
         },
     );
 
+    await rebuildLeadershipHistory(supabase, rankingId);
+
     return getClubRankingDetail(rankingId);
 }
 
@@ -1036,10 +1504,72 @@ export async function listClubRankings() {
     return (data || []) as RankingRow[];
 }
 
+export async function updateClubRankingMetadata(
+    rankingId: string,
+    input: {
+        name: string;
+        description?: string | null;
+        actorUserId?: string | null;
+    },
+) {
+    const nextName = input.name.trim();
+    if (!nextName) {
+        throw new Error('El ranking necesita un nombre.');
+    }
+
+    const supabase = getAdminClient();
+    const ranking = await getRankingRow(supabase, rankingId);
+    const nextDescription = readText(input.description);
+    const changes: Record<string, unknown> = {};
+
+    if (ranking.name !== nextName) {
+        changes.name = {
+            before: ranking.name,
+            after: nextName,
+        };
+    }
+
+    if ((ranking.description ?? null) !== nextDescription) {
+        changes.description = {
+            before: ranking.description ?? null,
+            after: nextDescription,
+        };
+    }
+
+    if (Object.keys(changes).length === 0) {
+        return getClubRankingDetail(rankingId);
+    }
+
+    const { error } = await supabase
+        .from('club_rankings')
+        .update({
+            name: nextName,
+            description: nextDescription,
+        })
+        .eq('id', rankingId);
+
+    if (error) {
+        throw createClubRankingQueryError(
+            error,
+            `No se pudo actualizar el ranking: ${error.message}`,
+        );
+    }
+
+    await writeAudit(
+        supabase,
+        input.actorUserId,
+        rankingId,
+        'metadata_updated',
+        changes,
+    );
+
+    return getClubRankingDetail(rankingId);
+}
+
 export async function getClubRankingDetail(rankingId: string): Promise<RankingDetail> {
     const supabase = getAdminClient();
     const ranking = await getRankingRow(supabase, rankingId);
-    const [entries, recentApplicationsRes, manualAdjustmentsRes] = await Promise.all([
+    const [entries, recentApplicationsRes, manualAdjustmentsRes, leadershipHistory] = await Promise.all([
         getRankingEntries(supabase, rankingId),
         supabase
             .from('club_ranking_match_applications')
@@ -1053,6 +1583,7 @@ export async function getClubRankingDetail(rankingId: string): Promise<RankingDe
             .eq('ranking_id', rankingId)
             .order('created_at', { ascending: false })
             .limit(20),
+        getLeadershipHistory(supabase, rankingId),
     ]);
 
     if (recentApplicationsRes.error) {
@@ -1086,6 +1617,9 @@ export async function getClubRankingDetail(rankingId: string): Promise<RankingDe
             value: roundRating(toNumber(row.value)),
             resulting_rating: row.resulting_rating === null ? null : roundRating(toNumber(row.resulting_rating)),
         })),
+        leadershipPeriods: leadershipHistory.leadershipPeriods,
+        leadershipSummary: leadershipHistory.leadershipSummary,
+        currentLeaderClubId: leadershipHistory.currentLeaderClubId,
     };
 }
 
@@ -1183,6 +1717,7 @@ export async function importClubRankingBase(input: ImportRankingBaseInput) {
 
     await supabase.from('club_ranking_match_applications').delete().eq('ranking_id', input.id);
     await supabase.from('club_ranking_manual_adjustments').delete().eq('ranking_id', input.id);
+    await supabase.from('club_ranking_leadership_periods').delete().eq('ranking_id', input.id);
     await supabase.from('club_ranking_entries').delete().eq('ranking_id', input.id);
 
     const { error: entriesError } = await supabase.from('club_ranking_entries').insert(
@@ -1200,6 +1735,7 @@ export async function importClubRankingBase(input: ImportRankingBaseInput) {
     }
 
     await recomputeEntryPositions(supabase, input.id);
+    await rebuildLeadershipHistory(supabase, input.id);
     await writeAudit(
         supabase,
         input.actorUserId,
@@ -1502,6 +2038,7 @@ export async function applyManualClubRankingAdjustment(
     }
 
     await recomputeEntryPositions(supabase, rankingId);
+    await rebuildLeadershipHistory(supabase, rankingId);
     await writeAudit(
         supabase,
         input.actorUserId,
@@ -1693,6 +2230,7 @@ export async function syncClubRankingsForMatchUpdate(
 
         await applyMatchToRanking(supabase, ranking, entryMap, currentMatch, 'incremental');
         await recomputeEntryPositions(supabase, ranking.id);
+        await rebuildLeadershipHistory(supabase, ranking.id);
         processedRankings += 1;
     }
 

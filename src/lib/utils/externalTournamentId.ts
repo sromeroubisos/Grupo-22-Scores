@@ -1,8 +1,11 @@
 import {
+    getTournamentEspnAmericanFootballConfig,
     getTournamentFlashScoreConfig,
     getTournamentRugbyApiSportsConfig,
+    isAmericanFootballSport,
     isRugbySport,
 } from '@/lib/externalProviderPolicy';
+import { parseEspnAmericanFootballTournamentId, toEspnAmericanFootballTournamentId } from '@/lib/services/espnAmericanFootball';
 
 type FlashScoreIdsLike = {
     tournamentId?: unknown;
@@ -21,6 +24,7 @@ type ResolveExternalTournamentIdInput = {
 
 const FLASHSCORE_TOURNAMENT_ID_RE = /^fs-/i;
 const RUGBY_API_SPORTS_TOURNAMENT_ID_RE = /^ras-league-\d+$/i;
+const ESPN_TOURNAMENT_ID_RE = /^espn-league-[a-z0-9-]+$/i;
 
 function normalizeString(value: unknown): string | null {
     if (typeof value === 'number' && Number.isFinite(value)) {
@@ -36,7 +40,7 @@ function normalizeString(value: unknown): string | null {
 function toFlashScoreTournamentId(value: unknown): string | null {
     const normalized = normalizeString(value);
     if (!normalized) return null;
-    if (RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized)) return normalized;
+    if (RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized) || ESPN_TOURNAMENT_ID_RE.test(normalized)) return normalized;
     return FLASHSCORE_TOURNAMENT_ID_RE.test(normalized) ? normalized : `fs-${normalized}`;
 }
 
@@ -48,10 +52,18 @@ function toRugbyApiTournamentId(value: unknown): string | null {
     return `ras-league-${normalized}`;
 }
 
+function toEspnTournamentId(value: unknown): string | null {
+    const normalized = normalizeString(value);
+    if (!normalized) return null;
+    if (ESPN_TOURNAMENT_ID_RE.test(normalized)) return normalized;
+    if (parseEspnAmericanFootballTournamentId(normalized)) return normalized;
+    return null;
+}
+
 export function isExternalTournamentId(value: unknown): boolean {
     const normalized = normalizeString(value);
     if (!normalized) return false;
-    return FLASHSCORE_TOURNAMENT_ID_RE.test(normalized) || RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized);
+    return FLASHSCORE_TOURNAMENT_ID_RE.test(normalized) || RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized) || ESPN_TOURNAMENT_ID_RE.test(normalized);
 }
 
 export function resolveExternalTournamentId(input: ResolveExternalTournamentIdInput): string | null {
@@ -71,6 +83,20 @@ export function resolveExternalTournamentId(input: ResolveExternalTournamentIdIn
     if (isRugbySport(input.sportId)) {
         const rugbyExternalId = toRugbyApiTournamentId(externalId);
         if (rugbyExternalId) return rugbyExternalId;
+    }
+
+    const espnConfig = getTournamentEspnAmericanFootballConfig({
+        sport_id: input.sportId,
+        ruleset: input.ruleset,
+    });
+    const espnTournamentId = espnConfig?.league_slug
+        ? toEspnAmericanFootballTournamentId(espnConfig.league_slug as any)
+        : null;
+    if (espnTournamentId) return espnTournamentId;
+
+    if (isAmericanFootballSport(input.sportId)) {
+        const espnExternalId = toEspnTournamentId(externalId);
+        if (espnExternalId) return espnExternalId;
     }
 
     const flashScoreConfig = getTournamentFlashScoreConfig({

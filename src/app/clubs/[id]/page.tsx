@@ -30,12 +30,18 @@ function isRugbyApiSportsTeamId(value: string) {
     return /^ras-team-\d+$/i.test(value);
 }
 
+function isEspnAmericanFootballTeamId(value: string) {
+    return /^espn-team-\d+$/i.test(value);
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function getExternalTeamId(value: string, teamUrl?: string) {
     if (value.startsWith('fs-team-')) return value.slice(8);
     const rugbyMatch = /^ras-team-(\d+)$/i.exec(value);
     if (rugbyMatch?.[1]) return rugbyMatch[1];
+    const espnMatch = /^espn-team-(\d+)$/i.exec(value);
+    if (espnMatch?.[1]) return espnMatch[1];
     if (teamUrl && !UUID_RE.test(value)) return value;
     return null;
 }
@@ -157,7 +163,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     // Hints from URL search params (passed from match/tournament page links)
     const hintName = sp.get('name') || '';
     const hintTeamUrl = sp.get('team_url') || '';
-    const preferredSport = sp.get('sport') || (isRugbyApiSportsTeamId(id) ? 'rugby' : '');
+    const hintLeague = sp.get('league') || '';
+    const preferredSport = sp.get('sport') || (isRugbyApiSportsTeamId(id) ? 'rugby' : isEspnAmericanFootballTeamId(id) ? 'american-football' : '');
 
     useEffect(() => {
         async function fetchData() {
@@ -169,6 +176,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 query.set('team_id', rawId);
                 if (hintName) query.set('team_name', hintName);
                 if (hintTeamUrl) query.set('team_url', hintTeamUrl);
+                if (hintLeague) query.set('league', hintLeague);
                 if (preferredSport) query.set('preferred_sport', preferredSport);
                 query.set('skip_squad', 'true');
 
@@ -180,11 +188,18 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                     return;
                 }
 
-                if (payload?.resolvedClubId && payload.resolvedClubId !== id && !id.startsWith('fs-team-') && !isRugbyApiSportsTeamId(id)) {
+                if (
+                    payload?.resolvedClubId &&
+                    payload.resolvedClubId !== id &&
+                    !id.startsWith('fs-team-') &&
+                    !isRugbyApiSportsTeamId(id) &&
+                    !isEspnAmericanFootballTeamId(id)
+                ) {
                     const nextParams = new URLSearchParams();
                     if (preferredSport) nextParams.set('sport', preferredSport);
                     if (hintName) nextParams.set('name', hintName);
                     if (hintTeamUrl) nextParams.set('team_url', hintTeamUrl);
+                    if (hintLeague) nextParams.set('league', hintLeague);
 
                     const queryString = nextParams.toString();
                     router.replace(`/clubs/${payload.resolvedClubId}${queryString ? `?${queryString}` : ''}`);
@@ -207,7 +222,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         }
 
         fetchData();
-    }, [id, rawId, hintName, hintTeamUrl, preferredSport, router]);
+    }, [hintLeague, hintName, hintTeamUrl, id, preferredSport, rawId, router]);
 
     // Derived: unique sports from matches
     const availableSports = useMemo(() => {
@@ -245,6 +260,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 query.set('team_id', rawId);
                 if (hintName) query.set('team_name', hintName);
                 if (hintTeamUrl) query.set('team_url', hintTeamUrl);
+                if (hintLeague) query.set('league', hintLeague);
                 if (preferredSport) query.set('preferred_sport', preferredSport);
 
                 const res = await fetch(`/api/teams?${query.toString()}`, { cache: 'no-store' });
@@ -261,7 +277,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         }
 
         fetchSquad();
-    }, [activeTab, squadFetched, loading, rawId, hintName, hintTeamUrl, preferredSport]);
+    }, [activeTab, squadFetched, loading, rawId, hintLeague, hintName, hintTeamUrl, preferredSport]);
 
     // Auto-select first squad tab when squad loads
     useEffect(() => {
@@ -277,7 +293,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const externalTeamId = getExternalTeamId(rawId, hintTeamUrl);
     const adminClubId = useMemo(() => {
         if (resolvedClubId) return resolvedClubId;
-        if (!externalTeamId && !rawId.startsWith('fs-team-') && !isRugbyApiSportsTeamId(rawId)) return rawId;
+        if (!externalTeamId && !rawId.startsWith('fs-team-') && !isRugbyApiSportsTeamId(rawId) && !isEspnAmericanFootballTeamId(rawId)) return rawId;
         return null;
     }, [externalTeamId, rawId, resolvedClubId]);
     const visibleTabs = useMemo(() => {
@@ -348,8 +364,10 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                 params.set('returnTo', returnTo);
                 if (preferredSport) params.set('sport', preferredSport);
                 if (hintTeamUrl) params.set('team_url', hintTeamUrl);
+                if (hintLeague) params.set('league', hintLeague);
                 if (rawId.startsWith('fs-team-')) params.set('source', 'flashscore');
                 if (isRugbyApiSportsTeamId(rawId)) params.set('source', 'rugby-api-sports');
+                if (isEspnAmericanFootballTeamId(rawId)) params.set('source', 'espn');
 
                 return `/admin/super/clubes/externos/${externalTeamId}/logo?${params.toString()}`;
             })()

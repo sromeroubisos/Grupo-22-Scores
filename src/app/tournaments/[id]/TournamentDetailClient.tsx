@@ -44,6 +44,10 @@ function isRugbyApiSportsTournamentId(value: string) {
     return /^ras-league-\d+$/i.test(value);
 }
 
+function isEspnAmericanFootballTournamentId(value: string) {
+    return /^espn-league-[a-z0-9-]+$/i.test(value);
+}
+
 type StandingsScopeView = {
     id: string;
     kind: 'global' | 'phase';
@@ -67,13 +71,13 @@ function getTournamentLogo(detailsData: any, localData: any): string {
 }
 
 function buildClubHref(
-    team: { id?: string | number | null; name?: string | null; teamUrl?: string | null },
+    team: { id?: string | number | null; name?: string | null; teamUrl?: string | null; league?: string | null },
     preferredSport?: string | null,
 ) {
     const rawId = String(team.id ?? '').trim();
     if (!rawId) return null;
 
-    const normalizedId = rawId.startsWith('fs-team-') || rawId.startsWith('ras-team-')
+    const normalizedId = rawId.startsWith('fs-team-') || rawId.startsWith('ras-team-') || rawId.startsWith('espn-team-')
         ? rawId
         : rawId.startsWith('fs-')
             ? `fs-team-${rawId.slice(3)}`
@@ -82,6 +86,7 @@ function buildClubHref(
     const params = new URLSearchParams();
     if (team.name) params.set('name', team.name);
     if (team.teamUrl) params.set('team_url', team.teamUrl);
+    if (team.league) params.set('league', team.league);
     if (preferredSport) params.set('sport', preferredSport);
 
     const query = params.toString();
@@ -1264,7 +1269,7 @@ export default function TournamentDetailPage({
                         ...(localTournament ?? {}),
                         ...(preloaded?.tournamentMeta ?? {}),
                         id: preloaded?.tournamentMeta?.id || id,
-                        sportId: preloaded?.tournamentMeta?.sportId || localTournament?.sportId || (overrideSport || 'rugby'),
+                        sportId: preloaded?.tournamentMeta?.sportId || localTournament?.sportId || (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : 'rugby')),
                         countryId: preloaded?.tournamentMeta?.countryId || localTournament?.countryId || 'international',
                         name: preloaded?.tournamentMeta?.name || localTournament?.name || 'Cargando...',
                         url: dbStoredUrl,
@@ -1277,13 +1282,13 @@ export default function TournamentDetailPage({
                 }
 
                 if (!localTournament) {
-                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id)) {
+                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id)) {
                         localTournament = {
                             id,
                             name: 'Cargando...',
                             url: '',
                             type: 'cup' as any,
-                            sportId: (overrideSport || 'rugby') as any,
+                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : 'rugby')) as any,
                             countryId: 'international',
                             categories: [],
                             priority: 0,
@@ -1300,7 +1305,7 @@ export default function TournamentDetailPage({
                             name: 'Cargando...',
                             url: dbStoredUrl,
                             type: 'league' as any,
-                            sportId: (overrideSport || 'rugby') as any,
+                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : 'rugby')) as any,
                             countryId: 'international',
                             categories: [],
                             priority: 0,
@@ -1413,7 +1418,7 @@ export default function TournamentDetailPage({
                 }
 
                 // Local DB metadata for UUID/slug routes that also use a FlashScore URL (fixture from API, nombre/logo desde Supabase).
-                if (!id.toLowerCase().startsWith('fs-') && !isRugbyApiSportsTournamentId(id)) {
+                if (!id.toLowerCase().startsWith('fs-') && !isRugbyApiSportsTournamentId(id) && !isEspnAmericanFootballTournamentId(id)) {
                     try {
                         const metaRes = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}`, {
                             cache: 'no-store',
@@ -1554,18 +1559,21 @@ export default function TournamentDetailPage({
 
     // ── Loading / Error ────────────────────────────────────────────────────
 
-    const isRugbyApiSportsProvider =
+    const isLimitedExternalProvider =
         details?.provider === 'rugby-api-sports' ||
         details?.externalProvider === 'rugby-api-sports' ||
-        isRugbyApiSportsTournamentId(id);
+        details?.provider === 'espn' ||
+        details?.externalProvider === 'espn' ||
+        isRugbyApiSportsTournamentId(id) ||
+        isEspnAmericanFootballTournamentId(id);
     const navigationTabs = useMemo(() => (
         BASE_TABS
-            .filter((tab: { id: string; label: string }) => !(isRugbyApiSportsProvider && (tab.id === 'stats' || tab.id === 'playoff')))
+            .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && (tab.id === 'stats' || tab.id === 'playoff')))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .map((tab: { id: string; label: string }) => tab.id === 'standings' && shouldUseIntegratedBracketView
                 ? { ...tab, label: 'Cuadro' }
                 : tab)
-    ), [hasDedicatedPlayoffTab, isRugbyApiSportsProvider, shouldUseIntegratedBracketView]);
+    ), [hasDedicatedPlayoffTab, isLimitedExternalProvider, shouldUseIntegratedBracketView]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
@@ -1709,13 +1717,13 @@ export default function TournamentDetailPage({
         overallRows.some((row: any) => (row.bonus_points ?? 0) > 0),
     );
     const teamMap = new Map<string, { id: string | null; name: string; logo: string; href: string | null }>();
-    const registerTeam = (team: { id?: string | number | null; name?: string | null; logo?: string | null; teamUrl?: string | null }) => {
+    const registerTeam = (team: { id?: string | number | null; name?: string | null; logo?: string | null; teamUrl?: string | null; league?: string | null }) => {
         const name = String(team.name ?? '').trim();
         if (!name) return;
 
         const normalizedId = team.id != null ? String(team.id) : null;
         const key = normalizedId ? `id:${normalizedId}` : `name:${name.toLowerCase()}`;
-        const href = buildClubHref({ id: normalizedId, name, teamUrl: team.teamUrl }, tournamentData?.sportId);
+        const href = buildClubHref({ id: normalizedId, name, teamUrl: team.teamUrl, league: team.league }, tournamentData?.sportId);
         const previous = teamMap.get(key);
 
         teamMap.set(key, {
@@ -1732,12 +1740,14 @@ export default function TournamentDetailPage({
                 name: match.home_team?.name || match.event_home_team || match.home_team_name,
                 logo: getTeamLogo(match.home_team) || match.home_team_logo || '',
                 teamUrl: match.home_team?.team_url || null,
+                league: match.home_team?.league || null,
             });
             registerTeam({
                 id: match.away_team?.id || match.away_team?.team_id || match.away_club_id || null,
                 name: match.away_team?.name || match.event_away_team || match.away_team_name,
                 logo: getTeamLogo(match.away_team) || match.away_team_logo || '',
                 teamUrl: match.away_team?.team_url || null,
+                league: match.away_team?.league || null,
             });
         });
     };
@@ -1747,6 +1757,7 @@ export default function TournamentDetailPage({
             name: getStandingsTeamName(row),
             logo: getStandingsTeamLogo(row),
             teamUrl: getStandingsTeamUrl(row),
+            league: row.team?.league || row.participant?.league || null,
         });
     });
     if (results.length > 0) addFromMatches(results);
@@ -2003,6 +2014,7 @@ export default function TournamentDetailPage({
             id: teamId,
             name: teamName,
             teamUrl: getStandingsTeamUrl(row),
+            league: row.team?.league || row.participant?.league || null,
         }, tournamentData?.sportId);
         const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
         const accentColor = rowLabel?.color ?? null;

@@ -32,6 +32,7 @@ import {
   normalizeYouTube,
   normalizeTikTok,
 } from '../utils/normalize';
+import { normalizeLogoUrl } from '../utils/logoUrl';
 import { validateClubCreate, validateClubCoreUpdate, validateClubProfileUpdate } from '../validation/clubValidation';
 import { isPatchEmpty } from '../utils/buildPatch';
 
@@ -81,7 +82,7 @@ export async function createClub(
     region: normalizeText(input.region),
     city: normalizeText(input.city),
     union_id: normalizeText(input.union_id),
-    logo_url: normalizeUrl(input.logo_url),
+    logo_url: normalizeLogoUrl(input.logo_url),
     primary_color: normalizeText(input.primary_color),
     categories: Array.isArray(input.categories)
       ? input.categories.map(normalizeText).filter((category): category is string => Boolean(category))
@@ -337,7 +338,7 @@ export async function updateClub(
         normalizedCore.union_id = normalizeText(input.core.union_id);
       }
       if (input.core.logo_url !== undefined) {
-        normalizedCore.logo_url = normalizeUrl(input.core.logo_url);
+        normalizedCore.logo_url = normalizeLogoUrl(input.core.logo_url);
       }
       if (input.core.primary_color !== undefined) {
         normalizedCore.primary_color = normalizeText(input.core.primary_color);
