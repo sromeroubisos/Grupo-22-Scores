@@ -502,6 +502,33 @@ function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants
     return [];
 }
 
+function getStandingsEligiblePhases(phases: any[]) {
+    if (!Array.isArray(phases)) return [];
+    return sortTournamentPhases(phases).filter((phase: any) => !isKnockoutPhaseType(phase?.phase_type));
+}
+
+function getPreferredStandingsPhase(phases: any[], matches: any[] = [], standings: any[] = []) {
+    const eligiblePhases = getStandingsEligiblePhases(phases);
+    if (eligiblePhases.length === 0) return null;
+
+    const explicitActivePhase = eligiblePhases.find((phase: any) => phase?.is_active);
+    if (explicitActivePhase) return explicitActivePhase;
+
+    const phaseIdsWithData = new Set<string>();
+    matches.forEach((match: any) => {
+        if (match?.phase_id) phaseIdsWithData.add(String(match.phase_id));
+    });
+    standings.forEach((row: any) => {
+        if (row?.phase_id) phaseIdsWithData.add(String(row.phase_id));
+    });
+
+    const latestPhaseWithData = [...eligiblePhases]
+        .reverse()
+        .find((phase: any) => phaseIdsWithData.has(String(phase.id)));
+
+    return latestPhaseWithData ?? eligiblePhases[0] ?? null;
+}
+
 function getPreferredDbPhase(phases: any[], matches: any[] = [], standings: any[] = []) {
     if (!Array.isArray(phases) || phases.length === 0) return null;
 
@@ -902,6 +929,7 @@ function buildCircuitGlobalStandings(dbData: TournamentInitialData) {
         phases,
         tournamentRuleset,
     } = getDbStandingsContext(dbData);
+    const stagePhases = getStandingsEligiblePhases(phases);
 
     const rowsByClub = new Map<string, any>();
 
@@ -929,7 +957,7 @@ function buildCircuitGlobalStandings(dbData: TournamentInitialData) {
         });
     });
 
-    phases.forEach((phase: any, index: number) => {
+    stagePhases.forEach((phase: any, index: number) => {
         const phaseId = String(phase?.id || '').trim();
         if (!phaseId) return;
 
@@ -1026,6 +1054,7 @@ function buildCircuitStandingsViews(dbData: TournamentInitialData): StandingsSco
     const { phases } = getDbStandingsContext(dbData);
     const views: StandingsScopeView[] = [];
     const globalStandings = buildCircuitGlobalStandings(dbData);
+    const stagePhases = getStandingsEligiblePhases(phases);
 
     if (globalStandings.length > 0) {
         views.push({
@@ -1038,7 +1067,7 @@ function buildCircuitStandingsViews(dbData: TournamentInitialData): StandingsSco
         });
     }
 
-    phases.forEach((phase: any, index: number) => {
+    stagePhases.forEach((phase: any, index: number) => {
         const phaseId = String(phase?.id || '').trim();
         if (!phaseId) return;
 
@@ -1062,8 +1091,9 @@ function buildCircuitStandingsViews(dbData: TournamentInitialData): StandingsSco
 function buildPhaseStandingsViews(dbData: TournamentInitialData): StandingsScopeView[] {
     const { phases } = getDbStandingsContext(dbData);
     const views: StandingsScopeView[] = [];
+    const eligiblePhases = getStandingsEligiblePhases(phases);
 
-    phases.forEach((phase: any, index: number) => {
+    eligiblePhases.forEach((phase: any, index: number) => {
         const phaseId = String(phase?.id || '').trim();
         if (!phaseId) return;
 
@@ -1091,14 +1121,21 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     const isCircuitCompetition = isCircuitTournamentRuleset(tournamentRuleset, tournament?.format ?? null);
     const { activePhase, phases } = getDbStandingsContext(dbData);
     const standingsScopeViews = isCircuitCompetition ? buildCircuitStandingsViews(dbData) : buildPhaseStandingsViews(dbData);
+    const preferredStandingsPhase = getPreferredStandingsPhase(
+        phases,
+        Array.isArray(dbData.matches) ? (dbData.matches as any[]) : [],
+        Array.isArray(dbData.standings) ? (dbData.standings as any[]) : [],
+    );
     const defaultStandingsScope = isCircuitCompetition
         ? standingsScopeViews[0]?.id ?? null
-        : (activePhase?.id && standingsScopeViews.some((view) => view.id === String(activePhase.id)))
-            ? String(activePhase.id)
+        : (preferredStandingsPhase?.id && standingsScopeViews.some((view) => view.id === String(preferredStandingsPhase.id)))
+            ? String(preferredStandingsPhase.id)
             : standingsScopeViews[0]?.id ?? null;
     const defaultStandings =
         standingsScopeViews.find((view) => view.id === defaultStandingsScope)?.standings ??
-        buildStandingsSnapshot(dbData);
+        (defaultStandingsScope && defaultStandingsScope !== CIRCUIT_GLOBAL_SCOPE
+            ? buildStandingsSnapshot(dbData, defaultStandingsScope)
+            : []);
     const preferredKnockoutPhase = getPreferredKnockoutPhase(
         phases,
         Array.isArray(dbData.rounds) ? dbData.rounds : [],
@@ -1550,6 +1587,16 @@ export default function TournamentDetailPage({
         Boolean(details?.current_stage_has_cup_trees) || isKnockoutPhaseType(activeDbPhase?.phase_type)
     );
     const hasDedicatedPlayoffTab = hasDbKnockoutPhase || (!shouldUseIntegratedBracketView && draw.length > 0);
+    const visibleStandingsScopeViews = useMemo(
+        () => standingsScopeViews.filter((view) => view.kind === 'global' || !isKnockoutPhaseType(view.phase?.phase_type)),
+        [standingsScopeViews],
+    );
+    const hasVisibleStandingsData = visibleStandingsScopeViews.length > 0 || (!hasDbKnockoutPhase && (
+        standings.length > 0 ||
+        standingsForm.length > 0 ||
+        standingsHtFt.length > 0 ||
+        standingsOverUnder.length > 0
+    ));
 
     useEffect(() => {
         if (shouldUseIntegratedBracketView && activeTab === 'playoff') {
@@ -1569,11 +1616,12 @@ export default function TournamentDetailPage({
     const navigationTabs = useMemo(() => (
         BASE_TABS
             .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && (tab.id === 'stats' || tab.id === 'playoff')))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .map((tab: { id: string; label: string }) => tab.id === 'standings' && shouldUseIntegratedBracketView
                 ? { ...tab, label: 'Cuadro' }
                 : tab)
-    ), [hasDedicatedPlayoffTab, isLimitedExternalProvider, shouldUseIntegratedBracketView]);
+    ), [hasDedicatedPlayoffTab, hasVisibleStandingsData, isLimitedExternalProvider, shouldUseIntegratedBracketView]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
@@ -1603,13 +1651,13 @@ export default function TournamentDetailPage({
     // ── Derived data ──────────────────────────────────────────────────────
 
     const isCircuitTournament = Boolean(
-        standingsScopeViews.some((view) => view.kind === 'global') ||
+        visibleStandingsScopeViews.some((view) => view.kind === 'global') ||
         tournamentData?.type === 'circuit' ||
         isCircuitTournamentRuleset(tournamentData?.ruleset),
     );
-    const shouldUseStandingsScopeViews = isCircuitTournament || standingsScopeViews.length > 1 || hasDbKnockoutPhase;
-    const selectedStandingsScopeView = shouldUseStandingsScopeViews && standingsScopeViews.length > 0
-        ? (standingsScopeViews.find((view) => view.id === activeStandingsScope) || standingsScopeViews[0] || null)
+    const shouldUseStandingsScopeViews = isCircuitTournament || visibleStandingsScopeViews.length > 1 || hasDbKnockoutPhase;
+    const selectedStandingsScopeView = shouldUseStandingsScopeViews && visibleStandingsScopeViews.length > 0
+        ? (visibleStandingsScopeViews.find((view) => view.id === activeStandingsScope) || visibleStandingsScopeViews[0] || null)
         : null;
     const isCircuitGlobalTable = selectedStandingsScopeView?.kind === 'global';
     const baseStandingsSource = selectedStandingsScopeView?.standings ?? standings;
@@ -1823,6 +1871,12 @@ export default function TournamentDetailPage({
     })();
     const bracketPhase = preferredKnockoutPhase ?? activeDbPhase;
     const bracketTitle = `${getKnockoutPhaseDisplayTitle(bracketPhase)} - ${tournamentName}`;
+    const bracketExportData = {
+        title: bracketTitle,
+        subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
+        tournamentLogo,
+        rounds: draw,
+    };
 
     // Quick stats
     const stats = getQuickStats(results, fixtures, overallRows, teamsList.length);
@@ -2378,6 +2432,15 @@ export default function TournamentDetailPage({
                                                 ? `${draw.length} ronda${draw.length === 1 ? '' : 's'} cargada${draw.length === 1 ? '' : 's'} para la fase eliminatoria activa.`
                                                 : 'La fase activa es eliminatoria. El cuadro aparecerá cuando haya cruces o rondas cargadas.'}
                                         </p>
+                                        {draw.length > 0 && (
+                                            <div style={{ marginTop: 12 }}>
+                                                <ExportImage
+                                                    template="playoffBracket"
+                                                    filename={`cuadro-${tournamentData?.name}`}
+                                                    data={bracketExportData}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -2527,23 +2590,18 @@ export default function TournamentDetailPage({
                                     <ExportImage
                                         template="playoffBracket"
                                         filename={`cuadro-${tournamentData?.name}`}
-                                        data={{
-                                            title: bracketTitle,
-                                            subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
-                                            tournamentLogo,
-                                            rounds: draw,
-                                        }}
+                                        data={bracketExportData}
                                     />
                                 </div>
                                 <PlayoffBracket data={draw} title={bracketTitle} />
                             </>
                         ) : (
                             <>
-                        {standingsScopeViews.length > 1 && (
+                        {visibleStandingsScopeViews.length > 1 && (
                             <div className={styles.standingsScopeBar}>
                                 <span className={styles.standingsScopeLabel}>Tabla</span>
                                 <div className={styles.pillsGroup}>
-                                    {standingsScopeViews.map((view) => (
+                                    {visibleStandingsScopeViews.map((view) => (
                                         <button
                                             key={view.id}
                                             className={`${styles.pillBtn} ${activeStandingsScope === view.id ? styles.pillBtnActive : ''}`}
@@ -2735,12 +2793,7 @@ export default function TournamentDetailPage({
                             <ExportImage
                                 template="playoffBracket"
                                 filename={`cuadro-${tournamentData?.name}`}
-                                data={{
-                                    title: bracketTitle,
-                                    subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
-                                    tournamentLogo,
-                                    rounds: draw,
-                                }}
+                                data={bracketExportData}
                             />
                         </div>
                         <PlayoffBracket data={draw} title={`Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`} />
