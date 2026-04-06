@@ -18,8 +18,10 @@ import {
 } from 'lucide-react';
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
+import { useAuth } from '@/context/AuthContext';
 import type { Sport } from '@/lib/types';
 import ExportImage from '@/components/ExportImage';
+import MobileSectionTabs from '@/components/MobileSectionTabs';
 import {
     buildRankingExportRows,
     formatRankingRating,
@@ -207,6 +209,7 @@ export default function RankingsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { selectedSport, activeSports, setSelectedSport } = useSport();
+    const { user } = useAuth();
     const [rankingList, setRankingList] = useState<PublicRankingSummary[]>([]);
     const [rankingDetail, setRankingDetail] = useState<PublicRankingDetail | null>(null);
     const [loadedSportId, setLoadedSportId] = useState('');
@@ -324,6 +327,7 @@ export default function RankingsPage() {
         () => buildRankingExportRows(activeRankingDetail?.entries ?? []),
         [activeRankingDetail?.entries],
     );
+    const canExportPublicRanking = user?.role === 'super_admin' || user?.role === 'admin_general';
 
     const rankingStatusLabel = loadingList || loadingDetail
         ? 'Cargando'
@@ -373,6 +377,10 @@ export default function RankingsPage() {
     return (
         <main className={styles.page} style={pageStyle}>
             <header className="container">
+                <MobileSectionTabs
+                    activeTab="rankings"
+                    rankingsHref={buildRankingsHref(selectedSport.id, selectedRankingId || undefined)}
+                />
                 <div className={styles.hero}>
                     <div className={styles.heroContent}>
                         <div className={styles.label}>
@@ -597,21 +605,6 @@ export default function RankingsPage() {
                 <section className={`${styles.sectionBlock} ${styles.tableSection}`} id="tabla-ranking">
                     <div className={styles.sectionHeader}>
                         <h3 className={styles.sectionTitle}>Tabla completa de posiciones</h3>
-                        <div className={styles.tableActions}>
-                            {hasEntries ? (
-                                <ExportImage
-                                    template="standings"
-                                    filename={`ranking-${selectedRanking?.name || selectedSport.id}`}
-                                    data={{
-                                        title: selectedRanking?.name || 'Ranking de Clubes',
-                                        subtitle: `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`,
-                                        rows: rankingExportRows,
-                                        columnLabels: RANKING_EXPORT_COLUMN_LABELS,
-                                        plainDiff: true,
-                                    }}
-                                />
-                            ) : null}
-                        </div>
                     </div>
 
                     {hasEntries ? (
@@ -669,6 +662,7 @@ export default function RankingsPage() {
                                                         <div className={styles.clubCopy}>
                                                             <strong>{clubName}</strong>
                                                             <span>{getRankingClubShortName(entry)}</span>
+                                                            <span className={styles.clubMetaMobile}>{entry.source_region || '-'}</span>
                                                         </div>
                                                     </td>
                                                     <td data-label="Region">{entry.source_region || '-'}</td>
@@ -761,6 +755,27 @@ export default function RankingsPage() {
                     </div>
                 </div>
             </section>
+
+            {hasEntries && canExportPublicRanking ? (
+                <section className={styles.exportSection}>
+                    <div className="container">
+                        <div className={styles.exportSectionInner}>
+                            <ExportImage
+                                className={styles.exportSectionAction}
+                                template="standings"
+                                filename={`ranking-${selectedRanking?.name || selectedSport.id}`}
+                                data={{
+                                    title: selectedRanking?.name || 'Ranking de Clubes',
+                                    subtitle: `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`,
+                                    rows: rankingExportRows,
+                                    columnLabels: RANKING_EXPORT_COLUMN_LABELS,
+                                    plainDiff: true,
+                                }}
+                            />
+                        </div>
+                    </div>
+                </section>
+            ) : null}
         </main>
     );
 }

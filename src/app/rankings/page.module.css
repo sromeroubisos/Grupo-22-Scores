@@ -506,6 +506,27 @@
     gap: 8px;
 }
 
+.mobileTableActions {
+    display: none;
+}
+
+.mobileExportAction {
+    flex: 1 1 auto;
+}
+
+.exportSection {
+    padding: 18px 0 28px;
+}
+
+.exportSectionInner {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.exportSectionAction {
+    flex-shrink: 0;
+}
+
 .tableContainer {
     width: 100%;
     overflow-x: auto;
@@ -614,6 +635,10 @@
     font-size: 11px;
     color: var(--text-muted);
     font-family: var(--mono);
+}
+
+.clubMetaMobile {
+    display: none;
 }
 
 .ovrCell {
@@ -762,6 +787,39 @@
         display: none;
     }
 
+    .mobileTableActions {
+        display: flex;
+        width: 100%;
+        margin-bottom: 12px;
+    }
+
+    .mobileExportAction {
+        width: 100%;
+    }
+
+    .mobileExportAction > button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .exportSection {
+        padding-top: 12px;
+        padding-bottom: 8px;
+    }
+
+    .exportSectionInner {
+        justify-content: stretch;
+    }
+
+    .exportSectionAction {
+        width: 100%;
+    }
+
+    .exportSectionAction > button {
+        width: 100%;
+        justify-content: center;
+    }
+
     .sectionBlock {
         padding-top: 10px;
     }
@@ -829,7 +887,7 @@
 
     .table tr {
         display: grid;
-        grid-template-columns: 54px minmax(0, 1fr) auto;
+        grid-template-columns: 52px minmax(0, 1fr) 54px 48px 58px;
         align-items: center;
         column-gap: 8px;
         background: var(--surface);
@@ -850,9 +908,7 @@
         font-size: 11px;
     }
 
-    .table td[data-label="Region"],
-    .table td[data-label="Base"],
-    .table td[data-label="Delta"] {
+    .table td[data-label="Region"] {
         display: none;
     }
 
@@ -868,7 +924,10 @@
     }
 
     .clubCopy {
-        align-items: flex-start;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
         min-width: 0;
     }
 
@@ -884,6 +943,23 @@
         line-height: 1.1;
     }
 
+    .clubMetaMobile {
+        display: inline-flex;
+        align-items: center;
+        max-width: 72px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 0;
+    }
+
     .clubLogo,
     .clubLogoPlaceholder {
         width: 18px;
@@ -895,6 +971,18 @@
         font-family: var(--mono);
         font-size: 10px;
         font-weight: 700;
+    }
+
+    .table td[data-label="Anterior"],
+    .table td[data-label="Delta"] {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .table td[data-label="Anterior"] {
+        color: var(--text-muted);
     }
 
     .posCell {
@@ -943,7 +1031,7 @@
     }
 
     .table tr {
-        grid-template-columns: 50px minmax(0, 1fr) auto;
+        grid-template-columns: 46px minmax(0, 1fr) 48px 44px 52px;
         column-gap: 6px;
         padding: 8px 9px;
     }
@@ -962,6 +1050,17 @@
     .posCell,
     .ovrCell {
         font-size: 9px;
+    }
+
+    .table td[data-label="Anterior"],
+    .table td[data-label="Delta"] {
+        font-size: 8px;
+    }
+
+    .clubMetaMobile {
+        max-width: 58px;
+        padding: 2px 5px;
+        font-size: 7px;
     }
 
     .positionUp,

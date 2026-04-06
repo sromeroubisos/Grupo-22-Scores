@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+import { useSport } from '@/context/SportContext';
+import MobileSectionTabs from '@/components/MobileSectionTabs';
 import {
     Plus,
     Search,
@@ -67,6 +69,7 @@ function formatPublishedAt(value?: string) {
 
 export default function NoticiasClient({ initialNews, canManageNews }: NoticiasClientProps) {
     const router = useRouter();
+    const { selectedSport } = useSport();
     const [news, setNews] = useState<NewsItem[]>(
         initialNews.map((item) => ({
             ...item,
@@ -161,7 +164,14 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
 
     return (
         <div className={styles.tectonicPage}>
-            <div className={styles.tectonicHeader} style={{ padding: '40px 24px 0' }}>
+            <div style={{ padding: '40px 24px 0' }}>
+                <MobileSectionTabs
+                    activeTab="news"
+                    rankingsHref={`/rankings?sport=${encodeURIComponent(selectedSport.id)}`}
+                />
+            </div>
+
+            <div className={styles.tectonicHeader} style={{ padding: '0 24px' }}>
                 <div className={styles.headerInfo}>
                     <h1>Noticias & Editorial</h1>
                     <p>Ultimas novedades y comunicados oficiales</p>

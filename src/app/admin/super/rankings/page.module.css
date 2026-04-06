@@ -900,6 +900,10 @@
     margin-left: auto;
 }
 
+.exportAction {
+    flex-shrink: 0;
+}
+
 .standingsTableWrap {
     overflow: auto;
     border: 1px solid var(--color-border);
@@ -1121,6 +1125,20 @@
 
     .tableToolbarMeta {
         text-align: left;
+    }
+
+    .tableToolbarActions {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .exportAction {
+        width: 100%;
+    }
+
+    .exportAction > button {
+        width: 100%;
+        justify-content: center;
     }
 
     .sheetTabs {
