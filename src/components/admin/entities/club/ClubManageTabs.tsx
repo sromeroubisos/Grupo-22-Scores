@@ -16,6 +16,7 @@ export const CLUB_MANAGE_VISIBLE_TABS = [
     { id: 'relacionados', label: 'Relacionados' },
     { id: 'identidad', label: 'Identidad' },
     { id: 'planteles', label: 'Planteles' },
+    { id: 'staff', label: 'Staff' },
 ];
 
 export const CLUB_MANAGE_VISIBLE_TAB_IDS = new Set(

@@ -1,4 +1,5 @@
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
+import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
 
@@ -1509,6 +1510,7 @@ export async function updateClubRankingMetadata(
     input: {
         name: string;
         description?: string | null;
+        positionLabels?: unknown;
         actorUserId?: string | null;
     },
 ) {
@@ -1520,6 +1522,9 @@ export async function updateClubRankingMetadata(
     const supabase = getAdminClient();
     const ranking = await getRankingRow(supabase, rankingId);
     const nextDescription = readText(input.description);
+    const nextMetadata = {
+        ...(ranking.metadata && typeof ranking.metadata === 'object' ? ranking.metadata : {}),
+    };
     const changes: Record<string, unknown> = {};
 
     if (ranking.name !== nextName) {
@@ -1536,6 +1541,18 @@ export async function updateClubRankingMetadata(
         };
     }
 
+    if (input.positionLabels !== undefined) {
+        const previousPositionLabels = normalizeRankingPositionLabels(nextMetadata.positionLabels);
+        const nextPositionLabels = normalizeRankingPositionLabels(input.positionLabels);
+        if (JSON.stringify(previousPositionLabels) !== JSON.stringify(nextPositionLabels)) {
+            nextMetadata.positionLabels = nextPositionLabels;
+            changes.positionLabels = {
+                before: previousPositionLabels,
+                after: nextPositionLabels,
+            };
+        }
+    }
+
     if (Object.keys(changes).length === 0) {
         return getClubRankingDetail(rankingId);
     }
@@ -1545,6 +1562,7 @@ export async function updateClubRankingMetadata(
         .update({
             name: nextName,
             description: nextDescription,
+            metadata: nextMetadata,
         })
         .eq('id', rankingId);
 

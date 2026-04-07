@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { getClubRankingDetail } from '@/lib/server/clubRankings';
 
 function jsonError(message: string, status = 500, details?: unknown) {
@@ -36,6 +37,9 @@ export async function GET(
                     last_incremental_match_id: detail.ranking.last_incremental_match_id,
                     created_at: detail.ranking.created_at,
                     updated_at: detail.ranking.updated_at,
+                    metadata: {
+                        positionLabels: normalizeRankingPositionLabels(detail.ranking.metadata?.positionLabels),
+                    },
                 },
                 entries: detail.entries.map((entry) => {
                     const club = Array.isArray(entry.clubs) ? entry.clubs[0] : entry.clubs;

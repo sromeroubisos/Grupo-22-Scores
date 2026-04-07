@@ -21,6 +21,7 @@ const SESSION_REFRESH_BYPASS_PREFIXES = [
     '/api/admin/super/console-data',
     '/api/admin/super/matches',
     '/manifest.json',
+    '/sw.js',
 ]
 
 function shouldBypassSessionRefresh(pathname: string): boolean {

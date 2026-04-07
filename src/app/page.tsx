@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import InstallAppButton from '@/components/InstallAppButton';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamentById } from '@/lib/data/tournaments/index';
 import { getCountryById } from '@/lib/data/countries';
@@ -1303,6 +1304,8 @@ export default function HomePage() {
                 </button>
               ))}
             </div>
+
+            <InstallAppButton />
 
             {/* Date Selector */}
             <section className={styles.dateSelector}>

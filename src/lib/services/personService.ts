@@ -64,6 +64,29 @@ function isMissingTableError(error: any) {
     return Boolean(error && typeof error.code === 'string' && MISSING_TABLE_CODES.has(error.code));
 }
 
+async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: any): Promise<string> {
+    const supabase = supabaseClient ?? await createClient();
+    const db = supabase as any;
+
+    const { data, error } = await db
+        .from('club_derivatives')
+        .select('base_club_id')
+        .eq('derived_club_id', clubId)
+        .eq('derivative_type', 'divisions')
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        if (!isMissingTableError(error)) {
+            console.error('Error resolving shared roster owner:', error);
+        }
+        return clubId;
+    }
+
+    const baseClubId = typeof data?.base_club_id === 'string' ? data.base_club_id : null;
+    return baseClubId && baseClubId !== clubId ? baseClubId : clubId;
+}
+
 function mapPersonRecord(person: any, membership: any, divisionName?: string, divisionId?: string): PersonWithRole {
     return {
         id: person.id,
@@ -192,8 +215,8 @@ async function fetchPeopleFromTeamMemberships(clubId: string, divisionId?: strin
             return mapPersonRecord(
                 person,
                 membership,
-                team?.name,
-                team?.legacy_division_id || team?.id
+                team?.name || undefined,
+                team?.legacy_division_id || team?.id || undefined
             );
         })
         .filter(Boolean) as PersonWithRole[];
@@ -257,7 +280,7 @@ async function fetchPeopleFromLegacy(clubId: string, divisionId?: string): Promi
             return mapPersonRecord(
                 person,
                 role,
-                role.division_id ? divisionsById.get(role.division_id) : undefined,
+                role.division_id ? divisionsById.get(role.division_id) || undefined : undefined,
                 role.division_id || undefined
             );
         })
@@ -265,15 +288,25 @@ async function fetchPeopleFromLegacy(clubId: string, divisionId?: string): Promi
 }
 
 export async function fetchPeopleByClub(clubId: string): Promise<PersonWithRole[]> {
-    const newLayerPeople = await fetchPeopleFromTeamMemberships(clubId);
+    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId);
+    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterClubId);
     if (newLayerPeople && newLayerPeople.length > 0) return newLayerPeople;
-    return fetchPeopleFromLegacy(clubId);
+    return fetchPeopleFromLegacy(rosterClubId);
 }
 
 export async function fetchPeopleByDivision(clubId: string, divisionId: string): Promise<PersonWithRole[]> {
-    const newLayerPeople = await fetchPeopleFromTeamMemberships(clubId, divisionId);
+    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId);
+    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterClubId, divisionId);
     if (newLayerPeople && newLayerPeople.length > 0) return newLayerPeople;
-    return fetchPeopleFromLegacy(clubId, divisionId);
+
+    const legacyPeople = await fetchPeopleFromLegacy(rosterClubId, divisionId);
+    if (legacyPeople.length > 0) return legacyPeople;
+
+    if (rosterClubId !== clubId) {
+        return fetchPeopleByClub(rosterClubId);
+    }
+
+    return [];
 }
 
 export async function addPersonToClub(clubId: string, personData: {
@@ -291,13 +324,15 @@ export async function addPersonToClub(clubId: string, personData: {
 }) {
     const supabase = await createClient();
     const db = supabase as any;
+    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId, db);
+    const rosterDivisionId = rosterClubId === clubId ? personData.division_id : undefined;
 
     const fullName = `${personData.first_name} ${personData.last_name}`.trim();
 
     const { data: person, error: personError } = await supabase
         .from('people')
         .insert({
-            club_id: clubId,
+            club_id: rosterClubId,
             first_name: personData.first_name,
             last_name: personData.last_name,
             full_name: fullName,
@@ -319,7 +354,7 @@ export async function addPersonToClub(clubId: string, personData: {
 
     let teamReference;
     try {
-        teamReference = await resolveTeamReference(db, clubId, personData.division_id);
+        teamReference = await resolveTeamReference(db, rosterClubId, rosterDivisionId);
     } catch (error: any) {
         return { success: false, error: error.message };
     }
@@ -327,7 +362,7 @@ export async function addPersonToClub(clubId: string, personData: {
     const { error: roleError } = await db
         .from('club_person_roles')
         .insert({
-            club_id: clubId,
+            club_id: rosterClubId,
             person_id: person.id,
             role: personData.role,
             division_id: teamReference.legacyDivisionId || null,
@@ -343,7 +378,7 @@ export async function addPersonToClub(clubId: string, personData: {
         const { error: membershipError } = await db
             .from('team_memberships')
             .insert({
-                club_id: clubId,
+                club_id: rosterClubId,
                 team_id: teamReference.teamId,
                 person_id: person.id,
                 role: personData.role,
@@ -380,10 +415,12 @@ export async function addPersonToClub(clubId: string, personData: {
 export async function deletePersonFromClub(clubId: string, personId: string, divisionId?: string) {
     const supabase = await createClient();
     const db = supabase as any;
+    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId, db);
+    const rosterDivisionId = rosterClubId === clubId ? divisionId : undefined;
 
     let teamReference;
     try {
-        teamReference = await resolveTeamReference(db, clubId, divisionId);
+        teamReference = await resolveTeamReference(db, rosterClubId, rosterDivisionId);
     } catch (error: any) {
         return { success: false, error: error.message };
     }
@@ -391,7 +428,7 @@ export async function deletePersonFromClub(clubId: string, personId: string, div
     let membershipsQuery = db
         .from('team_memberships')
         .delete()
-        .match({ person_id: personId, club_id: clubId });
+        .match({ person_id: personId, club_id: rosterClubId });
 
     if (teamReference.teamId) {
         membershipsQuery = membershipsQuery.eq('team_id', teamReference.teamId);
@@ -402,24 +439,26 @@ export async function deletePersonFromClub(clubId: string, personId: string, div
         return { success: false, error: membershipsError.message };
     }
 
-    let squadMembersQuery = db
-        .from('squad_members')
-        .delete()
-        .eq('person_id', personId);
+    if (!divisionId || teamReference.legacyDivisionId) {
+        let squadMembersQuery = db
+            .from('squad_members')
+            .delete()
+            .eq('person_id', personId);
 
-    if (teamReference.legacyDivisionId) {
-        squadMembersQuery = squadMembersQuery.eq('division_id', teamReference.legacyDivisionId);
-    }
+        if (teamReference.legacyDivisionId) {
+            squadMembersQuery = squadMembersQuery.eq('division_id', teamReference.legacyDivisionId);
+        }
 
-    const { error: squadMembersError } = await squadMembersQuery;
-    if (squadMembersError && !isMissingTableError(squadMembersError)) {
-        return { success: false, error: squadMembersError.message };
+        const { error: squadMembersError } = await squadMembersQuery;
+        if (squadMembersError && !isMissingTableError(squadMembersError)) {
+            return { success: false, error: squadMembersError.message };
+        }
     }
 
     let rolesQuery = db
         .from('club_person_roles')
         .delete()
-        .match({ person_id: personId, club_id: clubId });
+        .match({ person_id: personId, club_id: rosterClubId });
 
     if (teamReference.legacyDivisionId) {
         rolesQuery = rolesQuery.eq('division_id', teamReference.legacyDivisionId);

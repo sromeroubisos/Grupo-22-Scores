@@ -2,18 +2,22 @@ import { SPORTS, getSportById } from '@/lib/data/sports';
 import type { SportId } from '@/lib/types';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 
-export type ClubDerivativeType = 'youth' | 'women' | 'other_sport';
+export type ClubDerivativeType = 'family' | 'youth' | 'women' | 'other_sport' | 'divisions';
 
 export const CLUB_DERIVATIVE_LABELS: Record<ClubDerivativeType, string> = {
+  family: 'Familia',
   youth: 'Plantel juvenil',
   women: 'Rama',
   other_sport: 'Otro deporte',
+  divisions: 'Divisiones',
 };
 
 export const CLUB_DERIVATIVE_DESCRIPTIONS: Record<ClubDerivativeType, string> = {
+  family: 'Agrupa clubes existentes dentro de una misma familia operativa.',
   youth: 'Mantiene la identidad del club base, pero queda listo para una categoria formativa.',
   women: 'Arranca con la identidad del club base para que luego definas si la rama sera femenina o masculina.',
   other_sport: 'Crea una variante deportiva del mismo club para que la vista publica pueda resolverla por deporte.',
+  divisions: 'Agrupa equipos del mismo club que comparten plantel, como M16 A/B o Primera y Reserva.',
 };
 
 function isSportId(value: string): value is SportId {

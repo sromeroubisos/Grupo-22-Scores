@@ -29,8 +29,11 @@ import {
     getRankingClubShortName,
     getRankingDelta,
     getRankingPreviousRating,
+    getRankingPositionLabel,
     paginateRankingEntries,
     RANKING_EXPORT_COLUMN_LABELS,
+    normalizeRankingPositionLabels,
+    type RankingPositionLabel,
 } from '@/lib/rankings/rankingTable';
 
 type SportSurface = {
@@ -57,6 +60,7 @@ type PublicRankingSummary = {
     last_incremental_match_id?: string | null;
     created_at?: string | null;
     updated_at?: string | null;
+    metadata?: Record<string, unknown> | null;
 };
 
 type PublicRankingEntry = {
@@ -205,6 +209,16 @@ function getPositionChange(current: number | null | undefined, previous: number 
     };
 }
 
+function getPositionLabelStyle(label: Pick<RankingPositionLabel, 'color'>) {
+    return {
+        '--position-label-color': label.color,
+    } as CSSProperties;
+}
+
+function formatLegendPosition(position: number) {
+    return `#${String(position).padStart(2, '0')}`;
+}
+
 export default function RankingsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -314,6 +328,35 @@ export default function RankingsPage() {
         () => rankingList.find((ranking) => ranking.id === selectedRankingId) ?? activeRankingDetail?.ranking ?? null,
         [activeRankingDetail?.ranking, rankingList, selectedRankingId],
     );
+    const rankingPositionLabels = useMemo(
+        () => normalizeRankingPositionLabels(activeRankingDetail?.ranking.metadata?.positionLabels ?? selectedRanking?.metadata?.positionLabels),
+        [activeRankingDetail?.ranking.metadata?.positionLabels, selectedRanking?.metadata?.positionLabels],
+    );
+    const rankingLegendItems = useMemo(() => {
+        const groups: Array<{ color: string; end: number; label: string; start: number }> = [];
+
+        rankingPositionLabels.forEach((item) => {
+            const last = groups[groups.length - 1];
+            if (last && last.color === item.color && last.label === item.label && last.end + 1 === item.position) {
+                last.end = item.position;
+                return;
+            }
+
+            groups.push({
+                color: item.color,
+                end: item.position,
+                label: item.label,
+                start: item.position,
+            });
+        });
+
+        return groups.map((item) => ({
+            ...item,
+            rangeLabel: item.start === item.end
+                ? formatLegendPosition(item.start)
+                : `${formatLegendPosition(item.start)}-${formatLegendPosition(item.end)}`,
+        }));
+    }, [rankingPositionLabels]);
     const topEntries = activeRankingDetail?.entries.slice(0, 5) ?? [];
     const topThree = topEntries.slice(0, 3);
     const hasEntries = topEntries.length > 0;
@@ -558,14 +601,15 @@ export default function RankingsPage() {
                         <div className={styles.topGrid}>
                             {topEntries.map((entry, index) => {
                                 const delta = getRankingDelta(entry.current_rating, getRankingPreviousRating(entry));
+                                const position = entry.current_position || index + 1;
 
                                 return (
                                     <article
                                         key={entry.id}
                                         className={styles.rankCard}
-                                        data-rank={String(entry.current_position || index + 1)}
+                                        data-rank={String(position)}
                                     >
-                                        <div className={styles.rankBadge}>{entry.current_position || index + 1}</div>
+                                        <div className={styles.rankBadge}>{position}</div>
                                         <div className={styles.rankName}>
                                             {entry.clubs?.short_name || entry.clubs?.name || entry.source_name}
                                         </div>
@@ -629,13 +673,19 @@ export default function RankingsPage() {
                                             const delta = getRankingDelta(entry.current_rating, previousRating);
                                             const absoluteIndex = paginatedEntries.start + index + 1;
                                             const clubName = getRankingClubName(entry);
+                                            const position = entry.current_position || absoluteIndex;
                                             const positionChange = getPositionChange(entry.current_position, entry.source_previous_position);
+                                            const positionLabel = getRankingPositionLabel(rankingPositionLabels, position);
 
                                             return (
-                                                <tr key={entry.id}>
+                                                <tr
+                                                    key={entry.id}
+                                                    className={positionLabel ? styles.positionLabeledRow : undefined}
+                                                    style={positionLabel ? getPositionLabelStyle(positionLabel) : undefined}
+                                                >
                                                     <td className={styles.posCell} data-label="Pos">
                                                         <span className={styles.posWrap}>
-                                                            <span>#{String(entry.current_position || absoluteIndex).padStart(2, '0')}</span>
+                                                            <span>#{String(position).padStart(2, '0')}</span>
                                                             {positionChange ? (
                                                                 <span
                                                                     className={
@@ -690,6 +740,23 @@ export default function RankingsPage() {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {rankingLegendItems.length ? (
+                                <div className={styles.positionLegend} aria-label="Leyenda de puestos">
+                                    <span className={styles.positionLegendTitle}>Leyenda</span>
+                                    {rankingLegendItems.map((item) => (
+                                        <div
+                                            key={`${item.rangeLabel}-${item.label}-${item.color}`}
+                                            className={styles.positionLegendItem}
+                                            style={getPositionLabelStyle(item)}
+                                        >
+                                            <span className={styles.positionLegendSwatch} />
+                                            <strong>{item.rangeLabel}</strong>
+                                            <span>{item.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : null}
 
                             <div className={styles.paginationBar}>
                                 <span className={styles.paginationMeta}>

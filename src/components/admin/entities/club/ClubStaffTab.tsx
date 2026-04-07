@@ -1,25 +1,56 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { Search, Plus, Trash2, User, Shield } from 'lucide-react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+import { Search, Plus, Trash2, User, AlertCircle } from 'lucide-react';
 import { fetchPeopleByClub, deletePersonFromClub, PersonWithRole } from '@/lib/services/personService';
 import { PersonManagementModal } from './PersonManagementModal';
 import './flash-club-ui.css';
 
+const STAFF_ROLE_LABELS: Record<string, string> = {
+    admin: 'Administrador',
+    staff: 'Staff',
+    head_coach: 'Entrenador principal',
+    assistant_coach: 'Entrenador asistente',
+    physical_trainer: 'Preparador fisico',
+    physio: 'Kinesiologo',
+    doctor: 'Medico',
+    manager: 'Manager',
+    video_analyst: 'Analista de video',
+};
+
+function isStaffRole(role?: string | null) {
+    const normalized = String(role || '').trim().toLowerCase();
+    return normalized !== '' && normalized !== 'player' && normalized !== 'jugador';
+}
+
+function formatStaffRole(role?: string | null) {
+    const normalized = String(role || '').trim().toLowerCase();
+    return STAFF_ROLE_LABELS[normalized] || normalized.replace(/_/g, ' ') || 'Staff';
+}
+
 export function ClubStaffTab({ clubId }: { clubId: string }) {
     const [people, setPeople] = useState<PersonWithRole[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
-        const data = await fetchPeopleByClub(clubId);
-        setPeople(data.filter(p => p.role === 'staff' || p.role === 'admin'));
-        setLoading(false);
-    };
+        setError(null);
 
-    useEffect(() => { loadData(); }, [clubId]);
+        try {
+            const data = await fetchPeopleByClub(clubId);
+            setPeople(data.filter((person) => isStaffRole(person.role)));
+        } catch (nextError) {
+            setPeople([]);
+            setError(nextError instanceof Error ? nextError.message : 'No se pudo cargar el staff del club.');
+        } finally {
+            setLoading(false);
+        }
+    }, [clubId]);
+
+    useEffect(() => { void loadData(); }, [loadData]);
 
     const handleRemove = async (personId: string, name: string) => {
         if (!confirm(`¿Eliminar a ${name} del staff?`)) return;
@@ -35,9 +66,18 @@ export function ClubStaffTab({ clubId }: { clubId: string }) {
         const term = search.toLowerCase();
         return people.filter(p =>
             `${p.first_name} ${p.last_name}`.toLowerCase().includes(term) ||
-            p.position?.toLowerCase().includes(term)
+            p.position?.toLowerCase().includes(term) ||
+            formatStaffRole(p.role).toLowerCase().includes(term)
         );
     }, [people, search]);
+
+    const roleCounts = useMemo(() => {
+        return people.reduce<Record<string, number>>((acc, person) => {
+            const label = formatStaffRole(person.role);
+            acc[label] = (acc[label] || 0) + 1;
+            return acc;
+        }, {});
+    }, [people]);
 
     return (
         <div className="squads-wrap">
@@ -80,6 +120,23 @@ export function ClubStaffTab({ clubId }: { clubId: string }) {
                     </div>
                 </div>
 
+                {error && (
+                    <div className="m-4 p-4 rounded border border-red-500/30 bg-red-500/10 text-red-200 text-sm flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        {error}
+                    </div>
+                )}
+
+                {!loading && people.length > 0 && (
+                    <div className="flex flex-wrap gap-2 px-4 pt-4">
+                        {Object.entries(roleCounts).map(([role, count]) => (
+                            <span key={role} className="chip chip-draft">
+                                {role}: {count}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
                 {/* Staff Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                     {!loading && filteredRows.map((p) => (
@@ -97,7 +154,7 @@ export function ClubStaffTab({ clubId }: { clubId: string }) {
                                         {p.first_name} {p.last_name}
                                     </h3>
                                     <p className="text-[10px] text-amber-500 font-mono font-black uppercase tracking-widest">
-                                        {p.position || 'STAFF'}
+                                        {p.position || formatStaffRole(p.role)}
                                     </p>
                                 </div>
                             </div>
@@ -105,19 +162,19 @@ export function ClubStaffTab({ clubId }: { clubId: string }) {
                             <div className="space-y-2 mb-6">
                                 <div className="flex justify-between items-center py-2 px-3 bg-neutral-900/50 rounded-lg">
                                     <span className="text-[9px] text-neutral-500 font-bold uppercase">Estado</span>
-                                    <span className="text-[9px] text-green-500 font-black uppercase">Activo</span>
+                                    <span className="text-[9px] text-green-500 font-black uppercase">{p.status || 'active'}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 px-3 bg-neutral-900/50 rounded-lg">
-                                    <span className="text-[9px] text-neutral-500 font-bold uppercase">ID Doc</span>
+                                    <span className="text-[9px] text-neutral-500 font-bold uppercase">Rol</span>
+                                    <span className="text-[9px] text-neutral-300 font-mono">{formatStaffRole(p.role)}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 px-3 bg-neutral-900/50 rounded-lg">
+                                    <span className="text-[9px] text-neutral-500 font-bold uppercase">Documento</span>
                                     <span className="text-[9px] text-neutral-300 font-mono">{p.id_number || '-'}</span>
                                 </div>
                             </div>
 
-                            <div className="flex gap-2">
-                                <button className="btn flex-1 !h-10 text-[10px] gap-2" onClick={() => alert('Próximamente')}>
-                                    <Shield className="w-3.5 h-3.5 opacity-40" />
-                                    Permisos
-                                </button>
+                            <div className="flex justify-end gap-2">
                                 <button
                                     onClick={() => handleRemove(p.id, `${p.first_name} ${p.last_name}`)}
                                     className="btn btn-danger !w-10 !h-10 !p-0 justify-center"

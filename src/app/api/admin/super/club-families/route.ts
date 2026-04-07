@@ -16,7 +16,7 @@ type QueryError = {
     details?: string | null;
 } | null;
 
-const ALLOWED_DERIVATIVE_TYPES = new Set(['youth', 'women', 'other_sport']);
+const CLUB_FAMILY_RELATION_TYPE = 'family';
 
 function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -68,17 +68,12 @@ export async function POST(request: NextRequest) {
         const body = await request.json().catch(() => null) as {
             baseClubId?: unknown;
             derivedClubIds?: unknown;
-            derivativeType?: unknown;
         } | null;
 
         const baseClubId = typeof body?.baseClubId === 'string' ? body.baseClubId : '';
         const derivedClubIds = Array.isArray(body?.derivedClubIds)
             ? body.derivedClubIds.filter((id): id is string => typeof id === 'string' && id.length > 0)
             : [];
-        const derivativeType = typeof body?.derivativeType === 'string' && ALLOWED_DERIVATIVE_TYPES.has(body.derivativeType)
-            ? body.derivativeType
-            : 'youth';
-
         const uniqueDerivedClubIds = Array.from(new Set(derivedClubIds)).filter((id) => id !== baseClubId);
 
         if (!baseClubId || uniqueDerivedClubIds.length === 0) {
@@ -91,14 +86,18 @@ export async function POST(request: NextRequest) {
                 uniqueDerivedClubIds.map((derivedClubId) => ({
                     base_club_id: baseClubId,
                     derived_club_id: derivedClubId,
-                    derivative_type: derivativeType,
+                    derivative_type: CLUB_FAMILY_RELATION_TYPE,
                 })),
                 { onConflict: 'base_club_id,derived_club_id' },
             );
 
         if (error) {
             if (isMissingTableError(error, 'club_derivatives')) {
-                return jsonError('club_derivatives table is not available', 409, error.message || error.details || null);
+                return jsonError(
+                    'La tabla club_derivatives no existe. Ejecuta la migracion 20260407120000_add_divisions_club_derivative_type.sql y vuelve a intentar.',
+                    409,
+                    error.message || error.details || null,
+                );
             }
 
             return jsonError('Failed to create club family', 500, error.message || error.details || null);

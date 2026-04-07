@@ -4,10 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
-import { GitBranch, Link2, Plus, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, GitBranch, Link2, Plus, RefreshCw } from 'lucide-react';
 import { type ClubWithUnion } from '@/lib/cache/superAdminCache';
 import {
-    CLUB_DERIVATIVE_LABELS,
     type ClubDerivativeType,
     getSportDisplayName,
 } from '@/lib/clubDerivatives';
@@ -67,7 +66,8 @@ export default function SuperadminClubFamiliesPage() {
     const [familyLoadError, setFamilyLoadError] = useState<string | null>(null);
     const [isCreateFamilyOpen, setIsCreateFamilyOpen] = useState(false);
     const [selectedClubIds, setSelectedClubIds] = useState<string[]>([]);
-    const [familyType, setFamilyType] = useState<ClubDerivativeType>('youth');
+    const [clubSearch, setClubSearch] = useState('');
+    const [clubPage, setClubPage] = useState(0);
     const [isCreatingFamily, setIsCreatingFamily] = useState(false);
     const [createFamilyError, setCreateFamilyError] = useState<string | null>(null);
 
@@ -168,14 +168,16 @@ export default function SuperadminClubFamiliesPage() {
 
     const openCreateFamilyModal = () => {
         setSelectedClubIds([]);
-        setFamilyType('youth');
+        setClubSearch('');
+        setClubPage(0);
         setCreateFamilyError(null);
         setIsCreateFamilyOpen(true);
     };
 
     const openAddToFamilyModal = (club: ClubWithUnion) => {
         setSelectedClubIds([club.id]);
-        setFamilyType('youth');
+        setClubSearch('');
+        setClubPage(0);
         setCreateFamilyError(null);
         setIsCreateFamilyOpen(true);
     };
@@ -184,6 +186,8 @@ export default function SuperadminClubFamiliesPage() {
         if (isCreatingFamily) return;
         setIsCreateFamilyOpen(false);
         setSelectedClubIds([]);
+        setClubSearch('');
+        setClubPage(0);
         setCreateFamilyError(null);
     };
 
@@ -199,7 +203,37 @@ export default function SuperadminClubFamiliesPage() {
     const baseClubId = selectedClubIds[0] ?? null;
     const baseClub = baseClubId ? clubById.get(baseClubId) ?? null : null;
     const selectedDerivedClubIds = baseClubId ? selectedClubIds.filter((id) => id !== baseClubId) : [];
-    const visibleSelectionClubs = availableFamilyBaseClubs.slice(0, MAX_FAMILY_SELECTION_CARDS);
+    const normalizedClubSearch = clubSearch.trim().toLowerCase();
+    const filteredSelectionClubs = useMemo(() => {
+        if (!normalizedClubSearch) return availableFamilyBaseClubs;
+
+        return availableFamilyBaseClubs.filter((club) => {
+            const haystack = [
+                club.name,
+                club.short_name,
+                club.city,
+                club.region,
+                club.country,
+                club.sport,
+                club.union?.name,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            return haystack.includes(normalizedClubSearch);
+        });
+    }, [availableFamilyBaseClubs, normalizedClubSearch]);
+    const totalClubPages = Math.max(1, Math.ceil(filteredSelectionClubs.length / MAX_FAMILY_SELECTION_CARDS));
+    const currentClubPage = Math.min(clubPage, totalClubPages - 1);
+    const visibleSelectionClubs = filteredSelectionClubs.slice(
+        currentClubPage * MAX_FAMILY_SELECTION_CARDS,
+        currentClubPage * MAX_FAMILY_SELECTION_CARDS + MAX_FAMILY_SELECTION_CARDS,
+    );
+
+    useEffect(() => {
+        setClubPage(0);
+    }, [normalizedClubSearch]);
 
     const handleCreateFamily = async () => {
         if (!baseClubId || selectedDerivedClubIds.length === 0) {
@@ -218,7 +252,6 @@ export default function SuperadminClubFamiliesPage() {
                 body: JSON.stringify({
                     baseClubId,
                     derivedClubIds: selectedDerivedClubIds,
-                    derivativeType: familyType,
                 }),
             });
             const payload = await response.json().catch(() => ({})) as {
@@ -232,6 +265,8 @@ export default function SuperadminClubFamiliesPage() {
 
             setIsCreateFamilyOpen(false);
             setSelectedClubIds([]);
+            setClubSearch('');
+            setClubPage(0);
             await loadClubFamilies();
         } catch (error) {
             setCreateFamilyError(error instanceof Error ? error.message : 'No se pudo crear la familia.');
@@ -407,8 +442,6 @@ export default function SuperadminClubFamiliesPage() {
                                 <div style={{ display: 'grid', gap: 10 }}>
                                     {family.members.map((member) => {
                                         const isRoot = member.id === family.root.id;
-                                        const relation = family.relations.find((item) => item.derived_club_id === member.id);
-
                                         return (
                                             <div
                                                 key={member.id}
@@ -431,7 +464,7 @@ export default function SuperadminClubFamiliesPage() {
                                                         <div style={{ fontWeight: 600, color: '#ececec' }}>{member.name}</div>
                                                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 3 }}>
                                                             <span style={{ fontSize: 10, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)' }}>
-                                                                {isRoot ? 'BASE' : CLUB_DERIVATIVE_LABELS[relation?.derivative_type || 'youth']}
+                                                                {isRoot ? 'BASE' : 'FAMILIA'}
                                                             </span>
                                                             {member.sport && (
                                                                 <span style={{ fontSize: 10, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)' }}>
@@ -510,27 +543,23 @@ export default function SuperadminClubFamiliesPage() {
                                     Base: {baseClub?.name || 'marca primero el club base'}
                                 </div>
                             </div>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--basalt-300)', fontSize: 13 }}>
-                                Tipo de relacion
-                                <select
-                                    value={familyType}
-                                    onChange={(event) => setFamilyType(event.target.value as ClubDerivativeType)}
-                                    style={{
-                                        background: '#0f1217',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: 10,
-                                        color: '#fff',
-                                        padding: '9px 12px',
-                                        fontSize: 13,
-                                    }}
-                                >
-                                    {(Object.keys(CLUB_DERIVATIVE_LABELS) as ClubDerivativeType[]).map((option) => (
-                                        <option key={option} value={option}>
-                                            {CLUB_DERIVATIVE_LABELS[option]}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
+                            <input
+                                type="search"
+                                value={clubSearch}
+                                onChange={(event) => setClubSearch(event.target.value)}
+                                placeholder="Buscar club por nombre, deporte, ciudad o union..."
+                                style={{
+                                    minWidth: 320,
+                                    flex: '1 1 360px',
+                                    background: '#0f1217',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: 12,
+                                    color: '#fff',
+                                    padding: '11px 14px',
+                                    fontSize: 13,
+                                    outline: 'none',
+                                }}
+                            />
                         </div>
 
                         <div
@@ -543,7 +572,11 @@ export default function SuperadminClubFamiliesPage() {
                                 paddingRight: 4,
                             }}
                         >
-                            {visibleSelectionClubs.map((club) => {
+                            {visibleSelectionClubs.length === 0 ? (
+                                <div style={{ gridColumn: '1 / -1', padding: '28px 12px', textAlign: 'center', color: 'var(--basalt-400)', border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 14 }}>
+                                    No encontramos clubes con esa busqueda.
+                                </div>
+                            ) : visibleSelectionClubs.map((club) => {
                                 const isSelected = selectedClubIds.includes(club.id);
                                 const isBase = baseClubId === club.id;
 
@@ -600,9 +633,31 @@ export default function SuperadminClubFamiliesPage() {
                             })}
                         </div>
 
-                        {availableFamilyBaseClubs.length > MAX_FAMILY_SELECTION_CARDS && (
-                            <div style={{ fontSize: 12, color: 'var(--basalt-400)' }}>
-                                Mostrando 24 clubes como maximo. Si no ves el club, crealo o ajustalo desde el panel de clubes.
+                        {filteredSelectionClubs.length > MAX_FAMILY_SELECTION_CARDS && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', fontSize: 12, color: 'var(--basalt-400)' }}>
+                                <span>
+                                    Pagina {currentClubPage + 1} de {totalClubPages}. Mostrando {visibleSelectionClubs.length} de {filteredSelectionClubs.length} clubes encontrados.
+                                </span>
+                                <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                    <button
+                                        type="button"
+                                        className={styles.cardAction}
+                                        onClick={() => setClubPage((page) => Math.max(0, page - 1))}
+                                        disabled={currentClubPage === 0}
+                                    >
+                                        <ChevronLeft size={13} style={{ marginRight: 4 }} />
+                                        Anterior
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={styles.cardAction}
+                                        onClick={() => setClubPage((page) => Math.min(totalClubPages - 1, page + 1))}
+                                        disabled={currentClubPage >= totalClubPages - 1}
+                                    >
+                                        Siguiente
+                                        <ChevronRight size={13} style={{ marginLeft: 4 }} />
+                                    </button>
+                                </span>
                             </div>
                         )}
 

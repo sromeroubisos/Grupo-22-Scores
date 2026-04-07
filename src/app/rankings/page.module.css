@@ -563,6 +563,18 @@
     background: rgba(255, 255, 255, 0.01);
 }
 
+.positionLabeledRow td {
+    background: color-mix(in srgb, var(--position-label-color, #3b82f6) 9%, transparent);
+}
+
+.positionLabeledRow td:first-child {
+    box-shadow: inset 3px 0 0 var(--position-label-color, #3b82f6);
+}
+
+.positionLabeledRow:hover td {
+    background: color-mix(in srgb, var(--position-label-color, #3b82f6) 14%, transparent);
+}
+
 .posCell {
     font-family: var(--mono);
     font-weight: 600;
@@ -573,6 +585,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    flex-wrap: wrap;
 }
 
 .positionUp,
@@ -645,6 +658,50 @@
     font-family: var(--mono);
     font-weight: 600;
     color: #fff;
+}
+
+.positionLegend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 0 0;
+}
+
+.positionLegendTitle {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.positionLegendItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid color-mix(in srgb, var(--position-label-color, #3b82f6) 38%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--position-label-color, #3b82f6) 12%, transparent);
+    color: var(--text-main);
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.positionLegendItem strong {
+    color: color-mix(in srgb, var(--position-label-color, #3b82f6) 72%, white);
+}
+
+.positionLegendSwatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--position-label-color, #3b82f6);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--position-label-color, #3b82f6) 16%, transparent);
 }
 
 .paginationBar {
@@ -895,6 +952,21 @@
         margin-bottom: 12px;
         padding: 10px 10px;
         border-radius: var(--radius-sm);
+    }
+
+    .positionLabeledRow {
+        background: color-mix(in srgb, var(--position-label-color, #3b82f6) 12%, var(--surface));
+        border-color: color-mix(in srgb, var(--position-label-color, #3b82f6) 32%, var(--border));
+        box-shadow: inset 3px 0 0 var(--position-label-color, #3b82f6);
+    }
+
+    .positionLabeledRow td,
+    .positionLabeledRow:hover td {
+        background: transparent;
+    }
+
+    .positionLabeledRow td:first-child {
+        box-shadow: none;
     }
 
     .table td {

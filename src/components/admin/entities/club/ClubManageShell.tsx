@@ -19,6 +19,7 @@ import { ClubStandingsOverviewTab } from './ClubStandingsOverviewTab';
 import { ClubRelatedClubsTab } from './ClubRelatedClubsTab';
 import { ClubIdentityTab } from './ClubIdentityTab';
 import { ClubSquadsTab } from './ClubSquadsTab';
+import { ClubStaffTab } from './ClubStaffTab';
 import { TabPlaceholder } from './TabPlaceholder';
 import type {
     ClubDashboardMatch,
@@ -72,7 +73,7 @@ interface ClubRelatedData {
     clubs: ClubRelatedClub[];
 }
 
-const CLUB_MANAGE_ALLOWED_TABS = new Set(['resumen', 'fixture', 'posiciones', 'relacionados', 'identidad', 'planteles']);
+const CLUB_MANAGE_ALLOWED_TABS = new Set(['resumen', 'fixture', 'posiciones', 'relacionados', 'identidad', 'planteles', 'staff']);
 
 function formatSportLabel(sport?: string | null) {
     if (!sport?.trim()) return null;
@@ -419,28 +420,8 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                             )}
 
                             {currentTab === 'staff' && (
-                                <div className="card col-12">
-                                    <div className="card-header">
-                                        <div className="card-title">Directiva y Cuerpo Técnico</div>
-                                        <button className="btn btn-primary">+ Vincular Miembro</button>
-                                    </div>
-                                    <table className="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Profesional</th>
-                                                <th>Rol / Cargo</th>
-                                                <th>Vinculación</th>
-                                                <th style={{ textAlign: 'right' }}>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td colSpan={4} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                                                    No hay staff asociado a este club actualmente.
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div className="col-12">
+                                    <ClubStaffTab clubId={id} />
                                 </div>
                             )}
 

@@ -47,6 +47,7 @@ export async function PATCH(
                 body?.description === null || body?.description === undefined
                     ? null
                     : String(body.description),
+            positionLabels: body?.positionLabels,
             actorUserId,
         });
         return NextResponse.json({ data });

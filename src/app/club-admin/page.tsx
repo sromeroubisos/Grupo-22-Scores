@@ -210,6 +210,9 @@ export default function ClubAdminDashboardPage() {
                             <Link className={styles.btnGhost} href={buildClubHref('/club-admin/planteles', clubId)}>
                                 Gestionar planteles
                             </Link>
+                            <Link className={styles.btnGhost} href={buildClubHref('/club-admin/staff', clubId)}>
+                                Gestionar staff
+                            </Link>
                         </div>
                     </div>
                 </div>

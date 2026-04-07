@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChangeEvent, FormEvent, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, CSSProperties, FormEvent, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
 import {
     AlertCircle,
@@ -38,8 +38,11 @@ import {
     getRankingClubShortName,
     getRankingDelta,
     getRankingPreviousRating,
+    getRankingPositionLabel,
     paginateRankingEntries,
     RANKING_EXPORT_COLUMN_LABELS,
+    normalizeRankingPositionLabels,
+    type RankingPositionLabel,
 } from '@/lib/rankings/rankingTable';
 import baseStyles from '../page.module.css';
 import styles from './page.module.css';
@@ -151,6 +154,11 @@ type RankingDetail = {
     currentLeaderClubId?: string | null;
 };
 type Feedback = { tone: 'success' | 'error' | 'info'; text: string } | null;
+type PositionLabelDraft = {
+    positions: string;
+    label: string;
+    color: string;
+};
 type EntryEditorState = {
     mode: 'create' | 'edit';
     entryId: string | null;
@@ -319,6 +327,44 @@ function normalizeSearchText(value: unknown) {
         .toLowerCase()
         .trim();
 }
+function parsePositionInput(value: string) {
+    const positions = new Set<number>();
+
+    value.split(/[;,]+/).forEach((rawChunk) => {
+        const chunk = rawChunk.trim();
+        if (!chunk) return;
+
+        const rangeMatch = chunk.match(/^(\d+)\s*-\s*(\d+)$/);
+        if (rangeMatch) {
+            const start = Number(rangeMatch[1]);
+            const end = Number(rangeMatch[2]);
+            if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start) return;
+
+            for (let position = start; position <= Math.min(end, 999); position += 1) {
+                positions.add(position);
+            }
+            return;
+        }
+
+        const position = Number(chunk);
+        if (Number.isInteger(position) && position >= 1 && position <= 999) {
+            positions.add(position);
+        }
+    });
+
+    return Array.from(positions).sort((left, right) => left - right);
+}
+function getPositionLabelStyle(label: Pick<RankingPositionLabel, 'color'>) {
+    return {
+        '--position-label-color': label.color,
+    } as CSSProperties;
+}
+function formatRgbColor(value: string) {
+    const normalized = value.trim().replace('#', '');
+    if (!/^[0-9a-f]{6}$/i.test(normalized)) return 'RGB';
+    const channels = [0, 2, 4].map((start) => parseInt(normalized.slice(start, start + 2), 16));
+    return `RGB(${channels.join(', ')})`;
+}
 function parseWorkbook(file: File, buffer: ArrayBuffer): WorkbookPreview {
     const workbook = XLSX.read(buffer, { type: 'array' });
     const rowsBySheet: Record<string, SheetRows> = {};
@@ -406,6 +452,8 @@ export default function SuperRankingsPage() {
     const [entryPage, setEntryPage] = useState(1);
     const [entryEditor, setEntryEditor] = useState<EntryEditorState>(createEntryEditorState());
     const [entryBusy, setEntryBusy] = useState(false);
+    const [positionLabelDraft, setPositionLabelDraft] = useState<PositionLabelDraft>({ positions: '', label: '', color: '#3b82f6' });
+    const [savingPositionLabels, setSavingPositionLabels] = useState(false);
     const deferredEntryFilter = useDeferredValue(entryFilter);
 
     const selectedRanking = useMemo(() => rankings.find((ranking) => ranking.id === selectedRankingId) ?? rankings[0] ?? null, [rankings, selectedRankingId]);
@@ -465,6 +513,10 @@ export default function SuperRankingsPage() {
         [entryPage, filteredEntries],
     );
     const visibleEntries = paginatedEntries.items;
+    const rankingPositionLabels = useMemo(
+        () => normalizeRankingPositionLabels(selectedDetail?.ranking.metadata?.positionLabels ?? selectedSummary?.metadata?.positionLabels),
+        [selectedDetail?.ranking.metadata?.positionLabels, selectedSummary?.metadata?.positionLabels],
+    );
     const leadershipSummary = selectedDetail?.leadershipSummary ?? [];
     const leadershipPeriods = selectedDetail?.leadershipPeriods ?? [];
     const currentLeader = leadershipSummary.find((item) => item.is_current_leader) ?? null;
@@ -697,6 +749,7 @@ export default function SuperRankingsPage() {
         setEntryRegionFilter('all');
         setEntryPage(1);
         setEntryEditor(createEntryEditorState());
+        setPositionLabelDraft({ positions: '', label: '', color: '#3b82f6' });
     }, [selectedRankingId]);
 
     useEffect(() => {
@@ -871,6 +924,72 @@ export default function SuperRankingsPage() {
         } finally {
             setSavingMetadata(false);
         }
+    };
+    const persistPositionLabels = async (nextLabels: RankingPositionLabel[], successMessage: string) => {
+        if (!selectedRanking || !selectedSummary) {
+            setFeedback({ tone: 'info', text: 'Guarda la base primero para poder etiquetar puestos.' });
+            return;
+        }
+
+        const nextName = selectedRanking.name.trim();
+        if (!nextName) {
+            setFeedback({ tone: 'error', text: 'El ranking necesita un titulo para guardar etiquetas.' });
+            return;
+        }
+
+        setSavingPositionLabels(true);
+        try {
+            const payload = await readJson(await fetch(`/api/admin/super/rankings/${encodeURIComponent(selectedRanking.id)}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: nextName,
+                    description: selectedRanking.description.trim() || null,
+                    positionLabels: normalizeRankingPositionLabels(nextLabels),
+                }),
+            }));
+            applyDetail(payload.data as RankingDetail);
+            setFeedback({ tone: 'success', text: successMessage });
+        } catch (error) {
+            setFeedback({ tone: 'error', text: error instanceof Error ? error.message : 'No se pudieron guardar las etiquetas.' });
+        } finally {
+            setSavingPositionLabels(false);
+        }
+    };
+    const handleSavePositionLabel = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const positions = parsePositionInput(positionLabelDraft.positions);
+        const label = positionLabelDraft.label.trim();
+
+        if (!positions.length) {
+            setFeedback({ tone: 'error', text: 'Indica al menos un puesto valido, por ejemplo 1 o 1-4.' });
+            return;
+        }
+
+        if (!label) {
+            setFeedback({ tone: 'error', text: 'La etiqueta necesita un texto.' });
+            return;
+        }
+
+        const positionsToReplace = new Set(positions);
+        const nextLabels = normalizeRankingPositionLabels([
+            ...rankingPositionLabels.filter((item) => !positionsToReplace.has(item.position)),
+            ...positions.map((position) => ({
+                position,
+                label,
+                tone: 'info' as const,
+                color: positionLabelDraft.color,
+            })),
+        ]);
+
+        await persistPositionLabels(nextLabels, positions.length === 1 ? 'Etiqueta de puesto guardada.' : 'Etiquetas de puestos guardadas.');
+        setPositionLabelDraft((current) => ({ ...current, positions: '', label: '' }));
+    };
+    const handleRemovePositionLabel = (position: number) => {
+        void persistPositionLabels(
+            rankingPositionLabels.filter((item) => item.position !== position),
+            'Etiqueta de puesto quitada.',
+        );
     };
     const handleSaveBase = async () => {
         if (!selectedRanking) return;
@@ -1202,10 +1321,17 @@ export default function SuperRankingsPage() {
                                                 const previousRating = getRankingPreviousRating(entry);
                                                 const delta = getRankingDelta(entry.current_rating, previousRating);
                                                 const absoluteIndex = paginatedEntries.start + index + 1;
+                                                const position = entry.current_position || absoluteIndex;
+                                                const positionLabel = getRankingPositionLabel(rankingPositionLabels, position);
                                                 const isSelected = entryEditor.entryId === entry.id;
                                                 return (
                                                     <tr key={entry.id} className={isSelected ? styles.tableRowActive : undefined} onClick={() => openEditEntryEditor(entry)}>
-                                                        <td><span className={styles.rankBadge}>{entry.current_position || absoluteIndex}</span></td>
+                                                        <td>
+                                                            <div className={styles.rankBadgeStack}>
+                                                                <span className={styles.rankBadge}>{position}</span>
+                                                                {positionLabel ? <span className={styles.positionLabelChip} style={getPositionLabelStyle(positionLabel)}>{positionLabel.label}</span> : null}
+                                                            </div>
+                                                        </td>
                                                         <td><div className={styles.standingsTeamCell}>{entry.clubs?.logo_url ? <img src={entry.clubs.logo_url} alt="" className={styles.standingsTeamLogo} /> : <div className={styles.standingsTeamLogoPlaceholder} />}<div className={styles.teamCellCopy}><strong>{getRankingClubName(entry)}</strong><span>{getRankingClubShortName(entry)}</span></div></div></td>
                                                         <td>{formatRankingRating(entry.current_rating)}</td>
                                                         <td>{formatRankingRating(previousRating)}</td>
@@ -1257,6 +1383,77 @@ export default function SuperRankingsPage() {
                                 </div>
                                 {selectedDetail ? <form className={styles.manualForm} onSubmit={handleManualAdjustment}><div className={styles.formGroup}><label className={styles.formLabel}>Club</label><select className={styles.formSelect} value={manualForm.clubId} onChange={(event) => setManualForm((current) => ({ ...current, clubId: event.target.value }))}>{selectedDetail.entries.map((entry) => <option key={entry.club_id} value={entry.club_id}>{entry.clubs?.name || entry.source_name}</option>)}</select></div><div className={styles.formRow}><div className={styles.formGroup}><label className={styles.formLabel}>Modo</label><select className={styles.formSelect} value={manualForm.mode} onChange={(event) => setManualForm((current) => ({ ...current, mode: event.target.value === 'set' ? 'set' : 'delta' }))}><option value="delta">Sumar / restar</option><option value="set">Fijar valor</option></select></div><div className={styles.formGroup}><label className={styles.formLabel}>Valor</label><input className={styles.formInput} value={manualForm.value} onChange={(event) => setManualForm((current) => ({ ...current, value: event.target.value }))} placeholder={manualForm.mode === 'set' ? '81.25' : '+0.50'} /></div></div><div className={styles.formGroup}><label className={styles.formLabel}>Motivo</label><textarea className={styles.formTextarea} value={manualForm.reason} onChange={(event) => setManualForm((current) => ({ ...current, reason: event.target.value }))} /></div><button type="submit" className={styles.createBtn} disabled={manualBusy}>{manualBusy ? <RefreshCw size={16} className={styles.spin} /> : <Save size={16} />}Aplicar override</button></form> : <div className={styles.emptyPreview}>Guarda la base primero.</div>}
                                 {selectedDetail?.manualAdjustments.length ? <div className={styles.activityList}>{selectedDetail.manualAdjustments.map((adjustment) => <div key={adjustment.id} className={styles.activityItem}><div className={styles.activityTop}><strong>{entryNameMap.get(adjustment.club_id) || adjustment.club_id}</strong><span className={`${baseStyles.pill} ${baseStyles.pillWarning}`}>{adjustment.mode}</span></div><span className={styles.columnMeta}>Valor {Number(adjustment.value) >= 0 ? '+' : ''}{formatRankingRating(Number(adjustment.value))} / Resultado {formatRankingRating(adjustment.resulting_rating === null ? null : Number(adjustment.resulting_rating))}</span><span className={styles.columnMeta}>{adjustment.reason} / {formatDateTime(adjustment.created_at)}</span></div>)}</div> : null}
+                            </section>
+
+                            <section className={styles.inspectorCard}>
+                                <div className={styles.inspectorCardHeader}>
+                                    <div><span className={styles.panelEyebrow}>Editorial</span><strong>Etiquetas por puesto</strong></div>
+                                    <span className={`${styles.statusChip} ${rankingPositionLabels.length ? styles.statusChipInfo : styles.statusChipNeutral}`}>{rankingPositionLabels.length}</span>
+                                </div>
+                                {selectedSummary ? (
+                                    <>
+                                        <form className={styles.positionLabelForm} onSubmit={handleSavePositionLabel}>
+                                            <div className={styles.formRow}>
+                                                <div className={styles.formGroup}>
+                                                    <label className={styles.formLabel}>Puestos</label>
+                                                    <input
+                                                        className={styles.formInput}
+                                                        value={positionLabelDraft.positions}
+                                                        onChange={(event) => setPositionLabelDraft((current) => ({ ...current, positions: event.target.value }))}
+                                                        placeholder="1, 2 o 1-4"
+                                                    />
+                                                </div>
+                                                <div className={styles.formGroup}>
+                                                    <label className={styles.formLabel}>Color RGB</label>
+                                                    <div className={styles.rgbPickerRow}>
+                                                        <input
+                                                            className={styles.rgbPicker}
+                                                            type="color"
+                                                            value={positionLabelDraft.color}
+                                                            onChange={(event) => setPositionLabelDraft((current) => ({ ...current, color: event.target.value }))}
+                                                            aria-label="Color RGB de la etiqueta"
+                                                        />
+                                                        <span className={styles.rgbPickerValue}>{formatRgbColor(positionLabelDraft.color)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.formLabel}>Etiqueta</label>
+                                                <input
+                                                    className={styles.formInput}
+                                                    value={positionLabelDraft.label}
+                                                    onChange={(event) => setPositionLabelDraft((current) => ({ ...current, label: event.target.value }))}
+                                                    placeholder="Clasifica / Playoffs / Descenso"
+                                                    maxLength={40}
+                                                />
+                                            </div>
+                                            <button type="submit" className={styles.createBtn} disabled={savingPositionLabels}>
+                                                {savingPositionLabels ? <RefreshCw size={16} className={styles.spin} /> : <Save size={16} />}
+                                                Guardar etiqueta
+                                            </button>
+                                        </form>
+                                        {rankingPositionLabels.length ? (
+                                            <div className={styles.positionLabelList}>
+                                                {rankingPositionLabels.map((item) => (
+                                                    <div key={`ranking-position-label-${item.position}`} className={styles.positionLabelItem}>
+                                                        <div className={styles.rankBadgeStack}>
+                                                            <span className={styles.rankBadge}>{item.position}</span>
+                                                            <span className={styles.positionLabelChip} style={getPositionLabelStyle(item)}>{item.label}</span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            className={styles.linkBtn}
+                                                            onClick={() => handleRemovePositionLabel(item.position)}
+                                                            disabled={savingPositionLabels}
+                                                        >
+                                                            Quitar
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : <div className={styles.emptyPreview}>Todavia no hay etiquetas. Agrega puestos como 1 o 1-4.</div>}
+                                    </>
+                                ) : <div className={styles.emptyPreview}>Guarda la base primero para etiquetar puestos.</div>}
                             </section>
 
                             <div className={styles.inspectorStack} id="workspace-support">

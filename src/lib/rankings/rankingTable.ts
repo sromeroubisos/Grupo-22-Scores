@@ -15,6 +15,96 @@ export type RankingTableEntryLike = {
     clubs?: RankingTableClub;
 };
 
+export const RANKING_POSITION_LABEL_TONES = ['info', 'success', 'warning', 'danger', 'neutral'] as const;
+
+export type RankingPositionLabelTone = typeof RANKING_POSITION_LABEL_TONES[number];
+
+const RANKING_POSITION_LABEL_TONE_COLORS: Record<RankingPositionLabelTone, string> = {
+    info: '#3b82f6',
+    success: '#22c55e',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+    neutral: '#71717a',
+};
+
+export type RankingPositionLabel = {
+    position: number;
+    label: string;
+    tone: RankingPositionLabelTone;
+    color: string;
+};
+
+function isRankingPositionLabelTone(value: unknown): value is RankingPositionLabelTone {
+    return RANKING_POSITION_LABEL_TONES.includes(value as RankingPositionLabelTone);
+}
+
+function normalizeHexColor(value: string) {
+    const text = value.trim();
+    const shortHexMatch = text.match(/^#([0-9a-f]{3})$/i);
+    if (shortHexMatch) {
+        return `#${shortHexMatch[1].split('').map((char) => `${char}${char}`).join('')}`.toLowerCase();
+    }
+
+    if (/^#[0-9a-f]{6}$/i.test(text)) {
+        return text.toLowerCase();
+    }
+
+    return null;
+}
+
+function normalizeRgbColor(value: string) {
+    const match = value.trim().match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i);
+    if (!match) return null;
+
+    const channels = match.slice(1).map((channel) => Number(channel));
+    if (channels.some((channel) => !Number.isInteger(channel) || channel < 0 || channel > 255)) {
+        return null;
+    }
+
+    return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
+}
+
+export function normalizeRankingPositionLabelColor(value: unknown, tone: RankingPositionLabelTone = 'info') {
+    const text = String(value ?? '').trim();
+    return normalizeHexColor(text) ?? normalizeRgbColor(text) ?? RANKING_POSITION_LABEL_TONE_COLORS[tone];
+}
+
+export function normalizeRankingPositionLabels(value: unknown): RankingPositionLabel[] {
+    if (!Array.isArray(value)) return [];
+
+    const labelMap = new Map<number, RankingPositionLabel>();
+
+    value.forEach((item) => {
+        if (!item || typeof item !== 'object' || Array.isArray(item)) return;
+
+        const source = item as Record<string, unknown>;
+        const position = Number(source.position);
+        const label = String(source.label ?? '').trim();
+        const tone = isRankingPositionLabelTone(source.tone) ? source.tone : 'info';
+        const color = normalizeRankingPositionLabelColor(source.color, tone);
+
+        if (!Number.isInteger(position) || position < 1 || !label) return;
+
+        labelMap.set(position, {
+            position,
+            label: label.slice(0, 40),
+            tone,
+            color,
+        });
+    });
+
+    return Array.from(labelMap.values()).sort((left, right) => left.position - right.position);
+}
+
+export function getRankingPositionLabel(
+    labels: RankingPositionLabel[],
+    position: number | null | undefined,
+) {
+    const numericPosition = Number(position);
+    if (!Number.isInteger(numericPosition) || numericPosition < 1) return null;
+    return labels.find((label) => label.position === numericPosition) ?? null;
+}
+
 export function formatRankingRating(value: number | string | null | undefined) {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return '-';

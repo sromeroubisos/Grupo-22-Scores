@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { listClubRankings } from '@/lib/server/clubRankings';
 
 function jsonError(message: string, status = 500, details?: unknown) {
@@ -34,6 +35,9 @@ export async function GET(request: NextRequest) {
             last_incremental_match_id: ranking.last_incremental_match_id,
             created_at: ranking.created_at,
             updated_at: ranking.updated_at,
+            metadata: {
+                positionLabels: normalizeRankingPositionLabels(ranking.metadata?.positionLabels),
+            },
         }));
 
         return NextResponse.json({ data });
