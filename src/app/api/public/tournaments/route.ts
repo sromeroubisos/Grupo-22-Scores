@@ -62,6 +62,7 @@ type FlashScoreTournamentListItem = {
     logo?: string | null;
     url?: string | null;
     link?: string | null;
+    tournament_url?: string | null;
 };
 
 type FlashScoreTournamentEntity = {
@@ -84,6 +85,7 @@ type PublicExternalTournament = {
     type: 'international' | 'local';
     seasons: [];
     external_country_id?: string | null;
+    url?: string | null;
 };
 
 type PublicRugbyCountrySummary = {
@@ -183,6 +185,27 @@ function buildFlashScoreTournamentId(value: unknown): string | null {
     return normalized.toLowerCase().startsWith('fs-') ? normalized : `fs-${normalized}`;
 }
 
+function buildFlashScoreTournamentIdFromUrl(value: unknown): string | null {
+    const rawUrl = normalizeText(value);
+    if (!rawUrl) return null;
+
+    let pathname = rawUrl;
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+        try {
+            pathname = new URL(rawUrl).pathname;
+        } catch {
+            pathname = rawUrl;
+        }
+    }
+
+    const slug = pathname
+        .split('/')
+        .filter(Boolean)
+        .join('-');
+
+    return slug ? `fs-${slugifyCountryId(slug)}` : null;
+}
+
 async function applyStoredTournamentOverrides(
     tournaments: PublicExternalTournament[],
 ): Promise<PublicExternalTournament[]> {
@@ -227,7 +250,10 @@ function mapFlashScoreTournamentToPublicTournament(
     entity: FlashScoreTournamentEntity,
     sportKey = RUGBY_FLASHSCORE_SPORT_KEY,
 ): PublicExternalTournament | null {
-    const tournamentId = buildFlashScoreTournamentId(tournament.tournament_id ?? tournament.id);
+    const tournamentUrl = normalizeText(tournament.url || tournament.link || tournament.tournament_url) || null;
+    const tournamentId =
+        buildFlashScoreTournamentId(tournament.tournament_id ?? tournament.id) ||
+        buildFlashScoreTournamentIdFromUrl(tournamentUrl);
     if (!tournamentId || isBlockedTournamentId(tournamentId)) {
         return null;
     }
@@ -249,12 +275,24 @@ function mapFlashScoreTournamentToPublicTournament(
         type: countryId === 'international' ? 'international' : 'local',
         seasons: [],
         external_country_id: entity.id,
+        url: tournamentUrl,
     };
 }
 
 async function queryRugbyCountrySummaries() {
-    const payload = await getCountriesBySport(RUGBY_FLASHSCORE_SPORT_KEY);
-    return buildRugbyCountrySummaries(payload);
+    const payloads = await Promise.all([
+        getCountriesBySport('rugby-union'),
+        getCountriesBySport('rugby-league'),
+    ]);
+
+    const byCountryId = new Map<string, PublicRugbyCountrySummary>();
+    for (const country of payloads.flatMap((payload) => buildRugbyCountrySummaries(payload))) {
+        if (!byCountryId.has(country.external_country_id)) {
+            byCountryId.set(country.external_country_id, country);
+        }
+    }
+
+    return [...byCountryId.values()].sort((left, right) => left.name.localeCompare(right.name));
 }
 
 async function queryFlashScoreCountrySummaries(sportKey: string) {
@@ -269,7 +307,6 @@ async function queryRugbyCountryTournaments(args: {
     search: string;
     audience: TournamentAudience;
 }) {
-    const payload = await getTournamentsBySportAndEntity(RUGBY_FLASHSCORE_SPORT_KEY, args.externalCountryId);
     const entity: FlashScoreTournamentEntity = {
         id: args.externalCountryId,
         name: args.countryName,
@@ -277,9 +314,17 @@ async function queryRugbyCountryTournaments(args: {
         flag: args.flag || null,
     };
 
-    const mapped = extractListData<FlashScoreTournamentListItem>(payload)
-        .map((tournament) => mapFlashScoreTournamentToPublicTournament(tournament, entity, RUGBY_FLASHSCORE_SPORT_KEY))
-        .filter((tournament): tournament is PublicExternalTournament => tournament !== null);
+    const payloads = await Promise.all([
+        getTournamentsBySportAndEntity('rugby-union', args.externalCountryId),
+        getTournamentsBySportAndEntity('rugby-league', args.externalCountryId),
+    ]);
+
+    const mapped = payloads.flatMap((payload, index) => {
+        const sportKey = index === 0 ? 'rugby-union' : 'rugby-league';
+        return extractListData<FlashScoreTournamentListItem>(payload)
+            .map((tournament) => mapFlashScoreTournamentToPublicTournament(tournament, entity, sportKey))
+            .filter((tournament): tournament is PublicExternalTournament => tournament !== null);
+    });
 
     const withOverrides = await applyStoredTournamentOverrides(mapped);
 
@@ -538,6 +583,7 @@ export async function GET(request: NextRequest) {
         const sport = searchParams.get('sport');
         const flashScoreSportKey = resolveFlashScoreSportKey(sport);
         const flashScoreCatalogEnabled = Boolean(sport) && isFlashScoreEnabledForSport(flashScoreSportKey);
+        const shouldAggregateRugby = flashScoreSportKey === RUGBY_FLASHSCORE_SPORT_KEY;
         const scope = searchParams.get('scope');
         const forceFullCatalog = scope === 'full';
         const search = searchParams.get('search')?.trim().toLowerCase() || '';
@@ -566,14 +612,22 @@ export async function GET(request: NextRequest) {
             }
 
             try {
-                const tournaments = await queryFlashScoreCountryTournaments({
-                    sportKey: flashScoreSportKey,
-                    externalCountryId,
-                    countryName,
-                    flag: countryFlag || null,
-                    search,
-                    audience,
-                });
+                const tournaments = shouldAggregateRugby
+                    ? await queryRugbyCountryTournaments({
+                        externalCountryId,
+                        countryName,
+                        flag: countryFlag || null,
+                        search,
+                        audience,
+                    })
+                    : await queryFlashScoreCountryTournaments({
+                        sportKey: flashScoreSportKey,
+                        externalCountryId,
+                        countryName,
+                        flag: countryFlag || null,
+                        search,
+                        audience,
+                    });
                 return withCacheControl({ data: tournaments }, CATALOG_CACHE_CONTROL);
             } catch (error) {
                 console.error('[GET /api/public/tournaments] catalog country failed:', error);
@@ -612,7 +666,7 @@ export async function GET(request: NextRequest) {
 
         if (flashScoreCatalogEnabled && (isRugbySport(flashScoreSportKey) || Boolean(search) || forceFullCatalog)) {
             try {
-                const flashScoreTournaments = isRugbySport(flashScoreSportKey)
+                const flashScoreTournaments = shouldAggregateRugby
                     ? await queryPublicRugbyFlashScoreTournaments({ search, audience })
                     : await queryPublicFlashScoreTournaments({ sportKey: flashScoreSportKey, search, audience });
                 const combinedTournaments = mergePublicTournamentLists(dbTournaments, flashScoreTournaments);

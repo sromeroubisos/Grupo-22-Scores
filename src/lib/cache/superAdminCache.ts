@@ -13,7 +13,7 @@ import { normalizeError, serializeUnknownError, type NormalizedError } from '@/l
 
 const DEFAULT_TTL_MS = 5 * 60_000; // 5 minutes
 const FETCH_TIMEOUT_MS = 15_000; // 15 seconds
-const CONSOLE_RESOURCE_TIMEOUT_MS = 30_000; // Larger budget for heavyweight super admin datasets
+const CONSOLE_RESOURCE_TIMEOUT_MS = 60_000; // Clubs/tournaments can require a larger budget on slower schemas
 
 interface CacheEntry<T> {
     data: T;

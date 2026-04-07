@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { canManageClubContext, getClubManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { createDivision, deleteDivision, fetchDivisions, updateDivision } from '@/lib/services/divisionService';
 
 function err(message: string, status: number, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
+}
+
+function parseBooleanFlag(value: unknown) {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') return value.toLowerCase() === 'true';
+    return false;
 }
 
 async function resolvePermission(
@@ -21,27 +28,57 @@ async function resolvePermission(
     };
 }
 
-// ─── GET /api/clubs/:id/divisions ─────────────────────────────────────────────
+function validateDivisionPayload(body: Record<string, unknown>) {
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    const gender = typeof body.gender === 'string' ? body.gender : undefined;
+    const status = typeof body.status === 'string' ? body.status : undefined;
+
+    if (!name) {
+        return { ok: false as const, response: err('El nombre de la division es requerido', 400) };
+    }
+
+    const validGenders = ['Masculino', 'Femenino', 'Mixto'];
+    const validStatuses = ['active', 'draft', 'archived'];
+
+    if (gender && !validGenders.includes(gender)) {
+        return { ok: false as const, response: err('Rama invalida', 400, { allowed: validGenders }) };
+    }
+
+    if (status && !validStatuses.includes(status)) {
+        return { ok: false as const, response: err('Estado invalido', 400, { allowed: validStatuses }) };
+    }
+
+    return {
+        ok: true as const,
+        payload: {
+            name,
+            slug: typeof body.slug === 'string' ? body.slug : undefined,
+            sport: typeof body.sport === 'string' ? body.sport : undefined,
+            gender,
+            category: typeof body.category === 'string' ? body.category : undefined,
+            status,
+            featured: parseBooleanFlag(body.featured),
+            season: typeof body.season === 'string' ? body.season : undefined,
+            format: typeof body.format === 'string' ? body.format : undefined,
+            regulation: typeof body.regulation === 'string' ? body.regulation : undefined,
+        },
+    };
+}
 
 export async function GET(
     _request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const supabase = await createClient();
 
-    const { data, error } = await supabase
-        .from('club_divisions')
-        .select('*')
-        .eq('club_id', id)
-        .order('featured', { ascending: false })
-        .order('name');
-
-    if (error) return err('Error al obtener divisiones', 500, error.message);
-    return NextResponse.json({ data: data ?? [] });
+    try {
+        const data = await fetchDivisions(id);
+        return NextResponse.json({ data });
+    } catch (error: unknown) {
+        const details = error instanceof Error ? error.message : error;
+        return err('Error al obtener divisiones', 500, details);
+    }
 }
-
-// ─── POST /api/clubs/:id/divisions ────────────────────────────────────────────
 
 export async function POST(
     request: NextRequest,
@@ -54,69 +91,77 @@ export async function POST(
     if (!perm) return err('No autenticado', 401);
     if (!perm.allowed) return err('Sin permisos para crear divisiones en este club', 403);
 
-    // Verificar que el club existe
-    const { data: club } = await supabase
-        .from('clubs').select('id').eq('id', clubId).single();
+    const { data: club } = await supabase.from('clubs').select('id').eq('id', clubId).single();
     if (!club) return err('Club no encontrado', 404);
 
     let body: Record<string, unknown>;
     try {
         body = await request.json();
     } catch {
-        return err('Payload JSON inválido', 400);
+        return err('Payload JSON invalido', 400);
     }
 
-    const { name, sport, gender, category, status, featured, season, format, regulation, slug } = body as Record<string, string>;
+    const validation = validateDivisionPayload(body);
+    if (!validation.ok) return validation.response;
 
-    if (!name || name.trim().length < 1) {
-        return err('El nombre de la división es requerido', 400);
-    }
-
-    const VALID_GENDERS = ['Masculino', 'Femenino', 'Mixto'];
-    const VALID_STATUSES = ['active', 'draft', 'archived'];
-
-    if (gender && !VALID_GENDERS.includes(gender)) {
-        return err('Rama inválida', 400, { allowed: VALID_GENDERS });
-    }
-    if (status && !VALID_STATUSES.includes(status)) {
-        return err('Estado inválido', 400, { allowed: VALID_STATUSES });
-    }
-
-    const payload = {
-        club_id: clubId,
-        name: name.trim(),
-        slug: slug || name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-        sport: sport || null,
-        gender: gender || null,
-        category: category || null,
-        status: status || 'active',
-        featured: featured === 'true',
-        season: season || '2026',
-        format: format || null,
-        regulation: regulation || null,
-    };
-
-    const { data, error } = await supabase
-        .from('club_divisions')
-        .insert([payload])
-        .select('*')
-        .single();
-
-    if (error) {
-        // Unique constraint (club_id, name)
-        if (error.code === '23505') {
+    const result = await createDivision(clubId, validation.payload);
+    if (!result.success) {
+        if (result.code === 'duplicate') {
             return NextResponse.json(
-                { error: 'Ya existe una división con ese nombre en este club', details: { name } },
+                { error: 'Ya existe una division con ese nombre en este club', details: { name: validation.payload.name } },
                 { status: 409 }
             );
         }
-        return err('Error al crear división', 500, error.message);
+
+        return err('Error al crear division', result.code === 'not_found' ? 404 : 500, result.error);
     }
 
-    return NextResponse.json({ data }, { status: 201 });
+    return NextResponse.json({ data: result.data }, { status: 201 });
 }
 
-// ─── DELETE /api/clubs/:id/divisions?division_id=:div_id ─────────────────────
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id: clubId } = await params;
+    const supabase = await createClient();
+
+    const perm = await resolvePermission(supabase, clubId);
+    if (!perm) return err('No autenticado', 401);
+    if (!perm.allowed) return err('Sin permisos para editar divisiones en este club', 403);
+
+    const { searchParams } = new URL(request.url);
+    let body: Record<string, unknown>;
+    try {
+        body = await request.json();
+    } catch {
+        return err('Payload JSON invalido', 400);
+    }
+
+    const divisionId = searchParams.get('division_id') || (typeof body.division_id === 'string' ? body.division_id : null);
+    if (!divisionId) return err('division_id es requerido', 400);
+
+    const validation = validateDivisionPayload(body);
+    if (!validation.ok) return validation.response;
+
+    const result = await updateDivision(clubId, divisionId, validation.payload);
+    if (!result.success) {
+        if (result.code === 'duplicate') {
+            return NextResponse.json(
+                { error: 'Ya existe una division con ese nombre en este club', details: { name: validation.payload.name } },
+                { status: 409 }
+            );
+        }
+
+        return err(
+            result.code === 'not_found' ? 'Division no encontrada' : 'Error al actualizar division',
+            result.code === 'not_found' ? 404 : 500,
+            result.error
+        );
+    }
+
+    return NextResponse.json({ data: result.data });
+}
 
 export async function DELETE(
     request: NextRequest,
@@ -125,6 +170,7 @@ export async function DELETE(
     const { id: clubId } = await params;
     const { searchParams } = new URL(request.url);
     const divisionId = searchParams.get('division_id');
+    const name = searchParams.get('name') || undefined;
 
     if (!divisionId) return err('division_id es requerido', 400);
 
@@ -133,12 +179,14 @@ export async function DELETE(
     if (!perm) return err('No autenticado', 401);
     if (!perm.allowed) return err('Sin permisos', 403);
 
-    const { error } = await supabase
-        .from('club_divisions')
-        .delete()
-        .eq('id', divisionId)
-        .eq('club_id', clubId);
+    const result = await deleteDivision(clubId, divisionId, name);
+    if (!result.success) {
+        return err(
+            result.code === 'not_found' ? 'Division no encontrada' : 'Error al eliminar division',
+            result.code === 'not_found' ? 404 : 500,
+            result.error
+        );
+    }
 
-    if (error) return err('Error al eliminar división', 500, error.message);
     return NextResponse.json({ success: true });
 }

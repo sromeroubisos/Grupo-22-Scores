@@ -1293,6 +1293,7 @@ export default function TournamentDetailPage({
                 const overrideStageId = sp.get('tournament_stage_id') || sp.get('tournamentStageId') || sp.get('stageId');
                 const overrideSeason = sp.get('season') || sp.get('season_id') || sp.get('seasonId') || undefined;
                 const urlParam = sp.get('url');
+                const nameParam = sp.get('name');
 
                 localTournament = getTournamentById(id);
 
@@ -1322,7 +1323,7 @@ export default function TournamentDetailPage({
                     if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id)) {
                         localTournament = {
                             id,
-                            name: 'Cargando...',
+                            name: nameParam || 'Cargando...',
                             url: '',
                             type: 'cup' as any,
                             sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : 'rugby')) as any,
@@ -1489,6 +1490,7 @@ export default function TournamentDetailPage({
                 const query = new URLSearchParams();
                 query.set('id', id);
                 if (finalUrl) query.set('url', finalUrl);
+                if (nameParam) query.set('name', nameParam);
                 if (localTournament?.sportId) query.set('sport', localTournament.sportId);
                 if (overrideTournamentId) query.set('tournament_id', overrideTournamentId);
                 if (overrideStageId) query.set('tournament_stage_id', overrideStageId);

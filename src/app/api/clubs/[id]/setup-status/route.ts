@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { fetchDivisions } from '@/lib/services/divisionService';
 
 function err(message: string, status: number) {
     return NextResponse.json({ error: message }, { status });
@@ -15,17 +16,16 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClient();
 
-    // Fetch club + counts en paralelo
-    const [clubRes, divisionsRes, venuesRes] = await Promise.all([
+    const [clubRes, divisions, venuesRes] = await Promise.all([
         supabase.from('clubs').select('*').eq('id', id).single(),
-        supabase.from('club_divisions').select('id', { count: 'exact', head: true }).eq('club_id', id),
+        fetchDivisions(id),
         supabase.from('club_venues').select('id',    { count: 'exact', head: true }).eq('club_id', id),
     ]);
 
     if (clubRes.error || !clubRes.data) return err('Club no encontrado', 404);
 
     const club = clubRes.data;
-    const divisionCount = divisionsRes.count ?? 0;
+    const divisionCount = divisions.length;
     const venueCount    = venuesRes.count    ?? 0;
 
     const missingIdentity: string[] = [];

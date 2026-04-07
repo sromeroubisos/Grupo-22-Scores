@@ -26,6 +26,8 @@ const TABS = [
     { id: 'transfers', label: 'Transferencias' },
 ];
 
+const DEFAULT_PUBLIC_TABS = new Set(['summary', 'results', 'fixtures']);
+
 function isRugbyApiSportsTeamId(value: string) {
     return /^ras-team-\d+$/i.test(value);
 }
@@ -298,7 +300,9 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     }, [externalTeamId, rawId, resolvedClubId]);
     const visibleTabs = useMemo(() => {
         const supportedTabs = Array.isArray(details?.supported_tabs) ? details.supported_tabs : null;
-        if (!supportedTabs) return TABS;
+        if (!supportedTabs) {
+            return TABS.filter((tab) => DEFAULT_PUBLIC_TABS.has(tab.id));
+        }
         return TABS.filter((tab) => supportedTabs.includes(tab.id));
     }, [details?.supported_tabs]);
 

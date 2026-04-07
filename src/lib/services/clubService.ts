@@ -10,6 +10,7 @@
 //   - Sync arrays: diff add/remove
 // ============================================================
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import type {
   ClubCreateInput,
@@ -269,6 +270,19 @@ export async function createClub(
         union_id: uId
       }));
       await supabase.from('club_secondary_unions').insert(suInserts);
+    }
+
+    try {
+      await (supabase as any)
+        .from('club_settings')
+        .upsert({
+          club_id: club.id,
+          is_managed: false,
+          plan: 'free',
+          public_sync_enabled: true,
+        }, { onConflict: 'club_id' });
+    } catch (settingsError) {
+      console.warn('No se pudo inicializar club_settings para el club nuevo:', settingsError);
     }
 
     return { success: true, club: club as ClubCore };

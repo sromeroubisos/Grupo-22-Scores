@@ -53,6 +53,7 @@ type PublicTournamentListItem = {
     logo_url?: string | null;
     priority?: number | null;
     type?: string | null;
+    url?: string | null;
     seasons?: Array<{
         seasonId?: string | null;
         season?: string | number | null;
@@ -232,8 +233,34 @@ function isFlashScoreTournamentId(value: string): boolean {
     return /^fs-/i.test(value);
 }
 
+function buildTournamentHref(tournamentId: string, sourceUrl?: string | null, sportId?: string | null, name?: string | null): string {
+    const baseHref = `/tournaments/${tournamentId}`;
+    const normalizedSourceUrl = String(sourceUrl || '').trim();
+
+    if (!isFlashScoreTournamentId(tournamentId) || !normalizedSourceUrl) {
+        return baseHref;
+    }
+
+    const query = new URLSearchParams();
+    query.set('sport', sportId || 'rugby');
+    query.set('url', normalizedSourceUrl);
+    if (name) query.set('name', name);
+
+    return `${baseHref}?${query.toString()}`;
+}
+
+function appendTournamentSeasonHref(baseHref: string, seasonId: string): string {
+    return `${baseHref}${baseHref.includes('?') ? '&' : '?'}season=${encodeURIComponent(seasonId)}`;
+}
+
+function getTournamentHref(tournament: Pick<Tournament, 'id' | 'url'>): string {
+    return tournament.url || `/tournaments/${tournament.id}`;
+}
+
 function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tournament {
     const countryId = String(item.country_id || 'international').trim().toLowerCase() || 'international';
+    const sportId = (item.sport_id || 'rugby') as Tournament['sportId'];
+    const displayName = item.display_name || item.name;
     const type: Tournament['type'] = item.type === 'cup'
         ? 'cup'
         : countryId === 'international'
@@ -260,13 +287,13 @@ function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tourna
 
     return {
         id: item.id,
-        name: item.display_name || item.name,
-        displayName: item.display_name || item.name,
+        name: displayName,
+        displayName,
         originalName: item.name,
-        nameEs: item.display_name || item.name,
-        url: `/tournaments/${item.id}`,
+        nameEs: displayName,
+        url: buildTournamentHref(item.id, item.url, sportId, displayName),
         type,
-        sportId: (item.sport_id || 'rugby') as Tournament['sportId'],
+        sportId,
         countryId,
         priority: typeof item.priority === 'number' ? item.priority : 0,
         logoUrl: item.logo_url || null,
@@ -863,7 +890,7 @@ export default function TorneosPage() {
                                 {recommendedTournaments.map((tournament) => (
                                     <Link
                                         key={tournament.id}
-                                        href={`/tournaments/${tournament.id}`}
+                                        href={getTournamentHref(tournament)}
                                         className={pageStyles.accordionItemLink}
                                         style={{
                                             display: 'flex',
@@ -919,7 +946,7 @@ export default function TorneosPage() {
                                         .map((tournament) => (
                                             <Link
                                                 key={tournament.id}
-                                                href={`/tournaments/${tournament.id}`}
+                                                href={getTournamentHref(tournament)}
                                                 className={pageStyles.accordionItemLink}
                                                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                                             >
@@ -996,7 +1023,7 @@ export default function TorneosPage() {
                                                                 style={{ display: 'flex', alignItems: 'center', padding: 0, width: '100%' }}
                                                             >
                                                                 <Link
-                                                                    href={`/tournaments/${tournament.id}`}
+                                                                    href={getTournamentHref(tournament)}
                                                                     style={{
                                                                         flex: 1,
                                                                         padding: '10px 16px',
@@ -1048,7 +1075,7 @@ export default function TorneosPage() {
                                                                 {tournament.seasons!.map((season) => (
                                                                     <Link
                                                                         key={season.seasonId}
-                                                                        href={`/tournaments/${tournament.id}?season=${season.seasonId}`}
+                                                                        href={appendTournamentSeasonHref(getTournamentHref(tournament), season.seasonId)}
                                                                         className={pageStyles.accordionSubItemLink}
                                                                     >
                                                                         Temporada {season.seasonId}
@@ -1062,7 +1089,7 @@ export default function TorneosPage() {
                                                 return (
                                                     <Link
                                                         key={tournament.id}
-                                                        href={`/tournaments/${tournament.id}`}
+                                                        href={getTournamentHref(tournament)}
                                                         className={pageStyles.accordionItemLink}
                                                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                                                     >

@@ -515,6 +515,7 @@ export async function GET(request: Request) {
     const id = searchParams.get('id') || '';
     let url = searchParams.get('url') || searchParams.get('tournament_url') || searchParams.get('tournamentUrl') || '';
     const sport = searchParams.get('sport') || searchParams.get('sportId') || 'rugby'; // Default to rugby
+    const requestedName = normalizeId(searchParams.get('name') || searchParams.get('display_name') || searchParams.get('displayName'));
     const requestedSeason =
         searchParams.get('season') ||
         searchParams.get('season_id') ||
@@ -572,10 +573,42 @@ export async function GET(request: Request) {
     url = normalizeTournamentUrl(url) || url;
 
     const dbTournamentMeta = await findDbTournamentMeta(id);
+    const resolvedSportId = dbTournamentMeta?.sport_id || localTournament?.sportId || sport;
+
+    const hasFsPrefix = id.toLowerCase().startsWith('fs-');
+    const rawId = hasFsPrefix ? id.slice(3) : id;
+
+    if (hasFsPrefix && rawId && !url) {
+        tournamentId = tournamentId || rawId;
+    }
 
     tournamentId = stripFsPrefix(tournamentId);
     stageId = stripFsPrefix(stageId);
     drawStageId = stripFsPrefix(drawStageId);
+
+    let externalOverrideId: string | null = resolveExternalTournamentId({
+        routeId: id,
+        externalId: dbTournamentMeta?.external_id,
+        sportId: resolvedSportId,
+        ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
+        flashScoreIds: {
+            tournamentId,
+            tournamentStageId: stageId,
+            tournamentTemplateId: templateId,
+            seasonId,
+        },
+    });
+
+    if (externalOverrideId && !url) {
+        try {
+            const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
+            if (externalTournamentOverride?.url) {
+                url = normalizeTournamentUrl(externalTournamentOverride.url) || externalTournamentOverride.url;
+            }
+        } catch (error) {
+            console.warn('[Tournament API] Could not load external tournament override:', error);
+        }
+    }
 
     console.log('TOURNAMENT API GET:', {
         id,
@@ -590,14 +623,7 @@ export async function GET(request: Request) {
         hasLocalTournament: !!localTournament,
         hasDbTournament: !!dbTournamentMeta,
     });
-
-    const hasFsPrefix = id.toLowerCase().startsWith('fs-');
-    const rawId = hasFsPrefix ? id.slice(3) : id;
     console.log('ID Parsing:', { hasFsPrefix, rawId });
-
-    if (hasFsPrefix && rawId) {
-        tournamentId = tournamentId || rawId;
-    }
 
     const isBlockedTournament =
         isBlockedTournamentId(id) ||
@@ -614,8 +640,6 @@ export async function GET(request: Request) {
     }
 
     let details: any = null;
-    let externalOverrideId: string | null = null;
-    const resolvedSportId = dbTournamentMeta?.sport_id || localTournament?.sportId || sport;
     const espnLeague = isAmericanFootballSport(resolvedSportId)
         ? inferEspnAmericanFootballLeague({
             id,
@@ -732,7 +756,7 @@ export async function GET(request: Request) {
             });
         }
 
-        if (flashScoreEnabledForSport && hasFsPrefix && rawId && !stageId) {
+        if (flashScoreEnabledForSport && hasFsPrefix && rawId && !stageId && !url) {
             console.log('Attempting details with rawId as stageId:', rawId);
             const detailsAttemptRes = await getTournamentDetails(rawId);
             const detailsAttempt = normalizeDetails(detailsAttemptRes);
@@ -1025,6 +1049,17 @@ export async function GET(request: Request) {
                 finalStandings = overriddenStandings.standings;
                 externalStandingsTeamLabels = overriddenStandings.teamLabels;
             }
+        }
+
+        if (requestedName) {
+            const currentDetails = detailsPayload && typeof detailsPayload === 'object'
+                ? detailsPayload as Record<string, unknown>
+                : {};
+            detailsPayload = {
+                ...currentDetails,
+                name: currentDetails.name || requestedName,
+                display_name: currentDetails.display_name || requestedName,
+            };
         }
 
         console.log('FINAL RESOLVED:', {

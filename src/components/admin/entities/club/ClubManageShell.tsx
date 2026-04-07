@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useEffectEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { updateEntity, deleteEntity, createEntity, getClubDashboardData } from '@/app/admin/entities/actions';
+import { updateEntity, deleteEntity, createEntity, getClubDashboardData, getClubRelatedClubsData } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
 import { fetchDivisions, type Division } from '@/lib/services/divisionService';
 import { ClubContext } from './ClubContext';
@@ -14,14 +14,27 @@ import { ClubSquadsCard } from './ClubSquadsCard';
 import { ClubNextMatchesCard } from './ClubNextMatchesCard';
 import { ClubDataHealthCard } from './ClubDataHealthCard';
 import { ClubStandingsCard } from './ClubStandingsCard';
+import { ClubFixtureResultsTab } from './ClubFixtureResultsTab';
+import { ClubStandingsOverviewTab } from './ClubStandingsOverviewTab';
+import { ClubRelatedClubsTab } from './ClubRelatedClubsTab';
 import { ClubIdentityTab } from './ClubIdentityTab';
 import { ClubSquadsTab } from './ClubSquadsTab';
 import { TabPlaceholder } from './TabPlaceholder';
+import type {
+    ClubDashboardMatch,
+    ClubDashboardStanding,
+} from '@/lib/club-admin/dashboard-types';
 
 // Monolithic Basalt CSS integration
 import './vitreous-club.css';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
+
+interface ClubManageShellProps {
+    id: string;
+    data: ClubRow | null;
+    unions: { id: string, name: string }[];
+}
 
 interface DashboardMatch {
     id: string;
@@ -33,11 +46,33 @@ interface DashboardMatch {
     tournament: { name: string } | null;
 }
 
-interface ClubManageShellProps {
-    id: string;
-    data: ClubRow | null;
-    unions: { id: string, name: string }[];
+interface ClubDashboardData {
+    matches: DashboardMatch[];
+    upcomingMatches: ClubDashboardMatch[];
+    recentMatches: ClubDashboardMatch[];
+    standings: ClubDashboardStanding[];
 }
+
+interface ClubRelatedClub {
+    id: string;
+    name: string;
+    shortName: string | null;
+    logoUrl: string | null;
+    sport: string | null;
+    familyRootId: string;
+    parentClubId: string | null;
+    parentClubName: string | null;
+    isRoot: boolean;
+    isCurrent: boolean;
+}
+
+interface ClubRelatedData {
+    rootClubId: string;
+    rootClubName: string | null;
+    clubs: ClubRelatedClub[];
+}
+
+const CLUB_MANAGE_ALLOWED_TABS = new Set(['resumen', 'fixture', 'posiciones', 'relacionados', 'identidad', 'planteles']);
 
 function formatSportLabel(sport?: string | null) {
     if (!sport?.trim()) return null;
@@ -58,7 +93,8 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
     const isCreate = id === 'new';
     const router = useRouter();
     const searchParams = useSearchParams();
-    const currentTab = searchParams.get('tab') || 'resumen';
+    const requestedTab = searchParams.get('tab') || 'resumen';
+    const currentTab = CLUB_MANAGE_ALLOWED_TABS.has(requestedTab) ? requestedTab : 'resumen';
 
     const [isDirty, setIsDirty] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -76,8 +112,19 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
         categories: [],
     });
 
-    const [dashboardData, setDashboardData] = useState<{ matches: DashboardMatch[] }>({ matches: [] });
+    const [dashboardData, setDashboardData] = useState<ClubDashboardData>({
+        matches: [],
+        upcomingMatches: [],
+        recentMatches: [],
+        standings: [],
+    });
     const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+    const [relatedData, setRelatedData] = useState<ClubRelatedData>({
+        rootClubId: id,
+        rootClubName: null,
+        clubs: [],
+    });
+    const [isLoadingRelated, setIsLoadingRelated] = useState(false);
     const [linkedDivisions, setLinkedDivisions] = useState<Division[]>([]);
     const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate);
 
@@ -97,6 +144,29 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
         };
 
         loadDashboard();
+    }, [id, isCreate]);
+
+    useEffect(() => {
+        if (isCreate) return;
+
+        const loadRelated = async () => {
+            setIsLoadingRelated(true);
+            try {
+                const response = await getClubRelatedClubsData(id);
+                setRelatedData(response);
+            } catch (err) {
+                console.error('Related clubs load error:', err);
+                setRelatedData({
+                    rootClubId: id,
+                    rootClubName: null,
+                    clubs: [],
+                });
+            } finally {
+                setIsLoadingRelated(false);
+            }
+        };
+
+        void loadRelated();
     }, [id, isCreate]);
 
     useEffect(() => {
@@ -293,11 +363,47 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                                     <div className="card col-4">
                                         <ClubStandingsCard
                                             clubId={id}
-                                            tournamentName={dashboardData.matches[0]?.tournament?.name}
+                                            tournamentName={dashboardData.standings[0]?.tournamentName}
+                                            standings={dashboardData.standings.map((standing) => ({
+                                                pos: standing.position ?? 0,
+                                                label: standing.tournamentName,
+                                                row_id: `${standing.tournamentId}-${standing.phaseId || 'base'}-${standing.groupId || 'all'}`,
+                                                pj: standing.played,
+                                                pts: standing.points,
+                                            }))}
                                             loading={isLoadingDashboard}
                                         />
                                     </div>
                                 </>
+                            )}
+
+                            {currentTab === 'fixture' && (
+                                <div className="card col-12">
+                                    <ClubFixtureResultsTab
+                                        upcomingMatches={dashboardData.upcomingMatches}
+                                        recentMatches={dashboardData.recentMatches}
+                                        loading={isLoadingDashboard}
+                                    />
+                                </div>
+                            )}
+
+                            {currentTab === 'posiciones' && (
+                                <div className="card col-12">
+                                    <ClubStandingsOverviewTab
+                                        standings={dashboardData.standings}
+                                        loading={isLoadingDashboard}
+                                    />
+                                </div>
+                            )}
+
+                            {currentTab === 'relacionados' && (
+                                <div className="card col-12">
+                                    <ClubRelatedClubsTab
+                                        clubs={relatedData.clubs}
+                                        rootClubName={relatedData.rootClubName}
+                                        loading={isLoadingRelated}
+                                    />
+                                </div>
                             )}
 
                             {currentTab === 'identidad' && (
@@ -402,7 +508,7 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                                 </div>
                             )}
 
-                            {['posiciones', 'estadisticas', 'relacionados', 'auditoria'].includes(currentTab) && (
+                            {['estadisticas', 'auditoria'].includes(currentTab) && (
                                 <div className="card col-12">
                                     <TabPlaceholder name={currentTab} />
                                 </div>

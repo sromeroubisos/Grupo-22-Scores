@@ -51,7 +51,7 @@ function getSportVariants(sport: string): string[] {
     switch (lower) {
         case 'rugby': return ['rugby', 'rugby-union', 'rugby-league'];
         case 'rugby-union': return ['rugby', 'rugby-union'];
-        case 'rugby-league': return ['rugby', 'rugby-league'];
+        case 'rugby-league': return ['rugby-league'];
         case 'football': return ['football', 'soccer'];
         case 'hockey': return ['hockey', 'field-hockey'];
         default: return [lower];

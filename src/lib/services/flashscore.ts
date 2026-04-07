@@ -1097,7 +1097,7 @@ function normalizeFlashScoreTournamentList(payload: any) {
                     tournament?.country?.id ??
                     null,
             }))
-            .filter((tournament) => tournament.tournament_id != null && tournament.name),
+            .filter((tournament) => (tournament.tournament_id != null || tournament.url) && tournament.name),
     };
 }
 

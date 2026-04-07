@@ -88,7 +88,9 @@ function toErrorLog(err: unknown) {
 export function SuperConsoleProvider({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const currentPath = pathname ?? '';
-    const shouldAutoLoadClubs = currentPath.startsWith('/admin/super/clubes');
+    const shouldAutoLoadClubs =
+        currentPath.startsWith('/admin/super/clubes') ||
+        currentPath.startsWith('/admin/super/familias-clubes');
     const shouldAutoLoadMatches = false;
     const shouldAutoLoadTournaments =
         currentPath === '/admin/super' ||

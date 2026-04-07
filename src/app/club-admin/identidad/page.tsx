@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useManagedClubContext } from '../components/ManagedClubContext';
 import SectionShell from '../components/SectionShell';
 import styles from '../page.module.css';
 import LogoUploader from '@/components/LogoUploader';
@@ -199,8 +199,8 @@ function ClubIdentityEditor({ club, saving, error, saveClub }: ClubIdentityEdito
 }
 
 export default function ClubIdentidadPage() {
-    const { user } = useAuth();
-    const { club, clubId, loading, saving, error, saveClub } = useManagedClubData(user);
+    const { activeClubId } = useManagedClubContext();
+    const { club, clubId, loading, saving, error, saveClub } = useManagedClubData(activeClubId);
 
     if (!loading && !clubId) {
         return (

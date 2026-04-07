@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getActiveSports } from '@/lib/data/sports';
-import { resolveManagedClubId } from '@/lib/club-admin/resolveManagedClubId';
+import { useManagedClubContext } from '../components/ManagedClubContext';
 import SectionShell from '../components/SectionShell';
 import SportFilter from '../components/SportFilter';
 import { useDisciplinas } from '../components/DisciplinasContext';
@@ -80,10 +80,7 @@ function ToastBar({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 export default function ClubDivisionesPage() {
     const { user } = useAuth();
     const { clubSports } = useDisciplinas();
-
-    const clubId = useMemo(() => {
-        return resolveManagedClubId(user);
-    }, [user]);
+    const { activeClubId: clubId } = useManagedClubContext();
 
     const canManage = user?.role === 'admin_club' || user?.role === 'admin_general' || user?.role === 'super_admin';
 
@@ -196,6 +193,31 @@ export default function ClubDivisionesPage() {
             };
 
             if (editingId) {
+                const res = await fetch(`/api/clubs/${clubId}/divisions?division_id=${editingId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const j = await res.json();
+
+                if (res.status === 409) {
+                    showToast('Ya existe una divisiÃ³n con ese nombre', 'error');
+                    return;
+                }
+                if (!res.ok) {
+                    showToast(j.error || 'Error al actualizar divisiÃ³n', 'error');
+                    return;
+                }
+
+                setDivisions(prev => prev.map((division) => (
+                    division.id === editingId ? j.data : division
+                )));
+                showToast('DivisiÃ³n actualizada', 'success');
+                resetForm();
+                return;
+            }
+
+            if (editingId) {
                 const optimisticDivisionPatch: Partial<Division> = {
                     name: payload.name,
                     slug: payload.slug,
@@ -247,7 +269,10 @@ export default function ClubDivisionesPage() {
 
     const handleDelete = async (division: Division) => {
         if (!clubId || !confirm(`¿Eliminar "${division.name}"?`)) return;
-        const res = await fetch(`/api/clubs/${clubId}/divisions?division_id=${division.id}`, { method: 'DELETE' });
+        const res = await fetch(
+            `/api/clubs/${clubId}/divisions?division_id=${division.id}&name=${encodeURIComponent(division.name)}`,
+            { method: 'DELETE' }
+        );
         if (!res.ok) { showToast('Error al eliminar', 'error'); return; }
         setDivisions(prev => prev.filter(d => d.id !== division.id));
         showToast('División eliminada', 'success');

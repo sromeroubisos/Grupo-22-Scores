@@ -1,22 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { MembershipLike } from '@/lib/auth/roles';
+import { useCallback, useEffect, useState } from 'react';
 import type { ClubFull, ClubUpdateInput } from '@/lib/types/clubs';
-import { resolveManagedClubId } from '@/lib/club-admin/resolveManagedClubId';
-
-interface ClubScopedUserLike {
-    clubId?: string | null;
-    memberships?: MembershipLike[] | null;
-}
 
 interface RouteResponse<T> {
     data?: T;
     error?: string;
 }
 
-export function useManagedClubData(user?: ClubScopedUserLike | null) {
-    const clubId = useMemo(() => resolveManagedClubId(user), [user]);
+export function useManagedClubData(clubId?: string | null) {
     const [club, setClub] = useState<ClubFull | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);

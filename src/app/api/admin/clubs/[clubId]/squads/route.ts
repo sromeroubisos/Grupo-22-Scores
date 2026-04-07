@@ -1,58 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { fetchDivisions } from '@/lib/services/divisionService';
 
-/**
- * GET /api/admin/clubs/[clubId]/squads
- * Get all squads for a club
- */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ clubId: string }> }
+    _request: NextRequest,
+    { params }: { params: Promise<{ clubId: string }> }
 ) {
-  try {
-    const supabase = await createClient();
-    const { clubId } = await params;
+    try {
+        const { clubId } = await params;
+        const divisions = await fetchDivisions(clubId);
 
-    const { data: initialSquads, error } = await supabase
-      .from('club_divisions')
-      .select('id, name, sport, gender, category, season, status')
-      .eq('club_id', clubId)
-      .order('name', { ascending: true });
-    let squads = initialSquads;
-
-    if (error) {
-      console.warn('Error fetching club_divisions, falling back to club categories:', error);
-
-      const { data: club } = await supabase
-        .from('clubs')
-        .select('categories')
-        .eq('id', clubId)
-        .single();
-
-      if (club?.categories) {
-        squads = club.categories.map((cat: string, i: number) => ({
-          id: `legacy-${i}`,
-          name: cat,
-          sport: 'rugby',
-          gender: 'Masculino',
-          category: cat,
-          season: String(new Date().getFullYear()),
-          status: 'active'
+        const squads = divisions.map((division) => ({
+            id: division.id,
+            name: division.name,
+            sport: division.sport,
+            gender: division.gender,
+            category: division.category,
+            season: division.season,
+            status: division.status,
+            featured: division.featured ?? false,
+            players_count: division.players_count ?? 0,
+            staff_count: division.staff_count ?? 0,
         }));
-      } else {
-        return NextResponse.json(
-          { error: 'Failed to fetch squads', details: error.message },
-          { status: 500 }
-        );
-      }
-    }
 
-    return NextResponse.json(squads || []);
-  } catch (error) {
-    console.error('Unexpected error fetching squads:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+        return NextResponse.json(squads);
+    } catch (error) {
+        console.error('Unexpected error fetching squads:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
 }

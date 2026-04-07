@@ -331,6 +331,328 @@ function normalizeInternalMatch(m: InternalMatchSource): NormalizedInternalMatch
     };
 }
 
+const MISSING_RELATION_CODES = new Set(['PGRST204', '42P01']);
+const BASE_TEAM_TABS = ['summary', 'results', 'fixtures'] as const;
+
+function isMissingRelationError(error: unknown) {
+    return isRecord(error) && typeof error.code === 'string' && MISSING_RELATION_CODES.has(error.code);
+}
+
+function calculateAge(birthDate?: string | null) {
+    if (!birthDate) return null;
+
+    const birth = new Date(birthDate);
+    if (Number.isNaN(birth.getTime())) return null;
+
+    const now = new Date();
+    let age = now.getFullYear() - birth.getFullYear();
+    const hasBirthdayPassed =
+        now.getMonth() > birth.getMonth()
+        || (now.getMonth() === birth.getMonth() && now.getDate() >= birth.getDate());
+
+    if (!hasBirthdayPassed) {
+        age -= 1;
+    }
+
+    return age >= 0 ? age : null;
+}
+
+function buildSupportedTabs(options: {
+    supportedTabs?: unknown;
+    hasSquad: boolean;
+    hasTransfers: boolean;
+}) {
+    const tabs = new Set<string>(
+        Array.isArray(options.supportedTabs)
+            ? options.supportedTabs.filter((tab): tab is string => typeof tab === 'string')
+            : BASE_TEAM_TABS
+    );
+
+    BASE_TEAM_TABS.forEach((tab) => tabs.add(tab));
+
+    if (options.hasSquad) {
+        tabs.add('squad');
+    } else {
+        tabs.delete('squad');
+    }
+
+    if (options.hasTransfers) {
+        tabs.add('transfers');
+    } else {
+        tabs.delete('transfers');
+    }
+
+    return Array.from(tabs).filter((tab) =>
+        ['summary', 'results', 'fixtures', 'squad', 'transfers'].includes(tab)
+    );
+}
+
+async function fetchInternalClubSquad(
+    readClient: ReadClient,
+    clubId: string,
+    options?: { includePlayers?: boolean }
+) {
+    const includePlayers = options?.includePlayers ?? true;
+    const db = readClient as any;
+
+    try {
+        const { data: teams, error: teamsError } = await db
+            .from('club_teams')
+            .select('id, legacy_division_id, name')
+            .eq('club_id', clubId)
+            .order('featured', { ascending: false })
+            .order('name');
+
+        if (teamsError && !isMissingRelationError(teamsError)) {
+            throw teamsError;
+        }
+
+        const teamRows = Array.isArray(teams) ? teams : [];
+
+        if (teamRows.length > 0) {
+            const { data: memberships, error: membershipsError } = await db
+                .from('team_memberships')
+                .select('team_id, person_id, role, status, position')
+                .eq('club_id', clubId);
+
+            if (membershipsError && !isMissingRelationError(membershipsError)) {
+                throw membershipsError;
+            }
+
+            const playerMemberships = Array.isArray(memberships)
+                ? memberships.filter((membership: any) => membership.role === 'player' && membership.person_id && membership.team_id)
+                : [];
+
+            if (playerMemberships.length > 0) {
+                if (!includePlayers) {
+                    return { squad: [], hasSquad: true, source: 'internal' as const };
+                }
+
+                const personIds = Array.from(
+                    new Set(playerMemberships.map((membership: any) => String(membership.person_id)))
+                );
+                const legacyDivisionIds = Array.from(
+                    new Set(
+                        teamRows
+                            .map((team: any) => team.legacy_division_id)
+                            .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0)
+                    )
+                );
+
+                const [peopleRes, squadMembersRes] = await Promise.all([
+                    readClient
+                        .from('people')
+                        .select('id, first_name, last_name, full_name, photo_url, avatar_url, birth_date, position')
+                        .in('id', personIds),
+                    legacyDivisionIds.length > 0
+                        ? db
+                            .from('squad_members')
+                            .select('division_id, person_id, jersey_number, position')
+                            .in('division_id', legacyDivisionIds)
+                        : Promise.resolve({ data: [], error: null }),
+                ]);
+
+                if (peopleRes.error) {
+                    throw peopleRes.error;
+                }
+
+                if (squadMembersRes.error && !isMissingRelationError(squadMembersRes.error)) {
+                    throw squadMembersRes.error;
+                }
+
+                const teamById = new Map(
+                    teamRows.map((team: any) => [String(team.id), team])
+                );
+                const peopleById = new Map(
+                    ((peopleRes.data ?? []) as any[]).map((person) => [String(person.id), person])
+                );
+                const squadMemberByKey = new Map(
+                    (((squadMembersRes.data ?? []) as any[])).map((member) => [
+                        `${String(member.division_id)}:${String(member.person_id)}`,
+                        member,
+                    ])
+                );
+
+                const squad = playerMemberships
+                    .map((membership: any) => {
+                        const team = teamById.get(String(membership.team_id));
+                        const person = peopleById.get(String(membership.person_id));
+                        if (!team || !person) return null;
+
+                        const squadMember = team.legacy_division_id
+                            ? squadMemberByKey.get(`${String(team.legacy_division_id)}:${String(membership.person_id)}`)
+                            : null;
+                        const name = person.full_name || `${person.first_name || ''} ${person.last_name || ''}`.trim();
+                        const jerseyNumber = typeof squadMember?.jersey_number === 'number'
+                            ? squadMember.jersey_number
+                            : null;
+
+                        return {
+                            id: String(person.id),
+                            player_id: String(person.id),
+                            name,
+                            player_name: name,
+                            image_path: person.photo_url || person.avatar_url || '',
+                            photo: person.photo_url || person.avatar_url || '',
+                            jersey_number: jerseyNumber,
+                            shirt_number: jerseyNumber,
+                            number: jerseyNumber,
+                            position: membership.position || squadMember?.position || person.position || null,
+                            age: calculateAge(person.birth_date),
+                            status: membership.status || 'active',
+                            role: membership.role,
+                            team_id: String(team.id),
+                            team_name: team.name || 'Plantel',
+                            tab_name: team.name || 'Plantel',
+                        };
+                    })
+                    .filter(Boolean)
+                    .sort((left: any, right: any) => {
+                        const teamCompare = String(left.tab_name || '').localeCompare(String(right.tab_name || ''));
+                        if (teamCompare !== 0) return teamCompare;
+                        const leftNumber = typeof left.jersey_number === 'number' ? left.jersey_number : Number.MAX_SAFE_INTEGER;
+                        const rightNumber = typeof right.jersey_number === 'number' ? right.jersey_number : Number.MAX_SAFE_INTEGER;
+                        if (leftNumber !== rightNumber) return leftNumber - rightNumber;
+                        return String(left.name || '').localeCompare(String(right.name || ''));
+                    });
+
+                return {
+                    squad,
+                    hasSquad: squad.length > 0,
+                    source: 'internal' as const,
+                };
+            }
+        }
+    } catch (error) {
+        console.error('Teams API internal squad error (new layer):', error);
+    }
+
+    try {
+        const { data: divisions, error: divisionsError } = await db
+            .from('club_divisions')
+            .select('id, name')
+            .eq('club_id', clubId)
+            .order('featured', { ascending: false })
+            .order('name');
+
+        if (divisionsError && !isMissingRelationError(divisionsError)) {
+            throw divisionsError;
+        }
+
+        const divisionRows = Array.isArray(divisions) ? divisions : [];
+        if (divisionRows.length === 0) {
+            return { squad: [], hasSquad: false, source: 'none' as const };
+        }
+
+        const { data: roles, error: rolesError } = await db
+            .from('club_person_roles')
+            .select('person_id, division_id, role, status, position')
+            .eq('club_id', clubId)
+            .eq('role', 'player');
+
+        if (rolesError && !isMissingRelationError(rolesError)) {
+            throw rolesError;
+        }
+
+        const playerRoles = Array.isArray(roles)
+            ? roles.filter((role: any) => role.person_id && role.division_id)
+            : [];
+
+        if (playerRoles.length === 0) {
+            return { squad: [], hasSquad: false, source: 'legacy' as const };
+        }
+
+        if (!includePlayers) {
+            return { squad: [], hasSquad: true, source: 'legacy' as const };
+        }
+
+        const personIds = Array.from(new Set(playerRoles.map((role: any) => String(role.person_id))));
+        const divisionIds = Array.from(new Set(playerRoles.map((role: any) => String(role.division_id))));
+
+        const [peopleRes, squadMembersRes] = await Promise.all([
+            readClient
+                .from('people')
+                .select('id, first_name, last_name, full_name, photo_url, avatar_url, birth_date, position')
+                .in('id', personIds),
+            db
+                .from('squad_members')
+                .select('division_id, person_id, jersey_number, position')
+                .in('division_id', divisionIds),
+        ]);
+
+        if (peopleRes.error) {
+            throw peopleRes.error;
+        }
+
+        if (squadMembersRes.error && !isMissingRelationError(squadMembersRes.error)) {
+            throw squadMembersRes.error;
+        }
+
+        const divisionById = new Map(
+            divisionRows.map((division: any) => [String(division.id), division])
+        );
+        const peopleById = new Map(
+            ((peopleRes.data ?? []) as any[]).map((person) => [String(person.id), person])
+        );
+        const squadMemberByKey = new Map(
+            (((squadMembersRes.data ?? []) as any[])).map((member) => [
+                `${String(member.division_id)}:${String(member.person_id)}`,
+                member,
+            ])
+        );
+
+        const squad = playerRoles
+            .map((role: any) => {
+                const division = divisionById.get(String(role.division_id));
+                const person = peopleById.get(String(role.person_id));
+                if (!division || !person) return null;
+
+                const squadMember = squadMemberByKey.get(`${String(role.division_id)}:${String(role.person_id)}`);
+                const name = person.full_name || `${person.first_name || ''} ${person.last_name || ''}`.trim();
+                const jerseyNumber = typeof squadMember?.jersey_number === 'number'
+                    ? squadMember.jersey_number
+                    : null;
+
+                return {
+                    id: String(person.id),
+                    player_id: String(person.id),
+                    name,
+                    player_name: name,
+                    image_path: person.photo_url || person.avatar_url || '',
+                    photo: person.photo_url || person.avatar_url || '',
+                    jersey_number: jerseyNumber,
+                    shirt_number: jerseyNumber,
+                    number: jerseyNumber,
+                    position: role.position || squadMember?.position || person.position || null,
+                    age: calculateAge(person.birth_date),
+                    status: role.status || 'active',
+                    role: role.role,
+                    team_id: String(division.id),
+                    team_name: division.name || 'Plantel',
+                    tab_name: division.name || 'Plantel',
+                };
+            })
+            .filter(Boolean)
+            .sort((left: any, right: any) => {
+                const teamCompare = String(left.tab_name || '').localeCompare(String(right.tab_name || ''));
+                if (teamCompare !== 0) return teamCompare;
+                const leftNumber = typeof left.jersey_number === 'number' ? left.jersey_number : Number.MAX_SAFE_INTEGER;
+                const rightNumber = typeof right.jersey_number === 'number' ? right.jersey_number : Number.MAX_SAFE_INTEGER;
+                if (leftNumber !== rightNumber) return leftNumber - rightNumber;
+                return String(left.name || '').localeCompare(String(right.name || ''));
+            });
+
+        return {
+            squad,
+            hasSquad: squad.length > 0,
+            source: 'legacy' as const,
+        };
+    } catch (error) {
+        console.error('Teams API internal squad error (legacy):', error);
+        return { squad: [], hasSquad: false, source: 'none' as const };
+    }
+}
+
 async function resolveInternalClubBySport(
     readClient: ReadClient,
     club: InternalClubRow,
@@ -431,10 +753,19 @@ export async function GET(request: Request) {
                 return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
             }
 
+            const details = {
+                ...bundle.details,
+                supported_tabs: buildSupportedTabs({
+                    supportedTabs: bundle.details?.supported_tabs,
+                    hasSquad: Array.isArray(bundle.squad) && bundle.squad.length > 0,
+                    hasTransfers: Array.isArray(bundle.transfers) && bundle.transfers.length > 0,
+                }),
+            };
+
             return Response.json({
                 ok: true,
                 resolvedClubId: null,
-                details: bundle.details,
+                details,
                 results: bundle.results,
                 fixtures: bundle.fixtures,
                 squad: skipSquad ? [] : bundle.squad,
@@ -491,6 +822,14 @@ export async function GET(request: Request) {
                     lost: context.standingRow.lost,
                 } : null,
             };
+            const detailsWithTabs = {
+                ...details,
+                supported_tabs: buildSupportedTabs({
+                    supportedTabs: (details as any).supported_tabs,
+                    hasSquad: false,
+                    hasTransfers: false,
+                }),
+            };
             const results = sortMatchesByDate(
                 normalizedGames.filter((match) => match.status === 'final'),
                 'desc',
@@ -503,7 +842,7 @@ export async function GET(request: Request) {
             return Response.json({
                 ok: true,
                 resolvedClubId: null,
-                details,
+                details: detailsWithTabs,
                 results,
                 fixtures,
                 squad: [],
@@ -526,6 +865,8 @@ export async function GET(request: Request) {
     let internalExternalId: string | null = null;
     let internalClubName: string = '';
     let resolvedClubId: string | null = null;
+    let internalSquad: unknown = [];
+    let hasInternalSquad = false;
 
     try {
         const readClient = await getReadClient();
@@ -538,6 +879,11 @@ export async function GET(request: Request) {
         if (internalClub) {
             const effectiveClub = await resolveInternalClubBySport(readClient, internalClub as InternalClubRow, preferredSport);
             resolvedClubId = effectiveClub.id;
+            const internalSquadState = await fetchInternalClubSquad(readClient, effectiveClub.id, {
+                includePlayers: !skipSquad,
+            });
+            internalSquad = internalSquadState.squad;
+            hasInternalSquad = internalSquadState.hasSquad;
             details = {
                 id: effectiveClub.id,
                 name: effectiveClub.name,
@@ -548,7 +894,11 @@ export async function GET(request: Request) {
                 city: effectiveClub.city,
                 region: effectiveClub.region,
                 sport: effectiveClub.sport || effectiveClub.sport_id || null,
-                is_internal: true
+                is_internal: true,
+                supported_tabs: buildSupportedTabs({
+                    hasSquad: hasInternalSquad,
+                    hasTransfers: false,
+                }),
             };
             internalExternalId = effectiveClub.external_id || null;
             internalClubName = effectiveClub.name || '';
@@ -653,7 +1003,7 @@ export async function GET(request: Request) {
             }
         }
 
-        let squad: unknown = null;
+        let squad: unknown = internalSquad;
         let fsResults: NormalizedInternalMatch[] = [];
         let fsFixtures: NormalizedInternalMatch[] = [];
         let transfers: unknown[] = [];
@@ -665,7 +1015,7 @@ export async function GET(request: Request) {
             const [detailsRes, squadRes, transfersRes, fsResultsRes, fsFixturesRes] =
                 await Promise.allSettled([
                     teamUrl ? getTeamDetails(teamUrl) : Promise.resolve(null),
-                    teamUrl && !skipSquad ? getTeamSquad(teamUrl) : Promise.resolve(null),
+                    teamUrl && !skipSquad && !hasInternalSquad ? getTeamSquad(teamUrl) : Promise.resolve(null),
                     getTeamTransfers(resolvedExternalId),
                     needFsResults ? getTeamResults(resolvedExternalId) : Promise.resolve(null),
                     needFsFixtures ? getTeamFixtures(resolvedExternalId) : Promise.resolve(null),
@@ -690,7 +1040,10 @@ export async function GET(request: Request) {
             }
 
             const remoteDetails = normalize(detailsRes);
-            squad = normalize(squadRes);
+            const remoteSquad = normalize(squadRes);
+            if (!hasInternalSquad && remoteSquad) {
+                squad = remoteSquad;
+            }
 
             // Persist the working team_url to external_teams cache if not already stored
             if (teamUrl && !cachedTeamUrl && remoteDetails && isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
@@ -719,10 +1072,13 @@ export async function GET(request: Request) {
         } else if (teamUrl) {
             const [detailsRes, squadRes] = await Promise.allSettled([
                 getTeamDetails(teamUrl),
-                skipSquad ? Promise.resolve(null) : getTeamSquad(teamUrl),
+                skipSquad || hasInternalSquad ? Promise.resolve(null) : getTeamSquad(teamUrl),
             ]);
             const remoteDetails = normalize(detailsRes);
-            squad = normalize(squadRes);
+            const remoteSquad = normalize(squadRes);
+            if (!hasInternalSquad && remoteSquad) {
+                squad = remoteSquad;
+            }
             if (isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
                 details = { ...(details ?? {}), ...remoteDetails };
             }
@@ -731,11 +1087,22 @@ export async function GET(request: Request) {
         const finalResults = sortMatchesByDate(internalResults.length > 0 ? internalResults : fsResults, 'desc');
         const finalFixtures = sortMatchesByDate(internalFixtures.length > 0 ? internalFixtures : fsFixtures, 'asc');
         const detailsWithOverride = applyExternalTeamLogoOverride(details);
+        const hasExternalSquadSupport = Boolean(effectiveExternalId || teamUrlParam || cachedTeamUrl);
+        const detailsForResponse = isRecord(detailsWithOverride)
+            ? {
+                ...detailsWithOverride,
+                supported_tabs: buildSupportedTabs({
+                    supportedTabs: detailsWithOverride.supported_tabs,
+                    hasSquad: hasInternalSquad || hasExternalSquadSupport,
+                    hasTransfers: transfers.length > 0,
+                }),
+            }
+            : detailsWithOverride;
 
         return Response.json({
             ok: true,
             resolvedClubId,
-            details: detailsWithOverride,
+            details: detailsForResponse,
             results: finalResults,
             fixtures: finalFixtures,
             squad: squad || [],

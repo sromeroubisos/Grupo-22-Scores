@@ -7,14 +7,11 @@ import {
 } from '@/lib/auth/permissions';
 import { ADMIN_ONLY_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { fetchDivisions } from '@/lib/services/divisionService';
 
 function err(message: string, status: number) {
     return NextResponse.json({ error: message }, { status });
 }
-
-// ─── POST /api/clubs/:id/publish ─────────────────────────────────────────────
-// Idempotente: si ya está publicado, devuelve 200 igualmente.
-// Requiere: club con nombre y al menos 1 división.
 
 export async function POST(
     _request: NextRequest,
@@ -33,23 +30,21 @@ export async function POST(
         if (!canPublish) return err('Sin permisos para publicar este club', 403);
     }
 
-    // Validar que tenga los requisitos mínimos
     const { data: clubData } = await supabase
-        .from('clubs').select('name, status').eq('id', id).single();
+        .from('clubs')
+        .select('name, status')
+        .eq('id', id)
+        .single();
 
     if (!clubData) return err('Club no encontrado', 404);
 
-    const { count: divCount } = await supabase
-        .from('club_divisions')
-        .select('id', { count: 'exact', head: true })
-        .eq('club_id', id);
+    const divisions = await fetchDivisions(id);
 
     if (!clubData.name) return err('El club debe tener nombre antes de publicarse', 422);
-    if (!divCount || divCount === 0) {
-        return err('El club debe tener al menos una división antes de publicarse', 422);
+    if (divisions.length === 0) {
+        return err('El club debe tener al menos una division antes de publicarse', 422);
     }
 
-    // Idempotente: si ya está publicado, ok
     if (clubData.status === 'published') {
         return NextResponse.json({ data: { clubId: id, status: 'published', alreadyPublished: true } });
     }
@@ -61,13 +56,12 @@ export async function POST(
         .select('id, name, status, is_visible')
         .single();
 
-    if (error) return NextResponse.json({ error: 'Error al publicar club', details: error.message }, { status: 500 });
+    if (error) {
+        return NextResponse.json({ error: 'Error al publicar club', details: error.message }, { status: 500 });
+    }
 
     return NextResponse.json({ data });
 }
-
-// ─── POST /api/clubs/:id/publish con body { action: 'unpublish' } ─────────────
-// Opcionalmente también manejamos unpublish desde el mismo endpoint.
 
 export async function DELETE(
     _request: NextRequest,
@@ -85,7 +79,9 @@ export async function DELETE(
         .select('id, name, status')
         .single();
 
-    if (error) return NextResponse.json({ error: 'Error al despublicar', details: error.message }, { status: 500 });
+    if (error) {
+        return NextResponse.json({ error: 'Error al despublicar', details: error.message }, { status: 500 });
+    }
 
     return NextResponse.json({ data });
 }

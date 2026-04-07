@@ -9,19 +9,18 @@ interface ClubManageTabsProps {
     squadCount: number;
 }
 
-const TABS = [
+export const CLUB_MANAGE_VISIBLE_TABS = [
     { id: 'resumen', label: 'Resumen' },
+    { id: 'fixture', label: 'Fixture / Resultados' },
+    { id: 'posiciones', label: 'Posiciones' },
+    { id: 'relacionados', label: 'Relacionados' },
     { id: 'identidad', label: 'Identidad' },
     { id: 'planteles', label: 'Planteles' },
-    { id: 'staff', label: 'Staff' },
-    { id: 'competencias', label: 'Competencias' },
-    { id: 'partidos', label: 'Partidos' },
-    { id: 'posiciones', label: 'Posiciones' },
-    { id: 'estadisticas', label: 'Estadísticas' },
-    { id: 'medios', label: 'Medios' },
-    { id: 'relacionados', label: 'Relacionados' },
-    { id: 'auditoria', label: 'Auditoría' },
 ];
+
+export const CLUB_MANAGE_VISIBLE_TAB_IDS = new Set(
+    CLUB_MANAGE_VISIBLE_TABS.map((tab) => tab.id)
+);
 
 export function ClubManageTabs({ currentTab, squadCount }: ClubManageTabsProps) {
     const pathname = usePathname();
@@ -29,7 +28,7 @@ export function ClubManageTabs({ currentTab, squadCount }: ClubManageTabsProps) 
 
     return (
         <nav className="tabs-nav">
-            {TABS.map((tab) => {
+            {CLUB_MANAGE_VISIBLE_TABS.map((tab) => {
                 const params = new URLSearchParams(searchParams.toString());
                 params.set('tab', tab.id);
                 params.set('type', 'club');

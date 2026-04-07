@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { resolveClubFamilyIds } from '@/lib/club-admin/managedClubFamily';
 import {
     EDIT_MEMBERSHIP_ROLES,
     MANAGEMENT_MEMBERSHIP_ROLES,
@@ -31,6 +32,7 @@ export interface ClubManagementTarget {
     clubId: string;
     sportId: string | null;
     unionId: string | null;
+    familyClubIds: string[];
 }
 
 export interface MatchManagementTarget {
@@ -173,7 +175,9 @@ export function canManageClubContext(
     }
 
     return (
-        hasScopedMembershipAccess(context, 'club', target.clubId, allowedRoles) ||
+        target.familyClubIds.some((clubId) =>
+            hasScopedMembershipAccess(context, 'club', clubId, allowedRoles)
+        ) ||
         hasScopedMembershipAccess(context, 'sport', target.sportId, allowedRoles) ||
         hasScopedMembershipAccess(context, 'union', target.unionId, allowedRoles)
     );
@@ -231,10 +235,16 @@ export async function getClubManagementTarget(
         return null;
     }
 
+    const family = await resolveClubFamilyIds(supabase as any, data.id).catch(() => ({
+        rootClubId: data.id,
+        clubIds: [data.id],
+    }));
+
     return {
         clubId: data.id,
         sportId: data.sport_id ?? null,
         unionId: data.union_id ?? null,
+        familyClubIds: family.clubIds,
     };
 }
 

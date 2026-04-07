@@ -5,6 +5,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { EntityType } from '@/lib/services/entityResolver';
 import { getMissingTournamentPriorityMessage, isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { getClubDashboardOverview } from '@/lib/club-admin/dashboard';
+import { getClubFamilySummary } from '@/lib/club-admin/managedClubFamily';
 import { z } from 'zod';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -331,24 +333,42 @@ export async function duplicateTournament(
 // ── DASHBOARD HELPERS ──────────────────────────────────────────────────────
 export async function getClubDashboardData(clubId: string) {
     const supabase = await createClient();
-
-    // 1. Get upcoming matches
-    const { data: matches } = await supabase
-        .from('matches')
-        .select(`
-            id, date_time, status, home_club_id, away_club_id, venue, score,
-            home:clubs!matches_home_club_id_fkey(name, short_name, logo_url, slug),
-            away:clubs!matches_away_club_id_fkey(name, short_name, logo_url, slug),
-            tournament:tournaments(id, name, slug)
-        `)
-        .or(`home_club_id.eq.${clubId},away_club_id.eq.${clubId}`)
-        .gte('date_time', new Date().toISOString())
-        .order('date_time', { ascending: true })
-        .limit(3);
+    const overview = await getClubDashboardOverview(supabase, clubId);
 
     return {
-        matches: (matches as any[]) || []
+        ...overview,
+        matches: overview.upcomingMatches.map((match) => ({
+            id: match.id,
+            date_time: match.dateTime ?? '',
+            status: match.status,
+            venue: match.venue,
+            home: {
+                name: match.home.name,
+                short_name: match.home.shortName ?? match.home.name,
+                logo_url: match.home.logoUrl ?? '',
+            },
+            away: {
+                name: match.away.name,
+                short_name: match.away.shortName ?? match.away.name,
+                logo_url: match.away.logoUrl ?? '',
+            },
+            tournament: match.tournament ? { name: match.tournament.name } : null,
+        })),
     };
+}
+
+export async function getClubRelatedClubsData(clubId: string) {
+    const supabase = await createClient();
+    try {
+        return await getClubFamilySummary(supabase, clubId);
+    } catch (error) {
+        const message = error instanceof Error
+            ? error.message
+            : (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string')
+                ? (error as { message: string }).message
+                : 'No se pudo cargar la familia de clubes';
+        throw new Error(message);
+    }
 }
 
 /**

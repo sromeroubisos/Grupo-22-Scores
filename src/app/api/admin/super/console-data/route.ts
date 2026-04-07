@@ -215,15 +215,8 @@ export async function GET(request: NextRequest) {
                     readClient.from('clubs'),
                     [
                         'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport, sport_id',
-                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport',
-                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport_id',
-                        'id, name, short_name, city, country, logo_url, slug, is_visible, union_id, sport',
-                        'id, name, short_name, city, country, logo_url, slug, is_visible, union_id, sport_id',
-                        'id, name, city, country, logo_url, slug, is_visible, union_id, sport',
-                        'id, name, city, country, logo_url, slug, is_visible, union_id, sport_id',
-                        'id, name, city, country, logo_url, union_id, sport',
-                        'id, name, city, country, logo_url, union_id, sport_id',
-                        'id, name, union_id'
+                        'id, name, short_name, city, country, logo_url, primary_color, slug, is_visible, union_id, sport',
+                        'id, name, city, country, logo_url, slug, is_visible, union_id',
                     ]
                 ),
                 withSoftTimeout(

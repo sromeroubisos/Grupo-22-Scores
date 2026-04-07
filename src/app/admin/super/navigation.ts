@@ -49,6 +49,14 @@ export const superNavGroups: SuperNavGroup[] = [
                 description: 'Padron, identidad visual y gestion deportiva de clubes.',
             },
             {
+                id: 'club-families',
+                label: 'Familias de Clubes',
+                href: '/admin/super/familias-clubes',
+                iconPath:
+                    'M4 7h6M4 17h6M14 7h6M14 17h6M10 7h4v10h-4zM7 10v4m10-4v4',
+                description: 'Relaciones base-derivado, estructura familiar y acceso transversal.',
+            },
+            {
                 id: 'players',
                 label: 'Jugadores',
                 href: '/admin/super/jugadores',

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
-import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield, Users } from 'lucide-react';
+import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield, Users, GitBranch, Link2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateCache, type ClubWithUnion } from '@/lib/cache/superAdminCache';
 import { getActiveSports } from '@/lib/data/sports';
@@ -48,6 +48,11 @@ const ACTIVE_SPORTS = getActiveSports();
 
 type SortKey = 'name' | 'location' | 'followers_count' | 'union' | 'color' | 'visibility';
 type ActionMenuPosition = { top: number; left: number; transformOrigin: string };
+type ClubDerivativeRelationRow = {
+    base_club_id: string;
+    derived_club_id: string;
+    derivative_type: ClubDerivativeType;
+};
 
 export default function SuperadminClubesPage() {
     const router = useRouter();
@@ -89,7 +94,7 @@ export default function SuperadminClubesPage() {
     const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<ClubWithUnion>>>({});
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
 
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     const getSuggestedOtherSport = (clubSport?: string | null) => {
         const baseSport = canonicalizeSportId(clubSport);
@@ -307,6 +312,12 @@ export default function SuperadminClubesPage() {
         () => displayClubs.find((club) => club.id === actionMenuOpenId) ?? null,
         [actionMenuOpenId, displayClubs],
     );
+    const loadClubFamilies = useCallback(async () => {}, []);
+    const clubDerivativeRelations = useMemo<ClubDerivativeRelationRow[]>(() => [], []);
+    const familySummaries = useMemo<Array<{ root: ClubWithUnion; relations: ClubDerivativeRelationRow[]; members: ClubWithUnion[] }>>(() => [], []);
+    const standaloneClubsCount = 0;
+    const familyLoadError: string | null = null;
+    const isLoadingFamilies = false;
 
     useEffect(() => {
         if (!actionMenuOpenId) {
@@ -345,6 +356,9 @@ export default function SuperadminClubesPage() {
                     </div>
                 </div>
                 <div className={styles.consoleActions}>
+                    <Link href="/admin/super/familias-clubes" className={styles.cardAction}>
+                        Familias de clubes
+                    </Link>
                     <button
                         className={styles.cardAction}
                         onClick={() => refresh('clubs')}
@@ -426,6 +440,160 @@ export default function SuperadminClubesPage() {
             {errorMsg && (
                 <div style={{ padding: '12px 16px', marginBottom: 16, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, color: '#ef4444', fontSize: 13 }}>
                     ⚠️ {errorMsg}
+                </div>
+            )}
+
+            {false && !isLoading && (
+                <div className={styles.slab} style={{ marginBottom: 20 }}>
+                    <div className={styles.slabHeader}>
+                        <div>
+                            <span className={styles.slabLabel}>Estructura</span>
+                            <div className={styles.slabTitle}>Familias de clubes</div>
+                        </div>
+                        <div className={styles.slabActions}>
+                            <button
+                                className={styles.cardAction}
+                                onClick={() => void loadClubFamilies()}
+                                disabled={isLoadingFamilies}
+                            >
+                                <RefreshCw size={13} style={{ marginRight: 6, animation: isLoadingFamilies ? 'spin 1s linear infinite' : 'none' }} />
+                                Refrescar familias
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                            gap: 16,
+                            marginBottom: 20,
+                        }}
+                    >
+                        <div style={{ padding: 16, border: '1px solid var(--surface-edge)', background: 'var(--basalt-800)', borderRadius: 12 }}>
+                            <div className={styles.slabLabel} style={{ marginBottom: 10 }}>Familias</div>
+                            <div className={styles.statValue} style={{ fontSize: 28 }}>{familySummaries.length}</div>
+                            <div className={styles.statSub}>Grupos con base y derivados</div>
+                        </div>
+                        <div style={{ padding: 16, border: '1px solid var(--surface-edge)', background: 'var(--basalt-800)', borderRadius: 12 }}>
+                            <div className={styles.slabLabel} style={{ marginBottom: 10 }}>Vinculos</div>
+                            <div className={styles.statValue} style={{ fontSize: 28 }}>{clubDerivativeRelations.length}</div>
+                            <div className={styles.statSub}>Relaciones en club_derivatives</div>
+                        </div>
+                        <div style={{ padding: 16, border: '1px solid var(--surface-edge)', background: 'var(--basalt-800)', borderRadius: 12 }}>
+                            <div className={styles.slabLabel} style={{ marginBottom: 10 }}>Clubes sueltos</div>
+                            <div className={styles.statValue} style={{ fontSize: 28 }}>{standaloneClubsCount}</div>
+                            <div className={styles.statSub}>Sin familia declarada</div>
+                        </div>
+                    </div>
+
+                    {familyLoadError && (
+                        <div style={{ padding: '12px 14px', marginBottom: 16, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: 10, color: '#fca5a5', fontSize: 13 }}>
+                            No pudimos cargar las familias de clubes. {familyLoadError}
+                        </div>
+                    )}
+
+                    {isLoadingFamilies ? (
+                        <div style={{ color: 'var(--basalt-400)', textAlign: 'center', padding: '24px 0' }}>
+                            Cargando familias...
+                        </div>
+                    ) : familySummaries.length === 0 ? (
+                        <div style={{ color: 'var(--basalt-400)', textAlign: 'center', padding: '24px 0' }}>
+                            No hay familias configuradas todavia. Podes crearlas desde &quot;Crear derivado&quot; sobre un club base.
+                        </div>
+                    ) : (
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                                gap: 16,
+                            }}
+                        >
+                            {familySummaries.map((family) => (
+                                <div
+                                    key={family.root.id}
+                                    style={{
+                                        border: '1px solid var(--surface-edge)',
+                                        background: 'var(--basalt-800)',
+                                        borderRadius: 14,
+                                        padding: 18,
+                                        display: 'grid',
+                                        gap: 14,
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                                <GitBranch size={15} style={{ color: 'var(--color-accent)' }} />
+                                                <span className={styles.slabLabel} style={{ marginBottom: 0 }}>Familia base</span>
+                                            </div>
+                                            <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{family.root.name}</div>
+                                            <div style={{ fontSize: 12, color: 'var(--basalt-400)', marginTop: 4 }}>
+                                                {family.members.length} clubes · {family.relations.length} vinculos
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className={styles.cardAction}
+                                            onClick={() => openCreateDerivedModal(family.root)}
+                                        >
+                                            <Plus size={13} style={{ marginRight: 6 }} />
+                                            Derivado
+                                        </button>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gap: 10 }}>
+                                        {family.members.map((member) => {
+                                            const isRoot = member.id === family.root.id;
+                                            const relation = family.relations.find((item) => item.derived_club_id === member.id);
+                                            return (
+                                                <div
+                                                    key={member.id}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        gap: 12,
+                                                        padding: '10px 12px',
+                                                        borderRadius: 10,
+                                                        border: '1px solid var(--surface-edge)',
+                                                        background: isRoot ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)',
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                                                        <div style={{ width: 34, height: 34, borderRadius: 6, border: '1px solid var(--surface-edge)', background: 'var(--basalt-900)', overflow: 'hidden', flexShrink: 0 }}>
+                                                            <ClubLogo logo={member.logo_url} name={member.name} color={member.primary_color} />
+                                                        </div>
+                                                        <div style={{ minWidth: 0 }}>
+                                                            <div style={{ fontWeight: 600, color: '#ececec' }}>{member.name}</div>
+                                                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 3 }}>
+                                                                <span style={{ fontSize: 10, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)' }}>
+                                                                    {isRoot ? 'BASE' : CLUB_DERIVATIVE_LABELS[relation?.derivative_type || 'youth']}
+                                                                </span>
+                                                                {member.sport && (
+                                                                    <span style={{ fontSize: 10, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)' }}>
+                                                                        {getSportDisplayName(member.sport) || member.sport}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <Link
+                                                        href={`/admin/entities/${member.id}/manage?type=club&tab=relacionados`}
+                                                        className={styles.cardAction}
+                                                        style={{ padding: '6px 10px', fontSize: 11 }}
+                                                    >
+                                                        <Link2 size={11} style={{ marginRight: 4 }} />
+                                                        Gestionar
+                                                    </Link>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 
