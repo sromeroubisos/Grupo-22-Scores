@@ -13,6 +13,7 @@ import { getActiveSports } from '@/lib/data/sports';
 import {
     CLUB_DERIVATIVE_DESCRIPTIONS,
     CLUB_DERIVATIVE_LABELS,
+    CREATABLE_CLUB_DERIVATIVE_TYPES,
     type ClubDerivativeType,
     canonicalizeSportId,
     getSportDisplayName,
@@ -883,7 +884,7 @@ export default function SuperadminClubesPage() {
                         </div>
 
                         <div style={{ display: 'grid', gap: 12 }}>
-                            {(Object.keys(CLUB_DERIVATIVE_LABELS) as ClubDerivativeType[]).map((option) => {
+                            {CREATABLE_CLUB_DERIVATIVE_TYPES.map((option) => {
                                 const isActive = derivedType === option;
                                 return (
                                     <button

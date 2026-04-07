@@ -39,6 +39,11 @@ import { isPatchEmpty } from '../utils/buildPatch';
 
 type ClubDerivativeUpsertClient = {
   from(table: 'club_derivatives'): {
+    select(columns: string): {
+      eq(column: string, value: string): {
+        maybeSingle(): Promise<{ data: { base_club_id: string } | null; error: { message: string } | null }>;
+      };
+    };
     upsert(
       values: {
         base_club_id: string;
@@ -49,6 +54,12 @@ type ClubDerivativeUpsertClient = {
     ): Promise<{ error: { message: string } | null }>;
   };
 };
+
+function isMissingClubDerivativesError(error: { message?: string | null } | null | undefined) {
+  const message = error?.message ?? '';
+  return message.includes('club_derivatives') &&
+    (message.includes('schema cache') || message.includes('does not exist'));
+}
 
 // ============================================================
 // CREATE CLUB
@@ -730,21 +741,33 @@ export async function linkDerivedClub(params: {
   }
 
   const relationClient = supabase as unknown as ClubDerivativeUpsertClient;
+  const { data: existingFamilyRelation, error: existingFamilyRelationError } = await relationClient
+    .from('club_derivatives')
+    .select('base_club_id')
+    .eq('derived_club_id', params.baseClubId)
+    .maybeSingle();
+
+  if (existingFamilyRelationError) {
+    if (isMissingClubDerivativesError(existingFamilyRelationError)) {
+      return { success: true };
+    }
+
+    return { success: false, error: existingFamilyRelationError.message };
+  }
+
+  const familyBaseClubId = existingFamilyRelation?.base_club_id || params.baseClubId;
   const { error } = await relationClient
     .from('club_derivatives')
     .upsert({
-      base_club_id: params.baseClubId,
+      base_club_id: familyBaseClubId,
       derived_club_id: params.derivedClubId,
-      derivative_type: params.derivativeType,
+      derivative_type: 'family',
     }, {
       onConflict: 'base_club_id,derived_club_id',
     });
 
   if (error) {
-    if (
-      error.message.includes('club_derivatives') &&
-      (error.message.includes('schema cache') || error.message.includes('does not exist'))
-    ) {
+    if (isMissingClubDerivativesError(error)) {
       return { success: true };
     }
 

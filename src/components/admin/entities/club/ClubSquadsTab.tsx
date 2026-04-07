@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Database } from '@/lib/database.types';
 import { clsx } from 'clsx';
-import { fetchDivisions, createDivision } from '@/lib/services/divisionService';
+import { fetchDivisions } from '@/lib/services/divisionService';
 import { Users, Trophy, Calendar, Plus, LayoutGrid, List, Filter, Search, Shield } from 'lucide-react';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
@@ -66,20 +66,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [squads, setSquads] = useState<SquadSummary[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
-
-    async function loadSquads() {
-        setLoading(true);
-        try {
-            const nextSquads = await loadClubSquads(id);
-            setSquads(nextSquads);
-        } catch (error) {
-            console.error('Error loading squads:', error);
-            setSquads([]);
-        } finally {
-            setLoading(false);
-        }
-    }
+    const [actionMessage, setActionMessage] = useState<string | null>(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -110,23 +97,24 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
         };
     }, [id]);
 
-    async function handleCreateSquad() {
-        const name = window.prompt('Ingrese el nombre del nuevo plantel (ej: Primera Division, M19...):');
-        if (!name || name.trim() === '') return;
+    function openRoster(squadId: string) {
+        router.push(`/admin/super/clubes/${id}/planteles/${squadId}`);
+    }
 
-        setIsSaving(true);
-        try {
-            const result = await createDivision(id, name.trim());
-            if (result.success) {
-                await loadSquads();
-                window.dispatchEvent(new CustomEvent('club:divisions-updated'));
-            } else {
-                console.error('Error al crear:', result.error);
-                alert('Hubo un error al crear el plantel.');
-            }
-        } finally {
-            setIsSaving(false);
+    function handleRegisterPlayer() {
+        const candidates = activeSquads.length > 0 ? activeSquads : filteredSquads;
+
+        if (candidates.length === 0) {
+            setActionMessage('Primero tiene que existir una division activa para registrar jugadores.');
+            return;
         }
+
+        if (candidates.length === 1) {
+            openRoster(candidates[0].id);
+            return;
+        }
+
+        setActionMessage('Elegi una tarjeta de plantel para abrir su planilla y registrar jugadores.');
     }
 
     const filteredSquads = squads.filter((squad) =>
@@ -189,12 +177,11 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                         <label className="manager-field-label">Acciones Rapidas</label>
                         <div className="flex gap-3">
                             <button
-                                onClick={handleCreateSquad}
-                                disabled={isSaving}
+                                onClick={handleRegisterPlayer}
                                 className="flex-1 bg-[var(--accent)] text-[var(--bg)] px-4 py-3 font-bold uppercase tracking-widest text-xs border border-[var(--accent)] hover:opacity-80 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Plus className="w-4 h-4" />
-                                {isSaving ? 'Creando...' : 'Crear Plantel'}
+                                Registrar Jugador
                             </button>
                             <button className="px-4 py-3 bg-[rgba(255,255,255,0.05)] border border-[var(--border)] text-[#e2e2e2] font-bold uppercase text-xs hover:bg-[rgba(255,255,255,0.08)] transition-all flex items-center justify-center">
                                 <Filter className="w-4 h-4" />
@@ -203,6 +190,21 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                     </div>
                 </div>
             </div>
+
+            {actionMessage && (
+                <div className="manager-card border-[var(--accent)]/25">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <p className="text-sm text-[#cfcfcf]">{actionMessage}</p>
+                        <button
+                            type="button"
+                            className="px-4 py-2 bg-[rgba(255,255,255,0.05)] border border-[var(--border)] text-[#e2e2e2] font-bold uppercase text-xs hover:bg-[rgba(255,255,255,0.08)] transition-all"
+                            onClick={() => setActionMessage(null)}
+                        >
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="manager-card">
@@ -230,7 +232,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     <div
                                         key={squad.id}
                                         className="strata-card p-0 overflow-hidden cursor-pointer group"
-                                        onClick={() => router.push(`/admin/super/clubes/${id}/planteles/${squad.id}`)}
+                                        onClick={() => openRoster(squad.id)}
                                     >
                                         <div className={clsx('h-28 relative overflow-hidden bg-gradient-to-br', squad.colorClass)}>
                                             <div className="absolute inset-0 flex items-center justify-center">
@@ -285,7 +287,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     <div
                                         key={squad.id}
                                         className="strata-card p-0 overflow-hidden cursor-pointer opacity-70 hover:opacity-100"
-                                        onClick={() => router.push(`/admin/super/clubes/${id}/planteles/${squad.id}`)}
+                                        onClick={() => openRoster(squad.id)}
                                     >
                                         <div className="h-28 relative overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800">
                                             <div className="absolute inset-0 flex items-center justify-center">
@@ -333,7 +335,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     <div
                                         key={squad.id}
                                         className="strata-card p-0 overflow-hidden cursor-pointer"
-                                        onClick={() => router.push(`/admin/super/clubes/${id}/planteles/${squad.id}`)}
+                                        onClick={() => openRoster(squad.id)}
                                     >
                                         <div className="h-28 relative overflow-hidden bg-gradient-to-br from-gray-600 to-gray-700">
                                             <div className="absolute inset-0 flex items-center justify-center">
@@ -366,14 +368,9 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                             <div className="flex flex-col items-center justify-center py-16 gap-4">
                                 <Shield className="w-16 h-16 text-[#333] opacity-50" />
                                 <p className="text-[#888] uppercase text-sm tracking-widest">No se encontraron planteles</p>
-                                <button
-                                    onClick={handleCreateSquad}
-                                    disabled={isSaving}
-                                    className="mt-4 bg-[var(--accent)] text-[var(--bg)] px-6 py-3 font-bold uppercase tracking-widest text-xs border border-[var(--accent)] hover:opacity-80 transition-opacity flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    {isSaving ? 'Creando...' : 'Crear Primer Plantel'}
-                                </button>
+                                <p className="max-w-xl text-center text-[#666] text-xs uppercase tracking-widest">
+                                    Configura las divisiones del club para poder registrar jugadores en sus planillas.
+                                </p>
                             </div>
                         </div>
                     )}
@@ -403,7 +400,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     <tr
                                         key={squad.id}
                                         className="border-b border-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.02)] transition-colors cursor-pointer"
-                                        onClick={() => router.push(`/admin/super/clubes/${id}/planteles/${squad.id}`)}
+                                        onClick={() => openRoster(squad.id)}
                                     >
                                         <td className="px-6 py-5">
                                             <div className="font-bold text-sm text-[#e2e2e2] uppercase tracking-tight">{squad.name}</div>

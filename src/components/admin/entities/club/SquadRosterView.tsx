@@ -2,25 +2,21 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-    ChevronLeft,
-    Search,
-    Download,
-    Plus,
-    Trash2,
-    User,
     Calendar,
-    Fingerprint,
-    Trophy,
+    ChevronLeft,
+    Download,
     ExternalLink,
     Filter,
-    Zap
+    Plus,
+    Search,
+    Trash2,
+    User,
 } from 'lucide-react';
-import { fetchPeopleByDivision, deletePersonFromClub, PersonWithRole, addPersonToClub } from '@/lib/services/personService';
+import { clsx } from 'clsx';
+import { fetchPeopleByDivision, deletePersonFromClub, PersonWithRole } from '@/lib/services/personService';
 import { Division } from '@/lib/services/divisionService';
 import { PersonManagementModal } from './PersonManagementModal';
 import { CSVImportModal } from './CSVImportModal';
-import { MOCK_PLAYERS, generateMockBirthDate } from '@/lib/utils/mockPlayers';
-import { clsx } from 'clsx';
 
 interface Props {
     clubId: string;
@@ -34,69 +30,38 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
     const [search, setSearch] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
-    const [loadingMock, setLoadingMock] = useState(false);
 
     const loadPlayers = useCallback(async () => {
         setLoading(true);
         const data = await fetchPeopleByDivision(clubId, division.id);
-        setPlayers(data.filter(p => p.role === 'player'));
+        setPlayers(data.filter((person) => person.role === 'player'));
         setLoading(false);
     }, [clubId, division.id]);
 
     useEffect(() => {
-        loadPlayers();
+        // The roster must be loaded as soon as the selected division changes.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        void loadPlayers();
     }, [loadPlayers]);
 
     const handleRemovePlayer = async (personId: string, name: string) => {
-        if (!confirm(`¿Eliminar a ${name} de este plantel?`)) return;
+        if (!confirm(`Eliminar a ${name} de este plantel?`)) return;
+
         const res = await deletePersonFromClub(clubId, personId, division.id);
         if (res.success) {
-            setPlayers(prev => prev.filter(p => p.id !== personId));
+            setPlayers((prev) => prev.filter((person) => person.id !== personId));
         } else {
             alert('Error al eliminar: ' + res.error);
         }
     };
 
-    const handleLoadMockData = async () => {
-        if (!confirm(`¿Cargar ${MOCK_PLAYERS.length} jugadores de prueba en ${division.name}?`)) return;
-
-        setLoadingMock(true);
-        let successCount = 0;
-        let errorCount = 0;
-
-        for (const player of MOCK_PLAYERS) {
-            const res = await addPersonToClub(clubId, {
-                first_name: player.first_name,
-                last_name: player.last_name,
-                birth_date: generateMockBirthDate(),
-                position: player.position,
-                weight: player.weight,
-                height: player.height,
-                role: 'player',
-                division_id: division.id,
-                status: 'active'
-            });
-
-            if (res.success) {
-                successCount++;
-            } else {
-                errorCount++;
-            }
-        }
-
-        setLoadingMock(false);
-        alert(`Carga completada:\n✓ ${successCount} jugadores agregados\n${errorCount > 0 ? `✗ ${errorCount} errores` : ''}`);
-        loadPlayers();
-    };
-
-    const filteredPlayers = players.filter(p =>
-        `${p.first_name} ${p.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
-        p.position?.toLowerCase().includes(search.toLowerCase())
+    const filteredPlayers = players.filter((person) =>
+        `${person.first_name} ${person.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
+        person.position?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
         <div className="squads-wrap">
-            {/* Header Section */}
             <header className="page-head">
                 <div className="flex items-center gap-4">
                     <button
@@ -109,19 +74,11 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                         <h1 className="!mb-1">PLANILLA: {division.name}</h1>
                         <p className="muted flex items-center gap-2">
                             <Calendar className="w-3 h-3" />
-                            Actualizado hace unos instantes • {players.length} JUGADORES REGISTRADOS
+                            Actualizado hace unos instantes - {players.length} jugadores registrados
                         </p>
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button
-                        className="btn gap-2 !bg-amber-500/10 !border-amber-500/30 hover:!border-amber-500 !text-amber-500"
-                        onClick={handleLoadMockData}
-                        disabled={loadingMock}
-                    >
-                        <Zap className="w-4 h-4" />
-                        {loadingMock ? 'Cargando...' : 'Mock Data'}
-                    </button>
                     <button className="btn gap-2" onClick={() => setIsCSVModalOpen(true)}>
                         <Download className="w-4 h-4" />
                         Importar Excel
@@ -131,32 +88,29 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                         className="btn btn-primary gap-2"
                     >
                         <Plus className="w-4 h-4" />
-                        Añadir a Planilla
+                        Registrar jugador
                     </button>
                 </div>
             </header>
 
-            {/* Main Panel */}
             <section className="panel">
-                {/* Search Bar */}
                 <div className="p-4 border-b border-neutral-800 bg-neutral-900/30 flex flex-col md:flex-row gap-3">
                     <div className="relative flex-1 search-wrapper">
                         <Search className="search-icon" />
                         <input
                             type="text"
-                            placeholder="Filtrar por nombre o posición..."
+                            placeholder="Filtrar por nombre o posicion..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={(event) => setSearch(event.target.value)}
                             className="search"
                         />
                     </div>
                     <button className="btn gap-2 text-neutral-500">
                         <Filter className="w-4 h-4" />
-                        Filtros Avanzados
+                        Filtros avanzados
                     </button>
                 </div>
 
-                {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-sm">
                         <thead>
@@ -164,7 +118,7 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                 <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Jugador</th>
                                 <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Documento</th>
                                 <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">F. Nacimiento</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Posición</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Posicion</th>
                                 <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Estado</th>
                                 <th className="px-4 py-3 text-right text-[10px] font-black text-neutral-500 uppercase tracking-widest">Acciones</th>
                             </tr>
@@ -180,45 +134,53 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                 <tr>
                                     <td colSpan={6} className="py-32 text-center text-neutral-600 space-y-4">
                                         <User className="w-16 h-16 opacity-10 mx-auto" />
-                                        <p className="text-[14px] font-black uppercase tracking-[0.3em] opacity-30">Planilla Vacía</p>
+                                        <p className="text-[14px] font-black uppercase tracking-[0.3em] opacity-30">Planilla vacia</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsAddModalOpen(true)}
+                                            className="btn btn-primary gap-2 mx-auto"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            Registrar primer jugador
+                                        </button>
                                     </td>
                                 </tr>
-                            ) : filteredPlayers.map((p) => (
-                                <tr key={p.id} className="hover:bg-neutral-800/20 transition-colors group">
+                            ) : filteredPlayers.map((person) => (
+                                <tr key={person.id} className="hover:bg-neutral-800/20 transition-colors group">
                                     <td className="px-4 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-9 h-9 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                {p.photo_url ? (
-                                                    <img src={p.photo_url} alt={p.first_name} className="w-full h-full object-cover" />
+                                                {person.photo_url ? (
+                                                    <img src={person.photo_url} alt={person.first_name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <User className="w-4 h-4 text-neutral-600" />
                                                 )}
                                             </div>
                                             <div>
                                                 <div className="text-sm font-black text-white uppercase">
-                                                    {p.first_name} {p.last_name}
+                                                    {person.first_name} {person.last_name}
                                                 </div>
-                                                <div className="text-[9px] text-neutral-600 font-mono">#{p.id.slice(0, 8)}</div>
+                                                <div className="text-[9px] text-neutral-600 font-mono">#{person.id.slice(0, 8)}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-4 py-4 text-xs font-mono text-neutral-400">
-                                        {p.id_number || <span className="text-neutral-700">-</span>}
+                                        {person.id_number || <span className="text-neutral-700">-</span>}
                                     </td>
                                     <td className="px-4 py-4 text-xs font-mono text-neutral-400">
-                                        {p.birth_date ? new Date(p.birth_date).toLocaleDateString() : <span className="text-neutral-700">-</span>}
+                                        {person.birth_date ? new Date(person.birth_date).toLocaleDateString() : <span className="text-neutral-700">-</span>}
                                     </td>
                                     <td className="px-4 py-4">
                                         <span className={clsx(
-                                            "chip",
-                                            p.position ? "chip-ok" : "chip-draft"
+                                            'chip',
+                                            person.position ? 'chip-ok' : 'chip-draft'
                                         )}>
-                                            {p.position || 'SIN CARGO'}
+                                            {person.position || 'SIN POSICION'}
                                         </span>
                                     </td>
                                     <td className="px-4 py-4">
                                         <span className="chip chip-ok">
-                                            BORRADOR
+                                            {person.status || 'active'}
                                         </span>
                                     </td>
                                     <td className="px-4 py-4">
@@ -227,7 +189,7 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                                 <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
                                             </button>
                                             <button
-                                                onClick={() => handleRemovePlayer(p.id, `${p.first_name} ${p.last_name}`)}
+                                                onClick={() => handleRemovePlayer(person.id, `${person.first_name} ${person.last_name}`)}
                                                 className="p-2 hover:bg-red-500/10 hover:border-red-500/50 rounded transition-colors border border-neutral-800 group/trash"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5 text-neutral-400 group-hover/trash:text-red-500" />

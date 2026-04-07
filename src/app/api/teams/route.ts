@@ -116,6 +116,11 @@ type NormalizedInternalMatch = {
     tournament_name: string;
     sport_id: string | null;
 };
+type InternalSquadState = {
+    squad: unknown[];
+    hasSquad: boolean;
+    source: 'internal' | 'legacy' | 'none';
+};
 type TeamDetailsPayload = {
     id?: string;
     name?: string;
@@ -128,6 +133,19 @@ type TeamDetailsPayload = {
     sport?: string | null;
     is_internal?: boolean;
 } & Record<string, unknown>;
+type PublicRelatedClub = {
+    id: string;
+    name: string;
+    short_name: string | null;
+    logo_url: string | null;
+    sport: string | null;
+    sport_id: string | null;
+    city: string | null;
+    region: string | null;
+    country: string | null;
+    is_base: boolean;
+    is_current: boolean;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -390,10 +408,46 @@ function buildSupportedTabs(options: {
 async function fetchInternalClubSquad(
     readClient: ReadClient,
     clubId: string,
-    options?: { includePlayers?: boolean }
-) {
+    options?: { includePlayers?: boolean; allowFamilyFallback?: boolean }
+): Promise<InternalSquadState> {
     const includePlayers = options?.includePlayers ?? true;
+    const allowFamilyFallback = options?.allowFamilyFallback ?? true;
     const db = readClient as any;
+    const resolveFamilyBaseClubId = async () => {
+        try {
+            const { data, error } = await db
+                .from('club_derivatives')
+                .select('base_club_id')
+                .eq('derived_club_id', clubId)
+                .maybeSingle();
+
+            if (error) {
+                if (isMissingRelationError(error)) return null;
+                throw error;
+            }
+
+            return typeof data?.base_club_id === 'string' && data.base_club_id !== clubId
+                ? data.base_club_id
+                : null;
+        } catch {
+            return null;
+        }
+    };
+    const fallbackToFamilyBase = async (): Promise<InternalSquadState> => {
+        if (!allowFamilyFallback) {
+            return { squad: [], hasSquad: false, source: 'none' as const };
+        }
+
+        const familyBaseClubId = await resolveFamilyBaseClubId();
+        if (!familyBaseClubId) {
+            return { squad: [], hasSquad: false, source: 'none' as const };
+        }
+
+        return fetchInternalClubSquad(readClient, familyBaseClubId, {
+            includePlayers,
+            allowFamilyFallback: false,
+        });
+    };
 
     try {
         const { data: teams, error: teamsError } = await db
@@ -541,7 +595,7 @@ async function fetchInternalClubSquad(
 
         const divisionRows = Array.isArray(divisions) ? divisions : [];
         if (divisionRows.length === 0) {
-            return { squad: [], hasSquad: false, source: 'none' as const };
+            return fallbackToFamilyBase();
         }
 
         const { data: roles, error: rolesError } = await db
@@ -559,7 +613,7 @@ async function fetchInternalClubSquad(
             : [];
 
         if (playerRoles.length === 0) {
-            return { squad: [], hasSquad: false, source: 'legacy' as const };
+            return fallbackToFamilyBase();
         }
 
         if (!includePlayers) {
@@ -649,7 +703,91 @@ async function fetchInternalClubSquad(
         };
     } catch (error) {
         console.error('Teams API internal squad error (legacy):', error);
-        return { squad: [], hasSquad: false, source: 'none' as const };
+        return fallbackToFamilyBase();
+    }
+
+    return fallbackToFamilyBase();
+}
+
+async function fetchInternalClubFamily(readClient: ReadClient, clubId: string): Promise<PublicRelatedClub[]> {
+    const db = readClient as any;
+
+    try {
+        let familyBaseClubId = clubId;
+        const { data: incomingRelation, error: incomingError } = await db
+            .from('club_derivatives')
+            .select('base_club_id')
+            .eq('derived_club_id', clubId)
+            .maybeSingle();
+
+        if (incomingError) {
+            if (isMissingRelationError(incomingError)) return [];
+            throw incomingError;
+        }
+
+        familyBaseClubId = incomingRelation?.base_club_id || clubId;
+
+        const { data: outgoingRelations, error: outgoingError } = await db
+            .from('club_derivatives')
+            .select('derived_club_id')
+            .eq('base_club_id', familyBaseClubId);
+
+        if (outgoingError) {
+            if (isMissingRelationError(outgoingError)) return [];
+            throw outgoingError;
+        }
+
+        const familyClubIds = Array.from(new Set([
+            familyBaseClubId,
+            ...((outgoingRelations ?? []) as Array<{ derived_club_id?: string | null }>)
+                .map((relation) => relation.derived_club_id)
+                .filter((value): value is string => typeof value === 'string' && value.length > 0),
+        ]));
+
+        if (familyClubIds.length <= 1) return [];
+
+        const { data: familyClubs, error: clubsError } = await db
+            .from('clubs')
+            .select('id, name, short_name, logo_url, sport, sport_id, city, region, country')
+            .in('id', familyClubIds);
+
+        if (clubsError) {
+            throw clubsError;
+        }
+
+        return ((familyClubs ?? []) as Array<{
+            id: string;
+            name: string | null;
+            short_name: string | null;
+            logo_url: string | null;
+            sport: string | null;
+            sport_id: string | null;
+            city: string | null;
+            region: string | null;
+            country: string | null;
+        }>)
+            .filter((club) => club.id && club.name)
+            .map((club) => ({
+                id: club.id,
+                name: club.name || club.id,
+                short_name: club.short_name,
+                logo_url: club.logo_url,
+                sport: club.sport,
+                sport_id: club.sport_id,
+                city: club.city,
+                region: club.region,
+                country: club.country,
+                is_base: club.id === familyBaseClubId,
+                is_current: club.id === clubId,
+            }))
+            .sort((left, right) => {
+                if (left.is_base) return -1;
+                if (right.is_base) return 1;
+                return left.name.localeCompare(right.name);
+            });
+    } catch (error) {
+        console.error('Teams API internal family error:', error);
+        return [];
     }
 }
 
@@ -867,6 +1005,7 @@ export async function GET(request: Request) {
     let resolvedClubId: string | null = null;
     let internalSquad: unknown = [];
     let hasInternalSquad = false;
+    let internalClubFamily: PublicRelatedClub[] = [];
 
     try {
         const readClient = await getReadClient();
@@ -884,6 +1023,7 @@ export async function GET(request: Request) {
             });
             internalSquad = internalSquadState.squad;
             hasInternalSquad = internalSquadState.hasSquad;
+            internalClubFamily = await fetchInternalClubFamily(readClient, effectiveClub.id);
             details = {
                 id: effectiveClub.id,
                 name: effectiveClub.name,
@@ -895,6 +1035,7 @@ export async function GET(request: Request) {
                 region: effectiveClub.region,
                 sport: effectiveClub.sport || effectiveClub.sport_id || null,
                 is_internal: true,
+                related_clubs: internalClubFamily,
                 supported_tabs: buildSupportedTabs({
                     hasSquad: hasInternalSquad,
                     hasTransfers: false,

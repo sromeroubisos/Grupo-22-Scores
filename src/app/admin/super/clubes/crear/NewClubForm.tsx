@@ -125,6 +125,14 @@ function buildManualVariantCategories(
   return categories.size > 0 ? Array.from(categories) : undefined;
 }
 
+function getDerivedClubSuffix(type: ClubDerivativeType, sportLabel?: string | null) {
+  if (type === 'youth') return 'Juvenil';
+  if (type === 'women') return 'Femenino';
+  if (type === 'other_sport') return sportLabel || 'Otro deporte';
+  if (type === 'divisions') return 'Divisiones';
+  return 'Derivado';
+}
+
 export default function NewClubForm({ unions = [], derivedPrefill = null }: NewClubFormProps) {
   const router = useRouter();
 
@@ -175,7 +183,7 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
     notes_internal: ''
   });
 
-  const [initialForm, setInitialForm] = useState(form);
+  const [initialForm] = useState(form);
   const [saving, setSaving] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -232,6 +240,15 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
     const sportLabel = derivedPrefill.derivativeType === 'other_sport'
       ? getSportDisplayName(nextSport)
       : '';
+    const derivedSuffix = getDerivedClubSuffix(derivedPrefill.derivativeType, sportLabel);
+    const baseName = derivedPrefill.baseClub.name || form.name;
+    const baseShortName = derivedPrefill.baseClub.short_name || '';
+    const derivedName = baseName
+      ? `${baseName} ${derivedSuffix}`.trim()
+      : form.name;
+    const derivedShortName = baseShortName
+      ? `${baseShortName} ${derivedSuffix}`.trim()
+      : '';
     const noteTokens = [
       `Derivado de ${derivedPrefill.baseClub.name}`,
       relationLabel,
@@ -240,9 +257,9 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
 
     const nextForm: FormState = {
       ...form,
-      name: derivedPrefill.baseClub.name || form.name,
-      short_name: derivedPrefill.baseClub.short_name || '',
-      slug: normalizeSlug(derivedPrefill.baseClub.name || form.name),
+      name: derivedName,
+      short_name: derivedShortName,
+      slug: normalizeSlug(derivedName),
       slugManuallyEdited: false,
       logo_url: derivedPrefill.baseClub.logo_url || null,
       primary_color: derivedPrefill.baseClub.primary_color || form.primary_color,
@@ -257,7 +274,6 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
     };
 
     setForm(nextForm);
-    setInitialForm(nextForm);
 
     const selectedUnion = unions.find((union) => union.id === derivedPrefill.baseClub.union_id);
     if (selectedUnion) {
@@ -591,7 +607,9 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
   };
 
   const handleCreateAnotherClub = () => {
-    window.location.assign('/admin/entities/new?type=club');
+    setShowSuccessModal(false);
+    setCreatedClubId(null);
+    router.replace('/admin/entities/new?type=club');
   };
 
   return (

@@ -5,7 +5,11 @@ import { TournamentEditor } from '@/components/admin/entities/editors/Tournament
 import { MatchEditor } from '@/components/admin/entities/editors/MatchEditor';
 import { PlayerEditor, type PlayerData } from '@/components/admin/entities/editors/PlayerEditor';
 import NewClubForm from '@/app/admin/super/clubes/crear/NewClubForm';
-import type { ClubDerivativeType } from '@/lib/clubDerivatives';
+import {
+    CREATABLE_CLUB_DERIVATIVE_TYPES,
+    type ClubDerivativeType,
+    type CreatableClubDerivativeType,
+} from '@/lib/clubDerivatives';
 import type { Database } from '@/lib/database.types';
 
 const ENTITY_TYPES: EntityType[] = ['tournament', 'club', 'match', 'player', 'union'];
@@ -131,7 +135,7 @@ export default async function NewEntityPage({ searchParams }: NewEntityPageProps
     // New Club Form
     if (entityType === 'club') {
         const { data: unionsData } = await supabase.from('unions').select('id, name, country').order('name');
-        const derivativeType = rawDerivativeType === 'youth' || rawDerivativeType === 'women' || rawDerivativeType === 'other_sport'
+        const derivativeType = CREATABLE_CLUB_DERIVATIVE_TYPES.includes(rawDerivativeType as CreatableClubDerivativeType)
             ? rawDerivativeType as ClubDerivativeType
             : null;
 

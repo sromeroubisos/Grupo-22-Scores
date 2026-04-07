@@ -3,6 +3,14 @@ import type { SportId } from '@/lib/types';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 
 export type ClubDerivativeType = 'family' | 'youth' | 'women' | 'other_sport' | 'divisions';
+export type CreatableClubDerivativeType = Exclude<ClubDerivativeType, 'family'>;
+
+export const CREATABLE_CLUB_DERIVATIVE_TYPES: CreatableClubDerivativeType[] = [
+  'youth',
+  'women',
+  'other_sport',
+  'divisions',
+];
 
 export const CLUB_DERIVATIVE_LABELS: Record<ClubDerivativeType, string> = {
   family: 'Familia',

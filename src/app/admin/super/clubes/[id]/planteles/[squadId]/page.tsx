@@ -1,57 +1,65 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { SquadManagementShell } from '@/components/admin/entities/squad/SquadManagementShell';
-import { createClient } from '@/lib/supabase/client';
+import { SquadRosterView } from '@/components/admin/entities/club/SquadRosterView';
+import { Division } from '@/lib/services/divisionService';
+
+type DivisionsResponse = {
+    data?: Division[];
+    error?: string;
+    details?: unknown;
+};
 
 export default function SquadManagementPage() {
     const params = useParams();
     const router = useRouter();
+    const id = String(params.id || '');
+    const squadId = String(params.squadId || '');
+
     const [loading, setLoading] = useState(true);
-    const [squadData, setSquadData] = useState<any>(null);
-    const [clubData, setClubData] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [squadData, setSquadData] = useState<Division | null>(null);
 
-    const id = params.id as string;
-    const squadId = params.squadId as string;
+    const loadData = useCallback(async () => {
+        if (!id || !squadId) return;
 
-    useEffect(() => {
-        loadData();
-    }, [id, squadId]);
-
-    async function loadData() {
         setLoading(true);
-        const supabase = createClient();
+        setError(null);
 
         try {
-            // Cargar datos del club
-            const { data: club, error: clubError } = await supabase
-                .from('clubs')
-                .select('*')
-                .eq('id', id)
-                .single();
+            const response = await fetch(`/api/clubs/${encodeURIComponent(id)}/divisions`, {
+                cache: 'no-store',
+            });
+            const payload = await response.json().catch(() => ({})) as DivisionsResponse;
 
-            if (clubError) throw clubError;
+            if (!response.ok) {
+                throw new Error(payload.error || 'No se pudieron cargar las divisiones del club.');
+            }
 
-            // Cargar datos de la división/plantel
-            const { data: squad, error: squadError } = await supabase
-                .from('club_divisions')
-                .select('*')
-                .eq('id', squadId)
-                .single();
+            const divisions = Array.isArray(payload.data) ? payload.data : [];
+            const nextSquad = divisions.find((division) =>
+                division.id === squadId
+                || division.management_id === squadId
+                || division.legacy_division_id === squadId
+            );
 
-            if (squadError) throw squadError;
+            if (!nextSquad) {
+                throw new Error('No se encontro el plantel solicitado.');
+            }
 
-            setClubData(club);
-            setSquadData(squad);
-        } catch (error) {
-            console.error('Error loading data:', error);
-            alert('Error al cargar los datos');
-            router.back();
+            setSquadData(nextSquad);
+        } catch (nextError) {
+            setSquadData(null);
+            setError(nextError instanceof Error ? nextError.message : 'Error al cargar los datos del plantel.');
         } finally {
             setLoading(false);
         }
-    }
+    }, [id, squadId]);
+
+    useEffect(() => {
+        void loadData();
+    }, [loadData]);
 
     if (loading) {
         return (
@@ -61,20 +69,26 @@ export default function SquadManagementPage() {
         );
     }
 
-    if (!squadData || !clubData) {
+    if (!squadData) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-[var(--obsidian-deep)]">
-                <p className="text-[var(--text-secondary)]">No se encontraron datos</p>
+            <div className="flex flex-col items-center justify-center min-h-screen gap-5 bg-[var(--obsidian-deep)] text-center px-6">
+                <p className="text-[var(--text-secondary)]">{error || 'No se encontraron datos'}</p>
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="px-5 py-3 bg-[rgba(255,255,255,0.05)] border border-[var(--border)] text-[#e2e2e2] font-bold uppercase text-xs hover:bg-[rgba(255,255,255,0.08)] transition-all"
+                >
+                    Volver
+                </button>
             </div>
         );
     }
 
     return (
-        <SquadManagementShell
+        <SquadRosterView
             clubId={id}
-            squadId={squadId}
-            clubData={clubData}
-            squadData={squadData}
+            division={squadData}
+            onBack={() => router.back()}
         />
     );
 }

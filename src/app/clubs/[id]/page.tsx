@@ -68,6 +68,15 @@ const POSITION_LABELS: Record<number, string> = {
     4: 'Cuerpo Tecnico',
 };
 
+type PublicRelatedClub = {
+    id: string;
+    name: string;
+    logo_url: string | null;
+    sport: string | null;
+    sport_id: string | null;
+    is_base: boolean;
+};
+
 function groupSquadByPosition(squad: any): Record<number, any[]> {
     const groups: Record<number, any[]> = {};
 
@@ -305,6 +314,25 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
         }
         return TABS.filter((tab) => supportedTabs.includes(tab.id));
     }, [details?.supported_tabs]);
+    const relatedFamilyClubs = useMemo(() => {
+        const familyClubs: PublicRelatedClub[] = Array.isArray(details?.related_clubs)
+            ? details.related_clubs.filter((club: unknown): club is PublicRelatedClub => {
+                return typeof club === 'object'
+                    && club !== null
+                    && typeof (club as PublicRelatedClub).id === 'string'
+                    && typeof (club as PublicRelatedClub).name === 'string';
+            })
+            : [];
+        const currentClubId = resolvedClubId || (!externalTeamId ? rawId : '');
+
+        return familyClubs
+            .filter((club) => club.id !== currentClubId)
+            .sort((left, right) => {
+                if (left.is_base) return -1;
+                if (right.is_base) return 1;
+                return left.name.localeCompare(right.name);
+            });
+    }, [details?.related_clubs, externalTeamId, rawId, resolvedClubId]);
 
     useEffect(() => {
         if (visibleTabs.some((tab) => tab.id === activeTab)) return;
@@ -572,7 +600,59 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                     </div>
                                 )}
 
-                                {filteredResults.length === 0 && filteredFixtures.length === 0 && (
+                                {relatedFamilyClubs.length > 0 && (
+                                    <div className={styles.section} style={{ marginTop: '32px' }}>
+                                        <div className={styles.sectionHeader}>
+                                            <h2>Clubes relacionados</h2>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                                            {relatedFamilyClubs.map((club) => {
+                                                const relatedSport = canonicalizeSportId(club.sport || club.sport_id || '');
+                                                const href = relatedSport
+                                                    ? `/clubs/${club.id}?sport=${encodeURIComponent(relatedSport)}`
+                                                    : `/clubs/${club.id}`;
+
+                                                return (
+                                                    <Link
+                                                        key={club.id}
+                                                        href={href}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 12,
+                                                            padding: 14,
+                                                            borderRadius: 14,
+                                                            border: '1px solid rgba(255,255,255,0.08)',
+                                                            background: 'rgba(255,255,255,0.035)',
+                                                            textDecoration: 'none',
+                                                            color: 'inherit',
+                                                        }}
+                                                    >
+                                                        <span style={{ width: 42, height: 42, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                                                            {club.logo_url ? (
+                                                                <img src={club.logo_url} alt={club.name || 'Club'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                            ) : (
+                                                                <span style={{ fontSize: 13, fontWeight: 800 }}>{String(club.name || 'C').slice(0, 2).toUpperCase()}</span>
+                                                            )}
+                                                        </span>
+                                                        <span style={{ minWidth: 0 }}>
+                                                            <span style={{ display: 'block', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                {club.name}
+                                                            </span>
+                                                            <span style={{ display: 'block', marginTop: 4, fontSize: 11, color: 'var(--text-secondary, #888)' }}>
+                                                                {club.is_base ? 'Club base' : 'Misma familia'}
+                                                                {relatedSport ? ` · ${SPORT_LABEL[relatedSport] || relatedSport}` : ''}
+                                                            </span>
+                                                        </span>
+                                                        <ChevronRight size={16} style={{ marginLeft: 'auto', color: 'var(--text-secondary, #888)' }} />
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {filteredResults.length === 0 && filteredFixtures.length === 0 && relatedFamilyClubs.length === 0 && (
                                     <p className={styles.emptyState}>No hay datos de partidos disponibles.</p>
                                 )}
                             </>

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
@@ -67,6 +66,25 @@ function isMissingTableError(error: any) {
 async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: any): Promise<string> {
     const supabase = supabaseClient ?? await createClient();
     const db = supabase as any;
+
+    const { data: familyDivisionLink, error: familyDivisionError } = await db
+        .from('club_family_divisions')
+        .select('roster_owner_club_id')
+        .eq('division_club_id', clubId)
+        .limit(1)
+        .maybeSingle();
+
+    if (familyDivisionError && !isMissingTableError(familyDivisionError)) {
+        console.error('Error resolving family division roster owner:', familyDivisionError);
+    }
+
+    const rosterOwnerClubId = typeof familyDivisionLink?.roster_owner_club_id === 'string'
+        ? familyDivisionLink.roster_owner_club_id
+        : null;
+
+    if (rosterOwnerClubId && rosterOwnerClubId !== clubId) {
+        return rosterOwnerClubId;
+    }
 
     const { data, error } = await db
         .from('club_derivatives')
