@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertCircle, Hash, Info, Save, Search, Tag, UserPlus, X } from 'lucide-react';
+import { AlertCircle, Hash, Info, Repeat2, Save, Search, Tag, UserPlus, X } from 'lucide-react';
 import './participants-premium.css';
 import './drawer-premium.css';
 
@@ -40,10 +40,14 @@ interface Participant {
     notes: string | null;
 }
 
+type ParticipantSavePayload = Partial<Participant> & {
+    replace_across_tournament?: boolean;
+};
+
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: Partial<Participant>) => Promise<void>;
+    onSave: (data: ParticipantSavePayload) => Promise<void>;
     participant?: Participant | null;
     clubs: Club[];
     phases: TournamentPhase[];
@@ -87,6 +91,7 @@ export function UpsertParticipantDrawer({
     const [groupId, setGroupId] = useState('');
     const [shortCode, setShortCode] = useState('');
     const [notes, setNotes] = useState('');
+    const [replaceAcrossTournament, setReplaceAcrossTournament] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -102,6 +107,7 @@ export function UpsertParticipantDrawer({
         setGroupId('');
         setShortCode('');
         setNotes('');
+        setReplaceAcrossTournament(false);
         setError(null);
     };
 
@@ -119,6 +125,7 @@ export function UpsertParticipantDrawer({
             setGroupId(participant.group_id || '');
             setShortCode(participant.short_code || '');
             setNotes(participant.notes || '');
+            setReplaceAcrossTournament(false);
             setError(null);
             return;
         }
@@ -141,6 +148,13 @@ export function UpsertParticipantDrawer({
     }, [clubs, clubSearch]);
 
     const selectedClub = clubs.find((club) => club.id === clubId);
+    const isReplacingLinkedClub = Boolean(
+        isEditMode &&
+        participant?.club_id &&
+        sourceMode === 'database' &&
+        clubId &&
+        clubId !== participant.club_id
+    );
 
     const phasesWithGroups = useMemo(
         () => phases.filter((phase) => groups.some((group) => group.phase_id === phase.id)),
@@ -208,7 +222,7 @@ export function UpsertParticipantDrawer({
         setLoading(true);
 
         try {
-            const data: Partial<Participant> = {
+            const data: ParticipantSavePayload = {
                 club_id: sourceMode === 'database' ? clubId : null,
                 name: sourceMode === 'database' ? (selectedClub?.name || manualName) : manualName.trim(),
                 type,
@@ -217,6 +231,7 @@ export function UpsertParticipantDrawer({
                 group_id: groupId || null,
                 short_code: shortCode.trim() || null,
                 notes: notes.trim() || null,
+                replace_across_tournament: isReplacingLinkedClub && replaceAcrossTournament,
             };
 
             await onSave(data);
@@ -371,6 +386,27 @@ export function UpsertParticipantDrawer({
                                             {' '}Este club se usara como referencia principal del participante.
                                         </p>
                                     </div>
+                                )}
+
+                                {isReplacingLinkedClub && (
+                                    <label className="pp-replace-scope-card">
+                                        <input
+                                            type="checkbox"
+                                            checked={replaceAcrossTournament}
+                                            onChange={(event) => setReplaceAcrossTournament(event.target.checked)}
+                                            disabled={loading}
+                                        />
+                                        <div className="pp-replace-scope-icon">
+                                            <Repeat2 />
+                                        </div>
+                                        <div className="pp-replace-scope-content">
+                                            <strong>Reemplazar en todo el torneo</strong>
+                                            <span>
+                                                Actualiza fixture, tabla guardada e incidentes para que {selectedClub?.name || 'el club nuevo'} herede
+                                                los partidos, puntos y registros de {participant?.name || 'el club anterior'}.
+                                            </span>
+                                        </div>
+                                    </label>
                                 )}
                             </div>
                         ) : (

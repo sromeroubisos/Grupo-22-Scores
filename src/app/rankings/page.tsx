@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -219,7 +219,34 @@ function formatLegendPosition(position: number) {
     return `#${String(position).padStart(2, '0')}`;
 }
 
+function RankingsPageFallback() {
+    const pageStyle = {
+        '--rankings-accent': DEFAULT_SURFACE.accent,
+        '--rankings-glow': DEFAULT_SURFACE.glow,
+        '--rankings-plate': DEFAULT_SURFACE.plate,
+    } as CSSProperties;
+
+    return (
+        <div className={styles.page} style={pageStyle}>
+            <div className="container">
+                <div className={styles.inlineState}>
+                    <RefreshCw size={16} className={styles.spin} />
+                    <span>Cargando rankings...</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function RankingsPage() {
+    return (
+        <Suspense fallback={<RankingsPageFallback />}>
+            <RankingsPageContent />
+        </Suspense>
+    );
+}
+
+function RankingsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { selectedSport, activeSports, setSelectedSport } = useSport();
@@ -367,8 +394,8 @@ export default function RankingsPage() {
     );
     const visibleEntries = paginatedEntries.items;
     const rankingExportRows = useMemo(
-        () => buildRankingExportRows(activeRankingDetail?.entries ?? []),
-        [activeRankingDetail?.entries],
+        () => buildRankingExportRows(activeRankingDetail?.entries ?? [], rankingPositionLabels),
+        [activeRankingDetail?.entries, rankingPositionLabels],
     );
     const rankingExportSubtitle = selectedRanking?.description?.trim()
         || `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`;
@@ -420,7 +447,7 @@ export default function RankingsPage() {
     };
 
     return (
-        <main className={styles.page} style={pageStyle}>
+        <div className={styles.page} style={pageStyle}>
             <header className="container">
                 <MobileSectionTabs
                     activeTab="rankings"
@@ -845,6 +872,6 @@ export default function RankingsPage() {
                     </div>
                 </section>
             ) : null}
-        </main>
+        </div>
     );
 }

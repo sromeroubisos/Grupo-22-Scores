@@ -192,16 +192,58 @@ export function paginateRankingEntries<T>(entries: T[], page: number, pageSize: 
     };
 }
 
-export function buildRankingExportRows(entries: RankingTableEntryLike[]) {
+function formatRankingExportLegendPosition(position: number) {
+    return `#${String(position).padStart(2, '0')}`;
+}
+
+function buildRankingExportLegendLabels(labels: RankingPositionLabel[]) {
+    const groups: Array<{ color: string; end: number; label: string; start: number }> = [];
+
+    normalizeRankingPositionLabels(labels).forEach((item) => {
+        const last = groups[groups.length - 1];
+        if (last && last.color === item.color && last.label === item.label && last.end + 1 === item.position) {
+            last.end = item.position;
+            return;
+        }
+
+        groups.push({
+            color: item.color,
+            end: item.position,
+            label: item.label,
+            start: item.position,
+        });
+    });
+
+    const labelMap = new Map<number, string>();
+    groups.forEach((group) => {
+        const rangeLabel = group.start === group.end
+            ? formatRankingExportLegendPosition(group.start)
+            : `${formatRankingExportLegendPosition(group.start)}-${formatRankingExportLegendPosition(group.end)}`;
+
+        for (let position = group.start; position <= group.end; position += 1) {
+            labelMap.set(position, `${rangeLabel} ${group.label}`);
+        }
+    });
+
+    return labelMap;
+}
+
+export function buildRankingExportRows(entries: RankingTableEntryLike[], positionLabels: RankingPositionLabel[] = []) {
+    const exportLegendLabels = buildRankingExportLegendLabels(positionLabels);
+
     return entries.map((entry, index) => {
         const previousRating = getRankingPreviousRating(entry);
         const delta = getRankingDelta(entry.current_rating, previousRating);
         const positionChange = getRankingPositionChange(entry.current_position, entry.source_previous_position);
+        const position = entry.current_position || index + 1;
+        const positionLabel = getRankingPositionLabel(positionLabels, position);
 
         return {
-            pos: entry.current_position || index + 1,
+            pos: position,
             team: getRankingClubShortName(entry),
             teamLogo: entry.clubs?.logo_url || '',
+            labelName: positionLabel ? exportLegendLabels.get(position) || positionLabel.label : undefined,
+            zoneColor: positionLabel?.color,
             played: formatRankingRating(entry.current_rating),
             won: formatRankingRating(previousRating),
             lost: delta.label,

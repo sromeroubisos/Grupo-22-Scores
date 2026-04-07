@@ -521,8 +521,8 @@ export default function SuperRankingsPage() {
     const leadershipPeriods = selectedDetail?.leadershipPeriods ?? [];
     const currentLeader = leadershipSummary.find((item) => item.is_current_leader) ?? null;
     const rankingExportRows = useMemo(
-        () => buildRankingExportRows(filteredEntries),
-        [filteredEntries],
+        () => buildRankingExportRows(filteredEntries, rankingPositionLabels),
+        [filteredEntries, rankingPositionLabels],
     );
     const leadershipHistoryCard = (
         <div className={baseStyles.card}>

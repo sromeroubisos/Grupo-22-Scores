@@ -15,7 +15,7 @@ import {
 } from '@/lib/clubDerivatives';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { normalizeSlug } from '@/lib/utils/normalize';
-import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 type TournamentContextRow = {
   id: string;
@@ -67,6 +67,22 @@ type TournamentParticipantRecord = {
     logo?: string | null;
   } | null;
   division?: DivisionContextRow | null;
+};
+
+type TournamentParticipantUpdateContext = {
+  id: string;
+  tournament_id: string;
+  club_id: string | null;
+  division_id?: string | null;
+  name?: string | null;
+  short_code?: string | null;
+};
+
+type TournamentStandingReplacementRow = {
+  id: string;
+  phase_id: string | null;
+  group_id: string | null;
+  stats?: Record<string, unknown> | null;
 };
 
 type TournamentParticipantsListQuery = {
@@ -964,9 +980,13 @@ export async function POST(
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const supabase = await createClient();
+    const tournamentId = (await params).id;
     const { searchParams } = new URL(request.url);
     const participantId = searchParams.get('id');
 
@@ -976,17 +996,25 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
     const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
+    const shouldReplaceAcrossTournament =
+      body.replace_across_tournament === true ||
+      body.replaceAcrossTournament === true ||
+      body.propagateToFixtureAndStandings === true;
 
     // Build update object with only provided fields
     const updateData: Record<string, unknown> = {};
-    let existingParticipant: { club_id: string | null; division_id?: string | null } | null = null;
+    let existingParticipant: TournamentParticipantUpdateContext | null = null;
+    let standingsToReplace: TournamentStandingReplacementRow[] = [];
+    let replacementClubForStats: { name: string; logo_url?: string | null } | null = null;
 
-    if (supportsDivisionId && (body.division_id !== undefined || body.club_id !== undefined)) {
+    if (body.division_id !== undefined || body.club_id !== undefined || shouldReplaceAcrossTournament) {
       const participantsTable = supabase
         .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
 
       const { data: currentParticipant, error: currentParticipantError } = await participantsTable
-        .select('club_id, division_id')
+        .select(supportsDivisionId
+          ? 'id, tournament_id, club_id, division_id, name, short_code'
+          : 'id, tournament_id, club_id, name, short_code')
         .eq('id', participantId)
         .single();
 
@@ -994,7 +1022,11 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: 'No se pudo cargar el participante actual' }, { status: 400 });
       }
 
-      existingParticipant = currentParticipant;
+      existingParticipant = currentParticipant as TournamentParticipantUpdateContext;
+
+      if (existingParticipant.tournament_id !== tournamentId) {
+        return NextResponse.json({ error: 'El participante no pertenece a este torneo' }, { status: 400 });
+      }
     }
 
     if (body.name !== undefined) updateData.name = body.name;
@@ -1039,6 +1071,120 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    if (shouldReplaceAcrossTournament) {
+      if (!existingParticipant) {
+        return NextResponse.json(
+          { error: 'No se pudo cargar el participante actual para reemplazarlo en el torneo' },
+          { status: 400 },
+        );
+      }
+
+      const sourceClubId = String(existingParticipant.club_id || '').trim();
+      const targetClubId = String(body.club_id || '').trim();
+
+      if (!sourceClubId || !targetClubId) {
+        return NextResponse.json(
+          { error: 'La opcion de reemplazo completo solo esta disponible entre dos clubes vinculados' },
+          { status: 400 },
+        );
+      }
+
+      if (sourceClubId === targetClubId) {
+        return NextResponse.json(
+          { error: 'Selecciona un club distinto para reemplazar en todo el torneo' },
+          { status: 400 },
+        );
+      }
+
+      const [
+        targetClubRes,
+        duplicateParticipantRes,
+        sourceStandingsRes,
+        targetStandingsRes,
+        conflictingMatchesRes,
+      ] = await Promise.all([
+        supabase
+          .from('clubs')
+          .select('id, name, short_name, logo_url')
+          .eq('id', targetClubId)
+          .single(),
+        supabase
+          .from('tournament_participants')
+          .select('id, name')
+          .eq('tournament_id', tournamentId)
+          .eq('club_id', targetClubId)
+          .neq('id', participantId)
+          .limit(1),
+        supabase
+          .from('tournament_standings')
+          .select('id, phase_id, group_id, stats')
+          .eq('tournament_id', tournamentId)
+          .eq('club_id', sourceClubId),
+        supabase
+          .from('tournament_standings')
+          .select('id, phase_id, group_id')
+          .eq('tournament_id', tournamentId)
+          .eq('club_id', targetClubId),
+        supabase
+          .from('matches')
+          .select('id')
+          .eq('tournament_id', tournamentId)
+          .or(`and(home_club_id.eq.${sourceClubId},away_club_id.eq.${targetClubId}),and(home_club_id.eq.${targetClubId},away_club_id.eq.${sourceClubId})`)
+          .limit(1),
+      ]);
+
+      if (targetClubRes.error || !targetClubRes.data) {
+        return NextResponse.json(
+          { error: 'El club nuevo no existe en la base de datos' },
+          { status: 400 },
+        );
+      }
+
+      if (duplicateParticipantRes.error) {
+        throw duplicateParticipantRes.error;
+      }
+      if ((duplicateParticipantRes.data || []).length > 0) {
+        return NextResponse.json(
+          { error: 'El club nuevo ya esta registrado como participante en este torneo' },
+          { status: 409 },
+        );
+      }
+
+      if (sourceStandingsRes.error) throw sourceStandingsRes.error;
+      if (targetStandingsRes.error) throw targetStandingsRes.error;
+      if (conflictingMatchesRes.error) throw conflictingMatchesRes.error;
+
+      const targetStandingKeys = new Set(
+        (targetStandingsRes.data || []).map((row) => `${row.phase_id || ''}::${row.group_id || ''}`),
+      );
+      const hasStandingConflict = (sourceStandingsRes.data || []).some((row) =>
+        targetStandingKeys.has(`${row.phase_id || ''}::${row.group_id || ''}`),
+      );
+
+      if (hasStandingConflict) {
+        return NextResponse.json(
+          { error: 'No se puede reemplazar porque el club nuevo ya tiene una fila de tabla en la misma fase o grupo' },
+          { status: 409 },
+        );
+      }
+
+      if ((conflictingMatchesRes.data || []).length > 0) {
+        return NextResponse.json(
+          { error: 'No se puede reemplazar porque ya existe un partido entre el club anterior y el club nuevo en este torneo' },
+          { status: 409 },
+        );
+      }
+
+      standingsToReplace = (sourceStandingsRes.data || []) as TournamentStandingReplacementRow[];
+      replacementClubForStats = {
+        name: targetClubRes.data.name,
+        logo_url: targetClubRes.data.logo_url ?? null,
+      };
+      updateData.club_id = targetClubId;
+      updateData.name = body.name ?? targetClubRes.data.name;
+      updateData.short_code = body.short_code ?? targetClubRes.data.short_name ?? existingParticipant.short_code ?? null;
+    }
+
     const participantsTable = supabase
       .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
 
@@ -1051,6 +1197,57 @@ export async function PATCH(request: NextRequest) {
     if (error) {
       console.error('Error updating participant:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (shouldReplaceAcrossTournament && existingParticipant?.club_id && data?.club_id) {
+      const sourceClubId = existingParticipant.club_id;
+      const targetClubId = data.club_id;
+      const replacementTeamName = replacementClubForStats?.name ?? data.name ?? 'Equipo';
+      const replacementTeamLogo = replacementClubForStats?.logo_url ?? data.clubs?.logo_url ?? null;
+      const standingsUpdates = standingsToReplace.map((row) =>
+        supabase
+          .from('tournament_standings')
+          .update({
+            club_id: targetClubId,
+            stats: {
+              ...(row.stats ?? {}),
+              team_name: replacementTeamName,
+              team_logo: replacementTeamLogo,
+            },
+          })
+          .eq('id', row.id)
+      );
+
+      const [homeUpdate, awayUpdate, incidentsUpdate, ...standingUpdateResults] = await Promise.all([
+        supabase
+          .from('matches')
+          .update({ home_club_id: targetClubId })
+          .eq('tournament_id', tournamentId)
+          .eq('home_club_id', sourceClubId),
+        supabase
+          .from('matches')
+          .update({ away_club_id: targetClubId })
+          .eq('tournament_id', tournamentId)
+          .eq('away_club_id', sourceClubId),
+        supabase
+          .from('discipline_incidents')
+          .update({ club_id: targetClubId })
+          .eq('tournament_id', tournamentId)
+          .eq('club_id', sourceClubId),
+        ...standingsUpdates,
+      ]);
+
+      const standingUpdateError = standingUpdateResults.map((result) => result.error).find(Boolean);
+      const propagationError = [homeUpdate.error, awayUpdate.error, standingUpdateError].find(Boolean);
+      if (propagationError) {
+        console.error('[Participants API] Error propagating club replacement:', propagationError);
+        return NextResponse.json({ error: propagationError.message }, { status: 500 });
+      }
+
+      if (incidentsUpdate.error && !isMissingTableError(incidentsUpdate.error, 'discipline_incidents')) {
+        console.error('[Participants API] Error propagating discipline incidents replacement:', incidentsUpdate.error);
+        return NextResponse.json({ error: incidentsUpdate.error.message }, { status: 500 });
+      }
     }
 
     return NextResponse.json(data);

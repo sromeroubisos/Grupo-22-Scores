@@ -88,6 +88,10 @@ interface ParticipantStats {
     disqualified: number;
 }
 
+type ParticipantUpdatePayload = Partial<Participant> & {
+    replace_across_tournament?: boolean;
+};
+
 interface Props {
     data?: unknown;
     id?: string; // tournament ID
@@ -301,15 +305,15 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     // CRUD OPERATIONS
     // ============================================
 
-    const handleUpdate = async (id: string, data: Partial<Participant>) => {
+    const handleUpdate = async (id: string, data: ParticipantUpdatePayload) => {
         try {
             const response = await fetch(`/api/tournaments/${tournamentId}/participants?id=${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-            if (!response.ok) throw new Error('Error al actualizar participante');
             const updated = await response.json();
+            if (!response.ok) throw new Error(updated?.error || 'Error al actualizar participante');
             setParticipants(prev => prev.map(p => p.id === id ? updated : p));
             setEditingParticipant(null);
             showToast('success', 'Participante actualizado correctamente');

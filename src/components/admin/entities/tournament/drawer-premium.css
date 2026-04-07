@@ -498,6 +498,56 @@
     color: var(--pp-text-main);
 }
 
+.pp-replace-scope-card {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    border-radius: var(--pp-radius-md);
+    background: rgba(245, 158, 11, 0.08);
+    cursor: pointer;
+}
+
+.pp-replace-scope-card input {
+    margin-top: 4px;
+    accent-color: #f59e0b;
+}
+
+.pp-replace-scope-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: rgba(245, 158, 11, 0.14);
+    color: #f59e0b;
+}
+
+.pp-replace-scope-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.pp-replace-scope-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pp-replace-scope-content strong {
+    color: var(--pp-text-main);
+    font-size: 13px;
+}
+
+.pp-replace-scope-content span {
+    color: var(--pp-text-muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 .pp-drawer-footer {
     padding: 20px 32px 32px 32px;
     border-top: 1px solid var(--pp-border);
