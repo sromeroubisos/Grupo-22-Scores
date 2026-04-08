@@ -214,6 +214,7 @@ type DbTournamentLite = {
     name: string;
     sport_id?: string | null;
     sport?: string | null;
+    priority?: number | null;
     season_id?: string | null;
     status?: string | null;
     is_visible?: boolean | null;
@@ -284,8 +285,10 @@ async function fetchDbLookupMaps(
             'id',
             tournamentIds,
             [
-                'id, name, sport_id, sport, season_id, status, country_id, union_id',
+                'id, name, sport_id, sport, priority, season_id, status, is_visible, country_id, union_id',
+                'id, name, sport_id, sport, priority, season_id, status, country_id, union_id',
                 'id, name, sport_id, sport, season_id, status, is_visible, country_id, union_id',
+                'id, name, sport_id, sport, status, priority, is_visible, country_id, union_id',
                 'id, name, sport_id, sport, status, is_visible, country_id, union_id',
                 'id, name, sport_id, status, is_visible, country_id, union_id',
                 'id, name, sport, status, is_visible, country_id, union_id',
@@ -484,6 +487,7 @@ export async function GET(request: Request) {
                                     name: tournament.name,
                                     sport: resolvedSport || tournament.sport_id || tournament.sport || null,
                                     status: tournament.status || 'published',
+                                    priority: tournament.priority ?? 0,
                                     country: resolveTournamentCountry(tournament)
                                 } : { id: m.tournament_id || 'db-local', name: 'Partido Local', sport: resolvedSport, status: 'published', country: 'Internacional' },
                                 liveEnabled: m.status === 'live',
@@ -823,6 +827,7 @@ export async function GET(request: Request) {
                                 name: tournament.name,
                                 sport: resolvedSport || tournament.sport_id || tournament.sport || null,
                                 status: tournament.status || 'published',
+                                priority: tournament.priority ?? 0,
                                 country: resolveTournamentCountry(tournament)
                             } : {
                                 id: m.tournament_id || 'db-local',

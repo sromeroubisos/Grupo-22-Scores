@@ -15,7 +15,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
-import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
+import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 // Individual sports use player faces instead of team shields
@@ -97,6 +97,12 @@ function normalizeTournamentLookupKey(value: string | null | undefined): string 
     .trim();
 }
 
+function getTournamentCountryName(tournament: { country?: unknown } | null | undefined): string {
+  return typeof tournament?.country === 'string' && tournament.country.trim()
+    ? tournament.country
+    : 'Internacional';
+}
+
 // Type definitions
 interface Match {
   id: string | number;
@@ -119,6 +125,7 @@ interface LeagueMatches {
   country: string;
   flag: string;
   round: string;
+  priority: number;
   matches: Match[];
 }
 
@@ -565,10 +572,14 @@ export default function HomePage() {
 
       const overriddenTournament = tournament.id ? loadedRugbyTournamentMap.get(String(tournament.id)) : undefined;
       const rawCountryName = overriddenTournament
-        ? (getCountryById(overriddenTournament.countryId || '')?.name || overriddenTournament.countryId || (tournament as any).country || 'Internacional')
-        : ((tournament as any).country || 'Internacional');
+        ? (getCountryById(overriddenTournament.countryId || '')?.name || overriddenTournament.countryId || getTournamentCountryName(tournament))
+        : getTournamentCountryName(tournament);
       const countryName = rawCountryName.replace(/\b\w/g, (c: string) => c.toUpperCase());
       const tournamentName = overriddenTournament?.displayName || overriddenTournament?.name || tournament.name;
+      const tournamentPriority = Math.max(
+        getTournamentPriority(tournament),
+        overriddenTournament ? getTournamentPriority(overriddenTournament) : 0,
+      );
       const cleanedName = cleanLeagueName(tournamentName, countryName);
       const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
 
@@ -582,9 +593,12 @@ export default function HomePage() {
           country: countryName,
           flag: '',
           round: match.roundId?.startsWith('F') ? match.roundId.replace('F', 'Fecha ') : (match.roundId || 'General'),
+          priority: tournamentPriority,
           matches: []
         };
         dedupByKey.set(dedupKey, groupKey);
+      } else if (tournamentPriority > groups[groupKey].priority) {
+        groups[groupKey].priority = tournamentPriority;
       }
 
       const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
@@ -613,13 +627,14 @@ export default function HomePage() {
 
     const leaguesArray = Object.values(groups);
 
-    // Sort: favorited leagues first, then alphabetically by name
+    // Sort: favorited leagues first, then tournament priority, then alphabetically by name
     return leaguesArray.sort((a, b) => {
       const aIsFavorite = isLeagueFavorite(a.leagueId);
       const bIsFavorite = isLeagueFavorite(b.leagueId);
 
       if (aIsFavorite && !bIsFavorite) return -1;
       if (!aIsFavorite && bIsFavorite) return 1;
+      if (a.priority !== b.priority) return b.priority - a.priority;
       return a.league.localeCompare(b.league);
     });
   }, [isLeagueFavorite, loadedRugbyTournamentMap, matches, resolveMatchAudience, selectedAudience, userTimeZone]);

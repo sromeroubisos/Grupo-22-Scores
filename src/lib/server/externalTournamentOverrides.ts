@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { getReadClient } from '@/lib/supabase/read';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 export type ExternalTournamentOverrideRecord = {
     id: string;
@@ -12,6 +13,7 @@ export type ExternalTournamentOverrideRecord = {
     country?: string | null;
     country_id?: string | null;
     url?: string | null;
+    priority?: number | null;
     updated_at?: string | null;
 };
 
@@ -29,13 +31,24 @@ type MinimalReadClient = {
 
 const STORE_DIR = path.join(process.cwd(), 'storage');
 const STORE_PATH = path.join(STORE_DIR, 'external-tournament-overrides.json');
-const EXTERNAL_TOURNAMENT_SELECT = 'id, source, name, display_name, logo_url, sport, country, country_id, url, updated_at';
-const LEGACY_TOURNAMENT_SELECT = 'id, external_id, name, display_name, logo_url, sport_id, sport, country, country_id, url';
+const EXTERNAL_TOURNAMENT_SELECT = 'id, source, name, display_name, logo_url, sport, country, country_id, url, priority, updated_at';
+const EXTERNAL_TOURNAMENT_SELECT_WITHOUT_PRIORITY = 'id, source, name, display_name, logo_url, sport, country, country_id, url, updated_at';
+const LEGACY_TOURNAMENT_SELECT = 'id, external_id, name, display_name, logo_url, sport_id, sport, country, country_id, url, priority';
+const LEGACY_TOURNAMENT_SELECT_WITHOUT_PRIORITY = 'id, external_id, name, display_name, logo_url, sport_id, sport, country, country_id, url';
 
 function normalizeString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
     const trimmed = value.trim();
     return trimmed || null;
+}
+
+function normalizeInteger(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
+    if (typeof value === 'string' && value.trim()) {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) return Math.trunc(parsed);
+    }
+    return null;
 }
 
 function uniqueValues(values: Array<string | null | undefined>): string[] {
@@ -113,6 +126,7 @@ export function normalizeExternalTournamentOverrideRecord(
         country: normalizeString(record.country),
         country_id: normalizeString(record.country_id),
         url: normalizeString(record.url),
+        priority: normalizeInteger(record.priority),
         updated_at: new Date().toISOString(),
     };
 }
@@ -133,6 +147,7 @@ function mapExternalTournamentOverrideRow(row: Record<string, unknown> | null | 
         country: normalizeString(row.country),
         country_id: normalizeString(row.country_id),
         url: normalizeString(row.url),
+        priority: normalizeInteger(row.priority),
         updated_at: normalizeString(row.updated_at),
     };
 }
@@ -153,6 +168,7 @@ function mapLegacyTournamentOverrideRow(row: Record<string, unknown> | null | un
         country: normalizeString(row.country),
         country_id: normalizeString(row.country_id),
         url: normalizeString(row.url),
+        priority: normalizeInteger(row.priority),
     };
 }
 
@@ -208,10 +224,19 @@ async function getExternalTournamentOverridesFromTable(candidateIds: string[]): 
     try {
         const readClient = await getReadClient();
         const client = readClient as unknown as MinimalReadClient;
-        const { data, error } = await client
+        let { data, error } = await client
             .from('external_tournaments')
             .select(EXTERNAL_TOURNAMENT_SELECT)
             .in('id', candidateIds);
+
+        if (error && isMissingColumnError(error, 'priority')) {
+            const fallback = await client
+                .from('external_tournaments')
+                .select(EXTERNAL_TOURNAMENT_SELECT_WITHOUT_PRIORITY)
+                .in('id', candidateIds);
+            data = fallback.data;
+            error = fallback.error;
+        }
 
         if (error || !Array.isArray(data)) return [];
 
@@ -229,10 +254,19 @@ async function getLegacyTournamentOverridesFromTable(candidateIds: string[]): Pr
     try {
         const readClient = await getReadClient();
         const client = readClient as unknown as MinimalReadClient;
-        const { data, error } = await client
+        let { data, error } = await client
             .from('tournaments')
             .select(LEGACY_TOURNAMENT_SELECT)
             .in('external_id', candidateIds);
+
+        if (error && isMissingColumnError(error, 'priority')) {
+            const fallback = await client
+                .from('tournaments')
+                .select(LEGACY_TOURNAMENT_SELECT_WITHOUT_PRIORITY)
+                .in('external_id', candidateIds);
+            data = fallback.data;
+            error = fallback.error;
+        }
 
         if (error || !Array.isArray(data)) return [];
 
@@ -372,5 +406,8 @@ export function applyExternalTournamentOverride<T extends Record<string, unknown
         ...(override.country ? { country: override.country } : {}),
         ...(override.country_id ? { country_id: override.country_id } : {}),
         ...(override.url ? { url: override.url } : {}),
+        ...(typeof override.priority === 'number' && Number.isFinite(override.priority) ? {
+            priority: Math.trunc(override.priority),
+        } : {}),
     };
 }

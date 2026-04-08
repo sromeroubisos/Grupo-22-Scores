@@ -18,6 +18,7 @@ type ExternalTournamentPayload = {
     country?: string | null;
     country_id?: string | null;
     url?: string | null;
+    priority?: number | null;
 };
 
 type ExternalStandingsGroup = {
@@ -58,6 +59,8 @@ type ApiResponseEnvelope = {
     [key: string]: unknown;
 } | null;
 
+type ExternalApiRecord = Record<string, unknown>;
+
 type StandingsPreviewRow = {
     id: string;
     name: string;
@@ -83,6 +86,12 @@ function normalizeInteger(value: unknown): number | null {
         if (Number.isFinite(parsed)) return Math.trunc(parsed);
     }
     return null;
+}
+
+function asRecord(value: unknown): ExternalApiRecord | null {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as ExternalApiRecord
+        : null;
 }
 
 function slugify(value: string): string {
@@ -187,34 +196,55 @@ function expandLabelsForSave(labels: ExternalStandingsLabel[]): ExternalStanding
     return expanded;
 }
 
-function isGroupedStandings(rows: any[]): boolean {
-    return Array.isArray(rows) && rows.length > 0 && Array.isArray(rows[0]?.rows);
+function isGroupedStandings(rows: unknown[]): boolean {
+    const firstRow = asRecord(rows[0]);
+    return Array.isArray(rows) && rows.length > 0 && Array.isArray(firstRow?.rows);
 }
 
-function getStandingsTeamName(row: any) {
-    return row?.team?.name || row?.participant?.name || row?.team_name || row?.name || 'Equipo';
+function getStandingsTeamName(row: unknown) {
+    const record = asRecord(row);
+    const team = asRecord(record?.team);
+    const participant = asRecord(record?.participant);
+
+    return normalizeString(team?.name) ||
+        normalizeString(participant?.name) ||
+        normalizeString(record?.team_name) ||
+        normalizeString(record?.name) ||
+        'Equipo';
 }
 
-function getStandingsTeamId(row: any) {
-    return normalizeString(row?.team?.id || row?.team?.team_id || row?.participant?.id || row?.team_id);
+function getStandingsTeamId(row: unknown) {
+    const record = asRecord(row);
+    const team = asRecord(record?.team);
+    const participant = asRecord(record?.participant);
+
+    return normalizeString(team?.id || team?.team_id || participant?.id || record?.team_id);
 }
 
-function getStandingsTeamUrl(row: any) {
-    return normalizeString(row?.team?.team_url || row?.participant?.team_url || row?.team_url);
+function getStandingsTeamUrl(row: unknown) {
+    const record = asRecord(row);
+    const team = asRecord(record?.team);
+    const participant = asRecord(record?.participant);
+
+    return normalizeString(team?.team_url || participant?.team_url || record?.team_url);
 }
 
-function getStandingsTeamLogo(row: any) {
+function getStandingsTeamLogo(row: unknown) {
+    const record = asRecord(row);
+    const team = asRecord(record?.team);
+    const participant = asRecord(record?.participant);
+
     return normalizeString(
-        row?.team?.logo ||
-        row?.team?.image_path ||
-        row?.participant?.logo ||
-        row?.participant?.image_path ||
-        row?.team_logo ||
-        row?.logo
+        team?.logo ||
+        team?.image_path ||
+        participant?.logo ||
+        participant?.image_path ||
+        record?.team_logo ||
+        record?.logo
     );
 }
 
-function buildRowIdentity(row: any, index: number) {
+function buildRowIdentity(row: unknown, index: number) {
     const teamId = getStandingsTeamId(row);
     const teamUrl = getStandingsTeamUrl(row);
     const teamName = getStandingsTeamName(row);
@@ -224,50 +254,60 @@ function buildRowIdentity(row: any, index: number) {
     return `name:${slugify(teamName || `row-${index + 1}`) || `row-${index + 1}`}`;
 }
 
-function extractPreviewRows(standings: any[]): StandingsPreviewRow[] {
+function extractPreviewRows(standings: unknown[]): StandingsPreviewRow[] {
     if (!Array.isArray(standings)) return [];
 
     if (!isGroupedStandings(standings)) {
-        return standings.map((row: any, index: number) => ({
-            id: buildRowIdentity(row, index),
-            name: getStandingsTeamName(row),
-            teamId: getStandingsTeamId(row),
-            teamUrl: getStandingsTeamUrl(row),
-            logo: getStandingsTeamLogo(row),
-            position: normalizeInteger(row?.position),
-            points: normalizeInteger(row?.points_total ?? row?.total_points ?? row?.points ?? row?.pts),
-            groupId: normalizeString(row?.group_id),
-            groupName: null,
-        }));
-    }
+        return standings.map((row, index: number) => {
+            const record = asRecord(row);
 
-    return standings.flatMap((group: any, groupIndex: number) => {
-        const groupName = normalizeString(group?.group_name) || `Grupo ${groupIndex + 1}`;
-        const groupId = normalizeString(group?.group_id) || `ext-group-${slugify(groupName) || groupIndex + 1}`;
-
-        return Array.isArray(group?.rows)
-            ? group.rows.map((row: any, rowIndex: number) => ({
-                id: buildRowIdentity(row, rowIndex),
+            return {
+                id: buildRowIdentity(row, index),
                 name: getStandingsTeamName(row),
                 teamId: getStandingsTeamId(row),
                 teamUrl: getStandingsTeamUrl(row),
                 logo: getStandingsTeamLogo(row),
-                position: normalizeInteger(row?.position),
-                points: normalizeInteger(row?.points_total ?? row?.total_points ?? row?.points ?? row?.pts),
-                groupId: normalizeString(row?.group_id) || groupId,
-                groupName,
-            }))
-            : [];
+                position: normalizeInteger(record?.position),
+                points: normalizeInteger(record?.points_total ?? record?.total_points ?? record?.points ?? record?.pts),
+                groupId: normalizeString(record?.group_id),
+                groupName: null,
+            };
+        });
+    }
+
+    return standings.flatMap((group, groupIndex: number) => {
+        const groupRecord = asRecord(group);
+        const groupName = normalizeString(groupRecord?.group_name) || `Grupo ${groupIndex + 1}`;
+        const groupId = normalizeString(groupRecord?.group_id) || `ext-group-${slugify(groupName) || groupIndex + 1}`;
+        const groupRows: unknown[] = Array.isArray(groupRecord?.rows) ? groupRecord.rows : [];
+
+        return groupRows
+            .map((row, rowIndex: number) => {
+                const record = asRecord(row);
+
+                return {
+                    id: buildRowIdentity(row, rowIndex),
+                    name: getStandingsTeamName(row),
+                    teamId: getStandingsTeamId(row),
+                    teamUrl: getStandingsTeamUrl(row),
+                    logo: getStandingsTeamLogo(row),
+                    position: normalizeInteger(record?.position),
+                    points: normalizeInteger(record?.points_total ?? record?.total_points ?? record?.points ?? record?.pts),
+                    groupId: normalizeString(record?.group_id) || groupId,
+                    groupName,
+                };
+            });
     });
 }
 
-function deriveGroupsFromStandings(standings: any[]): ExternalStandingsGroup[] {
+function deriveGroupsFromStandings(standings: unknown[]): ExternalStandingsGroup[] {
     if (!isGroupedStandings(standings)) return [];
 
-    return standings.map((group: any, index: number) => {
-        const name = normalizeString(group?.group_name) || `Grupo ${index + 1}`;
+    return standings.map((group, index: number) => {
+        const record = asRecord(group);
+        const name = normalizeString(record?.group_name) || `Grupo ${index + 1}`;
         return {
-            id: normalizeString(group?.group_id) || `ext-group-${slugify(name) || index + 1}`,
+            id: normalizeString(record?.group_id) || `ext-group-${slugify(name) || index + 1}`,
             name,
             order_index: index,
         };
@@ -286,12 +326,15 @@ function deriveAssignments(rows: StandingsPreviewRow[]): ExternalStandingsAssign
         }));
 }
 
-function deriveLabels(teamLabels: any[]): ExternalStandingsLabel[] {
+function deriveLabels(teamLabels: unknown[]): ExternalStandingsLabel[] {
     if (!Array.isArray(teamLabels)) return [];
 
     return normalizeEditorLabels(
-        teamLabels.flatMap((record: any, index: number) => {
-            const label = Array.isArray(record?.label) ? record.label[0] : record?.label;
+        teamLabels.flatMap((rawRecord, index: number) => {
+            const record = asRecord(rawRecord);
+            const labelValue = record?.label;
+            const rawLabel = Array.isArray(labelValue) ? labelValue[0] : labelValue;
+            const label = asRecord(rawLabel);
             const name = normalizeString(label?.name);
             const color = normalizeString(label?.color);
             const position = normalizeInteger(record?.position);
@@ -354,6 +397,7 @@ export default function ExternalTournamentOverridePage() {
         country: searchParams.get('country') || '',
         country_id: searchParams.get('country_id') || '',
         url: searchParams.get('url') || '',
+        priority: normalizeInteger(searchParams.get('priority')) ?? 0,
     });
     const [standingsForm, setStandingsForm] = useState<ExternalStandingsPayload>({
         id: tournamentId,
@@ -431,6 +475,7 @@ export default function ExternalTournamentOverridePage() {
                     country: searchParams.get('country') || '',
                     country_id: searchParams.get('country_id') || '',
                     url: searchParams.get('url') || '',
+                    priority: normalizeInteger(searchParams.get('priority')) ?? 0,
                 };
 
                 const nextStandings: ExternalStandingsPayload = {
@@ -441,9 +486,9 @@ export default function ExternalTournamentOverridePage() {
                     labels: [],
                 };
 
-                let publicStandings: any[] = [];
+                let publicStandings: unknown[] = [];
                 let publicRows: StandingsPreviewRow[] = [];
-                let publicTeamLabels: any[] = [];
+                let publicTeamLabels: unknown[] = [];
 
                 if (metaResponse.status === 'fulfilled' && metaResponse.value.ok && metaResponse.value.payload?.data) {
                     const externalTournament = metaResponse.value.payload.data as ExternalTournamentPayload;
@@ -455,6 +500,7 @@ export default function ExternalTournamentOverridePage() {
                     nextForm.country = externalTournament.country || nextForm.country;
                     nextForm.country_id = externalTournament.country_id || nextForm.country_id;
                     nextForm.url = externalTournament.url || nextForm.url;
+                    nextForm.priority = normalizeInteger(externalTournament.priority) ?? nextForm.priority ?? 0;
                 }
 
                 if (standingsOverrideResponse.status === 'fulfilled' && standingsOverrideResponse.value.ok && standingsOverrideResponse.value.payload?.data) {
@@ -471,23 +517,24 @@ export default function ExternalTournamentOverridePage() {
                     publicRows = extractPreviewRows(publicStandings);
                     publicTeamLabels = Array.isArray(payload?.teamLabels) ? payload.teamLabels : [];
 
-                    const details = payload?.details;
+                    const details = asRecord(payload?.details);
                     const detailsName =
-                        details?.display_name ||
-                        details?.name ||
-                        details?.league_name ||
-                        details?.competition?.name;
+                        normalizeString(details?.display_name) ||
+                        normalizeString(details?.name) ||
+                        normalizeString(details?.league_name) ||
+                        normalizeString(asRecord(details?.competition)?.name);
                     const detailsLogo =
-                        details?.logo_url ||
-                        details?.image_path ||
-                        details?.logo ||
-                        details?.tournament_logo ||
-                        details?.tournament_image_path;
+                        normalizeString(details?.logo_url) ||
+                        normalizeString(details?.image_path) ||
+                        normalizeString(details?.logo) ||
+                        normalizeString(details?.tournament_logo) ||
+                        normalizeString(details?.tournament_image_path);
 
                     nextForm.name = nextForm.name || detailsName || nextForm.display_name;
                     nextForm.display_name = nextForm.display_name || detailsName || nextForm.name;
                     nextForm.logo_url = nextForm.logo_url || detailsLogo || '';
-                    nextForm.url = nextForm.url || details?.url || '';
+                    nextForm.url = nextForm.url || normalizeString(details?.url) || '';
+                    nextForm.priority = normalizeInteger(nextForm.priority) ?? normalizeInteger(details?.priority) ?? 0;
                 }
 
                 if (nextStandings.groups.length === 0) {
@@ -569,6 +616,7 @@ export default function ExternalTournamentOverridePage() {
                         country: form.country || null,
                         country_id: form.country_id || null,
                         url: form.url || null,
+                        priority: normalizeInteger(form.priority) ?? 0,
                     }),
                 }),
                 fetch(`/api/admin/super/external-tournaments/${encodeURIComponent(tournamentId)}/standings`, {
@@ -816,6 +864,30 @@ export default function ExternalTournamentOverridePage() {
                                         padding: '0 14px',
                                     }}
                                 />
+                            </label>
+
+                            <label style={{ display: 'grid', gap: 8 }}>
+                                <span style={{ color: '#9aa4b2', fontSize: 13, fontWeight: 700 }}>Prioridad publica</span>
+                                <input
+                                    type="number"
+                                    value={String(form.priority ?? 0)}
+                                    onChange={(event) => setForm((prev) => ({
+                                        ...prev,
+                                        priority: normalizeInteger(event.target.value) ?? 0,
+                                    }))}
+                                    title="Mayor numero = mas prioridad. Si empatan, se ordenan alfabeticamente."
+                                    style={{
+                                        height: 44,
+                                        borderRadius: 12,
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        background: '#0d1016',
+                                        color: '#fff',
+                                        padding: '0 14px',
+                                    }}
+                                />
+                                <span style={{ color: '#6b7280', fontSize: 12 }}>
+                                    Mayor numero aparece primero en la vista publica; 0 queda en orden alfabetico.
+                                </span>
                             </label>
 
                             <label style={{ display: 'grid', gap: 8 }}>
@@ -1172,7 +1244,8 @@ export default function ExternalTournamentOverridePage() {
                         <div style={{ color: '#9aa4b2', fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Torneo API</div>
                         <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>{form.display_name || form.name || 'Torneo externo'}</div>
                         <div style={{ color: '#9aa4b2', marginBottom: 4 }}>Tournament ID: {tournamentId}</div>
-                        <div style={{ color: '#9aa4b2', marginBottom: 20 }}>Source: {form.source || 'flashscore'}</div>
+                        <div style={{ color: '#9aa4b2', marginBottom: 4 }}>Source: {form.source || 'flashscore'}</div>
+                        <div style={{ color: '#9aa4b2', marginBottom: 20 }}>Prioridad: {form.priority ?? 0}</div>
 
                         <div style={{
                             width: 112,

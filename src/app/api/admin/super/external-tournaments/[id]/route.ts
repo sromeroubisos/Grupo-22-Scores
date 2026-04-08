@@ -7,6 +7,7 @@ import {
     normalizeExternalTournamentOverrideRecord,
     upsertExternalTournamentOverride,
 } from '@/lib/server/externalTournamentOverrides';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 type MinimalUpsertClient = {
     from: (table: string) => {
@@ -21,6 +22,15 @@ function normalizeString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
     const trimmed = value.trim();
     return trimmed || null;
+}
+
+function normalizeInteger(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
+    if (typeof value === 'string' && value.trim()) {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) return Math.trunc(parsed);
+    }
+    return null;
 }
 
 async function requireExactSuperAdmin() {
@@ -99,6 +109,7 @@ export async function PATCH(
             country: normalizeString(body?.country),
             country_id: normalizeString(body?.country_id),
             url: normalizeString(body?.url),
+            priority: normalizeInteger(body?.priority),
         });
 
         const { error } = await client
@@ -120,6 +131,16 @@ export async function PATCH(
                         { status: 500 },
                     );
                 }
+            }
+
+            if (isMissingColumnError(error, 'priority')) {
+                return NextResponse.json(
+                    {
+                        ok: false,
+                        error: "No se pudo guardar la prioridad. Aplica la migracion de Supabase para agregar `external_tournaments.priority` y recarga el schema cache.",
+                    },
+                    { status: 500 },
+                );
             }
 
             const dbMessage = formatDbError(error) || 'No se pudo guardar el override del torneo.';
