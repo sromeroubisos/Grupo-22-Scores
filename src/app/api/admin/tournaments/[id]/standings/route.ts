@@ -239,7 +239,7 @@ export async function GET(
         // 1. Fetch phase + tournament rules
         const { data: phase, error: phaseError } = await supabase
             .from('tournament_phases')
-            .select('id, settings, tournament_id')
+            .select('id, phase_type, settings, tournament_id')
             .eq('id', phaseId)
             .eq('tournament_id', tournamentId)
             .single();
@@ -259,6 +259,8 @@ export async function GET(
         }
 
         const resolvedRules = StandingsEngine.resolveRules(phase.settings, tournament?.ruleset);
+        const supportsGroups = phase.phase_type === 'group_stage';
+        const scopedGroupId = supportsGroups ? groupId : null;
 
         if (resolvedRules.calculation_mode === 'fully_manual') {
             let standingsQuery = supabase
@@ -268,33 +270,33 @@ export async function GET(
                 .eq('phase_id', phaseId)
                 .order('position', { ascending: true });
 
-            if (groupId) {
-                standingsQuery = standingsQuery.eq('group_id', groupId);
+            if (scopedGroupId) {
+                standingsQuery = standingsQuery.eq('group_id', scopedGroupId);
             } else {
                 standingsQuery = (standingsQuery as typeof standingsQuery & { is: (column: string, value: null) => typeof standingsQuery }).is('group_id', null);
             }
 
             const [{ data: persistedRows, error: persistedError }, { data: participants, error: pError }, { data: matches, error: mError }] = await Promise.all([
                 standingsQuery,
-                (groupId
+                (scopedGroupId
                     ? supabase
                         .from('tournament_participants')
                         .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
                         .eq('tournament_id', tournamentId)
-                        .eq('group_id', groupId)
+                        .eq('group_id', scopedGroupId)
                         .not('status', 'in', '("withdrawn","disqualified")')
                     : supabase
                         .from('tournament_participants')
                         .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
                         .eq('tournament_id', tournamentId)
                         .not('status', 'in', '("withdrawn","disqualified")')),
-                (groupId
+                (scopedGroupId
                     ? supabase
                         .from('matches')
                         .select('id, status')
                         .eq('tournament_id', tournamentId)
                         .eq('phase_id', phaseId)
-                        .eq('group_id', groupId)
+                        .eq('group_id', scopedGroupId)
                     : supabase
                         .from('matches')
                         .select('id, status')
@@ -367,7 +369,7 @@ export async function GET(
             .eq('tournament_id', tournamentId)
             .not('status', 'in', '("withdrawn","disqualified")');
 
-        if (groupId) pQuery = pQuery.eq('group_id', groupId);
+        if (scopedGroupId) pQuery = pQuery.eq('group_id', scopedGroupId);
         const { data: participants, error: pError } = await pQuery;
         if (pError) throw pError;
 
@@ -380,7 +382,7 @@ export async function GET(
                 .eq('phase_id', phaseId)
                 .eq('status', 'final');
 
-            if (groupId) query = query.eq('group_id', groupId);
+            if (scopedGroupId) query = query.eq('group_id', scopedGroupId);
             const { data, error } = await query;
             return {
                 data: data as StandingMatchRow[] | null,
@@ -396,7 +398,7 @@ export async function GET(
                 .eq('phase_id', phaseId)
                 .eq('status', 'final');
 
-            if (groupId) query = query.eq('group_id', groupId);
+            if (scopedGroupId) query = query.eq('group_id', scopedGroupId);
             const { data, error } = await query;
             return {
                 data: data as StandingMatchRowWithoutEvents[] | null,
@@ -436,7 +438,7 @@ export async function GET(
             .eq('phase_id', phaseId)
             .in('status', ['scheduled', 'live', 'suspended', 'delayed', 'postponed']);
 
-        if (groupId) pendingQuery = pendingQuery.eq('group_id', groupId);
+        if (scopedGroupId) pendingQuery = pendingQuery.eq('group_id', scopedGroupId);
         const { count: pendingCount } = await pendingQuery;
         metrics.pending_results = pendingCount || 0;
 
@@ -451,8 +453,8 @@ export async function GET(
                 .order('last_updated', { ascending: false })
                 .limit(1);
 
-            if (groupId) {
-                cQuery = cQuery.eq('group_id', groupId);
+            if (scopedGroupId) {
+                cQuery = cQuery.eq('group_id', scopedGroupId);
             } else {
                 cQuery = (cQuery as typeof cQuery & { is: (column: string, value: null) => typeof cQuery }).is('group_id', null);
             }

@@ -54,6 +54,9 @@ export function TournamentHeader({
     const status = (data.status ?? 'draft').toUpperCase();
     const health = computeHealth(data);
     const isVisible = data.is_visible;
+    const sportLabel = tournament.sport || 'Disciplina pendiente';
+    const categoryLabel = tournament.category || 'Categoria no definida';
+    const formatLabel = tournament.format ? getTournamentFormatLabel(tournament.format) : 'Formato en configuracion';
     const { shouldRender, isVisible: menuVisible } = useAnimatedDisclosure(menuOpen, 180);
     const { shouldRender: shouldRenderSeasonMenu, isVisible: seasonMenuVisible } = useAnimatedDisclosure(seasonMenuOpen, 180);
 
@@ -114,6 +117,37 @@ export function TournamentHeader({
 
                 <div className="basalt-header-title-row">
                     <h1 className="basalt-h1">{data.name || 'TORNEO SIN NOMBRE'}</h1>
+                </div>
+
+                <div className="basalt-header-meta">
+                    <span>{sportLabel}</span>
+                    <span>{categoryLabel}</span>
+                    <span>{formatLabel}</span>
+                </div>
+            </div>
+
+            <div className="basalt-header-actions">
+                <div className="basalt-header-metrics">
+                    <div className="basalt-metric-group">
+                        <span className={`basalt-badge badge-${status.toLowerCase()}`}>
+                            <span className="basalt-badge-prefix">Lifecycle</span>
+                            <span className="basalt-badge-dot" />
+                            <span>{status}</span>
+                        </span>
+                        <span className={`basalt-badge ${isVisible ? 'badge-visible' : 'badge-hidden'}`}>
+                            <span className="basalt-badge-prefix">Visibility</span>
+                            <span className="basalt-badge-dot" />
+                            <span>{isVisible ? 'PUBLIC' : 'HIDDEN'}</span>
+                        </span>
+                        <span className={`basalt-badge badge-${health.toLowerCase()}`}>
+                            <span className="basalt-badge-prefix">Health</span>
+                            <span className="basalt-badge-dot" />
+                            <span>{health}</span>
+                        </span>
+                    </div>
+
+                    <div className="basalt-header-divider" aria-hidden="true" />
+
                     <div className="basalt-header-season-shell">
                         <button
                             type="button"
@@ -123,7 +157,7 @@ export function TournamentHeader({
                             aria-expanded={seasonMenuOpen}
                             aria-label="Abrir acciones de temporada"
                         >
-                            <span>{data.season_id || '--'}</span>
+                            <span>SEASON {data.season_id || '--'}</span>
                             <ChevronDown size={14} />
                         </button>
 
@@ -198,31 +232,8 @@ export function TournamentHeader({
                     </div>
                 </div>
 
-                <div className="basalt-header-meta">
-                    <span>{tournament.sport || 'Disciplina pendiente'}</span>
-                    <span>{tournament.category || 'Categoria no definida'}</span>
-                    <span>{tournament.format ? getTournamentFormatLabel(tournament.format) : 'Formato en configuracion'}</span>
-                </div>
-
-                <div className="basalt-header-badges">
-                    <span className={`basalt-badge badge-${status.toLowerCase()}`}>
-                        <span className="basalt-badge-prefix">Lifecycle</span>
-                        <span>{status}</span>
-                    </span>
-                    <span className={`basalt-badge ${isVisible ? 'badge-visible' : 'badge-hidden'}`}>
-                        <span className="basalt-badge-prefix">Visibility</span>
-                        <span>{isVisible ? 'VISIBLE' : 'HIDDEN'}</span>
-                    </span>
-                    <span className={`basalt-badge badge-${health.toLowerCase()}`}>
-                        <span className="basalt-badge-prefix">Health</span>
-                        <span>{health}</span>
-                    </span>
-                </div>
-            </div>
-
-            <div className="basalt-header-actions">
                 <div className="basalt-header-action-strip basalt-header-secondary">
-                    <button className="basalt-btn" onClick={onRecalculate} disabled={isTransitioning}>
+                    <button className="basalt-btn" onClick={onRecalculate} disabled={isTransitioning} type="button">
                         Recalcular
                     </button>
                     {data.slug && (
@@ -240,14 +251,14 @@ export function TournamentHeader({
 
                 <div className="basalt-header-action-strip basalt-header-primary">
                     {isDirty ? (
-                        <button className="basalt-btn basalt-btn-primary" onClick={onSave} disabled={isTransitioning}>
+                        <button className="basalt-btn basalt-btn-primary" onClick={onSave} disabled={isTransitioning} type="button">
                             Guardar
                         </button>
                     ) : (
                         <div className="basalt-header-action-placeholder" aria-hidden="true" />
                     )}
 
-                    <button className="basalt-btn basalt-btn-primary" onClick={onStatusTransition} disabled={isTransitioning}>
+                    <button className="basalt-btn basalt-btn-primary" onClick={onStatusTransition} disabled={isTransitioning} type="button">
                         {isTransitioning ? 'Procesando...' : 'Cambiar estado'}
                     </button>
 

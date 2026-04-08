@@ -27,6 +27,7 @@ interface StandingsFiltersBarProps {
   errorMessage?: string | null;
   onRulesUpdated: () => Promise<void> | void;
   compactMobile?: boolean;
+  phaseSupportsGroups?: boolean;
 }
 
 type LogicFormState = {
@@ -213,6 +214,7 @@ export function StandingsFiltersBar({
   errorMessage,
   onRulesUpdated,
   compactMobile = false,
+  phaseSupportsGroups = false,
 }: StandingsFiltersBarProps) {
   const [isLogicEditorOpen, setIsLogicEditorOpen] = useState(false);
   const [isSavingLogic, setIsSavingLogic] = useState(false);
@@ -301,12 +303,16 @@ export function StandingsFiltersBar({
 
               <SelectField
                 label="Grupo o zona"
-                value={selectedGroup || ''}
+                value={phaseSupportsGroups ? (selectedGroup || '') : ''}
                 onChange={(value) => onGroupChange(value || null)}
-                disabled={!selectedPhase || groups.length === 0}
+                disabled={!selectedPhase || !phaseSupportsGroups || groups.length === 0}
               >
-                <option value="">{groups.length > 0 ? 'Todos los grupos' : 'Sin grupos configurados'}</option>
-                {groups.map((group) => (
+                <option value="">
+                  {phaseSupportsGroups
+                    ? (groups.length > 0 ? 'Todos los grupos' : 'Sin grupos configurados')
+                    : 'Tabla unica'}
+                </option>
+                {phaseSupportsGroups && groups.map((group) => (
                   <option key={group.id} value={group.id}>
                     {group.name}
                   </option>

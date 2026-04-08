@@ -106,6 +106,8 @@ export function TournamentManageShell(props: ShellProps) {
 function TournamentManageShellInner({ id, data, currentTab, children, seasonMenuItems = [] }: ShellProps) {
     const router = useRouter();
     const tournament = data as TournamentManageRow;
+    const hasSidebar = currentTab === 'resumen';
+    const useWideWorkspace = !hasSidebar || currentTab === 'posiciones';
     const {
         isDirty,
         drafts,
@@ -416,12 +418,12 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
             <TournamentTabs id={id} currentTab={currentTab} data={data} />
 
             <div className="basalt-shell-stage">
-                <div className={`basalt-shell-layout ${currentTab === 'posiciones' ? 'basalt-shell-layout-wide' : ''}`}>
-                    <main className={`basalt-shell-main ${currentTab === 'posiciones' ? 'basalt-shell-main-wide' : ''}`}>
+                <div className={`basalt-shell-layout ${useWideWorkspace ? 'basalt-shell-layout-wide' : ''} ${!hasSidebar ? 'basalt-shell-layout-no-sidebar' : ''}`}>
+                    <main className={`basalt-shell-main ${useWideWorkspace ? 'basalt-shell-main-wide' : ''} ${!hasSidebar ? 'basalt-shell-main-full' : ''}`}>
                         {children}
                     </main>
 
-                    {currentTab === 'resumen' && (
+                    {hasSidebar && (
                         <TournamentRightSidebar
                             id={id}
                             data={data}
@@ -438,19 +440,19 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
 
                 <footer className="basalt-action-footer">
                     <div className="basalt-action-footer-copy">
-                        <span className="basalt-action-footer-kicker">Consola</span>
+                        <span className="basalt-action-footer-kicker">Operational Console</span>
                         <strong className="basalt-action-footer-title">Gestion central del torneo</strong>
                         <p className="basalt-action-footer-text">
-                            Recorre el flujo real del torneo desde una sola vista: detalles, formato, estructura,
-                            participantes y operacion.
+                            Coordina identidad, estructura, participantes y operacion desde una sola superficie.
                         </p>
                     </div>
 
                     <div className="basalt-action-footer-meta">
+                        <span className="basalt-action-footer-shortcut">MODE: <strong>TOURNAMENT_CONSOLE</strong></span>
+                        <span className="basalt-action-footer-shortcut">ID: <strong>{id}</strong></span>
                         <span className={`basalt-action-footer-badge ${isDirty ? 'is-live' : 'is-ready'}`}>
-                            {isDirty ? 'Cambios pendientes' : 'Estado sincronizado'}
+                            {isDirty ? 'Cambios pendientes' : 'Systems nominal'}
                         </span>
-                        <span className="basalt-action-footer-shortcut">Ctrl/Cmd + S</span>
                     </div>
 
                     <div className="basalt-action-footer-actions">

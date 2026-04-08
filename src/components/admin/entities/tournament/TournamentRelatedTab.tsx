@@ -238,7 +238,7 @@ export function TournamentRelatedTab({ tournamentId, data }: Props) {
     }
 
     return (
-        <div className={styles.shell}>
+        <div className={`${styles.shell} basalt-related-shell`}>
             <div className={styles.ambience} aria-hidden="true">
                 <span className={styles.ambientOrbA} />
                 <span className={styles.ambientOrbB} />

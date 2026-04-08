@@ -861,3 +861,498 @@
         margin-left: 0;
     }
 }
+
+/* Console hardening */
+.tournament-structure-shell {
+    gap: 24px;
+}
+
+.structure-module,
+.structure-wizard-card,
+.structure-summary-card,
+.structure-label-row,
+.structure-label-empty,
+.structure-step-panel .tiebreaker-card,
+.structure-step-panel .available-item {
+    border-radius: 4px !important;
+}
+
+.structure-hero-panel,
+.structure-module,
+.structure-wizard-card {
+    background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.07), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+        rgba(14, 14, 17, 0.96) !important;
+}
+
+.structure-hero-panel {
+    padding: clamp(1.35rem, 2vw, 1.9rem) !important;
+}
+
+.structure-hero-title,
+.structure-module-title {
+    text-transform: uppercase;
+}
+
+.structure-hero-text,
+.structure-module-copy,
+.structure-wizard-sidebar-copy {
+    color: rgba(226, 232, 240, 0.52);
+}
+
+.structure-summary-grid {
+    gap: 16px;
+}
+
+.structure-summary-card {
+    min-height: 170px;
+    padding: 20px;
+    border-color: rgba(125, 211, 252, 0.1);
+    background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 40%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 32%),
+        rgba(18, 24, 30, 0.96);
+}
+
+.structure-summary-value {
+    font-size: clamp(32px, 4vw, 52px);
+}
+
+.structure-module {
+    padding: clamp(1.35rem, 2vw, 1.8rem) !important;
+}
+
+.structure-module-header {
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.structure-phase-list {
+    gap: 12px;
+}
+
+.structure-phase-card {
+    min-height: 132px;
+    padding: 16px 18px !important;
+    border-radius: 32px !important;
+    border-color: rgba(148, 163, 184, 0.14) !important;
+    background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 28%),
+        rgba(18, 24, 30, 0.96) !important;
+}
+
+.structure-phase-card::before {
+    inset: 16px auto 16px 0;
+    width: 4px;
+}
+
+.structure-phase-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.structure-phase-title {
+    font-size: clamp(1.9rem, 3vw, 2.9rem) !important;
+    line-height: 0.98;
+    letter-spacing: -0.06em;
+}
+
+.structure-phase-meta {
+    font-size: 0.92rem !important;
+}
+
+.structure-phase-meta-single {
+    color: rgba(226, 232, 240, 0.72) !important;
+}
+
+.structure-module-footer {
+    margin-top: 20px !important;
+    padding-top: 20px !important;
+}
+
+.structure-module-footer .basalt-btn-primary {
+    min-width: min(100%, 320px);
+    min-height: 3.45rem;
+    border-radius: 2px;
+}
+
+.tournament-structure-shell .basalt-btn,
+.tournament-structure-shell .structure-phase-actions button,
+.tournament-structure-shell .structure-label-action-btn,
+.tournament-structure-shell .structure-label-mode-btn {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: rgba(18, 24, 30, 0.98);
+    color: rgba(226, 232, 240, 0.82);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: none;
+}
+
+.tournament-structure-shell .basalt-btn:hover:not(:disabled),
+.tournament-structure-shell .structure-phase-actions button:hover:not(:disabled),
+.tournament-structure-shell .structure-label-action-btn:hover,
+.tournament-structure-shell .structure-label-mode-btn:hover {
+    background: rgba(36, 36, 41, 0.98);
+    border-color: rgba(226, 232, 240, 0.18);
+    color: #fff;
+    transform: none;
+}
+
+.tournament-structure-shell .basalt-btn-primary,
+.tournament-structure-shell .structure-label-submit,
+.tournament-structure-shell .structure-label-mode-btn.is-active {
+    background: linear-gradient(180deg, #4f8dfd, #2563eb) !important;
+    border-color: #2563eb !important;
+    color: #fff !important;
+    box-shadow: 0 0 22px rgba(59, 130, 246, 0.2) !important;
+}
+
+.tournament-structure-shell .basalt-btn-primary:hover:not(:disabled),
+.tournament-structure-shell .structure-label-submit:hover,
+.tournament-structure-shell .structure-label-mode-btn.is-active:hover {
+    background: linear-gradient(180deg, #5b96ff, #3570f4) !important;
+    border-color: #3570f4 !important;
+    transform: none !important;
+}
+
+.tournament-structure-shell .basalt-btn-secondary,
+.tournament-structure-shell .structure-group-row .basalt-btn,
+.tournament-structure-shell .structure-label-action-btn-danger {
+    background: rgba(18, 24, 30, 0.98) !important;
+}
+
+.tournament-structure-shell .structure-module-footer .basalt-btn-primary,
+.tournament-structure-shell .structure-wizard-footer .basalt-btn-primary {
+    min-height: 54px;
+    padding-inline: 28px;
+    border-radius: 2px;
+}
+
+.tournament-structure-shell .structure-phase-actions button {
+    min-height: 38px;
+    padding-inline: 14px;
+}
+
+.structure-wizard-layout {
+    min-height: 760px;
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+}
+
+.structure-wizard-sidebar {
+    padding: 22px !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 24%),
+        rgba(18, 24, 30, 0.98) !important;
+}
+
+.structure-wizard-progress-card,
+.structure-wizard-step,
+.structure-field-panel,
+.structure-label-list-panel,
+.structure-labels-form-panel,
+.structure-step-panel .wizard-main-panel,
+.structure-step-panel .wizard-right-panel,
+.structure-label-mode-toggle-form {
+    border-radius: 4px !important;
+}
+
+.structure-wizard-progress-card,
+.structure-field-panel,
+.structure-label-list-panel,
+.structure-labels-form-panel,
+.structure-step-panel .wizard-main-panel,
+.structure-step-panel .wizard-right-panel {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 28%),
+        rgba(18, 24, 30, 0.92) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.structure-wizard-step {
+    min-height: 54px;
+    border-radius: 22px !important;
+}
+
+.structure-wizard-content {
+    padding: 24px 26px !important;
+}
+
+.structure-wizard-footer .basalt-btn {
+    min-height: 3.2rem;
+}
+
+.structure-label-row-active,
+.structure-label-row:hover {
+    border-color: rgba(16, 185, 129, 0.26);
+}
+
+@media (max-width: 1100px) {
+    .structure-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .structure-wizard-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .structure-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .structure-phase-card {
+        min-height: 0;
+        border-radius: 24px !important;
+    }
+
+    .structure-phase-title {
+        font-size: 2rem !important;
+    }
+}
+
+/* Console refinement */
+.structure-module-header,
+.structure-step-head {
+    position: relative;
+}
+
+.structure-step-heading-main {
+    font-size: clamp(2rem, 3vw, 3rem) !important;
+    line-height: 0.94;
+    letter-spacing: -0.05em;
+    text-transform: none;
+}
+
+.structure-wizard-stepper {
+    gap: 12px !important;
+}
+
+.structure-wizard-step {
+    min-height: 58px;
+    padding: 14px 14px !important;
+    border-radius: 26px !important;
+    border-color: rgba(148, 163, 184, 0.12) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 32%),
+        rgba(18, 24, 30, 0.94) !important;
+}
+
+.structure-wizard-step.is-active {
+    border-color: rgba(59, 130, 246, 0.34) !important;
+    background:
+        radial-gradient(circle at left center, rgba(59, 130, 246, 0.12), transparent 50%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 34%),
+        rgba(18, 24, 30, 0.98) !important;
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
+}
+
+.structure-wizard-step.is-complete:not(.is-active) {
+    border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.structure-wizard-step-index {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+}
+
+.structure-wizard-step-index.is-active {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12), 0 0 18px rgba(59, 130, 246, 0.28);
+}
+
+.structure-wizard-step-index.is-complete {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.12), 0 0 18px rgba(16, 185, 129, 0.24);
+}
+
+.phase-wizard-step-title {
+    font-size: 0.98rem !important;
+    line-height: 1.1;
+}
+
+.phase-wizard-step-desc {
+    margin-top: 3px;
+    color: rgba(148, 163, 184, 0.74) !important;
+}
+
+.structure-sidebar-facts {
+    gap: 12px;
+}
+
+.structure-sidebar-fact {
+    padding: 14px 16px;
+    border-radius: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 30%),
+        rgba(18, 24, 30, 0.9);
+}
+
+.structure-sidebar-fact strong {
+    font-size: 1rem;
+}
+
+.structure-field-panel {
+    padding: 20px;
+    border-radius: 28px !important;
+    border-color: rgba(148, 163, 184, 0.14);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 30%),
+        rgba(18, 24, 30, 0.96) !important;
+}
+
+.structure-field-panel::before {
+    left: 20px;
+    right: 20px;
+    top: 20px;
+}
+
+.structure-field-label {
+    font-size: 0.78rem !important;
+    margin-bottom: 16px !important;
+}
+
+.structure-step-panel .basalt-input,
+.structure-step-panel input[type='number'],
+.structure-step-panel input[type='text'],
+.structure-step-panel select.basalt-input {
+    min-height: 58px;
+    border-radius: 18px !important;
+    background: rgba(7, 10, 14, 0.94) !important;
+    border-color: rgba(148, 163, 184, 0.14) !important;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.structure-single-table-note {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 30%),
+        rgba(18, 24, 30, 0.92) !important;
+}
+
+.structure-single-table-copy {
+    margin: 0;
+    color: rgba(226, 232, 240, 0.78);
+    font-size: 0.96rem;
+    line-height: 1.6;
+}
+
+.structure-option-grid {
+    gap: 14px !important;
+}
+
+.structure-option-card {
+    min-height: 104px;
+    padding: 16px 18px !important;
+    border-radius: 28px !important;
+    border-color: rgba(148, 163, 184, 0.14) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 30%),
+        rgba(18, 24, 30, 0.94) !important;
+}
+
+.structure-option-card.is-active {
+    border-color: rgba(59, 130, 246, 0.42) !important;
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.14), transparent 45%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 34%),
+        rgba(18, 24, 30, 0.98) !important;
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.16);
+}
+
+.structure-option-card span:first-child {
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.structure-option-card span:last-child {
+    font-size: 0.88rem !important;
+    line-height: 1.45;
+    opacity: 0.8 !important;
+}
+
+.structure-counter-shell {
+    min-height: 64px;
+    border-radius: 22px !important;
+    border-color: rgba(148, 163, 184, 0.14) !important;
+    background: rgba(7, 10, 14, 0.94) !important;
+}
+
+.structure-counter-button {
+    min-width: 52px !important;
+    font-size: 24px !important;
+    color: #f8fafc !important;
+}
+
+.structure-counter-input {
+    min-height: 62px !important;
+    font-size: 2rem !important;
+    letter-spacing: -0.04em;
+}
+
+.structure-score-panel {
+    min-height: 100%;
+}
+
+.structure-step-panel .phase-wizard-fields {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.structure-basic-name-panel,
+.structure-basic-type-panel {
+    grid-column: span 6 !important;
+}
+
+.structure-basic-groups-panel,
+.structure-split-grid {
+    grid-column: 1 / -1 !important;
+}
+
+.structure-basic-format-panel {
+    grid-column: span 6 !important;
+}
+
+.structure-group-row .basalt-input {
+    min-height: 52px;
+}
+
+.structure-group-row .basalt-btn,
+.structure-basic-groups-panel > .basalt-btn,
+.structure-wizard-footer .basalt-btn {
+    min-height: 3.2rem;
+    border-radius: 999px;
+}
+
+.structure-step-panel .wizard-main-panel,
+.structure-step-panel .wizard-right-panel,
+.structure-step-panel .tiebreaker-card,
+.structure-step-panel .available-item,
+.structure-label-row,
+.structure-label-empty {
+    border-radius: 26px !important;
+}
+
+.structure-step-panel .tiebreaker-card,
+.structure-step-panel .available-item {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 30%),
+        rgba(18, 24, 30, 0.94) !important;
+}
+
+@media (max-width: 1100px) {
+    .structure-basic-name-panel,
+    .structure-basic-type-panel,
+    .structure-basic-format-panel {
+        grid-column: 1 / -1 !important;
+    }
+}

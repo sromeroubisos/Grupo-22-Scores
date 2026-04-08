@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     ChevronDown,
@@ -40,6 +40,7 @@ interface TournamentTabsProps {
 
 export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
     const { hasDirtySection, hasRecentlySavedSection } = useTournamentDirty();
     const [mobileSelectorOpen, setMobileSelectorOpen] = useState(false);
     const { shouldRender, isVisible } = useAnimatedDisclosure(mobileSelectorOpen, 180);
@@ -52,9 +53,23 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
         (activeTab.id === 'detalles' && hasRecentlySavedSection('details')) ||
         (activeTab.id === 'formato' && hasRecentlySavedSection('format'));
 
+    const tabHref = useMemo(
+        () => (tabId: string) => `/admin/entities/${id}/manage?type=tournament&tab=${tabId}`,
+        [id],
+    );
+
+    useEffect(() => {
+        TOURNAMENT_TABS.forEach((tab) => {
+            router.prefetch(tabHref(tab.id));
+        });
+    }, [router, tabHref]);
+
     const switchTab = (tabId: string) => {
+        if (tabId === currentTab || isPending) return;
         setMobileSelectorOpen(false);
-        router.push(`/admin/entities/${id}/manage?type=tournament&tab=${tabId}`);
+        startTransition(() => {
+            router.push(tabHref(tabId), { scroll: false });
+        });
     };
 
     const tabHasDraft = (tabId: string) => {

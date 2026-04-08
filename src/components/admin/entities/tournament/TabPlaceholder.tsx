@@ -9,20 +9,22 @@ interface TabPlaceholderProps {
 export function TabPlaceholder({ title }: TabPlaceholderProps) {
     return (
         <div className="tab-content active transition-all">
-            <div className="basalt-card p-12 flex flex-col items-center justify-center text-center min-h-[400px]">
-                <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-4" style={{ color: 'var(--text-dim)' }}>
+            <div className="basalt-card basalt-placeholder-card p-12 flex flex-col items-center justify-center text-center min-h-[400px]">
+                <div className="basalt-placeholder-kicker">Operational Module</div>
+                <h2 className="text-2xl font-black uppercase tracking-[0.16em] mb-4" style={{ color: 'var(--text-main)' }}>
                     {title}
                 </h2>
-                <div className="w-16 h-1 bg-accent-primary mb-8"></div>
+                <div className="basalt-placeholder-rule mb-8"></div>
                 <p className="max-w-md text-dim leading-relaxed">
-                    Esta sección está siendo rediseñada bajo el motor <span className="text-main font-bold">Monolithic Basalt</span>.
-                    La lógica funcional se mantiene intacta en el backend.
+                    Esta seccion esta siendo adaptada a la nueva consola operativa del torneo.
+                    La logica funcional se mantiene intacta en el backend.
                 </p>
                 <button
                     className="basalt-btn mt-10"
                     onClick={() => window.location.reload()}
+                    type="button"
                 >
-                    Recargar Módulo
+                    Recargar modulo
                 </button>
             </div>
         </div>

@@ -247,7 +247,8 @@ export default function TournamentStandingsTab({
     });
   }, [selectedPhase, activePhase]);
 
-  const phaseRequiresGroup = (activePhase?.groups?.length || 0) > 0;
+  const phaseSupportsGroups = activePhase?.phase_type === 'group_stage';
+  const phaseRequiresGroup = phaseSupportsGroups && (activePhase?.groups?.length || 0) > 0;
   const canLoadGroupScopedData = !!selectedPhase && !loadingContext && (!phaseRequiresGroup || !!selectedGroup);
 
   useEffect(() => {
@@ -458,7 +459,9 @@ export default function TournamentStandingsTab({
   const hasZeroPlayed = tableData.length > 0 && tableData.every((row) => row.played === 0);
   const groupLabel = selectedGroup
     ? activeGroups.find((group) => group.id === selectedGroup)?.name
-    : 'Todos los grupos';
+    : phaseRequiresGroup
+      ? 'Todos los grupos'
+      : 'Tabla unica';
   const tableViewLabel = TABLE_VIEWS.find((tab) => tab.id === selectedTableType)?.label ?? selectedTableType;
   const tournamentStatus = context?.tournament?.status || 'draft';
   const hasOwnPhaseSettings = !!activePhase?.settings;
@@ -625,6 +628,7 @@ export default function TournamentStandingsTab({
               errorMessage={logicPanelError}
               onRulesUpdated={handleLogicUpdated}
               compactMobile={isCompactMobile}
+              phaseSupportsGroups={phaseSupportsGroups}
             />
           </aside>
 

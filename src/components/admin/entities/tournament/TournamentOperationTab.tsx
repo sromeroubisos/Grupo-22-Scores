@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -214,6 +214,7 @@ function OperationContent({
 }: OperationContentProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [isNavPending, startNavTransition] = useTransition();
     const { fixture, refreshFixture } = useFixture();
     const [mobilePhasePickerOpen, setMobilePhasePickerOpen] = useState(false);
     const [mobileSubtabPickerOpen, setMobileSubtabPickerOpen] = useState(false);
@@ -221,6 +222,19 @@ function OperationContent({
     const phaseSheet = useAnimatedDisclosure(mobilePhasePickerOpen, 180);
 
     const currentSubTab = searchParams.get('subtab') || 'fixture';
+    const [optimisticSubTab, setOptimisticSubTab] = useState(currentSubTab);
+
+    useEffect(() => {
+        setOptimisticSubTab(currentSubTab);
+    }, [currentSubTab]);
+
+    useEffect(() => {
+        OPERATION_SUB_TABS.forEach((tab) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set('subtab', tab.id);
+            router.prefetch(`/admin/entities/${id}/manage?${params.toString()}`);
+        });
+    }, [id, router, searchParams]);
 
     useEffect(() => {
         if (!fixture) {
@@ -236,15 +250,19 @@ function OperationContent({
     }, [phases, selectedPhaseId]);
 
     const activeSubTab = useMemo(
-        () => OPERATION_SUB_TABS.find((tab) => tab.id === currentSubTab) || OPERATION_SUB_TABS[0],
-        [currentSubTab],
+        () => OPERATION_SUB_TABS.find((tab) => tab.id === optimisticSubTab) || OPERATION_SUB_TABS[0],
+        [optimisticSubTab],
     );
 
     const switchSubTab = (subTabId: string) => {
+        if (subTabId === currentSubTab || isNavPending) return;
         setMobileSubtabPickerOpen(false);
+        setOptimisticSubTab(subTabId);
         const params = new URLSearchParams(searchParams.toString());
         params.set('subtab', subTabId);
-        router.replace(`/admin/entities/${id}/manage?${params.toString()}`);
+        startNavTransition(() => {
+            router.replace(`/admin/entities/${id}/manage?${params.toString()}`, { scroll: false });
+        });
     };
 
     // When global circuit is selected, only the standings tab is meaningful
@@ -261,7 +279,7 @@ function OperationContent({
     };
 
     return (
-        <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+        <div className="operation-console-shell flex flex-col gap-6 animate-in fade-in duration-500">
             <div className="basalt-card operation-context-card p-4 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-l-4 border-l-accent-primary bg-gradient-to-r from-surface-basalt to-transparent">
                 <div className="flex flex-col gap-2 min-w-0">
                     <span className="text-[10px] font-bold text-accent-primary uppercase tracking-widest">Contexto competitivo</span>
@@ -354,7 +372,7 @@ function OperationContent({
             <div className="operation-subtabs-bar">
                 {OPERATION_SUB_TABS.map((tab) => {
                     const Icon = tab.icon;
-                    const isActive = currentSubTab === tab.id;
+                    const isActive = optimisticSubTab === tab.id;
 
                     return (
                         <button
@@ -370,7 +388,7 @@ function OperationContent({
             </div>
 
             <div className="min-h-[500px]">
-                {currentSubTab === 'fixture' && (
+                {optimisticSubTab === 'fixture' && (
                     isGlobalSelected ? (
                         <GlobalOnlyPlaceholder label="Fixture" />
                     ) : (
@@ -381,21 +399,21 @@ function OperationContent({
                         />
                     )
                 )}
-                {currentSubTab === 'tabla' && (
+                {optimisticSubTab === 'tabla' && (
                     <TournamentStandingsTab
                         tournamentId={id}
                         preferredPhaseId={selectedPhaseId}
                         onPhaseChange={onSelectPhase}
                     />
                 )}
-                {currentSubTab === 'estadisticas' && (
+                {optimisticSubTab === 'estadisticas' && (
                     isGlobalSelected ? (
                         <GlobalOnlyPlaceholder label="Estadísticas" />
                     ) : (
                         <TournamentStatsTab id={id} data={data} phaseId={selectedPhaseId || undefined} />
                     )
                 )}
-                {currentSubTab === 'sincronizacion' && (
+                {optimisticSubTab === 'sincronizacion' && (
                     isGlobalSelected ? (
                         <GlobalOnlyPlaceholder label="Sincronización" />
                     ) : (
@@ -442,7 +460,7 @@ function OperationContent({
                         <div className="basalt-tabs-sheet-list">
                             {OPERATION_SUB_TABS.map((tab) => {
                                 const Icon = tab.icon;
-                                const isActive = currentSubTab === tab.id;
+                                const isActive = optimisticSubTab === tab.id;
 
                                 return (
                                     <button

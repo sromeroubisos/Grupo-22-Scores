@@ -131,6 +131,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
     }
 
     const isTournament = result.entityType === 'tournament';
+    const effectiveTab = currentTab === 'overview' && isTournament ? 'resumen' : currentTab;
 
     // For tournament tabs: fetch unions + match count in parallel
     let tournamentUnions: Array<{ id: string; name: string }> = [];
@@ -140,10 +141,18 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
     let tournamentSeasonMenuItems: TournamentSeasonMenuItem[] = [];
     if (isTournament) {
         const tournamentData = result.data as TournamentRow;
+        const needsDetailsData = effectiveTab === 'detalles';
+        const needsMatchCount = effectiveTab === 'resumen';
         const [{ data: unionsData }, { count }, { data: countriesData }, linkedRelations] = await Promise.all([
-            supabase.from('unions').select('id, name').order('name'),
-            supabase.from('matches').select('id', { count: 'exact', head: true }).eq('tournament_id', id),
-            supabase.from('countries').select('id, name, code, flag_emoji').order('name'),
+            needsDetailsData
+                ? supabase.from('unions').select('id, name').order('name')
+                : Promise.resolve({ data: [] as Array<{ id: string; name: string }> }),
+            needsMatchCount
+                ? supabase.from('matches').select('id', { count: 'exact', head: true }).eq('tournament_id', id)
+                : Promise.resolve({ count: 0 }),
+            needsDetailsData
+                ? supabase.from('countries').select('id, name, code, flag_emoji').order('name')
+                : Promise.resolve({ data: [] as Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> }),
             getTournamentLinkedRelations(id),
         ]);
         tournamentUnions = unionsData ?? [];
@@ -153,11 +162,10 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
             tournamentUnionName = tournamentUnions.find(u => u.id === (result.data as TournamentRow).union_id)?.name;
         }
 
-        const activeTab = currentTab === 'overview' ? 'resumen' : currentTab;
         const activeParams = new URLSearchParams();
         activeParams.set('type', 'tournament');
-        activeParams.set('tab', activeTab);
-        if (subtab && activeTab === 'operacion') {
+        activeParams.set('tab', effectiveTab);
+        if (subtab && effectiveTab === 'operacion') {
             activeParams.set('subtab', subtab);
         }
 
@@ -199,9 +207,6 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
             ...linkedSeasonItems,
         ];
     }
-
-    // Default tab: tournaments use 'resumen', others use 'overview'
-    const effectiveTab = currentTab === 'overview' && isTournament ? 'resumen' : currentTab;
 
     const isRelatedTab = effectiveTab === 'related';
     const relatedData = isRelatedTab && !isTournament ? await getRelatedItems(result.entityType, id, offset, limit) : null;

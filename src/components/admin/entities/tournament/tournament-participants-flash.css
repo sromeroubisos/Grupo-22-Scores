@@ -1193,3 +1193,129 @@ tr:hover .participant-name {
         grid-template-columns: 1fr;
     }
 }
+
+/* Console harmonization */
+.participants-flash-container {
+    min-height: auto;
+    padding: 0 0 96px;
+    background: transparent;
+    background-image: none;
+}
+
+.participants-header {
+    align-items: flex-end;
+    margin-bottom: 24px;
+    padding: 24px 28px 20px;
+    border: 1px solid var(--border-medium);
+    border-radius: 4px;
+    background: linear-gradient(135deg, var(--lattice-elevated) 0%, var(--void-bg) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.participants-header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+}
+
+.participants-section-label,
+.counter-pill-label,
+.phase-assignment-kicker,
+.phase-group-count {
+    letter-spacing: 0.14em;
+}
+
+.participants-title {
+    font-size: clamp(1.9rem, 2.6vw, 2.5rem);
+    text-transform: uppercase;
+}
+
+.counter-pill,
+.participants-filter-bar,
+.participants-table-container,
+.phase-assignment-panel,
+.phase-group-action {
+    border-radius: 4px;
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(22, 22, 27, 0.94);
+    backdrop-filter: none;
+}
+
+.counter-pill:hover,
+.btn-flash:hover:not(:disabled),
+.phase-group-action:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+}
+
+.btn-flash {
+    border-radius: 2px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: transparent;
+}
+
+.btn-flash.primary {
+    background: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.18);
+}
+
+.btn-flash.primary:hover:not(:disabled) {
+    background: #4d8df7;
+}
+
+.participants-filter-bar {
+    padding: 18px;
+}
+
+.filter-input,
+.filter-select {
+    border-radius: 2px;
+    font-family: var(--font-mono);
+}
+
+.participants-table-container {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.participants-table thead th {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+}
+
+.phase-assignment-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.phase-assignment-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+}
+
+@media (max-width: 1023px) {
+    .participants-flash-container {
+        padding-bottom: 120px;
+    }
+
+    .participants-header {
+        padding: 22px 18px 18px;
+    }
+
+    .participants-title {
+        font-size: 1.5rem;
+    }
+
+    .participants-filter-bar {
+        padding: 14px;
+    }
+}

@@ -779,7 +779,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 key={opt.value}
                                 type="button"
                                 onClick={() => setTournamentFormat(opt.value)}
-                                className={`structure-option-card flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${tournamentFormat === opt.value
+                                className={`structure-option-card ${tournamentFormat === opt.value ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${tournamentFormat === opt.value
                                     ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
                                     : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                 }`}
@@ -804,7 +804,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                         key={opt.value}
                                         type="button"
                                         onClick={() => setCircuitChampionMode(opt.value)}
-                                        className={`structure-option-card flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${circuitChampionMode === opt.value
+                                        className={`structure-option-card ${circuitChampionMode === opt.value ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${circuitChampionMode === opt.value
                                             ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
                                             : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                         }`}
@@ -936,6 +936,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     {phase.settings.advanceCount} avanzan
                                                 </span>
                                             )}
+                                            {phase.phase_type !== 'group_stage' && !((phase.settings as any)?.group_names?.length > 0) && (
+                                                <span className="structure-phase-meta-single text-white/70 font-semibold">
+                                                    Tabla unica
+                                                </span>
+                                            )}
                                             {(phase.settings as any)?.group_names?.length > 0 && (
                                                 <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
                                                     {(phase.settings as any).group_names.length} grupos
@@ -1061,12 +1066,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             key={s.step}
                                             type="button"
                                             onClick={() => setCurrentStep(s.step)}
-                                            className={`phase-wizard-step structure-wizard-step flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 ${currentStep === s.step
+                                            className={`phase-wizard-step structure-wizard-step ${currentStep === s.step ? 'is-active' : ''} ${currentStep > s.step ? 'is-complete' : ''} flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 ${currentStep === s.step
                                                 ? 'bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/30'
                                                 : 'hover:bg-[var(--surface-elevated)]'
                                                 }`}
                                         >
-                                            <span className={`phase-wizard-step-index structure-wizard-step-index w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5 ${currentStep > s.step
+                                            <span className={`phase-wizard-step-index structure-wizard-step-index ${currentStep === s.step ? 'is-active' : ''} ${currentStep > s.step ? 'is-complete' : ''} w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5 ${currentStep > s.step
                                                 ? 'bg-[var(--status-active)] text-white'
                                                 : currentStep === s.step
                                                     ? 'bg-[var(--accent-primary)] text-white'
@@ -1108,13 +1113,13 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-basic flex flex-col gap-6">
                                         <div className="phase-wizard-step-head structure-step-head">
                                             <p className="phase-wizard-kicker text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 1</p>
-                                            <h3 className="phase-wizard-step-heading text-2xl font-extrabold tracking-tight mb-1">Configuración Básica</h3>
+                                            <h3 className="phase-wizard-step-heading structure-step-heading-main text-2xl font-extrabold tracking-tight mb-1">Configuración Básica</h3>
                                             <p className="phase-wizard-step-subtitle text-dim text-sm">Define la estructura general de la fase</p>
                                         </div>
 
                                         <div className="phase-wizard-fields flex flex-col gap-5">
                                             {/* Name */}
-                                            <div className="structure-field-panel structure-field-panel-wide">
+                                            <div className="structure-field-panel structure-field-panel-wide structure-basic-name-panel">
                                                 <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-2">
                                                     Nombre de la fase
                                                 </label>
@@ -1130,7 +1135,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             </div>
 
                                             {/* Phase type */}
-                                            <div className="structure-field-panel structure-field-panel-wide">
+                                            <div className="structure-field-panel structure-field-panel-wide structure-basic-type-panel">
                                                 <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
                                                     Tipo de fase
                                                 </label>
@@ -1143,9 +1148,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                                 setPhaseType(type);
                                                                 if (type === 'group_stage' && groupNames.length === 0) {
                                                                     setGroupNames(['Grupo A', 'Grupo B']);
+                                                                } else if (type !== 'group_stage') {
+                                                                    setGroupNames([]);
                                                                 }
                                                             }}
-                                                            className={`structure-option-card flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${phaseType === type
+                                                            className={`structure-option-card ${phaseType === type ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${phaseType === type
                                                                 ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
                                                                 : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                                                 }`}
@@ -1165,8 +1172,19 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             </div>
 
                                             {/* Groups definition — only for group_stage */}
+                                            {phaseType !== 'group_stage' && (
+                                                <div className="structure-field-panel structure-field-panel-wide structure-single-table-note">
+                                                    <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-2">
+                                                        Tabla competitiva
+                                                    </label>
+                                                    <p className="structure-single-table-copy">
+                                                        Esta fase no usa grupos. Todos los equipos se ordenan en una sola tabla general.
+                                                    </p>
+                                                </div>
+                                            )}
+
                                             {phaseType === 'group_stage' && (
-                                                <div className="structure-field-panel structure-field-panel-wide structure-field-panel-accent rounded-xl border border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5 p-5">
+                                                <div className="structure-field-panel structure-field-panel-wide structure-field-panel-accent structure-basic-groups-panel rounded-xl border border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5 p-5">
                                                     <div className="flex items-center justify-between gap-3 mb-4">
                                                         <div>
                                                             <p className="text-xs font-bold text-dim uppercase tracking-widest mb-0.5">
@@ -1221,9 +1239,9 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                         Cantidad de equipos
                                                     </label>
                                                     <div className="structure-counter-shell flex items-center border border-[var(--border-basalt)] rounded-lg bg-[var(--bg-basalt)] overflow-hidden">
-                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 2 : Math.max(2, Number(p) - 1))}>−</button>
-                                                        <input type="number" className="flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={teamsCount} onChange={e => setTeamsCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
-                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 3 : Number(p) + 1)}>+</button>
+                                                        <button type="button" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 2 : Math.max(2, Number(p) - 1))}>−</button>
+                                                        <input type="number" className="structure-counter-input flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={teamsCount} onChange={e => setTeamsCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
+                                                        <button type="button" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 3 : Number(p) + 1)}>+</button>
                                                     </div>
                                                 </div>
                                                 <div className="structure-field-panel">
@@ -1231,15 +1249,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                         Equipos que avanzan
                                                     </label>
                                                     <div className="structure-counter-shell flex items-center border border-[var(--border-basalt)] rounded-lg bg-[var(--bg-basalt)] overflow-hidden">
-                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setAdvanceCount(p => p === '' ? 1 : Math.max(1, Number(p) - 1))}>−</button>
-                                                        <input type="number" className="flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={advanceCount} onChange={e => setAdvanceCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
-                                                        <button type="button" className="px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setAdvanceCount(p => p === '' ? 2 : Number(p) + 1)}>+</button>
+                                                        <button type="button" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setAdvanceCount(p => p === '' ? 1 : Math.max(1, Number(p) - 1))}>−</button>
+                                                        <input type="number" className="structure-counter-input flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={advanceCount} onChange={e => setAdvanceCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
+                                                        <button type="button" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setAdvanceCount(p => p === '' ? 2 : Number(p) + 1)}>+</button>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Match format */}
-                                            <div className="structure-field-panel">
+                                            <div className="structure-field-panel structure-basic-format-panel">
                                                 <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
                                                     Formato de partido
                                                 </label>
@@ -1249,7 +1267,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                             key={opt.value}
                                                             type="button"
                                                             onClick={() => setLegs(opt.value)}
-                                                            className={`structure-option-card flex-1 py-3 rounded-xl border text-sm font-semibold transition-all duration-150 ${legs === opt.value
+                                                            className={`structure-option-card ${legs === opt.value ? 'is-active' : ''} flex-1 py-3 rounded-xl border text-sm font-semibold transition-all duration-150 ${legs === opt.value
                                                                 ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
                                                                 : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                                                 }`}

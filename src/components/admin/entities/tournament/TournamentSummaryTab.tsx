@@ -22,6 +22,7 @@ export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: Summar
         false,
         Boolean(data.is_visible),
     ];
+    const completionPercent = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100);
 
     return (
         <div className="tab-content active transition-all">
@@ -63,6 +64,11 @@ export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: Summar
                         >
                             Editar detalles base
                         </Link>
+                    </div>
+
+                    <div className="basalt-hero-completion">
+                        <span className="basalt-hero-completion-label">Completion</span>
+                        <strong className="basalt-hero-completion-value">{completionPercent}%</strong>
                     </div>
                 </div>
 

@@ -11,47 +11,77 @@ interface RightSidebarProps {
     onDelete: () => void;
 }
 
-export function TournamentRightSidebar({ data, onDelete }: RightSidebarProps) {
+export function TournamentRightSidebar({ id, data, onDelete }: RightSidebarProps) {
+    const validations = [
+        {
+            label: 'Nombre y slug sincronizados',
+            ok: Boolean(data.name && data.slug),
+        },
+        {
+            label: 'Organizador vinculado',
+            ok: Boolean(data.union_id),
+        },
+        {
+            label: 'Formato competitivo definido',
+            ok: Boolean(data.format),
+        },
+        {
+            label: 'Visibilidad publica definida',
+            ok: data.is_visible !== null,
+        },
+    ];
+    const completedValidations = validations.filter((item) => item.ok).length;
+    const integrityHash = `${data.id.slice(0, 4).toUpperCase()}:${(data.slug || 'draft').slice(0, 4).toUpperCase()}:${(data.season_id || '--').slice(0, 4).toUpperCase()}:${(data.status || 'draft').slice(0, 4).toUpperCase()}`;
+
     return (
         <aside className="basalt-sidebar hidden xl:block w-[320px]">
             <div className="sidebar-section basalt-rail-section mb-8">
-                <span className="basalt-sidebar-title">Validaciones</span>
-                <div className="basalt-checklist-item">
-                    <div className={`basalt-check-box ${data.name && data.slug ? 'checked' : ''}`}></div>
-                    <span style={{ color: 'var(--text-dim)' }}>Nombre y slug</span>
+                <div className="basalt-sidebar-section-header">
+                    <span className="basalt-sidebar-title">Quick Validations</span>
+                    <span className="basalt-sidebar-section-value">{completedValidations}/{validations.length}</span>
                 </div>
-                <div className="basalt-checklist-item">
-                    <div className={`basalt-check-box ${data.union_id ? 'checked' : ''}`}></div>
-                    <span style={{ color: 'var(--text-dim)' }}>Organizador vinculado</span>
-                </div>
-                <div className="basalt-checklist-item">
-                    <div className="basalt-check-box"></div>
-                    <span>Carga de Participantes</span>
-                </div>
-                <div className="basalt-checklist-item">
-                    <div className="basalt-check-box"></div>
-                    <span>Definición de Fixture</span>
-                </div>
+                {validations.map((item) => (
+                    <div key={item.label} className="basalt-validation-item">
+                        <span className={`basalt-validation-icon ${item.ok ? 'is-ok' : 'is-pending'}`}>
+                            {item.ok ? '[OK]' : '[--]'}
+                        </span>
+                        <span>{item.label}</span>
+                    </div>
+                ))}
             </div>
 
             <div className="sidebar-section basalt-rail-section mb-8">
-                <span className="basalt-sidebar-title">Atajos de Teclado</span>
-                <div className="flex justify-between text-xs font-mono mb-2">
-                    <span style={{ color: 'var(--text-dim)' }}>Guardar</span>
-                    <span>⌘ S</span>
+                <div className="basalt-sidebar-section-header">
+                    <span className="basalt-sidebar-title">Operation Shortcuts</span>
                 </div>
-                <div className="flex justify-between text-xs font-mono mb-2">
-                    <span style={{ color: 'var(--text-dim)' }}>Recalcular</span>
-                    <span>⌘ R</span>
+                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}>
+                    Edit Participant List
+                </a>
+                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}>
+                    Define Competitive Structure
+                </a>
+                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}>
+                    Operate Fixture & Table
+                </a>
+                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=audit`}>
+                    Review Audit Trail
+                </a>
+            </div>
+
+            <div className="sidebar-section basalt-rail-section mb-8">
+                <div className="basalt-sidebar-section-header">
+                    <span className="basalt-sidebar-title">Data Integrity</span>
                 </div>
-                <div className="flex justify-between text-xs font-mono">
-                    <span style={{ color: 'var(--text-dim)' }}>Nueva Fase</span>
-                    <span>⌘ N</span>
+                <div className="basalt-integrity-box">
+                    <div className="basalt-integrity-label">GLOBAL HASH</div>
+                    <div className="basalt-integrity-value">{integrityHash}</div>
                 </div>
             </div>
 
             <div className="sidebar-section basalt-rail-section">
-                <span className="basalt-sidebar-title">Estado rapido</span>
+                <div className="basalt-sidebar-section-header">
+                    <span className="basalt-sidebar-title">Estado rapido</span>
+                </div>
                 <div className="basalt-sidebar-status">
                     <strong>{data.status?.toUpperCase() || 'DRAFT'}</strong>
                     <span>{data.is_visible ? 'Visible para publico' : 'Oculto para publico'}</span>
@@ -62,6 +92,7 @@ export function TournamentRightSidebar({ data, onDelete }: RightSidebarProps) {
                 <button
                     className="basalt-btn basalt-btn-danger w-full justify-center"
                     onClick={onDelete}
+                    type="button"
                 >
                     BORRAR TORNEO
                 </button>

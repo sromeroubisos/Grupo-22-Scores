@@ -667,3 +667,366 @@
     margin-top: 0.12rem;
   }
 }
+
+/* Console hardening */
+.surface {
+  padding: clamp(1.4rem, 2vw, 2rem) !important;
+  border-radius: 4px !important;
+  background:
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+    rgba(14, 14, 17, 0.96) !important;
+}
+
+.heroHeader {
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 1.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kicker {
+  border-radius: 999px;
+  border-color: rgba(16, 185, 129, 0.28);
+  background: rgba(16, 185, 129, 0.1);
+  color: #92f6cf;
+}
+
+.heroHeading {
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.heroDescription {
+  max-width: 64ch;
+  color: rgba(226, 232, 240, 0.56);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.sportBadge {
+  min-width: 180px;
+  padding: 1.2rem 1.3rem !important;
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 34%),
+    rgba(22, 22, 27, 0.96);
+  border-color: rgba(59, 130, 246, 0.38);
+  box-shadow: none;
+}
+
+.summaryGrid {
+  gap: 1.15rem;
+  margin-top: 1.8rem;
+}
+
+.summaryCard {
+  min-height: 208px;
+  padding: 1.5rem 1.35rem 1.25rem;
+  border-radius: 28px;
+  border-color: rgba(125, 211, 252, 0.12);
+  background:
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 34%),
+    rgba(18, 24, 30, 0.96);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.summaryCard strong {
+  font-size: clamp(2.1rem, 3vw, 3rem);
+  letter-spacing: -0.06em;
+}
+
+.summaryCard small {
+  max-width: 22ch;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.summaryIcon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1.1rem;
+  margin-bottom: 1.2rem;
+  color: #052218;
+  background: linear-gradient(135deg, #10d8b0, #4cc9ff);
+  box-shadow: none;
+}
+
+.layout {
+  grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.9fr);
+  gap: 1.5rem;
+  margin-top: 1.6rem;
+}
+
+.infoCard,
+.actionCard,
+.eventCard {
+  border-radius: 30px;
+  border-color: rgba(148, 163, 184, 0.14);
+  background:
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 32%),
+    rgba(18, 24, 30, 0.96);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.infoCard,
+.actionCard {
+  padding: 1.35rem 1.25rem;
+}
+
+.blockLabel {
+  color: rgba(148, 163, 184, 0.7);
+}
+
+.blockCopy,
+.ruleList p {
+  color: rgba(241, 245, 249, 0.78);
+}
+
+.primaryAction,
+.secondaryAction {
+  min-height: 3.55rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.primaryAction {
+  background: linear-gradient(180deg, #4f8dfd, #2563eb);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.18);
+}
+
+.secondaryAction {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.eventList {
+  gap: 1.15rem;
+}
+
+.eventCard {
+  padding: 1.2rem 1.2rem 1.05rem;
+}
+
+.eventCard::before {
+  inset: 0 auto 0 0;
+  width: 5px;
+  border-radius: 999px;
+}
+
+.eventCardHeader {
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eventIdentity {
+  gap: 1rem;
+}
+
+.eventIndex {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(226, 232, 240, 0.84);
+}
+
+.eventTitle {
+  font-size: 1.9rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.eventMeta span,
+.roleChip {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.formGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.95rem 1rem;
+}
+
+.fieldBlock:nth-child(1),
+.fieldBlock:nth-child(2) {
+  grid-column: span 3;
+}
+
+.fieldInput {
+  min-height: 3.55rem;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.footerStrip {
+  margin-top: 1rem;
+  padding-top: 0.95rem;
+}
+
+.footerHint {
+  color: rgba(148, 163, 184, 0.82);
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldBlock:nth-child(1),
+  .fieldBlock:nth-child(2) {
+    grid-column: auto;
+  }
+}
+
+/* Console refinement */
+.heroHeader {
+  padding-inline: 0.1rem;
+}
+
+.layout {
+  align-items: stretch;
+}
+
+.sidebar {
+  justify-content: flex-start;
+}
+
+.eventCard {
+  border-radius: 34px;
+  padding: 1.3rem 1.3rem 1.15rem;
+}
+
+.eventCardHeader {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.eventIdentity > div {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.eventIndex {
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
+.eventTitle {
+  font-size: clamp(1.85rem, 2.8vw, 2.6rem);
+  line-height: 0.95;
+  margin-bottom: 0;
+}
+
+.eventMeta {
+  gap: 0.5rem 0.55rem;
+}
+
+.eventMeta span {
+  min-height: 1.9rem;
+  padding: 0 0.78rem;
+  font-size: 0.69rem;
+  font-weight: 800;
+}
+
+.removeButton {
+  min-width: 7.5rem;
+  min-height: 2.75rem;
+  align-self: flex-start;
+}
+
+.formGrid {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.fieldBlock {
+  grid-column: span 3;
+}
+
+.fieldBlock:nth-child(1),
+.fieldBlock:nth-child(2) {
+  grid-column: span 6;
+}
+
+.fieldInput {
+  min-height: 4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  padding-inline: 1rem;
+}
+
+.footerStrip {
+  align-items: center;
+}
+
+.roleChip {
+  min-height: 2rem;
+  padding: 0 0.86rem;
+  font-size: 0.68rem;
+}
+
+.footerHint {
+  font-size: 0.76rem;
+  letter-spacing: 0.02em;
+}
+
+.emptyState {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  border-radius: 32px;
+}
+
+@media (max-width: 1200px) {
+  .formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fieldBlock,
+  .fieldBlock:nth-child(1),
+  .fieldBlock:nth-child(2) {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 860px) {
+  .eventCardHeader {
+    flex-direction: column;
+  }
+
+  .removeButton {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

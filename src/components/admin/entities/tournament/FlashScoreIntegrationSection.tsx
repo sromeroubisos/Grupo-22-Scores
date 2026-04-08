@@ -193,7 +193,7 @@ function EspnAmericanFootballIntegrationSection({
     }
 
     return (
-        <div className="manager-card mt-10">
+        <div className="manager-card details-integration-card mt-10">
             <header className="manager-header">
                 <div className="manager-header-titles">
                     <h1 className="flex items-center gap-3">
@@ -207,8 +207,8 @@ function EspnAmericanFootballIntegrationSection({
                 </div>
             </header>
 
-            <div className="manager-main-layout">
-                <aside className="manager-preview-zone">
+            <div className="manager-main-layout details-integration-layout">
+                <aside className="manager-preview-zone details-integration-preview">
                     <div className="manager-metadata-box flex flex-col gap-2 text-[11px]" style={{ minHeight: '140px' }}>
                         {config?.league_slug ? (
                             <>
@@ -228,7 +228,7 @@ function EspnAmericanFootballIntegrationSection({
                     </div>
                 </aside>
 
-                <main className="manager-controls-zone">
+                <main className="manager-controls-zone details-integration-controls">
                     <div className="manager-input-group mb-4">
                         <label className="manager-field-label">Liga de futbol americano</label>
                         <select
@@ -336,7 +336,7 @@ function EspnMotorsportIntegrationSection({
     }
 
     return (
-        <div className="manager-card mt-10">
+        <div className="manager-card details-integration-card mt-10">
             <header className="manager-header">
                 <div className="manager-header-titles">
                     <h1 className="flex items-center gap-3">
@@ -350,8 +350,8 @@ function EspnMotorsportIntegrationSection({
                 </div>
             </header>
 
-            <div className="manager-main-layout">
-                <aside className="manager-preview-zone">
+            <div className="manager-main-layout details-integration-layout">
+                <aside className="manager-preview-zone details-integration-preview">
                     <div className="manager-metadata-box flex flex-col gap-2 text-[11px]" style={{ minHeight: '140px' }}>
                         {config?.league_slug ? (
                             <>
@@ -371,7 +371,7 @@ function EspnMotorsportIntegrationSection({
                     </div>
                 </aside>
 
-                <main className="manager-controls-zone">
+                <main className="manager-controls-zone details-integration-controls">
                     <div className="manager-input-group mb-4">
                         <label className="manager-field-label">Categoria de motorsport</label>
                         <select
@@ -491,7 +491,7 @@ function FlashScoreOnlyIntegrationSection({
     }
 
     return (
-        <div className="manager-card mt-10">
+        <div className="manager-card details-integration-card mt-10">
             <header className="manager-header">
                 <div className="manager-header-titles">
                     <h1 className="flex items-center gap-3">
@@ -505,8 +505,8 @@ function FlashScoreOnlyIntegrationSection({
                 </div>
             </header>
 
-            <div className="manager-main-layout">
-                <aside className="manager-preview-zone">
+            <div className="manager-main-layout details-integration-layout">
+                <aside className="manager-preview-zone details-integration-preview">
                     <div className="manager-metadata-box flex flex-col gap-2 text-[11px]" style={{ minHeight: '120px' }}>
                         {hasIds ? (
                             <>
@@ -527,7 +527,7 @@ function FlashScoreOnlyIntegrationSection({
                     </div>
                 </aside>
 
-                <main className="manager-controls-zone">
+                <main className="manager-controls-zone details-integration-controls">
                     <div className="manager-input-group mb-4">
                         <label className="manager-field-label">URL de FlashScore (ruta relativa)</label>
                         <input
@@ -693,7 +693,7 @@ function RugbyApiSportsIntegrationSection({
     }
 
     return (
-        <div className="manager-card mt-10">
+        <div className="manager-card details-integration-card mt-10">
             <header className="manager-header">
                 <div className="manager-header-titles">
                     <h1 className="flex items-center gap-3">
@@ -707,8 +707,8 @@ function RugbyApiSportsIntegrationSection({
                 </div>
             </header>
 
-            <div className="manager-main-layout">
-                <aside className="manager-preview-zone">
+            <div className="manager-main-layout details-integration-layout">
+                <aside className="manager-preview-zone details-integration-preview">
                     <div className="manager-metadata-box flex flex-col gap-2 text-[11px]" style={{ minHeight: '160px' }}>
                         {config?.league_id ? (
                             <>
@@ -729,10 +729,10 @@ function RugbyApiSportsIntegrationSection({
                     </div>
                 </aside>
 
-                <main className="manager-controls-zone">
+                <main className="manager-controls-zone details-integration-controls">
                     <div className="manager-input-group mb-4">
                         <label className="manager-field-label">Buscar liga de rugby</label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 details-search-bar">
                             <input
                                 type="text"
                                 className="manager-url-input flex-1"
@@ -764,7 +764,7 @@ function RugbyApiSportsIntegrationSection({
                                         <button
                                             key={candidate.id}
                                             type="button"
-                                            className="text-left border rounded px-3 py-3 transition-all"
+                                            className="text-left border rounded px-3 py-3 transition-all details-search-result"
                                             style={{
                                                 borderColor: isSelected ? '#3b82f6' : 'rgba(255,255,255,0.1)',
                                                 background: isSelected ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.02)',
@@ -796,7 +796,7 @@ function RugbyApiSportsIntegrationSection({
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 details-provider-grid">
                         <div className="manager-input-group">
                             <label className="manager-field-label">Temporada</label>
                             <select

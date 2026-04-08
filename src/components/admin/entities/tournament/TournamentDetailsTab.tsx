@@ -224,7 +224,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
     handleSaveRef.current = handleSave;
 
     return (
-        <div className="flash-ui-container dark bg-transparent" style={{ '--accent': '#00a365', minHeight: 'auto' } as React.CSSProperties}>
+        <div className="flash-ui-container dark bg-transparent details-console-shell" style={{ '--accent': '#00a365', minHeight: 'auto' } as React.CSSProperties}>
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-28 md:pb-20">
                 {message && (
                     <div className={`p-4 mb-6 text-sm border ${message.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
@@ -233,7 +233,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                 )}
 
                 {isApiManaged && (
-                    <div className="p-4 mb-10 bg-blue-500/10 border border-blue-500/20 rounded flex items-start gap-4 animate-in fade-in duration-700">
+                    <div className="p-4 mb-10 bg-blue-500/10 border border-blue-500/20 rounded flex items-start gap-4 animate-in fade-in duration-700 details-api-alert">
                         <div className="w-10 h-10 rounded bg-blue-500/20 flex items-center justify-center shrink-0 text-blue-400">
                             <Globe size={20} />
                         </div>
@@ -248,7 +248,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                 )}
 
                 {/* Logo & Public Status (Kinetic Structuralism) */}
-                <div className="manager-card">
+                <div className="manager-card details-card details-logo-card">
                     <header className="manager-header">
                         <div className="manager-header-titles">
                             <h1>Escudo / Logo</h1>
@@ -325,7 +325,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     </div>
                 </div>
 
-                <div className="manager-card mt-10">
+                <div className="manager-card details-card details-identity-card mt-10">
                     <header className="manager-header">
                         <div className="manager-header-titles">
                             <h1 className="flex items-center gap-3"><Shield className="w-6 h-6 text-[var(--accent)]" /> Identidad Estratégica</h1>
@@ -333,7 +333,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                         </div>
                     </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 details-form-grid">
                         <div className="manager-input-group">
                             <label className="manager-field-label">{isApiManaged ? 'Nombre Público (Visible)' : 'Nombre del Torneo'}</label>
                                 <input
@@ -414,7 +414,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     </div>
                 </div>
 
-                <div className="manager-card mt-10">
+                <div className="manager-card details-card details-location-card mt-10">
                     <header className="manager-header">
                         <div className="manager-header-titles">
                             <h1 className="flex items-center gap-3"><Globe className="w-6 h-6 text-[var(--accent)]" /> Ubicación y Alcance</h1>
@@ -422,7 +422,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                         </div>
                     </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 details-geo-grid">
                         <div className="manager-input-group">
                             <label className="manager-field-label">País</label>
                             <select
@@ -464,7 +464,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     </div>
                 </div>
 
-                <div className={`manager-card mt-10 ${isApiManaged ? 'opacity-50 pointer-events-none grayscale-[0.5]' : ''}`}>
+                <div className={`manager-card details-card details-bonus-card mt-10 ${isApiManaged ? 'opacity-50 pointer-events-none grayscale-[0.5]' : ''}`}>
                     <header className="manager-header">
                         <div className="manager-header-titles">
                             <h1 className="flex items-center gap-3">🏆 Políticas del Torneo (Puntos Bonus)</h1>
@@ -472,8 +472,8 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                         </div>
                     </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 details-bonus-grid">
+                        <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)] details-bonus-panel">
                             <label className="checkbox-container !border-none !p-0 !bg-transparent mb-2">
                                 <input type="checkbox" checked={form.ruleset?.bonusRules?.offensiveBonus?.enabled || false} onChange={e => {
                                     update('ruleset', { ...form.ruleset, bonusRules: { ...form.ruleset?.bonusRules, offensiveBonus: { enabled: e.target.checked, type: 'tries', threshold: 4 } } });
@@ -484,7 +484,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                             <p className="text-xs text-[#888] ml-8 mt-2">Otorga 1 punto extra al equipo que anote 4 o más tries en un partido, siempre que la fase tenga activados los puntos bonus.</p>
                         </div>
 
-                        <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)]">
+                        <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)] details-bonus-panel">
                             <label className="checkbox-container !border-none !p-0 !bg-transparent mb-2">
                                 <input type="checkbox" checked={form.ruleset?.bonusRules?.defensiveBonus?.enabled || false} onChange={e => {
                                     update('ruleset', { ...form.ruleset, bonusRules: { ...form.ruleset?.bonusRules, defensiveBonus: { enabled: e.target.checked, type: 'point_diff', threshold: 7 } } });
@@ -506,7 +506,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     />
                 )}
 
-                <div className="basalt-mobile-savebar">
+                <div className="basalt-mobile-savebar details-savebar">
                     <button
                         className="manager-btn-inline"
                         style={{ padding: '12px 24px', fontSize: '14px', borderRadius: '4px' }}

@@ -53,7 +53,9 @@ export async function GET(
         // Map phases to include resolved rules and groups
         const enrichedPhases = [];
         for (const phase of phases || []) {
-            const phaseGroups = groups.filter(g => g.phase_id === phase.id);
+            const phaseGroups = phase.phase_type === 'group_stage'
+                ? groups.filter(g => g.phase_id === phase.id)
+                : [];
             let syncedSettings = phase.settings;
 
             try {

@@ -195,7 +195,7 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
     }, [isApiManaged, isDirty]);
 
     return (
-        <div className="flash-ui-container dark bg-transparent" style={{ '--accent': '#00a365', minHeight: 'auto' } as CSSProperties}>
+        <div className="flash-ui-container dark bg-transparent format-console-shell" style={{ '--accent': '#00a365', minHeight: 'auto' } as CSSProperties}>
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-28 md:pb-20">
                 {message && (
                     <div className={`p-4 text-sm border ${message.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
