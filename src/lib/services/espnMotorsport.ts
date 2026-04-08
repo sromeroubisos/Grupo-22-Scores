@@ -1223,14 +1223,15 @@ async function getEspnMotorsportSeasonRaceEventsForTournamentView(
     if (!seasonYear) return [];
 
     const league = LEAGUES[leagueSlug];
-    const events = await fetchLeagueCoreEvents(leagueSlug, seasonYear);
-    const normalized = events
-        .map((event) => normalizeEspnEventCore(event, league))
-        .filter((event): event is NonNullable<ReturnType<typeof normalizeEspnEventCore>> => Boolean(event))
-        .filter((event) => event.sessionType === 'race')
-        .sort((left, right) => (left.kickoff.getTime() || 0) - (right.kickoff.getTime() || 0))
+    const seasonStart = parseDate(leagueInfo?.season?.startDate) || new Date(Date.UTC(seasonYear, 0, 1));
+    const seasonEnd = parseDate(leagueInfo?.season?.endDate) || new Date(Date.UTC(seasonYear, 11, 31));
+    const events = await fetchScoreboardRangeEvents(leagueSlug, seasonStart, seasonEnd);
+    const normalized = (await Promise.all(events.map((event) => normalizeEspnEventForTournamentViews(event, league))))
+        .filter((event): event is NonNullable<Awaited<ReturnType<typeof normalizeEspnEventForTournamentViews>>> => Boolean(event))
+        .filter((event) => event.session_type === 'race')
+        .sort((left, right) => (left.timestamp || 0) - (right.timestamp || 0))
         .map((event, index) => ({
-            ...mapNormalizedEspnEventToTournamentView(event, league),
+            ...event,
             round_number: index + 1,
         }));
 

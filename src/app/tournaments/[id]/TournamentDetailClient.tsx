@@ -530,6 +530,19 @@ function getStandingsCountryFlagAsset(row: any) {
 }
 
 function getStandingsTeamLogo(row: any) {
+    const motorsportTeamName = row?.team?.affiliation_name || row?.participant?.affiliation_name || row?.affiliation_name || '';
+    if (motorsportTeamName) {
+        const motorsportSource = {
+            team_name: motorsportTeamName,
+            name: motorsportTeamName,
+            provider: row?.provider || row?.team?.provider || row?.participant?.provider || 'espn',
+            source: row?.source || row?.team?.source || row?.participant?.source || 'espn',
+            team_url: row?.team?.team_url || row?.participant?.team_url || row?.team_url || '',
+        };
+        const resolvedMotorsportLogo = resolveTeamLogo(motorsportSource, row?.team, row?.participant, row);
+        if (resolvedMotorsportLogo) return resolvedMotorsportLogo;
+    }
+
     return resolveTeamLogo(row?.team, row?.participant, row);
 }
 
