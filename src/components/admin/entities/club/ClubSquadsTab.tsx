@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Database } from '@/lib/database.types';
 import { clsx } from 'clsx';
-import { fetchDivisions } from '@/lib/services/divisionService';
+import { Division, fetchDivisions } from '@/lib/services/divisionService';
 import { Users, Trophy, Calendar, Plus, LayoutGrid, List, Filter, Search, Shield } from 'lucide-react';
+import { PersonManagementModal } from './PersonManagementModal';
+import { fetchPeopleByClub, PersonWithRole } from '@/lib/services/personService';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 
@@ -39,6 +41,9 @@ interface SquadSummary {
     colorClass: string;
     players: number;
     staff: number;
+    is_family_division?: boolean;
+    roster_owner_club_id?: string | null;
+    linked_clubs?: Array<{ id: string; name: string }>;
 }
 
 async function loadClubSquads(clubId: string): Promise<SquadSummary[]> {
@@ -57,7 +62,15 @@ async function loadClubSquads(clubId: string): Promise<SquadSummary[]> {
         colorClass: getColorClass(division.id),
         players: division.players_count || 0,
         staff: division.staff_count || 0,
+        is_family_division: division.is_family_division,
+        roster_owner_club_id: division.roster_owner_club_id,
+        linked_clubs: division.linked_clubs,
     }));
+}
+
+async function loadClubLevelPlayers(clubId: string): Promise<PersonWithRole[]> {
+    const people = await fetchPeopleByClub(clubId);
+    return people.filter((person) => person.role === 'player' && !person.division_id);
 }
 
 export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
@@ -67,6 +80,9 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
     const [squads, setSquads] = useState<SquadSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionMessage, setActionMessage] = useState<string | null>(null);
+    const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
+    const [editingPlayer, setEditingPlayer] = useState<PersonWithRole | null>(null);
+    const [clubPlayers, setClubPlayers] = useState<PersonWithRole[]>([]);
 
     useEffect(() => {
         let isMounted = true;
@@ -75,13 +91,16 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
             setLoading(true);
             try {
                 const nextSquads = await loadClubSquads(id);
+                const nextClubPlayers = await loadClubLevelPlayers(id);
                 if (isMounted) {
                     setSquads(nextSquads);
+                    setClubPlayers(nextClubPlayers);
                 }
             } catch (error) {
                 console.error('Error loading squads:', error);
                 if (isMounted) {
                     setSquads([]);
+                    setClubPlayers([]);
                 }
             } finally {
                 if (isMounted) {
@@ -105,7 +124,9 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
         const candidates = activeSquads.length > 0 ? activeSquads : filteredSquads;
 
         if (candidates.length === 0) {
-            setActionMessage('Primero tiene que existir una division activa para registrar jugadores.');
+            setActionMessage(null);
+            setEditingPlayer(null);
+            setIsAddPlayerOpen(true);
             return;
         }
 
@@ -117,6 +138,11 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
         setActionMessage('Elegi una tarjeta de plantel para abrir su planilla y registrar jugadores.');
     }
 
+    async function refreshClubPlayers() {
+        const nextClubPlayers = await loadClubLevelPlayers(id);
+        setClubPlayers(nextClubPlayers);
+    }
+
     const filteredSquads = squads.filter((squad) =>
         squad.name.toLowerCase().includes(searchQuery.toLowerCase())
         || squad.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -125,6 +151,21 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
     const activeSquads = filteredSquads.filter((squad) => squad.status === 'active' || squad.status === 'paused');
     const draftSquads = filteredSquads.filter((squad) => squad.status === 'draft');
     const historicalSquads = filteredSquads.filter((squad) => squad.status === 'archived');
+    const modalDivisions: Division[] = squads.map((squad) => ({
+        id: squad.id,
+        club_id: id,
+        name: squad.name,
+        category: squad.category,
+        sport: squad.sport,
+        gender: 'Masculino',
+        season: squad.season,
+        status: squad.status === 'archived' || squad.status === 'draft' ? squad.status : 'active',
+        players_count: squad.players,
+        staff_count: squad.staff,
+        is_family_division: squad.is_family_division,
+        roster_owner_club_id: squad.roster_owner_club_id,
+        linked_clubs: squad.linked_clubs,
+    }));
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
@@ -365,12 +406,80 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
 
                     {filteredSquads.length === 0 && (
                         <div className="manager-card">
-                            <div className="flex flex-col items-center justify-center py-16 gap-4">
-                                <Shield className="w-16 h-16 text-[#333] opacity-50" />
-                                <p className="text-[#888] uppercase text-sm tracking-widest">No se encontraron planteles</p>
-                                <p className="max-w-xl text-center text-[#666] text-xs uppercase tracking-widest">
-                                    Configura las divisiones del club para poder registrar jugadores en sus planillas.
-                                </p>
+                            <div className="flex flex-col gap-6">
+                                <div className="flex flex-col items-center justify-center py-10 gap-4">
+                                    <Shield className="w-16 h-16 text-[#333] opacity-50" />
+                                    <p className="text-[#888] uppercase text-sm tracking-widest">No se encontraron planteles</p>
+                                    <p className="max-w-xl text-center text-[#666] text-xs uppercase tracking-widest">
+                                        Todavia no hay divisiones configuradas. Igual podes registrar jugadores a nivel club.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditingPlayer(null);
+                                            setIsAddPlayerOpen(true);
+                                        }}
+                                        className="bg-[var(--accent)] text-[var(--bg)] px-4 py-2 font-bold uppercase tracking-widest text-xs border border-[var(--accent)] hover:opacity-80 transition-opacity flex items-center justify-center gap-2"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Registrar jugador
+                                    </button>
+                                </div>
+
+                                {clubPlayers.length > 0 && (
+                                    <div className="border-t border-[rgba(255,255,255,0.06)] pt-6">
+                                        <div className="flex items-center justify-between gap-4 mb-4">
+                                            <div>
+                                                <p className="text-[#e2e2e2] uppercase font-black tracking-tight">Jugadores del club</p>
+                                                <p className="text-[#666] text-xs uppercase tracking-widest">
+                                                    Registrados sin division especifica.
+                                                </p>
+                                            </div>
+                                            <div className="manager-metadata-box">
+                                                TOTAL: {clubPlayers.length}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                                            {clubPlayers.map((person) => (
+                                                <div
+                                                    key={person.id}
+                                                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-3 transition-colors hover:border-[var(--accent)]/40 hover:bg-[rgba(255,255,255,0.06)]"
+                                                    role="button"
+                                                    tabIndex={0}
+                                                    onClick={() => {
+                                                        setEditingPlayer(person);
+                                                        setIsAddPlayerOpen(true);
+                                                    }}
+                                                    onKeyDown={(event) => {
+                                                        if (event.key === 'Enter' || event.key === ' ') {
+                                                            event.preventDefault();
+                                                            setEditingPlayer(person);
+                                                            setIsAddPlayerOpen(true);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                        {person.photo_url ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img src={person.photo_url} alt={person.first_name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <Users className="w-4 h-4 text-neutral-600" />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-black text-[#e2e2e2] truncate uppercase">
+                                                            {person.first_name} {person.last_name}
+                                                        </p>
+                                                        <p className="text-[10px] text-[#888] uppercase tracking-widest truncate">
+                                                            {person.position || 'Sin posicion'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -431,6 +540,22 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                     </div>
                 </div>
             )}
+
+            <PersonManagementModal
+                clubId={id}
+                divisions={modalDivisions}
+                isOpen={isAddPlayerOpen}
+                onClose={() => {
+                    setIsAddPlayerOpen(false);
+                    setEditingPlayer(null);
+                }}
+                onSuccess={async () => {
+                    await refreshClubPlayers();
+                    setActionMessage(editingPlayer ? 'Jugador actualizado.' : 'Jugador registrado.');
+                }}
+                initialMode="player"
+                person={editingPlayer}
+            />
         </div>
     );
 }

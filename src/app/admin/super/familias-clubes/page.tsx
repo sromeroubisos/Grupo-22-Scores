@@ -303,12 +303,26 @@ export default function SuperadminClubFamiliesPage() {
             if (current.includes(clubId)) {
                 setDivisionGroups((groups) =>
                     groups
-                        .filter((group) => group.rosterOwnerClubId !== clubId)
-                        .map((group) => ({
-                            ...group,
-                            divisionClubIds: group.divisionClubIds.filter((id) => id !== clubId),
-                        }))
-                        .filter((group) => group.divisionClubIds.length > 0)
+                        .map((group) => {
+                            const nextDivisionClubIds = group.divisionClubIds.filter((id) => id !== clubId);
+
+                            if (group.rosterOwnerClubId !== clubId) {
+                                return {
+                                    ...group,
+                                    divisionClubIds: nextDivisionClubIds,
+                                };
+                            }
+
+                            const [nextRosterReferenceClubId, ...remainingDivisionClubIds] = nextDivisionClubIds;
+                            if (!nextRosterReferenceClubId) return null;
+
+                            return {
+                                ...group,
+                                rosterOwnerClubId: nextRosterReferenceClubId,
+                                divisionClubIds: remainingDivisionClubIds,
+                            };
+                        })
+                        .filter((group): group is DivisionGroupDraft => Boolean(group))
                 );
                 return current.filter((id) => id !== clubId);
             }
@@ -334,7 +348,7 @@ export default function SuperadminClubFamiliesPage() {
             {
                 id: `division-group-${Date.now()}-${current.length}`,
                 name: '',
-                rosterOwnerClubId: baseClubId,
+                rosterOwnerClubId: '',
                 divisionClubIds: [],
             },
         ]);
@@ -354,25 +368,30 @@ export default function SuperadminClubFamiliesPage() {
         ));
     };
 
-    const updateDivisionGroupOwner = (groupId: string, rosterOwnerClubId: string) => {
-        setCreateFamilyError(null);
-        setDivisionGroups((current) => current.map((group) =>
-            group.id === groupId
-                ? {
-                    ...group,
-                    rosterOwnerClubId,
-                    divisionClubIds: group.divisionClubIds.filter((clubId) => clubId !== rosterOwnerClubId),
-                }
-                : group
-        ));
-    };
-
     const toggleDivisionGroupMember = (groupId: string, clubId: string) => {
         if (!selectedClubIds.includes(clubId)) return;
 
         setCreateFamilyError(null);
         setDivisionGroups((current) => current.map((group) => {
-            if (group.id !== groupId || group.rosterOwnerClubId === clubId) return group;
+            if (group.id !== groupId) return group;
+
+            if (!group.rosterOwnerClubId) {
+                return {
+                    ...group,
+                    rosterOwnerClubId: clubId,
+                };
+            }
+
+            if (group.rosterOwnerClubId === clubId) {
+                const [nextRosterReferenceClubId, ...remainingDivisionClubIds] = group.divisionClubIds;
+                if (!nextRosterReferenceClubId) return group;
+
+                return {
+                    ...group,
+                    rosterOwnerClubId: nextRosterReferenceClubId,
+                    divisionClubIds: remainingDivisionClubIds,
+                };
+            }
 
             return {
                 ...group,
@@ -399,6 +418,10 @@ export default function SuperadminClubFamiliesPage() {
             divisionClubIds: [clubId],
         }]);
     };
+
+    const getDivisionGroupClubIds = (group: DivisionGroupDraft) => (
+        Array.from(new Set([group.rosterOwnerClubId, ...group.divisionClubIds].filter(Boolean)))
+    );
 
     const baseClubId = selectedClubIds[0] ?? null;
     const baseClub = baseClubId ? clubById.get(baseClubId) ?? null : null;
@@ -454,14 +477,18 @@ export default function SuperadminClubFamiliesPage() {
                     baseClubId,
                     derivedClubIds: selectedDerivedClubIds,
                     divisionGroups: divisionGroups
-                        .map((group) => ({
-                            name: group.name.trim(),
-                            rosterOwnerClubId: group.rosterOwnerClubId,
-                            divisionClubIds: group.divisionClubIds.filter((clubId) =>
-                                selectedClubIds.includes(clubId) && clubId !== group.rosterOwnerClubId
-                            ),
-                        }))
-                        .filter((group) => selectedClubIds.includes(group.rosterOwnerClubId) && group.divisionClubIds.length > 0),
+                        .map((group) => {
+                            const groupClubIds = Array.from(new Set([group.rosterOwnerClubId, ...group.divisionClubIds]))
+                                .filter((clubId) => selectedClubIds.includes(clubId));
+                            const [rosterOwnerClubId, ...divisionClubIds] = groupClubIds;
+
+                            return {
+                                name: group.name.trim(),
+                                rosterOwnerClubId,
+                                divisionClubIds,
+                            };
+                        })
+                        .filter((group) => Boolean(group.rosterOwnerClubId) && group.divisionClubIds.length > 0),
                     previousBaseClubId: editingBaseClubId || undefined,
                 }),
             });
@@ -793,7 +820,7 @@ export default function SuperadminClubFamiliesPage() {
                                                             </span>
                                                             {rosterOwner && (
                                                                 <span style={{ fontSize: 10, color: '#86efac', fontFamily: 'var(--font-mono)' }}>
-                                                                    {divisionGroupLabel ? `${divisionGroupLabel}: ` : 'PLANTEL: '}
+                                                                    {divisionGroupLabel ? `DIVISION ${divisionGroupLabel}: ` : 'DIVISION: '}
                                                                     {rosterOwner.name}
                                                                 </span>
                                                             )}
@@ -877,7 +904,7 @@ export default function SuperadminClubFamiliesPage() {
                                 El primer club seleccionado queda como base. Tambien podes cambiar la base desde el selector. Los clubes nuevos se crean desde el panel de clubes.
                             </p>
                             <p style={{ margin: 0, color: '#86efac', lineHeight: 1.55, fontSize: 13 }}>
-                                Para casos como M16 A/B o Primera/Reserva, marca &quot;comparte plantel&quot; en los clubes que deben usar el roster del club base.
+                                Para casos como M16 A/B o Primera/Reserva, crea una division y marca que equipos comparten ese roster.
                             </p>
                         </div>
 
@@ -1011,32 +1038,32 @@ export default function SuperadminClubFamiliesPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                                     <div style={{ display: 'grid', gap: 4 }}>
                                         <div style={{ fontSize: 11, color: '#86efac', fontFamily: 'var(--font-mono)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-                                            Configurar divisiones independientes
+                                            Divisiones con plantel compartido
                                         </div>
                                         <div style={{ fontSize: 13, color: 'var(--basalt-400)' }}>
-                                            Crea varios grupos con nombre propio. Cada grupo tiene su propio club dueño del plantel y sus clubes que comparten ese roster.
+                                            Cada division agrupa equipos que usan el mismo roster. Si cargas un jugador en cualquier equipo marcado, lo ven todos.
                                         </div>
                                     </div>
                                     <button type="button" className={styles.cardAction} onClick={addDivisionGroup}>
                                         <Plus size={13} style={{ marginRight: 6 }} />
-                                        Agregar grupo
+                                        Agregar division
                                     </button>
                                 </div>
 
                                 {divisionGroups.length === 0 ? (
                                     <div style={{ padding: 12, borderRadius: 10, border: '1px dashed rgba(255,255,255,0.12)', color: 'var(--basalt-400)', fontSize: 13 }}>
-                                        No hay grupos configurados. Si M16 A/B o Primera/Reserva comparten jugadores, agrega un grupo.
+                                        No hay divisiones configuradas. Si M16 A/B o Primera/Reserva comparten jugadores, agrega una division.
                                     </div>
                                 ) : (
                                     <div style={{ display: 'grid', gap: 10 }}>
                                         {divisionGroups.map((group, groupIndex) => {
-                                            const ownerClub = clubById.get(group.rosterOwnerClubId);
+                                            const divisionTeamIds = getDivisionGroupClubIds(group);
 
                                             return (
                                                 <div key={group.id} style={{ display: 'grid', gap: 10, padding: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.16)' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                                                        <label style={{ display: 'grid', gap: 6, color: 'var(--basalt-300)', fontSize: 12, minWidth: 220, flex: '1 1 240px' }}>
-                                                            Nombre del grupo #{groupIndex + 1}
+                                                        <label style={{ display: 'grid', gap: 6, color: 'var(--basalt-300)', fontSize: 12, minWidth: 220, flex: '1 1 360px' }}>
+                                                            Nombre de la division #{groupIndex + 1}
                                                             <input
                                                                 value={group.name}
                                                                 onChange={(event) => updateDivisionGroupName(group.id, event.target.value)}
@@ -1044,31 +1071,18 @@ export default function SuperadminClubFamiliesPage() {
                                                                 style={{ background: '#0f1217', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', padding: '9px 12px', fontSize: 13 }}
                                                             />
                                                         </label>
-                                                        <label style={{ display: 'grid', gap: 6, color: 'var(--basalt-300)', fontSize: 12, minWidth: 260, flex: '1 1 300px' }}>
-                                                            Plantel dueño #{groupIndex + 1}
-                                                            <select
-                                                                value={group.rosterOwnerClubId}
-                                                                onChange={(event) => updateDivisionGroupOwner(group.id, event.target.value)}
-                                                                style={{ background: '#0f1217', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', padding: '9px 12px', fontSize: 13 }}
-                                                            >
-                                                                {selectedClubIds.map((clubId) => {
-                                                                    const club = clubById.get(clubId);
-                                                                    return club ? <option key={club.id} value={club.id}>{club.name}</option> : null;
-                                                                })}
-                                                            </select>
-                                                        </label>
                                                         <button type="button" className={styles.cardAction} onClick={() => removeDivisionGroup(group.id)} style={{ color: '#fca5a5' }}>
                                                             <Trash2 size={13} style={{ marginRight: 6 }} />
-                                                            Quitar grupo
+                                                            Quitar division
                                                         </button>
                                                     </div>
 
                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                                        {selectedClubIds.filter((clubId) => clubId !== group.rosterOwnerClubId).map((clubId) => {
+                                                        {selectedClubIds.map((clubId) => {
                                                             const club = clubById.get(clubId);
                                                             if (!club) return null;
 
-                                                            const isLinked = group.divisionClubIds.includes(clubId);
+                                                            const isLinked = divisionTeamIds.includes(clubId);
 
                                                             return (
                                                                 <button
@@ -1088,7 +1102,7 @@ export default function SuperadminClubFamiliesPage() {
                                                                         textTransform: 'uppercase',
                                                                     }}
                                                                 >
-                                                                    {isLinked ? 'Comparte - ' : ''}
+                                                                    {isLinked ? 'En division - ' : ''}
                                                                     {club.name}
                                                                 </button>
                                                             );
@@ -1096,7 +1110,9 @@ export default function SuperadminClubFamiliesPage() {
                                                     </div>
 
                                                     <div style={{ fontSize: 12, color: 'var(--basalt-500)' }}>
-                                                        {ownerClub?.name || 'El club seleccionado'} sera la fuente del plantel para los clubes marcados.
+                                                        {divisionTeamIds.length < 2
+                                                            ? 'Marca al menos dos equipos para que esta division comparta plantel.'
+                                                            : `Los ${divisionTeamIds.length} equipos marcados comparten el mismo plantel. Podes cargar jugadores desde cualquiera de ellos.`}
                                                     </div>
                                                 </div>
                                             );
@@ -1113,7 +1129,7 @@ export default function SuperadminClubFamiliesPage() {
                                         Configurar divisiones
                                     </div>
                                     <div style={{ fontSize: 13, color: 'var(--basalt-400)' }}>
-                                        Marca los clubes que comparten el plantel del club base. La familia sigue siendo una familia; esto solo configura el roster compartido.
+                                        Marca los equipos de la division que comparten el mismo plantel.
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

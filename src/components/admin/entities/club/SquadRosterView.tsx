@@ -30,6 +30,7 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
     const [search, setSearch] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
+    const [editingPlayer, setEditingPlayer] = useState<PersonWithRole | null>(null);
 
     const loadPlayers = useCallback(async () => {
         setLoading(true);
@@ -84,7 +85,10 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                         Importar Excel
                     </button>
                     <button
-                        onClick={() => setIsAddModalOpen(true)}
+                        onClick={() => {
+                            setEditingPlayer(null);
+                            setIsAddModalOpen(true);
+                        }}
                         className="btn btn-primary gap-2"
                     >
                         <Plus className="w-4 h-4" />
@@ -137,7 +141,10 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                         <p className="text-[14px] font-black uppercase tracking-[0.3em] opacity-30">Planilla vacia</p>
                                         <button
                                             type="button"
-                                            onClick={() => setIsAddModalOpen(true)}
+                                            onClick={() => {
+                                                setEditingPlayer(null);
+                                                setIsAddModalOpen(true);
+                                            }}
                                             className="btn btn-primary gap-2 mx-auto"
                                         >
                                             <Plus className="w-4 h-4" />
@@ -185,7 +192,15 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                     </td>
                                     <td className="px-4 py-4">
                                         <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="p-2 hover:bg-neutral-700 rounded transition-colors border border-neutral-800">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setEditingPlayer(person);
+                                                    setIsAddModalOpen(true);
+                                                }}
+                                                className="p-2 hover:bg-neutral-700 rounded transition-colors border border-neutral-800"
+                                                title="Editar jugador"
+                                            >
                                                 <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
                                             </button>
                                             <button
@@ -207,10 +222,14 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                 clubId={clubId}
                 divisions={[division]}
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    setEditingPlayer(null);
+                }}
                 onSuccess={loadPlayers}
                 lockDivisionId={division.id}
                 initialMode="player"
+                person={editingPlayer}
             />
 
             <CSVImportModal

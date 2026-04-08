@@ -4,10 +4,10 @@
 -- ============================================
 
 ALTER TABLE public.matches
-  ADD COLUMN IF NOT EXISTS home_base_points       integer NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS away_base_points       integer NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS home_bonus_points      integer NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS away_bonus_points      integer NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS home_base_points       numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS away_base_points       numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS home_bonus_points      numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS away_bonus_points      numeric NOT NULL DEFAULT 0,
   ADD COLUMN IF NOT EXISTS points_autocalculated  boolean NOT NULL DEFAULT true,
   ADD COLUMN IF NOT EXISTS points_override_reason text;
 

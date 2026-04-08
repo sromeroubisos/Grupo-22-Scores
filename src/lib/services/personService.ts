@@ -16,6 +16,8 @@ export interface PersonWithRole {
     division_name?: string;
     position?: string;
     id_number?: string;
+    weight?: number;
+    height?: number;
 }
 
 type TeamLookupRow = {
@@ -50,6 +52,8 @@ type PersonRow = {
     birth_date: string | null;
     id_number: string | null;
     position: string | null;
+    weight: number | null;
+    height: number | null;
 };
 
 type DivisionLookupRow = {
@@ -57,10 +61,22 @@ type DivisionLookupRow = {
     name: string | null;
 };
 
-const MISSING_TABLE_CODES = new Set(['PGRST204', '42P01']);
+const MISSING_TABLE_CODES = new Set(['PGRST204', 'PGRST205', '42P01']);
+const FAMILY_DIVISION_ID_PREFIX = 'family-division';
 
 function isMissingTableError(error: any) {
     return Boolean(error && typeof error.code === 'string' && MISSING_TABLE_CODES.has(error.code));
+}
+
+function parseFamilyDivisionId(divisionId?: string) {
+    if (!divisionId?.startsWith(`${FAMILY_DIVISION_ID_PREFIX}|`)) return null;
+    const [, rosterOwnerClubId, encodedName] = divisionId.split('|');
+    if (!rosterOwnerClubId) return null;
+
+    return {
+        rosterOwnerClubId,
+        groupName: encodedName ? decodeURIComponent(encodedName) : null,
+    };
 }
 
 async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: any): Promise<string> {
@@ -86,23 +102,7 @@ async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: a
         return rosterOwnerClubId;
     }
 
-    const { data, error } = await db
-        .from('club_derivatives')
-        .select('base_club_id')
-        .eq('derived_club_id', clubId)
-        .eq('derivative_type', 'divisions')
-        .limit(1)
-        .maybeSingle();
-
-    if (error) {
-        if (!isMissingTableError(error)) {
-            console.error('Error resolving shared roster owner:', error);
-        }
-        return clubId;
-    }
-
-    const baseClubId = typeof data?.base_club_id === 'string' ? data.base_club_id : null;
-    return baseClubId && baseClubId !== clubId ? baseClubId : clubId;
+    return clubId;
 }
 
 function mapPersonRecord(person: any, membership: any, divisionName?: string, divisionId?: string): PersonWithRole {
@@ -120,7 +120,151 @@ function mapPersonRecord(person: any, membership: any, divisionName?: string, di
         division_id: divisionId,
         division_name: divisionName,
         position: membership.position || person.position || undefined,
+        weight: person.weight || undefined,
+        height: person.height || undefined,
     };
+}
+
+async function fetchPersonRowsByIds(supabase: any, personIds: string[]): Promise<PersonRow[]> {
+    if (personIds.length === 0) return [];
+
+    const richSelect = 'id, first_name, last_name, full_name, avatar_url, photo_url, birth_date, id_number, position, weight, height';
+    const safeSelect = 'id, first_name, last_name, full_name, avatar_url, birth_date, id_number';
+
+    const { data, error } = await supabase
+        .from('people')
+        .select(richSelect)
+        .in('id', personIds);
+
+    if (!error) {
+        return (data ?? []) as PersonRow[];
+    }
+
+    const { data: safeData, error: safeError } = await supabase
+        .from('people')
+        .select(safeSelect)
+        .in('id', personIds);
+
+    if (safeError) {
+        console.error('Error fetching people:', safeError);
+        return [];
+    }
+
+    return ((safeData ?? []) as any[]).map((person) => ({
+        ...person,
+        photo_url: null,
+        position: null,
+        weight: null,
+        height: null,
+    })) as PersonRow[];
+}
+
+async function insertPersonRecord(supabase: any, personData: {
+    first_name: string,
+    last_name: string,
+    birth_date?: string,
+    id_number?: string,
+    photo_url?: string,
+    weight?: number,
+    height?: number,
+    position?: string,
+    role?: string,
+    status?: string,
+    club_id?: string,
+}) {
+    const fullName = `${personData.first_name} ${personData.last_name}`.trim();
+    const richPayload = {
+        club_id: personData.club_id,
+        first_name: personData.first_name,
+        last_name: personData.last_name,
+        full_name: fullName,
+        name: fullName,
+        birth_date: personData.birth_date || null,
+        id_number: personData.id_number || null,
+        photo_url: personData.photo_url || null,
+        avatar_url: personData.photo_url || null,
+        weight: personData.weight || null,
+        height: personData.height || null,
+        position: personData.position || null,
+        role: personData.role || null,
+        status: personData.status || 'active',
+    };
+
+    const { data, error } = await supabase
+        .from('people')
+        .insert(richPayload)
+        .select()
+        .single();
+
+    if (!error) return { data, error: null };
+
+    const safePayload = {
+        first_name: personData.first_name,
+        last_name: personData.last_name,
+        birth_date: personData.birth_date || null,
+        id_number: personData.id_number || null,
+        avatar_url: personData.photo_url || null,
+    };
+
+    return supabase
+        .from('people')
+        .insert(safePayload)
+        .select()
+        .single();
+}
+
+async function updatePersonRecord(supabase: any, personId: string, personData: {
+    first_name: string,
+    last_name: string,
+    birth_date?: string,
+    id_number?: string,
+    photo_url?: string,
+    weight?: number,
+    height?: number,
+    position?: string,
+    role?: string,
+    status?: string,
+}) {
+    const fullName = `${personData.first_name} ${personData.last_name}`.trim();
+    const richPayload = {
+        first_name: personData.first_name,
+        last_name: personData.last_name,
+        full_name: fullName,
+        name: fullName,
+        birth_date: personData.birth_date || null,
+        id_number: personData.id_number || null,
+        photo_url: personData.photo_url || null,
+        avatar_url: personData.photo_url || null,
+        weight: personData.weight || null,
+        height: personData.height || null,
+        position: personData.position || null,
+        role: personData.role || null,
+        status: personData.status || 'active',
+    };
+
+    const { data, error } = await supabase
+        .from('people')
+        .update(richPayload)
+        .eq('id', personId)
+        .select()
+        .single();
+
+    if (!error) return { data, error: null };
+
+    const safePayload = {
+        first_name: personData.first_name,
+        last_name: personData.last_name,
+        birth_date: personData.birth_date || null,
+        id_number: personData.id_number || null,
+        avatar_url: personData.photo_url || null,
+    };
+
+    return supabase
+        .from('people')
+        .update(safePayload)
+        .eq('id', personId)
+        .select()
+        .single();
 }
 
 async function resolveTeamReference(supabase: any, clubId: string, divisionId?: string) {
@@ -212,16 +356,7 @@ async function fetchPeopleFromTeamMemberships(clubId: string, divisionId?: strin
     if (filteredMemberships.length === 0) return [];
 
     const personIds = Array.from(new Set(filteredMemberships.map((membership: any) => membership.person_id)));
-    const { data: people, error: peopleError } = await supabase
-        .from('people')
-        .select('id, first_name, last_name, full_name, avatar_url, photo_url, birth_date, id_number, position')
-        .in('id', personIds);
-
-    if (peopleError) {
-        console.error('Error fetching people for team memberships:', peopleError);
-        return [];
-    }
-
+    const people = await fetchPersonRowsByIds(supabase, personIds);
     const peopleById = new Map<string, PersonRow>(((people ?? []) as PersonRow[]).map((person) => [person.id, person]));
 
     return filteredMemberships
@@ -268,20 +403,12 @@ async function fetchPeopleFromLegacy(clubId: string, divisionId?: string): Promi
     const personIds = Array.from(new Set(roleRows.map((role) => role.person_id)));
     const divisionIds = Array.from(new Set(roleRows.map((role) => role.division_id).filter(Boolean))) as string[];
 
-    const [{ data: people, error: peopleError }, { data: divisions, error: divisionsError }] = await Promise.all([
-        supabase
-            .from('people')
-            .select('id, first_name, last_name, full_name, avatar_url, photo_url, birth_date, id_number, position')
-            .in('id', personIds),
+    const [people, { data: divisions, error: divisionsError }] = await Promise.all([
+        fetchPersonRowsByIds(supabase, personIds),
         divisionIds.length > 0
             ? db.from('club_divisions').select('id, name').in('id', divisionIds)
             : Promise.resolve({ data: [], error: null }),
     ]);
-
-    if (peopleError) {
-        console.error('Error fetching people from legacy roles:', peopleError);
-        return [];
-    }
 
     if (divisionsError && !isMissingTableError(divisionsError)) {
         console.error('Error fetching divisions from legacy roles:', divisionsError);
@@ -342,33 +469,24 @@ export async function addPersonToClub(clubId: string, personData: {
 }) {
     const supabase = await createClient();
     const db = supabase as any;
-    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId, db);
-    const rosterDivisionId = rosterClubId === clubId ? personData.division_id : undefined;
+    const familyDivision = parseFamilyDivisionId(personData.division_id);
+    const rosterClubId = familyDivision?.rosterOwnerClubId ?? await resolveSharedRosterOwnerClubId(clubId, db);
+    const rosterDivisionId = familyDivision ? undefined : rosterClubId === clubId ? personData.division_id : undefined;
 
-    const fullName = `${personData.first_name} ${personData.last_name}`.trim();
+    const { data: person, error: personError } = await insertPersonRecord(supabase, {
+        ...personData,
+        club_id: rosterClubId,
+    });
 
-    const { data: person, error: personError } = await supabase
-        .from('people')
-        .insert({
-            club_id: rosterClubId,
-            first_name: personData.first_name,
-            last_name: personData.last_name,
-            full_name: fullName,
-            name: fullName,
-            birth_date: personData.birth_date || null,
-            id_number: personData.id_number || null,
-            photo_url: personData.photo_url || null,
-            avatar_url: personData.photo_url || null,
-            weight: personData.weight || null,
-            height: personData.height || null,
-            position: personData.position || null,
-            role: personData.role || null,
-            status: personData.status || 'active',
-        })
-        .select()
-        .single();
-
-    if (personError) return { success: false, error: personError.message };
+    if (personError) {
+        const missingPeopleTable = isMissingTableError(personError) || personError.message?.includes("public.people");
+        return {
+            success: false,
+            error: missingPeopleTable
+                ? 'Falta la tabla public.people. Ejecuta la migracion 20260407190000_restore_people_for_club_rosters.sql y recarga el schema cache de Supabase.'
+                : personError.message,
+        };
+    }
 
     let teamReference;
     try {
@@ -392,22 +510,20 @@ export async function addPersonToClub(clubId: string, personData: {
         return { success: false, error: roleError.message };
     }
 
-    if (teamReference.teamId) {
-        const { error: membershipError } = await db
-            .from('team_memberships')
-            .insert({
-                club_id: rosterClubId,
-                team_id: teamReference.teamId,
-                person_id: person.id,
-                role: personData.role,
-                status: personData.status || 'active',
-                position: personData.position || null,
-                source: 'manual',
-            });
+    const { error: membershipError } = await db
+        .from('team_memberships')
+        .insert({
+            club_id: rosterClubId,
+            team_id: teamReference.teamId || null,
+            person_id: person.id,
+            role: personData.role,
+            status: personData.status || 'active',
+            position: personData.position || null,
+            source: 'manual',
+        });
 
-        if (membershipError && !isMissingTableError(membershipError)) {
-            return { success: false, error: membershipError.message };
-        }
+    if (membershipError && !isMissingTableError(membershipError)) {
+        return { success: false, error: membershipError.message };
     }
 
     if (personData.role === 'player' && teamReference.legacyDivisionId) {
@@ -425,6 +541,89 @@ export async function addPersonToClub(clubId: string, personData: {
         if (squadMemberError && !isMissingTableError(squadMemberError)) {
             return { success: false, error: squadMemberError.message };
         }
+    }
+
+    return { success: true, data: person };
+}
+
+export async function updatePersonInClub(clubId: string, personId: string, personData: {
+    first_name: string,
+    last_name: string,
+    role: string,
+    division_id?: string,
+    status?: string,
+    position?: string,
+    birth_date?: string,
+    id_number?: string,
+    photo_url?: string,
+    weight?: number,
+    height?: number
+}) {
+    const supabase = await createClient();
+    const db = supabase as any;
+    const familyDivision = parseFamilyDivisionId(personData.division_id);
+    const rosterClubId = familyDivision?.rosterOwnerClubId ?? await resolveSharedRosterOwnerClubId(clubId, db);
+    const rosterDivisionId = familyDivision ? undefined : rosterClubId === clubId ? personData.division_id : undefined;
+
+    const { data: person, error: personError } = await updatePersonRecord(supabase, personId, personData);
+    if (personError) {
+        return { success: false, error: personError.message };
+    }
+
+    let teamReference;
+    try {
+        teamReference = await resolveTeamReference(db, rosterClubId, rosterDivisionId);
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+
+    const { error: membershipsDeleteError } = await db
+        .from('team_memberships')
+        .delete()
+        .match({ club_id: rosterClubId, person_id: personId });
+
+    if (membershipsDeleteError && !isMissingTableError(membershipsDeleteError)) {
+        return { success: false, error: membershipsDeleteError.message };
+    }
+
+    const { error: membershipError } = await db
+        .from('team_memberships')
+        .insert({
+            club_id: rosterClubId,
+            team_id: teamReference.teamId || null,
+            person_id: personId,
+            role: personData.role,
+            status: personData.status || 'active',
+            position: personData.position || null,
+            source: 'manual',
+        });
+
+    if (membershipError && !isMissingTableError(membershipError)) {
+        return { success: false, error: membershipError.message };
+    }
+
+    const { error: rolesDeleteError } = await db
+        .from('club_person_roles')
+        .delete()
+        .match({ club_id: rosterClubId, person_id: personId });
+
+    if (rolesDeleteError && !isMissingTableError(rolesDeleteError)) {
+        return { success: false, error: rolesDeleteError.message };
+    }
+
+    const { error: roleError } = await db
+        .from('club_person_roles')
+        .insert({
+            club_id: rosterClubId,
+            person_id: personId,
+            role: personData.role,
+            division_id: teamReference.legacyDivisionId || null,
+            status: personData.status || 'active',
+            position: personData.position || null,
+        });
+
+    if (roleError && !isMissingTableError(roleError)) {
+        return { success: false, error: roleError.message };
     }
 
     return { success: true, data: person };

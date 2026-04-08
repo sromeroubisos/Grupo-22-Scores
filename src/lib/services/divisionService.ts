@@ -20,6 +20,9 @@ export interface Division {
     staff_count?: number;
     management_id?: string;
     legacy_division_id?: string | null;
+    is_family_division?: boolean;
+    roster_owner_club_id?: string | null;
+    linked_clubs?: Array<{ id: string; name: string }>;
 }
 
 export interface DivisionInput {
@@ -43,7 +46,8 @@ interface DivisionMutationResult {
 }
 
 const DEFAULT_SEASON = String(new Date().getFullYear());
-const MISSING_TABLE_CODES = new Set(['PGRST204', '42P01']);
+const MISSING_TABLE_CODES = new Set(['PGRST204', 'PGRST205', '42P01']);
+const FAMILY_DIVISION_ID_PREFIX = 'family-division';
 
 function isMissingTableError(error: any) {
     return Boolean(error && typeof error.code === 'string' && MISSING_TABLE_CODES.has(error.code));
@@ -158,6 +162,105 @@ function mergeDivisions(teamDivisions: Division[], legacyDivisions: Division[]) 
     }
 
     return Array.from(merged.values()).sort(sortDivisions);
+}
+
+function toFamilyDivisionId(rosterOwnerClubId: string, groupName: string | null) {
+    return `${FAMILY_DIVISION_ID_PREFIX}|${rosterOwnerClubId}|${encodeURIComponent(groupName || 'division')}`;
+}
+
+async function fetchFamilyDivisions(supabase: any, clubId: string): Promise<Division[]> {
+    const { data: seedLinks, error } = await supabase
+        .from('club_family_divisions')
+        .select('family_base_club_id, roster_owner_club_id, division_club_id, group_name')
+        .or(`roster_owner_club_id.eq.${clubId},division_club_id.eq.${clubId}`);
+
+    if (error) {
+        if (isMissingTableError(error)) return [];
+        throw error;
+    }
+
+    const seedGroupKeys = new Set(
+        (seedLinks ?? []).map((link: any) => `${link.roster_owner_club_id}::${link.group_name || ''}`)
+    );
+    const rosterOwnerIds = Array.from(new Set((seedLinks ?? []).map((link: any) => link.roster_owner_club_id).filter(Boolean)));
+
+    let allLinks = seedLinks ?? [];
+    if (rosterOwnerIds.length > 0) {
+        const { data: ownerLinks, error: ownerLinksError } = await supabase
+            .from('club_family_divisions')
+            .select('family_base_club_id, roster_owner_club_id, division_club_id, group_name')
+            .in('roster_owner_club_id', rosterOwnerIds);
+
+        if (ownerLinksError) {
+            if (!isMissingTableError(ownerLinksError)) throw ownerLinksError;
+        } else {
+            allLinks = (ownerLinks ?? []).filter((link: any) =>
+                seedGroupKeys.has(`${link.roster_owner_club_id}::${link.group_name || ''}`)
+            );
+        }
+    }
+
+    const clubIds = Array.from(new Set(
+        allLinks.flatMap((link: any) => [link.roster_owner_club_id, link.division_club_id]).filter(Boolean)
+    ));
+    const clubNames = new Map<string, string>();
+
+    if (clubIds.length > 0) {
+        const { data: clubs, error: clubsError } = await supabase
+            .from('clubs')
+            .select('id, name')
+            .in('id', clubIds);
+
+        if (clubsError) {
+            if (!isMissingTableError(clubsError)) throw clubsError;
+        } else {
+            for (const club of clubs ?? []) {
+                clubNames.set(String(club.id), String(club.name || club.id));
+            }
+        }
+    }
+
+    const groupedLinks = new Map<string, any[]>();
+    for (const link of allLinks) {
+        const rosterOwnerClubId = String(link.roster_owner_club_id || '');
+        if (!rosterOwnerClubId) continue;
+        const groupName = typeof link.group_name === 'string' && link.group_name.trim()
+            ? link.group_name.trim()
+            : 'Division compartida';
+        const key = `${rosterOwnerClubId}::${groupName}`;
+        groupedLinks.set(key, [...(groupedLinks.get(key) ?? []), link]);
+    }
+
+    const groups = new Map<string, Division>();
+
+    for (const [key, links] of groupedLinks.entries()) {
+        const [rosterOwnerClubId, groupName] = key.split('::');
+        if (!rosterOwnerClubId) continue;
+
+        const id = toFamilyDivisionId(rosterOwnerClubId, groupName);
+        const linkedClubIds = Array.from(new Set([rosterOwnerClubId, ...links.map((link: any) => link.division_club_id).filter(Boolean)]));
+
+        groups.set(id, {
+            id,
+            club_id: rosterOwnerClubId,
+            name: groupName,
+            sport: 'rugby',
+            gender: 'Masculino',
+            category: groupName,
+            season: DEFAULT_SEASON,
+            status: 'active',
+            players_count: 0,
+            staff_count: 0,
+            is_family_division: true,
+            roster_owner_club_id: rosterOwnerClubId,
+            linked_clubs: linkedClubIds.map((linkedClubId) => ({
+                id: linkedClubId,
+                name: clubNames.get(linkedClubId) ?? linkedClubId,
+            })),
+        });
+    }
+
+    return Array.from(groups.values()).sort(sortDivisions);
 }
 
 async function listClubTeams(supabase: any, clubId: string): Promise<any[] | null> {
@@ -347,16 +450,18 @@ export async function fetchDivisions(clubId: string): Promise<Division[]> {
             fetchDivisionsFromTeams(db, clubId),
             fetchDivisionsFromLegacy(db, clubId),
         ]);
+        const familyDivisions = await fetchFamilyDivisions(db, clubId);
 
         const hasTeamRows = Boolean(teamDivisions && teamDivisions.length > 0);
         const hasLegacyRows = Boolean(legacyDivisions && legacyDivisions.length > 0);
 
         if (hasTeamRows && hasLegacyRows) {
-            return mergeDivisions(teamDivisions!, legacyDivisions!);
+            return [...mergeDivisions(teamDivisions!, legacyDivisions!), ...familyDivisions].sort(sortDivisions);
         }
 
-        if (hasTeamRows) return teamDivisions!.sort(sortDivisions);
-        if (hasLegacyRows) return legacyDivisions!.sort(sortDivisions);
+        if (hasTeamRows) return [...teamDivisions!, ...familyDivisions].sort(sortDivisions);
+        if (hasLegacyRows) return [...legacyDivisions!, ...familyDivisions].sort(sortDivisions);
+        if (familyDivisions.length > 0) return familyDivisions;
 
         return fetchDivisionsFallback(clubId);
     } catch (error) {

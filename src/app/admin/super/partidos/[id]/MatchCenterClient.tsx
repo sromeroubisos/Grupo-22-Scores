@@ -345,6 +345,11 @@ function getPositiveInteger(value: string, fallback: number) {
     return parsed;
 }
 
+function parsePointInput(value: string, fallback = 0) {
+    const parsed = Number.parseFloat(value.replace(',', '.'));
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 function normalizePointsRules(rawRules: ReturnType<typeof StandingsEngine.resolveRules> | null | undefined): PointsRules {
     const offensiveRule = rawRules?.offensive_bonus_rule;
     const defensiveRule = rawRules?.defensive_bonus_rule;
@@ -1840,10 +1845,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <input
                                         type="number"
                                         min={0}
+                                        step="any"
                                         value={localPoints.home_base_points ?? 0}
                                         style={{ borderRadius: 4 }}
                                         onChange={(e) => {
-                                            const v = Math.max(0, parseInt(e.target.value) || 0);
+                                            const v = Math.max(0, parsePointInput(e.target.value));
                                             setLocalPoints(prev => ({ ...prev, home_base_points: v, points_autocalculated: false }));
                                         }}
                                     />
@@ -1853,10 +1859,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <input
                                         type="number"
                                         min={0}
+                                        step="any"
                                         value={localPoints.away_base_points ?? 0}
                                         style={{ borderRadius: 4 }}
                                         onChange={(e) => {
-                                            const v = Math.max(0, parseInt(e.target.value) || 0);
+                                            const v = Math.max(0, parsePointInput(e.target.value));
                                             setLocalPoints(prev => ({ ...prev, away_base_points: v, points_autocalculated: false }));
                                         }}
                                     />
@@ -1865,10 +1872,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <label>Bonus / modificador local</label>
                                     <input
                                         type="number"
+                                        step="any"
                                         value={localPoints.home_bonus_points ?? 0}
                                         style={{ borderRadius: 4 }}
                                         onChange={(e) => {
-                                            const v = parseInt(e.target.value) || 0;
+                                            const v = parsePointInput(e.target.value);
                                             setLocalPoints(prev => ({ ...prev, home_bonus_points: v, points_autocalculated: false }));
                                         }}
                                     />
@@ -1878,10 +1886,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <label>Bonus / modificador visitante</label>
                                     <input
                                         type="number"
+                                        step="any"
                                         value={localPoints.away_bonus_points ?? 0}
                                         style={{ borderRadius: 4 }}
                                         onChange={(e) => {
-                                            const v = parseInt(e.target.value) || 0;
+                                            const v = parsePointInput(e.target.value);
                                             setLocalPoints(prev => ({ ...prev, away_bonus_points: v, points_autocalculated: false }));
                                         }}
                                     />

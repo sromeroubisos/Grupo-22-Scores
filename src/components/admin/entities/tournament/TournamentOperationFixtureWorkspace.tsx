@@ -217,6 +217,11 @@ function parseQuickNumber(value: string, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function parseQuickPointNumber(value: string, fallback = 0) {
+  const parsed = Number.parseFloat(value.replace(',', '.'));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 function formatQuickNumber(value: number | null | undefined, fallback = 0) {
   const normalized = Number(value);
   return Number.isFinite(normalized) ? String(normalized) : String(fallback);
@@ -826,13 +831,13 @@ export function TournamentOperationFixtureWorkspace({
     if (!Number.isFinite(awayScore) || awayScore < 0) nextErrors.awayScore = 'Ingresa un marcador visitante valido.';
 
     if (quickResultForm.status === 'final') {
-      const homeBasePoints = Number.parseInt(quickResultForm.homeBasePoints, 10);
-      const awayBasePoints = Number.parseInt(quickResultForm.awayBasePoints, 10);
+      const homeBasePoints = parseQuickPointNumber(quickResultForm.homeBasePoints, Number.NaN);
+      const awayBasePoints = parseQuickPointNumber(quickResultForm.awayBasePoints, Number.NaN);
 
       if (!Number.isFinite(homeBasePoints) || homeBasePoints < 0) nextErrors.homeBasePoints = 'Los puntos base del local deben ser 0 o mas.';
       if (!Number.isFinite(awayBasePoints) || awayBasePoints < 0) nextErrors.awayBasePoints = 'Los puntos base del visitante deben ser 0 o mas.';
-      if (!Number.isFinite(Number.parseInt(quickResultForm.homeBonusPoints, 10))) nextErrors.homeBonusPoints = 'Ingresa un bonus local valido.';
-      if (!Number.isFinite(Number.parseInt(quickResultForm.awayBonusPoints, 10))) nextErrors.awayBonusPoints = 'Ingresa un bonus visitante valido.';
+      if (!Number.isFinite(parseQuickPointNumber(quickResultForm.homeBonusPoints, Number.NaN))) nextErrors.homeBonusPoints = 'Ingresa un bonus local valido.';
+      if (!Number.isFinite(parseQuickPointNumber(quickResultForm.awayBonusPoints, Number.NaN))) nextErrors.awayBonusPoints = 'Ingresa un bonus visitante valido.';
     }
 
     setQuickResultErrors(nextErrors);
@@ -876,10 +881,10 @@ export function TournamentOperationFixtureWorkspace({
         id: match.id,
         status: quickResultForm.status,
         score: { home: homeScore, away: awayScore },
-        homeBasePoints: isFinal ? Math.max(0, parseQuickNumber(quickResultForm.homeBasePoints)) : 0,
-        awayBasePoints: isFinal ? Math.max(0, parseQuickNumber(quickResultForm.awayBasePoints)) : 0,
-        homeBonusPoints: isFinal ? parseQuickNumber(quickResultForm.homeBonusPoints) : 0,
-        awayBonusPoints: isFinal ? parseQuickNumber(quickResultForm.awayBonusPoints) : 0,
+        homeBasePoints: isFinal ? Math.max(0, parseQuickPointNumber(quickResultForm.homeBasePoints)) : 0,
+        awayBasePoints: isFinal ? Math.max(0, parseQuickPointNumber(quickResultForm.awayBasePoints)) : 0,
+        homeBonusPoints: isFinal ? parseQuickPointNumber(quickResultForm.homeBonusPoints) : 0,
+        awayBonusPoints: isFinal ? parseQuickPointNumber(quickResultForm.awayBonusPoints) : 0,
         pointsAutocalculated: isFinal ? quickResultForm.pointsAutocalculated : true,
         pointsOverrideReason: isFinal && !quickResultForm.pointsAutocalculated
           ? quickResultForm.pointsOverrideReason.trim() || null
@@ -1922,13 +1927,18 @@ function MatchCard({
 }) {
   const { match, round } = entry;
   const [showScheduleEdit, setShowScheduleEdit] = useState(false);
-  useEffect(() => {
-    if (!quickResultOpen) setShowScheduleEdit(false);
-  }, [quickResultOpen]);
+  const handleQuickResultToggle = () => {
+    if (quickResultOpen) setShowScheduleEdit(false);
+    onQuickResult();
+  };
+  const handleQuickResultSave = () => {
+    setShowScheduleEdit(false);
+    onQuickResultSave();
+  };
   const quickBusy = busyAction === `quick-save-${match.id}`;
   const scoreVisible = match.status === 'live' || match.status === 'final';
-  const totalHomePoints = quickResultForm ? parseQuickNumber(quickResultForm.homeBasePoints) + parseQuickNumber(quickResultForm.homeBonusPoints) : 0;
-  const totalAwayPoints = quickResultForm ? parseQuickNumber(quickResultForm.awayBasePoints) + parseQuickNumber(quickResultForm.awayBonusPoints) : 0;
+  const totalHomePoints = quickResultForm ? parseQuickPointNumber(quickResultForm.homeBasePoints) + parseQuickPointNumber(quickResultForm.homeBonusPoints) : 0;
+  const totalAwayPoints = quickResultForm ? parseQuickPointNumber(quickResultForm.awayBasePoints) + parseQuickPointNumber(quickResultForm.awayBonusPoints) : 0;
   const getGroupLabel = (groupId: string | null | undefined) => groupLabel ?? formatGroupLabel(groupId);
   const manageHref = `/admin/matches/${match.id}/manage`;
   const matchLabel = `${match.homeClub?.name || 'Local'} vs ${match.awayClub?.name || 'Visitante'}`;
@@ -1975,7 +1985,7 @@ function MatchCard({
             <Pencil size={14} />
             <span>Editar</span>
           </button>
-          <button className={`fixture-mini-btn ${quickResultOpen ? 'is-active' : ''}`} onClick={onQuickResult}>
+          <button className={`fixture-mini-btn ${quickResultOpen ? 'is-active' : ''}`} onClick={handleQuickResultToggle}>
             <Zap size={14} />
             <span>Resultado rapido</span>
           </button>
@@ -1998,7 +2008,7 @@ function MatchCard({
               <span className="fixture-quick-kicker">Carga express</span>
               <strong>Resultado y puntos para la tabla</strong>
             </div>
-            <button type="button" className="fixture-icon-btn" title="Cerrar carga rapida" onClick={onQuickResult}>
+            <button type="button" className="fixture-icon-btn" title="Cerrar carga rapida" onClick={handleQuickResultToggle}>
               <X size={14} />
             </button>
           </div>
@@ -2038,22 +2048,22 @@ function MatchCard({
           <div className="fixture-quick-grid">
             <label className="fixture-quick-field">
               <span>Base local</span>
-              <input type="number" min={0} value={quickResultForm.homeBasePoints} onChange={(event) => onQuickPointsFieldChange('homeBasePoints', event.target.value)} />
+              <input type="number" min={0} step="any" value={quickResultForm.homeBasePoints} onChange={(event) => onQuickPointsFieldChange('homeBasePoints', event.target.value)} />
               {quickResultErrors.homeBasePoints ? <small className="operation-field-error">{quickResultErrors.homeBasePoints}</small> : null}
             </label>
             <label className="fixture-quick-field">
               <span>Base visitante</span>
-              <input type="number" min={0} value={quickResultForm.awayBasePoints} onChange={(event) => onQuickPointsFieldChange('awayBasePoints', event.target.value)} />
+              <input type="number" min={0} step="any" value={quickResultForm.awayBasePoints} onChange={(event) => onQuickPointsFieldChange('awayBasePoints', event.target.value)} />
               {quickResultErrors.awayBasePoints ? <small className="operation-field-error">{quickResultErrors.awayBasePoints}</small> : null}
             </label>
             <label className="fixture-quick-field">
               <span>Bonus / ajuste local</span>
-              <input type="number" value={quickResultForm.homeBonusPoints} onChange={(event) => onQuickPointsFieldChange('homeBonusPoints', event.target.value)} />
+              <input type="number" step="any" value={quickResultForm.homeBonusPoints} onChange={(event) => onQuickPointsFieldChange('homeBonusPoints', event.target.value)} />
               {quickResultErrors.homeBonusPoints ? <small className="operation-field-error">{quickResultErrors.homeBonusPoints}</small> : null}
             </label>
             <label className="fixture-quick-field">
               <span>Bonus / ajuste visitante</span>
-              <input type="number" value={quickResultForm.awayBonusPoints} onChange={(event) => onQuickPointsFieldChange('awayBonusPoints', event.target.value)} />
+              <input type="number" step="any" value={quickResultForm.awayBonusPoints} onChange={(event) => onQuickPointsFieldChange('awayBonusPoints', event.target.value)} />
               {quickResultErrors.awayBonusPoints ? <small className="operation-field-error">{quickResultErrors.awayBonusPoints}</small> : null}
             </label>
           </div>
@@ -2104,7 +2114,7 @@ function MatchCard({
                 <Clock3 size={14} />
                 Editar horario
               </button>
-              <button type="button" className="basalt-btn basalt-btn-primary" disabled={quickBusy} onClick={onQuickResultSave}>
+              <button type="button" className="basalt-btn basalt-btn-primary" disabled={quickBusy} onClick={handleQuickResultSave}>
                 {quickBusy ? <RefreshCw size={14} className="spin" /> : <CheckCircle2 size={14} />}
                 Guardar rapido
               </button>

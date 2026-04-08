@@ -66,12 +66,12 @@ CREATE TABLE IF NOT EXISTS public.tournament_standings (
     won INT NOT NULL DEFAULT 0,
     drawn INT NOT NULL DEFAULT 0,
     lost INT NOT NULL DEFAULT 0,
-    points INT NOT NULL DEFAULT 0,
+    points NUMERIC NOT NULL DEFAULT 0,
 
     -- Scoring stats (flexible for rugby/football/etc)
     scored INT NOT NULL DEFAULT 0, -- tries/goals scored
     conceded INT NOT NULL DEFAULT 0,
-    bonus_points INT NOT NULL DEFAULT 0,
+    bonus_points NUMERIC NOT NULL DEFAULT 0,
 
     -- Form and streaks
     form TEXT, -- "WWDLL" last 5 matches
