@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Trophy, Users, Star, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import styles from './favorites.module.css';
 import { useFavorites, FavoriteItem } from '@/hooks/useFavorites';
@@ -13,6 +14,18 @@ const TABS: Array<{ id: Tab; label: string; icon: typeof Star; entityTypes: Enti
     { id: 'league', label: 'Ligas', icon: Trophy, entityTypes: ['league', 'tournament'] },
     { id: 'club', label: 'Clubes', icon: Users, entityTypes: ['club'] },
 ];
+
+function getFavoriteHref(fav: FavoriteItem): string | null {
+    if (fav.entity_type === 'club') {
+        return `/clubs/${encodeURIComponent(fav.id)}`;
+    }
+
+    if (fav.entity_type === 'league' || fav.entity_type === 'tournament') {
+        return `/tournaments/${encodeURIComponent(fav.id)}`;
+    }
+
+    return null;
+}
 
 export default function FavoritesPage() {
     const { favorites, hasMore, loading: favsLoading, error: favsError, toggleFavorite, loadMore, refresh } = useFavorites();
@@ -142,8 +155,28 @@ export default function FavoritesPage() {
 }
 
 function FavoriteCard({ fav, onRemove }: { fav: FavoriteItem; onRemove: () => void }) {
+    const router = useRouter();
+    const href = getFavoriteHref(fav);
+
+    const handleNavigate = () => {
+        if (!href) return;
+        router.push(href);
+    };
+
     return (
-        <div className={styles.favoriteCard}>
+        <div
+            className={`${styles.favoriteCard} ${href ? styles.favoriteCardInteractive : ''}`}
+            onClick={handleNavigate}
+            onKeyDown={(event) => {
+                if (!href) return;
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                handleNavigate();
+            }}
+            role={href ? 'link' : undefined}
+            tabIndex={href ? 0 : undefined}
+            aria-label={href ? `Abrir ${fav.name}` : undefined}
+        >
             <div className={styles.favoriteContent}>
                 {fav.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -164,7 +197,10 @@ function FavoriteCard({ fav, onRemove }: { fav: FavoriteItem; onRemove: () => vo
 
                 <button
                     className={styles.favoriteAction}
-                    onClick={onRemove}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onRemove();
+                    }}
                     aria-label={`Quitar ${fav.name} de favoritos`}
                     title="Quitar de favoritos"
                 >

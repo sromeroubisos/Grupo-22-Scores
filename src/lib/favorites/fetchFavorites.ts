@@ -11,6 +11,10 @@ export type ResolvedFavorite = {
     created_at: string;
 };
 
+export const FAVORITES_LOCAL_CACHE_KEY = 'g22_favorites_v4_fix';
+const PENDING_FAVORITE_NAME = 'Pendiente de sincronizar';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 type RpcFavoriteRow = {
     entity_id?: unknown;
     entity_type?: unknown;
@@ -27,8 +31,228 @@ type FavoriteBaseRow = {
     created_at: string;
 };
 
+type ClubLookupRow = {
+    id?: unknown;
+    external_id?: unknown;
+    name?: unknown;
+    logo_url?: unknown;
+    primary_color?: unknown;
+};
+
+type TournamentLookupRow = {
+    id?: unknown;
+    external_id?: unknown;
+    name?: unknown;
+    display_name?: unknown;
+    logo_url?: unknown;
+};
+
+type ExternalTeamRow = {
+    id?: unknown;
+    name?: unknown;
+    short_name?: unknown;
+    logo_url?: unknown;
+};
+
+type ExternalTournamentRow = {
+    id?: unknown;
+    name?: unknown;
+    display_name?: unknown;
+    logo_url?: unknown;
+};
+
+type ExternalLookupClient = {
+    from: (table: string) => {
+        select: (columns: string) => {
+            in: (
+                column: string,
+                values: string[],
+            ) => Promise<{ data: Record<string, unknown>[] | null; error: unknown }>;
+        };
+    };
+};
+
 function isEntityType(value: unknown): value is EntityType {
     return typeof value === 'string' && ['club', 'league', 'tournament', 'match', 'player'].includes(value);
+}
+
+function uniqueStrings(values: Array<string | null | undefined>): string[] {
+    return Array.from(new Set(values.filter((value): value is string => Boolean(value && value.trim())).map((value) => value.trim())));
+}
+
+function buildClubCandidateIds(entityId: string): string[] {
+    const raw = entityId.trim();
+    if (!raw) return [];
+
+    const lower = raw.toLowerCase();
+    const values = [raw, lower];
+
+    if (lower.startsWith('fs-team-')) {
+        const stripped = raw.slice(8);
+        values.push(stripped, stripped.toLowerCase(), `fs-${stripped}`, `fs-${stripped.toLowerCase()}`);
+    } else if (lower.startsWith('fs-')) {
+        const stripped = raw.slice(3);
+        values.push(stripped, stripped.toLowerCase(), `fs-team-${stripped}`, `fs-team-${stripped.toLowerCase()}`);
+    } else if (lower.startsWith('ras-team-')) {
+        const stripped = raw.slice(9);
+        values.push(stripped, stripped.toLowerCase());
+    } else if (lower.startsWith('espn-team-')) {
+        const stripped = raw.slice(10);
+        values.push(stripped, stripped.toLowerCase());
+    }
+
+    return uniqueStrings(values);
+}
+
+function buildTournamentCandidateIds(entityId: string): string[] {
+    const raw = entityId.trim();
+    if (!raw) return [];
+
+    const lower = raw.toLowerCase();
+    const values = [raw, lower];
+
+    if (lower.startsWith('fs-')) {
+        const stripped = raw.slice(3);
+        values.push(stripped, stripped.toLowerCase());
+    } else if (lower.startsWith('ras-league-')) {
+        const stripped = raw.slice('ras-league-'.length);
+        values.push(stripped, stripped.toLowerCase());
+    } else if (lower.startsWith('espn-league-')) {
+        const stripped = raw.slice('espn-league-'.length);
+        values.push(stripped, stripped.toLowerCase());
+    }
+
+    return uniqueStrings(values);
+}
+
+function isUuid(value: string): boolean {
+    return UUID_RE.test(value.trim());
+}
+
+function createResolvedFavoriteMeta(
+    name: string,
+    logo_url: string | null,
+    color: string | null,
+    type_label: string,
+) {
+    return { name, logo_url, color, type_label };
+}
+
+function registerClubLookup(
+    map: Map<string, { name: string; logo_url: string | null; color: string | null; type_label: string }>,
+    row: ClubLookupRow,
+) {
+    const id = typeof row.id === 'string' ? row.id.trim() : '';
+    const externalId = typeof row.external_id === 'string' ? row.external_id.trim() : '';
+    const name = typeof row.name === 'string' ? row.name.trim() : '';
+    if (!name) return;
+
+    const resolved = createResolvedFavoriteMeta(
+        name,
+        typeof row.logo_url === 'string' ? row.logo_url : null,
+        typeof row.primary_color === 'string' ? row.primary_color : null,
+        'Club',
+    );
+
+    uniqueStrings([
+        id,
+        externalId,
+        ...buildClubCandidateIds(id),
+        ...buildClubCandidateIds(externalId),
+    ]).forEach((candidate) => {
+        if (!map.has(candidate)) {
+            map.set(candidate, resolved);
+        }
+    });
+}
+
+function registerTournamentLookup(
+    map: Map<string, { name: string; logo_url: string | null; color: string | null; type_label: string }>,
+    row: TournamentLookupRow,
+) {
+    const id = typeof row.id === 'string' ? row.id.trim() : '';
+    const externalId = typeof row.external_id === 'string' ? row.external_id.trim() : '';
+    const displayName = typeof row.display_name === 'string' ? row.display_name.trim() : '';
+    const name = displayName || (typeof row.name === 'string' ? row.name.trim() : '');
+    if (!name) return;
+
+    const resolved = createResolvedFavoriteMeta(
+        name,
+        typeof row.logo_url === 'string' ? row.logo_url : null,
+        null,
+        'Torneo',
+    );
+
+    uniqueStrings([
+        id,
+        externalId,
+        ...buildTournamentCandidateIds(id),
+        ...buildTournamentCandidateIds(externalId),
+    ]).forEach((candidate) => {
+        if (!map.has(candidate)) {
+            map.set(candidate, resolved);
+        }
+    });
+}
+
+function favoriteKey(favorite: Pick<ResolvedFavorite, 'entity_type' | 'id'>): string {
+    return `${favorite.entity_type}:${favorite.id}`;
+}
+
+function hasUsableName(favorite: Pick<ResolvedFavorite, 'id' | 'name'>): boolean {
+    const name = favorite.name.trim();
+    return Boolean(name) && name !== PENDING_FAVORITE_NAME && name !== favorite.id;
+}
+
+function readCachedFavorites(): ResolvedFavorite[] {
+    try {
+        if (typeof window === 'undefined') return [];
+
+        const raw = window.localStorage.getItem(FAVORITES_LOCAL_CACHE_KEY);
+        if (!raw) return [];
+
+        const parsed = JSON.parse(raw) as unknown;
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+            .filter((row): row is ResolvedFavorite => {
+                if (typeof row !== 'object' || row === null) return false;
+                const favorite = row as Partial<ResolvedFavorite>;
+                return (
+                    typeof favorite.id === 'string' &&
+                    typeof favorite.name === 'string' &&
+                    isEntityType(favorite.entity_type) &&
+                    typeof favorite.type_label === 'string' &&
+                    typeof favorite.created_at === 'string'
+                );
+            });
+    } catch {
+        return [];
+    }
+}
+
+function mergeWithCachedFavorites(items: ResolvedFavorite[]): ResolvedFavorite[] {
+    const cached = new Map(readCachedFavorites().map((favorite) => [favoriteKey(favorite), favorite]));
+    if (cached.size === 0) return items;
+
+    return items.map((favorite) => {
+        const cachedFavorite = cached.get(favoriteKey(favorite));
+        if (!cachedFavorite) return favorite;
+
+        return {
+            ...favorite,
+            name: hasUsableName(favorite)
+                ? favorite.name
+                : hasUsableName(cachedFavorite)
+                    ? cachedFavorite.name
+                    : favorite.name,
+            logo_url: favorite.logo_url || cachedFavorite.logo_url || null,
+            color: favorite.color || cachedFavorite.color || null,
+            type_label: favorite.type_label !== 'Favorito'
+                ? favorite.type_label
+                : cachedFavorite.type_label || favorite.type_label,
+        };
+    });
 }
 
 function isSyntheticMatchVote(entityType: unknown, entityId: unknown) {
@@ -41,7 +265,7 @@ function mapRpcRow(row: RpcFavoriteRow): ResolvedFavorite {
     return {
         id: typeof row.entity_id === 'string' ? row.entity_id : '',
         entity_type: isEntityType(row.entity_type) ? row.entity_type : 'club',
-        name: typeof row.name === 'string' && row.name.trim() ? row.name : 'Pendiente de sincronizar',
+        name: typeof row.name === 'string' && row.name.trim() ? row.name : PENDING_FAVORITE_NAME,
         logo_url: typeof row.logo_url === 'string' ? row.logo_url : null,
         color: typeof row.color === 'string' ? row.color : null,
         type_label: typeof row.type_label === 'string' && row.type_label.trim() ? row.type_label : 'Favorito',
@@ -110,49 +334,104 @@ async function fetchFavoritesFallback(
     const tournamentIds = favorites
         .filter((row) => row.entity_type === 'league' || row.entity_type === 'tournament')
         .map((row) => row.entity_id);
+    const internalTournamentIds = tournamentIds.filter(isUuid);
+    const externalClubCandidateIds = uniqueStrings(clubIds.flatMap(buildClubCandidateIds));
+    const externalTournamentCandidateIds = uniqueStrings(tournamentIds.flatMap(buildTournamentCandidateIds));
+    const externalLookupClient = supabase as unknown as ExternalLookupClient;
 
-    const [clubsRes, tournamentsRes] = await Promise.all([
+    const [
+        clubsByIdRes,
+        clubsByExternalIdRes,
+        tournamentsByIdRes,
+        tournamentsByExternalIdRes,
+        externalClubsRes,
+        externalTournamentsRes,
+    ] = await Promise.all([
         clubIds.length > 0
-            ? supabase.from('clubs').select('id, name, logo_url, primary_color').in('id', clubIds)
+            ? supabase.from('clubs').select('id, external_id, name, logo_url, primary_color').in('id', clubIds)
             : Promise.resolve({ data: [], error: null }),
-        tournamentIds.length > 0
-            ? supabase.from('tournaments').select('id, name, display_name, logo_url').in('id', tournamentIds)
+        externalClubCandidateIds.length > 0
+            ? supabase.from('clubs').select('id, external_id, name, logo_url, primary_color').in('external_id', externalClubCandidateIds)
+            : Promise.resolve({ data: [], error: null }),
+        internalTournamentIds.length > 0
+            ? supabase.from('tournaments').select('id, external_id, name, display_name, logo_url').in('id', internalTournamentIds)
+            : Promise.resolve({ data: [], error: null }),
+        externalTournamentCandidateIds.length > 0
+            ? supabase.from('tournaments').select('id, external_id, name, display_name, logo_url').in('external_id', externalTournamentCandidateIds)
+            : Promise.resolve({ data: [], error: null }),
+        externalClubCandidateIds.length > 0
+            ? externalLookupClient.from('external_teams').select('id, name, short_name, logo_url').in('id', externalClubCandidateIds)
+            : Promise.resolve({ data: [], error: null }),
+        externalTournamentCandidateIds.length > 0
+            ? externalLookupClient.from('external_tournaments').select('id, name, display_name, logo_url').in('id', externalTournamentCandidateIds)
             : Promise.resolve({ data: [], error: null }),
     ]);
 
-    const clubMap = new Map(
-        (clubsRes.data || []).map((club) => [
-            club.id,
-            {
-                name: club.name,
-                logo_url: club.logo_url || null,
-                color: club.primary_color || null,
-                type_label: 'Club',
-            },
-        ])
-    );
+    const clubMap = new Map<string, { name: string; logo_url: string | null; color: string | null; type_label: string }>();
+    ((clubsByIdRes.data || []) as ClubLookupRow[]).forEach((club) => registerClubLookup(clubMap, club));
+    ((clubsByExternalIdRes.data || []) as ClubLookupRow[]).forEach((club) => registerClubLookup(clubMap, club));
 
-    const tournamentMap = new Map(
-        (tournamentsRes.data || []).map((tournament) => [
-            String(tournament.id),
-            {
-                name: tournament.display_name || tournament.name,
-                logo_url: tournament.logo_url || null,
-                color: null,
-                type_label: 'Torneo',
-            },
-        ])
-    );
+    const externalClubMap = new Map<string, { name: string; logo_url: string | null; color: null; type_label: string }>();
+    ((externalClubsRes.data || []) as ExternalTeamRow[]).forEach((club) => {
+        const id = typeof club.id === 'string' ? club.id : '';
+        const name = typeof club.name === 'string' && club.name.trim()
+            ? club.name
+            : typeof club.short_name === 'string' && club.short_name.trim()
+                ? club.short_name
+                : '';
+        if (!id || !name) return;
+
+        const resolved = {
+            name,
+            logo_url: typeof club.logo_url === 'string' ? club.logo_url : null,
+            color: null,
+            type_label: 'Club',
+        };
+
+        buildClubCandidateIds(id).forEach((candidate) => {
+            if (!externalClubMap.has(candidate)) {
+                externalClubMap.set(candidate, resolved);
+            }
+        });
+    });
+
+    const tournamentMap = new Map<string, { name: string; logo_url: string | null; color: string | null; type_label: string }>();
+    ((tournamentsByIdRes.data || []) as TournamentLookupRow[]).forEach((tournament) => registerTournamentLookup(tournamentMap, tournament));
+    ((tournamentsByExternalIdRes.data || []) as TournamentLookupRow[]).forEach((tournament) => registerTournamentLookup(tournamentMap, tournament));
+
+    const externalTournamentMap = new Map<string, { name: string; logo_url: string | null; color: null; type_label: string }>();
+    ((externalTournamentsRes.data || []) as ExternalTournamentRow[]).forEach((tournament) => {
+        const id = typeof tournament.id === 'string' ? tournament.id : '';
+        const name = typeof tournament.display_name === 'string' && tournament.display_name.trim()
+            ? tournament.display_name
+            : typeof tournament.name === 'string' && tournament.name.trim()
+                ? tournament.name
+                : '';
+        if (!id || !name) return;
+
+        const resolved = {
+            name,
+            logo_url: typeof tournament.logo_url === 'string' ? tournament.logo_url : null,
+            color: null,
+            type_label: 'Torneo',
+        };
+
+        buildTournamentCandidateIds(id).forEach((candidate) => {
+            if (!externalTournamentMap.has(candidate)) {
+                externalTournamentMap.set(candidate, resolved);
+            }
+        });
+    });
 
     const items = favorites.map((favorite) => {
         const resolved = favorite.entity_type === 'club'
-            ? clubMap.get(favorite.entity_id)
-            : tournamentMap.get(favorite.entity_id);
+            ? clubMap.get(favorite.entity_id) || externalClubMap.get(favorite.entity_id) || buildClubCandidateIds(favorite.entity_id).map((candidate) => externalClubMap.get(candidate)).find(Boolean)
+            : tournamentMap.get(favorite.entity_id) || externalTournamentMap.get(favorite.entity_id) || buildTournamentCandidateIds(favorite.entity_id).map((candidate) => externalTournamentMap.get(candidate)).find(Boolean);
 
         return {
             id: favorite.entity_id,
             entity_type: favorite.entity_type,
-            name: resolved?.name || 'Pendiente de sincronizar',
+            name: resolved?.name || PENDING_FAVORITE_NAME,
             logo_url: resolved?.logo_url || null,
             color: resolved?.color || null,
             type_label: resolved?.type_label || 'Favorito',
@@ -166,17 +445,17 @@ async function fetchFavoritesFallback(
 export async function fetchResolvedFavorites(supabase: SupabaseClient): Promise<ResolvedFavorite[]> {
     const fallback = await fetchFavoritesFallback(supabase);
     if (fallback.ok) {
-        return fallback.items;
+        return mergeWithCachedFavorites(fallback.items);
     }
 
     const v2 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched_v2');
     if (v2 && v2.length > 0) {
-        return v2;
+        return mergeWithCachedFavorites(v2);
     }
 
     const v1 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched');
     if (v1 && v1.length > 0) {
-        return v1;
+        return mergeWithCachedFavorites(v1);
     }
 
     return [];
