@@ -67,7 +67,8 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
     const handleNameChange = (val: string) => {
         const updates: Partial<ClubRow> = { name: val };
 
-        if (!form.id || form.slug === form.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')) {
+        // Keep the slug stable for existing clubs unless the user edits it manually.
+        if (!form.id || !form.slug?.trim()) {
             updates.slug = val.toLowerCase()
                 .trim()
                 .replace(/\s+/g, '-')

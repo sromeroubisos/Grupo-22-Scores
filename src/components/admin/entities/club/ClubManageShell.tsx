@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useEffectEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { updateEntity, deleteEntity, createEntity, getClubDashboardData, getClubRelatedClubsData } from '@/app/admin/entities/actions';
+import { deleteEntity, createEntity, getClubDashboardData, getClubRelatedClubsData } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
 import { fetchDivisions, type Division } from '@/lib/services/divisionService';
 import { ClubContext } from './ClubContext';
@@ -275,7 +275,21 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                 setIsDirty(false);
                 router.push(`/admin/entities/${res.id}/manage?type=club&tab=resumen`);
             } else {
-                await updateEntity('club', id, form);
+                const response = await fetch(`/api/clubs/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(form),
+                });
+                const payload = await response.json() as { data?: ClubRow; error?: string };
+
+                if (!response.ok || !payload.data) {
+                    throw new Error(payload.error || 'No se pudo guardar el club');
+                }
+
+                setForm(payload.data);
                 setIsDirty(false);
                 window.dispatchEvent(new CustomEvent('club:save-success'));
                 router.refresh();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { canManageClubContext, getClubManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { normalizeSlug } from '@/lib/utils/normalize';
 
 function err(message: string, status: number, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -68,6 +69,7 @@ export async function PATCH(
         'name', 'short_name', 'city', 'region', 'country',
         'logo_url', 'primary_color', 'sport', 'union_id',
         'website', 'instagram', 'twitter',
+        'slug', 'is_visible', 'categories',
     ];
 
     const updates: Record<string, unknown> = {};
@@ -79,6 +81,38 @@ export async function PATCH(
         return err('No se enviaron campos para actualizar', 400);
     }
 
+    const nullableTextFields = ['short_name', 'city', 'region', 'country', 'logo_url', 'primary_color', 'sport', 'union_id'];
+    for (const field of nullableTextFields) {
+        if (typeof updates[field] === 'string' && !String(updates[field]).trim()) {
+            updates[field] = null;
+        }
+    }
+
+    if ('name' in updates && typeof updates.name === 'string') {
+        updates.name = updates.name.trim();
+        if (!updates.name) {
+            return err('El nombre del club es obligatorio', 400);
+        }
+    }
+
+    if ('slug' in updates) {
+        const normalized = typeof updates.slug === 'string' ? normalizeSlug(updates.slug) : null;
+        if (!normalized) {
+            return err('El slug no puede estar vacío', 400);
+        }
+        updates.slug = normalized;
+    }
+
+    if ('categories' in updates) {
+        if (Array.isArray(updates.categories)) {
+            updates.categories = updates.categories
+                .map((value) => typeof value === 'string' ? value.trim() : '')
+                .filter(Boolean);
+        } else if (updates.categories !== null && updates.categories !== undefined) {
+            return err('Las categorias deben ser un arreglo de texto', 400);
+        }
+    }
+
     const { data, error } = await supabase
         .from('clubs')
         .update(updates)
@@ -86,6 +120,9 @@ export async function PATCH(
         .select('*')
         .single();
 
+    if (error?.code === '23505' && error.message.includes('slug')) {
+        return err('El slug ya está en uso. Elegí uno diferente.', 409);
+    }
     if (error) return err('Error al actualizar club', 500, error.message);
     return NextResponse.json({ data });
 }
