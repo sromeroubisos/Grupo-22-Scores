@@ -521,6 +521,39 @@ function getStandingsTeamName(row: any) {
     return row.team?.name || row.participant?.name || row.team_name || row.name || '';
 }
 
+function getExplicitExportShortName(value: unknown) {
+    return typeof value === 'string' && value.trim() ? value.trim() : '';
+}
+
+function getPreferredExportTeamName(
+    fallbackName: string,
+    ...candidates: unknown[]
+) {
+    const explicitShortName = candidates.find((candidate) => getExplicitExportShortName(candidate)) as string | undefined;
+
+    return getExplicitExportShortName(explicitShortName) || fallbackName || 'Equipo';
+}
+
+function getMatchExportTeamName(match: any, side: 'home' | 'away') {
+    const teamLike = side === 'home' ? match?.home_team : match?.away_team;
+    const clubLike = side === 'home' ? match?.home : match?.away;
+    const fallbackName = side === 'home'
+        ? (teamLike?.name || clubLike?.name || match?.event_home_team || match?.home_team_name || 'Home')
+        : (teamLike?.name || clubLike?.name || match?.event_away_team || match?.away_team_name || 'Away');
+
+    return getPreferredExportTeamName(
+        fallbackName,
+        teamLike?.short_name,
+        teamLike?.shortName,
+        clubLike?.short_name,
+        clubLike?.shortName,
+        match?.[`${side}_short_name`],
+        match?.[`${side}TeamShortName`],
+        match?.[`${side}_team_short_name`],
+        match?.[`${side}_club_short_name`],
+    );
+}
+
 function getStandingsTeamId(row: any) {
     return row.team?.id || row.team?.team_id || row.participant?.id || row.team_id || null;
 }
@@ -1967,11 +2000,12 @@ export default function TournamentDetailPage({
         isCircuitTournament ? 'circuit-global' : 'standard',
         overallRows.some((row: any) => (row.bonus_points ?? 0) > 0),
     );
-    const teamMap = new Map<string, { id: string | null; name: string; logo: string; href: string | null }>();
-    const registerTeam = (team: { id?: string | number | null; name?: string | null; logo?: string | null; teamUrl?: string | null; league?: string | null }) => {
+    const teamMap = new Map<string, { id: string | null; name: string; shortName: string | null; logo: string; href: string | null }>();
+    const registerTeam = (team: { id?: string | number | null; name?: string | null; shortName?: string | null; logo?: string | null; teamUrl?: string | null; league?: string | null }) => {
         const name = String(team.name ?? '').trim();
         if (!name) return;
 
+        const shortName = getExplicitExportShortName(team.shortName) || null;
         const normalizedId = team.id != null ? String(team.id) : null;
         const key = normalizedId ? `id:${normalizedId}` : `name:${name.toLowerCase()}`;
         const href = buildClubHref({ id: normalizedId, name, teamUrl: team.teamUrl, league: team.league }, tournamentData?.sportId);
@@ -1980,6 +2014,7 @@ export default function TournamentDetailPage({
         teamMap.set(key, {
             id: previous?.id ?? normalizedId,
             name: previous?.name ?? name,
+            shortName: previous?.shortName ?? shortName,
             logo: previous?.logo || team.logo || '',
             href: previous?.href ?? href,
         });
@@ -1989,6 +2024,7 @@ export default function TournamentDetailPage({
             registerTeam({
                 id: match.home_team?.id || match.home_team?.team_id || match.home_club_id || null,
                 name: match.home_team?.name || match.event_home_team || match.home_team_name,
+                shortName: match.home_team?.short_name || match.home?.short_name || match.home_short_name || match.home_team_short_name || match.home_club_short_name || null,
                 logo: getTeamLogo(match.home_team) || match.home_team_logo || '',
                 teamUrl: match.home_team?.team_url || null,
                 league: match.home_team?.league || null,
@@ -1996,6 +2032,7 @@ export default function TournamentDetailPage({
             registerTeam({
                 id: match.away_team?.id || match.away_team?.team_id || match.away_club_id || null,
                 name: match.away_team?.name || match.event_away_team || match.away_team_name,
+                shortName: match.away_team?.short_name || match.away?.short_name || match.away_short_name || match.away_team_short_name || match.away_club_short_name || null,
                 logo: getTeamLogo(match.away_team) || match.away_team_logo || '',
                 teamUrl: match.away_team?.team_url || null,
                 league: match.away_team?.league || null,
@@ -2006,9 +2043,21 @@ export default function TournamentDetailPage({
         registerTeam({
             id: getStandingsTeamId(row),
             name: getStandingsTeamName(row),
+            shortName: row.team?.short_name || row.club?.short_name || row.participant?.short_name || row.participant?.clubs?.short_name || row.short_name || null,
             logo: getStandingsTeamLogo(row),
             teamUrl: getStandingsTeamUrl(row),
             league: row.team?.league || row.participant?.league || null,
+        });
+    });
+    dbParticipants.forEach((participant: any) => {
+        const club = getParticipantClub(participant);
+        registerTeam({
+            id: participant.club_id || club?.id || null,
+            name: club?.name || participant.name || '',
+            shortName: club?.short_name || participant.short_name || null,
+            logo: club?.logo_url || '',
+            teamUrl: club?.team_url || null,
+            league: club?.league || null,
         });
     });
     if (results.length > 0) addFromMatches(results);
@@ -2172,7 +2221,20 @@ export default function TournamentDetailPage({
         if (standingsColumnMode === 'circuit-global') {
             return {
                 pos: row.position || (idx + 1),
-                team: row.team?.short_name || getStandingsTeamName(row) || 'Equipo',
+                team: getPreferredExportTeamName(
+                    getStandingsTeamName(row) || 'Equipo',
+                    row.team?.short_name,
+                    row.team?.shortName,
+                    row.club?.short_name,
+                    row.club?.shortName,
+                    row.participant?.short_name,
+                    row.participant?.shortName,
+                    row.participant?.clubs?.short_name,
+                    row.participant?.clubs?.shortName,
+                    row.short_name,
+                    row.shortName,
+                    fallbackTeam?.shortName,
+                ),
                 teamLogo: getStandingsTeamLogo(row) || fallbackTeam?.logo || '',
                 labelName: rowLabel?.name ?? undefined,
                 zoneColor: rowLabel?.color ?? undefined,
@@ -2186,7 +2248,20 @@ export default function TournamentDetailPage({
 
         return {
             pos: row.position || (idx + 1),
-            team: row.team?.short_name || getStandingsTeamName(row) || 'Equipo',
+            team: getPreferredExportTeamName(
+                getStandingsTeamName(row) || 'Equipo',
+                row.team?.short_name,
+                row.team?.shortName,
+                row.club?.short_name,
+                row.club?.shortName,
+                row.participant?.short_name,
+                row.participant?.shortName,
+                row.participant?.clubs?.short_name,
+                row.participant?.clubs?.shortName,
+                row.short_name,
+                row.shortName,
+                fallbackTeam?.shortName,
+            ),
             teamLogo: getStandingsTeamLogo(row) || fallbackTeam?.logo || '',
             labelName: rowLabel?.name ?? undefined,
             zoneColor: rowLabel?.color ?? undefined,
@@ -3279,8 +3354,8 @@ export default function TournamentDetailPage({
                                     tournament: tournamentData?.name || 'Torneo',
                                     tournamentLogo,
                                     matches: results.map(m => ({
-                                        homeTeam: m.home_team?.short_name || m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
-                                        awayTeam: m.away_team?.short_name || m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
+                                        homeTeam: getMatchExportTeamName(m, 'home'),
+                                        awayTeam: getMatchExportTeamName(m, 'away'),
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         homeScore: m.scores?.home ?? m.scores?.home_score ?? m.home_score,
@@ -3326,8 +3401,8 @@ export default function TournamentDetailPage({
                                     tournament: tournamentData?.name || 'Torneo',
                                     tournamentLogo,
                                     matches: fixtures.map(m => ({
-                                        homeTeam: m.home_team?.short_name || m.home_team?.name || m.event_home_team || m.home_team_name || 'Home',
-                                        awayTeam: m.away_team?.short_name || m.away_team?.name || m.event_away_team || m.away_team_name || 'Away',
+                                        homeTeam: getMatchExportTeamName(m, 'home'),
+                                        awayTeam: getMatchExportTeamName(m, 'away'),
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
@@ -3413,6 +3488,7 @@ export default function TournamentDetailPage({
                                     groups: isMotorsportTournament ? [] : standingsExportGroups,
                                     columnLabels: standingsExportColumnLabels,
                                     plainDiff: standingsColumnMode === 'circuit-global',
+                                    showPositionDelta: false,
                                 }}
                             />
                         </div>

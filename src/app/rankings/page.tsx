@@ -866,6 +866,7 @@ function RankingsPageContent() {
                                     rows: rankingExportRows,
                                     columnLabels: RANKING_EXPORT_COLUMN_LABELS,
                                     plainDiff: true,
+                                    showPositionDelta: true,
                                 }}
                             />
                         </div>

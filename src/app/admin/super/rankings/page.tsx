@@ -1299,7 +1299,7 @@ export default function SuperRankingsPage() {
                                         <span>{selectedDetail.ranking.last_incremental_match_id ? `Ultimo match ${selectedDetail.ranking.last_incremental_match_id}` : 'Sin incremental aplicado'}</span>
                                     </div>
                                     <div className={styles.tableToolbarActions}>
-                                        <ExportImage className={styles.exportAction} template="standings" filename={`ranking-${selectedRanking?.name || 'clubes'}`} data={{ title: selectedRanking?.name || 'Ranking de Clubes', subtitle: rankingExportSubtitle, rows: rankingExportRows, columnLabels: RANKING_EXPORT_COLUMN_LABELS, plainDiff: true }} />
+                                        <ExportImage className={styles.exportAction} template="standings" filename={`ranking-${selectedRanking?.name || 'clubes'}`} data={{ title: selectedRanking?.name || 'Ranking de Clubes', subtitle: rankingExportSubtitle, rows: rankingExportRows, columnLabels: RANKING_EXPORT_COLUMN_LABELS, plainDiff: true, showPositionDelta: true }} />
                                     </div>
                                 </div>
                                 <div className={styles.standingsTableWrap}>
@@ -1803,6 +1803,7 @@ export default function SuperRankingsPage() {
                                                 rows: rankingExportRows,
                                                 columnLabels: RANKING_EXPORT_COLUMN_LABELS,
                                                 plainDiff: true,
+                                                showPositionDelta: true,
                                             }}
                                         />
                                     </div>
