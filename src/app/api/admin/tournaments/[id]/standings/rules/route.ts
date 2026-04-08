@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
 export async function PUT(
     request: NextRequest,
@@ -66,14 +66,19 @@ export async function PUT(
             payload: updatedSettings
         });
 
-        // Auto-recalculate standings so the public site reflects the new rules immediately
-        recalculateAndPersistStandings(tournamentId, phaseId).catch((err) =>
-            console.error('[PUT standings/rules] Auto-recalculate standings failed:', err)
-        );
+        // Auto-recalculate every effective scope so grouped phases refresh too.
+        const recalcResult = await recalculatePhaseStandingsScopes(tournamentId, phaseId);
+        if (!recalcResult.ok) {
+            return NextResponse.json(
+                { error: 'No se pudieron recalcular las tablas luego de guardar las reglas.' },
+                { status: 500 },
+            );
+        }
 
         return NextResponse.json({ ok: true });
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error('Exception saving standings rules:', e);
-        return NextResponse.json({ error: 'Internal server error', details: e.message }, { status: 500 });
+        const details = e instanceof Error ? e.message : 'Unknown error';
+        return NextResponse.json({ error: 'Internal server error', details }, { status: 500 });
     }
 }

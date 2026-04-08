@@ -7,6 +7,69 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 
+export async function recalculatePhaseStandingsScopes(
+    tournamentId: string,
+    phaseId: string,
+    tableType = 'general',
+): Promise<{ ok: boolean; rows_calculated: number; scopes_recalculated: number }> {
+    const supabase = createAdminClient();
+
+    const { data: phase, error: phaseError } = await supabase
+        .from('tournament_phases')
+        .select('id, phase_type')
+        .eq('id', phaseId)
+        .eq('tournament_id', tournamentId)
+        .single();
+
+    if (phaseError || !phase) {
+        console.error('[recalculatePhaseStandingsScopes] Phase not found', { tournamentId, phaseId });
+        return { ok: false, rows_calculated: 0, scopes_recalculated: 0 };
+    }
+
+    const { error: deleteError } = await supabase
+        .from('tournament_standings')
+        .delete()
+        .eq('tournament_id', tournamentId)
+        .eq('phase_id', phaseId);
+
+    if (deleteError) {
+        console.error('[recalculatePhaseStandingsScopes] Error clearing stale standings', deleteError);
+        return { ok: false, rows_calculated: 0, scopes_recalculated: 0 };
+    }
+
+    if (phase.phase_type === 'group_stage') {
+        const { data: groups, error: groupsError } = await supabase
+            .from('tournament_groups')
+            .select('id')
+            .eq('phase_id', phaseId)
+            .order('order_index', { ascending: true });
+
+        if (groupsError) {
+            console.error('[recalculatePhaseStandingsScopes] Error fetching groups', groupsError);
+            return { ok: false, rows_calculated: 0, scopes_recalculated: 0 };
+        }
+
+        if (Array.isArray(groups) && groups.length > 0) {
+            const results = await Promise.all(
+                groups.map((group) => recalculateAndPersistStandings(tournamentId, phaseId, group.id, tableType)),
+            );
+
+            return {
+                ok: results.every((result) => result.ok),
+                rows_calculated: results.reduce((total, result) => total + result.rows_calculated, 0),
+                scopes_recalculated: results.length,
+            };
+        }
+    }
+
+    const result = await recalculateAndPersistStandings(tournamentId, phaseId, null, tableType);
+    return {
+        ok: result.ok,
+        rows_calculated: result.rows_calculated,
+        scopes_recalculated: 1,
+    };
+}
+
 export async function recalculateAndPersistStandings(
     tournamentId: string,
     phaseId: string,
@@ -99,7 +162,9 @@ export async function recalculateAndPersistStandings(
     if (groupId) {
         delQuery = delQuery.eq('group_id', groupId);
     } else {
-        delQuery = (delQuery as any).is('group_id', null);
+        delQuery = (delQuery as typeof delQuery & {
+            is: (column: string, value: null) => typeof delQuery;
+        }).is('group_id', null);
     }
     await delQuery;
 

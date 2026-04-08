@@ -4312,7 +4312,9 @@ select.basalt-input {
 }
 
 .basalt-header-main {
+    flex: 1 1 760px;
     gap: 6px;
+    min-width: min(100%, 560px);
 }
 
 .basalt-header-eyebrow {
@@ -4336,11 +4338,14 @@ select.basalt-input {
 }
 
 .basalt-h1 {
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
+    font-size: clamp(28px, 4.8vw, 56px);
+    font-weight: 900;
+    letter-spacing: -0.055em;
     text-transform: uppercase;
     color: var(--text-main);
+    line-height: 0.92;
+    max-width: min(100%, 14ch);
+    text-wrap: balance;
 }
 
 .basalt-header-meta {
@@ -4353,8 +4358,8 @@ select.basalt-input {
 }
 
 .basalt-header-actions {
-    flex: 0 1 auto;
-    min-width: min(100%, 520px);
+    flex: 0 1 460px;
+    min-width: min(100%, 420px);
     align-items: flex-end;
 }
 
@@ -4861,6 +4866,15 @@ select.basalt-input {
     .basalt-header-actions {
         width: 100%;
         align-items: stretch;
+    }
+
+    .basalt-header-main {
+        min-width: 0;
+    }
+
+    .basalt-h1 {
+        font-size: clamp(24px, 6vw, 36px);
+        max-width: 100%;
     }
 
     .basalt-header-metrics {

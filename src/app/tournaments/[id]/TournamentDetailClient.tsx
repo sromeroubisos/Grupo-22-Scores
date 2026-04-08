@@ -761,9 +761,11 @@ function getDbStandingsContext(dbData: TournamentInitialData, preferredPhaseId?:
         : null;
     const activePhase = requestedPhase ?? getPreferredDbPhase(phases, matches, rawStandings);
     const activePhaseId = activePhase?.id ?? null;
-    const activeGroups = groups.filter(
-        (group: any) => !activePhaseId || String(group?.phase_id ?? '') === String(activePhaseId),
-    );
+    const activeGroups = activePhase?.phase_type === 'group_stage'
+        ? groups.filter(
+            (group: any) => !activePhaseId || String(group?.phase_id ?? '') === String(activePhaseId),
+        )
+        : [];
     const tournamentRuleset = (dbData.tournament as any)?.ruleset ?? {};
     const resolvedRules = StandingsEngine.resolveRules(activePhase?.settings ?? {}, tournamentRuleset);
 

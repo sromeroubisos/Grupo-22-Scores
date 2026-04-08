@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { buildPhaseSettingsWithSyncedLabels } from '@/lib/server/phaseLabels';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
 // PATCH update a phase
 export async function PATCH(
@@ -80,6 +81,16 @@ export async function PATCH(
         if (insertError) {
           console.error('Error re-creating groups for phase:', insertError);
         }
+      }
+    }
+
+    if (phase && (body.phase_type !== undefined || body.settings !== undefined)) {
+      const recalcResult = await recalculatePhaseStandingsScopes(tournamentId, phaseId);
+      if (!recalcResult.ok) {
+        return NextResponse.json(
+          { error: 'La fase se guardo pero no se pudieron recalcular las tablas.' },
+          { status: 500 },
+        );
       }
     }
 
