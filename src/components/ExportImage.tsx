@@ -65,6 +65,7 @@ interface StandingsData {
         points: string;
     }>;
     plainDiff?: boolean;
+    showPositionDelta?: boolean;
 }
 
 interface DailyMatchesData {
@@ -2683,29 +2684,36 @@ function truncateTextToWidth(ctx: CanvasRenderingContext2D, text: string, maxWid
     return current.length > 1 ? `${current}...` : text;
 }
 
+function getSharedFittedFontSize(
+    ctx: CanvasRenderingContext2D,
+    items: Array<{ text: string; maxWidth: number }>,
+    weight: string,
+    size: number,
+    family: string,
+    minSize: number
+) {
+    let currentSize = size;
+
+    while (currentSize > minSize) {
+        ctx.font = `${weight} ${currentSize}px ${family}`;
+        const fitsAll = items.every((item) => ctx.measureText(item.text).width <= item.maxWidth);
+        if (fitsAll) break;
+        currentSize -= 1;
+    }
+
+    return currentSize;
+}
+
 function drawStandingsTeamName(
     ctx: CanvasRenderingContext2D,
     text: string,
     x: number,
     centerY: number,
-    maxWidth: number,
-    isStory: boolean,
-    rowHeight: number
+    fontSize: number
 ) {
     const teamName = text.trim().toUpperCase();
-    const targetWidth = Math.max(72, maxWidth);
-    const minFontSize = Math.max(12, Math.min(16, Math.round(rowHeight * 0.3)));
-    setFittedFont(
-        ctx,
-        teamName,
-        targetWidth,
-        '900',
-        Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.4)),
-        FONT_OUTFIT_BLACK,
-        minFontSize
-    );
-    const safeTeamName = truncateTextToWidth(ctx, teamName, targetWidth);
-    ctx.fillText(safeTeamName, x, centerY + 1);
+    ctx.font = `900 ${fontSize}px ${FONT_OUTFIT_BLACK}`;
+    ctx.fillText(teamName, x, centerY + 1);
 }
 
 function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean) {
@@ -3780,13 +3788,23 @@ async function drawMatchResult(
 
     drawLogoBadge(ctx, { x: leftX, y: scoreY, size: teamLogoSize, img: homeLogo, label: data.homeTeam, rawLogo: data.homeLogo, isDark });
     drawLogoBadge(ctx, { x: rightX, y: scoreY, size: teamLogoSize, img: awayLogo, label: data.awayTeam, rawLogo: data.awayLogo, isDark });
+    const matchResultNameFontSize = getSharedFittedFontSize(
+        ctx,
+        [
+            { text: data.homeTeam.trim().toUpperCase(), maxWidth: panelWidth * 0.28 },
+            { text: data.awayTeam.trim().toUpperCase(), maxWidth: panelWidth * 0.28 },
+        ],
+        '800',
+        isStory ? 38 : 32,
+        FONT_DISPLAY,
+        8,
+    );
 
     ctx.save();
     ctx.textAlign = 'center';
     ctx.fillStyle = textColor;
-    setFittedFont(ctx, data.homeTeam.toUpperCase(), panelWidth * 0.28, '800', isStory ? 38 : 32, FONT_DISPLAY, 20);
+    ctx.font = `800 ${matchResultNameFontSize}px ${FONT_DISPLAY}`;
     ctx.fillText(data.homeTeam.toUpperCase(), leftX, nameY);
-    setFittedFont(ctx, data.awayTeam.toUpperCase(), panelWidth * 0.28, '800', isStory ? 38 : 32, FONT_DISPLAY, 20);
     ctx.fillText(data.awayTeam.toUpperCase(), rightX, nameY);
 
     ctx.fillStyle = mutedColor;
@@ -3917,6 +3935,7 @@ async function drawStandings(
     const lostLabel = data.columnLabels?.lost?.trim() || 'P';
     const diffLabel = data.columnLabels?.diff?.trim() || 'DIF';
     const pointsLabel = data.columnLabels?.points?.trim() || 'PTS';
+    const showPositionDelta = data.showPositionDelta === true;
 
     drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
     drawCenteredPill(
@@ -4011,6 +4030,18 @@ async function drawStandings(
     const crestCenterX = crestLeft + crestWidth / 2;
     const teamTextX = crestLeft + crestWidth + 14;
     const teamMaxWidth = colPlayedLeft - teamTextX - 22;
+    const baseTeamFontSize = Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.4));
+    const sharedTeamFontSize = getSharedFittedFontSize(
+        ctx,
+        slideRows.map((row) => ({
+            text: row.team.trim().toUpperCase(),
+            maxWidth: Math.max(72, teamMaxWidth),
+        })),
+        '900',
+        baseTeamFontSize,
+        FONT_OUTFIT_BLACK,
+        8,
+    );
     let logoIndex = 0;
     let rowIndex = 0;
     let cursorY = bodyTop;
@@ -4083,7 +4114,7 @@ async function drawStandings(
             ctx.textAlign = 'left';
             ctx.fillStyle = textColor;
             ctx.textBaseline = 'middle';
-            drawStandingsTeamName(ctx, row.team, teamTextX, centerY, teamMaxWidth, isStory, rowHeight);
+            drawStandingsTeamName(ctx, row.team, teamTextX, centerY, sharedTeamFontSize);
 
             ctx.textAlign = 'center';
             ctx.font = `700 ${statFontSize}px ${FONT_BODY}`;
@@ -4111,25 +4142,33 @@ async function drawStandings(
                 ctx.fillText(diffText, colDiffX, centerY + 1);
             }
 
-            const previousPositionLabel = String(row.points ?? '-').trim() || '-';
-            const positionDeltaLabel = (row.pointsDeltaLabel || '').trim();
-            const positionDeltaColor =
-                row.pointsDeltaTone === 'positive'
-                    ? '#10b981'
-                    : row.pointsDeltaTone === 'negative'
-                        ? '#ef4444'
-                        : mutedColor;
+            const pointsText = String(row.points ?? '-').trim() || '-';
+            if (showPositionDelta) {
+                const positionDeltaLabel = (row.pointsDeltaLabel || '').trim();
+                const positionDeltaColor =
+                    row.pointsDeltaTone === 'positive'
+                        ? '#10b981'
+                        : row.pointsDeltaTone === 'negative'
+                            ? '#ef4444'
+                            : mutedColor;
 
-            ctx.textBaseline = 'middle';
-            ctx.textAlign = 'left';
-            ctx.fillStyle = mutedColor;
-            ctx.font = `700 ${Math.max(11, statFontSize - 2)}px ${FONT_MONO}`;
-            ctx.fillText(previousPositionLabel, colPointsLeft + 10, centerY + 1);
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'left';
+                ctx.fillStyle = mutedColor;
+                ctx.font = `700 ${Math.max(11, statFontSize - 2)}px ${FONT_MONO}`;
+                ctx.fillText(pointsText, colPointsLeft + 10, centerY + 1);
 
-            ctx.textAlign = 'right';
-            ctx.fillStyle = positionDeltaColor;
-            ctx.font = `800 ${pointsFontSize}px ${FONT_MONO}`;
-            ctx.fillText(positionDeltaLabel || '-', tableRight - 6, centerY + 1);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = positionDeltaColor;
+                ctx.font = `800 ${pointsFontSize}px ${FONT_MONO}`;
+                ctx.fillText(positionDeltaLabel || '-', tableRight - 6, centerY + 1);
+            } else {
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = textColor;
+                ctx.font = `800 ${pointsFontSize}px ${FONT_MONO}`;
+                ctx.fillText(pointsText, colPointsX, centerY + 1);
+            }
             ctx.restore();
 
             rowIndex += 1;
@@ -4222,11 +4261,27 @@ async function drawDailyMatches(
         isStory ? 132 : 118,
         (listBottom - listTop - rowGap * Math.max(matches.length - 1, 0)) / Math.max(matches.length, 1)
     );
+    const crestHeight = Math.min(isStory ? 88 : 74, rowHeight - 8);
+    const crestWidth = Math.min(isStory ? 78 : 64, crestHeight * 0.86);
+    const crestInset = isStory ? 18 : 14;
+    const cardWidth = panelWidth - 36;
+    const homeTextWidth = Math.max(110, safe.centerX - 118 - (panelX + 18 + crestInset + crestWidth + 18));
+    const awayTextWidth = Math.max(110, (panelX + 18 + cardWidth - crestInset - crestWidth - 18) - (safe.centerX + 118));
+    const sharedMatchNameFontSize = getSharedFittedFontSize(
+        ctx,
+        matches.flatMap((match) => ([
+            { text: match.homeTeam.trim().toUpperCase(), maxWidth: homeTextWidth },
+            { text: match.awayTeam.trim().toUpperCase(), maxWidth: awayTextWidth },
+        ])),
+        '800',
+        isStory ? 26 : 22,
+        FONT_DISPLAY,
+        8,
+    );
 
     matches.forEach((match, index) => {
         const y = listTop + index * (rowHeight + rowGap);
         const cardX = panelX + 18;
-        const cardWidth = panelWidth - 36;
         const cardRight = cardX + cardWidth;
         const logoOffset = 1 + index * 2;
         const homeLogo = logoLoads[logoOffset] || null;
@@ -4234,10 +4289,7 @@ async function drawDailyMatches(
         const centerText = match.status === 'scheduled'
             ? match.time
             : `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`;
-        const crestHeight = Math.min(isStory ? 88 : 74, rowHeight - 8);
-        const crestWidth = Math.min(isStory ? 78 : 64, crestHeight * 0.86);
         const crestCenterY = y + rowHeight / 2;
-        const crestInset = isStory ? 18 : 14;
         const homeCrestCenterX = cardX + crestInset + crestWidth / 2;
         const awayCrestCenterX = cardRight - crestInset - crestWidth / 2;
         const homeTextX = homeCrestCenterX + crestWidth / 2 + 18;
@@ -4286,11 +4338,11 @@ async function drawDailyMatches(
         ctx.textBaseline = 'middle';
         ctx.fillStyle = textColor;
         ctx.textAlign = 'left';
-        setFittedFont(ctx, match.homeTeam.toUpperCase(), Math.max(110, safe.centerX - 118 - homeTextX), '800', isStory ? 26 : 22, FONT_DISPLAY, 14);
+        ctx.font = `800 ${sharedMatchNameFontSize}px ${FONT_DISPLAY}`;
         ctx.fillText(match.homeTeam.toUpperCase(), homeTextX, y + rowHeight / 2 + 10);
 
         ctx.textAlign = 'right';
-        setFittedFont(ctx, match.awayTeam.toUpperCase(), Math.max(110, awayTextX - (safe.centerX + 118)), '800', isStory ? 26 : 22, FONT_DISPLAY, 14);
+        ctx.font = `800 ${sharedMatchNameFontSize}px ${FONT_DISPLAY}`;
         ctx.fillText(match.awayTeam.toUpperCase(), awayTextX, y + rowHeight / 2 + 10);
 
         ctx.textAlign = 'center';
