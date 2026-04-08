@@ -1,11 +1,14 @@
 import {
     getTournamentEspnAmericanFootballConfig,
+    getTournamentEspnMotorsportConfig,
     getTournamentFlashScoreConfig,
     getTournamentRugbyApiSportsConfig,
     isAmericanFootballSport,
+    isMotorsportSport,
     isRugbySport,
 } from '@/lib/externalProviderPolicy';
 import { parseEspnAmericanFootballTournamentId, toEspnAmericanFootballTournamentId } from '@/lib/services/espnAmericanFootball';
+import { parseEspnMotorsportTournamentId, toEspnMotorsportTournamentId } from '@/lib/services/espnMotorsport';
 
 type FlashScoreIdsLike = {
     tournamentId?: unknown;
@@ -25,6 +28,7 @@ type ResolveExternalTournamentIdInput = {
 const FLASHSCORE_TOURNAMENT_ID_RE = /^fs-/i;
 const RUGBY_API_SPORTS_TOURNAMENT_ID_RE = /^ras-league-\d+$/i;
 const ESPN_TOURNAMENT_ID_RE = /^espn-league-[a-z0-9-]+$/i;
+const ESPN_MOTORSPORT_TOURNAMENT_ID_RE = /^espn-racing-league-[a-z0-9-]+$/i;
 
 function normalizeString(value: unknown): string | null {
     if (typeof value === 'number' && Number.isFinite(value)) {
@@ -40,7 +44,11 @@ function normalizeString(value: unknown): string | null {
 function toFlashScoreTournamentId(value: unknown): string | null {
     const normalized = normalizeString(value);
     if (!normalized) return null;
-    if (RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized) || ESPN_TOURNAMENT_ID_RE.test(normalized)) return normalized;
+    if (
+        RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized) ||
+        ESPN_TOURNAMENT_ID_RE.test(normalized) ||
+        ESPN_MOTORSPORT_TOURNAMENT_ID_RE.test(normalized)
+    ) return normalized;
     return FLASHSCORE_TOURNAMENT_ID_RE.test(normalized) ? normalized : `fs-${normalized}`;
 }
 
@@ -60,10 +68,23 @@ function toEspnTournamentId(value: unknown): string | null {
     return null;
 }
 
+function toEspnMotorsportId(value: unknown): string | null {
+    const normalized = normalizeString(value);
+    if (!normalized) return null;
+    if (ESPN_MOTORSPORT_TOURNAMENT_ID_RE.test(normalized)) return normalized;
+    if (parseEspnMotorsportTournamentId(normalized)) return normalized;
+    return null;
+}
+
 export function isExternalTournamentId(value: unknown): boolean {
     const normalized = normalizeString(value);
     if (!normalized) return false;
-    return FLASHSCORE_TOURNAMENT_ID_RE.test(normalized) || RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized) || ESPN_TOURNAMENT_ID_RE.test(normalized);
+    return (
+        FLASHSCORE_TOURNAMENT_ID_RE.test(normalized) ||
+        RUGBY_API_SPORTS_TOURNAMENT_ID_RE.test(normalized) ||
+        ESPN_TOURNAMENT_ID_RE.test(normalized) ||
+        ESPN_MOTORSPORT_TOURNAMENT_ID_RE.test(normalized)
+    );
 }
 
 export function resolveExternalTournamentId(input: ResolveExternalTournamentIdInput): string | null {
@@ -96,6 +117,20 @@ export function resolveExternalTournamentId(input: ResolveExternalTournamentIdIn
 
     if (isAmericanFootballSport(input.sportId)) {
         const espnExternalId = toEspnTournamentId(externalId);
+        if (espnExternalId) return espnExternalId;
+    }
+
+    const espnMotorsportConfig = getTournamentEspnMotorsportConfig({
+        sport_id: input.sportId,
+        ruleset: input.ruleset,
+    });
+    const espnMotorsportTournamentId = espnMotorsportConfig?.league_slug
+        ? toEspnMotorsportTournamentId(espnMotorsportConfig.league_slug as any)
+        : null;
+    if (espnMotorsportTournamentId) return espnMotorsportTournamentId;
+
+    if (isMotorsportSport(input.sportId)) {
+        const espnExternalId = toEspnMotorsportId(externalId);
         if (espnExternalId) return espnExternalId;
     }
 

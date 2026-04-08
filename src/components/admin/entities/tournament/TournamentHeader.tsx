@@ -19,6 +19,7 @@ type TournamentSeasonMenuItem = {
 export interface TournamentHeaderProps {
     data: TournamentRow;
     isDirty: boolean;
+    dirtyLabels?: string[];
     isTransitioning: boolean;
     menuOpen: boolean;
     seasonMenuOpen: boolean;
@@ -34,6 +35,7 @@ export interface TournamentHeaderProps {
     onSeasonMenuToggle: () => void;
     onSeasonMenuClose: () => void;
     onOpenHistoricalSeasonImport: () => void;
+    onSeasonNavigate: (href: string) => void;
 }
 
 export function computeHealth(data: TournamentRow): 'OK' | 'WARNING' | 'ERROR' {
@@ -44,9 +46,9 @@ export function computeHealth(data: TournamentRow): 'OK' | 'WARNING' | 'ERROR' {
 }
 
 export function TournamentHeader({
-    data, isDirty, isTransitioning, menuOpen, seasonMenuOpen, seasonItems,
+    data, isDirty, dirtyLabels = [], isTransitioning, menuOpen, seasonMenuOpen, seasonItems,
     onSave, onStatusTransition, onRecalculate, onDuplicate, onExport, onDelete,
-    onMenuToggle, onMenuClose, onSeasonMenuToggle, onSeasonMenuClose, onOpenHistoricalSeasonImport,
+    onMenuToggle, onMenuClose, onSeasonMenuToggle, onSeasonMenuClose, onOpenHistoricalSeasonImport, onSeasonNavigate,
 }: TournamentHeaderProps) {
     const tournament = data as TournamentDisplayRow;
     const status = (data.status ?? 'draft').toUpperCase();
@@ -104,7 +106,9 @@ export function TournamentHeader({
                 {isDirty && (
                     <div className="basalt-unsaved">
                         <div className="basalt-dot-pulse" />
-                        Cambios sin guardar
+                        {dirtyLabels.length > 0
+                            ? `Cambios sin guardar en ${dirtyLabels.join(', ')}`
+                            : 'Cambios sin guardar'}
                     </div>
                 )}
 
@@ -149,7 +153,13 @@ export function TournamentHeader({
                                                         href={item.href}
                                                         className={`basalt-overflow-item basalt-season-nav-item ${item.isCurrent ? 'is-current' : ''}`}
                                                         role="menuitem"
-                                                        onClick={onSeasonMenuClose}
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
+                                                            onSeasonMenuClose();
+                                                            if (!item.isCurrent) {
+                                                                onSeasonNavigate(item.href);
+                                                            }
+                                                        }}
                                                     >
                                                         <span className="basalt-season-nav-copy">
                                                             <strong>{item.label}</strong>

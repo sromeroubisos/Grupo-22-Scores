@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layers3, Plus, RotateCcw, Save, Settings2, Sparkles, Target, Zap } from 'lucide-react';
 import { updateEntity } from '@/app/admin/entities/actions';
@@ -13,7 +13,7 @@ import {
 } from '@/lib/matchEventCatalog';
 import { SPORTS } from '@/lib/data/sports';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
-import { useTournamentDirty } from './TournamentContext';
+import { type TournamentFormatDraft, useTournamentDirty } from './TournamentContext';
 import styles from './TournamentFormatTab.module.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -23,7 +23,7 @@ type TournamentFormatRow = TournamentRow & {
 };
 
 const CATEGORY_OPTIONS: Array<{ value: MatchEventCategory; label: string }> = [
-    { value: 'score', label: 'Puntuación' },
+    { value: 'score', label: 'Puntuacion' },
     { value: 'card', label: 'Tarjeta' },
     { value: 'discipline', label: 'Disciplina' },
     { value: 'substitution', label: 'Cambio' },
@@ -58,18 +58,28 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
     const tournament = (data || {}) as TournamentFormatRow;
     const tournamentId = id || tournament.id;
     const router = useRouter();
-    const { setDirty: setGlobalDirty } = useTournamentDirty();
+    const {
+        getSectionDraft,
+        setSectionDraft,
+        clearSectionDraft,
+        markSectionDirty,
+        hasDirtySection,
+    } = useTournamentDirty();
     const isApiManaged = tournament.is_api_managed || false;
     const sportId = tournament.sport_id || null;
     const sportLabel = sportId ? (SPORTS[sportId as keyof typeof SPORTS]?.nameEs || SPORTS[sportId as keyof typeof SPORTS]?.name || sportId) : 'Sin deporte';
 
-    const [definitions, setDefinitions] = useState<MatchEventDefinition[]>(() =>
-        resolveMatchEventDefinitions({
-            sportId,
-            tournamentRuleset: tournament.ruleset as Record<string, unknown> | null | undefined,
-        }),
+    const initialDefinitions = useMemo(
+        () =>
+            resolveMatchEventDefinitions({
+                sportId,
+                tournamentRuleset: tournament.ruleset as Record<string, unknown> | null | undefined,
+            }),
+        [sportId, tournament.ruleset],
     );
-    const [isDirty, setIsDirty] = useState(false);
+    const formatDraft = getSectionDraft<TournamentFormatDraft>('format');
+    const definitions = formatDraft?.definitions ?? initialDefinitions;
+    const isDirty = hasDirtySection('format');
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const scoringEvents = definitions.filter((definition) => definition.category === 'score');
@@ -77,64 +87,62 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
     const totalScoringPoints = scoringEvents.reduce((sum, definition) => sum + definition.points, 0);
 
     useEffect(() => {
-        setDefinitions(
-            resolveMatchEventDefinitions({
-                sportId: tournament.sport_id || null,
-                tournamentRuleset: tournament.ruleset as Record<string, unknown> | null | undefined,
-            }),
-        );
-        setIsDirty(false);
-        setMessage(null);
-    }, [tournament.ruleset, tournament.sport_id, tournamentId]);
-
-    useEffect(() => {
-        setGlobalDirty(isDirty);
-    }, [isDirty, setGlobalDirty]);
+        if (!formatDraft) {
+            setMessage(null);
+        }
+    }, [formatDraft, tournamentId]);
 
     useLeaveConfirm(isDirty);
 
     const markDirty = useCallback(() => {
-        setIsDirty(true);
+        markSectionDirty('format', true);
         setMessage(null);
-    }, []);
+    }, [markSectionDirty]);
 
     const updateDefinition = useCallback((index: number, patch: Partial<MatchEventDefinition>) => {
-        setDefinitions((current) => current.map((definition, currentIndex) => (
+        const nextDefinitions = definitions.map((definition, currentIndex) => (
             currentIndex === index ? { ...definition, ...patch } : definition
-        )));
+        ));
+        setSectionDraft('format', { definitions: nextDefinitions });
         markDirty();
-    }, [markDirty]);
+    }, [definitions, markDirty, setSectionDraft]);
 
     const removeDefinition = useCallback((index: number) => {
-        setDefinitions((current) => current.filter((_, currentIndex) => currentIndex !== index));
+        setSectionDraft('format', {
+            definitions: definitions.filter((_, currentIndex) => currentIndex !== index),
+        });
         markDirty();
-    }, [markDirty]);
+    }, [definitions, markDirty, setSectionDraft]);
 
     const addDefinition = useCallback(() => {
         const defaults = getDefaultMatchEventDefinitions(sportId);
         const usedTypes = new Set(definitions.map((definition) => definition.type));
         const nextPreset = defaults.find((definition) => !usedTypes.has(definition.type));
 
-        setDefinitions((current) => ([
-            ...current,
-            nextPreset
-                ? { ...nextPreset }
-                : {
-                    type: `custom_${Date.now()}`,
-                    label: 'Evento personalizado',
-                    category: 'other',
-                    points: 0,
-                    team: 'optional',
-                    player: 'optional',
-                },
-        ]));
+        setSectionDraft('format', {
+            definitions: [
+                ...definitions,
+                nextPreset
+                    ? { ...nextPreset }
+                    : {
+                        type: `custom_${Date.now()}`,
+                        label: 'Evento personalizado',
+                        category: 'other',
+                        points: 0,
+                        team: 'optional',
+                        player: 'optional',
+                    },
+            ],
+        });
         markDirty();
-    }, [definitions, markDirty, sportId]);
+    }, [definitions, markDirty, setSectionDraft, sportId]);
 
     const resetDefaults = useCallback(() => {
-        setDefinitions(cloneDefinitions(getDefaultMatchEventDefinitions(sportId)));
+        setSectionDraft('format', {
+            definitions: cloneDefinitions(getDefaultMatchEventDefinitions(sportId)),
+        });
         markDirty();
-    }, [markDirty, sportId]);
+    }, [markDirty, setSectionDraft, sportId]);
 
     const handleSave = useCallback(async () => {
         if (!tournamentId) return;
@@ -159,15 +167,16 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                 },
             }));
 
-            setIsDirty(false);
-            setMessage({ type: 'success', text: 'Formato guardado. La gestión de partidos ya usa esta configuración.' });
+            clearSectionDraft('format');
+            markSectionDirty('format', false);
+            setMessage({ type: 'success', text: 'Formato guardado. La gestion de partidos ya usa esta configuracion.' });
             router.refresh();
         } catch (error: unknown) {
             setMessage({ type: 'error', text: error instanceof Error ? error.message : 'No se pudo guardar el formato.' });
         } finally {
             setIsSaving(false);
         }
-    }, [definitions, router, tournament.ruleset, tournamentId]);
+    }, [clearSectionDraft, definitions, markSectionDirty, router, tournament.ruleset, tournamentId]);
 
     const handleSaveRef = useRef<() => void>(() => { });
     handleSaveRef.current = () => {
@@ -197,9 +206,9 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                 <div className={`manager-card ${styles.surface} ${isApiManaged ? 'opacity-60 pointer-events-none grayscale-[0.5]' : ''}`}>
                     <header className={`manager-header ${styles.heroHeader}`}>
                         <div className={`manager-header-titles ${styles.heroTitles}`}>
-                            <div className={styles.kicker}>Motor de gestión</div>
+                            <div className={styles.kicker}>Motor de gestion</div>
                             <h1 className={styles.heroHeading}><Settings2 className="w-6 h-6 text-[var(--accent)]" /> Formato de eventos</h1>
-                            <p className={styles.heroDescription}>Definí qué acciones puede cargar el operador, cómo se nombran y qué impacto tienen dentro de la gestión del partido.</p>
+                            <p className={styles.heroDescription}>Defini que acciones puede cargar el operador, como se nombran y que impacto tienen dentro de la gestion del partido.</p>
                         </div>
                         <div className={`manager-metadata-box ${styles.sportBadge}`}>
                             <span>Deporte</span>
@@ -216,13 +225,13 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                         </article>
                         <article className={styles.summaryCard}>
                             <div className={styles.summaryIcon}><Target size={18} /></div>
-                            <span>Eventos de puntuación</span>
+                            <span>Eventos de puntuacion</span>
                             <strong>{scoringEvents.length}</strong>
                             <small>{totalScoringPoints} puntos combinados entre presets</small>
                         </article>
                         <article className={styles.summaryCard}>
                             <div className={styles.summaryIcon}><Layers3 size={18} /></div>
-                            <span>Categorías cubiertas</span>
+                            <span>Categorias cubiertas</span>
                             <strong>{categoryCount}</strong>
                             <small>Balance entre juego, disciplina y reloj</small>
                         </article>
@@ -233,12 +242,12 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                             <div className={styles.infoCard}>
                                 <div className={styles.blockLabel}>Fuente de verdad</div>
                                 <p className={styles.blockCopy}>
-                                    La consola de gestión de partido toma esta lista desde la base de datos. Si aquí cambias el deporte o los eventos disponibles, la pestaña <strong>Eventos</strong> del partido se adapta.
+                                    La consola de gestion de partido toma esta lista desde la base de datos. Si aqui cambias el deporte o los eventos disponibles, la pestaña <strong>Eventos</strong> del partido se adapta.
                                 </p>
                             </div>
 
                             <div className={styles.actionCard}>
-                                <div className={styles.blockLabel}>Acciones rápidas</div>
+                                <div className={styles.blockLabel}>Acciones rapidas</div>
                                 <div className={styles.actionStack}>
                                     <button type="button" className={`${styles.primaryAction} manager-btn-inline`} onClick={addDefinition} disabled={isApiManaged}>
                                         <Plus size={14} /> Agregar evento
@@ -254,15 +263,15 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                                 <div className={styles.ruleList}>
                                     <div>
                                         <span className={styles.ruleDot} />
-                                        <p>Los eventos de puntuación reciben prioridad y destaque visual.</p>
+                                        <p>Los eventos de puntuacion reciben prioridad y destaque visual.</p>
                                     </div>
                                     <div>
                                         <span className={styles.ruleDot} />
-                                        <p>Tarjetas, cambios y reloj se agrupan por categoría para acelerar carga operativa.</p>
+                                        <p>Tarjetas, cambios y reloj se agrupan por categoria para acelerar carga operativa.</p>
                                     </div>
                                     <div>
                                         <span className={styles.ruleDot} />
-                                        <p>La etiqueta visible es el texto que después verá el operador en gestión.</p>
+                                        <p>La etiqueta visible es el texto que despues vera el operador en gestion.</p>
                                     </div>
                                 </div>
                             </div>
@@ -271,7 +280,7 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                         <main className={styles.eventList}>
                             {definitions.length === 0 ? (
                                 <div className={styles.emptyState}>
-                                    No hay eventos configurados todavía.
+                                    No hay eventos configurados todavia.
                                 </div>
                             ) : (
                                 definitions.map((definition, index) => {
@@ -346,7 +355,7 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                                                 </label>
 
                                                 <label className={styles.fieldBlock}>
-                                                    <span className="manager-field-label">Categoría</span>
+                                                    <span className="manager-field-label">Categoria</span>
                                                     <select
                                                         className={`manager-url-select ${styles.fieldInput}`}
                                                         value={definition.category}
@@ -394,7 +403,7 @@ export function TournamentFormatTab({ data, id }: { data?: TournamentRow; id?: s
                                                 </div>
                                                 <div className={styles.footerHint}>
                                                     <Sparkles size={14} />
-                                                    <span>Se aplica automáticamente en la consola de partido</span>
+                                                    <span>Se aplica automaticamente en la consola de partido</span>
                                                 </div>
                                             </div>
                                         </article>

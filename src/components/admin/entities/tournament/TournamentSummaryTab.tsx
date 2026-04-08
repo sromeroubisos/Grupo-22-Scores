@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Database } from '@/lib/database.types';
 import './basalt.css';
 
@@ -56,7 +57,12 @@ export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: Summar
                                 : 'Actualmente oculto para el publico. Los cambios no se reflejaran en la app principal.'}
                         </p>
 
-                        <button className="basalt-btn basalt-btn-primary mt-4 w-full sm:w-auto">Editar detalles de identidad</button>
+                        <Link
+                            href={`/admin/entities/${data.id}/manage?type=tournament&tab=detalles`}
+                            className="basalt-btn basalt-btn-primary mt-4 w-full sm:w-auto"
+                        >
+                            Editar detalles base
+                        </Link>
                     </div>
                 </div>
 
@@ -136,19 +142,20 @@ export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: Summar
                 </div>
 
                 <div className="basalt-card basalt-card-span-4">
-                    <span className="basalt-section-kicker">Checklist</span>
-                    <h3 className="basalt-section-title">Acciones pendientes</h3>
+                    <span className="basalt-section-kicker">Ruta sugerida</span>
+                    <h3 className="basalt-section-title">Siguientes pasos reales</h3>
 
-                    <div className="basalt-checklist-item">
-                        <div className="basalt-check-box"></div>
-                        <span>Cargar participantes</span>
+                    <div className="flex flex-col gap-2">
+                        <Link className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=estructura`}>
+                            Definir estructura
+                        </Link>
+                        <Link className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=participantes`}>
+                            Cargar participantes
+                        </Link>
+                        <Link className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=operacion`}>
+                            Gestionar fixture y tabla
+                        </Link>
                     </div>
-                    <div className="basalt-checklist-item">
-                        <div className="basalt-check-box"></div>
-                        <span>Generar fixture base</span>
-                    </div>
-
-                    <button className="basalt-btn w-full mt-3 justify-center">Ver checklist completa</button>
                 </div>
 
                 <div className="basalt-card basalt-card-span-8">

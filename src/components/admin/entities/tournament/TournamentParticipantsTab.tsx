@@ -24,6 +24,8 @@ import {
     AlertCircle, CheckCircle2
 } from 'lucide-react';
 import './tournament-participants-flash.css';
+import { canonicalizeSportId } from '@/lib/clubDerivatives';
+import { Database } from '@/lib/database.types';
 
 // Context & Drawers
 import { AddParticipantDrawer } from './AddParticipantDrawer';
@@ -78,6 +80,8 @@ interface ClubCatalogItem {
     name: string;
     short_name?: string | null;
     logo_url?: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
 }
 
 interface ParticipantStats {
@@ -93,7 +97,7 @@ type ParticipantUpdatePayload = Partial<Participant> & {
 };
 
 interface Props {
-    data?: unknown;
+    data?: Database['public']['Tables']['tournaments']['Row'] | null;
     id?: string; // tournament ID
 }
 
@@ -101,7 +105,7 @@ interface Props {
 // MAIN COMPONENT
 // ============================================
 
-export function TournamentParticipantsTab({ id: tournamentId }: Props) {
+export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
     // State
     const [participants, setParticipants] = useState<Participant[]>([]);
     const [groups, setGroups] = useState<TournamentGroup[]>([]);
@@ -130,6 +134,10 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
 
     // Toast
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const tournamentSportId = useMemo(
+        () => canonicalizeSportId(data?.sport_id || null),
+        [data?.sport_id]
+    );
 
     const getErrorMessage = (err: unknown, fallback: string) =>
         err instanceof Error && err.message ? err.message : fallback;
@@ -284,6 +292,17 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         });
         return counts;
     }, [participants]);
+
+    const sportFilteredClubCatalog = useMemo(() => {
+        if (!tournamentSportId) {
+            return clubCatalog;
+        }
+
+        return clubCatalog.filter((club) => {
+            const clubSport = canonicalizeSportId(club.sport_id || club.sport || null);
+            return clubSport === tournamentSportId;
+        });
+    }, [clubCatalog, tournamentSportId]);
 
     useEffect(() => {
         if (phasesWithGroups.length === 0) {
@@ -867,7 +886,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 isOpen={isAddDrawerOpen}
                 onClose={() => setIsAddDrawerOpen(false)}
                 onAdd={handleCreateFromClubCatalog}
-                clubs={clubCatalog}
+                clubs={sportFilteredClubCatalog}
                 phases={phasesWithGroups}
                 groups={groups}
                 existingParticipants={participants}
@@ -881,7 +900,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 }}
                 onSave={(data) => handleUpdate(editingParticipant!.id, data)}
                 participant={editingParticipant}
-                clubs={clubCatalog}
+                clubs={sportFilteredClubCatalog}
                 phases={phasesWithGroups}
                 groups={groups}
                 existingParticipants={participants}

@@ -28,6 +28,10 @@ import {
   parseEspnAmericanFootballMatchId,
 } from '@/lib/services/espnAmericanFootball';
 import {
+  getEspnMotorsportMatchBundle,
+  parseEspnMotorsportMatchId,
+} from '@/lib/services/espnMotorsport';
+import {
   getRugbyApiSportsGame,
   getRugbyApiSportsGamesH2H,
   getRugbyApiSportsStandings,
@@ -281,6 +285,7 @@ export async function GET(
     const matchId = (await params).id;
     const rugbyMatchId = parseRugbyApiSportsMatchId(matchId);
     const espnMatchId = parseEspnAmericanFootballMatchId(matchId);
+    const espnMotorsportMatchId = parseEspnMotorsportMatchId(matchId);
 
     if (rugbyMatchId) {
       const bundle = await getRugbyApiSportsMatchBundle(rugbyMatchId);
@@ -296,6 +301,18 @@ export async function GET(
 
     if (espnMatchId) {
       const bundle = await getEspnAmericanFootballMatchBundle(espnMatchId);
+      if (!bundle) {
+        return NextResponse.json(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(bundle);
+    }
+
+    if (espnMotorsportMatchId) {
+      const bundle = await getEspnMotorsportMatchBundle(matchId);
       if (!bundle) {
         return NextResponse.json(
           { error: 'Match not found' },

@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getTournamentEspnAmericanFootballConfig, isAmericanFootballSport } from '@/lib/externalProviderPolicy';
+import {
+    getTournamentEspnAmericanFootballConfig,
+    getTournamentEspnMotorsportConfig,
+    isAmericanFootballSport,
+    isMotorsportSport,
+} from '@/lib/externalProviderPolicy';
 import {
     getEspnAmericanFootballLeagueStandings,
     isEspnAmericanFootballLeagueSlug,
 } from '@/lib/services/espnAmericanFootball';
+import {
+    getEspnMotorsportLeagueStandings,
+    isEspnMotorsportLeagueSlug,
+} from '@/lib/services/espnMotorsport';
 
 export async function GET(
     _request: NextRequest,
@@ -24,16 +33,29 @@ export async function GET(
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
         }
 
-        if (!isAmericanFootballSport((tournament as any).sport_id ?? (tournament as any).sport ?? null)) {
-            return NextResponse.json({ error: 'This provider is only available for american football tournaments.' }, { status: 409 });
+        const sportKey = (tournament as any).sport_id ?? (tournament as any).sport ?? null;
+        const isAmericanFootball = isAmericanFootballSport(sportKey);
+        const isMotorsport = isMotorsportSport(sportKey);
+
+        if (!isAmericanFootball && !isMotorsport) {
+            return NextResponse.json({ error: 'This provider is only available for american football and motorsport tournaments.' }, { status: 409 });
         }
 
-        const config = getTournamentEspnAmericanFootballConfig(tournament as any);
-        if (!isEspnAmericanFootballLeagueSlug(config?.league_slug)) {
+        const config = isAmericanFootball
+            ? getTournamentEspnAmericanFootballConfig(tournament as any)
+            : getTournamentEspnMotorsportConfig(tournament as any);
+
+        if (isAmericanFootball && !isEspnAmericanFootballLeagueSlug(config?.league_slug)) {
             return NextResponse.json({ error: 'This tournament is not linked to ESPN yet.' }, { status: 400 });
         }
 
-        const standings = await getEspnAmericanFootballLeagueStandings(config.league_slug);
+        if (isMotorsport && !isEspnMotorsportLeagueSlug(config?.league_slug)) {
+            return NextResponse.json({ error: 'This tournament is not linked to ESPN yet.' }, { status: 400 });
+        }
+
+        const standings = isAmericanFootball
+            ? await getEspnAmericanFootballLeagueStandings(config!.league_slug as any)
+            : await getEspnMotorsportLeagueStandings(config!.league_slug as any);
 
         return NextResponse.json({
             standings: standings.rows,

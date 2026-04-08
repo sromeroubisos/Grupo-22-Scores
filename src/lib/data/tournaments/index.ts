@@ -3,6 +3,7 @@ export * from './rugby';
 export * from './hockey';
 export * from './basketball';
 export * from './american-football';
+export * from './motorsport';
 export * from './volleyball';
 export * from './football';
 export * from './tennis';
@@ -12,6 +13,7 @@ import { getAllRugbyTournaments, getRugbyTournamentsByCountry, getInternationalR
 import { getAllHockeyTournaments, getHockeyTournamentsByCountry, getInternationalHockeyTournaments } from './hockey';
 import { getAllBasketballTournaments, getBasketballTournamentsByCountry, getInternationalBasketballTournaments } from './basketball';
 import { getAllAmericanFootballTournaments, getAmericanFootballTournamentsByCountry, getInternationalAmericanFootballTournaments } from './american-football';
+import { getAllMotorsportTournaments, getInternationalMotorsportTournaments, getMotorsportTournamentsByCountry } from './motorsport';
 import { getAllVolleyballTournaments, getVolleyballTournamentsByCountry, getInternationalVolleyballTournaments } from './volleyball';
 import { getAllFootballTournaments, getFootballTournamentsByCountry, getInternationalFootballTournaments } from './football';
 import { getAllTennisTournaments, getTennisTournamentsByCountry, getInternationalTennisTournaments } from './tennis';
@@ -25,6 +27,7 @@ export const getTournamentsBySport = (sportId: SportId): Tournament[] => {
         case 'field-hockey': return getAllHockeyTournaments();
         case 'basketball': return getAllBasketballTournaments();
         case 'american-football': return getAllAmericanFootballTournaments();
+        case 'motorsport': return getAllMotorsportTournaments();
         case 'volleyball': return getAllVolleyballTournaments();
         case 'football': return getAllFootballTournaments();
         case 'tennis': return getAllTennisTournaments();
@@ -39,6 +42,7 @@ export const getTournamentsBySportAndCountry = (sportId: SportId, countryId: str
         case 'field-hockey': return getHockeyTournamentsByCountry(countryId);
         case 'basketball': return getBasketballTournamentsByCountry(countryId);
         case 'american-football': return getAmericanFootballTournamentsByCountry(countryId);
+        case 'motorsport': return getMotorsportTournamentsByCountry(countryId);
         case 'volleyball': return getVolleyballTournamentsByCountry(countryId);
         case 'football': return getFootballTournamentsByCountry(countryId);
         case 'tennis': return getTennisTournamentsByCountry(countryId);
@@ -53,6 +57,7 @@ export const getInternationalTournamentsBySport = (sportId: SportId): Tournament
         case 'field-hockey': return getInternationalHockeyTournaments();
         case 'basketball': return getInternationalBasketballTournaments();
         case 'american-football': return getInternationalAmericanFootballTournaments();
+        case 'motorsport': return getInternationalMotorsportTournaments();
         case 'volleyball': return getInternationalVolleyballTournaments();
         case 'football': return getInternationalFootballTournaments();
         case 'tennis': return getInternationalTennisTournaments();
@@ -66,6 +71,7 @@ export const getAllTournaments = (): Tournament[] => {
         ...getAllHockeyTournaments(),
         ...getAllBasketballTournaments(),
         ...getAllAmericanFootballTournaments(),
+        ...getAllMotorsportTournaments(),
         ...getAllVolleyballTournaments(),
         ...getAllFootballTournaments(),
         ...getAllTennisTournaments(),
@@ -106,6 +112,7 @@ export const getTournamentCountBySport = (): Partial<Record<SportId, number>> =>
         'field-hockey': getAllHockeyTournaments().length,
         'basketball': getAllBasketballTournaments().length,
         'american-football': getAllAmericanFootballTournaments().length,
+        'motorsport': getAllMotorsportTournaments().length,
         'volleyball': getAllVolleyballTournaments().length,
         'football': getAllFootballTournaments().length,
         'tennis': getAllTennisTournaments().length,

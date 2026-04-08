@@ -20,10 +20,12 @@ import {
 import { Database } from '@/lib/database.types';
 import {
     getEspnAmericanFootballLinkStatus,
+    getEspnMotorsportLinkStatus,
     getLinkStatus,
     getRugbyApiSportsLinkStatus,
     type ExternalMatchWithMapping,
     type EspnAmericanFootballConfig,
+    type EspnMotorsportConfig,
     type ExternalStandingsRow,
     type FlashScoreConfig,
     type MatchConfidence,
@@ -32,9 +34,11 @@ import {
 } from '@/lib/types/flashscore-integration';
 import {
     getRulesetEspnAmericanFootballConfig,
+    getRulesetEspnMotorsportConfig,
     getRulesetFlashScoreConfig,
     getRulesetRugbyApiSportsConfig,
     isAmericanFootballSport,
+    isMotorsportSport,
     isRugbySport,
 } from '@/lib/externalProviderPolicy';
 
@@ -71,18 +75,23 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
     const router = useRouter();
     const isRugby = isRugbySport((data as any).sport_id ?? (data as any).sport ?? null);
     const isAmericanFootball = isAmericanFootballSport((data as any).sport_id ?? (data as any).sport ?? null);
+    const isMotorsport = isMotorsportSport((data as any).sport_id ?? (data as any).sport ?? null);
     const flashScoreConfig: FlashScoreConfig | null = getRulesetFlashScoreConfig((data as any).ruleset);
     const rugbyConfig: RugbyApiSportsConfig | null = getRulesetRugbyApiSportsConfig((data as any).ruleset);
     const espnConfig: EspnAmericanFootballConfig | null = getRulesetEspnAmericanFootballConfig((data as any).ruleset);
+    const espnMotorsportConfig: EspnMotorsportConfig | null = getRulesetEspnMotorsportConfig((data as any).ruleset);
 
-    const provider = isRugby ? 'rugby-api-sports' : isAmericanFootball ? 'espn' : 'flashscore';
-    const providerLabel = isRugby ? 'Rugby API-Sports' : isAmericanFootball ? 'ESPN' : 'FlashScore';
+    const provider = isRugby ? 'rugby-api-sports' : (isAmericanFootball || isMotorsport) ? 'espn' : 'flashscore';
+    const providerLabel = isRugby ? 'Rugby API-Sports' : isMotorsport ? 'ESPN Racing' : isAmericanFootball ? 'ESPN' : 'FlashScore';
     const linkStatus = isRugby
         ? getRugbyApiSportsLinkStatus(rugbyConfig)
-        : isAmericanFootball
+        : isMotorsport
+            ? getEspnMotorsportLinkStatus(espnMotorsportConfig)
+            : isAmericanFootball
             ? getEspnAmericanFootballLinkStatus(espnConfig)
             : getLinkStatus(flashScoreConfig);
     const isLinked = linkStatus === 'ids_resolved' || linkStatus === 'synced';
+    const syncSupported = !isMotorsport;
 
     const [view, setView] = useState<SyncView>('idle');
     const [sourceType, setSourceType] = useState<'fixtures' | 'results'>('fixtures');
@@ -247,6 +256,22 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
             }).length;
     }, [clubOverrides, externalMatches, selectedIds]);
 
+    const syncProviderSummary = isRugby
+        ? `${rugbyConfig?.league_name || 'Liga'} · ${rugbyConfig?.season || '-'}`
+        : isMotorsport
+            ? `${espnMotorsportConfig?.league_name || 'Categoria'} · ${espnMotorsportConfig?.country_name || '-'}`
+            : isAmericanFootball
+                ? `${espnConfig?.league_name || 'Liga'} · ${espnConfig?.country_name || '-'}`
+                : flashScoreConfig?.tournament_url || 'Sin URL';
+
+    const syncLastSync = isRugby
+        ? rugbyConfig?.last_sync_at
+        : isMotorsport
+            ? espnMotorsportConfig?.last_sync_at
+            : isAmericanFootball
+                ? espnConfig?.last_sync_at
+                : flashScoreConfig?.last_sync;
+
     const providerSummary = isRugby
         ? `${rugbyConfig?.league_name || 'Liga'} · ${rugbyConfig?.season || '-'}`
         : isAmericanFootball
@@ -284,12 +309,12 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
                 <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-accent-primary">{providerLabel}</span>
                     <h3 className="text-lg font-extrabold tracking-tight mt-0.5">Sincronizacion Externa</h3>
-                    <p className="text-dim text-xs mt-1">{providerSummary}</p>
+                    <p className="text-dim text-xs mt-1">{syncProviderSummary}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                    {lastSync ? (
+                    {syncLastSync ? (
                         <span className="text-[10px] text-dim font-mono">
-                            Ultima sync: {new Date(lastSync).toLocaleString()}
+                            Ultima sync: {new Date(syncLastSync).toLocaleString()}
                         </span>
                     ) : (
                         <span className="text-[10px] text-dim font-mono">Sin sincronizaciones previas</span>
@@ -451,28 +476,36 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
                         </div>
 
                         <div className="flex items-center gap-2 ml-auto flex-wrap">
-                            <select
-                                className="basalt-input text-xs"
-                                style={{ minWidth: '200px' }}
-                                value={targetPhaseId}
-                                onChange={(event) => setTargetPhaseId(event.target.value)}
-                            >
-                                {phases.map((phase) => (
-                                    <option key={phase.id} value={phase.id}>{phase.name}</option>
-                                ))}
-                            </select>
+                            {syncSupported ? (
+                                <>
+                                    <select
+                                        className="basalt-input text-xs"
+                                        style={{ minWidth: '200px' }}
+                                        value={targetPhaseId}
+                                        onChange={(event) => setTargetPhaseId(event.target.value)}
+                                    >
+                                        {phases.map((phase) => (
+                                            <option key={phase.id} value={phase.id}>{phase.name}</option>
+                                        ))}
+                                    </select>
 
-                            <button
-                                className="basalt-btn basalt-btn-primary"
-                                onClick={handleImport}
-                                disabled={selectedIds.size === 0 || unresolvedCount > 0 || view === 'syncing' || !targetPhaseId}
-                            >
-                                {view === 'syncing' ? (
-                                    <><Loader2 size={14} className="animate-spin" /> Importando...</>
-                                ) : (
-                                    <><Download size={14} /> Importar seleccionados ({selectedIds.size})</>
-                                )}
-                            </button>
+                                    <button
+                                        className="basalt-btn basalt-btn-primary"
+                                        onClick={handleImport}
+                                        disabled={selectedIds.size === 0 || unresolvedCount > 0 || view === 'syncing' || !targetPhaseId}
+                                    >
+                                        {view === 'syncing' ? (
+                                            <><Loader2 size={14} className="animate-spin" /> Importando...</>
+                                        ) : (
+                                            <><Download size={14} /> Importar seleccionados ({selectedIds.size})</>
+                                        )}
+                                    </button>
+                                </>
+                            ) : (
+                                <span className="text-xs text-dim">
+                                    ESPN Racing se usa en modo lectura para automovilismo. La importacion al fixture interno no esta habilitada.
+                                </span>
+                            )}
                         </div>
                     </div>
 

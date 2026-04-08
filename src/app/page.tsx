@@ -117,11 +117,16 @@ interface Match {
   minute?: string;
   homeClubId?: string;
   awayClubId?: string;
+  venue?: string;
+  eventLabel?: string;
+  footerLabel?: string;
 }
 
 interface LeagueMatches {
   league: string;
   leagueId: string;
+  logoUrl?: string | null;
+  favoriteLeagueId?: string;
   country: string;
   flag: string;
   round: string;
@@ -330,7 +335,44 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport }: {
       </div>
     </Link>
   );
+  });
+
+const MotorsportMatchRow = memo(({ match, styles }: {
+  match: Match & { _dateTime: string },
+  styles: any,
+}) => {
+  const isLive = match.status === 'live';
+  const isFinished = match.status === 'finished';
+  const statusLabel = isLive ? 'Live' : isFinished ? 'Final' : 'Scheduled';
+  const footerLabel = match.footerLabel || (isLive ? 'Telemetry' : isFinished ? 'Race data' : 'Event details');
+
+  return (
+    <Link
+      href={`/matches/${match.id}`}
+      className={`${styles.motorsportHomeRow} ${isLive ? styles.motorsportHomeRowLive : ''}`}
+    >
+      <div className={styles.motorsportHomeRowTop}>
+        <div className={styles.motorsportHomeRowHeader}>
+          <span className={styles.motorsportHomeRowSeries}>{match.away}</span>
+          <h3 className={styles.motorsportHomeRowTitle}>{match.home}</h3>
+          <div className={styles.motorsportHomeRowMeta}>
+            {match.time && <span>{isFinished ? 'Finished' : match.time}</span>}
+            {match.venue && <span>{match.venue}</span>}
+          </div>
+        </div>
+        <span className={`${styles.motorsportHomeRowStatus} ${isLive ? styles.motorsportHomeRowStatusLive : ''}`}>
+          {statusLabel}
+        </span>
+      </div>
+      <div className={styles.motorsportHomeRowFooter}>
+        <span className={styles.motorsportHomeRowFooterLabel}>{footerLabel}</span>
+        <span className={styles.motorsportHomeRowFooterAction}>Open</span>
+      </div>
+    </Link>
+  );
 });
+
+MotorsportMatchRow.displayName = 'MotorsportMatchRow';
 
 // Update the display name for dev tools
 MatchRow.displayName = 'MatchRow';
@@ -581,22 +623,30 @@ export default function HomePage() {
         overriddenTournament ? getTournamentPriority(overriddenTournament) : 0,
       );
       const cleanedName = cleanLeagueName(tournamentName, countryName);
+      const isMotorsportGroup = selectedSport.id === 'motorsport';
       const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
 
       const existingId = dedupByKey.get(dedupKey);
-      const groupKey = existingId ?? tournament.id;
+      const groupKey = isMotorsportGroup
+        ? `${String(tournament.id || 'motorsport')}::${String(match.id)}`
+        : (existingId ?? tournament.id);
+      const favoriteLeagueId = String(tournament.id || groupKey);
 
       if (!groups[groupKey]) {
         groups[groupKey] = {
           league: `${countryName}: ${cleanedName}`,
           leagueId: groupKey,
+          logoUrl: overriddenTournament?.logoUrl || (tournament as any)?.logoUrl || (tournament as any)?.logo_url || null,
+          favoriteLeagueId,
           country: countryName,
           flag: '',
           round: match.roundId?.startsWith('F') ? match.roundId.replace('F', 'Fecha ') : (match.roundId || 'General'),
           priority: tournamentPriority,
           matches: []
         };
-        dedupByKey.set(dedupKey, groupKey);
+        if (!isMotorsportGroup) {
+          dedupByKey.set(dedupKey, groupKey);
+        }
       } else if (tournamentPriority > groups[groupKey].priority) {
         groups[groupKey].priority = tournamentPriority;
       }
@@ -622,6 +672,9 @@ export default function HomePage() {
         _dateTime: match.dateTime, // Preserve for real-time calculation
         homeClubId: match.homeClubId,
         awayClubId: match.awayClubId,
+        venue: match.venue || undefined,
+        eventLabel: (match as any).eventName || undefined,
+        footerLabel: match.status === 'live' ? 'Telemetry' : match.status === 'final' ? 'Race data' : 'Event details',
       } as any);
     });
 
@@ -637,7 +690,7 @@ export default function HomePage() {
       if (a.priority !== b.priority) return b.priority - a.priority;
       return a.league.localeCompare(b.league);
     });
-  }, [isLeagueFavorite, loadedRugbyTournamentMap, matches, resolveMatchAudience, selectedAudience, userTimeZone]);
+  }, [isLeagueFavorite, loadedRugbyTournamentMap, matches, resolveMatchAudience, selectedAudience, selectedSport.id, userTimeZone]);
 
   const displayedMatchesByLeague = useMemo<LeagueMatches[]>(() => {
     if (!showLiveOnly) return matchesByLeague;
@@ -987,6 +1040,7 @@ export default function HomePage() {
   const selectedDateInfo = dates.find(d => d.date === selectedDate);
 
   const isIndividualSport = INDIVIDUAL_SPORTS.has(selectedSport.id);
+  const isMotorsportSport = selectedSport.id === 'motorsport';
 
   useEffect(() => {
     setShowLiveOnly(false);
@@ -1687,7 +1741,38 @@ export default function HomePage() {
 
               {!loading && displayedMatchesByLeague.map((league) => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
-                const isFavorite = isLeagueFavorite(league.leagueId);
+                const favoriteLeagueId = league.favoriteLeagueId || league.leagueId;
+                const isFavorite = isLeagueFavorite(favoriteLeagueId);
+
+                if (isMotorsportSport) {
+                  const eventMatch = league.matches[0];
+                  if (!eventMatch) return null;
+
+                  return (
+                    <div key={league.leagueId} className={styles.motorsportStandaloneCard}>
+                      <div className={styles.motorsportStandaloneActions}>
+                        <button
+                          className={`${styles.leagueFavoriteBtn} ${styles.motorsportLeagueFavoriteBtn}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleLeagueFavorite(favoriteLeagueId, {
+                              name: league.league,
+                              logo_url: league.logoUrl || null,
+                            });
+                          }}
+                          aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                        >
+                          <Star size={18} fill={isFavorite ? "currentColor" : "none"} strokeWidth={isFavorite ? 0 : 2} />
+                        </button>
+                      </div>
+                      <MotorsportMatchRow
+                        match={eventMatch as any}
+                        styles={styles}
+                      />
+                    </div>
+                  );
+                }
 
                 return (
                   <div key={league.leagueId} className={styles.leagueSection}>
@@ -1715,7 +1800,10 @@ export default function HomePage() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            toggleLeagueFavorite(league.leagueId, { name: league.league });
+                            toggleLeagueFavorite(favoriteLeagueId, {
+                              name: league.league,
+                              logo_url: league.logoUrl || null,
+                            });
                           }}
                           aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
                         >

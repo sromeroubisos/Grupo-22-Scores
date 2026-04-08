@@ -7,7 +7,7 @@ import { Database } from '@/lib/database.types';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { SPORTS } from '@/lib/data/sports';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
-import { useTournamentDirty } from './TournamentContext';
+import { type TournamentDetailsDraft, useTournamentDirty } from './TournamentContext';
 import { Shield, Globe, Image as ImageIcon } from 'lucide-react';
 import LogoUploader from '@/components/LogoUploader';
 import { FlashScoreIntegrationSection } from './FlashScoreIntegrationSection';
@@ -72,13 +72,44 @@ interface TournamentDetailsTabProps {
     countries: CountryRow[];
 }
 
+function buildInitialDetailsDraft(
+    tournament: TournamentDetailsRow,
+    baseCountryOptions: TournamentCountryOption[],
+): TournamentDetailsDraft {
+    const normalizedCountryId = normalizeCountryId(tournament.country_id ?? tournament.country ?? '', baseCountryOptions);
+    const selectedCountryLabel = baseCountryOptions.find((option) => option.id === normalizedCountryId)?.label
+        || tournament.country
+        || normalizedCountryId;
+
+    return {
+        name: tournament.is_api_managed ? (tournament.display_name || tournament.name || '') : (tournament.name ?? ''),
+        display_name: tournament.display_name || '',
+        slug: tournament.slug ?? '',
+        season_id: tournament.season_id ?? '2026',
+        sport_id: tournament.sport_id ?? '',
+        union_id: tournament.union_id ?? '',
+        country_id: normalizedCountryId,
+        country_label: selectedCountryLabel,
+        region: tournament.region ?? '',
+        category: tournament.category ?? '',
+        age_grade: tournament.age_grade ?? '',
+        logo_url: tournament.logo_url ?? '',
+        ruleset: (tournament.ruleset ?? {}) as Record<string, unknown>,
+    };
+}
+
 export function TournamentDetailsTab({ data, id, unions, countries }: TournamentDetailsTabProps) {
     const tournament = data as TournamentDetailsRow;
     const router = useRouter();
-    const { setDirty: setGlobalDirty } = useTournamentDirty();
+    const {
+        getSectionDraft,
+        setSectionDraft,
+        clearSectionDraft,
+        markSectionDirty,
+        hasDirtySection,
+    } = useTournamentDirty();
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-    const [isDirty, setIsDirty] = useState(false);
     const [slugEdited, setSlugEdited] = useState(false);
     const [logoTab, setLogoTab] = useState<'url' | 'upload'>('url');
     const baseCountryOptions = useMemo(
@@ -96,22 +127,14 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
             ),
         [countries],
     );
+    const initialForm = useMemo(
+        () => buildInitialDetailsDraft(tournament, baseCountryOptions),
+        [baseCountryOptions, tournament],
+    );
 
     const isApiManaged = tournament.is_api_managed || false;
-    const [form, setForm] = useState(() => ({
-        name: isApiManaged ? (tournament.display_name || tournament.name) : (tournament.name ?? ''),
-        display_name: tournament.display_name || '',
-        slug: tournament.slug ?? '',
-        season_id: tournament.season_id ?? '2026',
-        sport_id: tournament.sport_id ?? '',
-        union_id: tournament.union_id ?? '',
-        country_id: normalizeCountryId(tournament.country_id ?? tournament.country ?? '', baseCountryOptions),
-        region: tournament.region ?? '',
-        category: tournament.category ?? '',
-        age_grade: tournament.age_grade ?? '',
-        logo_url: tournament.logo_url ?? '',
-        ruleset: tournament.ruleset ?? {},
-    }));
+    const form = getSectionDraft<TournamentDetailsDraft>('details') ?? initialForm;
+    const isDirty = hasDirtySection('details');
     const countryOptions = useMemo(() => {
         if (!form.country_id) return baseCountryOptions;
 
@@ -132,20 +155,26 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
         [countryOptions, form.country_id],
     );
 
-    useEffect(() => { setGlobalDirty(isDirty); }, [isDirty, setGlobalDirty]);
     useLeaveConfirm(isDirty);
 
-    const update = useCallback(<K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
-        setForm(prev => ({ ...prev, [key]: value }));
-        setIsDirty(true);
-        setMessage(null);
-    }, []);
+    const update = useCallback(<K extends keyof TournamentDetailsDraft>(key: K, value: TournamentDetailsDraft[K]) => {
+        const next = {
+            ...form,
+            [key]: value,
+        };
 
-    useEffect(() => {
-        if (!slugEdited && form.name && !form.slug) {
-            setForm(prev => ({ ...prev, slug: slugify(form.name) }));
+        if (key === 'name' && !slugEdited && !form.slug.trim()) {
+            next.slug = slugify(String(value));
         }
-    }, [form.name, slugEdited, form.slug]);
+
+        if (key === 'country_id') {
+            next.country_label = countryOptions.find((option) => option.id === value)?.label || String(value || '');
+        }
+
+        setSectionDraft('details', next);
+        markSectionDirty('details', true);
+        setMessage(null);
+    }, [countryOptions, form, markSectionDirty, setSectionDraft, slugEdited]);
 
     const handleSaveRef = useRef<() => void>(() => { });
     useEffect(() => {
@@ -181,7 +210,8 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     ruleset: form.ruleset,
                 })
             });
-            setIsDirty(false);
+            clearSectionDraft('details');
+            markSectionDirty('details', false);
             setMessage({ type: 'success', text: 'Cambios guardados.' });
             router.refresh();
         } catch (err: unknown) {

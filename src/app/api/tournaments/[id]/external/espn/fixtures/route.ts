@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getTournamentEspnAmericanFootballConfig, isAmericanFootballSport } from '@/lib/externalProviderPolicy';
+import {
+    getTournamentEspnAmericanFootballConfig,
+    getTournamentEspnMotorsportConfig,
+    isAmericanFootballSport,
+    isMotorsportSport,
+} from '@/lib/externalProviderPolicy';
 import { getEspnAmericanFootballLeagueFixtures, isEspnAmericanFootballLeagueSlug } from '@/lib/services/espnAmericanFootball';
+import { getEspnMotorsportLeagueFixtures, isEspnMotorsportLeagueSlug } from '@/lib/services/espnMotorsport';
 
 function matchParticipantTeamName(
     name: string,
@@ -52,34 +58,53 @@ export async function GET(
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
         }
 
-        if (!isAmericanFootballSport((tournament as any).sport_id ?? (tournament as any).sport ?? null)) {
-            return NextResponse.json({ error: 'This provider is only available for american football tournaments.' }, { status: 409 });
+        const sportKey = (tournament as any).sport_id ?? (tournament as any).sport ?? null;
+        const isAmericanFootball = isAmericanFootballSport(sportKey);
+        const isMotorsport = isMotorsportSport(sportKey);
+
+        if (!isAmericanFootball && !isMotorsport) {
+            return NextResponse.json({ error: 'This provider is only available for american football and motorsport tournaments.' }, { status: 409 });
         }
 
-        const config = getTournamentEspnAmericanFootballConfig(tournament as any);
-        if (!isEspnAmericanFootballLeagueSlug(config?.league_slug)) {
+        const config = isAmericanFootball
+            ? getTournamentEspnAmericanFootballConfig(tournament as any)
+            : getTournamentEspnMotorsportConfig(tournament as any);
+
+        if (isAmericanFootball && !isEspnAmericanFootballLeagueSlug(config?.league_slug)) {
             return NextResponse.json({ error: 'This tournament is not linked to ESPN yet.' }, { status: 400 });
         }
 
-        const { data: participantsData } = await supabase
-            .from('tournament_participants')
-            .select('club_id, clubs(id, name, short_name)')
-            .eq('tournament_id', tournamentId)
-            .eq('status', 'active');
+        if (isMotorsport && !isEspnMotorsportLeagueSlug(config?.league_slug)) {
+            return NextResponse.json({ error: 'This tournament is not linked to ESPN yet.' }, { status: 400 });
+        }
 
-        const participants = (participantsData ?? [])
-            .map((participant: any) => ({
-                club_id: participant.club_id,
-                clubs: Array.isArray(participant.clubs) ? participant.clubs[0] : participant.clubs,
-            }))
-            .filter((participant: any) => participant.clubs);
+        const participants = isAmericanFootball
+            ? (
+                ((await supabase
+                    .from('tournament_participants')
+                    .select('club_id, clubs(id, name, short_name)')
+                    .eq('tournament_id', tournamentId)
+                    .eq('status', 'active')).data ?? [])
+            )
+                .map((participant: any) => ({
+                    club_id: participant.club_id,
+                    clubs: Array.isArray(participant.clubs) ? participant.clubs[0] : participant.clubs,
+                }))
+                .filter((participant: any) => participant.clubs)
+            : [];
 
-        const fixtures = await getEspnAmericanFootballLeagueFixtures(config.league_slug, page);
+        const fixtures = isAmericanFootball
+            ? await getEspnAmericanFootballLeagueFixtures(config!.league_slug as any, page)
+            : await getEspnMotorsportLeagueFixtures(config!.league_slug as any, page);
         const matches = fixtures.matches
             .filter((match): match is NonNullable<(typeof fixtures.matches)[number]> => Boolean(match))
             .map((match) => {
-            const homeMatch = matchParticipantTeamName(match.home_team_name, participants);
-            const awayMatch = matchParticipantTeamName(match.away_team_name, participants);
+            const homeMatch = isAmericanFootball
+                ? matchParticipantTeamName(match.home_team_name, participants as any)
+                : { club_id: null, confidence: 'none' as const };
+            const awayMatch = isAmericanFootball
+                ? matchParticipantTeamName(match.away_team_name, participants as any)
+                : { club_id: null, confidence: 'none' as const };
 
             return {
                 external_match_id: match.match_id,

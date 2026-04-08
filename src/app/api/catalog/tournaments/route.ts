@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { RUGBY_TOURNAMENTS_INTERNATIONAL } from '@/lib/data/tournaments/rugby';
+import { MOTORSPORT_TOURNAMENTS_INTERNATIONAL, MOTORSPORT_TOURNAMENTS_BY_COUNTRY } from '@/lib/data/tournaments/motorsport';
 
 type TournamentCatalogRow = {
     id: string;
@@ -50,13 +51,19 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Include static international tournaments if they match the search
-    const staticTournaments = RUGBY_TOURNAMENTS_INTERNATIONAL
+    const staticCatalogSource = [
+        ...RUGBY_TOURNAMENTS_INTERNATIONAL,
+        ...MOTORSPORT_TOURNAMENTS_INTERNATIONAL,
+        ...Object.values(MOTORSPORT_TOURNAMENTS_BY_COUNTRY).flat(),
+    ];
+
+    // Include static tournaments if they match the search
+    const staticTournaments = staticCatalogSource
         .filter(t => !search || t.name.toLowerCase().includes(search.toLowerCase()))
         .map(t => ({
-            id: `fs-${t.id || (t.url ? t.url.split('/').filter(Boolean).pop() : 'unknown')}`, // Use slug as ID if no ID
+            id: String(t.id || `catalog-${t.name.toLowerCase().replace(/\s+/g, '-')}`),
             label: t.name,
-            meta: 'fs',
+            meta: String(t.id || '').startsWith('espn-racing-league-') ? 'espn' : 'fs',
             url: t.url,
             sportId: t.sportId || 'rugby',
         }));

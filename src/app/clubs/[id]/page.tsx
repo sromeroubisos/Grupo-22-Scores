@@ -150,7 +150,6 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const sp = useSearchParams();
     const { user } = useAuth();
-    const { isFavorited, toggle: toggleFavorite } = useFavorite('club', id);
 
     const [activeTab, setActiveTab] = useState('summary');
     const [loading, setLoading] = useState(true);
@@ -167,6 +166,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
 
     const [selectedSport, setSelectedSport] = useState<string>('all');
     const [selectedSquadTab, setSelectedSquadTab] = useState<string>('');
+    const favoriteClubId = resolvedClubId || id;
+    const { isFavorited, toggle: toggleFavorite } = useFavorite('club', favoriteClubId);
 
     // Keep provider-prefixed IDs so the API route can detect the correct external source.
     const rawId = id;
@@ -546,7 +547,11 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                             ) : null}
                             <button
                                 className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
-                                onClick={() => toggleFavorite()}
+                                onClick={() => toggleFavorite({
+                                    name: teamName,
+                                    logo_url: teamLogoUrl || null,
+                                    type_label: 'Club',
+                                })}
                                 type="button"
                             >
                                 <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />

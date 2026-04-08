@@ -58,6 +58,8 @@ export default function Header() {
         // Map path segments to readable names
         const segmentLabels: Record<string, string> = {
             'admin': 'Admin Dashboard',
+            'entities': 'Entidades',
+            'manage': 'Gestión',
             'torneo': 'Torneo',
             'torneos': 'Torneos',
             'tournaments': 'Torneos',

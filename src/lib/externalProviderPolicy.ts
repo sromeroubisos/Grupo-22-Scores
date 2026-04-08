@@ -1,5 +1,6 @@
 import type {
     EspnAmericanFootballConfig,
+    EspnMotorsportConfig,
     FlashScoreConfig,
     RugbyApiSportsConfig,
 } from '@/lib/types/flashscore-integration';
@@ -18,6 +19,14 @@ const AMERICAN_FOOTBALL_SPORT_KEYS = new Set([
     'american-football',
     '5',
     '/american-football/',
+]);
+
+const MOTORSPORT_SPORT_KEYS = new Set([
+    'motorsport',
+    '31',
+    '/motorsport/',
+    '/automovilismo/',
+    '/racing/',
 ]);
 
 export const FLASHSCORE_PROVIDER = 'flashscore';
@@ -50,6 +59,12 @@ export function isAmericanFootballSport(value: unknown): boolean {
     return AMERICAN_FOOTBALL_SPORT_KEYS.has(normalized);
 }
 
+export function isMotorsportSport(value: unknown): boolean {
+    const normalized = normalizeSportKey(value);
+    if (!normalized) return false;
+    return MOTORSPORT_SPORT_KEYS.has(normalized);
+}
+
 export function isFlashScoreEnabledForSport(_value: unknown): boolean {
     return true;
 }
@@ -57,6 +72,7 @@ export function isFlashScoreEnabledForSport(_value: unknown): boolean {
 export function getPreferredExternalProviderForSport(value: unknown) {
     if (isRugbySport(value)) return RUGBY_API_SPORTS_PROVIDER;
     if (isAmericanFootballSport(value)) return ESPN_PROVIDER;
+    if (isMotorsportSport(value)) return ESPN_PROVIDER;
     return FLASHSCORE_PROVIDER;
 }
 
@@ -145,6 +161,34 @@ export function getTournamentEspnAmericanFootballConfig(
     return getRulesetEspnAmericanFootballConfig(tournament.ruleset);
 }
 
+export function getRulesetEspnMotorsportConfig(ruleset: unknown): EspnMotorsportConfig | null {
+    if (!ruleset || typeof ruleset !== 'object') return null;
+
+    const rawRuleset = ruleset as Record<string, unknown>;
+    const external = rawRuleset.external && typeof rawRuleset.external === 'object'
+        ? rawRuleset.external as Record<string, unknown>
+        : null;
+
+    const rawConfig =
+        external?.espnMotorsport ??
+        rawRuleset.espnMotorsport ??
+        null;
+
+    if (!rawConfig || typeof rawConfig !== 'object') return null;
+    return rawConfig as EspnMotorsportConfig;
+}
+
+export function getTournamentEspnMotorsportConfig(
+    tournament: { sport_id?: unknown; sport?: unknown; ruleset?: unknown } | null | undefined
+): EspnMotorsportConfig | null {
+    if (!tournament) return null;
+
+    const sportKey = tournament.sport_id ?? tournament.sport ?? null;
+    if (!isMotorsportSport(sportKey)) return null;
+
+    return getRulesetEspnMotorsportConfig(tournament.ruleset);
+}
+
 export function withFlashScoreRuleset(ruleset: unknown, config: Partial<FlashScoreConfig>) {
     const currentRuleset = (ruleset && typeof ruleset === 'object')
         ? ruleset as Record<string, unknown>
@@ -220,6 +264,33 @@ export function withEspnAmericanFootballRuleset(ruleset: unknown, config: Partia
             },
         },
         espn: {
+            ...currentConfig,
+            ...config,
+        },
+    };
+}
+
+export function withEspnMotorsportRuleset(ruleset: unknown, config: Partial<EspnMotorsportConfig>) {
+    const currentRuleset = (ruleset && typeof ruleset === 'object')
+        ? ruleset as Record<string, unknown>
+        : {};
+
+    const currentExternal = currentRuleset.external && typeof currentRuleset.external === 'object'
+        ? currentRuleset.external as Record<string, unknown>
+        : {};
+
+    const currentConfig = getRulesetEspnMotorsportConfig(currentRuleset) ?? {};
+
+    return {
+        ...currentRuleset,
+        external: {
+            ...currentExternal,
+            espnMotorsport: {
+                ...currentConfig,
+                ...config,
+            },
+        },
+        espnMotorsport: {
             ...currentConfig,
             ...config,
         },

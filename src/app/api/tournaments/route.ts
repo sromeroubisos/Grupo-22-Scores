@@ -18,6 +18,11 @@ import {
     inferEspnAmericanFootballLeague,
     parseEspnAmericanFootballTournamentId,
 } from '@/lib/services/espnAmericanFootball';
+import {
+    getEspnMotorsportTournamentBundle,
+    inferEspnMotorsportLeague,
+    parseEspnMotorsportTournamentId,
+} from '@/lib/services/espnMotorsport';
 import { getReadClient } from '@/lib/supabase/read';
 import { db } from '@/lib/mock-db';
 import {
@@ -28,6 +33,7 @@ import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import {
     isAmericanFootballSport,
     isFlashScoreEnabledForSport,
+    isMotorsportSport,
 } from '@/lib/externalProviderPolicy';
 import {
     isBlockedTournamentId,
@@ -78,6 +84,10 @@ function isRugbyApiSportsTournamentId(value: string): boolean {
 
 function isEspnAmericanFootballTournamentId(value: string): boolean {
     return Boolean(parseEspnAmericanFootballTournamentId(value));
+}
+
+function isEspnMotorsportTournamentId(value: string): boolean {
+    return Boolean(parseEspnMotorsportTournamentId(value));
 }
 
 function getFlashScoreSportCandidates(sportId: string, tournamentUrl?: string): string[] {
@@ -382,7 +392,8 @@ async function findDbTournamentMeta(id: string) {
         !id ||
         id.toLowerCase().startsWith('fs-') ||
         isRugbyApiSportsTournamentId(id) ||
-        isEspnAmericanFootballTournamentId(id)
+        isEspnAmericanFootballTournamentId(id) ||
+        isEspnMotorsportTournamentId(id)
     ) {
         return null;
     }
@@ -649,6 +660,15 @@ export async function GET(request: Request) {
             ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
         })
         : null;
+    const espnMotorsportLeague = isMotorsportSport(resolvedSportId)
+        ? inferEspnMotorsportLeague({
+            id,
+            externalId: dbTournamentMeta?.external_id,
+            tournamentUrl: url || dbTournamentMeta?.url || localTournament?.url,
+            name: dbTournamentMeta?.display_name || dbTournamentMeta?.name || localTournament?.name,
+            ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
+        })
+        : null;
 
     try {
         if (espnLeague) {
@@ -716,6 +736,111 @@ export async function GET(request: Request) {
                     externalOverrideId,
                     provider: 'espn',
                     league: espnLeague,
+                    counts: {
+                        results: Array.isArray(bundle.results) ? bundle.results.length : 0,
+                        fixtures: Array.isArray(bundle.fixtures) ? bundle.fixtures.length : 0,
+                        standings: Array.isArray(standingsPayload) ? standingsPayload.length : 0,
+                        topScorers: Array.isArray(bundle.topScorers) ? bundle.topScorers.length : 0,
+                    },
+                },
+                _cache: {
+                    entityId: snapshotEntityId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                        standingsForm: 'api',
+                        standingsHtFt: 'api',
+                        standingsOverUnder: 'api',
+                        topScorers: 'api',
+                        draw: 'api',
+                        archives: 'api',
+                    },
+                },
+                ids: {
+                    ...bundle.ids,
+                    drawStageId: bundle.ids?.stageId,
+                },
+                details: detailsPayload,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: standingsPayload,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: externalStandingsTeamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                archives: bundle.archives,
+            });
+        }
+
+        if (espnMotorsportLeague) {
+            const bundle = await getEspnMotorsportTournamentBundle(espnMotorsportLeague);
+            externalOverrideId = resolveExternalTournamentId({
+                routeId: id,
+                externalId: dbTournamentMeta?.external_id,
+                sportId: resolvedSportId,
+                ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
+                flashScoreIds: {
+                    tournamentId: bundle.ids?.tournamentId,
+                    tournamentStageId: bundle.ids?.stageId,
+                    tournamentTemplateId: bundle.ids?.templateId,
+                    seasonId: bundle.ids?.seasonId,
+                },
+            });
+
+            let detailsPayload: any = bundle.details;
+            let standingsPayload: any = bundle.standings;
+            let externalStandingsTeamLabels: any[] = [];
+
+            if (externalOverrideId) {
+                const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
+                if (externalTournamentOverride) {
+                    detailsPayload = applyExternalTournamentOverride(
+                        (detailsPayload && typeof detailsPayload === 'object')
+                            ? detailsPayload
+                            : {},
+                        externalTournamentOverride,
+                    );
+                }
+
+                const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
+                if (externalStandingsOverride) {
+                    const overriddenStandings = applyExternalTournamentStandingsOverride(standingsPayload, externalStandingsOverride);
+                    standingsPayload = overriddenStandings.standings;
+                    externalStandingsTeamLabels = overriddenStandings.teamLabels;
+                }
+            }
+
+            try {
+                persistFromTournamentPayload({
+                    ids: {
+                        tournamentId: bundle.ids?.tournamentId,
+                        seasonId: bundle.ids?.seasonId != null ? String(bundle.ids.seasonId) : undefined,
+                    },
+                    sport,
+                    details: detailsPayload,
+                    standings: standingsPayload,
+                    fixtures: bundle.fixtures,
+                    results: bundle.results,
+                    topScorers: bundle.topScorers,
+                });
+            } catch (persistError) {
+                console.warn('Catalog persist failed:', persistError);
+            }
+
+            const snapshotEntityId = bundle.ids?.tournamentId || id || url || 'unknown';
+
+            return Response.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    externalOverrideId,
+                    provider: 'espn',
+                    league: espnMotorsportLeague,
                     counts: {
                         results: Array.isArray(bundle.results) ? bundle.results.length : 0,
                         fixtures: Array.isArray(bundle.fixtures) ? bundle.fixtures.length : 0,

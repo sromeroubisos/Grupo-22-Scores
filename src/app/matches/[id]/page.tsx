@@ -33,6 +33,46 @@ function isEspnAmericanFootballMatchId(value: string) {
     return /^espn-game-\d+$/i.test(value);
 }
 
+function isEspnMotorsportMatchId(value: string) {
+    return /^espn-race-[a-z0-9-]+--.+$/i.test(value);
+}
+
+function getMotorsportStatusLabel(status: string | null | undefined) {
+    if (status === 'live') return 'En vivo';
+    if (status === 'final') return 'Final';
+    if (status === 'postponed') return 'Postergado';
+    if (status === 'cancelled') return 'Cancelado';
+    return 'Programado';
+}
+
+function getMotorsportCompetitorCode(name: unknown) {
+    const parts = String(name || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (parts.length === 0) return '---';
+
+    if (parts.length === 1) {
+        return parts[0].slice(0, 3).toUpperCase();
+    }
+
+    return parts
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 3)
+        .toUpperCase();
+}
+
+function getMotorsportPointsGap(points: unknown, leaderPoints: number, index: number) {
+    const numericPoints = Number(points ?? 0);
+    if (!Number.isFinite(numericPoints)) return '-';
+    if (index === 0) return 'Lider';
+    const gap = Math.max(0, leaderPoints - numericPoints);
+    return gap === 0 ? 'Lider' : `-${gap} pts`;
+}
+
 function buildTeamHref(
     team: { id?: string; name?: string; teamUrl?: string; league?: string | null },
     preferredSport?: string | number | null,
@@ -57,7 +97,7 @@ function buildTeamHref(
 function buildTournamentHref(tournamentId?: string, season?: string | number | null) {
     if (!tournamentId) return null;
 
-    const id = tournamentId.startsWith('fs-') || tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-')
+    const id = tournamentId.startsWith('fs-') || tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-') || tournamentId.startsWith('espn-racing-league-')
         ? tournamentId
         : isExternalEntityId(tournamentId)
             ? `fs-${tournamentId}`
@@ -68,8 +108,10 @@ function buildTournamentHref(tournamentId?: string, season?: string | number | n
         params.set('sport', 'rugby');
     } else if (tournamentId.startsWith('espn-league-')) {
         params.set('sport', 'american-football');
+    } else if (tournamentId.startsWith('espn-racing-league-')) {
+        params.set('sport', 'motorsport');
     }
-    if ((tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-')) && season != null && season !== '') {
+    if ((tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-') || tournamentId.startsWith('espn-racing-league-')) && season != null && season !== '') {
         params.set('season', String(season));
     }
 
@@ -295,13 +337,26 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
     const isRugbyExternal = isRugbyApiSportsMatchId(id);
     const isEspnExternal = isEspnAmericanFootballMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal;
+    const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnMotorsportExternal;
     const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
     const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';
     const isEspnSource = state.matchData?.externalProvider === 'espn';
-    const isLimitedExternalSource = isRugbyApiSportsSource || isEspnSource;
+    const isMotorsportSource =
+        state.matchData?.sportId === 'motorsport' ||
+        isEspnMotorsportExternal ||
+        String(state.matchData?.tournamentId || '').startsWith('espn-racing-league-');
+    const isLimitedExternalSource = isRugbyApiSportsSource || (isEspnSource && !isMotorsportSource);
     const visibleTabs = useMemo(() => (
-        isLimitedExternalSource
+        isMotorsportSource
+            ? [
+                { id: 'summary', label: 'Resumen' },
+                { id: 'results', label: 'Resultados' },
+                { id: 'sessions', label: 'Sesiones' },
+                { id: 'championship', label: 'Campeonato' },
+                { id: 'circuit', label: 'Circuito' },
+            ]
+            : isLimitedExternalSource
             ? [
                 { id: 'summary', label: 'Resumen' },
                 { id: 'h2h', label: 'H2H' },
@@ -317,7 +372,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                 { id: 'standings', label: 'Clasificacion' },
                 { id: 'commentary', label: 'Comentarios' },
             ]
-    ), [isLimitedExternalSource]);
+    ), [isLimitedExternalSource, isMotorsportSource]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -929,6 +984,391 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const localHomeLineup = localLineups.home.filter((player) => Boolean(player.name));
     const localAwayLineup = localLineups.away.filter((player) => Boolean(player.name));
     const hasLocalLineups = localHomeLineup.length > 0 || localAwayLineup.length > 0;
+    const motorsportRows = (Array.isArray(matchData.standings) && matchData.standings.length > 0
+        ? matchData.standings
+        : [
+            matchData.home?.name ? { rank: 1, name: matchData.home.name, points: matchData.home.score ?? 0, matches_played: 0 } : null,
+            matchData.away?.name ? { rank: 2, name: matchData.away.name, points: matchData.away.score ?? 0, matches_played: 0 } : null,
+        ].filter(Boolean)
+    ) as any[];
+    const motorsportTopRows = motorsportRows.slice(0, 3);
+    const motorsportSidebarRows = motorsportRows.slice(0, 5);
+    const motorsportTableRows = activeTab === 'summary' ? motorsportRows.slice(0, 10) : motorsportRows;
+    const leaderPoints = Number(motorsportRows[0]?.points ?? 0);
+    const matchDate = new Date(matchData.date);
+    const matchDateText = Number.isNaN(matchDate.getTime())
+        ? '-'
+        : matchDate.toLocaleDateString('es-AR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            timeZone: USER_TZ,
+        });
+    const matchTimeText = matchData.time || (
+        Number.isNaN(matchDate.getTime())
+            ? '-'
+            : matchDate.toLocaleTimeString('es-AR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                timeZone: USER_TZ,
+            })
+    );
+    const motorsportTournamentHref = buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason);
+    const motorsportStatusLabel = getMotorsportStatusLabel(matchData.status);
+    const motorsportTitle = matchData.round || matchData.tournament || 'Evento Motorsport';
+    const motorsportVenue = matchData.venue || 'Circuito por confirmar';
+    const motorsportSeries = matchData.tournament || 'Motorsport';
+    const motorsportProviderLabel = String(matchData.externalProvider || 'externo').toUpperCase();
+    const motorsportSectionMeta = {
+        summary: motorsportStatusLabel,
+        results: `${motorsportRows.length} competidores`,
+        sessions: matchDateText,
+        championship: motorsportSeries,
+        circuit: motorsportVenue,
+    };
+    const motorsportQuickFacts = [
+        { label: 'Estado', value: motorsportStatusLabel },
+        { label: 'Serie', value: motorsportSeries },
+        { label: 'Fecha', value: matchDateText },
+        { label: 'Hora', value: matchTimeText },
+    ];
+
+    if (isMotorsportSource) {
+        return (
+            <div className={`${styles.page} ${styles.motorsportPage}`}>
+                <div className={styles.motorsportSlipstreamBg}></div>
+                <div className={styles.appContainer}>
+                    <header className={styles.motorsportHeaderBar}>
+                        <div className={styles.motorsportHeaderLeft}>
+                            <button onClick={() => router.back()} className={`${styles.btn} ${styles.motorsportBackButton}`}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                            </button>
+                            <div className={styles.motorsportBreadcrumbs}>
+                                <span>{matchData.category || 'Motorsport'}</span>
+                                <span>/</span>
+                                {motorsportTournamentHref ? (
+                                    <Link href={motorsportTournamentHref} className={styles.motorsportBreadcrumbLink}>
+                                        {motorsportSeries}
+                                    </Link>
+                                ) : (
+                                    <span>{motorsportSeries}</span>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+
+                    <section className={styles.motorsportHero}>
+                        <div className={styles.motorsportHeroCopy}>
+                            <div className={styles.motorsportBadgeRow}>
+                                <span className={styles.motorsportSeriesBadge}>{motorsportSeries}</span>
+                                <div className={styles.motorsportStatusPill}>
+                                    {matchData.status === 'live' && <span className={styles.motorsportStatusPulse}></span>}
+                                    <span>{motorsportStatusLabel}</span>
+                                </div>
+                                <span className={styles.motorsportTrackPill}>{matchData.category || 'Motorsport'}</span>
+                            </div>
+
+                            <h1 className={styles.motorsportHeroTitle}>{motorsportTitle}</h1>
+
+                            <div className={styles.motorsportHeroMeta}>
+                                <span>{motorsportVenue}</span>
+                                <span className={styles.motorsportMetaDivider}>/</span>
+                                <span>{matchDateText} - {matchTimeText}</span>
+                            </div>
+
+                            <div className={styles.motorsportQuickGrid}>
+                                {motorsportQuickFacts.map((fact) => (
+                                    <div key={fact.label} className={styles.motorsportQuickCard}>
+                                        <span className={styles.motorsportQuickLabel}>{fact.label}</span>
+                                        <span className={styles.motorsportQuickValue}>{fact.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <aside className={`${styles.motorsportGlassCard} ${styles.motorsportLeaderboardCard}`}>
+                            <div className={styles.motorsportCardHeader}>
+                                <span className={styles.motorsportCardEyebrow}>Clasificacion</span>
+                                <span className={styles.motorsportCardMeta}>Top {motorsportTopRows.length}</span>
+                            </div>
+                            <div className={styles.motorsportLeaderboardList}>
+                                {motorsportTopRows.map((row, index) => {
+                                    const name = row.name || row.team_name || row.team?.name || 'Competidor';
+                                    const points = Number(row.points ?? 0);
+
+                                    return (
+                                        <div key={`${name}-${index}`} className={styles.motorsportLeaderboardRow}>
+                                            <div className={styles.motorsportLeaderboardIdentity}>
+                                                <span className={`${styles.motorsportLeaderboardRank} ${index === 0 ? styles.rankGold : index === 1 ? styles.rankSilver : styles.rankBronze}`}>
+                                                    {String(row.rank || index + 1).padStart(2, '0')}
+                                                </span>
+                                                <div>
+                                                    <div className={styles.motorsportLeaderboardName}>{name}</div>
+                                                    <div className={styles.motorsportLeaderboardSub}>{getMotorsportCompetitorCode(name)}</div>
+                                                </div>
+                                            </div>
+                                            <span className={styles.motorsportLeaderboardValue}>
+                                                {activeTab === 'summary' && index > 0
+                                                    ? getMotorsportPointsGap(points, leaderPoints, index)
+                                                    : `${points} pts`}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </aside>
+                    </section>
+
+                    <nav className={styles.motorsportTabsNav}>
+                        {visibleTabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                className={`${styles.motorsportTab} ${activeTab === tab.id ? styles.motorsportTabActive : ''}`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+
+                    <main className={styles.motorsportContentGrid}>
+                        <section className={styles.motorsportMainColumn}>
+                            {(activeTab === 'summary' || activeTab === 'results' || activeTab === 'championship') && (
+                                <section className={styles.motorsportGlassCard}>
+                                    <div className={styles.motorsportCardHeader}>
+                                        <h2 className={styles.motorsportSectionTitle}>
+                                            {activeTab === 'championship' ? `Clasificacion ${motorsportSeries}` : activeTab === 'results' ? `Resultados de ${motorsportTitle}` : `Resumen de ${motorsportTitle}`}
+                                        </h2>
+                                        <span className={styles.motorsportCardMeta}>
+                                            {activeTab === 'summary' ? `${motorsportTableRows.length} mostrados` : `${motorsportRows.length} competidores`}
+                                        </span>
+                                    </div>
+
+                                    <div className={styles.motorsportTableWrap}>
+                                        <table className={styles.motorsportTable}>
+                                            <thead>
+                                                <tr>
+                                                    <th>Pos</th>
+                                                    <th>Competidor</th>
+                                                    <th>Eventos</th>
+                                                    <th>Gap</th>
+                                                    <th className={styles.motorsportAlignRight}>Pts</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {motorsportTableRows.map((row, index) => {
+                                                    const name = row.name || row.team_name || row.team?.name || 'Competidor';
+                                                    const points = Number(row.points ?? 0);
+                                                    const played = row.matches_played ?? row.played ?? 0;
+                                                    const rank = Number(row.rank || index + 1);
+
+                                                    return (
+                                                        <tr key={`${name}-${rank}-${index}`} className={styles.motorsportTableRow}>
+                                                            <td>
+                                                                <div className={styles.motorsportPositionCell}>
+                                                                    <span className={`${styles.motorsportPosition} ${rank === 1 ? styles.rankGold : rank === 2 ? styles.rankSilver : rank === 3 ? styles.rankBronze : ''}`}>
+                                                                        {String(rank).padStart(2, '0')}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className={styles.motorsportCompetitorCell}>
+                                                                    <span className={styles.motorsportCompetitorName}>{name}</span>
+                                                                    <span className={styles.motorsportCompetitorCode}>{getMotorsportCompetitorCode(name)}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>{played}</td>
+                                                            <td className={styles.motorsportGapCell}>{getMotorsportPointsGap(points, leaderPoints, index)}</td>
+                                                            <td className={styles.motorsportAlignRight}>{points}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {motorsportRows.length === 0 && (
+                                        <div className={styles.motorsportEmptyState}>Todavia no hay clasificacion disponible para este evento.</div>
+                                    )}
+                                </section>
+                            )}
+
+                            {activeTab === 'sessions' && (
+                                <section className={styles.motorsportGlassCard}>
+                                    <div className={styles.motorsportCardHeader}>
+                                        <h2 className={styles.motorsportSectionTitle}>Datos del evento</h2>
+                                        <span className={styles.motorsportCardMeta}>{motorsportSectionMeta.sessions}</span>
+                                    </div>
+                                    <div className={styles.motorsportStageGrid}>
+                                        {visibleTabs.map((tab) => (
+                                            <button
+                                                key={tab.id}
+                                                type="button"
+                                                className={`${styles.motorsportStageCard} ${activeTab === tab.id ? styles.motorsportStageCardActive : ''}`}
+                                                onClick={() => setActiveTab(tab.id)}
+                                            >
+                                                <span className={styles.motorsportStageLabel}>{tab.label}</span>
+                                                <span className={styles.motorsportStageValue}>
+                                                    {motorsportSectionMeta[tab.id as keyof typeof motorsportSectionMeta] || '-'}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className={styles.motorsportDetailsGrid}>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Evento</span>
+                                            <strong>{motorsportTitle}</strong>
+                                        </div>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Venue</span>
+                                            <strong>{motorsportVenue}</strong>
+                                        </div>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Serie</span>
+                                            <strong>{motorsportSeries}</strong>
+                                        </div>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Estado</span>
+                                            <strong>{motorsportStatusLabel}</strong>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {activeTab === 'circuit' && (
+                                <section className={styles.motorsportGlassCard}>
+                                    <div className={styles.motorsportCardHeader}>
+                                        <h2 className={styles.motorsportSectionTitle}>Circuito y sede</h2>
+                                        <span className={styles.motorsportCardMeta}>{motorsportVenue}</span>
+                                    </div>
+                                    <div className={styles.motorsportDetailsGrid}>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Circuito</span>
+                                            <strong>{motorsportVenue}</strong>
+                                        </div>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Pais / categoria</span>
+                                            <strong>{matchData.category || '-'}</strong>
+                                        </div>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Fecha</span>
+                                            <strong>{matchDateText}</strong>
+                                        </div>
+                                        <div className={styles.motorsportDetailCard}>
+                                            <span className={styles.motorsportDetailLabel}>Horario</span>
+                                            <strong>{matchTimeText}</strong>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {activeTab !== 'sessions' && (
+                                <div className={styles.motorsportStageGrid}>
+                                    {visibleTabs.map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            type="button"
+                                            className={`${styles.motorsportStageCard} ${activeTab === tab.id ? styles.motorsportStageCardActive : ''}`}
+                                            onClick={() => setActiveTab(tab.id)}
+                                        >
+                                            <span className={styles.motorsportStageLabel}>{tab.label}</span>
+                                            <span className={styles.motorsportStageValue}>
+                                                {motorsportSectionMeta[tab.id as keyof typeof motorsportSectionMeta] || '-'}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+
+                        <aside className={styles.motorsportSidebarColumn}>
+                            <section className={styles.motorsportGlassCard}>
+                                <div className={styles.motorsportCardHeader}>
+                                    <h2 className={styles.motorsportSectionTitle}>Clasificacion {motorsportSeries}</h2>
+                                    <span className={styles.motorsportCardMeta}>{motorsportSidebarRows.length} competidores</span>
+                                </div>
+                                <div className={styles.motorsportChampionshipList}>
+                                    {motorsportSidebarRows.map((row, index) => {
+                                        const name = row.name || row.team_name || row.team?.name || 'Competidor';
+                                        const points = Number(row.points ?? 0);
+                                        return (
+                                            <div key={`${name}-sidebar-${index}`} className={styles.motorsportChampionshipRow}>
+                                                <div className={styles.motorsportChampionshipIdentity}>
+                                                    <span className={styles.motorsportChampionshipRank}>{String(row.rank || index + 1).padStart(2, '0')}</span>
+                                                    <div>
+                                                        <div className={styles.motorsportChampionshipName}>{name}</div>
+                                                        <div className={styles.motorsportLeaderboardSub}>{getMotorsportCompetitorCode(name)}</div>
+                                                    </div>
+                                                </div>
+                                                <div className={styles.motorsportChampionshipPoints}>{points}</div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                <button type="button" className={styles.motorsportSidebarButton} onClick={() => setActiveTab('championship')}>
+                                    Ver clasificacion completa
+                                </button>
+                            </section>
+
+                            <section className={styles.motorsportGlassCard}>
+                                <div className={styles.motorsportCardHeader}>
+                                    <h2 className={styles.motorsportSectionTitle}>Detalles del evento</h2>
+                                    <span className={styles.motorsportCardMeta}>{motorsportTitle}</span>
+                                </div>
+                                <div className={styles.motorsportDetailsGrid}>
+                                    <div className={styles.motorsportDetailCard}>
+                                        <span className={styles.motorsportDetailLabel}>Serie</span>
+                                        <strong>{motorsportSeries}</strong>
+                                    </div>
+                                    <div className={styles.motorsportDetailCard}>
+                                        <span className={styles.motorsportDetailLabel}>Ronda</span>
+                                        <strong>{motorsportTitle}</strong>
+                                    </div>
+                                    <div className={styles.motorsportDetailCard}>
+                                        <span className={styles.motorsportDetailLabel}>Venue</span>
+                                        <strong>{motorsportVenue}</strong>
+                                    </div>
+                                    <div className={styles.motorsportDetailCard}>
+                                        <span className={styles.motorsportDetailLabel}>Estado</span>
+                                        <strong>{motorsportStatusLabel}</strong>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className={styles.motorsportGlassCard}>
+                                <div className={styles.motorsportCardHeader}>
+                                    <h2 className={styles.motorsportSectionTitle}>Datos de la fuente</h2>
+                                    <span className={styles.motorsportCardMeta}>{motorsportProviderLabel}</span>
+                                </div>
+                                <div className={styles.motorsportInsightsGrid}>
+                                    <div className={styles.motorsportInsightItem}>
+                                        <span className={styles.motorsportDetailLabel}>Fuente</span>
+                                        <strong>{motorsportProviderLabel}</strong>
+                                    </div>
+                                    <div className={styles.motorsportInsightItem}>
+                                        <span className={styles.motorsportDetailLabel}>Competidores</span>
+                                        <strong>{motorsportRows.length}</strong>
+                                    </div>
+                                    <div className={styles.motorsportInsightItem}>
+                                        <span className={styles.motorsportDetailLabel}>Estado</span>
+                                        <strong>{motorsportStatusLabel}</strong>
+                                    </div>
+                                    <div className={styles.motorsportInsightItem}>
+                                        <span className={styles.motorsportDetailLabel}>Hora oficial</span>
+                                        <strong>{matchTimeText}</strong>
+                                    </div>
+                                </div>
+                            </section>
+                        </aside>
+                    </main>
+                </div>
+                <div className={styles.motorsportGlowRed}></div>
+                <div className={styles.motorsportGlowCyan}></div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.page}>

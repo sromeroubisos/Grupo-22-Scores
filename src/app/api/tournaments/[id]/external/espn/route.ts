@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
     getTournamentEspnAmericanFootballConfig,
+    getTournamentEspnMotorsportConfig,
     isAmericanFootballSport,
+    isMotorsportSport,
     withEspnAmericanFootballRuleset,
+    withEspnMotorsportRuleset,
 } from '@/lib/externalProviderPolicy';
 
 export async function GET(
@@ -24,13 +27,17 @@ export async function GET(
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
         }
 
-        if (!isAmericanFootballSport((data as any).sport_id ?? (data as any).sport ?? null)) {
-            return NextResponse.json({ error: 'This provider is only available for american football tournaments.' }, { status: 409 });
+        const sportKey = (data as any).sport_id ?? (data as any).sport ?? null;
+
+        if (!isAmericanFootballSport(sportKey) && !isMotorsportSport(sportKey)) {
+            return NextResponse.json({ error: 'This provider is only available for american football and motorsport tournaments.' }, { status: 409 });
         }
 
         return NextResponse.json({
             provider: 'espn',
-            config: getTournamentEspnAmericanFootballConfig(data as any),
+            config: isAmericanFootballSport(sportKey)
+                ? getTournamentEspnAmericanFootballConfig(data as any)
+                : getTournamentEspnMotorsportConfig(data as any),
         });
     } catch (error: any) {
         return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
@@ -61,11 +68,15 @@ export async function PUT(
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
         }
 
-        if (!isAmericanFootballSport((existing as any).sport_id ?? (existing as any).sport ?? null)) {
-            return NextResponse.json({ error: 'This provider is only available for american football tournaments.' }, { status: 409 });
+        const sportKey = (existing as any).sport_id ?? (existing as any).sport ?? null;
+
+        if (!isAmericanFootballSport(sportKey) && !isMotorsportSport(sportKey)) {
+            return NextResponse.json({ error: 'This provider is only available for american football and motorsport tournaments.' }, { status: 409 });
         }
 
-        const mergedRuleset = withEspnAmericanFootballRuleset((existing as any).ruleset, config);
+        const mergedRuleset = isAmericanFootballSport(sportKey)
+            ? withEspnAmericanFootballRuleset((existing as any).ruleset, config)
+            : withEspnMotorsportRuleset((existing as any).ruleset, config);
         const { error: updateError } = await supabase
             .from('tournaments')
             .update({ ruleset: mergedRuleset } as any)
@@ -77,7 +88,9 @@ export async function PUT(
 
         return NextResponse.json({
             provider: 'espn',
-            config: getTournamentEspnAmericanFootballConfig({ ...existing, ruleset: mergedRuleset }),
+            config: isAmericanFootballSport(sportKey)
+                ? getTournamentEspnAmericanFootballConfig({ ...existing, ruleset: mergedRuleset })
+                : getTournamentEspnMotorsportConfig({ ...existing, ruleset: mergedRuleset }),
         });
     } catch (error: any) {
         return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

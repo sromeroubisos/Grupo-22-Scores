@@ -346,7 +346,7 @@ export default function AdminDashboard() {
 
                                 <div className="grid-12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                                     {filteredTournaments.map(t => (
-                                        <Link href={`/admin/torneo/${t.id}`} key={t.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <Link href={`/admin/entities/${t.id}/manage?type=tournament&tab=resumen`} key={t.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                                             <div className="glass" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
                                                 <span className={`badge ${t.status === 'published' ? 'badge-bio' : 'badge-warning'}`} style={{ marginBottom: '15px', display: 'inline-block' }}>
                                                     {t.status === 'published' ? 'Activo' : 'Borrador'}

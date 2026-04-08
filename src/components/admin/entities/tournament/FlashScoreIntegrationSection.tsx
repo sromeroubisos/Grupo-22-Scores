@@ -4,22 +4,27 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { AlertCircle, CheckCircle2, Link2, Loader2, RefreshCw, Search } from 'lucide-react';
 import type {
     EspnAmericanFootballConfig,
+    EspnMotorsportConfig,
     FlashScoreConfig,
     FlashScoreLinkStatus,
     RugbyApiSportsConfig,
 } from '@/lib/types/flashscore-integration';
 import {
     getEspnAmericanFootballLinkStatus,
+    getEspnMotorsportLinkStatus,
     getLinkStatus,
     getRugbyApiSportsLinkStatus,
 } from '@/lib/types/flashscore-integration';
 import {
     getRulesetEspnAmericanFootballConfig,
+    getRulesetEspnMotorsportConfig,
     getRulesetFlashScoreConfig,
     getRulesetRugbyApiSportsConfig,
     isAmericanFootballSport,
+    isMotorsportSport,
     isRugbySport,
     withEspnAmericanFootballRuleset,
+    withEspnMotorsportRuleset,
     withFlashScoreRuleset,
     withRugbyApiSportsRuleset,
 } from '@/lib/externalProviderPolicy';
@@ -52,6 +57,14 @@ const ESPN_LEAGUE_OPTIONS = [
     { slug: 'cfl', label: 'CFL', country: 'Canada' },
     { slug: 'ufl', label: 'UFL', country: 'USA' },
     { slug: 'xfl', label: 'XFL', country: 'USA' },
+] as const;
+
+const ESPN_MOTORSPORT_LEAGUE_OPTIONS = [
+    { slug: 'f1', label: 'Formula 1', country: 'International' },
+    { slug: 'irl', label: 'IndyCar', country: 'USA' },
+    { slug: 'nascar-premier', label: 'NASCAR Cup', country: 'USA' },
+    { slug: 'nascar-secondary', label: 'NASCAR Xfinity', country: 'USA' },
+    { slug: 'nascar-truck', label: 'NASCAR Truck', country: 'USA' },
 ] as const;
 
 const STATUS_LABELS: Record<FlashScoreLinkStatus, string> = {
@@ -92,6 +105,7 @@ export function FlashScoreIntegrationSection({
 }: FlashScoreIntegrationSectionProps) {
     const isRugby = isRugbySport(sportId ?? null);
     const isAmericanFootball = isAmericanFootballSport(sportId ?? null);
+    const isMotorsport = isMotorsportSport(sportId ?? null);
 
     if (isRugby) {
         return (
@@ -106,6 +120,16 @@ export function FlashScoreIntegrationSection({
     if (isAmericanFootball) {
         return (
             <EspnAmericanFootballIntegrationSection
+                tournamentId={tournamentId}
+                ruleset={ruleset}
+                onRulesetChange={onRulesetChange}
+            />
+        );
+    }
+
+    if (isMotorsport) {
+        return (
+            <EspnMotorsportIntegrationSection
                 tournamentId={tournamentId}
                 ruleset={ruleset}
                 onRulesetChange={onRulesetChange}
@@ -249,6 +273,149 @@ function EspnAmericanFootballIntegrationSection({
                             <div className="flex items-center gap-1 text-[#10b981] text-xs font-semibold">
                                 <CheckCircle2 size={14} />
                                 Liga configurada
+                            </div>
+                        )}
+                    </div>
+
+                    {error && (
+                        <div className="mt-3 p-3 border border-red-500/30 bg-red-500/10 text-red-400 text-xs rounded flex items-start gap-2">
+                            <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+                </main>
+            </div>
+        </div>
+    );
+}
+
+function EspnMotorsportIntegrationSection({
+    tournamentId,
+    ruleset,
+    onRulesetChange,
+}: {
+    tournamentId: string;
+    ruleset: any;
+    onRulesetChange: (newRuleset: any) => void;
+}) {
+    const config: EspnMotorsportConfig | null = getRulesetEspnMotorsportConfig(ruleset);
+    const status = getEspnMotorsportLinkStatus(config);
+    const [selectedLeague, setSelectedLeague] = useState(config?.league_slug ?? '');
+    const [resolving, setResolving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setSelectedLeague(config?.league_slug ?? '');
+    }, [config?.league_slug]);
+
+    async function handleResolve() {
+        if (!selectedLeague) return;
+
+        setResolving(true);
+        setError(null);
+
+        try {
+            const res = await fetch(`/api/tournaments/${tournamentId}/external/espn/resolve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ league_slug: selectedLeague }),
+            });
+
+            const json = await res.json();
+            if (!res.ok) {
+                setError(json.error || 'Error saving provider config');
+                return;
+            }
+
+            onRulesetChange(withEspnMotorsportRuleset(ruleset, json.config));
+        } catch (resolveError: any) {
+            setError(resolveError.message || 'Network error');
+        } finally {
+            setResolving(false);
+        }
+    }
+
+    return (
+        <div className="manager-card mt-10">
+            <header className="manager-header">
+                <div className="manager-header-titles">
+                    <h1 className="flex items-center gap-3">
+                        <Link2 className="w-6 h-6" style={{ color: '#3b82f6' }} />
+                        Integracion ESPN Racing
+                    </h1>
+                    <p>Usa la API publica de ESPN Racing para Formula 1, IndyCar y NASCAR.</p>
+                </div>
+                <div className="manager-metadata-box" style={STATUS_COLORS[status] || STATUS_COLORS.unlinked}>
+                    STATUS: {STATUS_LABELS[status] || 'SIN ESTADO'}
+                </div>
+            </header>
+
+            <div className="manager-main-layout">
+                <aside className="manager-preview-zone">
+                    <div className="manager-metadata-box flex flex-col gap-2 text-[11px]" style={{ minHeight: '140px' }}>
+                        {config?.league_slug ? (
+                            <>
+                                <div><span className="text-[#888]">LEAGUE:</span><br /><span className="text-white">{config.league_name || config.league_slug}</span></div>
+                                <div><span className="text-[#888]">COUNTRY:</span><br /><span className="text-white">{config.country_name || '-'}</span></div>
+                                <div><span className="text-[#888]">URL:</span><br /><span className="text-[#3b82f6] font-mono">{config.tournament_url || '-'}</span></div>
+                                {config.last_sync_at && (
+                                    <div><span className="text-[#888]">LAST_SYNC:</span><br /><span className="text-[#10b981] font-mono">{new Date(config.last_sync_at).toLocaleString()}</span></div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full opacity-40 gap-2 pt-4">
+                                <AlertCircle size={24} />
+                                <span className="text-center uppercase tracking-widest">Sin liga seleccionada</span>
+                            </div>
+                        )}
+                    </div>
+                </aside>
+
+                <main className="manager-controls-zone">
+                    <div className="manager-input-group mb-4">
+                        <label className="manager-field-label">Categoria de motorsport</label>
+                        <select
+                            className="manager-url-input"
+                            value={selectedLeague}
+                            onChange={(event) => setSelectedLeague(event.target.value)}
+                        >
+                            <option value="">Seleccionar categoria</option>
+                            {ESPN_MOTORSPORT_LEAGUE_OPTIONS.map((league) => (
+                                <option key={league.slug} value={league.slug}>
+                                    {league.label} · {league.country}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-[#888] mt-2 leading-relaxed">
+                            Esta configuracion usa ESPN para automovilismo en lugar de FlashScore.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            className="manager-btn-inline"
+                            style={{ padding: '10px 20px', fontSize: '13px', opacity: (!selectedLeague || resolving) ? 0.5 : 1 }}
+                            onClick={handleResolve}
+                            disabled={!selectedLeague || resolving}
+                        >
+                            {resolving ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    Guardando...
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-2">
+                                    <RefreshCw size={14} />
+                                    Guardar categoria
+                                </span>
+                            )}
+                        </button>
+
+                        {config?.league_slug && (
+                            <div className="flex items-center gap-1 text-[#10b981] text-xs font-semibold">
+                                <CheckCircle2 size={14} />
+                                Categoria configurada
                             </div>
                         )}
                     </div>

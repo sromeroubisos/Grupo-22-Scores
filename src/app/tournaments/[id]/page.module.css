@@ -738,6 +738,740 @@
    MATCH LIST — Grid layout: date | home | score | away | status
    ================================================================ */
 
+.motorsportSeasonHero {
+    background: linear-gradient(145deg, rgba(var(--color-accent-rgb), 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border: 1px solid var(--fl-border);
+    border-radius: var(--fl-radius-md);
+    box-shadow: var(--fl-shadow);
+    padding: 22px 24px;
+    display: grid;
+    gap: 18px;
+}
+.motorsportSeasonHeroHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.motorsportSeasonHeroEyebrow {
+    display: inline-flex;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fl-text-dim);
+    font-family: var(--fl-mono);
+}
+.motorsportSeasonHeroTitle {
+    margin: 10px 0 0;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--fl-text);
+    letter-spacing: -0.03em;
+}
+.motorsportSeasonHeroStatus {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    background: rgba(var(--color-accent-rgb), 0.08);
+    color: var(--fl-text);
+    font-size: 0.68rem;
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.motorsportSeasonHeroGrid {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+    gap: 20px;
+}
+.motorsportSeasonHeroLeader,
+.motorsportSeasonHeroStat {
+    display: grid;
+    gap: 6px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.025);
+}
+.motorsportSeasonHeroLabel {
+    font-size: 0.64rem;
+    color: var(--fl-text-dim);
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.motorsportSeasonHeroLeaderName {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--fl-text);
+}
+.motorsportSeasonHeroLeaderPts,
+.motorsportSeasonHeroSub {
+    font-size: 0.78rem;
+    color: var(--fl-text-muted);
+}
+.motorsportSeasonHeroStats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+.motorsportStandingsTable {
+    display: grid;
+    min-width: max-content;
+}
+.motorsportStandingsHeader,
+.motorsportStandingsDataRow {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1.35fr) minmax(110px, 0.95fr) 70px 70px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+}
+.motorsportStandingsHeader {
+    font-size: 0.62rem;
+    color: var(--fl-text-dim);
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--fl-border-sub);
+}
+.motorsportStandingsDataRow {
+    border-bottom: 1px solid var(--fl-border-sub);
+}
+.motorsportStandingsDataRow:last-child {
+    border-bottom: none;
+}
+.motorsportStandingsPos {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--fl-text);
+    font-family: var(--fl-mono);
+}
+.motorsportStandingsIdentity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.motorsportStandingsLogo,
+.motorsportStandingsLogoFallback {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+.motorsportStandingsLogo {
+    object-fit: cover;
+    background: var(--fl-surface-alt);
+}
+.motorsportStandingsLogoFallback {
+    display: grid;
+    place-items: center;
+    background: var(--fl-surface-alt);
+    border: 1px solid var(--fl-border);
+}
+.motorsportStandingsIdentityMeta {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+.motorsportStandingsIdentityTop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.motorsportStandingsName {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--fl-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.motorsportStandingsIdentitySubline {
+    font-size: 0.7rem;
+    color: var(--fl-text-muted);
+    font-family: var(--fl-mono);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.motorsportStandingsFlag {
+    font-size: 1rem;
+    line-height: 1;
+}
+.motorsportStandingsFlagIcon {
+    width: 18px;
+    height: 12px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.motorsportStandingsDetail,
+.motorsportStandingsDiff {
+    font-size: 0.78rem;
+    color: var(--fl-text-muted);
+    font-family: var(--fl-mono);
+}
+.motorsportStandingsRaceValue {
+    font-size: 0.76rem;
+    color: var(--fl-text);
+    font-family: var(--fl-mono);
+    text-align: center;
+}
+.motorsportStandingsPoints {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--fl-text);
+}
+.motorsportSeasonCalendarList {
+    display: grid;
+}
+.motorsportSeasonCalendarItem {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--fl-border-sub);
+    text-decoration: none;
+    color: inherit;
+}
+.motorsportSeasonCalendarItem:last-child {
+    border-bottom: none;
+}
+.motorsportSeasonRound {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--fl-text-dim);
+    font-family: var(--fl-mono);
+    padding-top: 2px;
+}
+.motorsportSeasonCalendarMain {
+    display: grid;
+    gap: 6px;
+}
+.motorsportSeasonCalendarTitleRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+.motorsportSeasonCalendarTitle {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--fl-text);
+}
+.motorsportSeasonCalendarStatus {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--fl-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--fl-text-muted);
+    font-size: 0.62rem;
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+}
+.motorsportSeasonCalendarStatusLive {
+    color: #00ff66;
+    border-color: rgba(0, 255, 102, 0.3);
+    background: rgba(0, 255, 102, 0.08);
+}
+.motorsportSeasonCalendarStatusDone {
+    color: var(--fl-text);
+}
+.motorsportSeasonCalendarMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.74rem;
+    color: var(--fl-text-muted);
+    font-family: var(--fl-mono);
+}
+.motorsportSeasonCalendarWinner {
+    font-size: 0.8rem;
+    color: var(--fl-text);
+    font-weight: 600;
+}
+.motorsportContextBlock {
+    display: grid;
+    gap: 10px;
+    padding: 12px 18px 16px;
+}
+.motorsportContextTitle {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--fl-text);
+}
+.motorsportContextMeta {
+    font-size: 0.78rem;
+    color: var(--fl-text-muted);
+    font-family: var(--fl-mono);
+}
+.motorsportContextPodium {
+    display: grid;
+    gap: 8px;
+}
+.motorsportContextPodiumRow {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--fl-text);
+}
+.motorsportContextPodiumPos {
+    font-family: var(--fl-mono);
+    color: var(--fl-text-dim);
+}
+
+.motorsportFeaturedCard {
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.035) 0%, rgba(15, 20, 27, 0.92) 100%);
+    background-size: 40px 40px, 40px 40px, auto;
+    border: 1px solid var(--fl-border);
+    backdrop-filter: blur(20px);
+    padding: 24px;
+    box-shadow: var(--fl-shadow);
+    position: relative;
+    overflow: hidden;
+}
+.motorsportFeaturedCard::after {
+    content: '';
+    position: absolute;
+    top: -90px;
+    right: -90px;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, var(--fl-primary-glow) 0%, transparent 70%);
+    pointer-events: none;
+}
+.motorsportFeaturedFrame {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.motorsportFeaturedFrame::before,
+.motorsportFeaturedFrame::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.motorsportFeaturedFrame::before {
+    top: 12px;
+    left: 12px;
+    border-right: 0;
+    border-bottom: 0;
+}
+.motorsportFeaturedFrame::after {
+    right: 12px;
+    bottom: 12px;
+    border-left: 0;
+    border-top: 0;
+}
+.motorsportFeaturedHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.motorsportFeaturedHeaderLeft {
+    display: flex;
+    align-items: center;
+}
+.motorsportSeriesBadge,
+.motorsportEventSeriesBadge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: var(--fl-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: var(--fl-text);
+    color: var(--fl-bg);
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+}
+.motorsportLiveStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--fl-mono);
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fl-text-dim);
+}
+.motorsportLiveDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+}
+.motorsportLiveDotActive {
+    background: #00ff66;
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.8);
+    animation: pulse 1.5s infinite;
+}
+.motorsportFeaturedBody {
+    display: grid;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
+.motorsportFeaturedMain {
+    display: grid;
+    gap: 18px;
+}
+.motorsportFeaturedVenue {
+    font-size: 0.73rem;
+    color: var(--fl-text-muted);
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.motorsportFeaturedTitle {
+    margin: 0;
+    font-size: 1.9rem;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    background: linear-gradient(to right, #ffffff, #8f98a8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.motorsportFeaturedMeta,
+.motorsportEventMeta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: var(--fl-text-muted);
+    font-size: 0.75rem;
+    font-family: var(--fl-mono);
+}
+.motorsportMetricsRow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+.motorsportMetricItem {
+    display: grid;
+    gap: 4px;
+}
+.motorsportMetricLabel {
+    font-size: 0.58rem;
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fl-text-dim);
+}
+.motorsportMetricValue {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--fl-text);
+}
+.motorsportMetricValueAccent {
+    color: #00ff66;
+}
+.motorsportTelemetryGrid {
+    border-top: 1px solid var(--fl-border);
+    border-bottom: 1px solid var(--fl-border);
+}
+.motorsportTelemetryHeader,
+.motorsportTelemetryRow {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 90px;
+    align-items: center;
+}
+.motorsportTelemetryHeader {
+    padding: 10px 0;
+    font-size: 0.58rem;
+    color: var(--fl-text-dim);
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.motorsportTelemetryRow {
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.2s ease;
+}
+.motorsportTelemetryRow:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+.motorsportTelemetryPos {
+    font-size: 0.86rem;
+    font-weight: 700;
+    font-family: var(--fl-mono);
+}
+.motorsportTelemetryPosP1 { color: #ffd700; }
+.motorsportTelemetryPosP2 { color: #c0c0c0; }
+.motorsportTelemetryPosP3 { color: #cd7f32; }
+.motorsportTelemetryDriver {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.motorsportTelemetryLogo,
+.motorsportTelemetryLogoFallback,
+.motorsportEventCompetitorLogo,
+.motorsportEventCompetitorPlaceholder {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+.motorsportTelemetryLogo,
+.motorsportEventCompetitorLogo {
+    object-fit: cover;
+    background: var(--fl-surface-alt);
+}
+.motorsportTelemetryLogoFallback,
+.motorsportEventCompetitorPlaceholder {
+    display: grid;
+    place-items: center;
+    background: var(--fl-surface-alt);
+    border: 1px solid var(--fl-border);
+    color: var(--fl-text-dim);
+    font-weight: 700;
+    font-family: var(--fl-mono);
+}
+.motorsportTelemetryName,
+.motorsportEventCompetitorName {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--fl-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.motorsportTelemetryGap {
+    font-size: 0.78rem;
+    text-align: right;
+    color: var(--fl-text-muted);
+    font-family: var(--fl-mono);
+}
+.motorsportFeaturedFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+.motorsportSessionsTimeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+.motorsportSession {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--fl-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.motorsportSessionCompleted {
+    color: var(--fl-text);
+}
+.motorsportSessionActive {
+    color: #00ff66;
+}
+.motorsportSessionIcon {
+    width: 16px;
+    height: 16px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.48rem;
+    font-family: var(--fl-mono);
+}
+.motorsportActionBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    color: var(--fl-text);
+    font-family: var(--fl-mono);
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.motorsportActionBtn:hover {
+    background: var(--fl-text);
+    color: var(--fl-bg);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+.motorsportEventRow {
+    display: grid;
+    gap: 14px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--fl-border-sub);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.14s;
+    position: relative;
+    overflow: hidden;
+}
+.motorsportEventRowAlt {
+    background:
+        linear-gradient(145deg, rgba(var(--color-accent-rgb), 0.06) 0%, rgba(255, 255, 255, 0.015) 100%);
+}
+.motorsportEventRow:last-child { border-bottom: none; }
+.motorsportEventRow:hover { background: rgba(255, 255, 255, 0.025); }
+.motorsportEventRow::before,
+.motorsportEventRow::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    pointer-events: none;
+}
+.motorsportEventRow::before {
+    top: 10px;
+    left: 10px;
+    border-right: 0;
+    border-bottom: 0;
+}
+.motorsportEventRow::after {
+    right: 10px;
+    bottom: 10px;
+    border-left: 0;
+    border-top: 0;
+}
+.motorsportEventTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+.motorsportEventHeader {
+    min-width: 0;
+}
+.motorsportEventTitle {
+    margin: 10px 0 0;
+    font-size: 1.02rem;
+    font-weight: 900;
+    color: var(--fl-text);
+    letter-spacing: -0.02em;
+}
+.motorsportEventStatus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--fl-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--fl-text-soft);
+    font-size: 0.64rem;
+    font-family: var(--fl-mono);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.motorsportEventStatusLive {
+    color: #00ff66;
+    border-color: rgba(0, 255, 102, 0.3);
+    background: rgba(0, 255, 102, 0.1);
+}
+.motorsportEventCompetitors {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.motorsportEventCompetitor {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.motorsportEventCompetitorDivider {
+    color: var(--fl-text-dim);
+    font-size: 0.9rem;
+}
+.motorsportPodiumList {
+    display: grid;
+    gap: 10px;
+}
+.motorsportPodiumRow {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.025);
+}
+.motorsportPodiumPos {
+    font-size: 0.82rem;
+    font-weight: 800;
+    font-family: var(--fl-mono);
+    text-align: center;
+}
+.motorsportPodiumPosP1 { color: #ffd700; }
+.motorsportPodiumPosP2 { color: #c0c0c0; }
+.motorsportPodiumPosP3 { color: #cd7f32; }
+.motorsportPodiumIdentity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.motorsportPodiumMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.motorsportPodiumFlag {
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.motorsportEventFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 2px;
+}
+.motorsportEventFooterLabel,
+.motorsportEventFooterAction {
+    font-size: 0.65rem;
+    font-family: var(--fl-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+.motorsportEventFooterLabel {
+    color: var(--fl-text-dim);
+}
+.motorsportEventFooterAction {
+    color: var(--fl-text);
+}
+
 .matchList {
     display: flex;
     flex-direction: column;
@@ -1519,6 +2253,35 @@
     }
 
     /* ── Match rows: show time | home | score | away (4-col) ── */
+    .motorsportFeaturedCard { padding: 16px 14px 14px; }
+    .motorsportSeasonHero { padding: 16px 14px; }
+    .motorsportSeasonHeroHeader { flex-direction: column; align-items: stretch; }
+    .motorsportSeasonHeroTitle { font-size: 1.2rem; }
+    .motorsportSeasonHeroGrid,
+    .motorsportSeasonHeroStats { grid-template-columns: 1fr; }
+    .motorsportStandingsHeader,
+    .motorsportStandingsDataRow { grid-template-columns: 38px minmax(0, 1.2fr) minmax(84px, 0.8fr) 56px 56px; padding: 10px 12px; gap: 8px; }
+    .motorsportSeasonCalendarItem { grid-template-columns: 44px minmax(0, 1fr); padding: 12px 14px; }
+    .motorsportFeaturedHeader { flex-direction: column; align-items: stretch; margin-bottom: 14px; }
+    .motorsportFeaturedTitle { font-size: 1.25rem; }
+    .motorsportFeaturedMeta,
+    .motorsportEventMeta { gap: 8px; font-size: 0.68rem; }
+    .motorsportMetricsRow { grid-template-columns: 1fr; gap: 10px; }
+    .motorsportTelemetryHeader,
+    .motorsportTelemetryRow { grid-template-columns: 34px minmax(0, 1fr) 72px; }
+    .motorsportTelemetryLogo,
+    .motorsportTelemetryLogoFallback,
+    .motorsportEventCompetitorLogo,
+    .motorsportEventCompetitorPlaceholder { width: 24px; height: 24px; }
+    .motorsportTelemetryName,
+    .motorsportEventCompetitorName { font-size: 0.8rem; }
+    .motorsportFeaturedFooter { flex-direction: column; align-items: stretch; }
+    .motorsportActionBtn { width: 100%; }
+    .motorsportEventRow { padding: 14px; gap: 12px; }
+    .motorsportEventTop { flex-direction: column; align-items: stretch; }
+    .motorsportEventTitle { font-size: 0.92rem; }
+    .motorsportEventStatus { align-self: flex-start; }
+    .motorsportEventCompetitorDivider { display: none; }
     .matchRow {
         grid-template-columns: 38px 1fr minmax(84px, auto) 1fr;
         padding: 10px 14px;
@@ -1617,6 +2380,26 @@
     .featuredMobileDate { font-size: 0.68rem; }
 
     /* Match rows */
+    .motorsportFeaturedCard { padding: 14px 12px 12px; }
+    .motorsportSeasonHeroTitle { font-size: 1.05rem; }
+    .motorsportStandingsHeader,
+    .motorsportStandingsDataRow { grid-template-columns: 32px minmax(0, 1fr) 76px 48px 48px; padding: 10px; gap: 6px; }
+    .motorsportStandingsDetail,
+    .motorsportStandingsDiff,
+    .motorsportSeasonCalendarMeta { font-size: 0.68rem; }
+    .motorsportSeasonCalendarTitle { font-size: 0.86rem; }
+    .motorsportContextBlock { padding: 10px 12px 14px; }
+    .motorsportFeaturedTitle { font-size: 1.08rem; }
+    .motorsportTelemetryHeader,
+    .motorsportTelemetryRow { grid-template-columns: 30px minmax(0, 1fr) 62px; }
+    .motorsportTelemetryLogo,
+    .motorsportTelemetryLogoFallback,
+    .motorsportEventCompetitorLogo,
+    .motorsportEventCompetitorPlaceholder { width: 22px; height: 22px; }
+    .motorsportTelemetryName { font-size: 0.76rem; }
+    .motorsportActionBtn { padding: 8px 12px; font-size: 0.6rem; }
+    .motorsportEventRow { padding: 12px 10px; gap: 10px; }
+    .motorsportEventTitle { font-size: 0.86rem; }
     .matchRow { grid-template-columns: 34px 1fr minmax(78px, auto) 1fr; padding: 9px 10px; gap: 5px; }
     .matchScore { font-size: 0.82rem; }
     .matchScoreBox { padding: 4px 5px; }

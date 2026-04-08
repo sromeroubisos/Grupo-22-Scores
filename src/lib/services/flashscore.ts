@@ -7,6 +7,10 @@ import {
     getEspnAmericanFootballLiveMatches,
     getEspnAmericanFootballMatches,
 } from '@/lib/services/espnAmericanFootball';
+import {
+    getEspnMotorsportLiveMatches,
+    getEspnMotorsportMatches,
+} from '@/lib/services/espnMotorsport';
 
 const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
 const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
@@ -171,6 +175,10 @@ export async function getFlashScoreMatches(
         return getEspnAmericanFootballMatches(date, options);
     }
 
+    if (sportId === 'motorsport') {
+        return getEspnMotorsportMatches(date, options);
+    }
+
     const timeZone = options?.timeZone;
     const targetDateKey = options?.targetDateKey || formatDateKey(date, timeZone);
 
@@ -263,6 +271,10 @@ function getAdjacentDayOffset(timeZone?: string): number {
 export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]> {
     if (sportId === 'american-football') {
         return getEspnAmericanFootballLiveMatches();
+    }
+
+    if (sportId === 'motorsport') {
+        return getEspnMotorsportLiveMatches();
     }
 
     if (!isFlashScoreEnabledForSport(sportId)) {

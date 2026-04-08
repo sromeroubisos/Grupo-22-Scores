@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
     ChevronDown,
     FileText,
-    Globe,
-    Image,
     Layers,
     LayoutDashboard,
     Link2,
@@ -19,18 +17,17 @@ import {
 import { Database } from '@/lib/database.types';
 import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
+import { useTournamentDirty } from './TournamentContext';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 
 export const TOURNAMENT_TABS = [
     { id: 'resumen', label: 'Resumen', icon: LayoutDashboard, description: 'Estado general y salud del torneo' },
-    { id: 'detalles', label: 'Detalles', icon: FileText, description: 'Identidad, temporada y metadata' },
+    { id: 'detalles', label: 'Detalles', icon: FileText, description: 'Identidad, temporada y datos base' },
+    { id: 'formato', label: 'Formato', icon: Palette, description: 'Puntaje, eventos y reglas deportivas' },
     { id: 'estructura', label: 'Estructura', icon: Layers, description: 'Fases, reglas y formato competitivo' },
     { id: 'participantes', label: 'Participantes', icon: Users, description: 'Altas, filtros y control de equipos' },
-    { id: 'operacion', label: 'Operacion', icon: Zap, description: 'Fixture, posiciones y operacion diaria' },
-    { id: 'formato', label: 'Formato', icon: Palette, description: 'Branding y experiencia visual' },
-    { id: 'medios', label: 'Medios', icon: Image, description: 'Assets y contenido multimedia' },
-    { id: 'publicacion', label: 'Publicacion', icon: Globe, description: 'Salida publica y visibilidad' },
+    { id: 'operacion', label: 'Operacion', icon: Zap, description: 'Fixture, resultados y tabla operativa' },
     { id: 'related', label: 'Relacionados', icon: Link2, description: 'Cruces y torneos vinculados' },
     { id: 'audit', label: 'Auditoria', icon: Shield, description: 'Bitacora y trazabilidad operativa' },
 ];
@@ -43,14 +40,33 @@ interface TournamentTabsProps {
 
 export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
     const router = useRouter();
+    const { hasDirtySection, hasRecentlySavedSection } = useTournamentDirty();
     const [mobileSelectorOpen, setMobileSelectorOpen] = useState(false);
     const { shouldRender, isVisible } = useAnimatedDisclosure(mobileSelectorOpen, 180);
     const activeTab = TOURNAMENT_TABS.find((tab) => tab.id === currentTab) || TOURNAMENT_TABS[0];
     const activeTabIndex = TOURNAMENT_TABS.findIndex((tab) => tab.id === activeTab.id);
+    const activeTabHasDraft =
+        (activeTab.id === 'detalles' && hasDirtySection('details')) ||
+        (activeTab.id === 'formato' && hasDirtySection('format'));
+    const activeTabWasSaved =
+        (activeTab.id === 'detalles' && hasRecentlySavedSection('details')) ||
+        (activeTab.id === 'formato' && hasRecentlySavedSection('format'));
 
     const switchTab = (tabId: string) => {
         setMobileSelectorOpen(false);
         router.push(`/admin/entities/${id}/manage?type=tournament&tab=${tabId}`);
+    };
+
+    const tabHasDraft = (tabId: string) => {
+        if (tabId === 'detalles') return hasDirtySection('details');
+        if (tabId === 'formato') return hasDirtySection('format');
+        return false;
+    };
+
+    const tabWasRecentlySaved = (tabId: string) => {
+        if (tabId === 'detalles') return hasRecentlySavedSection('details');
+        if (tabId === 'formato') return hasRecentlySavedSection('format');
+        return false;
     };
 
     const ActiveIcon = activeTab.icon;
@@ -76,7 +92,37 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                             <ActiveIcon size={16} />
                         </span>
                         <span className="basalt-tabs-trigger-text">
-                            <span className="basalt-tabs-trigger-title">{activeTab.label}</span>
+                            <span className="basalt-tabs-trigger-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>{activeTab.label}</span>
+                                {activeTabHasDraft ? (
+                                    <span
+                                        aria-label="Cambios pendientes"
+                                        title="Cambios pendientes"
+                                        style={{
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '999px',
+                                            background: 'var(--accent)',
+                                            boxShadow: '0 0 8px rgba(0, 163, 101, 0.65)',
+                                            flexShrink: 0,
+                                        }}
+                                    />
+                                ) : activeTabWasSaved ? (
+                                    <span
+                                        aria-label="Guardado recientemente"
+                                        title="Guardado recientemente"
+                                        style={{
+                                            width: 10,
+                                            height: 10,
+                                            borderRadius: '999px',
+                                            background: '#34d399',
+                                            boxShadow: '0 0 0 4px rgba(52, 211, 153, 0.2), 0 0 12px rgba(52, 211, 153, 0.75)',
+                                            flexShrink: 0,
+                                            transition: 'all 180ms ease',
+                                        }}
+                                    />
+                                ) : null}
+                            </span>
                             <span className="basalt-tabs-trigger-caption">{activeTab.description}</span>
                         </span>
                     </span>
@@ -97,6 +143,8 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                     const Icon = tab.icon;
                     const isActive = currentTab === tab.id;
                     const index = TOURNAMENT_TABS.indexOf(tab);
+                    const hasDraft = tabHasDraft(tab.id);
+                    const wasSaved = tabWasRecentlySaved(tab.id);
                     return (
                         <button
                             key={tab.id}
@@ -110,7 +158,37 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                                 <Icon size={14} className="basalt-tab-icon" />
                             </span>
                             <span className="basalt-tab-copy">
-                                <span className="basalt-tab-label">{tab.label}</span>
+                                <span className="basalt-tab-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span>{tab.label}</span>
+                                    {hasDraft ? (
+                                        <span
+                                            aria-label={`Cambios pendientes en ${tab.label}`}
+                                            title={`Cambios pendientes en ${tab.label}`}
+                                            style={{
+                                                width: 8,
+                                                height: 8,
+                                                borderRadius: '999px',
+                                                background: 'var(--accent)',
+                                                boxShadow: '0 0 8px rgba(0, 163, 101, 0.65)',
+                                                flexShrink: 0,
+                                            }}
+                                        />
+                                    ) : wasSaved ? (
+                                        <span
+                                            aria-label={`Cambios guardados recientemente en ${tab.label}`}
+                                            title={`Cambios guardados recientemente en ${tab.label}`}
+                                            style={{
+                                                width: 10,
+                                                height: 10,
+                                                borderRadius: '999px',
+                                                background: '#34d399',
+                                                boxShadow: '0 0 0 4px rgba(52, 211, 153, 0.2), 0 0 12px rgba(52, 211, 153, 0.75)',
+                                                flexShrink: 0,
+                                                transition: 'all 180ms ease',
+                                            }}
+                                        />
+                                    ) : null}
+                                </span>
                                 <small className="basalt-tab-description">{tab.description}</small>
                             </span>
                         </button>
@@ -152,6 +230,8 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                             {TOURNAMENT_TABS.map((tab) => {
                                 const Icon = tab.icon;
                                 const isActive = currentTab === tab.id;
+                                const hasDraft = tabHasDraft(tab.id);
+                                const wasSaved = tabWasRecentlySaved(tab.id);
 
                                 return (
                                     <button
@@ -165,11 +245,42 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                                                 <Icon size={16} />
                                             </span>
                                             <span className="basalt-tabs-sheet-item-text">
-                                                <span>{tab.label}</span>
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <span>{tab.label}</span>
+                                                    {hasDraft ? (
+                                                        <span
+                                                            aria-hidden="true"
+                                                            style={{
+                                                                width: 8,
+                                                                height: 8,
+                                                                borderRadius: '999px',
+                                                                background: 'var(--accent)',
+                                                                boxShadow: '0 0 8px rgba(0, 163, 101, 0.65)',
+                                                                flexShrink: 0,
+                                                            }}
+                                                        />
+                                                    ) : wasSaved ? (
+                                                        <span
+                                                            aria-hidden="true"
+                                                            style={{
+                                                                width: 10,
+                                                                height: 10,
+                                                                borderRadius: '999px',
+                                                                background: '#34d399',
+                                                                boxShadow: '0 0 0 4px rgba(52, 211, 153, 0.2), 0 0 12px rgba(52, 211, 153, 0.75)',
+                                                                flexShrink: 0,
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                </span>
                                                 <small>{tab.description}</small>
                                             </span>
                                         </span>
-                                        {isActive && <span className="basalt-tabs-sheet-badge">Actual</span>}
+                                        {(isActive || hasDraft || wasSaved) && (
+                                            <span className="basalt-tabs-sheet-badge">
+                                                {isActive ? 'Actual' : hasDraft ? 'Pendiente' : 'Guardado'}
+                                            </span>
+                                        )}
                                     </button>
                                 );
                             })}

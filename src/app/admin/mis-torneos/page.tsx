@@ -42,7 +42,7 @@ export default function MyTournamentsPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
                 {tournaments.map(t => (
-                    <Link key={t.id} href={`/admin/torneo/${t.id}`} style={{ textDecoration: 'none' }}>
+                    <Link key={t.id} href={`/admin/entities/${t.id}/manage?type=tournament&tab=resumen`} style={{ textDecoration: 'none' }}>
                         <div className="card" style={{ padding: '24px', height: '100%', transition: 'transform 0.2s', border: '1px solid var(--color-border)', borderRadius: '12px', background: 'white' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
                                 <div style={{ width: '48px', height: '48px', background: 'var(--color-bg-tertiary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--color-accent)' }}>

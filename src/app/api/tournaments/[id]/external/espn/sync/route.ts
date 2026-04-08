@@ -4,8 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 import { FixtureService } from '@/lib/services/fixtureService';
 import {
     getTournamentEspnAmericanFootballConfig,
+    getTournamentEspnMotorsportConfig,
     isAmericanFootballSport,
+    isMotorsportSport,
     withEspnAmericanFootballRuleset,
+    withEspnMotorsportRuleset,
 } from '@/lib/externalProviderPolicy';
 import type { SyncRequest } from '@/lib/types/flashscore-integration';
 
@@ -39,8 +42,16 @@ export async function POST(
             .eq('id', tournamentId)
             .single();
 
-        if (!isAmericanFootballSport((tournamentMeta as any)?.sport_id ?? (tournamentMeta as any)?.sport ?? null)) {
-            return NextResponse.json({ error: 'This provider is only available for american football tournaments.' }, { status: 409 });
+        const sportKey = (tournamentMeta as any)?.sport_id ?? (tournamentMeta as any)?.sport ?? null;
+        const isAmericanFootball = isAmericanFootballSport(sportKey);
+        const isMotorsport = isMotorsportSport(sportKey);
+
+        if (!isAmericanFootball && !isMotorsport) {
+            return NextResponse.json({ error: 'This provider is only available for american football and motorsport tournaments.' }, { status: 409 });
+        }
+
+        if (isMotorsport) {
+            return NextResponse.json({ error: 'ESPN sync import is not available for motorsport tournaments yet.' }, { status: 409 });
         }
 
         const { data: phase, error: phaseError } = await supabase
@@ -66,8 +77,15 @@ export async function POST(
         const result = await FixtureService.importMatches(tournamentId, phase_id, matchesData);
 
         if ((tournamentMeta as any)?.ruleset) {
-            const previousConfig = getTournamentEspnAmericanFootballConfig(tournamentMeta as any);
-            const updatedRuleset = withEspnAmericanFootballRuleset((tournamentMeta as any).ruleset, {
+            const previousConfig = isAmericanFootball
+                ? getTournamentEspnAmericanFootballConfig(tournamentMeta as any)
+                : getTournamentEspnMotorsportConfig(tournamentMeta as any);
+            const updatedRuleset = isAmericanFootball
+                ? withEspnAmericanFootballRuleset((tournamentMeta as any).ruleset, {
+                    ...previousConfig,
+                    last_sync_at: new Date().toISOString(),
+                })
+                : withEspnMotorsportRuleset((tournamentMeta as any).ruleset, {
                 ...previousConfig,
                 last_sync_at: new Date().toISOString(),
             });
