@@ -62,7 +62,7 @@ type CreateLeaguePayload = {
 
 type UpdateLeaguePayload = {
     leagueId?: string;
-    action?: 'update_rules' | 'set_member_role';
+    action?: 'update_rules' | 'set_member_role' | 'archive_league' | 'delete_league';
     rules?: LeagueRulesPayload;
     targetUserId?: string;
     role?: 'admin' | 'member';
@@ -116,6 +116,11 @@ function mergeLeagueRules(base: Record<string, unknown>, overrides: LeagueRulesP
             ? overrides.doubleFinals
             : Boolean(base.doubleFinals),
     };
+}
+
+function getLeagueLifecycle(metadata: Record<string, unknown>) {
+    const lifecycle = ensureString(metadata.lifecycle);
+    return lifecycle === 'archived' || lifecycle === 'deleted' ? lifecycle : 'active';
 }
 
 async function ensureUserProfile(admin: LooseAdminClient, authUser: { id: string; email?: string | null; user_metadata?: Record<string, unknown> }) {
@@ -341,6 +346,7 @@ export async function POST(request: Request) {
 
         const leagueMetadata = {
             description: ensureNullableString(payload.description),
+            lifecycle: 'active',
             rules,
             rulesVersion: 1,
             rulesHistory: [{
@@ -493,6 +499,9 @@ export async function PATCH(request: Request) {
 
         if (action === 'update_rules') {
             const currentMetadata = ensureObject(league.metadata);
+            if (getLeagueLifecycle(currentMetadata) !== 'active') {
+                return NextResponse.json({ error: 'La liga ya no esta activa para editar reglas.' }, { status: 400 });
+            }
             const currentRules = ensureObject(currentMetadata.rules);
             const currentVersion = ensureFiniteNumber(currentMetadata.rulesVersion, 1);
             const nextRules = mergeLeagueRules(currentRules, payload.rules);
@@ -535,6 +544,39 @@ export async function PATCH(request: Request) {
                 rulesVersion: nextVersion,
                 retroactive: false,
                 message: 'Las nuevas reglas aplican solo a futuros puntajes. Los puntos ya obtenidos no se recalculan.',
+            });
+        }
+
+        if (action === 'archive_league' || action === 'delete_league') {
+            const currentMetadata = ensureObject(league.metadata);
+            const nextLifecycle = action === 'archive_league' ? 'archived' : 'deleted';
+            const timestampKey = nextLifecycle === 'archived' ? 'archivedAt' : 'deletedAt';
+            const userKey = nextLifecycle === 'archived' ? 'archivedBy' : 'deletedBy';
+            const updatedMetadata = {
+                ...currentMetadata,
+                lifecycle: nextLifecycle,
+                [timestampKey]: new Date().toISOString(),
+                [userKey]: session.user.id,
+            };
+
+            const { error: updateLeagueError } = await admin
+                .from('prode_private_leagues')
+                .update({ metadata: updatedMetadata })
+                .eq('id', leagueId);
+
+            if (updateLeagueError) {
+                return NextResponse.json(
+                    { error: updateLeagueError.message || 'No se pudo actualizar el estado de la liga.' },
+                    { status: 500 },
+                );
+            }
+
+            return NextResponse.json({
+                ok: true,
+                lifecycle: nextLifecycle,
+                message: nextLifecycle === 'archived'
+                    ? 'La liga quedo archivada y ya no aparece como activa.'
+                    : 'La liga quedo borrada y dejara de estar disponible.',
             });
         }
 

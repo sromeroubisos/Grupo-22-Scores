@@ -27,6 +27,18 @@
     min-width: 0;
 }
 
+.profileStack {
+    display: grid;
+    gap: 20px;
+}
+
+.inlineSettingsShell {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px;
+}
+
 /* ── Profile Header ───────────────────────────────────────────────────────── */
 
 .profileHeader {
@@ -146,13 +158,19 @@
 /* ── Tabs ─────────────────────────────────────────────────────────────────── */
 
 .tabsContainer {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-bottom: none;
-    border-radius: 12px 12px 0 0;
+    align-self: center;
+    width: fit-content;
+    max-width: 100%;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+        var(--color-bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+    border-radius: 999px;
     display: flex;
     overflow-x: auto;
-    padding: 0 8px;
+    justify-content: center;
+    padding: 6px;
     scrollbar-width: none;
 }
 
@@ -161,32 +179,62 @@
 }
 
 .tab {
-    padding: 14px 18px;
+    min-height: 46px;
+    padding: 0 22px;
     color: var(--color-text-secondary);
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     border: none;
-    border-bottom: 2px solid transparent;
     background: transparent;
+    border-radius: 999px;
     font-size: 14px;
+    letter-spacing: 0.01em;
     white-space: nowrap;
-    transition: color 0.2s, border-color 0.2s;
+    transition: color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.tab:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .active {
-    color: var(--color-accent);
-    border-bottom-color: var(--color-accent);
+    color: #04140a;
+    background: linear-gradient(135deg, #00c853, #53f29b);
+    box-shadow: 0 8px 20px rgba(0, 200, 83, 0.28);
 }
 
 /* ── Main content area ────────────────────────────────────────────────────── */
 
 .mainContent {
+    display: grid;
+    gap: 20px;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
-    border-top: none;
-    border-radius: 0 0 16px 16px;
+    border-radius: 20px;
     padding: 24px;
     min-height: 360px;
+}
+
+.mainContentProde {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    min-height: 0;
+}
+
+.embeddedProdeShell {
+    min-width: 0;
+}
+
+.spinLoader {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* ── Seguidos panel ───────────────────────────────────────────────────────── */
@@ -217,7 +265,7 @@
 
 .seguridosGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -244,17 +292,14 @@
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid var(--color-border);
 }
 
 .seguridoName {
-    font-size: 13px;
+    font-size: 11.5px;
     font-weight: 600;
     color: var(--color-text-primary);
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.25;
     width: 100%;
 }
 
@@ -1190,25 +1235,38 @@
     }
 
     .tabsContainer {
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        padding: 0 4px;
-        margin: 0 -16px;
+        width: 100%;
+        padding: 5px;
+        margin: 0;
+        justify-content: stretch;
+        border-radius: 18px;
     }
 
     .tab {
-        padding: 12px 14px;
+        flex: 1 1 0;
+        min-height: 42px;
+        padding: 0 12px;
         font-size: 13px;
+        text-align: center;
     }
 
     .mainContent {
-        border-radius: 0 0 12px 12px;
+        border-radius: 16px;
         padding: 20px 16px;
     }
 
+    .mainContentProde {
+        border-radius: 0;
+        padding: 0;
+    }
+
+    .inlineSettingsShell {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
     .seguridosGrid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
     }
 
@@ -1222,7 +1280,7 @@
     }
 
     .seguridoName {
-        font-size: 12px;
+        font-size: 10.5px;
     }
 
     .actionHub {

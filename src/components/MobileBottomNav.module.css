@@ -8,16 +8,17 @@
     display: none;
     align-items: center;
     justify-content: space-around;
-    height: 65px;
-    background: var(--color-bg-secondary);
+    min-height: var(--mobile-nav-height);
+    background: rgba(18, 18, 20, 0.96);
     border-top: 1px solid var(--color-border);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding: 8px max(12px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    backdrop-filter: blur(16px);
 }
 
 .navList {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 4px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
     width: 100%;
     max-width: 640px;
     margin: 0 auto;
@@ -28,21 +29,21 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px;
     text-decoration: none;
     color: var(--color-text-secondary);
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    padding: 6px 0;
-    border-radius: 12px;
+    padding: 8px 0 6px;
+    border-radius: 14px;
     transition: all var(--transition-fast);
 }
 
 .navItem svg {
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
     stroke-width: 2;
 }
 

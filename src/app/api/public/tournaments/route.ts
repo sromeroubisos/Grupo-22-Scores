@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { memoryCache } from '@/lib/cache';
 import { getReadClient } from '@/lib/supabase/read';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { isFlashScoreEnabledForSport, isRugbySport } from '@/lib/externalProviderPolicy';
 import {
     getCountriesBySport,
     getTournamentsBySportAndEntity,
 } from '@/lib/services/flashscore';
+import {
+    readTournamentsFeedSnapshotMetadata,
+    readUsableTournamentsFeedSnapshot,
+    upsertTournamentsFeedSnapshot,
+    type TournamentsFeedType,
+} from '@/lib/server/tournamentsFeedCache';
 import {
     applyExternalTournamentOverride,
     getStoredExternalTournamentOverrides,
@@ -97,6 +105,132 @@ type PublicRugbyCountrySummary = {
     type: 'country';
 };
 
+type PublicTournamentsPayload = {
+    data: unknown;
+};
+
+type PublicTournamentsRequestParams = {
+    sport: string | null;
+    flashScoreSportKey: string;
+    flashScoreCatalogEnabled: boolean;
+    shouldAggregateRugby: boolean;
+    scope: string | null;
+    forceFullCatalog: boolean;
+    search: string;
+    audience: TournamentAudience;
+    externalCountryId: string | null;
+    countryName: string | null;
+    countryFlag: string | null;
+};
+
+type TournamentsResponseCacheEntry = {
+    payload: PublicTournamentsPayload;
+    createdAt: number;
+    freshTtlMs: number;
+    staleTtlMs: number;
+};
+
+type TournamentsRequestMetrics = Record<string, number>;
+
+type TournamentsTraceContext = {
+    requestId: string;
+    cacheKey: string;
+    params: PublicTournamentsRequestParams;
+    metrics: TournamentsRequestMetrics;
+    backgroundRefresh?: boolean;
+    refreshId?: string;
+    parentRequestId?: string;
+};
+
+const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v3';
+const tournamentsRefreshLocks = new Map<string, Promise<void>>();
+const tournamentsInFlightResponses = new Map<string, Promise<PublicTournamentsPayload>>();
+const tournamentsSnapshotPersistLocks = new Map<string, Promise<boolean>>();
+
+function createTraceId(prefix: 'req' | 'refresh') {
+    const randomPart = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID().slice(0, 8)
+        : Math.random().toString(36).slice(2, 10);
+    return `${prefix}_${randomPart}`;
+}
+
+function trackDuration(metrics: TournamentsRequestMetrics, metricName: string, startedAt: number) {
+    const durationMs = Date.now() - startedAt;
+    metrics[metricName] = durationMs;
+    return durationMs;
+}
+
+function addDurationMetric(metrics: TournamentsRequestMetrics, metricName: string, durationMs: number) {
+    metrics[metricName] = (metrics[metricName] || 0) + durationMs;
+    return metrics[metricName];
+}
+
+function buildTraceLogPayload(
+    trace: TournamentsTraceContext,
+    extra: Record<string, unknown> = {},
+) {
+    return {
+        request_id: trace.requestId,
+        refresh_id: trace.refreshId ?? null,
+        parent_request_id: trace.parentRequestId ?? null,
+        cache_key: trace.cacheKey,
+        sport: trace.params.sport || 'all',
+        scope: trace.params.scope || 'default',
+        audience: trace.params.audience,
+        search: trace.params.search,
+        external_country_id: trace.params.externalCountryId,
+        background_refresh: trace.backgroundRefresh === true,
+        ...trace.metrics,
+        ...extra,
+    };
+}
+
+function logTournamentsEvent(
+    level: 'info' | 'warn' | 'error',
+    event: string,
+    trace: TournamentsTraceContext,
+    extra: Record<string, unknown> = {},
+) {
+    const payload = buildTraceLogPayload(trace, { event, ...extra });
+    const line = `[public-tournaments] ${JSON.stringify(payload)}`;
+
+    if (level === 'warn') {
+        console.warn(line);
+        return;
+    }
+
+    if (level === 'error') {
+        console.error(line);
+        return;
+    }
+
+    console.info(line);
+}
+
+function attachObservabilityHeaders(
+    response: NextResponse,
+    trace: TournamentsTraceContext,
+    cacheStatus: string,
+) {
+    response.headers.set('X-G22-Cache', cacheStatus);
+    response.headers.set('X-G22-Request-Id', trace.requestId);
+
+    if (process.env.NODE_ENV !== 'production') {
+        response.headers.set('X-G22-Cache-Key', trace.cacheKey);
+        if (typeof trace.metrics.compute_payload_ms === 'number') {
+            response.headers.set('X-G22-Compute-Ms', String(trace.metrics.compute_payload_ms));
+        }
+    }
+
+    return response;
+}
+
+function finalizeRequestMetrics(trace: TournamentsTraceContext, requestStartedAt: number) {
+    const totalMs = trackDuration(trace.metrics, 'response_time_ms', requestStartedAt);
+    trace.metrics.total_request_ms = totalMs;
+    return totalMs;
+}
+
 function withCacheControl(payload: unknown, cacheControl: string) {
     return NextResponse.json(payload, { headers: { 'Cache-Control': cacheControl } });
 }
@@ -118,6 +252,18 @@ function normalizeLookupValue(value: unknown): string {
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase();
+}
+
+function sanitizePublicLogoUrl(value: unknown): string | null {
+    const normalized = normalizeText(value);
+    if (!normalized) return null;
+
+    // Avoid serving giant inline base64 images in list/catalog feeds.
+    if (normalized.startsWith('data:')) {
+        return null;
+    }
+
+    return normalized;
 }
 
 function resolveFlashScoreSportKey(rawSport: string | null): string {
@@ -479,7 +625,7 @@ function filterPublicDbTournaments(args: {
             country: tournament.country || (tournament.country_ref as { name?: string } | null)?.name || null,
             country_id: tournament.country_id,
             sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
-            logo_url: tournament.logo_url,
+            logo_url: sanitizePublicLogoUrl(tournament.logo_url),
             slug: tournament.slug,
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
         })));
@@ -577,124 +723,625 @@ async function queryVisiblePublicTournaments(
     };
 }
 
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const sport = searchParams.get('sport');
-        const flashScoreSportKey = resolveFlashScoreSportKey(sport);
-        const flashScoreCatalogEnabled = Boolean(sport) && isFlashScoreEnabledForSport(flashScoreSportKey);
-        const shouldAggregateRugby = flashScoreSportKey === RUGBY_FLASHSCORE_SPORT_KEY;
-        const scope = searchParams.get('scope');
-        const forceFullCatalog = scope === 'full';
-        const search = searchParams.get('search')?.trim().toLowerCase() || '';
-        const audience = resolveAudienceFilter(searchParams.get('audience'));
+function normalizePublicTournamentsRequest(request: Request): PublicTournamentsRequestParams {
+    const { searchParams } = new URL(request.url);
+    const sport = searchParams.get('sport');
+    const flashScoreSportKey = resolveFlashScoreSportKey(sport);
+    const scope = searchParams.get('scope');
+    const search = searchParams.get('search')?.trim().toLowerCase() || '';
 
-        if (flashScoreCatalogEnabled && scope === 'summary') {
-            try {
-                const countries = await queryFlashScoreCountrySummaries(flashScoreSportKey);
-                return withCacheControl({ data: { countries } }, CATALOG_CACHE_CONTROL);
-            } catch (error) {
-                console.error('[GET /api/public/tournaments] catalog summary failed:', error);
-                return withCacheControl({ data: { countries: [] } }, CATALOG_CACHE_CONTROL);
+    return {
+        sport,
+        flashScoreSportKey,
+        flashScoreCatalogEnabled: Boolean(sport) && isFlashScoreEnabledForSport(flashScoreSportKey),
+        shouldAggregateRugby: flashScoreSportKey === RUGBY_FLASHSCORE_SPORT_KEY,
+        scope,
+        forceFullCatalog: scope === 'full',
+        search,
+        audience: resolveAudienceFilter(searchParams.get('audience')),
+        externalCountryId: searchParams.get('external_country_id')?.trim() || null,
+        countryName: searchParams.get('country_name')?.trim() || null,
+        countryFlag: searchParams.get('country_flag')?.trim() || null,
+    };
+}
+
+function resolveCacheControl(params: PublicTournamentsRequestParams) {
+    if (params.flashScoreCatalogEnabled && (params.scope === 'summary' || params.scope === 'country')) {
+        return CATALOG_CACHE_CONTROL;
+    }
+
+    return FLAT_CACHE_CONTROL;
+}
+
+function buildPublicTournamentsResponse(payload: PublicTournamentsPayload, params: PublicTournamentsRequestParams) {
+    return withCacheControl(payload, resolveCacheControl(params));
+}
+
+function buildPublicTournamentsCacheKey(params: PublicTournamentsRequestParams) {
+    return [
+        TOURNAMENTS_RESPONSE_CACHE_PREFIX,
+        params.scope || 'default',
+        params.sport || 'all',
+        params.audience,
+        params.search || 'all',
+        params.externalCountryId || 'none',
+        params.countryName ? slugifyCountryId(params.countryName) : 'none',
+        params.countryFlag || 'none',
+        params.forceFullCatalog ? 'full' : 'normal',
+    ].join(':');
+}
+
+function getTournamentsFeedType(params: PublicTournamentsRequestParams): TournamentsFeedType {
+    if (params.scope === 'summary') return 'summary';
+    if (params.scope === 'country') return 'country';
+    if (params.scope === 'db') return 'db';
+    return 'list';
+}
+
+function getPublicTournamentsCachePolicy(params: PublicTournamentsRequestParams) {
+    if (params.flashScoreCatalogEnabled && params.scope === 'summary') {
+        return { freshTtlSec: 6 * 60 * 60, staleTtlSec: 7 * 24 * 60 * 60 };
+    }
+
+    if (params.flashScoreCatalogEnabled && params.scope === 'country') {
+        return { freshTtlSec: 60 * 60, staleTtlSec: 24 * 60 * 60 };
+    }
+
+    if (params.search || params.forceFullCatalog) {
+        return { freshTtlSec: 10 * 60, staleTtlSec: 60 * 60 };
+    }
+
+    return { freshTtlSec: 5 * 60, staleTtlSec: 30 * 60 };
+}
+
+function readTournamentsResponseCache(key: string) {
+    const entry = memoryCache.get<TournamentsResponseCacheEntry>(key);
+    if (!entry) return { state: 'miss' as const, entry: null };
+
+    const ageMs = Date.now() - entry.createdAt;
+    if (ageMs <= entry.freshTtlMs) {
+        return { state: 'fresh' as const, entry };
+    }
+    if (ageMs <= entry.staleTtlMs) {
+        return { state: 'stale' as const, entry };
+    }
+
+    memoryCache.delete(key);
+    return { state: 'miss' as const, entry: null };
+}
+
+function writeTournamentsResponseCache(
+    key: string,
+    payload: PublicTournamentsPayload,
+    params: PublicTournamentsRequestParams,
+    createdAt: number = Date.now(),
+) {
+    const policy = getPublicTournamentsCachePolicy(params);
+    const entry: TournamentsResponseCacheEntry = {
+        payload,
+        createdAt,
+        freshTtlMs: policy.freshTtlSec * 1000,
+        staleTtlMs: policy.staleTtlSec * 1000,
+    };
+
+    memoryCache.set(key, entry, Math.ceil(entry.staleTtlMs / 1000));
+}
+
+function getTournamentsFeedState(
+    generatedAtIso: string,
+    expiresAtIso: string,
+    staleUntilIso?: string | null,
+) {
+    const generatedAtMs = new Date(generatedAtIso).getTime();
+    const expiresAtMs = new Date(expiresAtIso).getTime();
+    const staleUntilMs = staleUntilIso ? new Date(staleUntilIso).getTime() : Number.NaN;
+    const nowMs = Date.now();
+
+    if (Number.isNaN(generatedAtMs) || Number.isNaN(expiresAtMs)) {
+        return { state: 'miss' as const, createdAt: Date.now() };
+    }
+
+    if (nowMs <= expiresAtMs) {
+        return { state: 'fresh' as const, createdAt: generatedAtMs };
+    }
+
+    if (!Number.isNaN(staleUntilMs) && nowMs <= staleUntilMs) {
+        return { state: 'stale' as const, createdAt: generatedAtMs };
+    }
+
+    return { state: 'miss' as const, createdAt: generatedAtMs };
+}
+
+async function persistTournamentsFeedSnapshot(
+    key: string,
+    params: PublicTournamentsRequestParams,
+    payload: PublicTournamentsPayload,
+    generatedAt: Date = new Date(),
+    trace?: TournamentsTraceContext,
+) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return false;
+    }
+
+    const policy = getPublicTournamentsCachePolicy(params);
+    const persistStartedAt = Date.now();
+
+    try {
+        const persisted = await upsertTournamentsFeedSnapshot(createAdminClient(), {
+            cacheKey: key,
+            feedType: getTournamentsFeedType(params),
+            sport: params.sport,
+            scope: params.scope,
+            audience: params.audience,
+            searchQuery: params.search,
+            externalCountryId: params.externalCountryId,
+            payload,
+            sourceSummary: {
+                flashscore_catalog_enabled: params.flashScoreCatalogEnabled,
+                should_aggregate_rugby: params.shouldAggregateRugby,
+            },
+            generatedAt,
+            freshTtlSeconds: policy.freshTtlSec,
+            staleTtlSeconds: policy.staleTtlSec,
+            lastRefreshStartedAt: generatedAt,
+            lastRefreshCompletedAt: new Date(),
+        });
+
+        if (trace) {
+            const durationMs = trackDuration(trace.metrics, 'snapshot_write_time_ms', persistStartedAt);
+            if (durationMs > 400) {
+                logTournamentsEvent('warn', 'tournaments_slow_snapshot_write', trace, {
+                    threshold_ms: 400,
+                    snapshot_persisted: persisted,
+                });
             }
         }
 
-        if (flashScoreCatalogEnabled && scope === 'country') {
-            const externalCountryId = searchParams.get('external_country_id')?.trim() || '';
-            const countryName = searchParams.get('country_name')?.trim() || '';
-            const countryFlag = searchParams.get('country_flag')?.trim() || '';
+        return persisted;
+    } catch (error) {
+        console.error('[public-tournaments] persisted snapshot failed:', error);
+        if (trace) {
+            trackDuration(trace.metrics, 'snapshot_write_time_ms', persistStartedAt);
+        }
+        return false;
+    }
+}
 
-            if (!externalCountryId || !countryName) {
-                return NextResponse.json(
-                    { error: 'Faltan external_country_id o country_name.' },
-                    { status: 400 },
-                );
-            }
+function queuePersistTournamentsFeedSnapshot(
+    key: string,
+    params: PublicTournamentsRequestParams,
+    payload: PublicTournamentsPayload,
+    generatedAt: Date = new Date(),
+    trace?: TournamentsTraceContext,
+) {
+    const existing = tournamentsSnapshotPersistLocks.get(key);
+    if (existing) return existing;
 
+    const persistPromise = persistTournamentsFeedSnapshot(key, params, payload, generatedAt, trace)
+        .finally(() => {
+            tournamentsSnapshotPersistLocks.delete(key);
+        });
+
+    tournamentsSnapshotPersistLocks.set(key, persistPromise);
+    return persistPromise;
+}
+
+function logSlowTournamentsComputeStageWarnings(trace: TournamentsTraceContext) {
+    const warnings: Array<{ metric: string; threshold: number; event: string }> = [
+        { metric: 'supabase_tournaments_read_ms', threshold: 400, event: 'tournaments_slow_supabase_read' },
+        { metric: 'external_tournaments_fetch_ms', threshold: 1200, event: 'tournaments_slow_external_fetch' },
+        { metric: 'merge_sources_ms', threshold: 250, event: 'tournaments_slow_merge_sources' },
+    ];
+
+    warnings.forEach(({ metric, threshold, event }) => {
+        const value = trace.metrics[metric];
+        if (typeof value === 'number' && value > threshold) {
+            logTournamentsEvent('warn', event, trace, { threshold_ms: threshold, metric, value_ms: value });
+        }
+    });
+}
+
+async function computePublicTournamentsPayload(
+    params: PublicTournamentsRequestParams,
+    trace?: TournamentsTraceContext,
+): Promise<PublicTournamentsPayload> {
+    const computeStartedAt = Date.now();
+    let dbItemsCount = 0;
+    let externalItemsCount = 0;
+    let finalItemsCount = 0;
+
+    try {
+        if (params.flashScoreCatalogEnabled && params.scope === 'summary') {
+            const externalFetchStartedAt = Date.now();
             try {
-                const tournaments = shouldAggregateRugby
-                    ? await queryRugbyCountryTournaments({
-                        externalCountryId,
-                        countryName,
-                        flag: countryFlag || null,
-                        search,
-                        audience,
-                    })
-                    : await queryFlashScoreCountryTournaments({
-                        sportKey: flashScoreSportKey,
-                        externalCountryId,
-                        countryName,
-                        flag: countryFlag || null,
-                        search,
-                        audience,
+                const countries = await queryFlashScoreCountrySummaries(params.flashScoreSportKey);
+                externalItemsCount = countries.length;
+                if (trace) {
+                    trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
+                    trace.metrics.build_payload_ms = 0;
+                    trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                    logSlowTournamentsComputeStageWarnings(trace);
+                    logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                        db_items_count: dbItemsCount,
+                        external_items_count: externalItemsCount,
+                        final_items_count: externalItemsCount,
                     });
-                return withCacheControl({ data: tournaments }, CATALOG_CACHE_CONTROL);
+                }
+                return { data: { countries } };
             } catch (error) {
-                console.error('[GET /api/public/tournaments] catalog country failed:', error);
-                return NextResponse.json(
-                    { error: 'No se pudieron cargar las ligas de FlashScore.' },
-                    { status: 500 },
-                );
+                console.error('[GET /api/public/tournaments] catalog summary failed:', error);
+                if (trace) {
+                    trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
+                }
+                return { data: { countries: [] } };
             }
+        }
+
+        if (params.flashScoreCatalogEnabled && params.scope === 'country') {
+            const externalFetchStartedAt = Date.now();
+            const tournaments = params.shouldAggregateRugby
+                ? await queryRugbyCountryTournaments({
+                    externalCountryId: params.externalCountryId || '',
+                    countryName: params.countryName || '',
+                    flag: params.countryFlag || null,
+                    search: params.search,
+                    audience: params.audience,
+                })
+                : await queryFlashScoreCountryTournaments({
+                    sportKey: params.flashScoreSportKey,
+                    externalCountryId: params.externalCountryId || '',
+                    countryName: params.countryName || '',
+                    flag: params.countryFlag || null,
+                    search: params.search,
+                    audience: params.audience,
+                });
+
+            externalItemsCount = tournaments.length;
+            finalItemsCount = tournaments.length;
+            if (trace) {
+                trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
+                trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                logSlowTournamentsComputeStageWarnings(trace);
+                logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                    db_items_count: dbItemsCount,
+                    external_items_count: externalItemsCount,
+                    final_items_count: finalItemsCount,
+                });
+            }
+            return { data: tournaments };
         }
 
         const supabase = await getReadClient();
-        const sportFilter = resolveSportFilter(sport);
+        const supabaseReadStartedAt = Date.now();
         const queryResult = await queryVisiblePublicTournaments(supabase);
+        if (trace) {
+            trackDuration(trace.metrics, 'supabase_tournaments_read_ms', supabaseReadStartedAt);
+        }
         const { data, error } = queryResult;
 
+        const buildDbPayloadStartedAt = Date.now();
         const dbTournaments = !error
             ? filterPublicDbTournaments({
                 tournaments: data || [],
-                sportFilter,
-                audience,
-                search,
+                sportFilter: resolveSportFilter(params.sport),
+                audience: params.audience,
+                search: params.search,
             })
             : [];
-
-        if (scope === 'db') {
-            if (error) {
-                console.error('[GET /api/public/tournaments] query failed:', error);
-                return NextResponse.json(
-                    { error: 'No se pudieron cargar los torneos.' },
-                    { status: 500 },
-                );
-            }
-
-            return withCacheControl({ data: dbTournaments }, FLAT_CACHE_CONTROL);
+        dbItemsCount = dbTournaments.length;
+        if (trace) {
+            addDurationMetric(trace.metrics, 'build_payload_ms', Date.now() - buildDbPayloadStartedAt);
         }
 
-        if (flashScoreCatalogEnabled && (isRugbySport(flashScoreSportKey) || Boolean(search) || forceFullCatalog)) {
-            try {
-                const flashScoreTournaments = shouldAggregateRugby
-                    ? await queryPublicRugbyFlashScoreTournaments({ search, audience })
-                    : await queryPublicFlashScoreTournaments({ sportKey: flashScoreSportKey, search, audience });
-                const combinedTournaments = mergePublicTournamentLists(dbTournaments, flashScoreTournaments);
+        if (params.scope === 'db') {
+            if (error) {
+                throw error;
+            }
 
-                return withCacheControl({ data: combinedTournaments }, FLAT_CACHE_CONTROL);
+            finalItemsCount = dbTournaments.length;
+            if (trace) {
+                trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                logSlowTournamentsComputeStageWarnings(trace);
+                logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                    db_items_count: dbItemsCount,
+                    external_items_count: externalItemsCount,
+                    final_items_count: finalItemsCount,
+                });
+            }
+            return { data: dbTournaments };
+        }
+
+        const shouldLoadExternalCatalog =
+            params.flashScoreCatalogEnabled &&
+            (
+                params.forceFullCatalog ||
+                Boolean(params.search) ||
+                !isRugbySport(params.flashScoreSportKey)
+            );
+
+        if (shouldLoadExternalCatalog) {
+            const externalFetchStartedAt = Date.now();
+            try {
+                const flashScoreTournaments = params.shouldAggregateRugby
+                    ? await queryPublicRugbyFlashScoreTournaments({ search: params.search, audience: params.audience })
+                    : await queryPublicFlashScoreTournaments({
+                        sportKey: params.flashScoreSportKey,
+                        search: params.search,
+                        audience: params.audience,
+                    });
+                externalItemsCount = flashScoreTournaments.length;
+                if (trace) {
+                    trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
+                }
+
+                const mergeStartedAt = Date.now();
+                const combinedTournaments = mergePublicTournamentLists(dbTournaments, flashScoreTournaments);
+                finalItemsCount = combinedTournaments.length;
+                if (trace) {
+                    trackDuration(trace.metrics, 'merge_sources_ms', mergeStartedAt);
+                    trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                    logSlowTournamentsComputeStageWarnings(trace);
+                    logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                        db_items_count: dbItemsCount,
+                        external_items_count: externalItemsCount,
+                        final_items_count: finalItemsCount,
+                    });
+                }
+
+                return { data: combinedTournaments };
             } catch (flashScoreError) {
                 console.error('[GET /api/public/tournaments] flashscore catalog fallback:', flashScoreError);
+                if (trace) {
+                    trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
+                }
 
                 if (!error) {
-                    return withCacheControl({ data: dbTournaments }, FLAT_CACHE_CONTROL);
+                    finalItemsCount = dbTournaments.length;
+                    if (trace) {
+                        trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                        logSlowTournamentsComputeStageWarnings(trace);
+                        logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                            db_items_count: dbItemsCount,
+                            external_items_count: externalItemsCount,
+                            final_items_count: finalItemsCount,
+                            fallback_path: 'db_only',
+                        });
+                    }
+                    return { data: dbTournaments };
                 }
             }
         }
 
         if (error) {
-            console.error('[GET /api/public/tournaments] query failed:', error);
-            return NextResponse.json(
-                { error: 'No se pudieron cargar los torneos.' },
-                { status: 500 },
-            );
+            throw error;
         }
 
-        return withCacheControl({ data: dbTournaments }, FLAT_CACHE_CONTROL);
+        finalItemsCount = dbTournaments.length;
+        if (trace) {
+            trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+            logSlowTournamentsComputeStageWarnings(trace);
+            logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                db_items_count: dbItemsCount,
+                external_items_count: externalItemsCount,
+                final_items_count: finalItemsCount,
+            });
+        }
+        return { data: dbTournaments };
+    } catch (error) {
+        if (trace) {
+            trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+            logTournamentsEvent('error', 'tournaments_compute_failed', trace, {
+                error: String(error),
+                db_items_count: dbItemsCount,
+                external_items_count: externalItemsCount,
+                final_items_count: finalItemsCount,
+            });
+        }
+        throw error;
+    }
+}
+
+async function refreshPublicTournamentsResponseCache(
+    key: string,
+    params: PublicTournamentsRequestParams,
+    parentRequestId?: string,
+) {
+    const existing = tournamentsRefreshLocks.get(key);
+    if (existing) return existing;
+
+    const refreshPromise = (async () => {
+        const startedAt = new Date();
+        const trace: TournamentsTraceContext = {
+            requestId: parentRequestId || createTraceId('req'),
+            parentRequestId,
+            refreshId: createTraceId('refresh'),
+            cacheKey: key,
+            params,
+            metrics: {},
+            backgroundRefresh: true,
+        };
+
+        logTournamentsEvent('info', 'tournaments_refresh_started', trace);
+        try {
+            const computeStartedAt = Date.now();
+            const payload = await computePublicTournamentsPayload(params, trace);
+            const computeDurationMs = trackDuration(trace.metrics, 'compute_payload_ms', computeStartedAt);
+            writeTournamentsResponseCache(key, payload, params, startedAt.getTime());
+            void queuePersistTournamentsFeedSnapshot(key, params, payload, startedAt, trace);
+            if (computeDurationMs > 1500) {
+                logTournamentsEvent('warn', 'tournaments_slow_compute', trace, { threshold_ms: 1500 });
+            }
+            trackDuration(trace.metrics, 'refresh_total_ms', startedAt.getTime());
+            logTournamentsEvent('info', 'tournaments_refresh_succeeded', trace);
+        } catch (error) {
+            trackDuration(trace.metrics, 'refresh_total_ms', startedAt.getTime());
+            logTournamentsEvent('error', 'tournaments_refresh_failed', trace, { error: String(error) });
+        } finally {
+            tournamentsRefreshLocks.delete(key);
+        }
+    })();
+
+    tournamentsRefreshLocks.set(key, refreshPromise);
+    return refreshPromise;
+}
+
+async function getOrComputePublicTournamentsPayload(
+    key: string,
+    params: PublicTournamentsRequestParams,
+    trace: TournamentsTraceContext,
+) {
+    const existing = tournamentsInFlightResponses.get(key);
+    if (existing) return existing;
+
+    const promise = (async () => {
+        const startedAt = new Date();
+        try {
+            const computeStartedAt = Date.now();
+            const payload = await computePublicTournamentsPayload(params, trace);
+            const computeDurationMs = trackDuration(trace.metrics, 'compute_payload_ms', computeStartedAt);
+            writeTournamentsResponseCache(key, payload, params, startedAt.getTime());
+            void queuePersistTournamentsFeedSnapshot(key, params, payload, startedAt, trace);
+            if (computeDurationMs > 1500) {
+                logTournamentsEvent('warn', 'tournaments_slow_compute', trace, { threshold_ms: 1500 });
+            }
+            return payload;
+        } finally {
+            tournamentsInFlightResponses.delete(key);
+        }
+    })();
+
+    tournamentsInFlightResponses.set(key, promise);
+    return promise;
+}
+
+export async function GET(request: NextRequest) {
+    const requestStartedAt = Date.now();
+    const params = normalizePublicTournamentsRequest(request);
+    const cacheKey = buildPublicTournamentsCacheKey(params);
+    const trace: TournamentsTraceContext = {
+        requestId: createTraceId('req'),
+        cacheKey,
+        params,
+        metrics: {},
+    };
+
+    if (
+        params.flashScoreCatalogEnabled &&
+        params.scope === 'country' &&
+        (!params.externalCountryId || !params.countryName)
+    ) {
+        const response = NextResponse.json(
+            { error: 'Faltan external_country_id o country_name.' },
+            { status: 400 },
+        );
+        attachObservabilityHeaders(response, trace, 'BYPASS');
+        return response;
+    }
+
+    const memoryLookupStartedAt = Date.now();
+    const cacheState = readTournamentsResponseCache(cacheKey);
+    trackDuration(trace.metrics, 'memory_cache_lookup_ms', memoryLookupStartedAt);
+
+    if (cacheState.state === 'fresh' && cacheState.entry) {
+        const serializeStartedAt = Date.now();
+        const response = buildPublicTournamentsResponse(cacheState.entry.payload, params);
+        trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+        finalizeRequestMetrics(trace, requestStartedAt);
+        attachObservabilityHeaders(response, trace, 'HIT');
+        logTournamentsEvent('info', 'tournaments_cache_hit', trace, { cache_status: 'HIT' });
+        return response;
+    }
+
+    if (cacheState.state === 'stale' && cacheState.entry) {
+        void refreshPublicTournamentsResponseCache(cacheKey, params, trace.requestId);
+        const serializeStartedAt = Date.now();
+        const response = buildPublicTournamentsResponse(cacheState.entry.payload, params);
+        trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+        finalizeRequestMetrics(trace, requestStartedAt);
+        attachObservabilityHeaders(response, trace, 'STALE');
+        logTournamentsEvent('info', 'tournaments_cache_stale', trace, { cache_status: 'STALE' });
+        return response;
+    }
+
+    try {
+        const readClient = await getReadClient();
+        const persistedLookupStartedAt = Date.now();
+        const persistedSnapshot = await readUsableTournamentsFeedSnapshot<PublicTournamentsPayload>(
+            readClient,
+            cacheKey,
+            new Date().toISOString(),
+        );
+        const persistedLookupMs = trackDuration(trace.metrics, 'persisted_cache_lookup_ms', persistedLookupStartedAt);
+        if (persistedLookupMs > 300) {
+            logTournamentsEvent('warn', 'tournaments_slow_persisted_lookup', trace, { threshold_ms: 300 });
+        }
+
+        if (persistedSnapshot) {
+            const persistedState = getTournamentsFeedState(
+                persistedSnapshot.generatedAt,
+                persistedSnapshot.expiresAt,
+                persistedSnapshot.staleUntil,
+            );
+            trace.metrics.persisted_payload_bytes = persistedSnapshot.payloadSizeBytes || 0;
+
+            if (persistedState.state === 'fresh') {
+                writeTournamentsResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
+                const serializeStartedAt = Date.now();
+                const response = buildPublicTournamentsResponse(persistedSnapshot.payload, params);
+                trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+                finalizeRequestMetrics(trace, requestStartedAt);
+                attachObservabilityHeaders(response, trace, 'PERSISTED-HIT');
+                logTournamentsEvent('info', 'tournaments_cache_persisted_hit', trace, {
+                    cache_status: 'PERSISTED-HIT',
+                    persisted_snapshot_state: 'fresh',
+                });
+                return response;
+            }
+
+            if (persistedState.state === 'stale') {
+                writeTournamentsResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
+                void refreshPublicTournamentsResponseCache(cacheKey, params, trace.requestId);
+                const serializeStartedAt = Date.now();
+                const response = buildPublicTournamentsResponse(persistedSnapshot.payload, params);
+                trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+                finalizeRequestMetrics(trace, requestStartedAt);
+                attachObservabilityHeaders(response, trace, 'PERSISTED-STALE');
+                logTournamentsEvent('info', 'tournaments_cache_persisted_stale', trace, {
+                    cache_status: 'PERSISTED-STALE',
+                    persisted_snapshot_state: 'stale',
+                });
+                return response;
+            }
+        }
+
+        const persistedMetaStartedAt = Date.now();
+        const persistedSnapshotMeta = await readTournamentsFeedSnapshotMetadata(readClient, cacheKey);
+        if (persistedSnapshotMeta) {
+            trackDuration(trace.metrics, 'persisted_metadata_recheck_ms', persistedMetaStartedAt);
+            trace.metrics.persisted_payload_bytes = persistedSnapshotMeta.payloadSizeBytes || 0;
+            logTournamentsEvent('info', 'tournaments_cache_persisted_expired', trace, {
+                cache_status: 'EXPIRED',
+                persisted_snapshot_state: 'expired',
+            });
+        }
+
+        const payload = await getOrComputePublicTournamentsPayload(cacheKey, params, trace);
+        const serializeStartedAt = Date.now();
+        const response = buildPublicTournamentsResponse(payload, params);
+        trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+        finalizeRequestMetrics(trace, requestStartedAt);
+        attachObservabilityHeaders(response, trace, 'MISS');
+        logTournamentsEvent('info', 'tournaments_cache_miss', trace, { cache_status: 'MISS' });
+        return response;
     } catch (error) {
         console.error('[GET /api/public/tournaments] unexpected error:', error);
-        return NextResponse.json(
+        finalizeRequestMetrics(trace, requestStartedAt);
+        logTournamentsEvent('error', 'tournaments_request_failed', trace, { error: String(error) });
+        const response = NextResponse.json(
             { error: 'No se pudieron cargar los torneos.' },
             { status: 500 },
         );
+        attachObservabilityHeaders(response, trace, 'ERROR');
+        return response;
     }
 }

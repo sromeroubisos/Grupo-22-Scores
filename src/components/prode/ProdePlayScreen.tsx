@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Shield } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
@@ -149,6 +150,7 @@ function getPredictionBreakdown(event: ProdePlayEvent, prediction: ProdePlayPred
 }
 
 export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlayScreenProps) {
+    const router = useRouter();
     const { user, login } = useAuth();
     const [events, setEvents] = useState(view.events);
     const [savingEventId, setSavingEventId] = useState<string | null>(null);
@@ -158,6 +160,8 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     const [isEditingRules, setIsEditingRules] = useState(false);
     const [isSavingRules, setIsSavingRules] = useState(false);
     const [rulesFeedback, setRulesFeedback] = useState<string | null>(null);
+    const [leagueActionFeedback, setLeagueActionFeedback] = useState<string | null>(null);
+    const [runningLeagueAction, setRunningLeagueAction] = useState<'archive_league' | 'delete_league' | null>(null);
     const [ruleDrafts, setRuleDrafts] = useState<Record<string, string>>(() => Object.fromEntries(
         view.rules.items.map((rule) => [rule.key, rule.points.toString()]),
     ));
@@ -241,6 +245,8 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         if (view.isFinished) return 'Competencia cerrada';
         return 'Sin fecha activa';
     }, [lockedOrLiveEvents.length, openEvents.length, view.isFinished]);
+    const inviteCode = view.inviteCode ?? '';
+    const shareUrl = view.shareUrl ?? '';
 
     async function copyToClipboard(value: string, target: 'code' | 'link') {
         if (typeof navigator === 'undefined' || !navigator.clipboard) return;
@@ -377,6 +383,53 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         }
     }
 
+    async function handleLeagueLifecycleAction(action: 'archive_league' | 'delete_league') {
+        if (!view.canManage || !view.privateLeagueId) {
+            return;
+        }
+
+        const isDelete = action === 'delete_league';
+        const confirmed = window.confirm(
+            isDelete
+                ? 'Esta accion saca la liga de circulacion. Queres borrarla?'
+                : 'La liga dejara de estar activa y quedara archivada. Queres continuar?',
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        setRunningLeagueAction(action);
+        setLeagueActionFeedback(isDelete ? 'Borrando liga...' : 'Archivando liga...');
+
+        try {
+            const response = await fetch('/api/prode/private-leagues', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    leagueId: view.privateLeagueId,
+                    action,
+                }),
+            });
+
+            const result = await response.json() as { error?: string; message?: string };
+
+            if (!response.ok) {
+                throw new Error(result.error || 'No se pudo actualizar la liga.');
+            }
+
+            setLeagueActionFeedback(result.message || 'La liga fue actualizada.');
+            router.replace('/prode');
+            router.refresh();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'No se pudo actualizar la liga.';
+            setLeagueActionFeedback(message);
+        } finally {
+            setRunningLeagueAction(null);
+        }
+    }
+
     return (
         <div className={styles.page}>
             <div className="container">
@@ -394,12 +447,13 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                     <span className={styles.metaTag}>Jugadores: {view.memberCount}</span>
                                     <span className={styles.metaTag}>Estado: {activityLabel}</span>
                                     <span className={styles.metaTag}>{formatTimeUntil(view.nextLockAt)}</span>
+                                    {view.canManage ? <span className={`${styles.metaTag} ${styles.metaTagSuccess}`}>Admin</span> : null}
                                 </div>
                             </div>
 
                             <div className={styles.playHeroActions}>
-                                {view.canInvite && view.inviteCode ? (
-                                    <button type="button" className={styles.posterPrimaryCta} onClick={() => void copyToClipboard(view.inviteCode, 'code')}>
+                                {view.canInvite && inviteCode ? (
+                                    <button type="button" className={styles.posterPrimaryCta} onClick={() => void copyToClipboard(inviteCode, 'code')}>
                                         {copiedTarget === 'code' ? 'Codigo copiado' : 'Invitar'}
                                     </button>
                                 ) : null}
@@ -626,17 +680,17 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                 </div>
                             </section>
 
-                            {view.canInvite && (view.inviteCode || view.shareUrl) ? (
+                            {view.canInvite && (inviteCode || shareUrl) ? (
                                 <section className={styles.summaryCard}>
                                     <p className={styles.previewEyebrow}>Acciones sociales</p>
                                     <div className={styles.socialActions}>
-                                        {view.inviteCode ? (
-                                            <button type="button" className={styles.inviteActionBtn} onClick={() => void copyToClipboard(view.inviteCode, 'code')}>
+                                        {inviteCode ? (
+                                            <button type="button" className={styles.inviteActionBtn} onClick={() => void copyToClipboard(inviteCode, 'code')}>
                                                 {copiedTarget === 'code' ? 'Codigo copiado' : 'Copiar codigo'}
                                             </button>
                                         ) : null}
-                                        {view.shareUrl ? (
-                                            <button type="button" className={styles.inviteActionBtn} onClick={() => void copyToClipboard(view.shareUrl, 'link')}>
+                                        {shareUrl ? (
+                                            <button type="button" className={styles.inviteActionBtn} onClick={() => void copyToClipboard(shareUrl, 'link')}>
                                                 {copiedTarget === 'link' ? 'Link copiado' : 'Copiar link'}
                                             </button>
                                         ) : null}
@@ -742,6 +796,34 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
 
                                 {rulesFeedback ? <div className={styles.warning}>{rulesFeedback}</div> : null}
                             </section>
+
+                            {view.canManage && view.privateLeagueId ? (
+                                <section className={styles.summaryCard}>
+                                    <p className={styles.previewEyebrow}>Administracion</p>
+                                    <p className={styles.leagueAdminCopy}>
+                                        Si esta liga ya no va a seguir, podes archivarla o borrarla sin tocar la competencia base.
+                                    </p>
+                                    <div className={styles.leagueAdminActions}>
+                                        <button
+                                            type="button"
+                                            className={styles.posterSecondaryCta}
+                                            onClick={() => void handleLeagueLifecycleAction('archive_league')}
+                                            disabled={runningLeagueAction !== null}
+                                        >
+                                            {runningLeagueAction === 'archive_league' ? 'Archivando...' : 'Archivar liga'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.dangerCta}
+                                            onClick={() => void handleLeagueLifecycleAction('delete_league')}
+                                            disabled={runningLeagueAction !== null}
+                                        >
+                                            {runningLeagueAction === 'delete_league' ? 'Borrando...' : 'Borrar liga'}
+                                        </button>
+                                    </div>
+                                    {leagueActionFeedback ? <div className={styles.warning}>{leagueActionFeedback}</div> : null}
+                                </section>
+                            ) : null}
                         </aside>
                     </section>
                 </div>

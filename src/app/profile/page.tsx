@@ -9,7 +9,6 @@ import {
     ChevronRight,
     CirclePlus,
     ClipboardPenLine,
-    FileText,
     Globe,
     Heart,
     LoaderCircle,
@@ -28,10 +27,12 @@ import { fetchResolvedFavorites, type ResolvedFavorite } from '@/lib/favorites/f
 import { createClient } from '@/lib/supabase/client';
 import { getActiveSports } from '@/lib/data/sports';
 import { useAuth } from '@/context/AuthContext';
+import ProdeLobby from '@/components/prode/ProdeLobby';
+import type { PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
 
 import styles from './profile.module.css';
 
-type MainTab = 'seguidos' | 'competiciones' | 'clubes' | 'actividad' | 'ajustes';
+type MainTab = 'favoritos' | 'prode' | 'perfil';
 type FavoriteItem = ResolvedFavorite;
 type ProfileActionKind = 'collaborator' | 'tournament';
 
@@ -105,19 +106,11 @@ async function sendProfileRequest(
 
 export default function ProfilePage() {
     const { user, logout } = useAuth();
-    const [activeTab, setActiveTab] = useState<MainTab>('seguidos');
-    const [isDesktop, setIsDesktop] = useState(false);
+    const [activeTab, setActiveTab] = useState<MainTab>('favoritos');
     const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
     const [favLoading, setFavLoading] = useState(true);
     const [activeRequestForm, setActiveRequestForm] = useState<ProfileActionKind | null>(null);
     const supabase = createClient();
-
-    useEffect(() => {
-        const check = () => setIsDesktop(window.innerWidth >= 1024);
-        check();
-        window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
-    }, []);
 
     useEffect(() => {
         if (!user?.id) {
@@ -150,32 +143,18 @@ export default function ProfilePage() {
         torneos: favorites.filter(favorite => ['league', 'tournament'].includes(favorite.entity_type)).length,
     };
 
-    const sportsTabs: { key: MainTab; label: string }[] = [
-        { key: 'seguidos', label: 'Seguidos' },
-        { key: 'competiciones', label: 'Competiciones' },
-        { key: 'clubes', label: 'Clubes' },
-        { key: 'actividad', label: 'Actividad' },
+    const topTabs: { key: MainTab; label: string }[] = [
+        { key: 'favoritos', label: 'Favoritos' },
+        { key: 'prode', label: 'Prode' },
+        { key: 'perfil', label: 'Perfil' },
     ];
-
-    const visibleTabs = isDesktop
-        ? sportsTabs
-        : [...sportsTabs, { key: 'ajustes' as MainTab, label: 'Ajustes' }];
 
     return (
         <div className={styles.page}>
             <div className={styles.container}>
-                <ProfileHeader user={user} stats={stats} />
-
-                <ProfileActionHub
-                    user={user}
-                    activeRequestForm={activeRequestForm}
-                    onSelectForm={(kind) => setActiveRequestForm(current => current === kind ? null : kind)}
-                    onCloseForm={() => setActiveRequestForm(null)}
-                />
-
                 <div className={styles.mainColumn}>
                     <nav className={styles.tabsContainer} aria-label="Secciones del perfil">
-                        {visibleTabs.map(({ key, label }) => (
+                        {topTabs.map(({ key, label }) => (
                             <button
                                 key={key}
                                 className={`${styles.tab} ${activeTab === key ? styles.active : ''}`}
@@ -186,46 +165,31 @@ export default function ProfilePage() {
                         ))}
                     </nav>
 
-                    <div className={styles.mainContent}>
-                        {activeTab === 'seguidos' && (
+                    <div className={`${styles.mainContent} ${activeTab === 'prode' ? styles.mainContentProde : ''}`}>
+                        {activeTab === 'favoritos' && (
                             <SeguidosPanel favorites={favorites} loading={favLoading} />
                         )}
 
-                        {activeTab === 'competiciones' && (
-                            <EmptySection
-                                icon={<Trophy size={40} color="var(--color-text-tertiary)" />}
-                                title="Competiciones"
-                                message="Las competiciones que sigas apareceran aca."
-                            />
+                        {activeTab === 'prode' && (
+                            <ProdePanel />
                         )}
 
-                        {activeTab === 'clubes' && (
-                            <EmptySection
-                                icon={<ShieldCheck size={40} color="var(--color-text-tertiary)" />}
-                                title="Clubes"
-                                message="Los clubes que sigas apareceran aca."
-                            />
-                        )}
-
-                        {activeTab === 'actividad' && (
-                            <EmptySection
-                                icon={<FileText size={40} color="var(--color-text-tertiary)" />}
-                                title="Actividad"
-                                message="Tu actividad reciente aparecera aca."
-                            />
-                        )}
-
-                        {activeTab === 'ajustes' && !isDesktop && (
-                            <SettingsPanel logout={logout} />
+                        {activeTab === 'perfil' && (
+                            <div className={styles.profileStack}>
+                                <ProfileHeader user={user} stats={stats} />
+                                <ProfileActionHub
+                                    user={user}
+                                    activeRequestForm={activeRequestForm}
+                                    onSelectForm={(kind) => setActiveRequestForm(current => current === kind ? null : kind)}
+                                    onCloseForm={() => setActiveRequestForm(null)}
+                                />
+                                <section className={styles.inlineSettingsShell}>
+                                    <SettingsPanel logout={logout} />
+                                </section>
+                            </div>
                         )}
                     </div>
                 </div>
-
-                {isDesktop && (
-                    <aside className={styles.sidebar}>
-                        <SettingsPanel logout={logout} />
-                    </aside>
-                )}
             </div>
         </div>
     );
@@ -924,6 +888,92 @@ function EmptySection({
             {title && <h3 className={styles.emptySectionTitle}>{title}</h3>}
             <p className={styles.emptySectionMsg}>{message}</p>
             {action}
+        </div>
+    );
+}
+
+function ProdePanel() {
+    const [competitions, setCompetitions] = useState<PublicProdeCompetition[]>([]);
+    const [totals, setTotals] = useState<PublicProdeUserTotal[]>([]);
+    const [schemaReady, setSchemaReady] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        (async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const [competitionsResponse, leaderboardResponse] = await Promise.all([
+                    fetch('/api/prode/competitions', { credentials: 'same-origin' }),
+                    fetch('/api/prode/leaderboard', { credentials: 'same-origin' }),
+                ]);
+
+                const competitionsJson = await competitionsResponse.json() as {
+                    schemaReady?: boolean;
+                    data?: PublicProdeCompetition[];
+                    error?: string;
+                };
+                const leaderboardJson = await leaderboardResponse.json() as {
+                    schemaReady?: boolean;
+                    data?: PublicProdeUserTotal[];
+                    error?: string;
+                };
+
+                if (!competitionsResponse.ok) {
+                    throw new Error(competitionsJson.error || 'No se pudo cargar el hub de prode.');
+                }
+
+                if (!leaderboardResponse.ok) {
+                    throw new Error(leaderboardJson.error || 'No se pudo cargar el ranking del prode.');
+                }
+
+                if (cancelled) return;
+
+                setCompetitions(Array.isArray(competitionsJson.data) ? competitionsJson.data : []);
+                setTotals(Array.isArray(leaderboardJson.data) ? leaderboardJson.data : []);
+                setSchemaReady(Boolean(competitionsJson.schemaReady) && Boolean(leaderboardJson.schemaReady));
+            } catch (fetchError) {
+                if (cancelled) return;
+                setError(fetchError instanceof Error ? fetchError.message : 'No se pudo cargar el hub de prode.');
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    return (
+        <div className={styles.embeddedProdeShell}>
+            {loading ? (
+                <EmptySection
+                    icon={<LoaderCircle size={40} color="var(--color-text-tertiary)" className={styles.spinLoader} />}
+                    title="Cargando prode"
+                    message="Estamos trayendo el hub para mostrarlo directo desde tu perfil."
+                />
+            ) : error ? (
+                <EmptySection
+                    icon={<Trophy size={40} color="var(--color-text-tertiary)" />}
+                    title="No se pudo cargar"
+                    message={error}
+                    action={<Link href="/prode" className={styles.btnAccent}>Abrir prode</Link>}
+                />
+            ) : (
+                <ProdeLobby
+                    competitions={competitions}
+                    totals={totals}
+                    schemaReady={schemaReady}
+                    embedded
+                />
+            )}
         </div>
     );
 }

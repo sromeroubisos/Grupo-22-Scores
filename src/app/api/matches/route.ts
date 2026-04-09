@@ -13,7 +13,13 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getCountryById } from '@/lib/data/countries';
+import { memoryCache } from '@/lib/cache';
 import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
+import {
+    readMatchesFeedSnapshotMetadata,
+    readUsableMatchesFeedSnapshot,
+    upsertMatchesFeedSnapshot,
+} from '@/lib/server/matchesFeedCache';
 import {
     applyExternalTournamentOverride,
     getStoredExternalTournamentOverrides,
@@ -198,6 +204,31 @@ async function getReadClient() {
     return createClient();
 }
 
+async function selectMatchesRowsWithFallback(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    buildQuery: (columns: string) => Promise<{ data: any[] | null; error: any }>,
+) {
+    let lastError: any = null;
+
+    for (const columns of MATCHES_DB_SELECT_VARIANTS) {
+        const result = await buildQuery(columns);
+        if (!result.error) {
+            return result;
+        }
+
+        lastError = result.error;
+        const isSchemaFallbackCandidate =
+            isMissingColumnError(result.error, 'sport_id') ||
+            isMissingColumnError(result.error, 'sport');
+
+        if (!isSchemaFallbackCandidate) {
+            return result;
+        }
+    }
+
+    return { data: null, error: lastError };
+}
+
 type LookupMapsClient = {
     from: (table: string) => {
         select: (columns: string) => {
@@ -347,35 +378,474 @@ function jsonWithPublicCache(payload: unknown, options: { liveOnly: boolean; dat
     return NextResponse.json(payload, headers.get('Cache-Control') ? { headers } : undefined);
 }
 
+type MatchesRequestParams = {
+    date: string | null;
+    sport?: string;
+    status: string | null;
+    timeZone: string;
+    requestedDate: string;
+    liveOnly: boolean;
+    useExternal: boolean;
+};
+
+type MatchesPayload = {
+    data: any[];
+    sources?: {
+        flashscore?: {
+            ok: boolean;
+            count: number;
+            fromCache?: boolean;
+            reason?: string | null;
+            message?: string | null;
+        };
+        supabase?: {
+            ok: boolean;
+            count: number;
+            fallback?: boolean;
+            reason?: string | null;
+            message?: string | null;
+        };
+    };
+};
+
+type MatchesResponseCacheEntry = {
+    payload: MatchesPayload;
+    createdAt: number;
+    freshTtlMs: number;
+    staleTtlMs: number;
+};
+
+type MatchesRequestMetrics = Record<string, number>;
+
+type MatchesTraceContext = {
+    requestId: string;
+    cacheKey: string;
+    params: MatchesRequestParams;
+    metrics: MatchesRequestMetrics;
+    backgroundRefresh?: boolean;
+    refreshId?: string;
+    parentRequestId?: string;
+};
+
+const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response';
+const MATCHES_DB_SELECT_COLUMNS = [
+    'id',
+    'tournament_id',
+    'date_time',
+    'status',
+    'score',
+    'round_label',
+    'round_id',
+    'venue',
+    'home_club_id',
+    'away_club_id',
+].join(', ');
+const MATCHES_DB_SELECT_VARIANTS = [
+    MATCHES_DB_SELECT_COLUMNS,
+    MATCHES_DB_SELECT_COLUMNS,
+];
+const matchesRefreshLocks = new Map<string, Promise<void>>();
+const matchesInFlightResponses = new Map<string, Promise<MatchesPayload>>();
+const matchesSnapshotPersistLocks = new Map<string, Promise<boolean>>();
+
+function createTraceId(prefix: 'req' | 'refresh') {
+    const randomPart = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID().slice(0, 8)
+        : Math.random().toString(36).slice(2, 10);
+    return `${prefix}_${randomPart}`;
+}
+
+function trackDuration(metrics: MatchesRequestMetrics, metricName: string, startedAt: number) {
+    const durationMs = Date.now() - startedAt;
+    metrics[metricName] = durationMs;
+    return durationMs;
+}
+
+function addDurationMetric(metrics: MatchesRequestMetrics, metricName: string, durationMs: number) {
+    metrics[metricName] = (metrics[metricName] || 0) + durationMs;
+    return metrics[metricName];
+}
+
+function buildTraceLogPayload(
+    trace: MatchesTraceContext,
+    extra: Record<string, unknown> = {},
+) {
+    return {
+        request_id: trace.requestId,
+        refresh_id: trace.refreshId ?? null,
+        parent_request_id: trace.parentRequestId ?? null,
+        cache_key: trace.cacheKey,
+        sport: trace.params.sport || 'all',
+        live: trace.params.liveOnly,
+        date: trace.params.date,
+        requested_date: trace.params.requestedDate,
+        timezone: trace.params.timeZone,
+        status: trace.params.status,
+        external: trace.params.useExternal,
+        background_refresh: trace.backgroundRefresh === true,
+        ...trace.metrics,
+        ...extra,
+    };
+}
+
+function logMatchesEvent(
+    level: 'info' | 'warn' | 'error',
+    event: string,
+    trace: MatchesTraceContext,
+    extra: Record<string, unknown> = {},
+) {
+    const payload = buildTraceLogPayload(trace, { event, ...extra });
+    const line = `[matches] ${JSON.stringify(payload)}`;
+
+    if (level === 'warn') {
+        console.warn(line);
+        return;
+    }
+
+    if (level === 'error') {
+        console.error(line);
+        return;
+    }
+
+    console.info(line);
+}
+
+function attachObservabilityHeaders(
+    response: NextResponse,
+    trace: MatchesTraceContext,
+    cacheStatus: string,
+) {
+    response.headers.set('X-G22-Cache', cacheStatus);
+    response.headers.set('X-G22-Request-Id', trace.requestId);
+
+    if (process.env.NODE_ENV !== 'production') {
+        response.headers.set('X-G22-Cache-Key', trace.cacheKey);
+        if (typeof trace.metrics.compute_payload_ms === 'number') {
+            response.headers.set('X-G22-Compute-Ms', String(trace.metrics.compute_payload_ms));
+        }
+    }
+
+    return response;
+}
+
+function finalizeRequestMetrics(trace: MatchesTraceContext, requestStartedAt: number) {
+    const totalMs = trackDuration(trace.metrics, 'response_time_ms', requestStartedAt);
+    trace.metrics.total_request_ms = totalMs;
+    return totalMs;
+}
+
+function logSlowComputeStageWarnings(trace: MatchesTraceContext) {
+    const warnings: Array<{ metric: string; threshold: number; event: string }> = [
+        { metric: 'external_fetch_ms', threshold: 800, event: 'matches_slow_external_fetch' },
+        { metric: 'supabase_matches_read_ms', threshold: 250, event: 'matches_slow_supabase_matches_read' },
+        { metric: 'supabase_live_read_ms', threshold: 250, event: 'matches_slow_supabase_live_read' },
+        { metric: 'merge_sources_ms', threshold: 250, event: 'matches_slow_merge_sources' },
+        { metric: 'enrich_matches_ms', threshold: 300, event: 'matches_slow_enrich_matches' },
+    ];
+
+    warnings.forEach(({ metric, threshold, event }) => {
+        const value = trace.metrics[metric];
+        if (typeof value === 'number' && value > threshold) {
+            logMatchesEvent('warn', event, trace, { threshold_ms: threshold, metric, value_ms: value });
+        }
+    });
+}
+
+function normalizeMatchesRequest(request: Request): MatchesRequestParams {
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get('date');
+    const sport = searchParams.get('sport') || undefined;
+    const status = searchParams.get('status');
+    const rawTimeZone = searchParams.get('tz') || undefined;
+    const timeZone = (() => {
+        const tz = rawTimeZone || 'America/Argentina/Buenos_Aires';
+        try {
+            new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+            return canonicalizeTimezone(tz);
+        } catch {
+            return 'America/Argentina/Buenos_Aires';
+        }
+    })();
+
+    return {
+        date,
+        sport,
+        status,
+        timeZone,
+        requestedDate: date || formatDateKey(new Date(), timeZone),
+        liveOnly: searchParams.get('live') === 'true',
+        useExternal: searchParams.get('external') === 'true',
+    };
+}
+
+function buildMatchesCacheKey(params: MatchesRequestParams) {
+    return [
+        MATCHES_RESPONSE_CACHE_PREFIX,
+        params.liveOnly ? 'live' : 'list',
+        params.requestedDate,
+        params.sport || 'all',
+        params.status || 'all',
+        params.useExternal ? 'external' : 'local',
+        params.timeZone,
+    ].join(':');
+}
+
+function getMatchesResponseCachePolicy(params: MatchesRequestParams) {
+    if (params.liveOnly) {
+        return { freshTtlSec: 15, staleTtlSec: 45 };
+    }
+
+    const todayKey = formatDateKey(new Date(), params.timeZone);
+    const dayDiff = Math.round(
+        (new Date(`${params.requestedDate}T00:00:00Z`).getTime() - new Date(`${todayKey}T00:00:00Z`).getTime()) / 86400000
+    );
+
+    if (dayDiff === 0) {
+        return { freshTtlSec: 45, staleTtlSec: 120 };
+    }
+
+    if (Math.abs(dayDiff) === 1) {
+        return { freshTtlSec: 300, staleTtlSec: 900 };
+    }
+
+    return { freshTtlSec: 1800, staleTtlSec: 7200 };
+}
+
+function getMatchesFeedState(
+    generatedAtIso: string,
+    expiresAtIso: string,
+    params: MatchesRequestParams,
+    staleUntilIso?: string | null,
+) {
+    const generatedAtMs = new Date(generatedAtIso).getTime();
+    const expiresAtMs = new Date(expiresAtIso).getTime();
+    const staleUntilMs = staleUntilIso ? new Date(staleUntilIso).getTime() : Number.NaN;
+    const { staleTtlSec } = getMatchesResponseCachePolicy(params);
+    const staleCutoffMs = Number.isNaN(staleUntilMs)
+        ? generatedAtMs + staleTtlSec * 1000
+        : staleUntilMs;
+    const nowMs = Date.now();
+
+    if (Number.isNaN(generatedAtMs) || Number.isNaN(expiresAtMs)) {
+        return { state: 'miss' as const, createdAt: Date.now() };
+    }
+
+    if (nowMs <= expiresAtMs) {
+        return { state: 'fresh' as const, createdAt: generatedAtMs };
+    }
+
+    if (nowMs <= staleCutoffMs) {
+        return { state: 'stale' as const, createdAt: generatedAtMs };
+    }
+
+    return { state: 'miss' as const, createdAt: generatedAtMs };
+}
+
+function readMatchesResponseCache(key: string) {
+    const entry = memoryCache.get<MatchesResponseCacheEntry>(key);
+    if (!entry) return { state: 'miss' as const, entry: null };
+
+    const ageMs = Date.now() - entry.createdAt;
+    if (ageMs <= entry.freshTtlMs) {
+        return { state: 'fresh' as const, entry };
+    }
+    if (ageMs <= entry.staleTtlMs) {
+        return { state: 'stale' as const, entry };
+    }
+
+    memoryCache.delete(key);
+    return { state: 'miss' as const, entry: null };
+}
+
+function writeMatchesResponseCache(
+    key: string,
+    payload: MatchesPayload,
+    params: MatchesRequestParams,
+    createdAt: number = Date.now(),
+) {
+    const policy = getMatchesResponseCachePolicy(params);
+    const entry: MatchesResponseCacheEntry = {
+        payload,
+        createdAt,
+        freshTtlMs: policy.freshTtlSec * 1000,
+        staleTtlMs: policy.staleTtlSec * 1000,
+    };
+
+    memoryCache.set(key, entry, Math.ceil(policy.staleTtlMs / 1000));
+}
+
+async function persistMatchesFeedSnapshot(
+    key: string,
+    params: MatchesRequestParams,
+    payload: MatchesPayload,
+    generatedAt: Date = new Date(),
+    trace?: MatchesTraceContext,
+) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return false;
+    }
+
+    const { freshTtlSec } = getMatchesResponseCachePolicy(params);
+    const { staleTtlSec } = getMatchesResponseCachePolicy(params);
+    const persistStartedAt = Date.now();
+
+    try {
+        const persisted = await upsertMatchesFeedSnapshot(createAdminClient(), {
+            cacheKey: key,
+            feedType: params.liveOnly ? 'live' : 'daily',
+            sport: params.sport,
+            effectiveDate: params.liveOnly ? null : params.requestedDate,
+            timeZone: params.timeZone,
+            statusFilter: params.status,
+            externalMode: params.useExternal,
+            payload,
+            sourceSummary: payload.sources ?? {},
+            generatedAt,
+            freshTtlSeconds: freshTtlSec,
+            staleTtlSeconds: staleTtlSec,
+            lastRefreshStartedAt: generatedAt,
+            lastRefreshCompletedAt: new Date(),
+        });
+
+        if (trace) {
+            const durationMs = trackDuration(trace.metrics, 'snapshot_write_time_ms', persistStartedAt);
+            if (durationMs > 400) {
+                logMatchesEvent('warn', 'matches_slow_snapshot_write', trace, { threshold_ms: 400, snapshot_persisted: persisted });
+            }
+        }
+
+        return persisted;
+    } catch (error) {
+        console.error('[matches] persisted feed snapshot failed:', error);
+        if (trace) {
+            trackDuration(trace.metrics, 'snapshot_write_time_ms', persistStartedAt);
+        }
+        return false;
+    }
+}
+
+function queuePersistMatchesFeedSnapshot(
+    key: string,
+    params: MatchesRequestParams,
+    payload: MatchesPayload,
+    generatedAt: Date = new Date(),
+    trace?: MatchesTraceContext,
+) {
+    const existing = matchesSnapshotPersistLocks.get(key);
+    if (existing) return existing;
+
+    const persistPromise = persistMatchesFeedSnapshot(key, params, payload, generatedAt, trace)
+        .finally(() => {
+            matchesSnapshotPersistLocks.delete(key);
+        });
+
+    matchesSnapshotPersistLocks.set(key, persistPromise);
+    return persistPromise;
+}
+
+async function refreshMatchesResponseCache(
+    key: string,
+    params: MatchesRequestParams,
+    parentRequestId?: string,
+) {
+    const existing = matchesRefreshLocks.get(key);
+    if (existing) return existing;
+
+    const refreshPromise = (async () => {
+        const startedAt = new Date();
+        const trace: MatchesTraceContext = {
+            requestId: parentRequestId || createTraceId('req'),
+            parentRequestId,
+            refreshId: createTraceId('refresh'),
+            cacheKey: key,
+            params,
+            metrics: {},
+            backgroundRefresh: true,
+        };
+
+        logMatchesEvent('info', 'matches_refresh_started', trace);
+        try {
+            const computeStartedAt = Date.now();
+            const payload = await computeMatchesPayload(params, trace);
+            const computeDurationMs = trackDuration(trace.metrics, 'compute_payload_ms', computeStartedAt);
+            writeMatchesResponseCache(key, payload, params, startedAt.getTime());
+            void queuePersistMatchesFeedSnapshot(key, params, payload, startedAt, trace);
+            if (computeDurationMs > 1200) {
+                logMatchesEvent('warn', 'matches_slow_compute', trace, { threshold_ms: 1200 });
+            }
+            trackDuration(trace.metrics, 'refresh_total_ms', startedAt.getTime());
+            logMatchesEvent('info', 'matches_refresh_succeeded', trace);
+        } catch (error) {
+            console.error('[matches] background refresh failed:', error);
+            trackDuration(trace.metrics, 'refresh_total_ms', startedAt.getTime());
+            logMatchesEvent('error', 'matches_refresh_failed', trace, { error: String(error) });
+        } finally {
+            matchesRefreshLocks.delete(key);
+        }
+    })();
+
+    matchesRefreshLocks.set(key, refreshPromise);
+    return refreshPromise;
+}
+
+async function getOrComputeMatchesPayload(
+    key: string,
+    params: MatchesRequestParams,
+    trace: MatchesTraceContext,
+) {
+    const existing = matchesInFlightResponses.get(key);
+    if (existing) return existing;
+
+    const promise = (async () => {
+        const startedAt = new Date();
+        try {
+            const computeStartedAt = Date.now();
+            const payload = await computeMatchesPayload(params, trace);
+            const computeDurationMs = trackDuration(trace.metrics, 'compute_payload_ms', computeStartedAt);
+            writeMatchesResponseCache(key, payload, params, startedAt.getTime());
+            void queuePersistMatchesFeedSnapshot(key, params, payload, startedAt, trace);
+            if (computeDurationMs > 1200) {
+                logMatchesEvent('warn', 'matches_slow_compute', trace, { threshold_ms: 1200 });
+            }
+            return payload;
+        } finally {
+            matchesInFlightResponses.delete(key);
+        }
+    })();
+
+    matchesInFlightResponses.set(key, promise);
+    return promise;
+}
+
 // GET /api/matches
 // Parameters: 
 // - date: YYYY-MM-DD
 // - sport: 'rugby' | 'football' | ...
 // - status: 'live' | 'scheduled' | ...
-export async function GET(request: Request) {
+async function computeMatchesPayload(
+    params: MatchesRequestParams,
+    trace?: MatchesTraceContext,
+): Promise<MatchesPayload> {
+    const computeStartedAt = Date.now();
+    let externalItemsCount = 0;
+    let supabaseItemsCount = 0;
+    let mergedItemsCount = 0;
+    let finalItemsCount = 0;
+
     try {
-        const { searchParams } = new URL(request.url);
-        const date = searchParams.get('date');
-        const sport = searchParams.get('sport') || undefined;
-        const status = searchParams.get('status');
-        const rawTimeZone = searchParams.get('tz') || undefined;
-        const timeZone = (() => {
-            const tz = rawTimeZone || 'America/Argentina/Buenos_Aires';
-            try {
-                // Validate the timezone is recognized by Node.js
-                new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
-                return canonicalizeTimezone(tz);
-            } catch {
-                return 'America/Argentina/Buenos_Aires';
-            }
-        })();
-        const requestedDate = date || formatDateKey(new Date(), timeZone);
+        const { date, sport, status, timeZone, requestedDate, liveOnly, useExternal } = params;
 
         // Fast path: live=true returns only live matches (for polling)
-        const liveOnly = searchParams.get('live') === 'true';
         if (liveOnly && sport) {
             try {
+                const externalFetchStartedAt = Date.now();
                 const liveMatches = await getFlashScoreLiveMatches(sport);
+                externalItemsCount = liveMatches?.length || 0;
+                if (trace) {
+                    const durationMs = trackDuration(trace.metrics, 'external_fetch_ms', externalFetchStartedAt);
+                    trace.metrics.external_fetch_time_ms = durationMs;
+                }
+                const enrichLiveStartedAt = Date.now();
                 const enrichedLive = (liveMatches || []).map(m => {
                     let dateStr = new Date().toISOString();
                     try {
@@ -426,6 +896,9 @@ export async function GET(request: Request) {
                         liveEnabled: true
                     };
                 });
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichLiveStartedAt);
+                }
                 if (liveMatches && liveMatches.length > 0) {
                     persistFromExternalMatches(liveMatches, sport);
                 }
@@ -434,17 +907,23 @@ export async function GET(request: Request) {
 
                 // Append DB live matches
                 try {
+                    const supabaseLiveReadStartedAt = Date.now();
                     const supabase = await getReadClient();
-                    const { data: dbLiveMatches, error: dbError } = await supabase
-                        .from('matches')
-                        .select('*')
-                        .eq('status', 'live');
+                    const { data: dbLiveMatches, error: dbError } = await selectMatchesRowsWithFallback(
+                        supabase,
+                        (columns) => supabase
+                            .from('matches')
+                            .select(columns)
+                            .eq('status', 'live'),
+                    );
 
                     if (!dbError && dbLiveMatches) {
+                        supabaseItemsCount = dbLiveMatches.length;
                         const tournamentIds = [...new Set(dbLiveMatches.map((m: any) => m.tournament_id).filter(Boolean))];
                         const clubIds = [...new Set(dbLiveMatches.flatMap((m: any) => [m.home_club_id, m.away_club_id]).filter(Boolean))];
                         const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
                         const sportVariants = getSportVariants(sport);
+                        const enrichDbLiveStartedAt = Date.now();
                         const enrichedDbLive = dbLiveMatches.filter((m: any) => {
                             const tournament = tournamentMap.get(m.tournament_id);
                             const homeTeam = clubMap.get(m.home_club_id);
@@ -494,28 +973,73 @@ export async function GET(request: Request) {
                                 source: 'db'
                            }
                         });
+                        if (trace) {
+                            addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichDbLiveStartedAt);
+                        }
+                        const mergeLiveStartedAt = Date.now();
                         finalLiveMatches = [...finalLiveMatches, ...enrichedDbLive];
+                        if (trace) {
+                            addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeLiveStartedAt);
+                        }
+                    }
+                    if (trace) {
+                        const durationMs = trackDuration(trace.metrics, 'supabase_live_read_ms', supabaseLiveReadStartedAt);
+                        if (durationMs > 250) {
+                            logMatchesEvent('warn', 'matches_slow_supabase_live_read', trace, { threshold_ms: 250 });
+                        }
                     }
                 } catch (dbErr) {
                     console.error('DB Live-only fetch failed:', dbErr);
                 }
 
+                const buildLivePayloadStartedAt = Date.now();
                 finalLiveMatches = await applyStoredTournamentOverridesToMatches(finalLiveMatches);
-                return jsonWithPublicCache({ data: finalLiveMatches }, { liveOnly: true });
+                mergedItemsCount = finalLiveMatches.length;
+                finalItemsCount = finalLiveMatches.length;
+                if (trace) {
+                    trackDuration(trace.metrics, 'build_payload_ms', buildLivePayloadStartedAt);
+                    trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                    logSlowComputeStageWarnings(trace);
+                    logMatchesEvent('info', 'matches_compute_summary', trace, {
+                        external_items_count: externalItemsCount,
+                        supabase_items_count: supabaseItemsCount,
+                        merged_items_count: mergedItemsCount,
+                        final_items_count: finalItemsCount,
+                    });
+                }
+                return { data: finalLiveMatches };
             } catch (e) {
                 console.error('Live-only fetch failed, trying external_match_cache:', e);
                 try {
+                    const externalCacheFallbackStartedAt = Date.now();
                     const supabase = await getReadClient();
                     const cachedLive = await getLiveMatches(sport, supabase);
+                    externalItemsCount = cachedLive.length;
                     const enriched = await applyStoredTournamentOverridesToMatches(
                         cachedLive.map(m => mapCachedToEnrichedMatch(m, sport)),
                     );
-                    return jsonWithPublicCache({
+                    if (trace) {
+                        trackDuration(trace.metrics, 'external_cache_fallback_ms', externalCacheFallbackStartedAt);
+                    }
+                    mergedItemsCount = enriched.length;
+                    finalItemsCount = enriched.length;
+                    if (trace) {
+                        trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                        logSlowComputeStageWarnings(trace);
+                        logMatchesEvent('info', 'matches_compute_summary', trace, {
+                            external_items_count: externalItemsCount,
+                            supabase_items_count: 0,
+                            merged_items_count: mergedItemsCount,
+                            final_items_count: finalItemsCount,
+                            fallback_path: 'live_external_cache',
+                        });
+                    }
+                    return {
                         data: enriched,
                         sources: { flashscore: { ok: false, count: 0, fromCache: cachedLive.length > 0 } }
-                    }, { liveOnly: true });
+                    };
                 } catch {
-                    return jsonWithPublicCache({ data: [] }, { liveOnly: true });
+                    return { data: [] };
                 }
             }
         }
@@ -524,8 +1048,6 @@ export async function GET(request: Request) {
         // timeZone is provided, falls back to UTC otherwise.
 
         // External API Integration
-        const useExternal = searchParams.get('external') === 'true';
-
         // When using external data, skip mock-db matches entirely
         // so the user only sees real FlashScore data.
         let enrichedMatches: any[] = [];
@@ -548,6 +1070,7 @@ export async function GET(request: Request) {
             }
 
             // Enrich data (join relationships)
+            const enrichLocalStartedAt = Date.now();
             enrichedMatches = matches.map(m => {
                 const home = db.clubs.find(c => c.id === m.homeClubId);
                 const away = db.clubs.find(c => c.id === m.awayClubId);
@@ -575,6 +1098,9 @@ export async function GET(request: Request) {
                     }
                 };
             });
+            if (trace) {
+                addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichLocalStartedAt);
+            }
 
             // Filter by Sport (needs enriched data to know the sport)
             if (sport) {
@@ -583,6 +1109,7 @@ export async function GET(request: Request) {
 
             // Filter public visibility (only published tournaments)
             enrichedMatches = enrichedMatches.filter(m => m.tournament?.status === 'published' || m.id.startsWith('ext-') || m.id.startsWith('fs-'));
+            mergedItemsCount = enrichedMatches.length;
         }
 
         const flashScoreEnabledForRequestedSport = isFlashScoreEnabledForSport(sport || 'rugby');
@@ -601,6 +1128,7 @@ export async function GET(request: Request) {
                 let fsFetchFailed = false;
 
                 // Parallel fetch if today, otherwise just list
+                const externalFetchStartedAt = Date.now();
                 const [externalMatches, liveMatches] = await Promise.all([
                     getFlashScoreMatches(localDate, sport || 'rugby', {
                         timeZone,
@@ -617,15 +1145,30 @@ export async function GET(request: Request) {
                         return [];
                     }) : Promise.resolve([])
                 ]);
+                if (trace) {
+                    const durationMs = trackDuration(trace.metrics, 'external_fetch_ms', externalFetchStartedAt);
+                    trace.metrics.external_fetch_time_ms = durationMs;
+                }
+                externalItemsCount = externalMatches.length;
 
                 // ── Cache fallback when FlashScore is unavailable ─────────────
                 if (fsFetchFailed) {
                     try {
+                        const externalCacheFallbackStartedAt = Date.now();
                         const supabaseForCache = await getReadClient();
                         const cached = await getMatchesForDate(date, sport || 'rugby', supabaseForCache);
                         if (cached.length > 0) {
+                            const enrichFallbackStartedAt = Date.now();
                             const fromCache = cached.map(m => mapCachedToEnrichedMatch(m, sport || 'rugby'));
+                            if (trace) {
+                                addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichFallbackStartedAt);
+                            }
+                            const mergeFallbackStartedAt = Date.now();
                             enrichedMatches = [...enrichedMatches, ...fromCache];
+                            if (trace) {
+                                addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeFallbackStartedAt);
+                                trackDuration(trace.metrics, 'external_cache_fallback_ms', externalCacheFallbackStartedAt);
+                            }
                             fsOk = false;
                             fsFromCache = true;
                             fsCount = fromCache.length;
@@ -641,6 +1184,7 @@ export async function GET(request: Request) {
 
                 if (!fsFetchFailed) {
                 // Merge live data into list
+                const mergeExternalStartedAt = Date.now();
                 const mergedExternalMatches = liveMatches && liveMatches.length > 0
                     ? (() => {
                         const liveMap = new Map(liveMatches.map(m => [m.id, m]));
@@ -657,7 +1201,11 @@ export async function GET(request: Request) {
                         });
                     })()
                     : externalMatches;
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeExternalStartedAt);
+                }
 
+                const enrichExternalStartedAt = Date.now();
                 const enrichedExternalMatches = (mergedExternalMatches || []).map(m => {
                     // Defensive date conversion
                     let dateStr = new Date().toISOString();
@@ -711,13 +1259,25 @@ export async function GET(request: Request) {
                         liveEnabled: false
                     };
                 });
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichExternalStartedAt);
+                }
 
+                const dedupeExternalStartedAt = Date.now();
                 const filteredExternalMatches = enrichedExternalMatches.filter(
                     m => !isBlockedTournamentId(m.tournamentId)
                 );
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'dedupe_matches_ms', Date.now() - dedupeExternalStartedAt);
+                }
+                const mergeFilteredExternalStartedAt = Date.now();
                 enrichedMatches = [...enrichedMatches, ...filteredExternalMatches];
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeFilteredExternalStartedAt);
+                }
                 fsOk = true;
                 fsCount = filteredExternalMatches.length;
+                mergedItemsCount = enrichedMatches.length;
                 fsReason = fsCount === 0 ? 'empty_result' : null;
                 fsMessage = fsCount === 0 ? 'No hay partidos de FlashScore para este filtro.' : null;
                 console.log(`[matches] FlashScore: ${fsCount} matches for date=${date}`);
@@ -738,6 +1298,7 @@ export async function GET(request: Request) {
         // and merge them with external (FlashScore) matches.
         try {
             const supabase = await getReadClient();
+            const supabaseReadStartedAt = Date.now();
 
             // Build the base query for the selected date
             const utcStart = combineLocalDateTimeToUtcIso(requestedDate, '00:00:00', timeZone);
@@ -750,23 +1311,30 @@ export async function GET(request: Request) {
             // Filter by sport through tournament relationship
             const sportVariants = sport ? getSportVariants(sport) : null;
 
-            const query = supabase
-                .from('matches')
-                .select('*')
-                .gte('date_time', utcStart)
-                .lt('date_time', utcNextDayStart)
-                .order('date_time', { ascending: true });
-
-            const { data: dbMatches, error: dbError } = await query;
+            const { data: dbMatches, error: dbError } = await selectMatchesRowsWithFallback(
+                supabase,
+                (columns) => supabase
+                    .from('matches')
+                    .select(columns)
+                    .gte('date_time', utcStart)
+                    .lt('date_time', utcNextDayStart)
+                    .order('date_time', { ascending: true }),
+            );
 
             if (!dbError && dbMatches) {
+                supabaseItemsCount = dbMatches.length;
                 const tournamentIds = [...new Set(dbMatches.map((m: any) => m.tournament_id).filter(Boolean))];
                 const clubIds = [...new Set(dbMatches.flatMap((m: any) => [m.home_club_id, m.away_club_id]).filter(Boolean))];
                 const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
 
                 dbOk = true;
+                const dedupeDbStartedAt = Date.now();
                 const existingIds = new Set(enrichedMatches.map((m: any) => m.id));
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'dedupe_matches_ms', Date.now() - dedupeDbStartedAt);
+                }
 
+                const enrichDbStartedAt = Date.now();
                 const enrichedDbMatches = dbMatches
                     .filter((m: any) => {
                         if (existingIds.has(m.id)) return false;
@@ -840,9 +1408,17 @@ export async function GET(request: Request) {
                             source: 'db' // Mark as database-sourced
                         };
                     });
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichDbStartedAt);
+                }
 
+                const mergeDbStartedAt = Date.now();
                 enrichedMatches = [...enrichedMatches, ...enrichedDbMatches];
+                if (trace) {
+                    addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeDbStartedAt);
+                }
                 dbCount = enrichedDbMatches.length;
+                mergedItemsCount = enrichedMatches.length;
                 dbReason = dbCount === 0 ? 'empty_result' : null;
                 dbMessage = dbCount === 0 ? 'No hay partidos en base de datos para este filtro.' : null;
                 console.log(`[matches] Supabase: ${dbCount} matches (fallback=${dbFallback})`);
@@ -850,8 +1426,12 @@ export async function GET(request: Request) {
                 dbReason = 'database_query_failed';
                 dbMessage = 'No se pudieron cargar los partidos desde la base de datos.';
                 console.error('[matches] Supabase query failed:', JSON.stringify(dbError));
-                if (process.env.NODE_ENV === 'development') {
-                    dbMessage = `Supabase error: ${dbError.message} | code: ${dbError.code} | details: ${dbError.details}`;
+            }
+            if (trace) {
+                const durationMs = trackDuration(trace.metrics, 'supabase_matches_read_ms', supabaseReadStartedAt);
+                trace.metrics.supabase_read_time_ms = durationMs;
+                if (durationMs > 250) {
+                    logMatchesEvent('warn', 'matches_slow_supabase_matches_read', trace, { threshold_ms: 250 });
                 }
             }
         } catch (dbFetchError) {
@@ -859,11 +1439,16 @@ export async function GET(request: Request) {
             dbReason = 'database_fetch_failed';
             dbMessage = 'No se pudieron cargar los partidos desde la base de datos.';
             // Non-fatal: FlashScore data still available
+            if (trace) {
+                trace.metrics.supabase_matches_read_ms = trace.metrics.supabase_matches_read_ms || 0;
+                trace.metrics.supabase_read_time_ms = trace.metrics.supabase_read_time_ms || 0;
+            }
         }
 
         // ─── Date Filter ─────────────────────────────────────────────────────
         // Always use timezone-aware comparison so that
         // e.g. 00:00 UTC correctly maps to 21:00 previous day in UTC-3.
+        const buildPayloadStartedAt = Date.now();
         enrichedMatches = await applyStoredTournamentOverridesToMatches(enrichedMatches);
 
         if (date) {
@@ -875,20 +1460,159 @@ export async function GET(request: Request) {
         }
 
         // Final sort by date_time
+        const sortStartedAt = Date.now();
         enrichedMatches.sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+        if (trace) {
+            trackDuration(trace.metrics, 'sort_matches_ms', sortStartedAt);
+        }
 
         console.log(`[matches] Final after filter (${date ?? 'no-date'}): ${enrichedMatches.length} total (fs=${fsCount}, db=${dbCount})`);
 
-        return jsonWithPublicCache({
+        finalItemsCount = enrichedMatches.length;
+        mergedItemsCount = mergedItemsCount || enrichedMatches.length;
+        const payload = {
             data: enrichedMatches,
             sources: {
                 flashscore: { ok: fsOk, count: fsCount, fromCache: fsFromCache, reason: fsReason, message: fsMessage },
                 supabase: { ok: dbOk, count: dbCount, fallback: dbFallback, reason: dbReason, message: dbMessage }
             }
-        }, { liveOnly: false, date });
+        };
+        if (trace) {
+            trackDuration(trace.metrics, 'build_payload_ms', buildPayloadStartedAt);
+            trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+            logSlowComputeStageWarnings(trace);
+            logMatchesEvent('info', 'matches_compute_summary', trace, {
+                external_items_count: externalItemsCount,
+                supabase_items_count: supabaseItemsCount,
+                merged_items_count: mergedItemsCount,
+                final_items_count: finalItemsCount,
+            });
+        }
+        return payload;
+    } catch (error) {
+        console.error('Fatal API Error [computeMatchesPayload]:', error);
+        if (trace) {
+            trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+            logMatchesEvent('error', 'matches_compute_failed', trace, {
+                error: String(error),
+                external_items_count: externalItemsCount,
+                supabase_items_count: supabaseItemsCount,
+                merged_items_count: mergedItemsCount,
+                final_items_count: finalItemsCount,
+            });
+        }
+        throw error;
+    }
+}
+
+export async function GET(request: Request) {
+    const requestStartedAt = Date.now();
+    const params = normalizeMatchesRequest(request);
+    const cacheKey = buildMatchesCacheKey(params);
+    const trace: MatchesTraceContext = {
+        requestId: createTraceId('req'),
+        cacheKey,
+        params,
+        metrics: {},
+    };
+
+    const memoryLookupStartedAt = Date.now();
+    const cacheState = readMatchesResponseCache(cacheKey);
+    trackDuration(trace.metrics, 'memory_cache_lookup_ms', memoryLookupStartedAt);
+
+    if (cacheState.state === 'fresh' && cacheState.entry) {
+        const serializeStartedAt = Date.now();
+        const response = jsonWithPublicCache(cacheState.entry.payload, { liveOnly: params.liveOnly, date: params.date });
+        trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+        finalizeRequestMetrics(trace, requestStartedAt);
+        attachObservabilityHeaders(response, trace, 'HIT');
+        logMatchesEvent('info', 'matches_cache_hit', trace, { cache_status: 'HIT' });
+        return response;
+    }
+
+    if (cacheState.state === 'stale' && cacheState.entry) {
+        void refreshMatchesResponseCache(cacheKey, params, trace.requestId);
+        const serializeStartedAt = Date.now();
+        const response = jsonWithPublicCache(cacheState.entry.payload, { liveOnly: params.liveOnly, date: params.date });
+        trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+        finalizeRequestMetrics(trace, requestStartedAt);
+        attachObservabilityHeaders(response, trace, 'STALE');
+        logMatchesEvent('info', 'matches_cache_stale', trace, { cache_status: 'STALE' });
+        return response;
+    }
+
+    try {
+        const readClient = await getReadClient();
+        const persistedLookupStartedAt = Date.now();
+        const persistedSnapshot = await readUsableMatchesFeedSnapshot<MatchesPayload>(
+            readClient,
+            cacheKey,
+            new Date().toISOString(),
+        );
+        const persistedLookupMs = trackDuration(trace.metrics, 'persisted_cache_lookup_ms', persistedLookupStartedAt);
+        if (persistedLookupMs > 300) {
+            logMatchesEvent('warn', 'matches_slow_persisted_lookup', trace, { threshold_ms: 300 });
+        }
+
+        if (persistedSnapshot) {
+            const persistedState = getMatchesFeedState(
+                persistedSnapshot.generatedAt,
+                persistedSnapshot.expiresAt,
+                params,
+                persistedSnapshot.staleUntil,
+            );
+            trace.metrics.persisted_payload_bytes = persistedSnapshot.payloadSizeBytes || 0;
+
+            if (persistedState.state === 'fresh') {
+                writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
+                const serializeStartedAt = Date.now();
+                const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
+                trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+                finalizeRequestMetrics(trace, requestStartedAt);
+                attachObservabilityHeaders(response, trace, 'PERSISTED-HIT');
+                logMatchesEvent('info', 'matches_cache_persisted_hit', trace, { cache_status: 'PERSISTED-HIT', persisted_snapshot_state: 'fresh' });
+                return response;
+            }
+
+            if (persistedState.state === 'stale') {
+                writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
+                void refreshMatchesResponseCache(cacheKey, params, trace.requestId);
+                const serializeStartedAt = Date.now();
+                const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
+                trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+                finalizeRequestMetrics(trace, requestStartedAt);
+                attachObservabilityHeaders(response, trace, 'PERSISTED-STALE');
+                logMatchesEvent('info', 'matches_cache_persisted_stale', trace, { cache_status: 'PERSISTED-STALE', persisted_snapshot_state: 'stale' });
+                return response;
+            }
+        }
+
+        const persistedMetaStartedAt = Date.now();
+        const persistedSnapshotMeta = await readMatchesFeedSnapshotMetadata(readClient, cacheKey);
+        if (persistedSnapshotMeta) {
+            trackDuration(trace.metrics, 'persisted_metadata_recheck_ms', persistedMetaStartedAt);
+            trace.metrics.persisted_payload_bytes = persistedSnapshotMeta.payloadSizeBytes || 0;
+            logMatchesEvent('info', 'matches_cache_persisted_expired', trace, {
+                cache_status: 'EXPIRED',
+                persisted_snapshot_state: 'expired',
+            });
+        }
+
+        const payload = await getOrComputeMatchesPayload(cacheKey, params, trace);
+        const serializeStartedAt = Date.now();
+        const response = jsonWithPublicCache(payload, { liveOnly: params.liveOnly, date: params.date });
+        trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+        finalizeRequestMetrics(trace, requestStartedAt);
+        attachObservabilityHeaders(response, trace, 'MISS');
+        logMatchesEvent('info', 'matches_cache_miss', trace, { cache_status: 'MISS' });
+        return response;
     } catch (error) {
         console.error('Fatal API Error [GET /api/matches]:', error);
-        return NextResponse.json({ error: 'Internal Server Error', details: String(error) }, { status: 500 });
+        finalizeRequestMetrics(trace, requestStartedAt);
+        logMatchesEvent('error', 'matches_request_failed', trace, { error: String(error) });
+        const response = NextResponse.json({ error: 'Internal Server Error', details: String(error) }, { status: 500 });
+        attachObservabilityHeaders(response, trace, 'ERROR');
+        return response;
     }
 }
 

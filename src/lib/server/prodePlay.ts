@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getAllTournaments } from '@/lib/data/tournaments';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
+import { getTournamentFixtures, getTournamentIds } from '@/lib/services/flashscore';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import type {
     ProdeCompetitionStatus,
@@ -8,10 +10,12 @@ import type {
     ProdePlayOfficialResult,
     ProdePlayPersonalSummary,
     ProdePlayPrediction,
+    ProdePlayRuleItem,
     ProdePlayRulesSummary,
     ProdePlayView,
     ProdePredictionOutcome,
 } from '@/lib/prode/types';
+import type { Tournament } from '@/lib/types';
 
 type AnyRow = Record<string, unknown>;
 type QueryError = { message?: string | null } | null;
@@ -138,6 +142,126 @@ function normalizeEventStatus(value: unknown): ProdePlayEvent['status'] {
     }
 }
 
+function normalizeLookupKey(value: unknown) {
+    return toSafeString(value)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+}
+
+function getExternalMatchDateTime(match: AnyRow) {
+    const directDateTime = toNullableString(match.date_time) || toNullableString(match.start_date);
+    if (directDateTime) {
+        return directDateTime;
+    }
+
+    const timestamp = toNullableNumber(
+        match.start_time
+        ?? match.timestamp
+        ?? match.time
+        ?? match.event_timestamp,
+    );
+
+    return timestamp !== null
+        ? new Date(timestamp * 1000).toISOString()
+        : null;
+}
+
+function getExternalMatchScore(match: AnyRow) {
+    const score = toRecord(match.score);
+    const nestedScores = toRecord(match.scores);
+
+    const homeScore = toNullableNumber(
+        score.home
+        ?? score.home_score
+        ?? score.homeScore
+        ?? nestedScores.home
+        ?? nestedScores.home_score
+        ?? nestedScores.homeScore
+        ?? match.home_score
+        ?? match.homeScore,
+    );
+    const awayScore = toNullableNumber(
+        score.away
+        ?? score.away_score
+        ?? score.awayScore
+        ?? nestedScores.away
+        ?? nestedScores.away_score
+        ?? nestedScores.awayScore
+        ?? match.away_score
+        ?? match.awayScore,
+    );
+
+    return {
+        rawScore: Object.keys(score).length ? score : nestedScores,
+        homeScore,
+        awayScore,
+    };
+}
+
+function extractExternalFixtureMatches(payload: unknown): AnyRow[] {
+    const rawList = Array.isArray(payload)
+        ? payload
+        : Array.isArray(toRecord(payload).DATA)
+            ? toRecord(payload).DATA as unknown[]
+            : Array.isArray(toRecord(payload).data)
+                ? toRecord(payload).data as unknown[]
+                : [];
+
+    const matches: AnyRow[] = [];
+
+    for (const item of rawList) {
+        const row = toRecord(item);
+        const nestedMatches = Array.isArray(row.matches) ? row.matches : null;
+
+        if (nestedMatches) {
+            for (const nestedItem of nestedMatches) {
+                const nestedRow = toRecord(nestedItem);
+                if (Object.keys(nestedRow).length) {
+                    matches.push(nestedRow);
+                }
+            }
+            continue;
+        }
+
+        if (Object.keys(row).length) {
+            matches.push(row);
+        }
+    }
+
+    return matches;
+}
+
+function findCatalogTournamentByName(name: string | null, displayName: string | null) {
+    const lookupKeys = [name, displayName]
+        .map((value) => normalizeLookupKey(value))
+        .filter(Boolean);
+
+    if (!lookupKeys.length) {
+        return null;
+    }
+
+    const tournaments = getAllTournaments().filter((tournament) => Boolean(tournament.url));
+
+    return tournaments.find((tournament: Tournament) => {
+        const candidateKeys = [
+            tournament.name,
+            tournament.displayName,
+            tournament.originalName,
+            tournament.nameEs,
+        ]
+            .map((value) => normalizeLookupKey(value))
+            .filter(Boolean);
+
+        return lookupKeys.some((lookupKey) => (
+            candidateKeys.includes(lookupKey)
+            || candidateKeys.some((candidateKey) => candidateKey.includes(lookupKey) || lookupKey.includes(candidateKey))
+        ));
+    }) || null;
+}
+
 function getSportLabel(value: string | null) {
     switch (value) {
         case 'rugby':
@@ -183,17 +307,25 @@ function resolveRulesSummary(
         defaultPrivateLeagueRules,
     ];
 
-    const winnerPoints = sources.map((source) => getRuleNumber(source, 'winner', 'outcome', 'correctOutcome')).find((value) => value !== null) ?? 3;
-    const diffPoints = sources.map((source) => getRuleNumber(source, 'diff', 'difference', 'exactDifference')).find((value) => value !== null) ?? 2;
-    const oneTeamExactPoints = sources.map((source) => getRuleNumber(source, 'oneTeamExact', 'singleExact', 'teamExact', 'exactTeam')).find((value) => value !== null);
-    const exactPoints = sources.map((source) => getRuleNumber(source, 'exact', 'exactScore', 'twoTeamsExact', 'fullExact')).find((value) => value !== null) ?? 5;
+    const winnerPoints: number = sources
+        .map((source) => getRuleNumber(source, 'winner', 'outcome', 'correctOutcome'))
+        .find((value): value is number => value !== null && value !== undefined) ?? 3;
+    const diffPoints: number = sources
+        .map((source) => getRuleNumber(source, 'diff', 'difference', 'exactDifference'))
+        .find((value): value is number => value !== null && value !== undefined) ?? 2;
+    const oneTeamExactPoints: number | null = sources
+        .map((source) => getRuleNumber(source, 'oneTeamExact', 'singleExact', 'teamExact', 'exactTeam'))
+        .find((value): value is number => value !== null && value !== undefined) ?? null;
+    const exactPoints: number = sources
+        .map((source) => getRuleNumber(source, 'exact', 'exactScore', 'twoTeamsExact', 'fullExact'))
+        .find((value): value is number => value !== null && value !== undefined) ?? 5;
     const lockMinutes = sources.map((source) => getRuleNumber(source, 'minutes', 'lockMinutes', 'predictionLeadMinutes')).find((value) => value !== null)
         ?? toNullableNumber(competitionRow.prediction_lead_minutes);
     const doubleFinals = toBoolean(leagueRules.doubleFinals)
         || toBoolean(defaultPrivateLeagueRules.doubleFinals)
         || toBoolean(rulesetModel.doubleFinals);
 
-    const items = [
+    const items: ProdePlayRuleItem[] = [
         {
             key: 'winner',
             label: 'Ganador correcto',
@@ -484,13 +616,17 @@ async function getExternalBaseMatches(
 
     if (result.error) {
         if (isMissingRelationError(result.error)) {
-            return [];
+            return getFlashscoreExternalBaseMatches(admin, provider, tournamentId);
         }
 
         throw new Error(result.error.message || 'No se pudieron cargar los partidos externos cacheados.');
     }
 
     const externalRows = result.data || [];
+    if (!externalRows.length && provider === 'flashscore') {
+        return getFlashscoreExternalBaseMatches(admin, provider, tournamentId);
+    }
+
     const externalTeamIds = Array.from(new Set(
         externalRows.flatMap((row) => {
             const homeTeam = toRecord(row.home_team);
@@ -602,6 +738,102 @@ async function getExternalBaseMatches(
                 awayLogoUrl: resolveStoredLogo(awayTeamLookup, awayTeam) || toNullableString(resolveTeamLogo(awayTeamLookup || awayTeam, awayTeam)),
                 score,
                 sourceMatchStatus: toSafeString(row.status) || 'scheduled',
+            },
+        } satisfies BaseMatchRow;
+    }).filter((row) => Boolean(row.externalMatchId && row.startsAt));
+}
+
+async function getFlashscoreExternalBaseMatches(
+    admin: LooseMutationClient,
+    provider: string,
+    tournamentId: string,
+): Promise<BaseMatchRow[]> {
+    if (provider !== 'flashscore') {
+        return [];
+    }
+
+    const externalTournamentResult = await admin
+        .from('external_tournaments')
+        .select('id, source, name, display_name, sport, country')
+        .eq('id', tournamentId)
+        .maybeSingle();
+
+    if (externalTournamentResult.error) {
+        if (isMissingRelationError(externalTournamentResult.error)) {
+            return [];
+        }
+
+        throw new Error(externalTournamentResult.error.message || 'No se pudo resolver el torneo externo del prode.');
+    }
+
+    const externalTournament = externalTournamentResult.data;
+    if (!externalTournament) {
+        return [];
+    }
+
+    const catalogTournament = findCatalogTournamentByName(
+        toNullableString(externalTournament.name),
+        toNullableString(externalTournament.display_name),
+    );
+    const tournamentUrl = toNullableString(catalogTournament?.url);
+
+    if (!tournamentUrl) {
+        return [];
+    }
+
+    const tournamentIds = toRecord(await getTournamentIds(tournamentUrl));
+    const tournamentTemplateId = toNullableString(
+        tournamentIds.tournament_template_id
+        ?? tournamentIds.tournamentTemplateId
+        ?? catalogTournament?.flashScoreIds?.tournamentTemplateId,
+    );
+    const seasonId = toNullableString(
+        tournamentIds.season_id
+        ?? tournamentIds.seasonId
+        ?? catalogTournament?.flashScoreIds?.seasonId,
+    );
+
+    if (!tournamentTemplateId || !seasonId) {
+        return [];
+    }
+
+    const fixturePayload = await getTournamentFixtures(tournamentTemplateId, seasonId, 1);
+    const matches = extractExternalFixtureMatches(fixturePayload);
+
+    return matches.map((match) => {
+        const homeTeam = toRecord(
+            match.home_team
+            ?? match.home
+            ?? match.event_home_team,
+        );
+        const awayTeam = toRecord(
+            match.away_team
+            ?? match.away
+            ?? match.event_away_team,
+        );
+        const matchDateTime = getExternalMatchDateTime(match);
+        const score = getExternalMatchScore(match);
+
+        return {
+            sourceType: 'external',
+            localMatchId: null,
+            externalProvider: provider,
+            externalMatchId: toSafeString(match.id || match.match_id || match.event_id || match.event_key),
+            tournamentId,
+            homeLabel: toSafeString(homeTeam.shortName) || toSafeString(homeTeam.name) || toSafeString(match.home_team_name) || 'Local',
+            awayLabel: toSafeString(awayTeam.shortName) || toSafeString(awayTeam.name) || toSafeString(match.away_team_name) || 'Visitante',
+            startsAt: matchDateTime || '',
+            status: normalizeEventStatus(match.status || match.state || match.match_status),
+            officialResult: buildOfficialResultFromScores(score.homeScore, score.awayScore),
+            matchSnapshot: {
+                tournamentName: toNullableString(externalTournament.display_name) || toNullableString(externalTournament.name),
+                countryName: toNullableString(externalTournament.country),
+                roundLabel: toNullableString(match.round_label || match.round || match.stage),
+                sport: toNullableString(externalTournament.sport),
+                homeLogoUrl: resolveStoredLogo(homeTeam) || toNullableString(resolveTeamLogo(homeTeam, homeTeam)),
+                awayLogoUrl: resolveStoredLogo(awayTeam) || toNullableString(resolveTeamLogo(awayTeam, awayTeam)),
+                score: score.rawScore,
+                sourceMatchStatus: toSafeString(match.status || match.state || match.match_status) || 'scheduled',
             },
         } satisfies BaseMatchRow;
     }).filter((row) => Boolean(row.externalMatchId && row.startsAt));
@@ -758,6 +990,12 @@ function buildLeagueSubtitle(leagueRow: AnyRow, competitionRow: AnyRow) {
     return description || `Competi con tus amigos dentro de ${toSafeString(competitionRow.name)}.`;
 }
 
+function getLeagueLifecycle(leagueRow: AnyRow) {
+    const metadata = toRecord(leagueRow.metadata);
+    const lifecycle = toSafeString(metadata.lifecycle);
+    return lifecycle === 'archived' || lifecycle === 'deleted' ? lifecycle : 'active';
+}
+
 export async function getPublicCompetitionPlayView(slug: string, currentUserId: string | null): Promise<ProdePlayView | null> {
     const admin = createAdminClient() as unknown as LooseMutationClient;
     const competitionResult = await admin
@@ -843,6 +1081,10 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
     }
 
     if (!leagueResult.data) {
+        return null;
+    }
+
+    if (getLeagueLifecycle(leagueResult.data) !== 'active') {
         return null;
     }
 

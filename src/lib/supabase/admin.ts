@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
+let adminClientSingleton: ReturnType<typeof createClient> | null = null
+
 /**
  * Admin client using the service_role (or new sb_secret) key.
  * Bypasses RLS — use ONLY in trusted server-side code (Server Actions, API routes).
@@ -15,7 +17,13 @@ export function createAdminClient() {
     if (!url) throw new Error('[createAdminClient] Missing NEXT_PUBLIC_SUPABASE_URL')
     if (!serviceKey) throw new Error('[createAdminClient] Missing SUPABASE_SERVICE_ROLE_KEY — add it to .env.local (dev) and Vercel env vars (prod). Never use NEXT_PUBLIC_ prefix.')
 
-    return createClient(url, serviceKey, {
+    if (adminClientSingleton) {
+        return adminClientSingleton
+    }
+
+    adminClientSingleton = createClient(url, serviceKey, {
         auth: { autoRefreshToken: false, persistSession: false },
     })
+
+    return adminClientSingleton
 }

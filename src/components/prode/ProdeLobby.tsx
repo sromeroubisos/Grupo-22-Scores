@@ -9,22 +9,10 @@ type ProdeLobbyProps = {
     competitions: PublicProdeCompetition[];
     totals: PublicProdeUserTotal[];
     schemaReady: boolean;
+    embedded?: boolean;
 };
 
 type StateFilter = 'all' | 'active' | 'upcoming';
-
-function formatDate(value: string | null) {
-    if (!value) return 'Sin fecha';
-
-    try {
-        return new Intl.DateTimeFormat('es-AR', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-        }).format(new Date(value));
-    } catch {
-        return value;
-    }
-}
 
 function getSportLabel(sportId: string | null) {
     switch (sportId) {
@@ -41,16 +29,10 @@ function getSportLabel(sportId: string | null) {
     }
 }
 
-function getStatusLabel(status: string, openEvents: number) {
-    if (status === 'active' || openEvents > 0) return 'Activa';
-    if (status === 'finished') return 'Cerrada';
-    return 'Proxima';
-}
-
 function getTypeLabel(competition: PublicProdeCompetition) {
     if (competition.metadata?.featured === true) return 'Destacada';
     if (competition.visibility === 'unlisted') return 'Especial';
-    return 'Publica';
+    return 'Oficial';
 }
 
 function isCompetitionActive(competition: PublicProdeCompetition) {
@@ -63,7 +45,7 @@ function isCompetitionUpcoming(competition: PublicProdeCompetition) {
     return new Date(competition.startAt).getTime() > Date.now();
 }
 
-export default function ProdeLobby({ competitions, totals, schemaReady }: ProdeLobbyProps) {
+export default function ProdeLobby({ competitions, totals, schemaReady, embedded = false }: ProdeLobbyProps) {
     const [sportFilter, setSportFilter] = useState<string>('all');
     const [stateFilter, setStateFilter] = useState<StateFilter>('all');
 
@@ -105,10 +87,8 @@ export default function ProdeLobby({ competitions, totals, schemaReady }: ProdeL
     const activeCount = competitions.filter((competition) => isCompetitionActive(competition)).length;
     const totalPlayers = competitions.reduce((sum, competition) => sum + competition.members.totalMembers, 0);
 
-    return (
-        <div className={styles.page}>
-            <div className="container">
-                <div className={styles.shell}>
+    const lobbyContent = (
+        <div className={`${styles.shell} ${embedded ? styles.embeddedShell : ''}`}>
                     <section className={styles.posterHero}>
                         <div className={styles.posterCopy}>
                             <p className={styles.posterKicker}>G22 Prode Lobby</p>
@@ -198,13 +178,11 @@ export default function ProdeLobby({ competitions, totals, schemaReady }: ProdeL
                             <div className={styles.lobbyGrid}>
                                 {filteredCompetitions.map((competition) => {
                                     const featured = competition.metadata?.featured === true;
-                                    const deadlineText = competition.stats.nextLockAt
-                                        ? `Cierra: ${formatDate(competition.stats.nextLockAt)}`
-                                        : `Inicio: ${formatDate(competition.startAt)}`;
 
                                     return (
-                                        <article
+                                        <Link
                                             key={competition.id}
+                                            href={`/prode/${competition.slug}`}
                                             className={`${styles.leagueCard} ${featured ? styles.leagueCardFeatured : ''}`}
                                         >
                                             <div className={styles.leagueTopline}>
@@ -212,33 +190,17 @@ export default function ProdeLobby({ competitions, totals, schemaReady }: ProdeL
                                                 <span className={styles.leagueSport}>{getSportLabel(competition.sportId)}</span>
                                             </div>
 
-                                            <div className={styles.leagueHeader}>
-                                                <div>
-                                                    <h3 className={styles.leagueTitle}>{competition.name}</h3>
-                                                    <p className={styles.leagueSubtitle}>
-                                                        {featured ? 'Prode destacado' : 'Prode oficial'}
-                                                    </p>
-                                                </div>
-                                                <span className={styles.leagueStatus}>
-                                                    {getStatusLabel(competition.status, competition.stats.open)}
-                                                </span>
+                                            <div className={styles.leagueCompactBody}>
+                                                <h3 className={styles.leagueTitle}>{competition.name}</h3>
+                                                <p className={styles.leagueSubtitle}>
+                                                    {competition.description || (featured ? 'Prode destacado' : 'Prode oficial')}
+                                                </p>
                                             </div>
 
-                                            <div className={styles.leagueMeta}>
-                                                <span>Jugadores: {competition.members.totalMembers}</span>
-                                                <span>Fechas cerradas: {competition.stats.finished}</span>
-                                                <span>{deadlineText}</span>
+                                            <div className={styles.leagueCompactMeta}>
+                                                <span>{competition.members.totalMembers} participantes</span>
                                             </div>
-
-                                            <div className={styles.leagueFooter}>
-                                                <Link href={`/prode/${competition.slug}`} className={styles.leaguePrimaryCta}>
-                                                    Jugar
-                                                </Link>
-                                                <Link href={`/prode/${competition.slug}`} className={styles.leagueSecondaryCta}>
-                                                    Ver tabla
-                                                </Link>
-                                            </div>
-                                        </article>
+                                        </Link>
                                     );
                                 })}
                             </div>
@@ -300,7 +262,17 @@ export default function ProdeLobby({ competitions, totals, schemaReady }: ProdeL
                             </div>
                         )}
                     </section>
-                </div>
+        </div>
+    );
+
+    if (embedded) {
+        return lobbyContent;
+    }
+
+    return (
+        <div className={styles.page}>
+            <div className="container">
+                {lobbyContent}
             </div>
         </div>
     );

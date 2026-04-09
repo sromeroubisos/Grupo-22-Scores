@@ -8,6 +8,115 @@
     gap: 32px;
 }
 
+.embeddedShell {
+    gap: 24px;
+}
+
+.embeddedShell .posterHero {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 24px;
+}
+
+.embeddedShell .posterCopy {
+    gap: 10px;
+}
+
+.embeddedShell .posterTitle {
+    font-size: clamp(2.35rem, 4.8vw, 3.8rem);
+}
+
+.embeddedShell .posterLead {
+    max-width: 58ch;
+    font-size: 0.7rem;
+    line-height: 1.35;
+}
+
+.embeddedShell .posterActions {
+    gap: 10px;
+}
+
+.embeddedShell .posterRail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.embeddedShell .posterStat {
+    padding: 9px 10px;
+    border-radius: 14px;
+}
+
+.embeddedShell .posterStat strong {
+    font-size: 1.1rem;
+}
+
+.embeddedShell .posterStat span {
+    font-size: 0.58rem;
+    line-height: 1.2;
+}
+
+.embeddedShell .section {
+    gap: 14px;
+}
+
+.embeddedShell .sectionTitle {
+    font-size: 1.25rem;
+}
+
+.embeddedShell .sectionText {
+    font-size: 0.9rem;
+}
+
+.embeddedShell .lobbyGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.embeddedShell .leagueCard {
+    gap: 7px;
+    padding: 10px;
+    border-radius: 16px;
+}
+
+.embeddedShell .leagueType,
+.embeddedShell .leagueSport,
+.embeddedShell .leagueStatus {
+    min-height: 22px;
+    padding: 0 7px;
+    font-size: 0.6rem;
+}
+
+.embeddedShell .leagueTitle {
+    font-size: 0.86rem;
+    line-height: 1.15;
+}
+
+.embeddedShell .leagueSubtitle {
+    font-size: 0.68rem;
+    line-height: 1.35;
+}
+
+.embeddedShell .leagueCompactMeta {
+    gap: 6px;
+}
+
+.embeddedShell .leagueCompactMeta span {
+    min-height: 22px;
+    padding: 0 8px;
+    font-size: 0.64rem;
+}
+
+.embeddedShell .privateLeagueCta {
+    padding: 18px;
+    border-radius: 20px;
+}
+
+.embeddedShell .globalLeaderboardRow {
+    padding: 12px 14px;
+    border-radius: 16px;
+}
+
 .posterHero {
     position: relative;
     overflow: hidden;
@@ -180,9 +289,33 @@
     color: #ffffff;
 }
 
+.dangerCta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 107, 107, 0.28);
+    background: rgba(255, 107, 107, 0.1);
+    color: #ffd0d0;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
 .posterPrimaryCta:hover,
-.posterSecondaryCta:hover {
+.posterSecondaryCta:hover,
+.dangerCta:hover {
     transform: translateY(-2px);
+}
+
+.posterPrimaryCta:disabled,
+.posterSecondaryCta:disabled,
+.dangerCta:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .posterRail {
@@ -283,27 +416,29 @@
 
 .lobbyGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
 }
 
 .leagueCard {
     display: grid;
-    gap: 14px;
-    padding: 22px;
-    border-radius: 28px;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 22px;
     border: 1px solid var(--color-border);
     background:
         radial-gradient(circle at top right, rgba(255, 255, 255, 0.05), transparent 34%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
         linear-gradient(180deg, rgba(10, 15, 20, 0.96), rgba(7, 11, 18, 0.96));
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
 }
 
 .leagueCard:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     border-color: rgba(0, 200, 83, 0.48);
-    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
 }
 
 .leagueCardFeatured {
@@ -326,6 +461,11 @@
 
 .leagueTopline {
     align-items: center;
+}
+
+.leagueCompactBody {
+    display: grid;
+    gap: 4px;
 }
 
 .leagueType,
@@ -364,15 +504,16 @@
 
 .leagueTitle {
     margin: 0;
-    font-size: 1.28rem;
+    font-size: 1.02rem;
     font-weight: 800;
+    line-height: 1.2;
 }
 
 .leagueSubtitle {
-    margin: 6px 0 0;
+    margin: 0;
     color: var(--color-text-secondary);
-    line-height: 1.55;
-    font-size: 0.92rem;
+    line-height: 1.45;
+    font-size: 0.78rem;
 }
 
 .leagueMeta {
@@ -389,6 +530,24 @@
     padding: 0 10px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.04);
+}
+
+.leagueCompactMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.leagueCompactMeta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    font-weight: 700;
 }
 
 .leaguePrimaryCta,
@@ -1113,6 +1272,19 @@
     justify-content: flex-end;
 }
 
+.leagueAdminCopy {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.leagueAdminActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .rulesNotes {
     display: flex;
     flex-wrap: wrap;
@@ -1584,7 +1756,7 @@
 
 @media (max-width: 900px) {
     .page {
-        padding: 18px 0 104px;
+        padding: 18px 0 calc(var(--mobile-nav-height) + 28px + env(safe-area-inset-bottom));
     }
 
     .posterHero {
@@ -1644,7 +1816,8 @@
     }
 
     .posterPrimaryCta,
-    .posterSecondaryCta {
+    .posterSecondaryCta,
+    .dangerCta {
         min-height: 30px;
         padding: 0 10px;
         font-size: 0.72rem;
@@ -1706,7 +1879,7 @@
     }
 
     .leagueCard {
-        gap: 10px;
+        gap: 8px;
         padding: 12px;
         border-radius: 18px;
     }
@@ -1715,6 +1888,11 @@
         font-size: 0.94rem;
     }
 
+    .leagueSubtitle {
+        font-size: 0.72rem;
+    }
+
+    .leagueCompactMeta span,
     .leagueMeta span {
         min-height: 24px;
         padding: 0 8px;
@@ -1980,6 +2158,33 @@
         grid-template-columns: 1fr;
     }
 
+    .embeddedShell .posterHero {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .embeddedShell .posterTitle {
+        font-size: 1.65rem;
+    }
+
+    .embeddedShell .lobbyGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .embeddedShell .leagueCard {
+        padding: 8px;
+        border-radius: 14px;
+    }
+
+    .embeddedShell .leagueTitle {
+        font-size: 0.8rem;
+    }
+
+    .embeddedShell .leagueSubtitle {
+        font-size: 0.64rem;
+    }
+
     .leaderboardRow {
         grid-template-columns: 1fr;
         justify-items: start;
@@ -2084,6 +2289,10 @@
         gap: 8px;
     }
 
+    .embeddedShell .lobbyGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .leagueCard,
     .competitionChoice,
     .templateCard,
@@ -2103,6 +2312,7 @@
     }
 
     .leagueMeta span,
+    .leagueCompactMeta span,
     .metaTag,
     .filterChip,
     .togglePill {
@@ -2150,7 +2360,8 @@
     .leagueSecondaryCta,
     .quickCreateBtn,
     .posterPrimaryCta,
-    .posterSecondaryCta {
+    .posterSecondaryCta,
+    .dangerCta {
         min-height: 30px;
         font-size: 0.7rem;
     }

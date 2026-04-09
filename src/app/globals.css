@@ -129,7 +129,7 @@
     --grid-glow: rgba(var(--color-accent-rgb), 0.08);
 
     /* Mobile */
-    --mobile-nav-height: 64px;
+    --mobile-nav-height: 78px;
 
     /* Titan Design System (for Tournament Dashboard) */
     --titan-primary: #00ff88;
