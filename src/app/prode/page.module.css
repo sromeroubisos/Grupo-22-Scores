@@ -1,0 +1,2264 @@
+.page {
+    min-height: 100vh;
+    padding: 48px 0 96px;
+}
+
+.shell {
+    display: grid;
+    gap: 32px;
+}
+
+.posterHero {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+    gap: 24px;
+    align-items: end;
+    padding: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    background:
+        radial-gradient(circle at 85% 18%, rgba(0, 200, 83, 0.28), transparent 24%),
+        radial-gradient(circle at 18% 15%, rgba(255, 196, 0, 0.16), transparent 20%),
+        linear-gradient(130deg, rgba(11, 16, 23, 0.98), rgba(7, 11, 18, 0.98));
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at top right, rgba(0, 200, 83, 0.22), transparent 32%),
+        radial-gradient(circle at left center, rgba(255, 196, 0, 0.12), transparent 30%),
+        linear-gradient(145deg, rgba(12, 16, 24, 0.96), rgba(7, 11, 18, 0.98));
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.heroInner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.8fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.eyebrowDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #00c853;
+    box-shadow: 0 0 16px rgba(0, 200, 83, 0.7);
+}
+
+.title {
+    margin: 0;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(3rem, 7vw, 5.6rem);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.lead {
+    max-width: 62ch;
+    margin: 14px 0 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.metaGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.metaCard {
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.metaValue {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.metaLabel {
+    display: block;
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.posterCopy {
+    display: grid;
+    gap: 16px;
+}
+
+.posterKicker {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.posterTitle {
+    margin: 0;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(3.4rem, 8vw, 6.2rem);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.posterLead {
+    max-width: 56ch;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 1.02rem;
+    line-height: 1.65;
+}
+
+.posterActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.posterPrimaryCta,
+.posterSecondaryCta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.posterPrimaryCta {
+    background: #00c853;
+    color: #04140a;
+}
+
+.posterSecondaryCta {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+}
+
+.posterPrimaryCta:hover,
+.posterSecondaryCta:hover {
+    transform: translateY(-2px);
+}
+
+.posterRail {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.posterStat {
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.posterStat strong {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.posterStat span {
+    display: block;
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.section {
+    display: grid;
+    gap: 18px;
+}
+
+.sectionHeaderLobby {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.sectionText {
+    margin: 6px 0 0;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.filterBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filterChip {
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-secondary);
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filterChip:hover {
+    border-color: rgba(0, 200, 83, 0.38);
+    color: #ffffff;
+}
+
+.filterChipActive {
+    border-color: rgba(0, 200, 83, 0.5);
+    background: rgba(0, 200, 83, 0.12);
+    color: #86f6b6;
+}
+
+.joinLink {
+    color: #86f6b6;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.lobbyGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+.leagueCard {
+    display: grid;
+    gap: 14px;
+    padding: 22px;
+    border-radius: 28px;
+    border: 1px solid var(--color-border);
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.05), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        linear-gradient(180deg, rgba(10, 15, 20, 0.96), rgba(7, 11, 18, 0.96));
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.leagueCard:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 200, 83, 0.48);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.2);
+}
+
+.leagueCardFeatured {
+    border-color: rgba(255, 196, 0, 0.2);
+    background:
+        radial-gradient(circle at top right, rgba(255, 196, 0, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        linear-gradient(180deg, rgba(10, 15, 20, 0.96), rgba(7, 11, 18, 0.96));
+}
+
+.leagueTopline,
+.leagueHeader,
+.leagueFooter,
+.leagueMeta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+}
+
+.leagueTopline {
+    align-items: center;
+}
+
+.leagueType,
+.leagueSport,
+.leagueStatus {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.leagueType {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.leagueSport {
+    background: rgba(0, 200, 83, 0.08);
+    color: #7ff4ae;
+}
+
+.leagueStatus {
+    background: rgba(255, 196, 0, 0.1);
+    color: #ffd987;
+    white-space: nowrap;
+}
+
+.leagueHeader {
+    align-items: flex-start;
+}
+
+.leagueTitle {
+    margin: 0;
+    font-size: 1.28rem;
+    font-weight: 800;
+}
+
+.leagueSubtitle {
+    margin: 6px 0 0;
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+    font-size: 0.92rem;
+}
+
+.leagueMeta {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.leagueMeta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.leaguePrimaryCta,
+.leagueSecondaryCta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.leaguePrimaryCta {
+    background: #00c853;
+    color: #04140a;
+}
+
+.leagueSecondaryCta {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #ffffff;
+}
+
+.statsRow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.statPill {
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.statPillValue {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.statPillLabel {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-tertiary);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.footerRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+}
+
+.cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #7ff4ae;
+    font-weight: 700;
+}
+
+.empty {
+    padding: 28px;
+    border-radius: 24px;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--color-text-secondary);
+}
+
+.warning {
+    padding: 18px 20px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 196, 0, 0.22);
+    background: rgba(255, 196, 0, 0.08);
+    color: #ffd987;
+    line-height: 1.6;
+}
+
+.privateLeagueCta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: center;
+    padding: 26px;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        radial-gradient(circle at left center, rgba(0, 200, 83, 0.14), transparent 22%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        var(--color-bg-secondary);
+}
+
+.privateLeagueEyebrow {
+    margin: 0 0 8px;
+    color: #7ff4ae;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.privateLeagueTitle {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 800;
+}
+
+.privateLeagueText {
+    margin: 10px 0 0;
+    max-width: 56ch;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.privateLeagueActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.globalLeaderboardList {
+    display: grid;
+    gap: 12px;
+}
+
+.globalLeaderboardRow {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    padding: 18px 20px;
+    border-radius: 22px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.globalLeaderboardPosition {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #7ff4ae;
+}
+
+.globalLeaderboardIdentity strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.globalLeaderboardIdentity span {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-tertiary);
+    font-size: 0.86rem;
+}
+
+.globalLeaderboardPoints {
+    font-size: 1.05rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.createPageShell {
+    display: grid;
+    gap: 18px;
+}
+
+.createGate {
+    padding: 30px;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        radial-gradient(circle at top right, rgba(0, 200, 83, 0.2), transparent 26%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        var(--color-bg-secondary);
+}
+
+.createGateCopy {
+    display: grid;
+    gap: 14px;
+    max-width: 62ch;
+}
+
+.createGateEyebrow {
+    margin: 0;
+    color: #7ff4ae;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.createGateTitle {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.05;
+}
+
+.createGateText {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+}
+
+.createGateActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.wizardLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.wizardPanel,
+.wizardSidebar,
+.previewCard,
+.competitionChoice,
+.templateCard,
+.ruleCard,
+.inviteCodeCard,
+.inviteHintCard,
+.createSuccessShell,
+.inviteResultCard {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        var(--color-bg-secondary);
+}
+
+.wizardPanel {
+    display: grid;
+    gap: 22px;
+    padding: 24px;
+}
+
+.wizardSidebar {
+    padding: 0;
+    position: sticky;
+    top: 108px;
+    overflow: hidden;
+}
+
+.wizardHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.quickCreateBtn {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.stepper {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.stepperItem {
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--color-text-secondary);
+}
+
+.stepperItemActive {
+    border-color: rgba(0, 200, 83, 0.45);
+    background: rgba(0, 200, 83, 0.1);
+    color: #86f6b6;
+}
+
+.stepperItemDone {
+    border-color: rgba(255, 196, 0, 0.18);
+    color: #ffd987;
+}
+
+.stepperIndex {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.stepperLabel {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.formStep {
+    display: grid;
+    gap: 20px;
+}
+
+.formField {
+    display: grid;
+    gap: 10px;
+}
+
+.formLabel {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.formInput,
+.formTextarea {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    padding: 14px 16px;
+}
+
+.formTextarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.competitionChoiceGrid,
+.templateGrid,
+.inviteHintGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.competitionChoice,
+.templateCard {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+}
+
+.competitionChoiceActive,
+.templateCardActive {
+    border-color: rgba(0, 200, 83, 0.5);
+    box-shadow: 0 0 0 1px rgba(0, 200, 83, 0.14) inset;
+}
+
+.competitionChoice strong,
+.templateCard strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.competitionChoiceHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.competitionChoiceCopy {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.competitionChoiceLogo,
+.competitionChoiceLogoFallback {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    flex-shrink: 0;
+}
+
+.competitionChoiceLogo {
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.competitionChoiceLogoFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.competitionChoice span,
+.templateCard span,
+.competitionChoice small,
+.templateCard small {
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.inlineFieldGrid {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1fr);
+    gap: 16px;
+}
+
+.toggleRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.togglePill {
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-secondary);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.togglePillActive {
+    border-color: rgba(0, 200, 83, 0.45);
+    background: rgba(0, 200, 83, 0.1);
+    color: #86f6b6;
+}
+
+.ruleHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.ruleGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.ruleCard {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.inviteCodeCard,
+.inviteHintCard {
+    display: grid;
+    gap: 8px;
+    padding: 18px;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+}
+
+.wizardActions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.previewCard {
+    display: grid;
+    gap: 18px;
+    padding: 22px;
+}
+
+.previewEyebrow {
+    margin: 0;
+    color: #7ff4ae;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.previewTitle {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.previewMeta,
+.previewDescription {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.previewPills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.previewRuleList {
+    display: grid;
+    gap: 10px;
+}
+
+.previewRuleRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--color-text-secondary);
+}
+
+.detailShell {
+    display: grid;
+    gap: 24px;
+}
+
+.playHero {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        radial-gradient(circle at top right, rgba(0, 200, 83, 0.18), transparent 24%),
+        radial-gradient(circle at left center, rgba(255, 196, 0, 0.12), transparent 24%),
+        linear-gradient(145deg, rgba(12, 16, 24, 0.96), rgba(7, 11, 18, 0.98));
+}
+
+.playHeroMain {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.playHeroCopy {
+    display: grid;
+    gap: 8px;
+    max-width: 48ch;
+}
+
+.playHeroTitle {
+    margin: 0;
+    font-size: clamp(1.45rem, 3vw, 2.35rem);
+    font-weight: 900;
+    line-height: 0.92;
+    text-transform: uppercase;
+}
+
+.playHeroText {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.45;
+    font-size: 0.82rem;
+}
+
+.playHeroMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.playHeroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.playHeroRail {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.playGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.playMainColumn,
+.playSidebar {
+    display: grid;
+    gap: 18px;
+}
+
+.mobilePlayTabs {
+    display: none;
+}
+
+.mobilePlayTab {
+    min-height: 38px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+}
+
+.mobilePlayTabActive {
+    border-color: rgba(0, 200, 83, 0.38);
+    background: rgba(0, 200, 83, 0.12);
+    color: #86f6b6;
+}
+
+.rulesCardHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.rulesCardHeader strong {
+    font-size: 0.98rem;
+}
+
+.rulesAdminBar {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.rulesList {
+    display: grid;
+    gap: 10px;
+}
+
+.rulesRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rulesRow:first-child {
+    padding-top: 0;
+    border-top: none;
+}
+
+.rulesRow strong {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.rulesRow p {
+    margin: 4px 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.rulesPoints {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(0, 200, 83, 0.1);
+    color: #86f6b6;
+    font-size: 0.8rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.rulesInput {
+    width: 72px;
+    min-height: 36px;
+    padding: 0 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.rulesEditorExtras {
+    display: grid;
+    gap: 12px;
+}
+
+.rulesEditorActions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.rulesNotes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pickList,
+.historyList,
+.leaderboardCompact,
+.summaryList,
+.socialActions {
+    display: grid;
+    gap: 10px;
+}
+
+.pickGroup {
+    display: grid;
+    gap: 10px;
+}
+
+.dateDivider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2px 0 4px;
+}
+
+.dateDivider::before {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dateDivider span {
+    position: relative;
+    z-index: 1;
+    padding: 0 12px;
+    background: var(--color-bg-primary);
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.pickCard,
+.historyCard,
+.summaryCard {
+    display: grid;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        var(--color-bg-secondary);
+}
+
+.pickCardTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.pickMatchTitle {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.pickMatchMeta {
+    margin: 4px 0 0;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.pickOptions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.scoreEntryRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: end;
+}
+
+.scoreInputGroup {
+    display: grid;
+    gap: 6px;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.scoreInputGroupAway {
+    justify-items: end;
+    text-align: right;
+}
+
+.scoreInputShell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+}
+
+.scoreInputShellReverse {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.scoreInput {
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.scoreTeamCrest,
+.scoreTeamCrestFallback {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.scoreTeamCrest {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.scoreTeamCrestImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.scoreTeamCrestFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.52);
+}
+
+.scoreDivider {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.scoringHint {
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    font-size: 0.84rem;
+}
+
+.pickOptionBtn,
+.inviteActionBtn {
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.pickOptionBtn:hover,
+.inviteActionBtn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(0, 200, 83, 0.34);
+}
+
+.pickOptionBtnActive {
+    border-color: rgba(0, 200, 83, 0.5);
+    background: rgba(0, 200, 83, 0.14);
+    color: #86f6b6;
+}
+
+.pickFooter {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pickFooterActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.pickSaveBtn {
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.pickSaveBtnPending {
+    border: 1px solid rgba(255, 82, 82, 0.34);
+    background: rgba(255, 82, 82, 0.12);
+    color: #ff9f9f;
+}
+
+.pickSaveBtnSaved {
+    border: 1px solid rgba(0, 200, 83, 0.32);
+    background: rgba(0, 200, 83, 0.12);
+    color: #86f6b6;
+}
+
+.pickState,
+.pickFeedback {
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    font-size: 0.88rem;
+}
+
+.historyMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.summaryRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    color: var(--color-text-secondary);
+}
+
+.summaryRow strong {
+    color: #ffffff;
+    font-size: 1.04rem;
+}
+
+.leaderboardCompactRow {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboardCompactRowCurrent {
+    border-color: rgba(0, 200, 83, 0.34);
+    background: rgba(0, 200, 83, 0.08);
+}
+
+.metaTagSuccess {
+    color: #86f6b6;
+}
+
+.metaTagDanger {
+    color: #ff9f9f;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.eventList {
+    display: grid;
+    gap: 14px;
+}
+
+.eventCard {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+    border-radius: 22px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.eventTeams {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.eventTeam {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.eventMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.metaTag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.leaderboard {
+    display: grid;
+    gap: 12px;
+}
+
+.leaderboardRow {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) repeat(4, minmax(72px, auto));
+    gap: 12px;
+    align-items: center;
+    padding: 16px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.leaderboardPosition {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #7ff4ae;
+}
+
+.leaderboardUser {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.leaderboardAvatar,
+.leaderboardAvatarPlaceholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.leaderboardAvatar {
+    object-fit: cover;
+}
+
+.leaderboardAvatarPlaceholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-secondary);
+    font-weight: 800;
+}
+
+.leaderboardName {
+    display: block;
+    font-weight: 700;
+}
+
+.leaderboardSub {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-tertiary);
+    font-size: 0.82rem;
+}
+
+.leaderboardMetric {
+    display: grid;
+    gap: 2px;
+    justify-items: end;
+}
+
+.leaderboardMetricValue {
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.leaderboardMetricLabel {
+    color: var(--color-text-tertiary);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.createSuccessShell {
+    display: grid;
+    gap: 18px;
+    padding: 28px;
+}
+
+.createSuccessCopy {
+    display: grid;
+    gap: 10px;
+}
+
+.inviteResultCard {
+    display: grid;
+    gap: 10px;
+    padding: 22px;
+}
+
+.inviteResultLabel {
+    color: var(--color-text-tertiary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.inviteResultCode {
+    font-family: "JetBrains Mono", monospace;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.inviteResultLink {
+    color: var(--color-text-secondary);
+    word-break: break-all;
+}
+
+.inviteResultActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.successNote {
+    padding: 16px 18px;
+    border-radius: 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .page {
+        padding: 18px 0 104px;
+    }
+
+    .posterHero {
+        gap: 12px;
+        padding: 14px;
+        border-radius: 20px;
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding: 22px;
+    }
+
+    .heroInner {
+        grid-template-columns: 1fr;
+    }
+
+    .statsRow {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .privateLeagueCta {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 20px;
+    }
+
+    .wizardLayout,
+    .playGrid,
+    .inlineFieldGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .playHero {
+        gap: 10px;
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .playHeroTitle {
+        font-size: clamp(1.25rem, 6vw, 1.8rem);
+    }
+
+    .playHeroText {
+        font-size: 0.76rem;
+        line-height: 1.4;
+    }
+
+    .playHeroMeta {
+        gap: 6px;
+    }
+
+    .playHeroActions {
+        width: 100%;
+    }
+
+    .posterPrimaryCta,
+    .posterSecondaryCta {
+        min-height: 30px;
+        padding: 0 10px;
+        font-size: 0.72rem;
+    }
+
+    .posterStat {
+        padding: 8px 10px;
+        border-radius: 12px;
+    }
+
+    .posterStat strong {
+        font-size: 0.96rem;
+    }
+
+    .posterStat span {
+        margin-top: 2px;
+        font-size: 0.58rem;
+    }
+
+    .playMainColumn,
+    .playSidebar {
+        gap: 14px;
+    }
+
+    .posterKicker,
+    .createGateEyebrow,
+    .previewEyebrow,
+    .privateLeagueEyebrow {
+        font-size: 0.68rem;
+    }
+
+    .posterTitle,
+    .createGateTitle,
+    .privateLeagueTitle {
+        font-size: clamp(1.5rem, 6vw, 2.25rem);
+    }
+
+    .posterLead,
+    .createGateText,
+    .privateLeagueText,
+    .leagueSubtitle,
+    .leagueMeta,
+    .footerRow,
+    .previewMeta,
+    .previewDescription {
+        font-size: 0.84rem;
+        line-height: 1.45;
+    }
+
+    .posterCopy {
+        gap: 10px;
+    }
+
+    .posterActions,
+    .createGateActions,
+    .privateLeagueActions,
+    .inviteResultActions {
+        gap: 8px;
+    }
+
+    .leagueCard {
+        gap: 10px;
+        padding: 12px;
+        border-radius: 18px;
+    }
+
+    .leagueTitle {
+        font-size: 0.94rem;
+    }
+
+    .leagueMeta span {
+        min-height: 24px;
+        padding: 0 8px;
+        font-size: 0.68rem;
+    }
+
+    .leaguePrimaryCta,
+    .leagueSecondaryCta {
+        min-height: 32px;
+        padding: 0 10px;
+        font-size: 0.72rem;
+    }
+
+    .globalLeaderboardRow {
+        grid-template-columns: 36px minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .globalLeaderboardPosition,
+    .globalLeaderboardPoints {
+        font-size: 0.9rem;
+    }
+
+    .globalLeaderboardIdentity strong {
+        font-size: 0.92rem;
+    }
+
+    .globalLeaderboardIdentity span {
+        font-size: 0.76rem;
+    }
+
+    .createGate,
+    .wizardPanel,
+    .previewCard,
+    .createSuccessShell,
+    .inviteResultCard {
+        padding: 16px;
+        border-radius: 20px;
+    }
+
+    .wizardPanel {
+        gap: 16px;
+    }
+
+    .wizardHeader {
+        gap: 12px;
+    }
+
+    .quickCreateBtn {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 0.76rem;
+    }
+
+    .stepperItem {
+        gap: 4px;
+        padding: 10px;
+        border-radius: 14px;
+    }
+
+    .stepperIndex,
+    .stepperLabel,
+    .formLabel {
+        font-size: 0.76rem;
+    }
+
+    .formStep,
+    .formField,
+    .previewRuleList {
+        gap: 12px;
+    }
+
+    .formInput,
+    .formTextarea {
+        padding: 10px 12px;
+        border-radius: 14px;
+        font-size: 0.84rem;
+    }
+
+    .formTextarea {
+        min-height: 88px;
+    }
+
+    .competitionChoiceGrid,
+    .templateGrid,
+    .inviteHintGrid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .competitionChoice,
+    .templateCard,
+    .ruleCard,
+    .inviteCodeCard,
+    .inviteHintCard {
+        gap: 6px;
+        padding: 12px;
+        border-radius: 18px;
+    }
+
+    .competitionChoiceLogo,
+    .competitionChoiceLogoFallback {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+    }
+
+    .competitionChoice strong,
+    .templateCard strong,
+    .previewTitle {
+        font-size: 0.96rem;
+    }
+
+    .inviteResultCode {
+        font-size: 1.4rem;
+        letter-spacing: 0.06em;
+    }
+
+    .competitionChoice span,
+    .templateCard span,
+    .competitionChoice small,
+    .templateCard small,
+    .inviteResultLink,
+    .successNote {
+        font-size: 0.74rem;
+        line-height: 1.4;
+    }
+
+    .ruleGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .previewPills,
+    .toggleRow,
+    .filterBar {
+        gap: 8px;
+    }
+
+    .filterChip,
+    .togglePill {
+        min-height: 32px;
+        padding: 0 10px;
+        font-size: 0.74rem;
+    }
+
+    .inviteResultLabel {
+        font-size: 0.68rem;
+    }
+
+    .mobilePlayTabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .mobileTabHidden {
+        display: none;
+    }
+
+    .pickCard,
+    .historyCard,
+    .summaryCard {
+        gap: 10px;
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .pickMatchTitle {
+        font-size: 0.96rem;
+    }
+
+    .pickMatchMeta,
+    .sectionText,
+    .pickState,
+    .pickFeedback,
+    .scoringHint {
+        font-size: 0.8rem;
+    }
+
+    .scoreInputGroup {
+        font-size: 0.74rem;
+    }
+
+    .scoreInput {
+        min-height: 38px;
+        padding: 0 10px;
+        font-size: 0.9rem;
+        border-radius: 13px;
+    }
+
+    .scoreDivider {
+        min-height: 38px;
+        font-size: 1rem;
+    }
+
+    .scoreTeamCrest,
+    .scoreTeamCrestFallback {
+        width: 26px;
+        height: 26px;
+    }
+
+    .pickSaveBtn,
+    .inviteActionBtn {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 0.8rem;
+        border-radius: 999px;
+    }
+
+    .rulesRow {
+        gap: 10px;
+        padding: 10px 0;
+    }
+
+    .rulesRow strong {
+        font-size: 0.84rem;
+    }
+
+    .rulesRow p {
+        font-size: 0.74rem;
+    }
+
+    .rulesPoints {
+        min-height: 24px;
+        padding: 0 8px;
+        font-size: 0.72rem;
+    }
+
+    .rulesInput {
+        width: 64px;
+        min-height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .rulesEditorActions {
+        justify-content: stretch;
+    }
+
+    .rulesEditorActions .posterPrimaryCta {
+        width: 100%;
+    }
+
+    .leagueStatus {
+        min-height: 24px;
+        padding: 0 8px;
+        font-size: 0.66rem;
+    }
+
+    .metaTag {
+        min-height: 20px;
+        padding: 0 7px;
+        font-size: 0.62rem;
+    }
+
+    .wizardSidebar {
+        position: static;
+    }
+
+    .playHeroRail {
+        grid-template-columns: 1fr;
+    }
+
+    .leaderboardRow {
+        grid-template-columns: 1fr;
+        justify-items: start;
+    }
+
+    .leaderboardMetric {
+        justify-items: start;
+    }
+}
+
+@media (max-width: 560px) {
+    .statsRow {
+        grid-template-columns: 1fr;
+    }
+
+    .shell,
+    .section,
+    .detailShell,
+    .createPageShell {
+        gap: 14px;
+    }
+
+    .sectionHeaderLobby,
+    .sectionHeader,
+    .footerRow,
+    .eventTeams,
+    .leagueHeader,
+    .leagueTopline,
+    .leagueFooter,
+    .privateLeagueActions,
+    .globalLeaderboardRow,
+    .wizardHeader,
+    .ruleHeader,
+    .wizardActions,
+    .playHeroMain {
+        grid-auto-flow: row;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stepper {
+        grid-template-columns: 1fr;
+    }
+
+    .pickOptions {
+        grid-template-columns: 1fr;
+    }
+
+    .mobilePlayTabs {
+        gap: 6px;
+    }
+
+    .mobilePlayTab {
+        min-height: 32px;
+        padding: 0 8px;
+        font-size: 0.68rem;
+    }
+
+    .sectionTitle {
+        font-size: 1rem;
+    }
+
+    .posterHero,
+    .privateLeagueCta,
+    .createGate,
+    .wizardPanel,
+    .previewCard,
+    .createSuccessShell,
+    .inviteResultCard {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .posterCopy {
+        gap: 8px;
+    }
+
+    .posterTitle,
+    .createGateTitle,
+    .privateLeagueTitle {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    .posterLead,
+    .createGateText,
+    .privateLeagueText,
+    .leagueSubtitle,
+    .leagueMeta,
+    .previewMeta,
+    .previewDescription,
+    .sectionText {
+        font-size: 0.74rem;
+    }
+
+    .lobbyGrid,
+    .competitionChoiceGrid,
+    .templateGrid,
+    .inviteHintGrid,
+    .ruleGrid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .leagueCard,
+    .competitionChoice,
+    .templateCard,
+    .ruleCard,
+    .inviteCodeCard,
+    .inviteHintCard {
+        gap: 8px;
+        padding: 8px;
+        border-radius: 14px;
+    }
+
+    .leagueTitle,
+    .globalLeaderboardIdentity strong,
+    .leaderboardName,
+    .previewTitle {
+        font-size: 0.9rem;
+    }
+
+    .leagueMeta span,
+    .metaTag,
+    .filterChip,
+    .togglePill {
+        font-size: 0.66rem;
+    }
+
+    .posterRail {
+        gap: 6px;
+    }
+
+    .posterStat {
+        padding: 6px 8px;
+        border-radius: 10px;
+    }
+
+    .posterStat strong {
+        font-size: 0.82rem;
+        line-height: 1;
+    }
+
+    .posterStat span {
+        margin-top: 2px;
+        font-size: 0.52rem;
+        letter-spacing: 0.05em;
+    }
+
+    .leagueTopline,
+    .leagueHeader,
+    .leagueMeta,
+    .leagueFooter {
+        gap: 6px;
+    }
+
+    .leagueMeta {
+        justify-content: flex-start;
+    }
+
+    .leagueFooter {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .leaguePrimaryCta,
+    .leagueSecondaryCta,
+    .quickCreateBtn,
+    .posterPrimaryCta,
+    .posterSecondaryCta {
+        min-height: 30px;
+        font-size: 0.7rem;
+    }
+
+    .globalLeaderboardRow {
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+        padding: 10px;
+        border-radius: 14px;
+    }
+
+    .globalLeaderboardPosition,
+    .globalLeaderboardPoints,
+    .leaderboardMetricValue {
+        font-size: 0.8rem;
+    }
+
+    .leaderboardSub,
+    .globalLeaderboardIdentity span,
+    .leaderboardMetricLabel,
+    .inviteResultLink,
+    .successNote {
+        font-size: 0.68rem;
+    }
+
+    .leaderboardAvatar,
+    .leaderboardAvatarPlaceholder,
+    .competitionChoiceLogo,
+    .competitionChoiceLogoFallback {
+        width: 30px;
+        height: 30px;
+    }
+
+    .leaderboardRow {
+        padding: 10px;
+        border-radius: 14px;
+    }
+
+    .playHeroCopy {
+        gap: 6px;
+    }
+
+    .privateLeagueEyebrow {
+        margin: 0 0 2px;
+        font-size: 0.58rem;
+    }
+
+    .playHeroTitle {
+        font-size: 1.1rem;
+    }
+
+    .playHeroRail {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .pickCardTop {
+        align-items: center;
+    }
+
+    .rulesCardHeader,
+    .rulesRow {
+        grid-template-columns: 1fr;
+    }
+
+    .rulesAdminBar {
+        align-items: flex-start;
+    }
+
+    .rulesPoints {
+        justify-self: flex-start;
+    }
+
+    .scoreEntryRow {
+        grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .scoreInputShell {
+        gap: 6px;
+    }
+
+    .scoreInput {
+        min-height: 34px;
+        padding: 0 8px;
+        font-size: 0.82rem;
+    }
+
+    .scoreDivider {
+        min-height: 34px;
+        font-size: 0.9rem;
+    }
+
+    .scoreTeamCrest,
+    .scoreTeamCrestFallback {
+        width: 22px;
+        height: 22px;
+    }
+
+    .pickFooter {
+        gap: 8px;
+    }
+
+    .pickFooterActions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pickSaveBtn {
+        flex-shrink: 0;
+    }
+}

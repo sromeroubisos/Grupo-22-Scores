@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import styles from './MobileBottomNav.module.css';
 
 const hiddenPrefixes = ['/login', '/terminos', '/privacidad', '/contacto', '/ayuda'];
@@ -9,6 +10,7 @@ const hiddenPrefixes = ['/login', '/terminos', '/privacidad', '/contacto', '/ayu
 const navItems = [
     { href: '/', label: 'Partidos', icon: 'matches' },
     { href: '/noticias', label: 'Noticias', icon: 'news' },
+    { href: '/prode', label: 'Prode', icon: 'prode' },
     { href: '/tournaments', label: 'Ligas', icon: 'trophy' },
     { href: '/favorites', label: 'Siguiendo', icon: 'star' },
     { href: '/search', label: 'Buscar', icon: 'search' },
@@ -22,7 +24,6 @@ function isActive(pathname: string | null, href: string) {
 
 function NavIcon({ name, active }: { name: string; active?: boolean }) {
     const strokeWidth = active ? 3 : 2;
-    const fill = active ? "currentColor" : "none";
 
     switch (name) {
         case 'matches':
@@ -36,7 +37,7 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
             );
         case 'news':
             return (
-                <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+                <svg viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
                     <path d="M4 7h12" />
                     <path d="M4 11h16" />
                     <path d="M4 15h10" />
@@ -45,7 +46,7 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
             );
         case 'trophy':
             return (
-                <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+                <svg viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
                     <path d="M8 4h8v3a4 4 0 0 1-8 0V4z" />
                     <path d="M6 4h-2a2 2 0 0 0-2 2v1a5 5 0 0 0 5 5" />
                     <path d="M18 4h2a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5" />
@@ -53,9 +54,19 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
                     <path d="M8 20h8" />
                 </svg>
             );
+        case 'prode':
+            return (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}>
+                    <path d="M4 6h16" />
+                    <path d="M7 12h10" />
+                    <path d="M10 18h4" />
+                    <circle cx="7" cy="12" r="1.5" fill={active ? 'currentColor' : 'none'} />
+                    <circle cx="17" cy="12" r="1.5" fill={active ? 'currentColor' : 'none'} />
+                </svg>
+            );
         case 'star':
             return (
-                <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+                <svg viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
                     <path d="M12 3l3.1 6.3 7 1-5 4.9 1.2 6.9L12 18l-6.3 3.1 1.2-6.9-5-4.9 7-1L12 3z" />
                 </svg>
             );
@@ -73,15 +84,18 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
 
 export default function MobileBottomNav() {
     const pathname = usePathname();
+    const { user } = useAuth();
+    const canSeeProde = user?.role === 'super_admin';
+    const visibleNavItems = navItems.filter((item) => item.href !== '/prode' || canSeeProde);
 
     if (hiddenPrefixes.some((prefix) => pathname?.startsWith(prefix))) {
         return null;
     }
 
     return (
-        <nav className={styles.nav} aria-label="Navegación principal">
+        <nav className={styles.nav} aria-label="Navegacion principal">
             <div className={styles.navList}>
-                {navItems.map((item) => {
+                {visibleNavItems.map((item) => {
                     const active = isActive(pathname, item.href);
                     return (
                         <Link
@@ -99,4 +113,3 @@ export default function MobileBottomNav() {
         </nav>
     );
 }
-

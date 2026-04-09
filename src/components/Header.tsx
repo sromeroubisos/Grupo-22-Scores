@@ -115,8 +115,10 @@ export default function Header() {
     }, [pathname]);
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
+    const canSeeProde = user?.role === 'super_admin';
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
+    const isProdeRoute = pathname?.startsWith('/prode') ?? false;
     const rankingsHref = `/rankings?sport=${encodeURIComponent(selectedSport.id)}`;
 
     return (
@@ -148,6 +150,23 @@ export default function Header() {
                         </svg>
                         <span>Noticias</span>
                     </Link>
+
+                    {canSeeProde ? (
+                        <Link
+                            href="/prode"
+                            className={`g22-desktop-link ${isProdeRoute ? 'active' : ''}`}
+                            aria-current={isProdeRoute ? 'page' : undefined}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M4 6h16" />
+                                <path d="M7 12h10" />
+                                <path d="M10 18h4" />
+                                <circle cx="7" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                                <circle cx="17" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                            </svg>
+                            <span>Prode</span>
+                        </Link>
+                    ) : null}
 
                     <Link
                         href={rankingsHref}

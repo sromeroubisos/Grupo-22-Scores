@@ -16,10 +16,10 @@
 
 .navList {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
     width: 100%;
-    max-width: 520px;
+    max-width: 640px;
     margin: 0 auto;
 }
 
