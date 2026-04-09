@@ -28,7 +28,16 @@ function getFavoriteHref(fav: FavoriteItem): string | null {
 }
 
 export default function FavoritesPage() {
-    const { favorites, hasMore, loading: favsLoading, error: favsError, toggleFavorite, loadMore, refresh } = useFavorites();
+    const {
+        favorites,
+        hasMore,
+        loading: favsLoading,
+        error: favsError,
+        toggleFavorite,
+        toggleLeagueFavorite,
+        loadMore,
+        refresh,
+    } = useFavorites();
     const [activeTab, setActiveTab] = useState<Tab>('all');
 
     const filtered = activeTab === 'all'
@@ -125,7 +134,19 @@ export default function FavoritesPage() {
                                     <FavoriteCard
                                         key={`${fav.entity_type}-${fav.id}`}
                                         fav={fav}
-                                        onRemove={() => toggleFavorite(fav)}
+                                        onRemove={() => {
+                                            if (fav.entity_type === 'league' || fav.entity_type === 'tournament') {
+                                                void toggleLeagueFavorite(String(fav.id), {
+                                                    name: fav.name,
+                                                    logo_url: fav.logo_url ?? null,
+                                                    color: fav.color ?? null,
+                                                    type_label: fav.type_label,
+                                                });
+                                                return;
+                                            }
+
+                                            void toggleFavorite(fav);
+                                        }}
                                     />
                                 ))}
                             </div>

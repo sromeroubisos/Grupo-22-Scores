@@ -116,6 +116,12 @@ function getSportLabel(value: string | null) {
     }
 }
 
+function getPrivateLeagueLifecycle(row: AnyRow) {
+    const metadata = toRecord(row.metadata);
+    const lifecycle = toSafeString(metadata.lifecycle);
+    return lifecycle === 'archived' || lifecycle === 'deleted' ? lifecycle : 'active';
+}
+
 function buildStatsMap(rows: AnyRow[]) {
     const now = Date.now();
     const statsMap = new Map<string, ProdeCompetitionEventStats>();
@@ -600,7 +606,7 @@ export async function listUserPrivateLeagues(userId: string): Promise<SchemaStat
     const [{ data: leagueRows, error: leaguesError }, { data: memberCountRows, error: memberCountsError }] = await Promise.all([
         supabase
             .from('prode_private_leagues')
-            .select('id, slug, name, invite_code, visibility, competition_id, owner_user_id')
+            .select('id, slug, name, invite_code, visibility, competition_id, owner_user_id, metadata')
             .in('id', leagueIds),
         supabase
             .from('prode_private_league_members')
@@ -643,6 +649,7 @@ export async function listUserPrivateLeagues(userId: string): Promise<SchemaStat
     return {
         schemaReady: true,
         data: leagues
+            .filter((row) => getPrivateLeagueLifecycle(row) === 'active')
             .map((row) => {
                 const leagueId = toSafeString(row.id);
                 const membership = membershipMap.get(leagueId) || {};

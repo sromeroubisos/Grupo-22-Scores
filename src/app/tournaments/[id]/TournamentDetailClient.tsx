@@ -3070,6 +3070,7 @@ export default function TournamentDetailPage({
                                         name: tournamentName,
                                         logo_url: tournamentLogo || null,
                                         followerTournamentId: adminTournamentId,
+                                        sportId: tournamentData?.sportId ?? tournamentData?.sport_id ?? null,
                                     })}
                                     type="button"
                                 >

@@ -5,6 +5,11 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/context/AuthContext'
 import { getFavoriteSports, getFavoriteLeagues } from '@/lib/services/preferencesService'
 
+type FavoriteLeaguePreferenceUpdatedDetail = {
+    leagueId?: string
+    isFavorite?: boolean
+}
+
 interface UserPreferences {
     favoriteSportIds: string[]
     favoriteLeagueIds: string[]
@@ -47,7 +52,31 @@ export function useUserPreferences(): UserPreferences {
         }
 
         load()
-        return () => { cancelled = true }
+
+        function handleFavoriteLeaguePreferenceUpdated(event: Event) {
+            const detail = (event as CustomEvent<FavoriteLeaguePreferenceUpdatedDetail>).detail
+            const leagueId = typeof detail?.leagueId === 'string' ? detail.leagueId.trim() : ''
+            const isFavorite = detail?.isFavorite === true
+
+            if (!leagueId) return
+
+            setFavoriteLeagueIds(prev => {
+                const exists = prev.includes(leagueId)
+
+                if (isFavorite) {
+                    return exists ? prev : [...prev, leagueId]
+                }
+
+                return exists ? prev.filter(id => id !== leagueId) : prev
+            })
+        }
+
+        window.addEventListener('preferences:favorite-leagues-updated', handleFavoriteLeaguePreferenceUpdated)
+
+        return () => {
+            cancelled = true
+            window.removeEventListener('preferences:favorite-leagues-updated', handleFavoriteLeaguePreferenceUpdated)
+        }
     }, [user?.id])
 
     return { favoriteSportIds, favoriteLeagueIds, isLoading }

@@ -1759,6 +1759,7 @@ export default function HomePage() {
                             toggleLeagueFavorite(favoriteLeagueId, {
                               name: league.league,
                               logo_url: league.logoUrl || null,
+                              sportId: selectedSport.id,
                             });
                           }}
                           aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
@@ -1803,6 +1804,7 @@ export default function HomePage() {
                             toggleLeagueFavorite(favoriteLeagueId, {
                               name: league.league,
                               logo_url: league.logoUrl || null,
+                              sportId: selectedSport.id,
                             });
                           }}
                           aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
