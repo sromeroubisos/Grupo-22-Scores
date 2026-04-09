@@ -28,7 +28,7 @@ import { createClient } from '@/lib/supabase/client';
 import { getActiveSports } from '@/lib/data/sports';
 import { useAuth } from '@/context/AuthContext';
 import ProdeLobby from '@/components/prode/ProdeLobby';
-import type { PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
+import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
 
 import styles from './profile.module.css';
 
@@ -895,6 +895,7 @@ function EmptySection({
 function ProdePanel() {
     const [competitions, setCompetitions] = useState<PublicProdeCompetition[]>([]);
     const [totals, setTotals] = useState<PublicProdeUserTotal[]>([]);
+    const [privateLeagues, setPrivateLeagues] = useState<ProdePrivateLeagueSummary[]>([]);
     const [schemaReady, setSchemaReady] = useState(true);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -907,9 +908,10 @@ function ProdePanel() {
             setError(null);
 
             try {
-                const [competitionsResponse, leaderboardResponse] = await Promise.all([
+                const [competitionsResponse, leaderboardResponse, privateLeaguesResponse] = await Promise.all([
                     fetch('/api/prode/competitions', { credentials: 'same-origin' }),
                     fetch('/api/prode/leaderboard', { credentials: 'same-origin' }),
+                    fetch('/api/prode/private-leagues', { credentials: 'same-origin' }),
                 ]);
 
                 const competitionsJson = await competitionsResponse.json() as {
@@ -922,6 +924,11 @@ function ProdePanel() {
                     data?: PublicProdeUserTotal[];
                     error?: string;
                 };
+                const privateLeaguesJson = await privateLeaguesResponse.json() as {
+                    schemaReady?: boolean;
+                    data?: ProdePrivateLeagueSummary[];
+                    error?: string;
+                };
 
                 if (!competitionsResponse.ok) {
                     throw new Error(competitionsJson.error || 'No se pudo cargar el hub de prode.');
@@ -930,12 +937,20 @@ function ProdePanel() {
                 if (!leaderboardResponse.ok) {
                     throw new Error(leaderboardJson.error || 'No se pudo cargar el ranking del prode.');
                 }
+                if (!privateLeaguesResponse.ok && privateLeaguesResponse.status !== 401) {
+                    throw new Error(privateLeaguesJson.error || 'No se pudieron cargar tus ligas privadas.');
+                }
 
                 if (cancelled) return;
 
                 setCompetitions(Array.isArray(competitionsJson.data) ? competitionsJson.data : []);
                 setTotals(Array.isArray(leaderboardJson.data) ? leaderboardJson.data : []);
-                setSchemaReady(Boolean(competitionsJson.schemaReady) && Boolean(leaderboardJson.schemaReady));
+                setPrivateLeagues(Array.isArray(privateLeaguesJson.data) ? privateLeaguesJson.data : []);
+                setSchemaReady(
+                    Boolean(competitionsJson.schemaReady)
+                    && Boolean(leaderboardJson.schemaReady)
+                    && (privateLeaguesResponse.status === 401 || Boolean(privateLeaguesJson.schemaReady))
+                );
             } catch (fetchError) {
                 if (cancelled) return;
                 setError(fetchError instanceof Error ? fetchError.message : 'No se pudo cargar el hub de prode.');
@@ -970,6 +985,7 @@ function ProdePanel() {
                 <ProdeLobby
                     competitions={competitions}
                     totals={totals}
+                    privateLeagues={privateLeagues}
                     schemaReady={schemaReady}
                     embedded
                 />

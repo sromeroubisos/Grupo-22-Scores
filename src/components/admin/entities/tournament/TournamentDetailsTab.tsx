@@ -11,6 +11,7 @@ import { type TournamentDetailsDraft, useTournamentDirty } from './TournamentCon
 import { Shield, Globe, Image as ImageIcon } from 'lucide-react';
 import LogoUploader from '@/components/LogoUploader';
 import { FlashScoreIntegrationSection } from './FlashScoreIntegrationSection';
+import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 import '../club/vitreous-club.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -101,6 +102,10 @@ function buildInitialDetailsDraft(
 export function TournamentDetailsTab({ data, id, unions, countries }: TournamentDetailsTabProps) {
     const tournament = data as TournamentDetailsRow;
     const router = useRouter();
+    usePerfComponentLifecycle('TournamentDetailsTab', {
+        tournamentId: id,
+        apiManaged: Boolean(tournament.is_api_managed),
+    });
     const {
         getSectionDraft,
         setSectionDraft,
@@ -190,6 +195,10 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
         }
         setIsSaving(true);
         setMessage(null);
+        const saveRequest = beginClientRequest(`tournament:${id}:details`, 'manual_save', {
+            component: 'TournamentDetailsTab',
+            apiManaged: isApiManaged,
+        });
         try {
             await updateEntity('tournament', id, {
                 ...(isApiManaged ? {
@@ -210,11 +219,17 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     ruleset: form.ruleset,
                 })
             });
+            saveRequest.end({
+                error: false,
+            });
             clearSectionDraft('details');
             markSectionDirty('details', false);
             setMessage({ type: 'success', text: 'Cambios guardados.' });
             router.refresh();
         } catch (err: unknown) {
+            saveRequest.end({
+                error: true,
+            });
             setMessage({ type: 'error', text: 'Error: ' + (err instanceof Error ? err.message : String(err)) });
         } finally {
             setIsSaving(false);

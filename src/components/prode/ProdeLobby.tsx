@@ -1,13 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from '@/app/prode/page.module.css';
-import type { PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
+import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
 
 type ProdeLobbyProps = {
     competitions: PublicProdeCompetition[];
     totals: PublicProdeUserTotal[];
+    privateLeagues?: ProdePrivateLeagueSummary[];
     schemaReady: boolean;
     embedded?: boolean;
 };
@@ -45,9 +47,17 @@ function isCompetitionUpcoming(competition: PublicProdeCompetition) {
     return new Date(competition.startAt).getTime() > Date.now();
 }
 
-export default function ProdeLobby({ competitions, totals, schemaReady, embedded = false }: ProdeLobbyProps) {
+export default function ProdeLobby({ competitions, totals, privateLeagues = [], schemaReady, embedded = false }: ProdeLobbyProps) {
+    const router = useRouter();
     const [sportFilter, setSportFilter] = useState<string>('all');
     const [stateFilter, setStateFilter] = useState<StateFilter>('all');
+    const [managedPrivateLeagues, setManagedPrivateLeagues] = useState<ProdePrivateLeagueSummary[]>(privateLeagues);
+    const [deletingLeagueId, setDeletingLeagueId] = useState<string | null>(null);
+    const [privateLeagueFeedback, setPrivateLeagueFeedback] = useState<string | null>(null);
+
+    useEffect(() => {
+        setManagedPrivateLeagues(privateLeagues);
+    }, [privateLeagues]);
 
     const sportFilters = useMemo(() => {
         const uniqueSports = Array.from(
@@ -86,6 +96,47 @@ export default function ProdeLobby({ competitions, totals, schemaReady, embedded
 
     const activeCount = competitions.filter((competition) => isCompetitionActive(competition)).length;
     const totalPlayers = competitions.reduce((sum, competition) => sum + competition.members.totalMembers, 0);
+
+    async function handleQuickDeleteLeague(league: ProdePrivateLeagueSummary) {
+        if (!league.canManage || deletingLeagueId) {
+            return;
+        }
+
+        const confirmed = window.confirm('Esta accion borra la liga privada del lobby. Queres continuar?');
+        if (!confirmed) {
+            return;
+        }
+
+        setDeletingLeagueId(league.id);
+        setPrivateLeagueFeedback('Borrando liga...');
+
+        try {
+            const response = await fetch('/api/prode/private-leagues', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    leagueId: league.id,
+                    action: 'delete_league',
+                }),
+            });
+
+            const result = await response.json() as { error?: string; message?: string };
+
+            if (!response.ok) {
+                throw new Error(result.error || 'No se pudo borrar la liga.');
+            }
+
+            setManagedPrivateLeagues((current) => current.filter((item) => item.id !== league.id));
+            setPrivateLeagueFeedback(result.message || 'La liga fue borrada.');
+            router.refresh();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'No se pudo borrar la liga.';
+            setPrivateLeagueFeedback(message);
+        } finally {
+            setDeletingLeagueId(null);
+        }
+    }
 
     const lobbyContent = (
         <div className={`${styles.shell} ${embedded ? styles.embeddedShell : ''}`}>
@@ -128,6 +179,61 @@ export default function ProdeLobby({ competitions, totals, schemaReady, embedded
                         <section className={styles.warning}>
                             La UI del lobby ya esta lista, pero la base activa todavia no tiene aplicadas las
                             tablas del prode. Al correr la migracion de Supabase se van a poblar estas vistas.
+                        </section>
+                    ) : null}
+
+                    {managedPrivateLeagues.length ? (
+                        <section className={styles.section}>
+                            <div className={styles.sectionHeaderLobby}>
+                                <div>
+                                    <h2 className={styles.sectionTitle}>Tus ligas privadas</h2>
+                                    <p className={styles.sectionText}>
+                                        Entra siempre desde aca para volver a tu liga privada, sin caer en la competencia global.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {privateLeagueFeedback ? (
+                                <div className={styles.warning}>{privateLeagueFeedback}</div>
+                            ) : null}
+
+                            <div className={styles.lobbyGrid}>
+                                {managedPrivateLeagues.map((league) => (
+                                    <article key={league.id} className={styles.leagueCard}>
+                                        <div className={styles.leagueTopline}>
+                                            <span className={styles.leagueType}>Privada</span>
+                                            <span className={styles.leagueSport}>{league.sportLabel || 'General'}</span>
+                                        </div>
+
+                                        <Link href={`/prode/ligas/${league.slug}`} className={styles.leagueCompactBody}>
+                                            <h3 className={styles.leagueTitle}>{league.name}</h3>
+                                            <p className={styles.leagueSubtitle}>{league.competitionName}</p>
+                                        </Link>
+
+                                        <div className={styles.leagueCompactMeta}>
+                                            <span>{league.memberCount} participantes</span>
+                                            {league.canManage ? <span>Admin</span> : null}
+                                            {league.inviteCode ? <span>Codigo: {league.inviteCode}</span> : null}
+                                        </div>
+
+                                        <div className={styles.leagueFooter}>
+                                            <Link href={`/prode/ligas/${league.slug}`} className={styles.leagueSecondaryCta}>
+                                                Entrar
+                                            </Link>
+                                            {league.canManage ? (
+                                                <button
+                                                    type="button"
+                                                    className={styles.leagueQuickDanger}
+                                                    onClick={() => void handleQuickDeleteLeague(league)}
+                                                    disabled={deletingLeagueId === league.id}
+                                                >
+                                                    {deletingLeagueId === league.id ? 'Borrando...' : 'Borrar'}
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
                         </section>
                     ) : null}
 
@@ -193,7 +299,7 @@ export default function ProdeLobby({ competitions, totals, schemaReady, embedded
                                             <div className={styles.leagueCompactBody}>
                                                 <h3 className={styles.leagueTitle}>{competition.name}</h3>
                                                 <p className={styles.leagueSubtitle}>
-                                                    {competition.description || (featured ? 'Prode destacado' : 'Prode oficial')}
+                                                    {competition.description || 'PRODE NO OFICIAL'}
                                                 </p>
                                             </div>
 
@@ -217,7 +323,7 @@ export default function ProdeLobby({ competitions, totals, schemaReady, embedded
                             <h2 className={styles.privateLeagueTitle}>Crea tu propia liga privada.</h2>
                             <p className={styles.privateLeagueText}>
                                 Arma una liga con amigos, comparti un codigo unico y competi sobre cualquier prode
-                                oficial ya publicado en G22 Scores.
+                                no oficial ya publicado en G22 Scores.
                             </p>
                         </div>
                         <div className={styles.privateLeagueActions}>

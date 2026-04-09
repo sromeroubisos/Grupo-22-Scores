@@ -460,7 +460,10 @@
 }
 
 .leagueTopline {
+    justify-content: flex-start;
     align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
 }
 
 .leagueCompactBody {
@@ -472,6 +475,7 @@
 .leagueSport,
 .leagueStatus {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     min-height: 28px;
     padding: 0 9px;
@@ -480,6 +484,7 @@
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .leagueType {
@@ -513,7 +518,9 @@
     margin: 0;
     color: var(--color-text-secondary);
     line-height: 1.45;
-    font-size: 0.78rem;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .leagueMeta {
@@ -571,6 +578,33 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.03);
     color: #ffffff;
+}
+
+.leagueQuickDanger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 107, 107, 0.28);
+    background: rgba(255, 107, 107, 0.1);
+    color: #ffd0d0;
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.leagueQuickDanger:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 107, 107, 0.44);
+}
+
+.leagueQuickDanger:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .statsRow {
@@ -768,15 +802,7 @@
     margin-top: 6px;
 }
 
-.wizardLayout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
-    gap: 20px;
-    align-items: start;
-}
-
 .wizardPanel,
-.wizardSidebar,
 .previewCard,
 .competitionChoice,
 .templateCard,
@@ -794,87 +820,117 @@
 
 .wizardPanel {
     display: grid;
-    gap: 22px;
+    gap: 18px;
+    width: min(100%, 880px);
+    margin: 0 auto;
     padding: 24px;
 }
 
-.wizardSidebar {
-    padding: 0;
-    position: sticky;
-    top: 108px;
-    overflow: hidden;
-}
-
 .wizardHeader {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
     gap: 16px;
-    align-items: flex-start;
 }
 
-.quickCreateBtn {
-    min-height: 42px;
-    padding: 0 16px;
+.wizardHeaderCopy {
+    display: grid;
+    gap: 8px;
+}
+
+.modeSwitch {
+    display: inline-grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: min(100%, 260px);
+    padding: 6px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.04);
-    color: #ffffff;
-    font-weight: 700;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modeSwitchBtn {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 800;
     cursor: pointer;
 }
 
-.stepper {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.stepperItem {
-    display: grid;
-    gap: 6px;
-    padding: 12px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--color-text-secondary);
-}
-
-.stepperItemActive {
-    border-color: rgba(0, 200, 83, 0.45);
-    background: rgba(0, 200, 83, 0.1);
+.modeSwitchBtnActive {
+    background: rgba(0, 200, 83, 0.14);
     color: #86f6b6;
 }
 
-.stepperItemDone {
-    border-color: rgba(255, 196, 0, 0.18);
-    color: #ffd987;
+.wizardProgress {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
 }
 
-.stepperIndex {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.86rem;
+.wizardProgressLabel {
+    margin: 0 0 4px;
+    color: var(--color-text-tertiary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.wizardProgressTitle {
+    display: block;
+    font-size: 0.96rem;
     font-weight: 800;
 }
 
-.stepperLabel {
-    font-size: 0.9rem;
-    font-weight: 700;
+.wizardProgressDots {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.wizardProgressDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.wizardProgressDotActive {
+    background: #00c853;
+    box-shadow: 0 0 0 4px rgba(0, 200, 83, 0.18);
+}
+
+.wizardProgressDotDone {
+    background: rgba(255, 196, 0, 0.76);
 }
 
 .formStep {
     display: grid;
-    gap: 20px;
+    gap: 16px;
 }
 
 .formField {
     display: grid;
-    gap: 10px;
+    gap: 8px;
 }
 
 .formLabel {
     color: rgba(255, 255, 255, 0.78);
     font-size: 0.86rem;
     font-weight: 700;
+}
+
+.fieldHint {
+    color: var(--color-text-tertiary);
+    font-size: 0.74rem;
+    line-height: 1.45;
 }
 
 .formInput,
@@ -892,11 +948,16 @@
     min-height: 120px;
 }
 
-.competitionChoiceGrid,
+.competitionChoiceGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
 .templateGrid,
 .inviteHintGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -904,10 +965,11 @@
 .templateCard {
     display: grid;
     gap: 8px;
-    padding: 16px;
+    padding: 12px;
     text-align: left;
     color: inherit;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .competitionChoiceActive,
@@ -916,48 +978,40 @@
     box-shadow: 0 0 0 1px rgba(0, 200, 83, 0.14) inset;
 }
 
-.competitionChoice strong,
-.templateCard strong {
-    display: block;
-    font-size: 1rem;
-}
-
-.competitionChoiceHeader {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
 .competitionChoiceCopy {
     display: grid;
-    gap: 4px;
+    gap: 2px;
     min-width: 0;
+}
+
+.competitionChoiceGrid .empty {
+    grid-column: 1 / -1;
 }
 
 .competitionChoiceLogo,
 .competitionChoiceLogoFallback {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 0;
     flex-shrink: 0;
 }
 
 .competitionChoiceLogo {
-    object-fit: cover;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    object-fit: contain;
+    background: transparent;
+    border: none;
 }
 
 .competitionChoiceLogoFallback {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.06);
-    color: #ffffff;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.72);
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.84rem;
     text-transform: uppercase;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
 }
 
 .competitionChoice span,
@@ -965,7 +1019,65 @@
 .competitionChoice small,
 .templateCard small {
     color: var(--color-text-secondary);
-    line-height: 1.5;
+    line-height: 1.4;
+}
+
+.competitionChoice {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.competitionChoice strong {
+    display: block;
+    font-size: 0.8rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.competitionChoice span {
+    font-size: 0.68rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.competitionChoice small {
+    font-size: 0.66rem;
+    white-space: nowrap;
+}
+
+.competitionSearchMeta,
+.paginationBar {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.competitionSearchMeta {
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+}
+
+.paginationBtn {
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.paginationBtn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .inlineFieldGrid {
@@ -1032,6 +1144,7 @@
     text-align: left;
     color: inherit;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .wizardActions {
@@ -1786,7 +1899,6 @@
         border-radius: 20px;
     }
 
-    .wizardLayout,
     .playGrid,
     .inlineFieldGrid {
         grid-template-columns: 1fr;
@@ -1943,22 +2055,28 @@
         gap: 12px;
     }
 
-    .quickCreateBtn {
+    .modeSwitch {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .modeSwitchBtn {
         min-height: 34px;
-        padding: 0 12px;
         font-size: 0.76rem;
     }
 
-    .stepperItem {
-        gap: 4px;
-        padding: 10px;
-        border-radius: 14px;
+    .wizardProgress {
+        padding: 12px;
+        border-radius: 16px;
     }
 
-    .stepperIndex,
-    .stepperLabel,
+    .wizardProgressLabel,
     .formLabel {
         font-size: 0.76rem;
+    }
+
+    .wizardProgressTitle {
+        font-size: 0.9rem;
     }
 
     .formStep,
@@ -1978,7 +2096,6 @@
         min-height: 88px;
     }
 
-    .competitionChoiceGrid,
     .templateGrid,
     .inviteHintGrid {
         grid-template-columns: 1fr 1fr;
@@ -1997,9 +2114,8 @@
 
     .competitionChoiceLogo,
     .competitionChoiceLogoFallback {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
+        width: 28px;
+        height: 28px;
     }
 
     .competitionChoice strong,
@@ -2021,6 +2137,10 @@
     .successNote {
         font-size: 0.74rem;
         line-height: 1.4;
+    }
+
+    .fieldHint {
+        font-size: 0.7rem;
     }
 
     .ruleGrid {
@@ -2150,10 +2270,6 @@
         font-size: 0.62rem;
     }
 
-    .wizardSidebar {
-        position: static;
-    }
-
     .playHeroRail {
         grid-template-columns: 1fr;
     }
@@ -2212,7 +2328,6 @@
     .footerRow,
     .eventTeams,
     .leagueHeader,
-    .leagueTopline,
     .leagueFooter,
     .privateLeagueActions,
     .globalLeaderboardRow,
@@ -2223,10 +2338,6 @@
         grid-auto-flow: row;
         flex-direction: column;
         align-items: flex-start;
-    }
-
-    .stepper {
-        grid-template-columns: 1fr;
     }
 
     .pickOptions {
@@ -2281,12 +2392,19 @@
     }
 
     .lobbyGrid,
-    .competitionChoiceGrid,
     .templateGrid,
     .inviteHintGrid,
     .ruleGrid {
         grid-template-columns: 1fr;
         gap: 8px;
+    }
+
+    .wizardProgress {
+        align-items: flex-start;
+    }
+
+    .wizardProgressDots {
+        gap: 6px;
     }
 
     .embeddedShell .lobbyGrid {
@@ -2346,6 +2464,12 @@
         gap: 6px;
     }
 
+    .leagueTopline {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
     .leagueMeta {
         justify-content: flex-start;
     }
@@ -2390,8 +2514,8 @@
     .leaderboardAvatarPlaceholder,
     .competitionChoiceLogo,
     .competitionChoiceLogoFallback {
-        width: 30px;
-        height: 30px;
+        width: 24px;
+        height: 24px;
     }
 
     .leaderboardRow {

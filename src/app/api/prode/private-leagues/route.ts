@@ -1,11 +1,32 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
+import { listUserPrivateLeagues } from '@/lib/server/prodeCompetitions';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
 import type { ProdeSourceBinding } from '@/lib/prode/types';
 
 export const dynamic = 'force-dynamic';
+
+export async function GET() {
+    try {
+        const supabase = await createServerClient();
+        const {
+            data: { session },
+            error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError || !session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const result = await listUserPrivateLeagues(session.user.id);
+        return NextResponse.json(result);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'No se pudieron cargar tus ligas privadas.';
+        return NextResponse.json({ error: message }, { status: 500 });
+    }
+}
 
 type QueryError = { message?: string | null } | null;
 type LooseRow = Record<string, unknown>;
@@ -175,7 +196,7 @@ async function generateUniqueInviteCode(admin: LooseAdminClient) {
     throw new Error('No se pudo generar un codigo unico para la liga.');
 }
 
-async function generateUniqueLeagueSlug(admin: LooseAdminClient, competitionId: string, leagueName: string) {
+async function generateUniqueLeagueSlug(admin: LooseAdminClient, leagueName: string) {
     const baseSlug = normalizeSlug(leagueName) || 'liga-privada';
 
     for (let attempt = 0; attempt < 20; attempt += 1) {
@@ -183,7 +204,6 @@ async function generateUniqueLeagueSlug(admin: LooseAdminClient, competitionId: 
         const { data, error } = await admin
             .from('prode_private_leagues')
             .select('id')
-            .eq('competition_id', competitionId)
             .eq('slug', nextSlug)
             .maybeSingle();
 
@@ -342,7 +362,7 @@ export async function POST(request: Request) {
 
         const competitionId = await ensureBaseCompetition(admin, selectedCompetition, rules);
         const inviteCodeValue = await generateUniqueInviteCode(admin);
-        const leagueSlug = await generateUniqueLeagueSlug(admin, competitionId, leagueName);
+        const leagueSlug = await generateUniqueLeagueSlug(admin, leagueName);
 
         const leagueMetadata = {
             description: ensureNullableString(payload.description),
@@ -400,7 +420,7 @@ export async function POST(request: Request) {
                 .upsert({
                     private_league_id: createdLeague.id,
                     user_id: session.user.id,
-                    role: 'owner',
+                    role: 'admin',
                 }, { onConflict: 'private_league_id,user_id' }),
         ]);
 

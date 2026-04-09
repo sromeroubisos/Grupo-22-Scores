@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
+import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
 
 let adminClientSingleton: ReturnType<typeof createClient> | null = null
 
@@ -11,6 +13,7 @@ let adminClientSingleton: ReturnType<typeof createClient> | null = null
  * No fallback to anon key — silent fallback would bypass the intent of admin access.
  */
 export function createAdminClient() {
+    const startedAt = nowMs()
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -23,7 +26,19 @@ export function createAdminClient() {
 
     adminClientSingleton = createClient(url, serviceKey, {
         auth: { autoRefreshToken: false, persistSession: false },
+        global: {
+            fetch: createInstrumentedSupabaseFetch('server', url, fetch),
+        },
     })
+
+    logPerf(
+        ['SERVER', 'SUPABASE'],
+        {
+            operation: 'create_admin_client',
+            duration: formatDurationMs(nowMs() - startedAt),
+        },
+        'server',
+    )
 
     return adminClientSingleton
 }

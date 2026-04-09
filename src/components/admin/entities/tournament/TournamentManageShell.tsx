@@ -14,6 +14,7 @@ import {
     type TournamentFormatDraft,
     useTournamentDirty,
 } from './TournamentContext';
+import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 import './basalt.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -108,6 +109,10 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
     const tournament = data as TournamentManageRow;
     const hasSidebar = currentTab === 'resumen';
     const useWideWorkspace = !hasSidebar || currentTab === 'posiciones';
+    usePerfComponentLifecycle('TournamentManageShell', {
+        tournamentId: id,
+        tab: currentTab,
+    });
     const {
         isDirty,
         drafts,
@@ -176,8 +181,15 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
 
         setIsTransitioning(true);
         setActionMessage(null);
+        const saveRequest = beginClientRequest(`tournament:${id}:save`, 'manual_save', {
+            component: 'TournamentManageShell',
+            sections: Object.keys(updates).join(','),
+        });
         try {
             await updateEntity('tournament', id, updates);
+            saveRequest.end({
+                error: false,
+            });
 
             if (hasDirtyFormat && drafts.format) {
                 const nextMatchEvents = sanitizeMatchEventDefinitions(drafts.format as TournamentFormatDraft);
@@ -204,6 +216,9 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
             setActionMessage({ type: 'success', text: 'Cambios del torneo guardados correctamente.' });
             router.refresh();
         } catch (err: unknown) {
+            saveRequest.end({
+                error: true,
+            });
             setActionMessage({ type: 'error', text: err instanceof Error ? err.message : String(err) });
         } finally {
             setIsTransitioning(false);
@@ -255,11 +270,21 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
 
         setIsTransitioning(true);
         setActionMessage(null);
+        const statusRequest = beginClientRequest(`tournament:${id}:status`, 'status_transition', {
+            component: 'TournamentManageShell',
+            targetStatus,
+        });
         try {
             await updateEntity('tournament', id, { status: targetStatus });
+            statusRequest.end({
+                error: false,
+            });
             setActionMessage({ type: 'success', text: `Estado actualizado a ${targetStatus.toUpperCase()}.` });
             router.refresh();
         } catch (err: unknown) {
+            statusRequest.end({
+                error: true,
+            });
             setActionMessage({ type: 'error', text: err instanceof Error ? err.message : String(err) });
         } finally {
             setIsTransitioning(false);
@@ -271,10 +296,17 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
         setActionMessage(null);
 
         try {
+            const phasesRequest = beginClientRequest(`tournament:${id}:phases`, 'recalculate', {
+                component: 'TournamentManageShell',
+            });
             const phasesRes = await fetch(`/api/tournaments/${id}/phases`, {
                 cache: 'no-store',
             });
             const phasesJson = await phasesRes.json().catch(() => ({}));
+            phasesRequest.end({
+                status: phasesRes.status,
+                error: !phasesRes.ok,
+            });
             if (!phasesRes.ok) {
                 throw new Error(typeof phasesJson?.error === 'string' ? phasesJson.error : 'No se pudieron cargar las fases del torneo.');
             }
@@ -286,6 +318,10 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
                 throw new Error('El torneo no tiene fases activas para recalcular la tabla.');
             }
 
+            const recalcRequest = beginClientRequest(`tournament:${id}:standings:recalculate`, 'recalculate', {
+                component: 'TournamentManageShell',
+                phaseId: targetPhase.id,
+            });
             const recalcRes = await fetch(`/api/admin/tournaments/${id}/standings/recalculate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -295,6 +331,10 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
                 }),
             });
             const recalcJson = await recalcRes.json().catch(() => ({}));
+            recalcRequest.end({
+                status: recalcRes.status,
+                error: !recalcRes.ok,
+            });
 
             if (!recalcRes.ok) {
                 throw new Error(typeof recalcJson?.error === 'string' ? recalcJson.error : 'No se pudo recalcular la tabla.');

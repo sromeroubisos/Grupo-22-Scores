@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createApiPerfTracker } from '@/lib/perf/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,13 +9,17 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const tournamentId = (await params).id;
+  const route = `/api/tournaments/${tournamentId}/groups`;
+  const perf = createApiPerfTracker(route);
+
   try {
-    const supabase = await createClient();
-    const tournamentId = (await params).id;
+    const supabase = await perf.measureStep('create_client', () => createClient(), {
+      bucket: 'client',
+    });
     const { searchParams } = new URL(request.url);
     const phaseId = searchParams.get('phaseId');
 
-    // Fetch groups joined through phases to filter by tournament_id
     let query = supabase
       .from('tournament_groups')
       .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
@@ -25,19 +30,33 @@ export async function GET(
       query = query.eq('phase_id', phaseId);
     }
 
-    const { data: groups, error } = await query;
+    const { data: groups, error } = await perf.measureStep(
+      'load_groups',
+      async () => query,
+      {
+        bucket: 'query',
+        logQuery: true,
+        metadata: {
+          phaseId: phaseId || 'all',
+        },
+      },
+    );
 
     if (error) {
       console.error('Error fetching groups:', error);
-      return NextResponse.json({ error: 'Error fetching groups' }, { status: 500 });
+      return perf.json({ error: 'Error fetching groups' }, { status: 500 });
     }
 
-    // Return flat list without the nested tournament_phases join data
-    const result = (groups || []).map(({ tournament_phases: _tp, ...g }) => g);
-    return NextResponse.json(result);
-  } catch (error: any) {
+    const result = (groups || []).map((group) => ({
+      id: group.id,
+      name: group.name,
+      phase_id: group.phase_id,
+      order_index: group.order_index,
+    }));
+    return perf.json(result);
+  } catch (error: unknown) {
     console.error('Error in GET /api/tournaments/[id]/groups:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return perf.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -46,33 +65,45 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const tournamentId = (await params).id;
+  const route = `/api/tournaments/${tournamentId}/groups`;
+  const perf = createApiPerfTracker(route);
+
   try {
-    const supabase = await createClient();
-    await params; // ensure params are resolved
+    const supabase = await perf.measureStep('create_client', () => createClient(), {
+      bucket: 'client',
+    });
     const body = await request.json();
 
     if (!body.phase_id || !body.name) {
-      return NextResponse.json({ error: 'phase_id and name are required' }, { status: 400 });
+      return perf.json({ error: 'phase_id and name are required' }, { status: 400 });
     }
 
-    const { data: group, error } = await supabase
-      .from('tournament_groups')
-      .insert({
-        phase_id: body.phase_id,
-        name: body.name,
-        order_index: body.order_index ?? 0,
-      })
-      .select()
-      .single();
+    const { data: group, error } = await perf.measureStep(
+      'insert_group',
+      async () => supabase
+        .from('tournament_groups')
+        .insert({
+          phase_id: body.phase_id,
+          name: body.name,
+          order_index: body.order_index ?? 0,
+        })
+        .select()
+        .single(),
+      {
+        bucket: 'query',
+        logQuery: true,
+      },
+    );
 
     if (error) {
       console.error('Error creating group:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return perf.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ data: group }, { status: 201 });
-  } catch (error: any) {
+    return perf.json({ data: group }, { status: 201 });
+  } catch (error: unknown) {
     console.error('Error in POST /api/tournaments/[id]/groups:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return perf.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
 }

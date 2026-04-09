@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
+import { measureAsync } from '@/lib/perf/measure';
 
 // Routes that do NOT need a proxy-level session refresh.
 // Some are public, while others enforce auth inside the route handler itself.
@@ -33,21 +34,45 @@ export async function proxy(request: NextRequest) {
 
     // 1. Skip proxy-level auth refresh for routes that do not need it.
     if (shouldBypassSessionRefresh(pathname)) {
-        return NextResponse.next()
+        return measureAsync(
+            'proxy_bypass',
+            async () => NextResponse.next(),
+            {
+                runtime: 'server',
+                tags: ['PROXY'],
+                metadata: {
+                    path: pathname,
+                    authChecked: false,
+                },
+            },
+        )
     }
 
-    // 2. Auth Code Redirect Handler
-    // Supabase redirects to site URL. If root and code present, forward to API handler.
-    if (pathname === '/' && searchParams.has('code')) {
-        const callbackUrl = new URL('/api/auth/callback/google', request.url)
-        callbackUrl.searchParams.set('code', searchParams.get('code')!)
-        const next = searchParams.get('next')
-        if (next) callbackUrl.searchParams.set('next', next)
-        return NextResponse.redirect(callbackUrl)
-    }
+    return measureAsync(
+        'proxy',
+        async () => {
+            // 2. Auth Code Redirect Handler
+            // Supabase redirects to site URL. If root and code present, forward to API handler.
+            if (pathname === '/' && searchParams.has('code')) {
+                const callbackUrl = new URL('/api/auth/callback/google', request.url)
+                callbackUrl.searchParams.set('code', searchParams.get('code')!)
+                const next = searchParams.get('next')
+                if (next) callbackUrl.searchParams.set('next', next)
+                return NextResponse.redirect(callbackUrl)
+            }
 
-    // 3. Update Session (Refresh Auth Tokens via Cookie Management)
-    return await updateSession(request)
+            // 3. Update Session (Refresh Auth Tokens via Cookie Management)
+            return await updateSession(request)
+        },
+        {
+            runtime: 'server',
+            tags: ['PROXY'],
+            metadata: {
+                path: pathname,
+                authChecked: true,
+            },
+        },
+    )
 }
 
 export const config = {

@@ -9,6 +9,8 @@ import {
     fetchResolvedFavorites,
     type ResolvedFavorite,
 } from '@/lib/favorites/fetchFavorites';
+import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
+import { measureAsync, warnIfDuplicateWindow } from '@/lib/perf/measure';
 
 export type FavoriteItem = ResolvedFavorite;
 
@@ -97,8 +99,15 @@ function getTournamentSportCandidates(entityId: string): string[] {
 async function resolveFavoriteClientSide(favorite: FavoriteItem): Promise<Partial<FavoriteItem> | null> {
     if (favorite.entity_type === 'club') {
         try {
+            const request = beginClientRequest(`favorite:${favorite.entity_type}:${favorite.id}:team`, 'client_resolve', {
+                hook: 'useFavorites',
+            });
             const response = await fetch(`/api/teams?team_id=${encodeURIComponent(favorite.id)}&skip_squad=true`, {
                 cache: 'no-store',
+            });
+            request.end({
+                status: response.status,
+                error: !response.ok,
             });
 
             if (!response.ok) return null;
@@ -143,10 +152,17 @@ async function resolveFavoriteClientSide(favorite: FavoriteItem): Promise<Partia
 
         for (const sport of sportCandidates) {
             try {
+                const request = beginClientRequest(`favorite:${favorite.entity_type}:${favorite.id}:tournament:${sport}`, 'client_resolve', {
+                    hook: 'useFavorites',
+                });
                 const response = await fetch(
                     `/api/tournaments?id=${encodeURIComponent(favorite.id)}&sport=${encodeURIComponent(sport)}`,
                     { cache: 'no-store' }
                 );
+                request.end({
+                    status: response.status,
+                    error: !response.ok,
+                });
 
                 if (!response.ok) {
                     continue;
@@ -197,6 +213,7 @@ function redirectToLogin(): void {
 }
 
 export function useFavorites() {
+    usePerfComponentLifecycle('useFavorites', {});
     const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
     const [hasMore, setHasMore] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -260,11 +277,34 @@ export function useFavorites() {
 
     const fetchFavorites = useCallback(async () => {
         const myId = ++requestIdRef.current;
+        warnIfDuplicateWindow(
+            'useFavorites:fetchFavorites',
+            ['FETCH'],
+            {
+                key: 'favorites:resolved',
+                trigger: 'hook_refresh',
+            },
+            'client',
+            {
+                windowMs: 2000,
+                warnAfterCount: 2,
+            },
+        );
         setLoading(true);
         setError(null);
 
         try {
-            const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+            const { data: { session }, error: sessionErr } = await measureAsync(
+                'favorites_get_session',
+                async () => supabase.auth.getSession(),
+                {
+                    runtime: 'client',
+                    tags: ['AUTH'],
+                    metadata: {
+                        step: 'favorites_get_session',
+                    },
+                },
+            );
             if (myId !== requestIdRef.current) return;
 
             if (sessionErr || !session) {
@@ -273,9 +313,16 @@ export function useFavorites() {
                 return;
             }
 
+            const favoritesRequest = beginClientRequest('favorites:resolved', 'hook_refresh', {
+                hook: 'useFavorites',
+            });
             const t0 = performance.now();
             const items = await fetchResolvedFavorites(supabase);
             const t1 = performance.now();
+            favoritesRequest.end({
+                rows: items.length,
+                error: false,
+            });
 
             if (myId !== requestIdRef.current) return;
 

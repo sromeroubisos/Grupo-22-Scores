@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
+import { logPerf, measureAsync } from '@/lib/perf/measure';
 
 export async function updateSession(request: NextRequest) {
     let response = NextResponse.next({
@@ -56,12 +58,30 @@ export async function updateSession(request: NextRequest) {
                     })
                 },
             },
+            global: {
+                fetch: createInstrumentedSupabaseFetch('server', process.env.NEXT_PUBLIC_SUPABASE_URL, fetch),
+            },
         }
     )
 
     // Refresh session if expired - required for Server Components and OAuth PKCE flow.
     // DO NOT skip this call: it is needed to exchange OAuth codes and refresh tokens.
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const { data: { user }, error } = await measureAsync(
+        'proxy_get_user',
+        async () => supabase.auth.getUser(),
+        {
+            runtime: 'server',
+            tags: ['PROXY'],
+            metadata: {
+                path: request.nextUrl.pathname,
+                authChecked: true,
+            },
+            describeResult: (result) => ({
+                success: !result.error,
+                hasUser: Boolean(result.data?.user),
+            }),
+        },
+    )
     if (error) {
         // Only log if it's not a common "no session" state
         if (!error.message.includes('Auth session missing')) {
@@ -72,6 +92,16 @@ export async function updateSession(request: NextRequest) {
     } else {
         console.log('[Middleware] No session session found on request');
     }
+
+    logPerf(
+        ['PROXY'],
+        {
+            path: request.nextUrl.pathname,
+            authChecked: true,
+            hasUser: Boolean(user),
+        },
+        'server',
+    )
 
     return response
 }

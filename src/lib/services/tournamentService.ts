@@ -2,6 +2,7 @@ import { supabase } from '../supabase';
 import { Database } from '../database.types';
 import { normalizeError } from '../utils/errorUtils';
 import { getMissingTournamentPriorityMessage, isMissingColumnError } from '../utils/supabaseSchema';
+import { logOverfetchWarning, measureAsync } from '@/lib/perf/measure';
 
 export interface TournamentGlobal {
   id: string;
@@ -56,10 +57,20 @@ export const tournamentService = {
     userId?: string 
   } = {}): Promise<TournamentGlobal[]> {
     try {
-      const { data, error } = await supabase.rpc('get_all_tournaments', {
-        p_include_hidden: options.includeHidden || false,
-        p_viewer_user_id: options.userId || null
-      });
+      const { data, error } = await measureAsync(
+        'get_all_tournaments_rpc',
+        async () => supabase.rpc('get_all_tournaments', {
+          p_include_hidden: options.includeHidden || false,
+          p_viewer_user_id: options.userId || null
+        }),
+        {
+          runtime: 'client',
+          tags: ['CLIENT', 'SUPABASE'],
+          metadata: {
+            operation: 'get_all_tournaments_rpc',
+          },
+        },
+      );
 
       if (error) {
         console.warn('[tournamentService] RPC failed, falling back to direct table query:', error.message);
@@ -81,6 +92,11 @@ export const tournamentService = {
    * Fallback method when RPC is missing or failing
    */
   async getTournamentsFallback(options: { includeHidden?: boolean }): Promise<TournamentGlobal[]> {
+    logOverfetchWarning({
+      endpoint: 'tournamentService.getTournamentsFallback',
+      reason: 'fallback query returns tournament rows with joined sport/country/union data',
+    }, 'client');
+
     const buildQuery = (select: string) => {
       let query = supabase
         .from('tournaments')
@@ -94,10 +110,30 @@ export const tournamentService = {
       return query;
     };
 
-    let { data, error } = await buildQuery(TOURNAMENT_FALLBACK_SELECT_WITH_PRIORITY);
+    let { data, error } = await measureAsync(
+      'get_tournaments_fallback',
+      async () => buildQuery(TOURNAMENT_FALLBACK_SELECT_WITH_PRIORITY),
+      {
+        runtime: 'client',
+        tags: ['CLIENT', 'SUPABASE'],
+        metadata: {
+          operation: 'get_tournaments_fallback',
+        },
+      },
+    );
 
     if (error && isMissingColumnError(error, 'priority')) {
-      ({ data, error } = await buildQuery(TOURNAMENT_FALLBACK_SELECT));
+      ({ data, error } = await measureAsync(
+        'get_tournaments_fallback_no_priority',
+        async () => buildQuery(TOURNAMENT_FALLBACK_SELECT),
+        {
+          runtime: 'client',
+          tags: ['CLIENT', 'SUPABASE'],
+          metadata: {
+            operation: 'get_tournaments_fallback_no_priority',
+          },
+        },
+      ));
     }
 
     if (error) {
@@ -189,11 +225,22 @@ export const tournamentService = {
     }
 
     // Step 3a: Existence check
-    const { data: existing, error: checkError } = await supabase
-      .from('tournaments')
-      .select('id, name')
-      .eq('id', id)
-      .maybeSingle();
+    const { data: existing, error: checkError } = await measureAsync(
+      'check_tournament_exists',
+      async () => supabase
+        .from('tournaments')
+        .select('id, name')
+        .eq('id', id)
+        .maybeSingle(),
+      {
+        runtime: 'client',
+        tags: ['CLIENT', 'SUPABASE'],
+        metadata: {
+          operation: 'check_tournament_exists',
+          table: 'tournaments',
+        },
+      },
+    );
 
     if (checkError) {
       console.error('[tournamentService] Database check error:', checkError);
@@ -203,7 +250,19 @@ export const tournamentService = {
     if (!existing) {
       // If we are here, we might want to check if it's visible with a service role bypass (not possible client-side)
       // but we can check if there are ANY tournaments to see if it's a general connection issue.
-      const { count } = await supabase.from('tournaments').select('*', { count: 'exact', head: true });
+      const { count } = await measureAsync(
+        'count_visible_tournaments',
+        async () => supabase.from('tournaments').select('*', { count: 'exact', head: true }),
+        {
+          runtime: 'client',
+          tags: ['CLIENT', 'SUPABASE'],
+          metadata: {
+            operation: 'count_visible_tournaments',
+            table: 'tournaments',
+            head: true,
+          },
+        },
+      );
       
       console.error(`[tournamentService] Tournament ${id} not found. Total records in table visible to user: ${count}`);
       throw new Error(`Torneo NO ENCONTRADO (ID: ${id}). Es posible que haya sido eliminado o que el ID suministrado sea incorrecto.`);
@@ -218,7 +277,19 @@ export const tournamentService = {
         .select()
         .maybeSingle();
 
-    let { data, error, status } = await runUpdate(filteredUpdates);
+    let { data, error, status } = await measureAsync(
+      'update_tournament_meta',
+      async () => runUpdate(filteredUpdates),
+      {
+        runtime: 'client',
+        tags: ['CLIENT', 'SUPABASE'],
+        metadata: {
+          operation: 'update_tournament_meta',
+          table: 'tournaments',
+          tournamentId: id,
+        },
+      },
+    );
 
     if (error && filteredUpdates.priority !== undefined && isMissingColumnError(error, 'priority')) {
       const { priority: _ignoredPriority, ...retryUpdates } = filteredUpdates;
@@ -228,7 +299,19 @@ export const tournamentService = {
       }
 
       console.warn('[tournamentService] priority column missing. Retrying update without priority.');
-      ({ data, error, status } = await runUpdate(retryUpdates));
+      ({ data, error, status } = await measureAsync(
+        'update_tournament_meta_no_priority',
+        async () => runUpdate(retryUpdates),
+        {
+          runtime: 'client',
+          tags: ['CLIENT', 'SUPABASE'],
+          metadata: {
+            operation: 'update_tournament_meta_no_priority',
+            table: 'tournaments',
+            tournamentId: id,
+          },
+        },
+      ));
     }
 
     if (error) {
@@ -306,9 +389,20 @@ export const tournamentService = {
     const fileName = `${id}-${Math.random()}.${fileExt}`;
     const filePath = `logos/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('tournaments')
-      .upload(filePath, file);
+    const { error: uploadError } = await measureAsync(
+      'upload_tournament_logo',
+      async () => supabase.storage
+        .from('tournaments')
+        .upload(filePath, file),
+      {
+        runtime: 'client',
+        tags: ['CLIENT', 'SUPABASE'],
+        metadata: {
+          operation: 'upload_tournament_logo',
+          bucket: 'tournaments',
+        },
+      },
+    );
 
     if (uploadError) {
       console.error('Error uploading logo:', uploadError);

@@ -554,6 +554,19 @@ async function getCompetitionRows(admin: LooseMutationClient, competitionId: str
     };
 }
 
+async function getCompetitionEventRows(admin: LooseMutationClient, competitionId: string) {
+    const eventResult = await admin
+        .from('prode_events')
+        .select('id, competition_id, home_label, away_label, starts_at, locks_at, status, scoring_status, official_result, match_snapshot')
+        .eq('competition_id', competitionId)
+        .order('starts_at', { ascending: true });
+
+    return {
+        eventRows: eventResult.data || [],
+        errors: eventResult.error ? [eventResult.error] : [],
+    };
+}
+
 async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: string): Promise<BaseMatchRow[]> {
     const result = await admin
         .from('matches')
@@ -981,7 +994,7 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
 }
 
 function buildCompetitionSubtitle(competitionRow: AnyRow) {
-    return toNullableString(competitionRow.description) || 'Liga global oficial del torneo.';
+    return toNullableString(competitionRow.description) || 'Liga global no oficial del torneo.';
 }
 
 function buildLeagueSubtitle(leagueRow: AnyRow, competitionRow: AnyRow) {
@@ -1070,42 +1083,65 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
 
 export async function getPrivateLeaguePlayView(slug: string, currentUserId: string | null, baseUrl: string): Promise<ProdePlayView | null> {
     const admin = createAdminClient() as unknown as LooseMutationClient;
-    const leagueResult = await admin
+    const leagueListResult = await admin
         .from('prode_private_leagues')
-        .select('id, competition_id, owner_user_id, name, invite_code, visibility, metadata')
+        .select('id, competition_id, owner_user_id, name, invite_code, visibility, metadata, created_at')
         .eq('slug', slug)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
-    if (leagueResult.error) {
-        throw new Error(leagueResult.error.message || 'No se pudo cargar la liga.');
+    if (leagueListResult.error) {
+        throw new Error(leagueListResult.error.message || 'No se pudo cargar la liga.');
     }
 
-    if (!leagueResult.data) {
+    const activeLeagueCandidates = (leagueListResult.data || []).filter((row) => getLeagueLifecycle(row) === 'active');
+
+    if (!activeLeagueCandidates.length) {
         return null;
     }
 
-    if (getLeagueLifecycle(leagueResult.data) !== 'active') {
-        return null;
+    let leagueRow = activeLeagueCandidates[0];
+
+    if (activeLeagueCandidates.length > 1 && currentUserId) {
+        const candidateIds = activeLeagueCandidates.map((row) => toSafeString(row.id)).filter(Boolean);
+        const membershipProbeResult = candidateIds.length
+            ? await admin
+                .from('prode_private_league_members')
+                .select('private_league_id, user_id, role')
+                .in('private_league_id', candidateIds)
+                .eq('user_id', currentUserId)
+            : { data: [], error: null };
+
+        if (membershipProbeResult.error) {
+            throw new Error(membershipProbeResult.error.message || 'No se pudo resolver la liga privada.');
+        }
+
+        const membershipLeagueIds = new Set(
+            (membershipProbeResult.data || []).map((row) => toSafeString(row.private_league_id)).filter(Boolean),
+        );
+
+        const ownedLeague = activeLeagueCandidates.find((row) => toSafeString(row.owner_user_id) === currentUserId);
+        const memberLeague = activeLeagueCandidates.find((row) => membershipLeagueIds.has(toSafeString(row.id)));
+        leagueRow = ownedLeague || memberLeague || activeLeagueCandidates[0];
     }
 
-    const leagueId = toSafeString(leagueResult.data.id);
-    const leagueVisibility = toSafeString(leagueResult.data.visibility) || 'private';
-    const ownerUserId = toSafeString(leagueResult.data.owner_user_id);
+    const leagueId = toSafeString(leagueRow.id);
+    const leagueVisibility = toSafeString(leagueRow.visibility) || 'private';
+    const ownerUserId = toSafeString(leagueRow.owner_user_id);
 
-    const [leagueMemberResult, competitionResult] = await Promise.all([
+    const [leagueMembershipResult, competitionResult] = await Promise.all([
         admin
             .from('prode_private_league_members')
-            .select('user_id, role, users(name, avatar_url)')
+            .select('user_id, role')
             .eq('private_league_id', leagueId),
         admin
             .from('prode_competitions')
             .select('id, name, description, status, sport_id, prediction_lead_minutes, source_type, local_tournament_id, external_provider, external_tournament_id, active_ruleset_id, metadata')
-            .eq('id', toSafeString(leagueResult.data.competition_id))
+            .eq('id', toSafeString(leagueRow.competition_id))
             .maybeSingle(),
     ]);
 
-    if (leagueMemberResult.error) {
-        throw new Error(leagueMemberResult.error.message || 'No se pudieron cargar los miembros de la liga.');
+    if (leagueMembershipResult.error) {
+        throw new Error(leagueMembershipResult.error.message || 'No se pudieron cargar los miembros de la liga.');
     }
     if (competitionResult.error) {
         throw new Error(competitionResult.error.message || 'No se pudo cargar la competencia asociada.');
@@ -1114,13 +1150,18 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
         return null;
     }
 
+    const leagueMembershipRows = leagueMembershipResult.data || [];
     const isMember = currentUserId
-        ? leagueMemberResult.data?.some((row) => toSafeString(row.user_id) === currentUserId) || ownerUserId === currentUserId
+        ? leagueMembershipRows.some((row) => toSafeString(row.user_id) === currentUserId) || ownerUserId === currentUserId
         : false;
     const currentMembershipRole = currentUserId
-        ? toSafeString(leagueMemberResult.data?.find((row) => toSafeString(row.user_id) === currentUserId)?.role)
+        ? toSafeString(leagueMembershipRows.find((row) => toSafeString(row.user_id) === currentUserId)?.role)
         : '';
-    const canManage = Boolean(currentUserId) && (ownerUserId === currentUserId || currentMembershipRole === 'admin');
+    const canManage = Boolean(currentUserId) && (
+        ownerUserId === currentUserId
+        || currentMembershipRole === 'admin'
+        || currentMembershipRole === 'owner'
+    );
 
     if (leagueVisibility === 'private' && !isMember) {
         return null;
@@ -1131,7 +1172,7 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
     const competitionId = toSafeString(competitionResult.data.id);
     const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
     const [{ eventRows, errors }, rankingResult, predictionResult, rulesetResult] = await Promise.all([
-        getCompetitionRows(admin, competitionId),
+        getCompetitionEventRows(admin, competitionId),
         admin
             .from('prode_rankings')
             .select('user_id, total_points, exact_hits, correct_outcomes, position, users(name, avatar_url)')
@@ -1161,24 +1202,38 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
     }
 
     const events = mapEvents(eventRows, predictionResult.data || []);
-    const leaderboardRows = rankingResult.data?.length
+    let leaderboardRows = rankingResult.data?.length
         ? rankingResult.data.map((row) => mapLeaderboardEntry(row, currentUserId))
-        : buildFallbackLeaderboard(leagueMemberResult.data || [], currentUserId);
+        : [];
+
+    if (!leaderboardRows.length) {
+        const fallbackMemberResult = await admin
+            .from('prode_private_league_members')
+            .select('user_id, role, users(name, avatar_url)')
+            .eq('private_league_id', leagueId);
+
+        if (fallbackMemberResult.error) {
+            throw new Error(fallbackMemberResult.error.message || 'No se pudo cargar el ranking base de la liga.');
+        }
+
+        leaderboardRows = buildFallbackLeaderboard(fallbackMemberResult.data || [], currentUserId);
+    }
+
     const nextLockAt = events.filter((event) => event.isOpen).map((event) => event.locksAt)[0] || null;
 
     return {
         scope: 'private_league',
         privateLeagueId: leagueId,
-        title: toSafeString(leagueResult.data.name),
-        subtitle: buildLeagueSubtitle(leagueResult.data, competitionResult.data),
+        title: toSafeString(leagueRow.name),
+        subtitle: buildLeagueSubtitle(leagueRow, competitionResult.data),
         competitionName: toSafeString(competitionResult.data.name),
         competitionStatus: normalizeCompetitionStatus(competitionResult.data.status),
         sportLabel: getSportLabel(toNullableString(competitionResult.data.sport_id)),
-        memberCount: (leagueMemberResult.data || []).length,
+        memberCount: leagueMembershipRows.length,
         nextLockAt,
-        inviteCode: toNullableString(leagueResult.data.invite_code),
-        shareUrl: toNullableString(leagueResult.data.invite_code)
-            ? `${baseUrl.replace(/\/$/, '')}/prode/ligas/unirse?codigo=${encodeURIComponent(toSafeString(leagueResult.data.invite_code))}`
+        inviteCode: toNullableString(leagueRow.invite_code),
+        shareUrl: toNullableString(leagueRow.invite_code)
+            ? `${baseUrl.replace(/\/$/, '')}/prode/ligas/unirse?codigo=${encodeURIComponent(toSafeString(leagueRow.invite_code))}`
             : null,
         canInvite: isMember,
         canManage,
@@ -1187,6 +1242,6 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
         events,
         leaderboard: leaderboardRows,
         personalSummary: buildPersonalSummary(leaderboardRows, events, currentUserId),
-        rules: resolveRulesSummary(competitionResult.data, leagueResult.data, rulesetResult.data),
+        rules: resolveRulesSummary(competitionResult.data, leagueRow, rulesetResult.data),
     };
 }

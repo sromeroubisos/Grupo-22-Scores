@@ -3,6 +3,7 @@ import { getProdeSourceSummary, normalizeProdeSourceBinding } from '@/lib/prode/
 import type {
     ProdeBaseCompetitionOption,
     ProdeCompetitionEventStats,
+    ProdePrivateLeagueSummary,
     PublicProdeCompetition,
     PublicProdeCompetitionDetail,
     PublicProdeEventSummary,
@@ -98,6 +99,21 @@ function getDefaultMemberStats() {
     return {
         totalMembers: 0,
     };
+}
+
+function getSportLabel(value: string | null) {
+    switch (value) {
+        case 'rugby':
+            return 'Rugby';
+        case 'football':
+            return 'Futbol';
+        case 'basketball':
+            return 'Basquet';
+        case 'tennis':
+            return 'Tenis';
+        default:
+            return value;
+    }
 }
 
 function buildStatsMap(rows: AnyRow[]) {
@@ -556,5 +572,97 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
                 position: Number.isFinite(Number(row.position)) ? Number(row.position) : null,
             };
         }),
+    };
+}
+
+export async function listUserPrivateLeagues(userId: string): Promise<SchemaStatus<ProdePrivateLeagueSummary[]>> {
+    const supabase = await getReadClient() as unknown as SupabaseClientLike;
+    const { data: membershipRows, error: membershipsError } = await supabase
+        .from('prode_private_league_members')
+        .select('private_league_id, user_id, role')
+        .eq('user_id', userId);
+
+    if (membershipsError) {
+        if (isMissingRelationError(membershipsError)) {
+            return { schemaReady: false, data: [] };
+        }
+
+        throw new Error(membershipsError.message || 'No se pudieron cargar tus ligas privadas.');
+    }
+
+    const memberships = (membershipRows || []) as AnyRow[];
+    const leagueIds = Array.from(new Set(memberships.map((row) => toSafeString(row.private_league_id)).filter(Boolean)));
+
+    if (!leagueIds.length) {
+        return { schemaReady: true, data: [] };
+    }
+
+    const [{ data: leagueRows, error: leaguesError }, { data: memberCountRows, error: memberCountsError }] = await Promise.all([
+        supabase
+            .from('prode_private_leagues')
+            .select('id, slug, name, invite_code, visibility, competition_id, owner_user_id')
+            .in('id', leagueIds),
+        supabase
+            .from('prode_private_league_members')
+            .select('private_league_id')
+            .in('private_league_id', leagueIds),
+    ]);
+
+    if (leaguesError) {
+        throw new Error(leaguesError.message || 'No se pudieron cargar tus ligas privadas.');
+    }
+    if (memberCountsError && !isMissingRelationError(memberCountsError)) {
+        throw new Error(memberCountsError.message || 'No se pudo contar los miembros de tus ligas.');
+    }
+
+    const leagues = (leagueRows || []) as AnyRow[];
+    const competitionIds = Array.from(new Set(leagues.map((row) => toSafeString(row.competition_id)).filter(Boolean)));
+    const { data: competitionRows, error: competitionsError } = competitionIds.length
+        ? await supabase
+            .from('prode_competitions')
+            .select('id, name, sport_id')
+            .in('id', competitionIds)
+        : { data: [], error: null };
+
+    if (competitionsError && !isMissingRelationError(competitionsError)) {
+        throw new Error(competitionsError.message || 'No se pudieron cargar las competencias de tus ligas.');
+    }
+
+    const competitionMap = new Map(
+        ((competitionRows || []) as AnyRow[]).map((row) => [toSafeString(row.id), row]),
+    );
+    const memberCountMap = new Map<string, number>();
+    ((memberCountRows || []) as AnyRow[]).forEach((row) => {
+        const leagueId = toSafeString(row.private_league_id);
+        memberCountMap.set(leagueId, (memberCountMap.get(leagueId) || 0) + 1);
+    });
+    const membershipMap = new Map(
+        memberships.map((row) => [toSafeString(row.private_league_id), row]),
+    );
+
+    return {
+        schemaReady: true,
+        data: leagues
+            .map((row) => {
+                const leagueId = toSafeString(row.id);
+                const membership = membershipMap.get(leagueId) || {};
+                const competition = competitionMap.get(toSafeString(row.competition_id)) || {};
+                const role = toNullableString(membership.role);
+                const ownerUserId = toSafeString(row.owner_user_id);
+
+                return {
+                    id: leagueId,
+                    slug: toSafeString(row.slug),
+                    name: toSafeString(row.name),
+                    competitionName: toSafeString(competition.name) || 'Competencia',
+                    sportLabel: getSportLabel(toNullableString(competition.sport_id)),
+                    memberCount: memberCountMap.get(leagueId) || 0,
+                    inviteCode: toNullableString(row.invite_code),
+                    visibility: (toSafeString(row.visibility) || 'private') as 'private' | 'public',
+                    role,
+                    canManage: ownerUserId === userId || role === 'admin' || role === 'owner',
+                };
+            })
+            .sort((left, right) => left.name.localeCompare(right.name, 'es')),
     };
 }

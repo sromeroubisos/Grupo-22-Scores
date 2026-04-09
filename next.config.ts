@@ -2,6 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'static.flashscore.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'a.espncdn.com',
+      },
+    ],
+  },
   typescript: {
     // Velocidad extrema: saltamos la comprobación de tipos durante el build.
     // Los errores se verán en el IDE o en el pre-commit.

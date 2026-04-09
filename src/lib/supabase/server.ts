@@ -1,12 +1,18 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase';
+import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
 
 export async function createClient() {
+    const startedAt = nowMs()
     const cookieStore = await cookies()
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+    const instrumentedFetch = createInstrumentedSupabaseFetch('server', url, fetch)
 
-    return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
+    const client = createServerClient(
+        url,
+        key,
         {
             cookies: {
                 getAll() {
@@ -26,6 +32,29 @@ export async function createClient() {
                     }
                 },
             },
+            global: {
+                fetch: instrumentedFetch,
+            },
         }
     )
+
+    logPerf(
+        ['SERVER', 'SUPABASE'],
+        {
+            operation: 'create_server_client',
+            duration: formatDurationMs(nowMs() - startedAt),
+            cookieCount: cookieStore.getAll().length,
+        },
+        'server',
+    )
+
+    return client
+}
+
+export async function runServerSupabaseLatencyCheck(table = 'matches') {
+    const supabase = await createClient();
+    return runSupabaseLatencyProbe(supabase, {
+        runtime: 'server',
+        table,
+    });
 }

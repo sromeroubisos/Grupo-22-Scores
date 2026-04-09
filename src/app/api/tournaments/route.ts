@@ -48,6 +48,8 @@ import {
     applyExternalTournamentStandingsOverride,
     getExternalTournamentStandingsOverride,
 } from '@/lib/server/externalTournamentStandingsOverrides';
+import { createApiPerfTracker } from '@/lib/perf/api';
+import { formatDurationMs, logPerf, measureAsync, nowMs } from '@/lib/perf/measure';
 
 const TAB_TIMEOUT_MS = 5000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -380,10 +382,21 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 }
 
 function timedTab<T>(label: string, promise: Promise<T>, ms: number = TAB_TIMEOUT_MS): Promise<T> {
-    return withTimeout(promise, ms, label).catch((error) => {
-        console.warn(`[Tournament API] ${label} failed:`, error);
-        throw error;
-    });
+    return measureAsync(
+        `tournaments_${label}`,
+        async () => withTimeout(promise, ms, label).catch((error) => {
+            console.warn(`[Tournament API] ${label} failed:`, error);
+            throw error;
+        }),
+        {
+            runtime: 'server',
+            tags: ['API', 'QUERY'],
+            metadata: {
+                route: '/api/tournaments',
+                step: label,
+            },
+        },
+    );
 }
 
 
@@ -522,6 +535,8 @@ async function resolveIdsFromTournamentId(
 }
 
 export async function GET(request: Request) {
+    const perf = createApiPerfTracker('/api/tournaments');
+    const startedAt = nowMs();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id') || '';
     let url = searchParams.get('url') || searchParams.get('tournament_url') || searchParams.get('tournamentUrl') || '';
@@ -532,6 +547,11 @@ export async function GET(request: Request) {
         searchParams.get('season_id') ||
         searchParams.get('seasonId') ||
         undefined;
+    perf.note({
+        id: id || 'none',
+        sport,
+        hasUrl: Boolean(searchParams.get('url') || searchParams.get('tournament_url') || searchParams.get('tournamentUrl')),
+    });
 
     let tournamentId = searchParams.get('tournament_id') || searchParams.get('tournamentId') || undefined;
     let stageId = searchParams.get('tournament_stage_id') || searchParams.get('tournamentStageId') || searchParams.get('stageId') || undefined;
@@ -583,7 +603,14 @@ export async function GET(request: Request) {
 
     url = normalizeTournamentUrl(url) || url;
 
-    const dbTournamentMeta = await findDbTournamentMeta(id);
+    const dbTournamentMeta = await perf.measureStep(
+        'find_db_tournament_meta',
+        async () => findDbTournamentMeta(id),
+        {
+            bucket: 'query',
+            logQuery: true,
+        },
+    );
     const resolvedSportId = dbTournamentMeta?.sport_id || localTournament?.sportId || sport;
 
     const hasFsPrefix = id.toLowerCase().startsWith('fs-');
@@ -644,7 +671,7 @@ export async function GET(request: Request) {
         isBlockedTournamentId(dbTournamentMeta?.slug);
 
     if (isBlockedTournament) {
-        return Response.json(
+        return perf.json(
             { ok: false, error: 'Tournament not found' },
             { status: 404 }
         );
@@ -728,7 +755,7 @@ export async function GET(request: Request) {
 
             const snapshotEntityId = bundle.ids?.tournamentId || id || url || 'unknown';
 
-            return Response.json({
+            return perf.json({
                 ok: true,
                 _debug: {
                     query: { id, url, sport, requestedSeason },
@@ -833,7 +860,7 @@ export async function GET(request: Request) {
 
             const snapshotEntityId = bundle.ids?.tournamentId || id || url || 'unknown';
 
-            return Response.json({
+            return perf.json({
                 ok: true,
                 _debug: {
                     query: { id, url, sport, requestedSeason },
@@ -1271,7 +1298,17 @@ export async function GET(request: Request) {
             console.warn('Catalog persist failed:', persistError);
         }
 
-        return Response.json({
+        logPerf(
+            ['API', 'WARN'],
+            {
+                route: '/api/tournaments',
+                reason: 'initial payload includes details + results + fixtures + standings + variants + draw + archives',
+                duration: formatDurationMs(nowMs() - startedAt),
+            },
+            'server',
+        );
+
+        return perf.json({
             ok: true,
             _debug: {
                 query: { id, url, sport, tournamentId, stageId, templateId, seasonId },
@@ -1365,7 +1402,7 @@ export async function GET(request: Request) {
 
             const hasAnySnapshot = Object.values(fallbackSources).some((v) => v === 'snapshot');
             if (hasAnySnapshot) {
-                return Response.json({
+                return perf.json({
                     ok: true,
                     _cache: {
                         entityId: fallbackEntityId,
@@ -1389,7 +1426,7 @@ export async function GET(request: Request) {
         } catch (fallbackError) {
             console.error('Tournament fallback error', fallbackError);
         }
-        return Response.json(
+        return perf.json(
             { ok: false, error: 'Failed to load tournament data', details: e.message || String(e) },
             { status: 500 }
         );

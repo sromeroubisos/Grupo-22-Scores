@@ -247,6 +247,8 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     }, [lockedOrLiveEvents.length, openEvents.length, view.isFinished]);
     const inviteCode = view.inviteCode ?? '';
     const shareUrl = view.shareUrl ?? '';
+    const showInviteActions = view.scope === 'private_league' && Boolean(inviteCode || shareUrl) && (view.canInvite || view.canManage);
+    const showManageShortcut = view.scope === 'private_league' && view.canManage;
 
     async function copyToClipboard(value: string, target: 'code' | 'link') {
         if (typeof navigator === 'undefined' || !navigator.clipboard) return;
@@ -452,12 +454,30 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                             </div>
 
                             <div className={styles.playHeroActions}>
-                                {view.canInvite && inviteCode ? (
+                                {showInviteActions && inviteCode ? (
                                     <button type="button" className={styles.posterPrimaryCta} onClick={() => void copyToClipboard(inviteCode, 'code')}>
-                                        {copiedTarget === 'code' ? 'Codigo copiado' : 'Invitar'}
+                                        {copiedTarget === 'code' ? 'Codigo copiado' : 'Copiar codigo'}
+                                    </button>
+                                ) : null}
+                                {showInviteActions && shareUrl ? (
+                                    <button type="button" className={styles.posterSecondaryCta} onClick={() => void copyToClipboard(shareUrl, 'link')}>
+                                        {copiedTarget === 'link' ? 'Link copiado' : 'Copiar link'}
                                     </button>
                                 ) : null}
                                 <button type="button" className={styles.posterSecondaryCta} onClick={() => setActiveTab('table')}>Ver tabla</button>
+                                {showManageShortcut ? (
+                                    <button
+                                        type="button"
+                                        className={styles.posterSecondaryCta}
+                                        onClick={() => {
+                                            setRulesFeedback(null);
+                                            setActiveTab('rules');
+                                            setIsEditingRules(true);
+                                        }}
+                                    >
+                                        Editar reglas
+                                    </button>
+                                ) : null}
                             </div>
                         </div>
 
@@ -680,7 +700,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                 </div>
                             </section>
 
-                            {view.canInvite && (inviteCode || shareUrl) ? (
+                            {showInviteActions ? (
                                 <section className={styles.summaryCard}>
                                     <p className={styles.previewEyebrow}>Acciones sociales</p>
                                     <div className={styles.socialActions}>

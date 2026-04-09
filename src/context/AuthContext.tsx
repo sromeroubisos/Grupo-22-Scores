@@ -14,6 +14,7 @@ import {
     getOnboardingStatus,
 } from '@/lib/services/preferencesService';
 import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client';
+import { logPerf, measureAsync, nowMs, warnIfDuplicateWindow } from '@/lib/perf/measure';
 
 interface User {
     id: string;
@@ -74,6 +75,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
     const isMounted = useRef(true);
+    const authProviderStartedAt = useRef(nowMs());
+
+    const trackAuthDuplicate = useCallback((step: string, metadata: Record<string, unknown> = {}) => {
+        return warnIfDuplicateWindow(
+            `auth:${step}`,
+            ['AUTH'],
+            {
+                step,
+                ...metadata,
+            },
+            'client',
+            {
+                windowMs: 2000,
+                warnAfterCount: 2,
+            },
+        );
+    }, []);
 
     const resolveFallbackOnboarding = useCallback((sbUser: SupabaseUser) => {
         const metadataStatus = getOnboardingMetadataStatus(sbUser.user_metadata);
@@ -104,15 +122,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     const fetchAndSetUser = useCallback(async (sbUser: SupabaseUser) => {
+        trackAuthDuplicate('restoreUser', { userId: sbUser.id });
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
         const fallbackOnboarding = resolveFallbackOnboarding(sbUser);
 
         try {
-            const { data: profile, error: profileError } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', sbUser.id)
-                .single();
+            const { data: profile, error: profileError } = await measureAsync(
+                'restore_user_profile',
+                async () => supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', sbUser.id)
+                    .single(),
+                {
+                    runtime: 'client',
+                    tags: ['AUTH'],
+                    metadata: {
+                        step: 'restoreUserProfile',
+                        userId: sbUser.id,
+                    },
+                    describeResult: (result) => ({
+                        success: !result.error,
+                        hasProfile: Boolean(result.data),
+                    }),
+                },
+            );
 
             if (!isMounted.current) return;
 
@@ -122,13 +156,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (profile) {
                 console.log('[AuthContext] Profile found in DB');
-                const [membershipsResult, onboarding] = await Promise.all([
-                    supabase
-                        .from('memberships')
-                        .select('scope_type, scope_id, role')
-                        .eq('user_id', sbUser.id),
-                    getOnboardingStatus(supabase, sbUser.id),
-                ]);
+                const [membershipsResult, onboarding] = await measureAsync(
+                    'restore_user_dependencies',
+                    async () => Promise.all([
+                        supabase
+                            .from('memberships')
+                            .select('scope_type, scope_id, role')
+                            .eq('user_id', sbUser.id),
+                        getOnboardingStatus(supabase, sbUser.id),
+                    ]),
+                    {
+                        runtime: 'client',
+                        tags: ['AUTH'],
+                        metadata: {
+                            step: 'restoreUserDependencies',
+                            userId: sbUser.id,
+                        },
+                    },
+                );
 
                 if (membershipsResult.error) {
                     console.warn('[AuthContext] Memberships fetch error:', membershipsResult.error.message);
@@ -216,14 +261,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setIsLoading(false);
             }
         }
-    }, [rehydrateMissingOnboardingStatus, resolveFallbackOnboarding, supabase]);
+    }, [rehydrateMissingOnboardingStatus, resolveFallbackOnboarding, supabase, trackAuthDuplicate]);
 
     useEffect(() => {
         isMounted.current = true;
+        logPerf(
+            ['AUTH'],
+            {
+                step: 'provider_mount',
+                duration: `${(nowMs() - authProviderStartedAt.current).toFixed(1)}ms`,
+            },
+            'client',
+        );
 
         const initAuth = async () => {
             try {
-                const { data: { session }, error } = await supabase.auth.getSession();
+                trackAuthDuplicate('getSession', { source: 'initAuth' });
+                const { data: { session }, error } = await measureAsync(
+                    'getSession',
+                    async () => supabase.auth.getSession(),
+                    {
+                        runtime: 'client',
+                        tags: ['AUTH'],
+                        metadata: {
+                            step: 'getSession',
+                            source: 'initAuth',
+                        },
+                        describeResult: (result) => ({
+                            success: !result.error,
+                            hasSession: Boolean(result.data?.session),
+                        }),
+                    },
+                );
                 if (error) throw error;
 
                 if (isMounted.current) {
@@ -248,6 +317,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+            warnIfDuplicateWindow(
+                `auth:event:${event}`,
+                ['AUTH'],
+                {
+                    step: 'onAuthStateChange',
+                    event,
+                },
+                'client',
+                {
+                    windowMs: 2000,
+                    warnAfterCount: 2,
+                },
+            );
+            logPerf(
+                ['AUTH'],
+                {
+                    step: 'onAuthStateChange',
+                    event,
+                    hasSession: Boolean(session),
+                },
+                'client',
+            );
             console.log('[AuthContext] onAuthStateChange event:', event, 'Has session:', !!session);
             if (!isMounted.current) return;
 
@@ -278,13 +369,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         });
 
-        initAuth();
+        void measureAsync(
+            'initAuth',
+            async () => initAuth(),
+            {
+                runtime: 'client',
+                tags: ['AUTH'],
+                metadata: {
+                    step: 'initAuth',
+                },
+            },
+        );
 
         return () => {
             isMounted.current = false;
             subscription.unsubscribe();
         };
-    }, [fetchAndSetUser, resetBrokenSession, supabase]);
+    }, [fetchAndSetUser, resetBrokenSession, supabase, trackAuthDuplicate]);
 
     const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
         void _role;
@@ -313,10 +414,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshOnboardingStatus = async () => {
         if (!user) return;
         try {
-            const response = await fetch('/api/onboarding/preferences?mode=status', {
-                cache: 'no-store',
-                credentials: 'same-origin',
-            });
+            const response = await measureAsync(
+                'refresh_onboarding_status',
+                async () => fetch('/api/onboarding/preferences?mode=status', {
+                    cache: 'no-store',
+                    credentials: 'same-origin',
+                }),
+                {
+                    runtime: 'client',
+                    tags: ['AUTH'],
+                    metadata: {
+                        step: 'refreshOnboardingStatus',
+                        userId: user.id,
+                    },
+                },
+            );
 
             if (!response.ok) {
                 throw new Error(`Status request failed: ${response.status}`);

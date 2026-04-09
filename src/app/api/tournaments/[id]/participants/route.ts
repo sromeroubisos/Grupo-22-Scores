@@ -16,6 +16,8 @@ import {
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { createApiPerfTracker } from '@/lib/perf/api';
+import { logOverfetchWarning } from '@/lib/perf/measure';
 
 type TournamentContextRow = {
   id: string;
@@ -653,32 +655,51 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const tournamentId = (await params).id;
+  const route = `/api/tournaments/${tournamentId}/participants`;
+  const perf = createApiPerfTracker(route);
   try {
-    const supabase = await createClient();
-    const tournamentId = (await params).id;
+    const supabase = await perf.measureStep('create_client', () => createClient(), {
+      bucket: 'client',
+    });
 
     // Check if query param 'full' is set to return full participant data
     const { searchParams } = new URL(request.url);
     const full = searchParams.get('full') === 'true';
+    perf.note({ full });
 
     // ─── FLASH SCORE SUPPORT ──────────────────────────────────────────────────
     const espnLeagueSlug = parseEspnAmericanFootballTournamentId(tournamentId);
     if (espnLeagueSlug) {
-      const standings = await getEspnAmericanFootballLeagueStandings(espnLeagueSlug);
+      const standings = await perf.measureStep(
+        'load_espn_standings',
+        async () => getEspnAmericanFootballLeagueStandings(espnLeagueSlug),
+        {
+          bucket: 'query',
+          logQuery: true,
+        },
+      );
       const teamNames = standings.rows.map((row) => row.team_name).filter(Boolean);
 
       if (teamNames.length === 0) {
-        return NextResponse.json([]);
+        return perf.json([]);
       }
 
-      const { data: dbClubs, error: dbError } = await supabase
-        .from('clubs')
-        .select('id, name, short_name, logo_url')
-        .or(`name.in.(${teamNames.map(n => `"${n.replace(/"/g, '""')}"`).join(',')})`);
+      const { data: dbClubs, error: dbError } = await perf.measureStep(
+        'load_espn_participant_clubs',
+        async () => supabase
+          .from('clubs')
+          .select('id, name, short_name, logo_url')
+          .or(`name.in.(${teamNames.map(n => `"${n.replace(/"/g, '""')}"`).join(',')})`),
+        {
+          bucket: 'query',
+          logQuery: true,
+        },
+      );
 
       if (dbError) {
         console.error('[Participants API] Error searching clubs for ESPN:', dbError);
-        return NextResponse.json({ error: 'Database search failed' }, { status: 500 });
+        return perf.json({ error: 'Database search failed' }, { status: 500 });
       }
 
       const clubs = (dbClubs || []).map(club => ({
@@ -690,7 +711,11 @@ export async function GET(
       }));
 
       if (full) {
-        return NextResponse.json(clubs.map(c => ({
+        logOverfetchWarning({
+          endpoint: route,
+          reason: 'full=true returns expanded participant compatibility payload for ESPN',
+        }, 'server');
+        return perf.json(clubs.map(c => ({
           id: `espn-link-${c.id}`,
           club_id: c.id,
           division_id: null,
@@ -705,7 +730,7 @@ export async function GET(
         })));
       }
 
-      return NextResponse.json(clubs);
+      return perf.json(clubs);
     }
 
     if (tournamentId.toLowerCase().startsWith('fs-')) {
@@ -716,7 +741,14 @@ export async function GET(
 
       console.log(`[Participants API] Fetching FS participants for stage ${stageId}`);
 
-      const standingsRes = await getTournamentStandings(tournamentFsId, stageId);
+      const standingsRes = await perf.measureStep(
+        'load_flashscore_standings',
+        async () => getTournamentStandings(tournamentFsId, stageId),
+        {
+          bucket: 'query',
+          logQuery: true,
+        },
+      );
       const standings = Array.isArray(standingsRes?.DATA)
         ? (standingsRes.DATA as FlashscoreParticipantLike[])
         : [];
@@ -743,19 +775,26 @@ export async function GET(
       }
 
       if (teamNames.length === 0) {
-        return NextResponse.json([]);
+        return perf.json([]);
       }
 
       // ─── SEARCH IN DATABASE ───────────────────────────────────────────────
       // We look for clubs that match either name OR the external_id
-      const { data: dbClubs, error: dbError } = await supabase
-        .from('clubs')
-        .select('id, name, short_name, logo_url')
-        .or(`name.in.(${teamNames.map(n => `"${n.replace(/"/g, '""')}"`).join(',')})`);
+      const { data: dbClubs, error: dbError } = await perf.measureStep(
+        'load_flashscore_participant_clubs',
+        async () => supabase
+          .from('clubs')
+          .select('id, name, short_name, logo_url')
+          .or(`name.in.(${teamNames.map(n => `"${n.replace(/"/g, '""')}"`).join(',')})`),
+        {
+          bucket: 'query',
+          logQuery: true,
+        },
+      );
 
       if (dbError) {
         console.error('[Participants API] Error searching clubs:', dbError);
-        return NextResponse.json({ error: 'Database search failed' }, { status: 500 });
+        return perf.json({ error: 'Database search failed' }, { status: 500 });
       }
 
       const clubs = (dbClubs || []).map(club => ({
@@ -769,7 +808,11 @@ export async function GET(
       // In participants route, we return the same structure as before
       if (full) {
         // Mock the participant structure for compatibility
-        return NextResponse.json(clubs.map(c => ({
+        logOverfetchWarning({
+          endpoint: route,
+          reason: 'full=true returns expanded participant compatibility payload for FlashScore',
+        }, 'server');
+        return perf.json(clubs.map(c => ({
           id: `fs-link-${c.id}`,
           club_id: c.id,
           division_id: null,
@@ -784,23 +827,43 @@ export async function GET(
         })));
       }
 
-      return NextResponse.json(clubs);
+      return perf.json(clubs);
     }
 
     // ─── REGULAR SUPABASE SUPPORT ─────────────────────────────────────────────
-    const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
+    const supportsDivisionId = await perf.measureStep(
+      'check_division_id_support',
+      async () => supportsTournamentParticipantDivisionId(supabase),
+      {
+        bucket: 'query',
+        logQuery: true,
+      },
+    );
+    if (full) {
+      logOverfetchWarning({
+        endpoint: route,
+        reason: 'full=true loads tournament_participants plus clubs and division relations',
+      }, 'server');
+    }
 
     const participantListQuery = supabase
       .from('tournament_participants') as unknown as TournamentParticipantsListQuery;
 
-    const { data: participants, error } = await participantListQuery
-      .select(getTournamentParticipantSelectColumns(supportsDivisionId))
-      .eq('tournament_id', tournamentId)
-      .order('created_at', { ascending: false });
+    const { data: participants, error } = await perf.measureStep(
+      'load_tournament_participants',
+      async () => participantListQuery
+        .select(getTournamentParticipantSelectColumns(supportsDivisionId))
+        .eq('tournament_id', tournamentId)
+        .order('created_at', { ascending: false }),
+      {
+        bucket: 'query',
+        logQuery: true,
+      },
+    );
 
     if (error) {
       console.error('Error fetching participants:', error);
-      return NextResponse.json(
+      return perf.json(
         { error: 'Error fetching participants' },
         { status: 500 }
       );
@@ -808,7 +871,7 @@ export async function GET(
 
     // Return full participant data if requested, otherwise just club info
     if (full) {
-      return NextResponse.json(participants || []);
+      return perf.json(participants || []);
     } else {
       const clubs = (participants || [])
         .filter((participant) => participant.status === 'active' && participant.clubs)
@@ -821,11 +884,11 @@ export async function GET(
           division_name: supportsDivisionId ? participant.division?.name ?? null : null,
         }));
 
-      return NextResponse.json(clubs);
+      return perf.json(clubs);
     }
   } catch (error: unknown) {
     console.error('Error in GET /api/tournaments/[id]/participants:', error);
-    return NextResponse.json(
+    return perf.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );

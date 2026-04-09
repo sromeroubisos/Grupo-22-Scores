@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
 import type { ProdeBaseCompetitionOption } from '@/lib/prode/types';
@@ -15,6 +14,7 @@ type CreatePrivateLeagueWizardProps = {
 type StepIndex = 0 | 1 | 2;
 type RuleTemplate = 'classic' | 'competitive' | 'casual';
 type VisibilityMode = 'public' | 'private';
+type CreationMode = 'quick' | 'advanced';
 
 type TemplateConfig = {
     id: RuleTemplate;
@@ -26,11 +26,28 @@ type TemplateConfig = {
     minutes: number;
 };
 
+type LeagueCreatePayload = {
+    name: string;
+    description: string;
+    visibility: VisibilityMode;
+    selectedCompetition: ProdeBaseCompetitionOption;
+    rules: {
+        templateId: RuleTemplate;
+        exact: number;
+        winner: number;
+        diff: number;
+        minutes: number;
+        doubleFinals: boolean;
+    };
+};
+
 const TEMPLATES: TemplateConfig[] = [
     { id: 'classic', name: 'Prode clasico', description: 'Equilibrado y facil de explicar.', exact: 5, winner: 3, diff: 2, minutes: 15 },
     { id: 'competitive', name: 'Prode competitivo', description: 'Premia mas el marcador exacto.', exact: 6, winner: 3, diff: 2, minutes: 10 },
     { id: 'casual', name: 'Prode casual', description: 'Entrada rapida para grupos de amigos.', exact: 4, winner: 3, diff: 1, minutes: 20 },
 ];
+
+const ADVANCED_STEP_LABELS = ['Base', 'Configuracion', 'Invitar'];
 
 function makeInviteCode() {
     return Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -60,10 +77,14 @@ export default function CreatePrivateLeagueWizard({
     competitions,
     catalogReady,
 }: CreatePrivateLeagueWizardProps) {
+    const competitionsPerPage = 10;
     const { user, login } = useAuth();
+    const [mode, setMode] = useState<CreationMode>('quick');
     const [step, setStep] = useState<StepIndex>(0);
     const [leagueName, setLeagueName] = useState('');
     const [sportFilter, setSportFilter] = useState<string>('all');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [competitionPage, setCompetitionPage] = useState(1);
     const [competitionId, setCompetitionId] = useState<string>(competitions[0]?.id || '');
     const [visibility, setVisibility] = useState<VisibilityMode>('private');
     const [description, setDescription] = useState('');
@@ -99,11 +120,45 @@ export default function CreatePrivateLeagueWizard({
         ];
     }, [competitions]);
 
-    const filteredCompetitions = useMemo(() => (
-        sportFilter === 'all'
+    const filteredCompetitions = useMemo(() => {
+        const baseCompetitions = sportFilter === 'all'
             ? competitions
-            : competitions.filter((competition) => (competition.sportId || competition.sportLabel || 'other') === sportFilter)
-    ), [competitions, sportFilter]);
+            : competitions.filter((competition) => (competition.sportId || competition.sportLabel || 'other') === sportFilter);
+        const normalizedSearch = searchTerm.trim().toLowerCase();
+
+        if (!normalizedSearch) {
+            return baseCompetitions;
+        }
+
+        return baseCompetitions.filter((competition) => {
+            const haystack = [
+                competition.displayName,
+                competition.name,
+                competition.sportLabel,
+                competition.countryLabel,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            return haystack.includes(normalizedSearch);
+        });
+    }, [competitions, searchTerm, sportFilter]);
+
+    const competitionPageCount = Math.max(1, Math.ceil(filteredCompetitions.length / competitionsPerPage));
+    const paginatedCompetitions = useMemo(() => {
+        const safePage = Math.min(competitionPage, competitionPageCount);
+        const startIndex = (safePage - 1) * competitionsPerPage;
+        return filteredCompetitions.slice(startIndex, startIndex + competitionsPerPage);
+    }, [competitionPage, competitionPageCount, filteredCompetitions]);
+
+    useEffect(() => {
+        setCompetitionPage(1);
+    }, [searchTerm, sportFilter]);
+
+    useEffect(() => {
+        setCompetitionPage((current) => Math.min(current, competitionPageCount));
+    }, [competitionPageCount]);
 
     useEffect(() => {
         if (!filteredCompetitions.length) {
@@ -122,7 +177,10 @@ export default function CreatePrivateLeagueWizard({
     );
 
     const template = useMemo(() => getTemplateById(templateId), [templateId]);
-    const canContinueConfig = Boolean(leagueName.trim()) && Boolean(competitionId);
+    const totalSteps = mode === 'advanced' ? 3 : 1;
+    const currentStepNumber = mode === 'advanced' ? step + 1 : 1;
+    const currentStepLabel = mode === 'advanced' ? ADVANCED_STEP_LABELS[step] : 'Base';
+    const canContinueBase = Boolean(competitionId);
 
     const previewRules = useMemo(() => ({
         exact: customizeRules ? pointsExact : template.exact,
@@ -133,7 +191,9 @@ export default function CreatePrivateLeagueWizard({
         doubleFinals,
     }), [customizeRules, doubleFinals, lockMinutes, pointsDiff, pointsExact, pointsWinner, template]);
 
-    const previewName = leagueName.trim() || 'Tu liga privada';
+    const previewName = leagueName.trim() || `${selectedCompetition?.displayName || 'Nueva liga'} - Mi liga`;
+    const invitePreviewUrl = makeShareUrl(inviteCode);
+    const quickModeReady = Boolean(selectedCompetition);
 
     function syncTemplate(nextTemplateId: RuleTemplate) {
         const nextTemplate = getTemplateById(nextTemplateId);
@@ -146,26 +206,31 @@ export default function CreatePrivateLeagueWizard({
         }
     }
 
-    function handleQuickCreate() {
-        const firstCompetition = filteredCompetitions[0] || competitions[0];
-        if (!firstCompetition) return;
+    function switchMode(nextMode: CreationMode) {
+        setMode(nextMode);
+        setStep(0);
+        setSubmitError(null);
+    }
 
-        setLeagueName((current) => current || `${firstCompetition.displayName} - Mi liga`);
-        setCompetitionId(firstCompetition.id);
-        setVisibility('private');
-        setDescription((current) => current || 'Liga privada creada para competir con amigos.');
-        setTemplateId('classic');
-        setCustomizeRules(false);
-        setPointsExact(5);
-        setPointsWinner(3);
-        setPointsDiff(2);
-        setLockMinutes(15);
-        setDoubleFinals(false);
-        setStep(2);
+    function buildPayload(competition: ProdeBaseCompetitionOption, overrides?: Partial<LeagueCreatePayload>): LeagueCreatePayload {
+        return {
+            name: overrides?.name || previewName,
+            description: overrides?.description ?? description,
+            visibility: overrides?.visibility ?? visibility,
+            selectedCompetition: overrides?.selectedCompetition ?? competition,
+            rules: overrides?.rules ?? {
+                templateId,
+                exact: previewRules.exact,
+                winner: previewRules.winner,
+                diff: previewRules.diff,
+                minutes: previewRules.minutes,
+                doubleFinals,
+            },
+        };
     }
 
     function goNext() {
-        if (step === 0 && canContinueConfig) {
+        if (step === 0 && canContinueBase) {
             setStep(1);
             return;
         }
@@ -187,9 +252,7 @@ export default function CreatePrivateLeagueWizard({
         }, 1600);
     }
 
-    async function handleCreateLeague() {
-        if (!selectedCompetition) return;
-
+    async function submitLeague(payload: LeagueCreatePayload) {
         setIsSubmitting(true);
         setSubmitError(null);
 
@@ -200,20 +263,7 @@ export default function CreatePrivateLeagueWizard({
                     'Content-Type': 'application/json',
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({
-                    name: previewName,
-                    description,
-                    visibility,
-                    selectedCompetition,
-                    rules: {
-                        templateId,
-                        exact: previewRules.exact,
-                        winner: previewRules.winner,
-                        diff: previewRules.diff,
-                        minutes: previewRules.minutes,
-                        doubleFinals,
-                    },
-                }),
+                body: JSON.stringify(payload),
             });
 
             const result = await response.json() as { error?: string; inviteCode?: string; shareUrl?: string; leagueUrl?: string };
@@ -233,6 +283,31 @@ export default function CreatePrivateLeagueWizard({
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+    async function handleQuickCreate() {
+        const competition = selectedCompetition ?? filteredCompetitions[0] ?? competitions[0] ?? null;
+        if (!competition) return;
+
+        await submitLeague({
+            name: leagueName.trim() || `${competition.displayName} - Mi liga`,
+            description: description.trim() || 'Liga privada creada para competir rapido con amigos.',
+            visibility: 'private',
+            selectedCompetition: competition,
+            rules: {
+                templateId: 'classic',
+                exact: 5,
+                winner: 3,
+                diff: 2,
+                minutes: 15,
+                doubleFinals: false,
+            },
+        });
+    }
+
+    async function handleCreateLeague() {
+        if (!selectedCompetition) return;
+        await submitLeague(buildPayload(selectedCompetition));
     }
 
     if (!user) {
@@ -264,11 +339,27 @@ export default function CreatePrivateLeagueWizard({
             <div className={styles.createPageShell}>
                 <div className={styles.createSuccessShell}>
                     <div className={styles.createSuccessCopy}>
-                        <p className={styles.privateLeagueEyebrow}>Liga creada</p>
+                        <p className={styles.privateLeagueEyebrow}>Tu liga esta lista</p>
                         <h1 className={styles.privateLeagueTitle}>{previewName}</h1>
                         <p className={styles.privateLeagueText}>
-                            Tu liga nace dentro de {selectedCompetition.displayName} y genera un codigo unico para invitar.
+                            Ya quedo creada dentro de {selectedCompetition.displayName}. Desde aca podes copiar el acceso y entrar directo a jugar.
                         </p>
+                    </div>
+
+                    <div className={styles.previewCard}>
+                        <p className={styles.previewEyebrow}>Resumen</p>
+                        <h2 className={styles.previewTitle}>{selectedCompetition.displayName}</h2>
+                        <div className={styles.previewPills}>
+                            <span className={styles.metaTag}>{visibility === 'private' ? 'Privada con codigo' : 'Publica'}</span>
+                            <span className={styles.metaTag}>{previewRules.mode}</span>
+                            {selectedCompetition.sportLabel ? <span className={styles.metaTag}>{selectedCompetition.sportLabel}</span> : null}
+                        </div>
+                        <div className={styles.previewRuleList}>
+                            <div className={styles.previewRuleRow}><span>Resultado correcto</span><strong>{previewRules.winner} pts</strong></div>
+                            <div className={styles.previewRuleRow}><span>Marcador exacto</span><strong>{previewRules.exact} pts</strong></div>
+                            <div className={styles.previewRuleRow}><span>Diferencia</span><strong>{previewRules.diff} pts</strong></div>
+                            <div className={styles.previewRuleRow}><span>Cierre</span><strong>{previewRules.minutes} min antes</strong></div>
+                        </div>
                     </div>
 
                     <div className={styles.inviteResultCard}>
@@ -290,16 +381,24 @@ export default function CreatePrivateLeagueWizard({
                             >
                                 {copiedTarget === 'link' ? 'Link copiado' : 'Copiar link'}
                             </button>
+                            <a
+                                href={`https://wa.me/?text=${encodeURIComponent(`Sumate a ${previewName}: ${createdState.shareUrl}`)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={styles.posterSecondaryCta}
+                            >
+                                WhatsApp
+                            </a>
                         </div>
                     </div>
 
                     <div className={styles.successNote}>
-                        Ya quedaste registrado como owner y primer miembro de la liga.
+                        Ya quedaste registrado como administrador y primer miembro de la liga.
                     </div>
 
                     <div className={styles.inviteResultActions}>
                         <Link href={createdState.leagueUrl} className={styles.posterPrimaryCta}>
-                            Entrar a jugar
+                            Ir a la liga
                         </Link>
                         <Link href="/prode" className={styles.posterSecondaryCta}>
                             Volver al hub
@@ -327,35 +426,53 @@ export default function CreatePrivateLeagueWizard({
 
     return (
         <div className={styles.createPageShell}>
-            <div className={styles.wizardLayout}>
-                <section className={styles.wizardPanel}>
-                    <div className={styles.wizardHeader}>
-                        <div>
-                            <p className={styles.privateLeagueEyebrow}>Crear tu liga en 30 segundos</p>
-                            <h1 className={styles.privateLeagueTitle}>Wizard de liga privada</h1>
-                            <p className={styles.privateLeagueText}>
-                                Flujo corto para crear, invitar y arrancar a competir sin configuraciones tecnicas.
-                            </p>
-                        </div>
-                        <button type="button" className={styles.quickCreateBtn} onClick={handleQuickCreate}>
-                            Crear liga rapida
+            <section className={styles.wizardPanel}>
+                <div className={styles.wizardHeader}>
+                    <div className={styles.wizardHeaderCopy}>
+                        <p className={styles.privateLeagueEyebrow}>Liga privada</p>
+                        <h1 className={styles.privateLeagueTitle}>Crear liga</h1>
+                        <p className={styles.privateLeagueText}>
+                            Elegi torneo, defini el formato y sali a invitar sin vueltas.
+                        </p>
+                    </div>
+
+                    <div className={styles.modeSwitch} role="tablist" aria-label="Modo de creacion">
+                        <button
+                            type="button"
+                            className={`${styles.modeSwitchBtn} ${mode === 'quick' ? styles.modeSwitchBtnActive : ''}`}
+                            onClick={() => switchMode('quick')}
+                        >
+                            Rapido
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.modeSwitchBtn} ${mode === 'advanced' ? styles.modeSwitchBtnActive : ''}`}
+                            onClick={() => switchMode('advanced')}
+                        >
+                            Avanzado
                         </button>
                     </div>
+                </div>
 
-                    <div className={styles.stepper}>
-                        {['Configuracion', 'Reglas', 'Invitar'].map((label, index) => (
-                            <div
-                                key={label}
-                                className={`${styles.stepperItem} ${step === index ? styles.stepperItemActive : ''} ${step > index ? styles.stepperItemDone : ''}`}
-                            >
-                                <span className={styles.stepperIndex}>{index + 1}</span>
-                                <span className={styles.stepperLabel}>{label}</span>
-                            </div>
-                        ))}
+                <div className={styles.wizardProgress}>
+                    <div>
+                        <p className={styles.wizardProgressLabel}>Paso {currentStepNumber} de {totalSteps}</p>
+                        <strong className={styles.wizardProgressTitle}>{mode === 'quick' ? 'Base de la liga' : currentStepLabel}</strong>
                     </div>
+                    {mode === 'advanced' ? (
+                        <div className={styles.wizardProgressDots} aria-hidden="true">
+                            {ADVANCED_STEP_LABELS.map((label, index) => (
+                                <span
+                                    key={label}
+                                    className={`${styles.wizardProgressDot} ${step === index ? styles.wizardProgressDotActive : ''} ${step > index ? styles.wizardProgressDotDone : ''}`}
+                                />
+                            ))}
+                        </div>
+                    ) : null}
+                </div>
 
-                    {step === 0 ? (
-                        <div className={styles.formStep}>
+                {step === 0 ? (
+                    <div className={styles.formStep}>
                             <div className={styles.formField}>
                                 <label className={styles.formLabel} htmlFor="league-name">Nombre de la liga</label>
                                 <input
@@ -363,12 +480,13 @@ export default function CreatePrivateLeagueWizard({
                                     className={styles.formInput}
                                     value={leagueName}
                                     onChange={(event) => setLeagueName(event.target.value)}
-                                    placeholder="Ej: Prode Salida de 22"
+                                    placeholder="Ej: Prode amigos del laburo"
                                 />
+                                <span className={styles.fieldHint}>Si no lo completas, usamos un nombre sugerido con el torneo elegido.</span>
                             </div>
 
                             <div className={styles.formField}>
-                                <span className={styles.formLabel}>Competencia base</span>
+                                <span className={styles.formLabel}>Deporte</span>
                                 <div className={styles.filterBar}>
                                     {sportOptions.map((option) => (
                                         <button
@@ -381,35 +499,52 @@ export default function CreatePrivateLeagueWizard({
                                         </button>
                                     ))}
                                 </div>
+                            </div>
+
+                            <div className={styles.formField}>
+                                <label className={styles.formLabel} htmlFor="competition-search">Buscar torneo</label>
+                                <input
+                                    id="competition-search"
+                                    type="search"
+                                    className={styles.formInput}
+                                    value={searchTerm}
+                                    onChange={(event) => setSearchTerm(event.target.value)}
+                                    placeholder="Buscar liga o torneo"
+                                />
+                                {filteredCompetitions.length ? (
+                                    <div className={styles.competitionSearchMeta}>
+                                        <span>{filteredCompetitions.length} ligas encontradas</span>
+                                        <span>Pagina {competitionPage} de {competitionPageCount}</span>
+                                    </div>
+                                ) : null}
                                 <div className={styles.competitionChoiceGrid}>
-                                    {filteredCompetitions.length ? filteredCompetitions.map((competition) => (
+                                    {paginatedCompetitions.length ? paginatedCompetitions.map((competition) => (
                                         <button
                                             key={competition.id}
                                             type="button"
                                             className={`${styles.competitionChoice} ${competitionId === competition.id ? styles.competitionChoiceActive : ''}`}
                                             onClick={() => setCompetitionId(competition.id)}
                                         >
-                                            <div className={styles.competitionChoiceHeader}>
-                                                {competition.logoUrl ? (
-                                                    <Image
-                                                        src={competition.logoUrl}
-                                                        alt={`Logo de ${competition.displayName}`}
-                                                        className={styles.competitionChoiceLogo}
-                                                        width={46}
-                                                        height={46}
-                                                    />
-                                                ) : (
-                                                    <div className={styles.competitionChoiceLogoFallback} aria-hidden="true">
-                                                        {competition.displayName.slice(0, 1)}
-                                                    </div>
-                                                )}
-                                                <div className={styles.competitionChoiceCopy}>
-                                                    <strong>{competition.displayName}</strong>
-                                                    <span>{getCompetitionStatus(competition)}</span>
+                                            {competition.logoUrl ? (
+                                                <img
+                                                    src={competition.logoUrl}
+                                                    alt={`Logo de ${competition.displayName}`}
+                                                    className={styles.competitionChoiceLogo}
+                                                    width={28}
+                                                    height={28}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                />
+                                            ) : (
+                                                <div className={styles.competitionChoiceLogoFallback} aria-hidden="true">
+                                                    {competition.displayName.slice(0, 1)}
                                                 </div>
+                                            )}
+                                            <div className={styles.competitionChoiceCopy}>
+                                                <strong>{competition.displayName}</strong>
+                                                <span>{competition.sportLabel || 'Competencia general'} - {competition.countryLabel || 'Cobertura general'}</span>
                                             </div>
-                                            <small>{competition.sportLabel || 'Competencia general'}</small>
-                                            <small>{competition.countryLabel || 'Cobertura general'}</small>
+                                            <small>{getCompetitionStatus(competition)}</small>
                                         </button>
                                     )) : (
                                         <div className={styles.empty}>
@@ -417,40 +552,58 @@ export default function CreatePrivateLeagueWizard({
                                         </div>
                                     )}
                                 </div>
-                            </div>
-
-                            <div className={styles.inlineFieldGrid}>
-                                <div className={styles.formField}>
-                                    <span className={styles.formLabel}>Visibilidad</span>
-                                    <div className={styles.toggleRow}>
-                                        <button type="button" className={`${styles.togglePill} ${visibility === 'public' ? styles.togglePillActive : ''}`} onClick={() => setVisibility('public')}>
-                                            Publica
+                                {filteredCompetitions.length > competitionsPerPage ? (
+                                    <div className={styles.paginationBar}>
+                                        <button
+                                            type="button"
+                                            className={styles.paginationBtn}
+                                            onClick={() => setCompetitionPage((current) => Math.max(1, current - 1))}
+                                            disabled={competitionPage === 1}
+                                        >
+                                            Anterior
                                         </button>
-                                        <button type="button" className={`${styles.togglePill} ${visibility === 'private' ? styles.togglePillActive : ''}`} onClick={() => setVisibility('private')}>
-                                            Privada con codigo
+                                        <button
+                                            type="button"
+                                            className={styles.paginationBtn}
+                                            onClick={() => setCompetitionPage((current) => Math.min(competitionPageCount, current + 1))}
+                                            disabled={competitionPage === competitionPageCount}
+                                        >
+                                            Siguiente
                                         </button>
                                     </div>
-                                </div>
+                                ) : null}
+                            </div>
+                    </div>
+                ) : null}
 
-                                <div className={styles.formField}>
-                                    <label className={styles.formLabel} htmlFor="league-description">Descripcion</label>
-                                    <textarea
-                                        id="league-description"
-                                        className={styles.formTextarea}
-                                        value={description}
-                                        onChange={(event) => setDescription(event.target.value)}
-                                        placeholder="Invita a tus amigos y compitan cada fecha."
-                                        rows={4}
-                                    />
+                {mode === 'advanced' && step === 1 ? (
+                    <div className={styles.formStep}>
+                            <div className={styles.formField}>
+                                <span className={styles.formLabel}>Visibilidad</span>
+                                <div className={styles.toggleRow}>
+                                    <button type="button" className={`${styles.togglePill} ${visibility === 'public' ? styles.togglePillActive : ''}`} onClick={() => setVisibility('public')}>
+                                        Publica
+                                    </button>
+                                    <button type="button" className={`${styles.togglePill} ${visibility === 'private' ? styles.togglePillActive : ''}`} onClick={() => setVisibility('private')}>
+                                        Privada con codigo
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    ) : null}
 
-                    {step === 1 ? (
-                        <div className={styles.formStep}>
                             <div className={styles.formField}>
-                                <span className={styles.formLabel}>Plantilla de reglas</span>
+                                <label className={styles.formLabel} htmlFor="league-description">Descripcion</label>
+                                <textarea
+                                    id="league-description"
+                                    className={styles.formTextarea}
+                                    value={description}
+                                    onChange={(event) => setDescription(event.target.value)}
+                                    placeholder="Invita a tus amigos y compitan fecha a fecha."
+                                    rows={4}
+                                />
+                            </div>
+
+                            <div className={styles.formField}>
+                                <span className={styles.formLabel}>Sistema de puntos</span>
                                 <div className={styles.templateGrid}>
                                     {TEMPLATES.map((currentTemplate) => (
                                         <button
@@ -470,7 +623,7 @@ export default function CreatePrivateLeagueWizard({
                             <div className={styles.ruleHeader}>
                                 <span className={styles.formLabel}>Personalizar reglas</span>
                                 <button type="button" className={`${styles.togglePill} ${customizeRules ? styles.togglePillActive : ''}`} onClick={() => setCustomizeRules((current) => !current)}>
-                                    {customizeRules ? 'Modo avanzado' : 'Usar defaults'}
+                                    {customizeRules ? 'Modo avanzado activo' : 'Usar defaults'}
                                 </button>
                             </div>
 
@@ -497,15 +650,35 @@ export default function CreatePrivateLeagueWizard({
                                 <input type="checkbox" checked={doubleFinals} onChange={(event) => setDoubleFinals(event.target.checked)} />
                                 <span>Doble puntaje en finales</span>
                             </label>
-                        </div>
-                    ) : null}
+                    </div>
+                ) : null}
 
-                    {step === 2 ? (
-                        <div className={styles.formStep}>
+                {mode === 'advanced' && step === 2 ? (
+                    <div className={styles.formStep}>
                             <div className={styles.inviteCodeCard}>
                                 <span className={styles.inviteResultLabel}>Codigo de acceso</span>
                                 <strong className={styles.inviteResultCode}>{inviteCode}</strong>
-                                <span className={styles.inviteResultLink}>{makeShareUrl(inviteCode)}</span>
+                                <span className={styles.inviteResultLink}>{invitePreviewUrl}</span>
+                            </div>
+
+                            <div className={styles.previewCard}>
+                                <p className={styles.previewEyebrow}>Resumen final</p>
+                                <h2 className={styles.previewTitle}>{previewName}</h2>
+                                <p className={styles.previewMeta}>
+                                    Basado en: <strong>{selectedCompetition?.displayName || 'Elegi una competencia'}</strong>
+                                </p>
+                                <div className={styles.previewPills}>
+                                    <span className={styles.metaTag}>{visibility === 'private' ? 'Privada con codigo' : 'Publica'}</span>
+                                    <span className={styles.metaTag}>{previewRules.mode}</span>
+                                    {selectedCompetition?.sportLabel ? <span className={styles.metaTag}>{selectedCompetition.sportLabel}</span> : null}
+                                </div>
+                                <div className={styles.previewRuleList}>
+                                    <div className={styles.previewRuleRow}><span>Resultado correcto</span><strong>{previewRules.winner} pts</strong></div>
+                                    <div className={styles.previewRuleRow}><span>Marcador exacto</span><strong>{previewRules.exact} pts</strong></div>
+                                    <div className={styles.previewRuleRow}><span>Diferencia</span><strong>{previewRules.diff} pts</strong></div>
+                                    <div className={styles.previewRuleRow}><span>Cierre</span><strong>{previewRules.minutes} min antes</strong></div>
+                                </div>
+                                {description.trim() ? <p className={styles.previewDescription}>{description}</p> : null}
                             </div>
 
                             <div className={styles.inviteHintGrid}>
@@ -514,65 +687,61 @@ export default function CreatePrivateLeagueWizard({
                                     className={styles.inviteHintCard}
                                     onClick={() => void copyToClipboard(inviteCode, 'code')}
                                 >
-                                    <strong>Compartir codigo</strong>
-                                    <span>{copiedTarget === 'code' ? 'Codigo copiado al portapapeles.' : 'Ideal para WhatsApp, grupo de amigos o la oficina.'}</span>
+                                    <strong>Copiar codigo</strong>
+                                    <span>{copiedTarget === 'code' ? 'Codigo copiado al portapapeles.' : 'Ideal para pasarlo por grupo o mensaje.'}</span>
                                 </button>
                                 <button
                                     type="button"
                                     className={styles.inviteHintCard}
-                                    onClick={() => void copyToClipboard(makeShareUrl(inviteCode), 'link')}
+                                    onClick={() => void copyToClipboard(invitePreviewUrl, 'link')}
                                 >
-                                    <strong>Link directo</strong>
-                                    <span>{copiedTarget === 'link' ? 'Link copiado al portapapeles.' : 'Copia el link directo para entrar con el codigo cargado.'}</span>
+                                    <strong>Copiar link</strong>
+                                    <span>{copiedTarget === 'link' ? 'Link copiado al portapapeles.' : 'Entra con el codigo ya cargado.'}</span>
                                 </button>
+                                <a
+                                    href={`https://wa.me/?text=${encodeURIComponent(`Sumate a ${previewName}: ${invitePreviewUrl}`)}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className={styles.inviteHintCard}
+                                >
+                                    <strong>Compartir por WhatsApp</strong>
+                                    <span>Abre el mensaje listo para mandar la invitacion.</span>
+                                </a>
                             </div>
-                        </div>
-                    ) : null}
+                    </div>
+                ) : null}
 
-                    <div className={styles.wizardActions}>
-                        <button type="button" className={styles.posterSecondaryCta} onClick={goBack} disabled={step === 0}>
-                            Volver
-                        </button>
-
-                        {step < 2 ? (
-                            <button type="button" className={styles.posterPrimaryCta} onClick={goNext} disabled={step === 0 && !canContinueConfig}>
-                                Continuar
+                <div className={styles.wizardActions}>
+                    {mode === 'advanced' ? (
+                        <>
+                            <button type="button" className={styles.posterSecondaryCta} onClick={goBack} disabled={step === 0}>
+                                Volver
                             </button>
-                        ) : (
-                            <button type="button" className={styles.posterPrimaryCta} onClick={() => void handleCreateLeague()} disabled={isSubmitting || !selectedCompetition}>
+
+                            {step < 2 ? (
+                                <button type="button" className={styles.posterPrimaryCta} onClick={goNext} disabled={step === 0 && !canContinueBase}>
+                                    Continuar
+                                </button>
+                            ) : (
+                                <button type="button" className={styles.posterPrimaryCta} onClick={() => void handleCreateLeague()} disabled={isSubmitting || !selectedCompetition}>
+                                    {isSubmitting ? 'Creando...' : 'Crear liga'}
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <button type="button" className={styles.posterSecondaryCta} onClick={() => switchMode('advanced')}>
+                                Configurar mas
+                            </button>
+                            <button type="button" className={styles.posterPrimaryCta} onClick={() => void handleQuickCreate()} disabled={isSubmitting || !quickModeReady}>
                                 {isSubmitting ? 'Creando...' : 'Crear liga'}
                             </button>
-                        )}
-                    </div>
+                        </>
+                    )}
+                </div>
 
-                    {submitError ? <div className={styles.warning}>{submitError}</div> : null}
-                </section>
-
-                <aside className={styles.wizardSidebar}>
-                    <div className={styles.previewCard}>
-                        <p className={styles.previewEyebrow}>Vista previa</p>
-                        <h2 className={styles.previewTitle}>{previewName}</h2>
-                        <p className={styles.previewMeta}>
-                            Basado en: <strong>{selectedCompetition?.displayName || 'Elegi una competencia'}</strong>
-                        </p>
-
-                        <div className={styles.previewPills}>
-                            <span className={styles.metaTag}>{visibility === 'private' ? 'Privada con codigo' : 'Publica'}</span>
-                            <span className={styles.metaTag}>{previewRules.mode}</span>
-                            {selectedCompetition?.sportLabel ? <span className={styles.metaTag}>{selectedCompetition.sportLabel}</span> : null}
-                        </div>
-
-                        <div className={styles.previewRuleList}>
-                            <div className={styles.previewRuleRow}><span>Resultado correcto</span><strong>{previewRules.winner} pts</strong></div>
-                            <div className={styles.previewRuleRow}><span>Marcador exacto</span><strong>{previewRules.exact} pts</strong></div>
-                            <div className={styles.previewRuleRow}><span>Diferencia</span><strong>{previewRules.diff} pts</strong></div>
-                            <div className={styles.previewRuleRow}><span>Cierre</span><strong>{previewRules.minutes} min antes</strong></div>
-                        </div>
-
-                        {description.trim() ? <p className={styles.previewDescription}>{description}</p> : null}
-                    </div>
-                </aside>
-            </div>
+                {submitError ? <div className={styles.warning}>{submitError}</div> : null}
+            </section>
         </div>
     );
 }

@@ -1,5 +1,7 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { Database } from './types'
+import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase';
+import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
 
 let client: ReturnType<typeof createBrowserClient<Database>> | undefined
 let clearedAuthSessionAt = 0
@@ -69,9 +71,10 @@ export function createClient() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     const storageKey = getSupabaseBrowserStorageKey() || undefined
+    const instrumentedFetch = createInstrumentedSupabaseFetch('client', url, fetch)
     const browserFetch = async (input: string | URL | Request, init?: RequestInit) => {
         try {
-            return await fetch(input, init)
+            return await instrumentedFetch(input, init)
         } catch (error) {
             if (url && isSupabaseAuthRequest(input, url)) {
                 clearBrokenSupabaseSessionOnce()
@@ -82,6 +85,7 @@ export function createClient() {
     }
 
 
+    const startedAt = nowMs();
     client = createBrowserClient<Database>(
         url || 'https://placeholder.supabase.co',
         key || 'placeholder-key',
@@ -95,5 +99,23 @@ export function createClient() {
         }
     )
 
+    logPerf(
+        ['CLIENT', 'SUPABASE'],
+        {
+            operation: 'create_browser_client',
+            storageKey: storageKey || 'none',
+            duration: formatDurationMs(nowMs() - startedAt),
+        },
+        'client',
+    )
+
     return client
+}
+
+export async function runClientSupabaseLatencyCheck(table = 'matches') {
+    const supabase = createClient();
+    return runSupabaseLatencyProbe(supabase, {
+        runtime: 'client',
+        table,
+    });
 }

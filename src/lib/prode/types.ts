@@ -89,6 +89,19 @@ export interface PublicProdeUserTotal {
     position: number | null;
 }
 
+export interface ProdePrivateLeagueSummary {
+    id: string;
+    slug: string;
+    name: string;
+    competitionName: string;
+    sportLabel: string | null;
+    memberCount: number;
+    inviteCode: string | null;
+    visibility: 'private' | 'public';
+    role: string | null;
+    canManage: boolean;
+}
+
 export type ProdePredictionOutcome = 'home' | 'draw' | 'away';
 
 export interface ProdePlayPrediction {

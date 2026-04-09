@@ -32,6 +32,7 @@ import { AddParticipantDrawer } from './AddParticipantDrawer';
 import { UpsertParticipantDrawer } from './UpsertParticipantDrawer';
 import { ImportParticipantsDrawerV2 } from './ImportParticipantsDrawerV2';
 import { ParticipantsHistoryDrawer } from './ParticipantsHistoryDrawer';
+import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 
 // ============================================
 // TYPES
@@ -106,6 +107,9 @@ interface Props {
 // ============================================
 
 export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
+    usePerfComponentLifecycle('TournamentParticipantsTab', {
+        tournamentId: tournamentId || 'unknown',
+    });
     // State
     const [participants, setParticipants] = useState<Participant[]>([]);
     const [groups, setGroups] = useState<TournamentGroup[]>([]);
@@ -158,7 +162,14 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
     const loadParticipants = async () => {
         try {
             setLoading(true);
+            const request = beginClientRequest(`tournament:${tournamentId}:participants:full`, 'mount', {
+                component: 'TournamentParticipantsTab',
+            });
             const response = await fetch(`/api/tournaments/${tournamentId}/participants?full=true`);
+            request.end({
+                status: response.status,
+                error: !response.ok,
+            });
             if (!response.ok) throw new Error('Error al cargar participantes');
             const data = await response.json();
             setParticipants(data);
@@ -172,7 +183,14 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
 
     const loadGroups = async () => {
         try {
+            const request = beginClientRequest(`tournament:${tournamentId}:groups`, 'mount', {
+                component: 'TournamentParticipantsTab',
+            });
             const response = await fetch(`/api/tournaments/${tournamentId}/groups`);
+            request.end({
+                status: response.status,
+                error: !response.ok,
+            });
             if (response.ok) {
                 const data = await response.json();
                 setGroups(data || []);
@@ -184,7 +202,14 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
 
     const loadPhases = async () => {
         try {
+            const request = beginClientRequest(`tournament:${tournamentId}:phases`, 'mount', {
+                component: 'TournamentParticipantsTab',
+            });
             const response = await fetch(`/api/tournaments/${tournamentId}/phases`, { cache: 'no-store' });
+            request.end({
+                status: response.status,
+                error: !response.ok,
+            });
             if (!response.ok) throw new Error('Error al cargar fases');
             const payload = await response.json();
             setPhases(Array.isArray(payload?.data) ? payload.data : []);
@@ -196,7 +221,14 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
     const loadClubs = async () => {
         try {
             setClubsLoading(true);
+            const request = beginClientRequest('admin:clubs:catalog', 'mount', {
+                component: 'TournamentParticipantsTab',
+            });
             const response = await fetch('/api/admin/clubs', { cache: 'no-store' });
+            request.end({
+                status: response.status,
+                error: !response.ok,
+            });
             if (!response.ok) throw new Error('Error al cargar clubes');
             const data = await response.json();
             setClubCatalog(Array.isArray(data) ? data : []);

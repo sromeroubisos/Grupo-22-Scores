@@ -109,15 +109,25 @@ async function runTournamentWriteWithPriorityFallback(
     return mutate(payloadWithoutPriority);
 }
 
-function sanitizeFields(type: EntityType, updates: Record<string, any>): Record<string, any> {
-    const schema = SCHEMAS[type];
-    if (!schema) throw new Error(`Invalid entity type: ${type}`);
+function sanitizeFields(
+    type: EntityType,
+    updates: Record<string, any>,
+    mode: 'create' | 'update' = 'create',
+): Record<string, any> {
+    const baseSchema = SCHEMAS[type];
+    if (!baseSchema) throw new Error(`Invalid entity type: ${type}`);
+    const schema = mode === 'update' ? baseSchema.partial() : baseSchema;
 
     const result = schema.safeParse(updates);
     if (!result.success) {
         const firstError = result.error.issues[0];
         throw new Error(`Validation Error: ${firstError.path.join('.')} - ${firstError.message}`);
     }
+
+    if (mode === 'update' && Object.keys(result.data).length === 0) {
+        throw new Error('Validation Error: no hay campos validos para actualizar');
+    }
+
     return result.data;
 }
 
@@ -159,7 +169,7 @@ export async function createEntity(
         id: payload.id || (type === 'union' || type === 'club' ? crypto.randomUUID() : undefined)
     };
 
-    const cleanPayload = sanitizeFields(type, payloadWithId);
+    const cleanPayload = sanitizeFields(type, payloadWithId, 'create');
 
     // Manually push ID back if it was generated/provided and stripped by Zod 
     // (Wait, I added 'id' to the schema for union/club now, so it shouldn't be stripped if provided).
@@ -208,7 +218,7 @@ export async function updateEntity(
         throw new Error(`Invalid ID format: ${type} requires a UUID.`);
     }
 
-    const cleanUpdates = sanitizeFields(type, updates);
+    const cleanUpdates = sanitizeFields(type, updates, 'update');
     const table = TABLE[type];
 
     // Pre-state for audit diff
