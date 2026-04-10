@@ -13,6 +13,13 @@ export interface MatchScore {
   away: number;
 }
 
+export interface MatchClock {
+  minute?: number;
+  seconds?: number;
+  period?: string;
+  running?: boolean;
+}
+
 export interface Match {
   id: string;
   tournamentId: string;
@@ -37,6 +44,7 @@ export interface Match {
   // Match details
   status: MatchStatus;
   score: MatchScore;
+  clock?: MatchClock | null;
   notes: string | null;
   homeBasePoints?: number | null;
   awayBasePoints?: number | null;
@@ -163,6 +171,7 @@ export interface MatchFormData {
   referee?: string | null;
   pitch?: string | null;
   score?: MatchScore | null;
+  clock?: MatchClock | null;
   homeBasePoints?: number | null;
   awayBasePoints?: number | null;
   homeBonusPoints?: number | null;

@@ -134,7 +134,7 @@ export async function cachedFetch<T>(
         } catch (err: unknown) {
             if (isTimeoutLikeError(err)) {
                 const normalized = toSerializableNormalizedError(err);
-                console.error(`[Cache] FETCH FAILED for '${key}':`, {
+                console.warn(`[Cache] FETCH FAILED for '${key}':`, {
                     message: normalized.message,
                     details: normalized.details,
                     code: normalized.code,
@@ -152,7 +152,7 @@ export async function cachedFetch<T>(
                 return fallbackData;
             } catch (retryErr: unknown) {
                 const normalized = toSerializableNormalizedError(retryErr);
-                console.error(`[Cache] RE-FETCH FAILED for '${key}':`, {
+                console.warn(`[Cache] RE-FETCH FAILED for '${key}':`, {
                     message: normalized.message,
                     details: normalized.details,
                     code: normalized.code,
@@ -178,7 +178,7 @@ function getSupabase() {
     return createClient();
 }
 
-async function fetchAdminConsoleResource<T>(resource: 'clubs' | 'matches', signal?: AbortSignal): Promise<T[]> {
+async function fetchAdminConsoleResource<T>(resource: 'clubs' | 'matches' | 'tournaments', signal?: AbortSignal): Promise<T[]> {
     type ConsolePayload = {
         data?: T[];
         error?: string;
@@ -305,42 +305,15 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
     const KEY = 'tournaments_list';
     if (force) invalidateCache(KEY);
 
-    return cachedFetch(KEY, async () => {
+    return cachedFetch(KEY, async (context) => {
         try {
-            const supabase = getSupabase();
-            const [{ data, error }, { data: favRows }] = await Promise.all([
-                supabase.rpc('get_all_tournaments', {
-                    p_include_hidden: true,
-                    p_viewer_user_id: null
-                }),
-                supabase
-                    .from('favorites')
-                    .select('entity_id')
-                    .in('entity_type', ['tournament', 'league']),
-            ]);
-
-            if (error) {
-                // Fall back on any RPC error — function may reference removed columns
-                console.warn('[Cache] get_all_tournaments RPC failed, falling back to direct query:', error.message);
-                return fetchTournamentsFallback();
-            }
-
-            const favMap = new Map<string, number>();
-            for (const row of favRows ?? []) {
-                favMap.set(row.entity_id, (favMap.get(row.entity_id) ?? 0) + 1);
-            }
-
-            return (data || []).map(t => ({
-                ...t,
-                sport: t.sport_id, // For backward compatibility with existing filters
-                country: t.country_name || t.country_id, // For grouping by country
-                followers_count: ((t as any).followers_count || 0) + (favMap.get(t.id) ?? 0),
-            })) as unknown as TournamentRow[];
-        } catch (err: any) {
-            console.warn('[Cache] get_all_tournaments exception, falling back to direct query:', err?.message);
+            return await fetchAdminConsoleResource<TournamentRow>('tournaments', context?.signal);
+        } catch (err: unknown) {
+            const normalized = normalizeError(err);
+            console.warn('[Cache] tournaments console endpoint failed, falling back to direct query:', normalized.message);
             return fetchTournamentsFallback();
         }
-    });
+    }, DEFAULT_TTL_MS, { timeoutMs: CONSOLE_RESOURCE_TIMEOUT_MS });
 }
 
 /**
@@ -364,7 +337,7 @@ async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
     ]);
 
     if (error) {
-        console.error('[Cache] Fallback query failed:', error);
+        console.warn('[Cache] Fallback query failed:', error);
         throw error;
     }
 

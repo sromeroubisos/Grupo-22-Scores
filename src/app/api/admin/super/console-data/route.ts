@@ -184,6 +184,33 @@ type TournamentConsoleRow = {
     season_id?: string | null;
 };
 
+type TournamentAdminListRow = {
+    id: string;
+    name: string;
+    slug?: string | null;
+    sport_id?: string | null;
+    country_id?: string | null;
+    logo_url?: string | null;
+    is_popular?: boolean | null;
+    is_active?: boolean | null;
+    display_order?: number | null;
+    priority?: number | null;
+    created_at?: string | null;
+    updated_at?: string | null;
+    season_id?: string | null;
+    status?: string | null;
+    category?: string | null;
+    age_grade?: string | null;
+    format?: string | null;
+    is_visible?: boolean | null;
+    is_api_managed?: boolean | null;
+    data_source?: string | null;
+    display_name?: string | null;
+    original_name?: string | null;
+    union_id?: string | null;
+    external_id?: string | null;
+};
+
 function normalizeSportValue(value: string | null | undefined) {
     const normalized = value?.trim().toLowerCase();
     return normalized || null;
@@ -198,7 +225,7 @@ export async function GET(request: NextRequest) {
 
     const resource = new URL(request.url).searchParams.get('resource');
 
-    if (!resource || !['clubs', 'matches'].includes(resource)) {
+    if (!resource || !['clubs', 'matches', 'tournaments'].includes(resource)) {
         return jsonError('Invalid resource', 400);
     }
 
@@ -264,6 +291,87 @@ export async function GET(request: NextRequest) {
                 sport: club.sport || club.sport_id || null,
                 union: club.union_id ? unionMap.get(club.union_id) ?? null : null,
                 followers_count: clubFavMap.get(club.id) ?? 0,
+            }));
+
+            return NextResponse.json({ data });
+        }
+
+        if (resource === 'tournaments') {
+            const [
+                tournamentsResult,
+                { data: favoriteRows, error: favoritesError },
+            ] = await Promise.all([
+                selectWithFallback<TournamentAdminListRow>(
+                    readClient.from('tournaments'),
+                    [
+                        'id, name, slug, sport_id, country_id, logo_url, is_popular, is_active, display_order, priority, created_at, updated_at, season_id, status, category, age_grade, format, is_visible, is_api_managed, data_source, display_name, original_name, union_id, external_id',
+                        'id, name, slug, sport_id, country_id, logo_url, is_popular, display_order, priority, created_at, updated_at, season_id, status, category, age_grade, format, is_visible, is_api_managed, data_source, display_name, original_name, union_id, external_id',
+                        'id, name, slug, sport_id, country_id, logo_url, display_order, priority, created_at, updated_at, season_id, status, category, age_grade, format, is_visible, is_api_managed, data_source, display_name, original_name, union_id, external_id',
+                        'id, name, sport_id, country_id, logo_url, created_at, updated_at, season_id, status, is_visible, display_name, original_name, union_id, external_id',
+                        'id, name, sport_id, country_id, logo_url, created_at, updated_at',
+                        'id, name'
+                    ],
+                    { column: 'updated_at', ascending: false }
+                ),
+                withSoftTimeout(
+                    readClient
+                        .from('favorites')
+                        .select('entity_id')
+                        .in('entity_type', ['tournament', 'league']) as PromiseLike<{
+                            data: { entity_id: string }[] | null;
+                            error: QueryError;
+                        }>,
+                    AUXILIARY_QUERY_TIMEOUT_MS,
+                    { data: [] as { entity_id: string }[], error: null },
+                    'tournaments favorites lookup'
+                ),
+            ]);
+
+            const { data: tournaments, error: tournamentsError } = tournamentsResult;
+            if (tournamentsError) return jsonError('Failed to load tournaments', 500, tournamentsError.message);
+
+            if (favoritesError) {
+                console.warn('[ConsoleData] Failed to load tournament favorites, continuing with zero follower counts:', favoritesError.message);
+            }
+
+            const favoriteMap = new Map<string, number>();
+            for (const row of (favoritesError ? [] : favoriteRows) ?? []) {
+                favoriteMap.set(row.entity_id, (favoriteMap.get(row.entity_id) ?? 0) + 1);
+            }
+
+            const data = (tournaments ?? []).map((tournament) => ({
+                id: tournament.id,
+                name: tournament.name,
+                slug: tournament.slug ?? null,
+                sport_id: tournament.sport_id ?? null,
+                sport_name: null,
+                country_id: tournament.country_id ?? null,
+                country_name: null,
+                organization_id: tournament.union_id ?? null,
+                organization_name: null,
+                logo_url: tournament.logo_url ?? null,
+                is_popular: Boolean(tournament.is_popular ?? false),
+                is_active: Boolean(tournament.is_active ?? (tournament.status === 'active' || tournament.status === 'published')),
+                display_order: typeof tournament.display_order === 'number' ? tournament.display_order : null,
+                priority: typeof tournament.priority === 'number' ? tournament.priority : null,
+                followers_count: favoriteMap.get(tournament.id) ?? 0,
+                is_followed_by_user: false,
+                created_at: tournament.created_at ?? '',
+                updated_at: tournament.updated_at ?? '',
+                season_id: tournament.season_id ?? null,
+                status: tournament.status ?? null,
+                category: tournament.category ?? null,
+                age_grade: tournament.age_grade ?? null,
+                format: tournament.format ?? null,
+                is_visible: tournament.is_visible ?? null,
+                is_api_managed: Boolean(tournament.is_api_managed ?? false),
+                data_source: tournament.data_source ?? null,
+                display_name: tournament.display_name ?? tournament.name ?? null,
+                original_name: tournament.original_name ?? tournament.name ?? null,
+                union_id: tournament.union_id ?? null,
+                external_id: tournament.external_id ?? null,
+                sport: tournament.sport_id ?? null,
+                country: tournament.country_id ?? null,
             }));
 
             return NextResponse.json({ data });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ChangeEvent } from 'react';
 import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -1931,7 +1931,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         >
                                             <div
                                                 className={styles.paletteSwatch}
-                                                style={{ background: `linear-gradient(135deg, ${palette.bg} 0%, ${palette.bg} 62%, ${palette.accent} 62%, ${palette.accent} 100%)` }}
+                                                style={{
+                                                    '--palette-bg': palette.bg,
+                                                    '--palette-accent': palette.accent,
+                                                } as CSSProperties}
                                             />
                                             <div className={styles.paletteMeta}>
                                                 <span className={styles.paletteName}>{palette.name}</span>
@@ -2343,6 +2346,69 @@ function getPresetComparableSignature(value: unknown): string {
     return JSON.stringify(value);
 }
 
+function getPresetSyncErrorMetadata(error: unknown): {
+    message: string;
+    code: string;
+    status: number | null;
+} {
+    if (error instanceof Error) {
+        return {
+            message: error.message,
+            code: '',
+            status: null,
+        };
+    }
+
+    if (error && typeof error === 'object') {
+        const record = error as Record<string, unknown>;
+        return {
+            message: typeof record.message === 'string' ? record.message : '',
+            code: typeof record.code === 'string' ? record.code : '',
+            status: typeof record.status === 'number' ? record.status : null,
+        };
+    }
+
+    return {
+        message: '',
+        code: '',
+        status: null,
+    };
+}
+
+function isExpectedPresetSyncFailure(error: unknown): boolean {
+    const { message, code, status } = getPresetSyncErrorMetadata(error);
+    const normalizedMessage = message.toLowerCase();
+
+    if (!message && !code && status === null) {
+        return true;
+    }
+
+    if (status === 401 || status === 403 || status === 404 || status === 503) {
+        return true;
+    }
+
+    if (code === '42P01' || code === 'PGRST301') {
+        return true;
+    }
+
+    return normalizedMessage.includes('failed to fetch')
+        || normalizedMessage.includes('fetch failed')
+        || normalizedMessage.includes('load failed')
+        || normalizedMessage.includes('networkerror')
+        || normalizedMessage.includes('network error')
+        || normalizedMessage.includes('supabase_auth_unreachable')
+        || normalizedMessage.includes('jwt')
+        || normalizedMessage.includes('session')
+        || normalizedMessage.includes('auth session missing')
+        || normalizedMessage.includes('relation')
+        || normalizedMessage.includes('user_export_presets');
+}
+
+function logUnexpectedPresetSyncFailure(label: string, error: unknown) {
+    if (isExpectedPresetSyncFailure(error)) return;
+    console.warn(label, error);
+}
+
 function asPresetPayload(value: unknown): Record<string, unknown> {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
     return value as Record<string, unknown>;
@@ -2371,7 +2437,7 @@ function mapRemoteGradientPresetRows(rows: PersistedExportPresetRow[]): SavedMat
 async function getAuthenticatedPresetUserId(supabase: SupabaseBrowserClient): Promise<string | null> {
     const { data, error } = await supabase.auth.getUser();
     if (error) {
-        console.error('Preset auth read error:', error);
+        logUnexpectedPresetSyncFailure('Preset auth read warning:', error);
         return null;
     }
     return data.user?.id ?? null;
@@ -2524,7 +2590,7 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
             storageMode: 'cloud',
         };
     } catch (error) {
-        console.error('Preset cloud hydrate error:', error);
+        logUnexpectedPresetSyncFailure('Preset cloud hydrate warning:', error);
         return {
             editorialPresets: localEditorialPresets,
             gradientPresets: localGradientPresets,

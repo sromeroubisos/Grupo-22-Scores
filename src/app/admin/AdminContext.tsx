@@ -111,9 +111,9 @@ export function AdminConsoleProvider({ children }: { children: ReactNode }) {
             setter(data);
             setLoading(prev => ({ ...prev, [lKey]: false }));
             setErrors(prev => ({ ...prev, [key]: null }));
-        } catch (err: any) {
+        } catch (err: unknown) {
             const normalized = normalizeError(err);
-            console.error(`[AdminContext] Failed to load ${key}:`, {
+            console.warn(`[AdminContext] Failed to load ${key}:`, {
                 message: normalized.message,
                 details: normalized.details,
                 code: normalized.code,

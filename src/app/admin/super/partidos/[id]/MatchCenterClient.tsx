@@ -106,6 +106,7 @@ interface MatchScore {
 
 interface MatchClock {
     minute?: number;
+    seconds?: number;
     period?: string;
     running?: boolean;
 }
@@ -122,7 +123,7 @@ export interface MatchRow {
     away_club_id: string | null;
     status: string;
     score: MatchScore;
-    clock: MatchClock;
+    clock: MatchClock | null;
     events: MatchEvent[] | null;
     lineups: MatchLineups | null;
     broadcast_url?: string | null;
@@ -147,6 +148,7 @@ export interface MatchRow {
 type ApplyMatchResponseOptions = {
     preserveLineupsIfIncomingEmpty?: boolean;
     preserveUnsavedScore?: boolean;
+    preserveUnsavedClock?: boolean;
     preserveUnsavedEvents?: boolean;
     preserveUnsavedLineups?: boolean;
 };
@@ -154,6 +156,8 @@ type ApplyMatchResponseOptions = {
 type PersistMatchPatchOptions = {
     includePoints?: boolean;
     preserveLineupsIfIncomingEmpty?: boolean;
+    preserveUnsavedScore?: boolean;
+    preserveUnsavedClock?: boolean;
     preserveUnsavedEvents?: boolean;
     preserveUnsavedLineups?: boolean;
     syncDirtyEvents?: boolean;
@@ -197,6 +201,83 @@ function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
                 }
                 : null,
     };
+}
+
+function normalizeClockMinute(value: unknown) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : 0;
+}
+
+function normalizeClockSeconds(
+    value: unknown,
+) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return 0;
+
+    if (parsed >= 60) {
+        return Math.max(0, Math.trunc(parsed % 60));
+    }
+
+    if (parsed < 0) return 0;
+    return Math.min(59, Math.trunc(parsed));
+}
+
+function normalizeMatchClock(clock: MatchClock | null | undefined): MatchClock {
+    const normalizedMinute = normalizeClockMinute(clock?.minute);
+    const normalizedSeconds = normalizeClockSeconds(clock?.seconds);
+    const rawSeconds = Number(clock?.seconds);
+    const hasOnlyLegacyTotalSeconds =
+        !Number.isFinite(Number(clock?.minute))
+        && Number.isFinite(rawSeconds)
+        && rawSeconds >= 60;
+
+    if (hasOnlyLegacyTotalSeconds) {
+        return {
+            minute: Math.max(0, Math.trunc(rawSeconds / 60)),
+            seconds: Math.max(0, Math.trunc(rawSeconds % 60)),
+            period: typeof clock?.period === 'string' ? clock.period : '',
+            running: Boolean(clock?.running),
+        };
+    }
+
+    return {
+        minute: normalizedMinute,
+        seconds: normalizedSeconds,
+        period: typeof clock?.period === 'string' ? clock.period : '',
+        running: Boolean(clock?.running),
+    };
+}
+
+function areMatchClocksEqual(left: MatchClock | null | undefined, right: MatchClock | null | undefined) {
+    const normalizedLeft = normalizeMatchClock(left);
+    const normalizedRight = normalizeMatchClock(right);
+
+    return (
+        normalizedLeft.minute === normalizedRight.minute
+        && normalizedLeft.seconds === normalizedRight.seconds
+        && (normalizedLeft.period || '') === (normalizedRight.period || '')
+        && Boolean(normalizedLeft.running) === Boolean(normalizedRight.running)
+    );
+}
+
+function incrementMatchClock(clock: MatchClock) {
+    const normalizedClock = normalizeMatchClock(clock);
+    const totalSeconds = (normalizedClock.minute || 0) * 60 + (normalizedClock.seconds || 0) + 1;
+
+    return {
+        ...normalizedClock,
+        minute: Math.floor(totalSeconds / 60),
+        seconds: totalSeconds % 60,
+    };
+}
+
+function formatMatchClock(clock: MatchClock | null | undefined) {
+    const normalizedClock = normalizeMatchClock(clock);
+    const minute = String(normalizedClock.minute || 0).padStart(2, '0');
+    const seconds = String(normalizedClock.seconds || 0).padStart(2, '0');
+    const period = (normalizedClock.period || '').trim();
+
+    return period ? `${minute}:${seconds} · ${period}` : `${minute}:${seconds}`;
 }
 
 function normalizeTextValue(value: string | null | undefined) {
@@ -349,6 +430,27 @@ export interface MatchPoints {
     points_override_reason: string | null;
 }
 
+type PlayerStatBreakdown = {
+    type: string;
+    label: string;
+    count: number;
+    pointsPerEvent: number;
+    totalPoints: number;
+    color: string;
+};
+
+type PlayerStatRow = {
+    key: string;
+    playerId: string | null;
+    name: string;
+    team: 'home' | 'away';
+    totalEvents: number;
+    scoringEvents: number;
+    points: number;
+    lastMinute: number;
+    breakdown: PlayerStatBreakdown[];
+};
+
 interface MatchCenterClientProps {
     initialMatch: MatchRow;
     matchId: string;
@@ -449,6 +551,7 @@ const DEFAULT_POINTS_RULES: PointsRules = {
     offensive: null,
     defensive: null,
 };
+const COMMON_MATCH_PERIODS = ['Previa', '1T', 'HT', '2T', 'ET', 'Final'];
 
 function getPositiveInteger(value: string, fallback: number) {
     const parsed = Number.parseInt(value, 10);
@@ -828,12 +931,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const initialEvents = normalizeMatchEvents(initialMatch.events);
     const initialLineups = normalizeMatchLineups(initialMatch.lineups);
     const initialScore = normalizeMatchScore(initialMatch.score);
+    const initialClock = normalizeMatchClock(initialMatch.clock);
 
     const [match, setMatch] = useState<MatchRow>(initialMatch);
     const [activeTab, setActiveTab] = useState('resumen');
     const [saving, setSaving] = useState(false);
     const [saveMsg, setSaveMsg] = useState<{ type: 'ok' | 'warn' | 'err'; text: string } | null>(null);
     const [scoreDraft, setScoreDraft] = useState<MatchScore>(initialScore);
+    const [clockDraft, setClockDraft] = useState<MatchClock>(initialClock);
 
     // Editable state for events & lineups (local mirrors of DB JSONB)
     const [localEvents, setLocalEvents] = useState<MatchEvent[]>(initialEvents);
@@ -843,7 +948,9 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const persistedEventsRef = useRef<MatchEvent[]>(initialEvents);
     const persistedLineupsRef = useRef<MatchLineups>(initialLineups);
     const persistedScoreRef = useRef<MatchScore>(initialScore);
+    const persistedClockRef = useRef<MatchClock>(initialClock);
     const scoreDraftRef = useRef<MatchScore>(initialScore);
+    const clockDraftRef = useRef<MatchClock>(initialClock);
     const localEventsRef = useRef<MatchEvent[]>(initialEvents);
     const localLineupsRef = useRef<MatchLineups>(initialLineups);
 
@@ -889,6 +996,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     useEffect(() => {
         scoreDraftRef.current = scoreDraft;
     }, [scoreDraft]);
+
+    useEffect(() => {
+        clockDraftRef.current = clockDraft;
+    }, [clockDraft]);
 
     useEffect(() => {
         setQuickLineupDrafts((prev) => ({
@@ -1042,12 +1153,17 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         const nextEvents = normalizeMatchEvents(nextMatch.events);
         const nextLineups = normalizeMatchLineups(nextMatch.lineups);
         const nextScore = normalizeMatchScore(nextMatch.score);
+        const nextClock = normalizeMatchClock(nextMatch.clock);
         const currentLocalEvents = localEventsRef.current;
         const currentLocalLineups = localLineupsRef.current;
         const currentScoreDraft = scoreDraftRef.current;
+        const currentClockDraft = clockDraftRef.current;
         const hasUnsavedScore =
             options?.preserveUnsavedScore === true &&
             !areMatchScoresEqual(currentScoreDraft, persistedScoreRef.current);
+        const hasUnsavedClock =
+            options?.preserveUnsavedClock === true &&
+            !areMatchClocksEqual(currentClockDraft, persistedClockRef.current);
         const hasUnsavedEvents =
             options?.preserveUnsavedEvents === true &&
             !areDraftValuesEqual(currentLocalEvents, persistedEventsRef.current);
@@ -1064,15 +1180,18 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 ? currentLocalLineups
                 : nextLineups;
         const resolvedScore = hasUnsavedScore ? currentScoreDraft : nextScore;
+        const resolvedClock = hasUnsavedClock ? currentClockDraft : nextClock;
 
         persistedMatchRef.current = nextMatch;
         persistedEventsRef.current = nextEvents;
         persistedLineupsRef.current = nextLineups;
         persistedScoreRef.current = nextScore;
+        persistedClockRef.current = nextClock;
         localEventsRef.current = resolvedEvents;
         localLineupsRef.current = resolvedLineups;
         setMatch(nextMatch);
         setScoreDraft(resolvedScore);
+        setClockDraft(resolvedClock);
         setLocalEvents(resolvedEvents);
         setLocalLineups(resolvedLineups);
         setLocalPoints(toLocalPoints(nextMatch));
@@ -1144,6 +1263,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             payload.score = officialScore;
         }
 
+        if (!areMatchClocksEqual(clockDraftRef.current, persistedClockRef.current)) {
+            payload.clock = normalizeMatchClock(clockDraftRef.current);
+        }
+
         if ((match.venue || '') !== (persistedMatch.venue || '')) {
             payload.venue = match.venue || '';
         }
@@ -1186,6 +1309,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         const payloadIncludesEvents = Object.prototype.hasOwnProperty.call(effectivePayload, 'events');
         const payloadIncludesLineups = Object.prototype.hasOwnProperty.call(effectivePayload, 'lineups');
         const payloadIncludesScore = Object.prototype.hasOwnProperty.call(effectivePayload, 'score');
+        const payloadIncludesClock = Object.prototype.hasOwnProperty.call(effectivePayload, 'clock');
         const effectiveScore = resolveOfficialScore(
             payloadIncludesScore ? effectivePayload.score as MatchScore : undefined,
             effectiveEvents,
@@ -1250,6 +1374,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 ?? warnings.lineupsNotPersisted
                 ?? false,
             preserveUnsavedScore: options?.preserveUnsavedScore ?? !payloadIncludesScore,
+            preserveUnsavedClock: options?.preserveUnsavedClock ?? !payloadIncludesClock,
             preserveUnsavedEvents: options?.preserveUnsavedEvents ?? !payloadIncludesEvents,
             preserveUnsavedLineups:
                 options?.preserveUnsavedLineups
@@ -1348,12 +1473,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 const hasUnsavedEvents = !areDraftValuesEqual(localEventsRef.current, persistedEventsRef.current);
                 const hasUnsavedLineups = !areDraftValuesEqual(localLineupsRef.current, persistedLineupsRef.current);
                 const hasUnsavedScore = !areMatchScoresEqual(scoreDraftRef.current, persistedScoreRef.current);
+                const hasUnsavedClock = !areMatchClocksEqual(clockDraftRef.current, persistedClockRef.current);
                 const hasUnsavedStatus = currentDraftMatch.status !== currentPersistedMatch.status;
                 const hasUnsavedVenue = (currentDraftMatch.venue || '') !== (currentPersistedMatch.venue || '');
                 const hasUnsavedNotes = !areTextValuesEqual(currentDraftMatch.notes, currentPersistedMatch.notes);
                 const hasUnsavedDateTime =
                     toDateTimeLocalInput(currentDraftMatch.date_time) !== toDateTimeLocalInput(currentPersistedMatch.date_time);
                 const incomingScore = updated.score as MatchScore | undefined;
+                const incomingClock = updated.clock as MatchClock | undefined;
                 const nextPersistedMatch = { ...currentPersistedMatch, ...updated } as MatchRow;
 
                 persistedMatchRef.current = nextPersistedMatch;
@@ -1370,6 +1497,13 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     persistedScoreRef.current = normalizedIncomingScore;
                     if (!hasUnsavedScore) {
                         setScoreDraft(normalizedIncomingScore);
+                    }
+                }
+                if (incomingClock !== undefined) {
+                    const normalizedIncomingClock = normalizeMatchClock(incomingClock);
+                    persistedClockRef.current = normalizedIncomingClock;
+                    if (!hasUnsavedClock) {
+                        setClockDraft(normalizedIncomingClock);
                     }
                 }
                 if (incomingEvents) {
@@ -1449,6 +1583,21 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     };
 
     /* â”€â”€â”€ DERIVED DATA (all computed, zero hardcode) â”€â”€â”€ */
+    useEffect(() => {
+        if (match.status === 'live' || !clockDraft.running) return;
+        setClockDraft((prev) => ({ ...normalizeMatchClock(prev), running: false }));
+    }, [clockDraft.running, match.status]);
+
+    useEffect(() => {
+        if (!clockDraft.running) return;
+
+        const intervalId = window.setInterval(() => {
+            setClockDraft((prev) => incrementMatchClock(prev));
+        }, 1000);
+
+        return () => window.clearInterval(intervalId);
+    }, [clockDraft.running]);
+
     const handleScoreInputChange = useCallback((team: 'home' | 'away', value: string) => {
         const parsedValue = Math.max(0, Number.parseInt(value || '0', 10) || 0);
         const currentOfficialScore = resolveOfficialScore();
@@ -1706,14 +1855,100 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         bonusOffText,
         bonusDefText,
     } = summaryStats;
+    const playerStatsByTeam = useMemo(() => {
+        const grouped: Record<'home' | 'away', PlayerStatRow[]> = { home: [], away: [] };
+        const playerStatsMap = new Map<string, {
+            key: string;
+            playerId: string | null;
+            name: string;
+            team: 'home' | 'away';
+            totalEvents: number;
+            scoringEvents: number;
+            points: number;
+            lastMinute: number;
+            breakdown: Map<string, PlayerStatBreakdown>;
+        }>();
+
+        events.forEach((event) => {
+            if ((event.team !== 'home' && event.team !== 'away') || !event.playerName.trim()) return;
+
+            const statKey = `${event.team}:${event.playerId || normalizeLookupKey(event.playerName)}`;
+            const points = getConfiguredEventPoints(event.type, eventDefinitionMap);
+            const definition = eventDefinitionMap[event.type];
+            const existing = playerStatsMap.get(statKey) || {
+                key: statKey,
+                playerId: event.playerId || null,
+                name: event.playerName.trim(),
+                team: event.team,
+                totalEvents: 0,
+                scoringEvents: 0,
+                points: 0,
+                lastMinute: 0,
+                breakdown: new Map<string, PlayerStatBreakdown>(),
+            };
+
+            existing.totalEvents += 1;
+            existing.points += points;
+            existing.lastMinute = Math.max(existing.lastMinute, Number(event.minute) || 0);
+            if (points > 0) {
+                existing.scoringEvents += 1;
+            }
+
+            const currentBreakdown = existing.breakdown.get(event.type) || {
+                type: event.type,
+                label: definition?.label || eventTypeLabel(event.type, eventDefinitions),
+                count: 0,
+                pointsPerEvent: points,
+                totalPoints: 0,
+                color: eventTypeColor(event.type, eventDefinitions),
+            };
+            currentBreakdown.count += 1;
+            currentBreakdown.totalPoints += points;
+            existing.breakdown.set(event.type, currentBreakdown);
+            playerStatsMap.set(statKey, existing);
+        });
+
+        playerStatsMap.forEach((playerStat) => {
+            grouped[playerStat.team].push({
+                key: playerStat.key,
+                playerId: playerStat.playerId,
+                name: playerStat.name,
+                team: playerStat.team,
+                totalEvents: playerStat.totalEvents,
+                scoringEvents: playerStat.scoringEvents,
+                points: playerStat.points,
+                lastMinute: playerStat.lastMinute,
+                breakdown: Array.from(playerStat.breakdown.values()).sort((left, right) => (
+                    right.totalPoints - left.totalPoints
+                    || right.count - left.count
+                    || left.label.localeCompare(right.label)
+                )),
+            });
+        });
+
+        grouped.home.sort((left, right) => (
+            right.points - left.points
+            || right.totalEvents - left.totalEvents
+            || left.name.localeCompare(right.name)
+        ));
+        grouped.away.sort((left, right) => (
+            right.points - left.points
+            || right.totalEvents - left.totalEvents
+            || left.name.localeCompare(right.name)
+        ));
+
+        return grouped;
+    }, [eventDefinitionMap, eventDefinitions, events]);
     const scoreDirty = !areMatchScoresEqual(score, persistedScoreRef.current);
+    const clockDirty = !areMatchClocksEqual(clockDraft, persistedClockRef.current);
     const eventsDirty = !areDraftValuesEqual(events, persistedEventsRef.current);
     const lineupsDirty = !areDraftValuesEqual(lineups, persistedLineupsRef.current);
     const statusDirty = match.status !== persistedMatchRef.current.status;
     const venueDirty = (match.venue || '') !== (persistedMatchRef.current.venue || '');
     const notesDirty = !areTextValuesEqual(match.notes, persistedMatchRef.current.notes);
     const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
-    const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
+    const hasUnsavedMatchParameters = scoreDirty || clockDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
+    const liveClockLabel = formatMatchClock(clockDraft);
     const sortedEvents = useMemo(
         () => (activeTab === 'eventos' ? [...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)) : []),
         [activeTab, events],
@@ -1753,7 +1988,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     </div>
                     <div className="match-meta-line" style={{ flexDirection: 'row', gap: 12, justifyContent: 'center' }}>
                         <div className="status-indicator" style={{ borderColor: statusColor(match.status), color: statusColor(match.status), background: `${statusColor(match.status)}15` }}>
-                            {match.status === 'live' && match.clock?.minute ? `${match.clock.minute}'` : ''} {statusLabel(match.status)}
+                            {match.status === 'live' ? `${liveClockLabel} ` : ''}{statusLabel(match.status)}
                         </div>
                         <div className="context-info">
                             {match.tournament?.name || 'Amistoso'} · {formattedDate} · {match.venue || 'Sin estadio'}
@@ -2390,6 +2625,72 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                         })}
                                     </div>
                                 </div>
+
+                                <div className="mc-card-body" style={{ borderTop: '1px solid #222', paddingTop: 24 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                                        <h4 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', color: '#888', margin: 0 }}>Estadisticas por Jugador</h4>
+                                        <span style={{ fontSize: '0.78rem', color: '#666' }}>
+                                            Solo se computan eventos con jugador asignado.
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+                                        {([
+                                            { team: 'home' as const, label: homeName, rows: playerStatsByTeam.home },
+                                            { team: 'away' as const, label: awayName, rows: playerStatsByTeam.away },
+                                        ]).map((group) => (
+                                            <div key={group.team} style={{ padding: 16, background: '#1a1a1a', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                                                    <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>{group.label}</div>
+                                                    <span style={{ fontSize: '0.72rem', color: '#777', textTransform: 'uppercase', fontWeight: 800 }}>
+                                                        {group.rows.length} jugador{group.rows.length === 1 ? '' : 'es'}
+                                                    </span>
+                                                </div>
+                                                {group.rows.length === 0 ? (
+                                                    <div style={{ color: '#666', fontSize: '0.82rem', lineHeight: 1.5 }}>
+                                                        No hay eventos con jugador identificado para este equipo.
+                                                    </div>
+                                                ) : group.rows.map((player) => (
+                                                    <div key={player.key} style={{ border: '1px solid #262626', borderRadius: 8, padding: 12, background: '#141414', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                                                            <div>
+                                                                <div style={{ fontWeight: 800 }}>{player.name}</div>
+                                                                <div style={{ fontSize: '0.75rem', color: '#777', marginTop: 4 }}>
+                                                                    {player.totalEvents} evento{player.totalEvents === 1 ? '' : 's'} · ultimo {player.lastMinute}&apos;
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ textAlign: 'right' }}>
+                                                                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: player.points > 0 ? 'var(--accent)' : '#fff' }}>{player.points}</div>
+                                                                <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase', fontWeight: 800 }}>puntos</div>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                            {player.breakdown.map((entry) => (
+                                                                <span
+                                                                    key={`${player.key}-${entry.type}`}
+                                                                    style={{
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: 6,
+                                                                        padding: '6px 10px',
+                                                                        borderRadius: 999,
+                                                                        background: `${entry.color}18`,
+                                                                        border: `1px solid ${entry.color}33`,
+                                                                        color: entry.color,
+                                                                        fontSize: '0.74rem',
+                                                                        fontWeight: 800,
+                                                                    }}
+                                                                >
+                                                                    {entry.label} x{entry.count}
+                                                                    {entry.totalPoints > 0 ? <strong style={{ color: '#fff' }}>+{entry.totalPoints}</strong> : null}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </article>
                         )}
                     </div>
@@ -2496,6 +2797,132 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <option value="cancelled">Cancelado</option>
                                 </select>
                             </div>
+                            <div style={{ padding: 20, borderRadius: 12, border: '1px solid rgba(0, 163, 101, 0.28)', background: 'linear-gradient(180deg, rgba(8, 18, 14, 0.98) 0%, rgba(17, 17, 17, 0.98) 100%)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', gap: 18 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 6 }}>Cronometro Oficial</div>
+                                        <div style={{ padding: '10px 14px', borderRadius: 10, border: `1px solid ${clockDraft.running ? 'rgba(16,185,129,0.45)' : 'rgba(255,255,255,0.12)'}`, background: clockDraft.running ? 'rgba(6, 78, 59, 0.26)' : 'rgba(0, 0, 0, 0.34)', display: 'inline-flex', alignItems: 'center', fontSize: '2rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '0.04em', textShadow: '0 1px 10px rgba(0,0,0,0.35)' }}>{liveClockLabel}</div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                        <button
+                                            type="button"
+                                            className="mc-btn mc-btn-outline"
+                                            style={{ border: '1px solid rgba(16,185,129,0.35)', background: clockDraft.running ? 'rgba(16,185,129,0.18)' : '#0f172a', color: '#f8fafc' }}
+                                            onClick={() => {
+                                                setClockDraft((prev) => {
+                                                    const normalized = normalizeMatchClock(prev);
+                                                    const nextRunning = !normalized.running;
+                                                    return {
+                                                        ...normalized,
+                                                        running: nextRunning,
+                                                        period: normalized.period || '1T',
+                                                    };
+                                                });
+                                                if (match.status !== 'live') {
+                                                    setMatch((prev) => ({ ...prev, status: 'live' }));
+                                                }
+                                            }}
+                                        >
+                                            {clockDraft.running ? 'Pausar' : 'Iniciar'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mc-btn mc-btn-outline"
+                                            style={{ border: '1px solid rgba(255,255,255,0.16)', background: '#111827', color: '#e5e7eb' }}
+                                            onClick={() => setClockDraft((prev) => ({
+                                                ...normalizeMatchClock(prev),
+                                                minute: getLatestEventMinute(localEventsRef.current) ?? prev.minute ?? 0,
+                                                seconds: 0,
+                                                running: false,
+                                            }))}
+                                        >
+                                            Tomar ultimo evento
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mc-btn mc-btn-outline"
+                                            style={{ border: '1px solid rgba(248,113,113,0.26)', background: 'rgba(127,29,29,0.28)', color: '#fecaca' }}
+                                            onClick={() => setClockDraft({ minute: 0, seconds: 0, period: 'Previa', running: false })}
+                                        >
+                                            Reiniciar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+                                    <label style={{ display: 'grid', gap: 6 }}>
+                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Periodo</span>
+                                        <select
+                                            value={clockDraft.period || ''}
+                                            style={{ borderRadius: 8, background: '#020617', border: '1px solid rgba(255,255,255,0.14)', color: '#f8fafc', padding: '10px 12px' }}
+                                            onChange={(e) => setClockDraft((prev) => ({
+                                                ...normalizeMatchClock(prev),
+                                                period: e.target.value,
+                                            }))}
+                                        >
+                                            {Array.from(new Set([clockDraft.period || '', ...COMMON_MATCH_PERIODS].filter(Boolean))).map((period) => (
+                                                <option key={period} value={period}>{period}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <label style={{ display: 'grid', gap: 6 }}>
+                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Minuto</span>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            value={clockDraft.minute ?? 0}
+                                            style={{ borderRadius: 8, background: '#020617', border: '1px solid rgba(255,255,255,0.14)', color: '#f8fafc', padding: '10px 12px' }}
+                                            onChange={(e) => setClockDraft((prev) => ({
+                                                ...normalizeMatchClock(prev),
+                                                minute: normalizeClockMinute(e.target.value),
+                                            }))}
+                                        />
+                                    </label>
+                                    <label style={{ display: 'grid', gap: 6 }}>
+                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Segundos</span>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            max={59}
+                                            value={clockDraft.seconds ?? 0}
+                                            style={{ borderRadius: 8, background: '#020617', border: '1px solid rgba(255,255,255,0.14)', color: '#f8fafc', padding: '10px 12px' }}
+                                            onChange={(e) => setClockDraft((prev) => ({
+                                                ...normalizeMatchClock(prev),
+                                                seconds: normalizeClockSeconds(e.target.value),
+                                            }))}
+                                        />
+                                    </label>
+                                    <label style={{ display: 'grid', gap: 6 }}>
+                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Ajuste rapido</span>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                                            {[
+                                                { label: '-1m', delta: -1 },
+                                                { label: '+1m', delta: 1 },
+                                                { label: '+5m', delta: 5 },
+                                            ].map((action) => (
+                                                <button
+                                                    key={action.label}
+                                                    type="button"
+                                                    className="mc-btn mc-btn-outline"
+                                                    style={{ border: '1px solid rgba(255,255,255,0.14)', background: '#111827', color: '#f8fafc', justifyContent: 'center', paddingInline: 0 }}
+                                                    onClick={() => setClockDraft((prev) => ({
+                                                        ...normalizeMatchClock(prev),
+                                                        minute: Math.max(0, (prev.minute ?? 0) + action.delta),
+                                                    }))}
+                                                >
+                                                    {action.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div style={{ fontSize: '0.78rem', color: clockDirty ? '#fde68a' : '#94a3b8', lineHeight: 1.5 }}>
+                                    {clockDirty
+                                        ? 'Hay cambios del cronometro sin guardar. Se persisten con el boton Guardar del encabezado.'
+                                        : 'El cronometro se guarda en el campo clock del partido y puede convivir con la carga manual de eventos.'}
+                                </div>
+                            </div>
                             <div className="form-group">
                                 <label>Marcador Local</label>
                                 <input
@@ -2535,10 +2962,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 />
                             </div>
                             <div style={{ marginTop: -8, fontSize: '0.78rem', color: scoreDirty ? '#fcd34d' : '#666', lineHeight: 1.5 }}>
-                                {scoreDirty
-                                    ? 'Hay cambios locales sin guardar. Usa el boton Guardar del encabezado para persistir marcador, estado, sede, fecha y notas juntos.'
+                                {(scoreDirty || clockDirty)
+                                    ? 'Hay cambios locales sin guardar. Usa el boton Guardar del encabezado para persistir cronometro, marcador, estado, sede, fecha y notas juntos.'
                                     : hasUnsavedMatchParameters
-                                        ? 'Hay cambios administrativos sin guardar. El guardado ahora evita recalcular datos del partido si solo cambias sede, fecha o notas.'
+                                        ? 'Hay cambios administrativos sin guardar. El guardado ahora evita recalcular datos del partido si solo cambias sede, fecha, reloj o notas.'
                                         : 'El marcador oficial manda sobre la timeline. Si no coincide con los eventos, la consola lo mostrara como resultado manual.'}
                             </div>
                         </div>

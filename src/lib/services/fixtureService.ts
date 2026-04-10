@@ -722,7 +722,7 @@ export class FixtureService {
 
     const { data: existingMatch, error: existingMatchError } = await supabase
       .from('matches')
-      .select('id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
+      .select('id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
       .eq('id', matchId)
       .single();
 
@@ -805,6 +805,7 @@ export class FixtureService {
     if (supportsBroadcastUrl && data.streamUrl !== undefined) updateData.broadcast_url = data.streamUrl || null;
     if (supportsReplayUrl && data.replayUrl !== undefined) updateData.replay_url = data.replayUrl || null;
     if (data.score !== undefined) updateData.score = data.score;
+    if (data.clock !== undefined) updateData.clock = data.clock;
     if (data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
     if (data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;
     if (data.homeBonusPoints !== undefined) updateData.home_bonus_points = data.homeBonusPoints;
@@ -1414,6 +1415,7 @@ export class FixtureService {
       venue: match.venue || null,
       status: match.status,
       score: match.score || { home: 0, away: 0 },
+      clock: match.clock ?? null,
       notes: match.notes,
       streamUrl: match.stream_url ?? match.broadcast_url ?? null,
       replayUrl: match.replay_url ?? null,
