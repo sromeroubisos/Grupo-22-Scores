@@ -221,6 +221,29 @@ function extractDisplayLineupPlayers(rawPlayers: unknown) {
         } => Boolean(player));
 }
 
+function splitDisplayLineupPlayers(
+    players: Array<{
+        id: string | null;
+        name: string;
+        number: number;
+        position: string | null;
+        role: string | null;
+        isCaptain: boolean;
+    }>
+) {
+    const isStarter = (player: typeof players[number], index: number) => {
+        const role = String(player.role || '').trim().toLowerCase();
+        if (role === 'starter' || role === 'titular') return true;
+        if (role === 'substitute' || role === 'suplente' || role === 'finisher') return false;
+        return Number(player.number) <= 15 || index < 15;
+    };
+
+    return {
+        starters: players.filter((player, index) => isStarter(player, index)),
+        finishers: players.filter((player, index) => !isStarter(player, index)),
+    };
+}
+
 function getComparableTeamId(value: unknown) {
     return String(value || '').trim().toLowerCase();
 }
@@ -1032,6 +1055,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
             ? localAwayLineup
             : (matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || [])
     );
+    const homeLineupGroups = splitDisplayLineupPlayers(displayHomeLineup);
+    const awayLineupGroups = splitDisplayLineupPlayers(displayAwayLineup);
     const hasAnyLineups = displayHomeLineup.length > 0 || displayAwayLineup.length > 0;
     const motorsportRows = (Array.isArray(matchData.standings) && matchData.standings.length > 0
         ? matchData.standings
@@ -1800,43 +1825,93 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.home.name}</div>
-                                            <div className={styles.playerList}>
-                                                {displayHomeLineup.map((p, i: number) => {
-                                                    const pId = p.id;
-                                                    const pName = p.name;
-                                                    const pNumber = p.number;
-                                                    const pPosition = p.position || p.role;
-                                                    return (
-                                                        <div key={i} className={styles.playerItem}>
-                                                            <span>
-                                                                <span className={styles.playerNumber}>{pNumber}</span>{' '}
-                                                                {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
-                                                            </span>
-                                                            <span style={{ opacity: 0.5, fontSize: '11px' }}>{pPosition}</span>
-                                                        </div>
-                                                    );
-                                                })}
+                                            <div className={styles.lineupSection}>
+                                                <div className={styles.lineupSectionTitle}>Titulares</div>
+                                                <div className={styles.playerList}>
+                                                    {homeLineupGroups.starters.map((p, i: number) => {
+                                                        const pId = p.id;
+                                                        const pName = p.name;
+                                                        const pNumber = p.number;
+                                                        const pPosition = p.position || p.role;
+                                                        return (
+                                                            <div key={`home-starter-${i}`} className={styles.playerItem}>
+                                                                <span className={styles.playerMain}>
+                                                                    <span className={styles.playerNumber}>{pNumber}</span>
+                                                                    {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                </span>
+                                                                {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
+                                            {homeLineupGroups.finishers.length > 0 && (
+                                                <div className={styles.lineupSection}>
+                                                    <div className={styles.lineupSectionTitle}>Suplentes</div>
+                                                    <div className={styles.playerList}>
+                                                        {homeLineupGroups.finishers.map((p, i: number) => {
+                                                            const pId = p.id;
+                                                            const pName = p.name;
+                                                            const pNumber = p.number;
+                                                            const pPosition = p.position || p.role;
+                                                            return (
+                                                                <div key={`home-finisher-${i}`} className={styles.playerItem}>
+                                                                    <span className={styles.playerMain}>
+                                                                        <span className={styles.playerNumber}>{pNumber}</span>
+                                                                        {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                    </span>
+                                                                    {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.away.name}</div>
-                                            <div className={styles.playerList}>
-                                                {displayAwayLineup.map((p, i: number) => {
-                                                    const pId = p.id;
-                                                    const pName = p.name;
-                                                    const pNumber = p.number;
-                                                    const pPosition = p.position || p.role;
-                                                    return (
-                                                        <div key={i} className={styles.playerItem}>
-                                                            <span>
-                                                                <span className={styles.playerNumber}>{pNumber}</span>{' '}
-                                                                {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
-                                                            </span>
-                                                            <span style={{ opacity: 0.5, fontSize: '11px' }}>{pPosition}</span>
-                                                        </div>
-                                                    );
-                                                })}
+                                            <div className={styles.lineupSection}>
+                                                <div className={styles.lineupSectionTitle}>Titulares</div>
+                                                <div className={styles.playerList}>
+                                                    {awayLineupGroups.starters.map((p, i: number) => {
+                                                        const pId = p.id;
+                                                        const pName = p.name;
+                                                        const pNumber = p.number;
+                                                        const pPosition = p.position || p.role;
+                                                        return (
+                                                            <div key={`away-starter-${i}`} className={styles.playerItem}>
+                                                                <span className={styles.playerMain}>
+                                                                    <span className={styles.playerNumber}>{pNumber}</span>
+                                                                    {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                </span>
+                                                                {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
+                                            {awayLineupGroups.finishers.length > 0 && (
+                                                <div className={styles.lineupSection}>
+                                                    <div className={styles.lineupSectionTitle}>Suplentes</div>
+                                                    <div className={styles.playerList}>
+                                                        {awayLineupGroups.finishers.map((p, i: number) => {
+                                                            const pId = p.id;
+                                                            const pName = p.name;
+                                                            const pNumber = p.number;
+                                                            const pPosition = p.position || p.role;
+                                                            return (
+                                                                <div key={`away-finisher-${i}`} className={styles.playerItem}>
+                                                                    <span className={styles.playerMain}>
+                                                                        <span className={styles.playerNumber}>{pNumber}</span>
+                                                                        {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                    </span>
+                                                                    {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ) : (

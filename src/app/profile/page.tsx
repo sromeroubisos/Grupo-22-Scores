@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Bell,
     Camera,
@@ -86,6 +86,14 @@ interface ProfileUser {
     avatarUrl?: string | null;
 }
 
+function resolveMainTab(value: string | null): MainTab {
+    if (value === 'favoritos' || value === 'prode' || value === 'perfil') {
+        return value;
+    }
+
+    return 'favoritos';
+}
+
 async function sendProfileRequest(
     payload: CollaboratorRequestPayload | TournamentRequestPayload
 ): Promise<RequestApiResponse> {
@@ -106,11 +114,16 @@ async function sendProfileRequest(
 
 export default function ProfilePage() {
     const { user, logout } = useAuth();
+    const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState<MainTab>('favoritos');
     const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
     const [favLoading, setFavLoading] = useState(true);
     const [activeRequestForm, setActiveRequestForm] = useState<ProfileActionKind | null>(null);
     const supabase = createClient();
+
+    useEffect(() => {
+        setActiveTab(resolveMainTab(searchParams.get('tab')));
+    }, [searchParams]);
 
     useEffect(() => {
         if (!user?.id) {

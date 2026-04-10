@@ -539,6 +539,10 @@
     gap: 24px;
 }
 
+.lineupsContainer {
+    min-width: 0;
+}
+
 .lineupsToolbar {
     grid-column: 1 / -1;
     display: flex;
@@ -569,6 +573,42 @@
     flex-shrink: 0;
 }
 
+.lineupTeam {
+    min-width: 0;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 18px;
+    padding: 20px;
+}
+
+.lineupSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.lineupSection + .lineupSection {
+    margin-top: 18px;
+}
+
+.lineupSectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.lineupSectionTitle::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--stroke);
+}
+
 .playerList {
     display: flex;
     flex-direction: column;
@@ -578,17 +618,34 @@
 .playerItem {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     padding: 8px 12px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 8px;
     font-size: 13px;
 }
 
+.playerMain {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
 .playerNumber {
     color: var(--accent);
     font-weight: 700;
-    margin-right: 8px;
     font-family: var(--font-mono);
+    flex-shrink: 0;
+}
+
+.playerMeta {
+    opacity: 0.5;
+    font-size: 11px;
+    flex-shrink: 0;
+    text-transform: uppercase;
 }
 
 /* Standings */
@@ -828,10 +885,6 @@
         grid-template-columns: 1fr;
     }
 
-    .lineupsGrid {
-        grid-template-columns: 1fr;
-    }
-
     .lineupsToolbar {
         flex-direction: column;
         align-items: stretch;
@@ -843,6 +896,58 @@
 }
 
 @media (max-width: 768px) {
+    .lineupsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .lineupTeam {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .lineupTeam .panelTitle {
+        margin-bottom: 14px;
+        font-size: 14px;
+    }
+
+    .lineupSection + .lineupSection {
+        margin-top: 14px;
+    }
+
+    .lineupSectionTitle {
+        font-size: 9px;
+        letter-spacing: 0.12em;
+    }
+
+    .playerList {
+        gap: 6px;
+    }
+
+    .playerItem {
+        padding: 7px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        gap: 8px;
+    }
+
+    .playerMain {
+        gap: 6px;
+    }
+
+    .playerMeta {
+        font-size: 9px;
+        opacity: 0.42;
+    }
+
+    .lineupsToolbarHint {
+        font-size: 12px;
+    }
+
+    .lineupsExportAction {
+        width: 100%;
+    }
+
     .scoreNum {
         font-size: 64px;
     }
