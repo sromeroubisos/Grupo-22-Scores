@@ -30,20 +30,20 @@ export interface TournamentGlobal {
 export type TournamentUpdate = Database['public']['Tables']['tournaments']['Update'];
 
 const TOURNAMENT_FALLBACK_SELECT_WITH_PRIORITY = `
-  id, name, slug, sport_id, country_id, union_id,
+  id, name, slug, sport_id, country_id, country_label:country, union_id,
   logo_url, is_popular, is_visible, display_name, status, priority,
   created_at, updated_at,
   sport:sports(name),
-  country:countries(name),
+  country_ref:countries(name),
   union:unions(name)
 `;
 
 const TOURNAMENT_FALLBACK_SELECT = `
-  id, name, slug, sport_id, country_id, union_id,
+  id, name, slug, sport_id, country_id, country_label:country, union_id,
   logo_url, is_popular, is_visible, display_name, status,
   created_at, updated_at,
   sport:sports(name),
-  country:countries(name),
+  country_ref:countries(name),
   union:unions(name)
 `;
 
@@ -152,7 +152,7 @@ export const tournamentService = {
       sport_id: t.sport_id || '',
       sport_name: (t.sport as any)?.name || 'Unknown',
       country_id: t.country_id || null,
-      country_name: (t.country as any)?.name || null,
+      country_name: (t.country_ref as any)?.name || t.country_label || null,
       // organization_id column was dropped; fall back to union_id
       organization_id: t.union_id || null,
       organization_name: (t.union as any)?.name || null,

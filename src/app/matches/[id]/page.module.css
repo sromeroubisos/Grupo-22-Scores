@@ -648,6 +648,20 @@
     text-transform: uppercase;
 }
 
+.playerRatingMeta {
+    flex-shrink: 0;
+    min-width: 3.5ch;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(16, 185, 129, 0.32);
+    background: rgba(16, 185, 129, 0.12);
+    color: #7ef0c0;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 0.04em;
+}
+
 /* Standings */
 .standingsTable {
     width: 100%;

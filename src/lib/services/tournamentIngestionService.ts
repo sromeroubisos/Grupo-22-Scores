@@ -17,6 +17,7 @@ import {
     isRugbySport,
     withRugbyApiSportsRuleset,
 } from '@/lib/externalProviderPolicy';
+import { resolveTournamentCountryId, resolveTournamentCountryLabel } from '@/lib/data/countries';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 export interface ExternalEntity {
@@ -331,13 +332,37 @@ export class TournamentIngestionService {
                 resolved_at: new Date().toISOString(),
             })
             : undefined;
+        const resolvedCountryId =
+            resolveTournamentCountryId(externalTournament.country_name) ||
+            resolveTournamentCountryId(externalTournament.country_id);
+        const resolvedCountryLabel =
+            resolveTournamentCountryLabel(externalTournament.country_name) ||
+            resolveTournamentCountryLabel(externalTournament.country_id) ||
+            (typeof externalTournament.country_name === 'string' ? externalTournament.country_name : null);
+
+        if (resolvedCountryId) {
+            const { error: countryError } = await supabase
+                .from('countries')
+                .upsert(
+                    {
+                        id: resolvedCountryId,
+                        name: resolvedCountryLabel || resolvedCountryId,
+                    },
+                    { onConflict: 'id' },
+                );
+
+            if (countryError && !countryError.message?.includes('Could not find the table')) {
+                throw countryError;
+            }
+        }
 
         const payload = {
             name: internalParams.name || externalTournament.name,
             display_name: internalParams.display_name || externalTournament.name,
             slug: normalizeSlug(internalParams.name || externalTournament.name),
             sport_id: externalTournament.sport_id,
-            country_id: externalTournament.country_id,
+            country: resolvedCountryLabel || null,
+            country_id: resolvedCountryId,
             logo_url: externalTournament.logo_url,
             url: externalTournament.url || null,
             external_id: rugbyLeagueId || externalTournament.id || null,

@@ -257,7 +257,15 @@
     border-radius: 14px;
 }
 
+.compactPresetItem {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
+}
+
 .compactPresetBtn {
+    flex: 1 1 auto;
     min-width: 0;
     min-height: 38px;
     padding: 8px 10px;
@@ -839,7 +847,15 @@
     gap: 10px;
 }
 
+.savedPresetCard {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
+}
+
 .gradientPresetBtn {
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -885,6 +901,27 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.savedPresetDeleteBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    min-width: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.savedPresetDeleteBtn:hover {
+    transform: translateY(-1px);
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fecaca;
 }
 
 .emptyPresetState {

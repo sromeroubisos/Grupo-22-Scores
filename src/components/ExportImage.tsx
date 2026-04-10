@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
@@ -126,6 +127,7 @@ interface LineupExportPlayerData {
     name: string;
     position?: string | null;
     role?: string | null;
+    rating?: number | string | null;
     isCaptain?: boolean | null;
 }
 
@@ -242,6 +244,15 @@ type SavedMatchGradientPreset = {
     gradientRightColor: string;
     gradientImage: MatchBackgroundUpload | null;
 };
+type ExportPresetStorageMode = 'local' | 'cloud';
+type ExportPresetKind = 'editorial' | 'gradient';
+type SupabaseBrowserClient = ReturnType<typeof createClient>;
+type PersistedExportPresetRow = {
+    id: string;
+    name: string;
+    payload: unknown;
+    updated_at?: string;
+};
 
 interface ExportImageProps {
     template: ExportTemplate;
@@ -323,6 +334,7 @@ const EXPORT_STORAGE_DB_VERSION = 1;
 const EXPORT_STORAGE_STORE_NAME = 'kv';
 const EXPORT_STORAGE_EDITORIAL_PRESETS_KEY = 'editorial-presets';
 const EXPORT_STORAGE_EDITORIAL_GRADIENTS_KEY = 'editorial-gradient-presets';
+const EXPORT_PRESETS_TABLE = 'user_export_presets';
 const MAX_SAVED_EDITORIAL_PRESETS = 24;
 const MAX_SAVED_EDITORIAL_GRADIENT_PRESETS = 24;
 const EDITORIAL_SPONSOR_SLOTS = 6;
@@ -487,11 +499,13 @@ const EXPORT_TIMEZONE_PRESETS: ExportTimeZonePreset[] = [
 let localExportFontsPromise: Promise<void> | null = null;
 
 export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
+    const supabase = useMemo(() => createClient(), []);
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
+    const [presetStorageMode, setPresetStorageMode] = useState<ExportPresetStorageMode>('local');
     const defaultTournamentName = getDefaultTournamentName(template, data);
     const defaultMatchExportMode = getDefaultMatchExportMode(template, data);
     const [customTournamentName, setCustomTournamentName] = useState(defaultTournamentName);
@@ -616,22 +630,25 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         let isMounted = true;
 
         const hydrateSavedPresets = async () => {
-            const [editorialPresets, gradientPresets] = await Promise.all([
-                readSavedEditorialPresets(),
-                readSavedGradientPresets(),
-            ]);
+            const { editorialPresets, gradientPresets, storageMode } = await hydrateSavedPresetCollections(supabase);
 
             if (!isMounted) return;
             setSavedEditorialPresets(editorialPresets);
             setSavedGradientPresets(gradientPresets);
+            setPresetStorageMode(storageMode);
         };
 
         void hydrateSavedPresets();
 
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+            void hydrateSavedPresets();
+        });
+
         return () => {
             isMounted = false;
+            subscription.unsubscribe();
         };
-    }, []);
+    }, [supabase]);
 
     useEffect(() => {
         if (template !== 'matchStats') return;
@@ -853,9 +870,12 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const nextPresets = upsertSavedEditorialPreset(savedEditorialPresets, nextPreset);
         setSavedEditorialPresets(nextPresets);
         try {
-            await persistSavedEditorialPresets(nextPresets);
+            const storageMode = await persistSavedEditorialPresets(nextPresets, supabase);
+            setPresetStorageMode(storageMode);
             setEditorialPresetName('');
-            setStatus(`Preset "${name}" guardado`);
+            setStatus(storageMode === 'cloud'
+                ? `Preset "${name}" guardado y sincronizado`
+                : `Preset "${name}" guardado en este dispositivo`);
             window.setTimeout(() => setStatus(''), 2200);
         } catch (error) {
             console.error('Editorial preset save error:', error);
@@ -892,13 +912,52 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const nextPresets = upsertSavedGradientPreset(savedGradientPresets, nextPreset);
         setSavedGradientPresets(nextPresets);
         try {
-            await persistSavedGradientPresets(nextPresets);
+            const storageMode = await persistSavedGradientPresets(nextPresets, supabase);
+            setPresetStorageMode(storageMode);
             setGradientPresetName('');
-            setStatus(`Gradiente "${name}" guardado`);
+            setStatus(storageMode === 'cloud'
+                ? `Gradiente "${name}" guardado y sincronizado`
+                : `Gradiente "${name}" guardado en este dispositivo`);
             window.setTimeout(() => setStatus(''), 2200);
         } catch (error) {
             console.error('Gradient preset save error:', error);
             setStatus('No se pudo guardar el gradiente. Reintenta en unos segundos.');
+        }
+    };
+
+    const handleDeleteEditorialPreset = async (presetId: string, presetName: string) => {
+        const nextPresets = savedEditorialPresets.filter((preset) => preset.id !== presetId);
+        setSavedEditorialPresets(nextPresets);
+
+        try {
+            const storageMode = await persistSavedEditorialPresets(nextPresets, supabase);
+            setPresetStorageMode(storageMode);
+            setStatus(storageMode === 'cloud'
+                ? `Preset "${presetName}" eliminado y sincronizado`
+                : `Preset "${presetName}" eliminado`);
+            window.setTimeout(() => setStatus(''), 2200);
+        } catch (error) {
+            console.error('Editorial preset delete error:', error);
+            setSavedEditorialPresets(savedEditorialPresets);
+            setStatus('No se pudo borrar el preset. Reintenta en unos segundos.');
+        }
+    };
+
+    const handleDeleteGradientPreset = async (presetId: string, presetName: string) => {
+        const nextPresets = savedGradientPresets.filter((preset) => preset.id !== presetId);
+        setSavedGradientPresets(nextPresets);
+
+        try {
+            const storageMode = await persistSavedGradientPresets(nextPresets, supabase);
+            setPresetStorageMode(storageMode);
+            setStatus(storageMode === 'cloud'
+                ? `Gradiente "${presetName}" eliminado y sincronizado`
+                : `Gradiente "${presetName}" eliminado`);
+            window.setTimeout(() => setStatus(''), 2200);
+        } catch (error) {
+            console.error('Gradient preset delete error:', error);
+            setSavedGradientPresets(savedGradientPresets);
+            setStatus('No se pudo borrar el gradiente. Reintenta en unos segundos.');
         }
     };
 
@@ -1597,7 +1656,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             <div className={styles.presetLibrarySection}>
                                                 <div className={styles.presetLibraryHeader}>
                                                     <span className={styles.presetLibraryTitle}>Tus gradientes</span>
-                                                    <span className={styles.presetLibraryMeta}>Se guardan en este navegador</span>
+                                                    <span className={styles.presetLibraryMeta}>
+                                                        {presetStorageMode === 'cloud' ? 'Sincronizados con tu cuenta' : 'Se guardan en este dispositivo'}
+                                                    </span>
                                                 </div>
                                                 <div className={styles.inlineActionRow}>
                                                     <input
@@ -1617,21 +1678,31 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                                                 && editorialGradientRightColor === preset.gradientRightColor
                                                                 && (editorialGradientUpload?.src || '') === (preset.gradientImage?.src || '');
                                                             return (
-                                                                <button
-                                                                    key={preset.id}
-                                                                    className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
-                                                                    onClick={() => applySavedGradientPreset(preset)}
-                                                                    title={`Aplicar ${preset.name}`}
-                                                                    type="button"
-                                                                >
-                                                                    <span
-                                                                        className={styles.gradientPresetSwatch}
-                                                                        style={{ background: preset.gradientImage?.src
-                                                                            ? `center / cover no-repeat url(${preset.gradientImage.src})`
-                                                                            : `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
-                                                                    />
-                                                                    <span className={styles.gradientPresetName}>{preset.name}</span>
-                                                                </button>
+                                                                <div key={preset.id} className={styles.savedPresetCard}>
+                                                                    <button
+                                                                        className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
+                                                                        onClick={() => applySavedGradientPreset(preset)}
+                                                                        title={`Aplicar ${preset.name}`}
+                                                                        type="button"
+                                                                    >
+                                                                        <span
+                                                                            className={styles.gradientPresetSwatch}
+                                                                            style={{ background: preset.gradientImage?.src
+                                                                                ? `center / cover no-repeat url(${preset.gradientImage.src})`
+                                                                                : `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
+                                                                        />
+                                                                        <span className={styles.gradientPresetName}>{preset.name}</span>
+                                                                    </button>
+                                                                    <button
+                                                                        className={styles.savedPresetDeleteBtn}
+                                                                        onClick={() => handleDeleteGradientPreset(preset.id, preset.name)}
+                                                                        title={`Borrar ${preset.name}`}
+                                                                        aria-label={`Borrar ${preset.name}`}
+                                                                        type="button"
+                                                                    >
+                                                                        <X size={14} />
+                                                                    </button>
+                                                                </div>
                                                             );
                                                         })}
                                                     </div>
@@ -1707,15 +1778,25 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             <label className={styles.modalLabel}>Presets guardados</label>
                                             <div className={styles.compactPresetPanel}>
                                                 {savedEditorialPresets.map((preset) => (
-                                                    <button
-                                                        key={preset.id}
-                                                        className={styles.compactPresetBtn}
-                                                        onClick={() => applySavedEditorialPreset(preset)}
-                                                        type="button"
-                                                        title={`Aplicar ${preset.name}`}
-                                                    >
-                                                        {preset.name}
-                                                    </button>
+                                                    <div key={preset.id} className={styles.compactPresetItem}>
+                                                        <button
+                                                            className={styles.compactPresetBtn}
+                                                            onClick={() => applySavedEditorialPreset(preset)}
+                                                            type="button"
+                                                            title={`Aplicar ${preset.name}`}
+                                                        >
+                                                            {preset.name}
+                                                        </button>
+                                                        <button
+                                                            className={styles.savedPresetDeleteBtn}
+                                                            onClick={() => handleDeleteEditorialPreset(preset.id, preset.name)}
+                                                            title={`Borrar ${preset.name}`}
+                                                            aria-label={`Borrar ${preset.name}`}
+                                                            type="button"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
@@ -1875,7 +1956,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         <div className={styles.presetLibrarySection}>
                                             <div className={styles.presetLibraryHeader}>
                                                 <span className={styles.presetLibraryTitle}>Tus gradientes</span>
-                                                <span className={styles.presetLibraryMeta}>Se guardan en este navegador</span>
+                                                <span className={styles.presetLibraryMeta}>
+                                                    {presetStorageMode === 'cloud' ? 'Sincronizados con tu cuenta' : 'Se guardan en este dispositivo'}
+                                                </span>
                                             </div>
                                             <div className={styles.gradientUploadRow}>
                                                 <input
@@ -1894,19 +1977,29 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                                         const isActive = bgColor === preset.gradientLeftColor
                                                             && accentColor === preset.gradientRightColor;
                                                         return (
-                                                            <button
-                                                                key={preset.id}
-                                                                className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
-                                                                onClick={() => applySavedGradientPreset(preset)}
-                                                                title={`Aplicar ${preset.name}`}
-                                                                type="button"
-                                                            >
-                                                                <span
-                                                                    className={styles.gradientPresetSwatch}
-                                                                    style={{ background: `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
-                                                                />
-                                                                <span className={styles.gradientPresetName}>{preset.name}</span>
-                                                            </button>
+                                                            <div key={preset.id} className={styles.savedPresetCard}>
+                                                                <button
+                                                                    className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
+                                                                    onClick={() => applySavedGradientPreset(preset)}
+                                                                    title={`Aplicar ${preset.name}`}
+                                                                    type="button"
+                                                                >
+                                                                    <span
+                                                                        className={styles.gradientPresetSwatch}
+                                                                        style={{ background: `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
+                                                                    />
+                                                                    <span className={styles.gradientPresetName}>{preset.name}</span>
+                                                                </button>
+                                                                <button
+                                                                    className={styles.savedPresetDeleteBtn}
+                                                                    onClick={() => handleDeleteGradientPreset(preset.id, preset.name)}
+                                                                    title={`Borrar ${preset.name}`}
+                                                                    aria-label={`Borrar ${preset.name}`}
+                                                                    type="button"
+                                                                >
+                                                                    <X size={14} />
+                                                                </button>
+                                                            </div>
                                                         );
                                                     })}
                                                 </div>
@@ -2194,7 +2287,7 @@ async function persistCollection<T>(storageKey: string, legacyKey: string, value
     }
 }
 
-async function readSavedEditorialPresets(): Promise<SavedMatchEditorialPreset[]> {
+async function readLocalSavedEditorialPresets(): Promise<SavedMatchEditorialPreset[]> {
     return readPersistedCollection(
         EXPORT_STORAGE_EDITORIAL_PRESETS_KEY,
         EDITORIAL_PRESET_STORAGE_KEY,
@@ -2202,7 +2295,7 @@ async function readSavedEditorialPresets(): Promise<SavedMatchEditorialPreset[]>
     );
 }
 
-async function readSavedGradientPresets(): Promise<SavedMatchGradientPreset[]> {
+async function readLocalSavedGradientPresets(): Promise<SavedMatchGradientPreset[]> {
     return readPersistedCollection(
         EXPORT_STORAGE_EDITORIAL_GRADIENTS_KEY,
         EDITORIAL_GRADIENT_PRESET_STORAGE_KEY,
@@ -2210,7 +2303,7 @@ async function readSavedGradientPresets(): Promise<SavedMatchGradientPreset[]> {
     );
 }
 
-async function persistSavedEditorialPresets(presets: SavedMatchEditorialPreset[]): Promise<void> {
+async function persistLocalSavedEditorialPresets(presets: SavedMatchEditorialPreset[]): Promise<void> {
     await persistCollection(
         EXPORT_STORAGE_EDITORIAL_PRESETS_KEY,
         EDITORIAL_PRESET_STORAGE_KEY,
@@ -2218,12 +2311,252 @@ async function persistSavedEditorialPresets(presets: SavedMatchEditorialPreset[]
     );
 }
 
-async function persistSavedGradientPresets(presets: SavedMatchGradientPreset[]): Promise<void> {
+async function persistLocalSavedGradientPresets(presets: SavedMatchGradientPreset[]): Promise<void> {
     await persistCollection(
         EXPORT_STORAGE_EDITORIAL_GRADIENTS_KEY,
         EDITORIAL_GRADIENT_PRESET_STORAGE_KEY,
         presets,
     );
+}
+
+function mergeSavedEditorialPresetCollections(
+    remotePresets: SavedMatchEditorialPreset[],
+    localPresets: SavedMatchEditorialPreset[],
+): SavedMatchEditorialPreset[] {
+    return localPresets.reduce(
+        (merged, preset) => upsertSavedEditorialPreset(merged, preset),
+        [...remotePresets],
+    );
+}
+
+function mergeSavedGradientPresetCollections(
+    remotePresets: SavedMatchGradientPreset[],
+    localPresets: SavedMatchGradientPreset[],
+): SavedMatchGradientPreset[] {
+    return localPresets.reduce(
+        (merged, preset) => upsertSavedGradientPreset(merged, preset),
+        [...remotePresets],
+    );
+}
+
+function getPresetComparableSignature(value: unknown): string {
+    return JSON.stringify(value);
+}
+
+function asPresetPayload(value: unknown): Record<string, unknown> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return value as Record<string, unknown>;
+}
+
+function mapRemoteEditorialPresetRows(rows: PersistedExportPresetRow[]): SavedMatchEditorialPreset[] {
+    return normalizeSavedEditorialPresets(
+        rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            ...asPresetPayload(row.payload),
+        })),
+    );
+}
+
+function mapRemoteGradientPresetRows(rows: PersistedExportPresetRow[]): SavedMatchGradientPreset[] {
+    return normalizeSavedGradientPresets(
+        rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            ...asPresetPayload(row.payload),
+        })),
+    );
+}
+
+async function getAuthenticatedPresetUserId(supabase: SupabaseBrowserClient): Promise<string | null> {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+        console.error('Preset auth read error:', error);
+        return null;
+    }
+    return data.user?.id ?? null;
+}
+
+async function readRemotePresetRows(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presetType: ExportPresetKind,
+): Promise<PersistedExportPresetRow[]> {
+    const { data, error } = await supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .select('id, name, payload, updated_at')
+        .eq('user_id', userId)
+        .eq('preset_type', presetType)
+        .order('updated_at', { ascending: false });
+
+    if (error) {
+        throw error;
+    }
+
+    return (data ?? []) as PersistedExportPresetRow[];
+}
+
+async function replaceRemoteEditorialPresets(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presets: SavedMatchEditorialPreset[],
+): Promise<void> {
+    const { error: deleteError } = await supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .delete()
+        .eq('user_id', userId)
+        .eq('preset_type', 'editorial');
+
+    if (deleteError) {
+        throw deleteError;
+    }
+
+    if (!presets.length) return;
+
+    const rows = presets.map((preset) => ({
+        id: preset.id,
+        user_id: userId,
+        preset_type: 'editorial',
+        name: preset.name,
+        name_normalized: normalizePresetName(preset.name),
+        payload: {
+            layoutPresetId: preset.layoutPresetId,
+            gradientLeftColor: preset.gradientLeftColor,
+            gradientRightColor: preset.gradientRightColor,
+            gradientImage: preset.gradientImage,
+            sponsors: preset.sponsors,
+        },
+    }));
+
+    const { error: insertError } = await supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .insert(rows);
+
+    if (insertError) {
+        throw insertError;
+    }
+}
+
+async function replaceRemoteGradientPresets(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presets: SavedMatchGradientPreset[],
+): Promise<void> {
+    const { error: deleteError } = await supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .delete()
+        .eq('user_id', userId)
+        .eq('preset_type', 'gradient');
+
+    if (deleteError) {
+        throw deleteError;
+    }
+
+    if (!presets.length) return;
+
+    const rows = presets.map((preset) => ({
+        id: preset.id,
+        user_id: userId,
+        preset_type: 'gradient',
+        name: preset.name,
+        name_normalized: normalizePresetName(preset.name),
+        payload: {
+            gradientLeftColor: preset.gradientLeftColor,
+            gradientRightColor: preset.gradientRightColor,
+            gradientImage: preset.gradientImage,
+        },
+    }));
+
+    const { error: insertError } = await supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .insert(rows);
+
+    if (insertError) {
+        throw insertError;
+    }
+}
+
+async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): Promise<{
+    editorialPresets: SavedMatchEditorialPreset[];
+    gradientPresets: SavedMatchGradientPreset[];
+    storageMode: ExportPresetStorageMode;
+}> {
+    const [localEditorialPresets, localGradientPresets, userId] = await Promise.all([
+        readLocalSavedEditorialPresets(),
+        readLocalSavedGradientPresets(),
+        getAuthenticatedPresetUserId(supabase),
+    ]);
+
+    if (!userId) {
+        return {
+            editorialPresets: localEditorialPresets,
+            gradientPresets: localGradientPresets,
+            storageMode: 'local',
+        };
+    }
+
+    try {
+        const [remoteEditorialRows, remoteGradientRows] = await Promise.all([
+            readRemotePresetRows(supabase, userId, 'editorial'),
+            readRemotePresetRows(supabase, userId, 'gradient'),
+        ]);
+        const remoteEditorialPresets = mapRemoteEditorialPresetRows(remoteEditorialRows);
+        const remoteGradientPresets = mapRemoteGradientPresetRows(remoteGradientRows);
+        const mergedEditorialPresets = mergeSavedEditorialPresetCollections(remoteEditorialPresets, localEditorialPresets);
+        const mergedGradientPresets = mergeSavedGradientPresetCollections(remoteGradientPresets, localGradientPresets);
+
+        await Promise.all([
+            persistLocalSavedEditorialPresets(mergedEditorialPresets),
+            persistLocalSavedGradientPresets(mergedGradientPresets),
+        ]);
+
+        if (getPresetComparableSignature(mergedEditorialPresets) !== getPresetComparableSignature(remoteEditorialPresets)) {
+            await replaceRemoteEditorialPresets(supabase, userId, mergedEditorialPresets);
+        }
+
+        if (getPresetComparableSignature(mergedGradientPresets) !== getPresetComparableSignature(remoteGradientPresets)) {
+            await replaceRemoteGradientPresets(supabase, userId, mergedGradientPresets);
+        }
+
+        return {
+            editorialPresets: mergedEditorialPresets,
+            gradientPresets: mergedGradientPresets,
+            storageMode: 'cloud',
+        };
+    } catch (error) {
+        console.error('Preset cloud hydrate error:', error);
+        return {
+            editorialPresets: localEditorialPresets,
+            gradientPresets: localGradientPresets,
+            storageMode: 'local',
+        };
+    }
+}
+
+async function persistSavedEditorialPresets(
+    presets: SavedMatchEditorialPreset[],
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedEditorialPresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    await replaceRemoteEditorialPresets(supabase, userId, presets);
+    return 'cloud';
+}
+
+async function persistSavedGradientPresets(
+    presets: SavedMatchGradientPreset[],
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedGradientPresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    await replaceRemoteGradientPresets(supabase, userId, presets);
+    return 'cloud';
 }
 
 function applyMatchExportMode(data: MatchStatsData, mode: MatchExportMode): MatchStatsData {
@@ -4529,6 +4862,27 @@ function isLineupStarter(player: LineupExportPlayerData, index: number) {
     return index < 15;
 }
 
+function formatLineupExportRating(value: unknown) {
+    const parsed =
+        typeof value === 'number' && Number.isFinite(value)
+            ? value
+            : typeof value === 'string'
+                ? Number(value.replace(',', '.'))
+                : Number.NaN;
+
+    if (!Number.isFinite(parsed)) return '';
+    const clamped = Math.min(10, Math.max(0, parsed));
+    return clamped.toFixed(1);
+}
+
+function getLineupExportRatingValue(value: unknown) {
+    const formatted = formatLineupExportRating(value);
+    if (!formatted) return null;
+
+    const parsed = Number(formatted);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
 async function drawLineups(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -4552,6 +4906,17 @@ async function drawLineups(
             ? team.starters.filter((player) => player && String(player.name || '').trim()).slice(0, 23)
             : [],
     }));
+    const highestRating = selectedTeams.reduce<number | null>((best, team) => {
+        team.starters.forEach((player) => {
+            const rating = getLineupExportRatingValue(player.rating);
+            if (rating == null) return;
+            if (best == null || rating > best) {
+                best = rating;
+            }
+        });
+
+        return best;
+    }, null);
     const isSingleTeam = selectedTeams.length === 1;
     const totalPlayers = selectedTeams.reduce((sum, team) => sum + team.starters.length, 0);
     const [tournamentLogo, homeLogo, awayLogo] = await Promise.all([
@@ -4674,7 +5039,7 @@ async function drawLineups(
         const finisherRowRadius = Math.max(10, Math.round(finisherRowHeight * 0.42));
         const rowInset = isSingleTeam ? 16 : 12;
         const numberWidth = isSingleTeam ? 60 : 48;
-        const positionWidth = columnWidth > 360 ? 72 : 56;
+        const ratingWidth = columnWidth > 360 ? 84 : 68;
         const titleMaxWidth = columnWidth - (isSingleTeam ? 176 : 140);
         const subtitleY = contentY + (isSingleTeam ? 86 : 76);
 
@@ -4727,9 +5092,12 @@ async function drawLineups(
             const rowY = listTop + playerIndex * (starterRowHeight + starterGap);
             const rowNumber = player.number ?? playerIndex + 1;
             const playerName = `${player.name}${player.isCaptain ? ' (C)' : ''}`.trim().toUpperCase();
-            const positionLabel = String(player.position || '').trim().toUpperCase();
+            const ratingLabel = formatLineupExportRating(player.rating);
+            const ratingValue = getLineupExportRatingValue(player.rating);
+            const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+            const displayRatingLabel = isTopRated && ratingLabel ? `${ratingLabel} ★` : ratingLabel;
             const textX = columnX + rowInset + numberWidth + 16;
-            const textWidth = Math.max(110, columnWidth - rowInset * 2 - numberWidth - positionWidth - 22);
+            const textWidth = Math.max(110, columnWidth - rowInset * 2 - numberWidth - (displayRatingLabel ? ratingWidth : 0) - 22);
             const positionX = columnX + columnWidth - rowInset - 4;
 
             ctx.save();
@@ -4754,11 +5122,11 @@ async function drawLineups(
             setFittedFont(ctx, playerName, textWidth, '800', isSingleTeam ? 17 : 15, FONT_BODY, 11);
             ctx.fillText(playerName, textX, rowY + starterRowHeight / 2 + 1);
 
-            if (positionLabel) {
+            if (displayRatingLabel) {
                 ctx.textAlign = 'right';
-                ctx.fillStyle = mutedColor;
-                ctx.font = `700 ${isSingleTeam ? 10 : 9}px ${FONT_BODY}`;
-                ctx.fillText(truncateTextToWidth(ctx, positionLabel, positionWidth), positionX, rowY + starterRowHeight / 2 + 1);
+                ctx.fillStyle = isTopRated ? '#facc15' : accentColor;
+                setFittedFont(ctx, displayRatingLabel, ratingWidth, '800', isSingleTeam ? 17 : 15, FONT_BODY, 11);
+                ctx.fillText(truncateTextToWidth(ctx, displayRatingLabel, ratingWidth), positionX, rowY + starterRowHeight / 2 + 1);
             }
 
             ctx.restore();
@@ -4784,9 +5152,12 @@ async function drawLineups(
                 const rowY = finishersLabelY + finishersLabelHeight + finishersTopPadding + finisherIndex * (finisherRowHeight + finisherGap);
                 const rowNumber = player.number ?? startersCount + finisherIndex + 1;
                 const playerName = `${player.name}${player.isCaptain ? ' (C)' : ''}`.trim().toUpperCase();
-                const positionLabel = String(player.position || '').trim().toUpperCase();
+                const ratingLabel = formatLineupExportRating(player.rating);
+                const ratingValue = getLineupExportRatingValue(player.rating);
+                const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                const displayRatingLabel = isTopRated && ratingLabel ? `${ratingLabel} ★` : ratingLabel;
                 const textX = columnX + rowInset + numberWidth + 12;
-                const textWidth = Math.max(96, columnWidth - rowInset * 2 - numberWidth - positionWidth - 18);
+                const textWidth = Math.max(96, columnWidth - rowInset * 2 - numberWidth - (displayRatingLabel ? ratingWidth : 0) - 18);
                 const positionX = columnX + columnWidth - rowInset - 2;
 
                 ctx.save();
@@ -4811,11 +5182,11 @@ async function drawLineups(
                 setFittedFont(ctx, playerName, textWidth, '800', isSingleTeam ? 13 : 12, FONT_BODY, 9);
                 ctx.fillText(playerName, textX, rowY + finisherRowHeight / 2 + 1);
 
-                if (positionLabel) {
+                if (displayRatingLabel) {
                     ctx.textAlign = 'right';
-                    ctx.fillStyle = mutedColor;
-                    ctx.font = `700 ${isSingleTeam ? 9 : 8}px ${FONT_BODY}`;
-                    ctx.fillText(truncateTextToWidth(ctx, positionLabel, positionWidth), positionX, rowY + finisherRowHeight / 2 + 1);
+                    ctx.fillStyle = isTopRated ? '#facc15' : accentColor;
+                    setFittedFont(ctx, displayRatingLabel, ratingWidth, '800', isSingleTeam ? 13 : 12, FONT_BODY, 9);
+                    ctx.fillText(truncateTextToWidth(ctx, displayRatingLabel, ratingWidth), positionX, rowY + finisherRowHeight / 2 + 1);
                 }
 
                 ctx.restore();

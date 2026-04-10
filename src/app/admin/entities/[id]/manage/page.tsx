@@ -66,7 +66,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     // 2. Specialized Redirects: matches use the new dedicated Match Center
     if (result.kind === 'ok' && result.entityType === 'match') {
-        redirect(`/admin/super/partidos/${id}`);
+        redirect(`/admin/matches/${id}/manage`);
     }
 
     // Standardize error handling

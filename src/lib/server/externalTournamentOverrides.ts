@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { getReadClient } from '@/lib/supabase/read';
+import { resolveTournamentCountryId, resolveTournamentCountryLabel } from '@/lib/data/countries';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 export type ExternalTournamentOverrideRecord = {
@@ -66,6 +67,54 @@ function uniqueValues(values: Array<string | null | undefined>): string[] {
     return result;
 }
 
+function normalizeExternalTournamentCountryFields(country: unknown, countryId: unknown) {
+    const rawCountry = normalizeString(country);
+    const rawCountryId = normalizeString(countryId);
+
+    const countryBasedId = resolveTournamentCountryId(rawCountry);
+    const idBasedId = resolveTournamentCountryId(rawCountryId);
+    const resolvedCountryId =
+        countryBasedId && (countryBasedId !== 'international' || !idBasedId)
+            ? countryBasedId
+            : idBasedId || countryBasedId || null;
+
+    const resolvedCountry =
+        resolveTournamentCountryLabel(resolvedCountryId) ||
+        resolveTournamentCountryLabel(rawCountry) ||
+        rawCountry;
+
+    return {
+        country: resolvedCountry,
+        country_id: resolvedCountryId,
+    };
+}
+
+function coerceExternalTournamentOverrideRecord(
+    record: ExternalTournamentOverrideRecord,
+): ExternalTournamentOverrideRecord {
+    const normalizedId = normalizeString(record.id);
+    if (!normalizedId) {
+        throw new Error('Tournament id is required');
+    }
+
+    const normalizedCountry = normalizeExternalTournamentCountryFields(record.country, record.country_id);
+
+    return {
+        ...record,
+        id: normalizedId,
+        name: normalizeString(record.display_name) || normalizeString(record.name),
+        display_name: normalizeString(record.display_name) || normalizeString(record.name),
+        logo_url: normalizeString(record.logo_url),
+        source: normalizeString(record.source) || 'flashscore',
+        sport: normalizeString(record.sport) || 'rugby',
+        country: normalizedCountry.country,
+        country_id: normalizedCountry.country_id,
+        url: normalizeString(record.url),
+        priority: normalizeInteger(record.priority),
+        updated_at: normalizeString(record.updated_at),
+    };
+}
+
 export function buildExternalTournamentOverrideCandidates(id: string | null | undefined): string[] {
     const raw = normalizeString(id);
     if (!raw) return [];
@@ -110,23 +159,8 @@ async function writeStore(store: ExternalTournamentOverrideStore) {
 export function normalizeExternalTournamentOverrideRecord(
     record: ExternalTournamentOverrideRecord,
 ): ExternalTournamentOverrideRecord {
-    const normalizedId = normalizeString(record.id);
-    if (!normalizedId) {
-        throw new Error('Tournament id is required');
-    }
-
     return {
-        ...record,
-        id: normalizedId,
-        name: normalizeString(record.display_name) || normalizeString(record.name),
-        display_name: normalizeString(record.display_name) || normalizeString(record.name),
-        logo_url: normalizeString(record.logo_url),
-        source: normalizeString(record.source) || 'flashscore',
-        sport: normalizeString(record.sport) || 'rugby',
-        country: normalizeString(record.country),
-        country_id: normalizeString(record.country_id),
-        url: normalizeString(record.url),
-        priority: normalizeInteger(record.priority),
+        ...coerceExternalTournamentOverrideRecord(record),
         updated_at: new Date().toISOString(),
     };
 }
@@ -282,7 +316,8 @@ export async function getStoredExternalTournamentOverride(id: string): Promise<E
     const store = await readStore();
     const candidates = buildExternalTournamentOverrideCandidates(id);
 
-    return findStoredOverrideByCandidates(store, candidates);
+    const override = findStoredOverrideByCandidates(store, candidates);
+    return override ? coerceExternalTournamentOverrideRecord(override) : null;
 }
 
 export async function getStoredExternalTournamentOverrides(ids: string[]): Promise<Map<string, ExternalTournamentOverrideRecord>> {
@@ -316,8 +351,9 @@ export async function getStoredExternalTournamentOverrides(ids: string[]): Promi
             findRecordByCandidates(legacyLookup, candidates);
 
         if (override) {
-            result.set(rawId, override);
-            result.set(rawId.toLowerCase(), override);
+            const normalizedOverride = coerceExternalTournamentOverrideRecord(override);
+            result.set(rawId, normalizedOverride);
+            result.set(rawId.toLowerCase(), normalizedOverride);
         }
     }
 
@@ -336,10 +372,11 @@ export async function getDatabaseExternalTournamentOverride(id: string): Promise
     const externalLookup = buildRecordCandidateMap(externalRows);
     const legacyLookup = buildRecordCandidateMap(legacyRows);
 
-    return (
+    const override =
         findRecordByCandidates(externalLookup, candidates) ||
-        findRecordByCandidates(legacyLookup, candidates)
-    );
+        findRecordByCandidates(legacyLookup, candidates);
+
+    return override ? coerceExternalTournamentOverrideRecord(override) : null;
 }
 
 export async function getExternalTournamentOverride(id: string): Promise<ExternalTournamentOverrideRecord | null> {
@@ -355,11 +392,12 @@ export async function getExternalTournamentOverride(id: string): Promise<Externa
     const externalLookup = buildRecordCandidateMap(externalRows);
     const legacyLookup = buildRecordCandidateMap(legacyRows);
 
-    return (
+    const override =
         findRecordByCandidates(externalLookup, candidates) ||
         findStoredOverrideByCandidates(store, candidates) ||
-        findRecordByCandidates(legacyLookup, candidates)
-    );
+        findRecordByCandidates(legacyLookup, candidates);
+
+    return override ? coerceExternalTournamentOverrideRecord(override) : null;
 }
 
 export async function upsertExternalTournamentOverride(
@@ -386,8 +424,9 @@ export function applyExternalTournamentOverride<T extends Record<string, unknown
 ): T {
     if (!override) return tournament;
 
-    const resolvedName = normalizeString(override.display_name) || normalizeString(override.name);
-    const resolvedLogo = normalizeString(override.logo_url);
+    const normalizedOverride = coerceExternalTournamentOverrideRecord(override);
+    const resolvedName = normalizeString(normalizedOverride.display_name) || normalizeString(normalizedOverride.name);
+    const resolvedLogo = normalizeString(normalizedOverride.logo_url);
 
     return {
         ...tournament,
@@ -403,11 +442,11 @@ export function applyExternalTournamentOverride<T extends Record<string, unknown
             tournament_logo: resolvedLogo,
             tournament_image_path: resolvedLogo,
         } : {}),
-        ...(override.country ? { country: override.country } : {}),
-        ...(override.country_id ? { country_id: override.country_id } : {}),
-        ...(override.url ? { url: override.url } : {}),
-        ...(typeof override.priority === 'number' && Number.isFinite(override.priority) ? {
-            priority: Math.trunc(override.priority),
+        ...(normalizedOverride.country ? { country: normalizedOverride.country } : {}),
+        ...(normalizedOverride.country_id ? { country_id: normalizedOverride.country_id } : {}),
+        ...(normalizedOverride.url ? { url: normalizedOverride.url } : {}),
+        ...(typeof normalizedOverride.priority === 'number' && Number.isFinite(normalizedOverride.priority) ? {
+            priority: Math.trunc(normalizedOverride.priority),
         } : {}),
     };
 }

@@ -779,6 +779,10 @@ function normalizeCountryKey(value: string): string {
     return value.trim().toLowerCase();
 }
 
+function normalizeTournamentCountryValue(value: string): string {
+    return slugifyCountryLabel(value);
+}
+
 export const isTournamentCountrySelectable = (id?: string | null): boolean => {
     if (!id?.trim()) return false;
 
@@ -831,7 +835,7 @@ export const getTournamentCountryOptions = (
         }
     };
 
-    Object.values(COUNTRIES).forEach(upsertOption);
+    Object.values(COUNTRIES).forEach((country) => upsertOption(country));
     extraCountries.forEach((country) => upsertOption(country, true));
     upsertOption({ id: 'international', nameEs: 'Internacional' }, databaseCountryIds.has('international'));
 
@@ -847,4 +851,40 @@ export const getTournamentCountryOptions = (
         ...Array.from(options.values()).sort((left, right) => left.label.localeCompare(right.label, 'es')),
         internationalOption,
     ];
+};
+
+export const resolveTournamentCountryOption = (
+    value: string | null | undefined,
+    extraCountries: TournamentCountrySource[] = [],
+): TournamentCountryOption | null => {
+    if (!value?.trim()) return null;
+
+    const normalizedValue = normalizeTournamentCountryValue(value);
+    if (!normalizedValue) return null;
+
+    const options = getTournamentCountryOptions(extraCountries);
+
+    return options.find((option) => {
+        const normalizedId = normalizeTournamentCountryValue(option.id);
+        const normalizedLabel = normalizeTournamentCountryValue(option.label);
+        const normalizedCode = option.code ? normalizeTournamentCountryValue(option.code) : '';
+
+        return normalizedValue === normalizedId
+            || normalizedValue === normalizedLabel
+            || (normalizedCode.length > 0 && normalizedValue === normalizedCode);
+    }) || null;
+};
+
+export const resolveTournamentCountryId = (
+    value: string | null | undefined,
+    extraCountries: TournamentCountrySource[] = [],
+): string | null => {
+    return resolveTournamentCountryOption(value, extraCountries)?.id || null;
+};
+
+export const resolveTournamentCountryLabel = (
+    value: string | null | undefined,
+    extraCountries: TournamentCountrySource[] = [],
+): string | null => {
+    return resolveTournamentCountryOption(value, extraCountries)?.label || null;
 };

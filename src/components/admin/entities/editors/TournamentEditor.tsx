@@ -1190,7 +1190,7 @@ export function TournamentEditor({
             const payload = {
                 ...form,
                 country: form.country_id ? (selectedCountryOption?.label || selectedCountryLabel || form.country_id) : null,
-                country_id: selectedCountryOption?.dbBacked ? selectedCountryOption.id : null,
+                country_id: form.country_id || null,
                 union_id: primaryOrganizerId,
                 format: effectiveFormat,
                 status: form.status === 'live' ? 'published' : form.status,

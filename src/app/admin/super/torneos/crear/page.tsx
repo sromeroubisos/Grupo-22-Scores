@@ -683,7 +683,9 @@ export default function SuperCreateTournament() {
                 country: formData.country
                     ? (selectedCountryOption?.label || formData.country)
                     : null,
-                country_id: selectedCountryOption?.dbBacked ? selectedCountryOption.id : null,
+                country_id: formData.country
+                    ? (selectedCountryOption?.id || formData.country)
+                    : null,
                 union_id: formData.unionId || null,
                 logo_url: formData.logoUrl || null,
                 status: formData.visibility === 'public' ? 'published' : 'draft',

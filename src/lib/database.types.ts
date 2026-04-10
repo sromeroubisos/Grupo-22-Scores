@@ -1120,6 +1120,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_export_presets: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          name_normalized: string
+          payload: Json
+          preset_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          name: string
+          name_normalized: string
+          payload?: Json
+          preset_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          name_normalized?: string
+          payload?: Json
+          preset_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          { foreignKeyName: "user_export_presets_user_id_fkey"; columns: ["user_id"]; referencedRelation: "users"; referencedColumns: ["id"] }
+        ]
+      }
       admin_audit_log: {
         Row: {
           id: string

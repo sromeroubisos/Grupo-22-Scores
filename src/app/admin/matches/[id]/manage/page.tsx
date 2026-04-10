@@ -1,18 +1,7 @@
-import { notFound } from 'next/navigation';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { notFound, redirect } from 'next/navigation';
 import MatchCenterClient from '@/app/admin/super/partidos/[id]/MatchCenterClient';
 import type { MatchRow } from '@/app/admin/super/partidos/[id]/MatchCenterClient';
-import { fetchMatchCenterMatch } from '@/lib/services/matchCenterService';
-
-// Use a plain Supabase client (no cookie management) for the public SELECT.
-// This avoids the server-side session refresh that can corrupt browser cookies
-// and cause the user to get logged out on page refresh.
-function getReadOnlyClient() {
-    return createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-}
+import { loadManagedMatchCenterMatch } from '@/lib/server/matchCenterAdmin';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -20,15 +9,21 @@ interface PageProps {
 
 export default async function MatchManagementPage({ params }: PageProps) {
     const { id: matchId } = await params;
-    const supabase = getReadOnlyClient();
+    let match: MatchRow | null = null;
 
-    const { data, error } = await fetchMatchCenterMatch(supabase, matchId);
-
-    if (error || !data) {
+    try {
+        const result = await loadManagedMatchCenterMatch(matchId);
+        match = result.match as unknown as MatchRow;
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message === 'Unauthorized') {
+            redirect(`/login?returnTo=${encodeURIComponent(`/admin/matches/${matchId}/manage`)}`);
+        }
         notFound();
     }
 
-    const match = data as unknown as MatchRow;
+    if (!match) {
+        notFound();
+    }
 
     return <MatchCenterClient initialMatch={match} matchId={matchId} />;
 }

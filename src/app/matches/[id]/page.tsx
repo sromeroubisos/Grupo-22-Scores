@@ -201,6 +201,13 @@ function extractDisplayLineupPlayers(rawPlayers: unknown) {
 
             const rawNumber = source.number ?? source.jerseyNumber ?? source.PLAYER_NUMBER ?? source.player_number ?? index + 1;
             const numericNumber = Number(rawNumber);
+            const rawRating = source.rating ?? source.playerRating ?? source.PLAYER_RATING ?? source.player_rating ?? null;
+            const numericRating =
+                typeof rawRating === 'number' && Number.isFinite(rawRating)
+                    ? rawRating
+                    : typeof rawRating === 'string'
+                        ? Number(rawRating.replace(',', '.'))
+                        : Number.NaN;
 
             return {
                 id: String(source.id || source.playerId || source.PLAYER_ID || source.player_id || '').trim() || null,
@@ -208,6 +215,7 @@ function extractDisplayLineupPlayers(rawPlayers: unknown) {
                 number: Number.isFinite(numericNumber) ? numericNumber : index + 1,
                 position: String(source.position || source.PLAYER_POSITION || source.player_position || '').trim() || null,
                 role: String(source.role || source.PLAYER_ROLE || source.player_role || '').trim() || null,
+                rating: Number.isFinite(numericRating) ? Math.round(Math.min(10, Math.max(0, numericRating)) * 10) / 10 : null,
                 isCaptain: Boolean(source.isCaptain || source.IS_CAPTAIN || source.player_captain || source.captain),
             };
         })
@@ -217,6 +225,7 @@ function extractDisplayLineupPlayers(rawPlayers: unknown) {
             number: number;
             position: string | null;
             role: string | null;
+            rating: number | null;
             isCaptain: boolean;
         } => Boolean(player));
 }
@@ -228,6 +237,7 @@ function splitDisplayLineupPlayers(
         number: number;
         position: string | null;
         role: string | null;
+        rating: number | null;
         isCaptain: boolean;
     }>
 ) {
@@ -242,6 +252,41 @@ function splitDisplayLineupPlayers(
         starters: players.filter((player, index) => isStarter(player, index)),
         finishers: players.filter((player, index) => !isStarter(player, index)),
     };
+}
+
+function isGenericLineupRoleLabel(value: string | null | undefined) {
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized === 'starter'
+        || normalized === 'titular'
+        || normalized === 'substitute'
+        || normalized === 'suplente'
+        || normalized === 'finisher'
+        || normalized === 'bench';
+}
+
+function getDisplayLineupBadges(
+    player: {
+        position: string | null;
+        role: string | null;
+        rating: number | null;
+    },
+) {
+    const badges: Array<{ label: string; kind: 'position' | 'rating' }> = [];
+    const position = String(player.position || '').trim();
+    if (position && !isGenericLineupRoleLabel(position)) {
+        badges.push({ label: position, kind: 'position' });
+    }
+
+    if (typeof player.rating === 'number') {
+        badges.push({ label: player.rating.toFixed(1), kind: 'rating' });
+    }
+
+    const role = String(player.role || '').trim();
+    if (badges.length === 0 && role && !isGenericLineupRoleLabel(role)) {
+        badges.push({ label: role, kind: 'position' });
+    }
+
+    return badges;
 }
 
 function getComparableTeamId(value: unknown) {
@@ -1468,7 +1513,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     </div>
                     <div className={styles.matchActions}>
                         {isSuperAdminUser && !isExternalMatch && (
-                            <Link href={`/admin/super/partidos/${id}`} className={`${styles.btn} ${styles.btnPrimary}`}>
+                            <Link href={`/admin/matches/${id}/manage`} className={`${styles.btn} ${styles.btnPrimary}`}>
                                 Editar partido
                             </Link>
                         )}
@@ -1832,14 +1877,18 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                         const pId = p.id;
                                                         const pName = p.name;
                                                         const pNumber = p.number;
-                                                        const pPosition = p.position || p.role;
+                                                        const pBadges = getDisplayLineupBadges(p);
                                                         return (
                                                             <div key={`home-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
                                                                     <span className={styles.playerNumber}>{pNumber}</span>
                                                                     {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                 </span>
-                                                                {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                                <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                                    {pBadges.map((badge) => (
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                    ))}
+                                                                </span>
                                                             </div>
                                                         );
                                                     })}
@@ -1853,14 +1902,18 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                             const pId = p.id;
                                                             const pName = p.name;
                                                             const pNumber = p.number;
-                                                            const pPosition = p.position || p.role;
+                                                            const pBadges = getDisplayLineupBadges(p);
                                                             return (
                                                                 <div key={`home-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
                                                                         <span className={styles.playerNumber}>{pNumber}</span>
                                                                         {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                     </span>
-                                                                    {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                                    <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                                        {pBadges.map((badge) => (
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                        ))}
+                                                                    </span>
                                                                 </div>
                                                             );
                                                         })}
@@ -1877,14 +1930,18 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                         const pId = p.id;
                                                         const pName = p.name;
                                                         const pNumber = p.number;
-                                                        const pPosition = p.position || p.role;
+                                                        const pBadges = getDisplayLineupBadges(p);
                                                         return (
                                                             <div key={`away-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
                                                                     <span className={styles.playerNumber}>{pNumber}</span>
                                                                     {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                 </span>
-                                                                {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                                <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                                    {pBadges.map((badge) => (
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                    ))}
+                                                                </span>
                                                             </div>
                                                         );
                                                     })}
@@ -1898,14 +1955,18 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                             const pId = p.id;
                                                             const pName = p.name;
                                                             const pNumber = p.number;
-                                                            const pPosition = p.position || p.role;
+                                                            const pBadges = getDisplayLineupBadges(p);
                                                             return (
                                                                 <div key={`away-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
                                                                         <span className={styles.playerNumber}>{pNumber}</span>
                                                                         {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                     </span>
-                                                                    {pPosition ? <span className={styles.playerMeta}>{pPosition}</span> : null}
+                                                                    <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                                        {pBadges.map((badge) => (
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                        ))}
+                                                                    </span>
                                                                 </div>
                                                             );
                                                         })}
@@ -2167,6 +2228,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                     </div>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                                    {typeof player.rating === 'number' && <span className={styles.playerRatingMeta}>Puntaje {player.rating.toFixed(1)}</span>}
                                                     <span className={styles.positionBadge}>Pts {player.points}</span>
                                                     <span className={styles.positionBadge}>Tries {player.tries}</span>
                                                     <span className={styles.positionBadge}>YC {player.yellowCards}</span>

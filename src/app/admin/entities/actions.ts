@@ -11,6 +11,7 @@ import {
 } from '@/lib/auth/permissions';
 import { revalidatePath } from 'next/cache';
 import { EntityType } from '@/lib/services/entityResolver';
+import { resolveTournamentCountryLabel } from '@/lib/data/countries';
 import { getMissingTournamentPriorityMessage, isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { getClubDashboardOverview } from '@/lib/club-admin/dashboard';
 import { getClubFamilySummary } from '@/lib/club-admin/managedClubFamily';
@@ -194,6 +195,29 @@ function readOptionalScopedId(value: unknown): string | null {
     return trimmed.length > 0 ? trimmed : null;
 }
 
+async function ensureTournamentCountryExists(payload: Record<string, any>) {
+    const countryId = readOptionalScopedId(payload.country_id);
+    if (!countryId) return;
+
+    const rawCountry = typeof payload.country === 'string' ? payload.country.trim() : '';
+    const countryName = rawCountry || resolveTournamentCountryLabel(countryId) || countryId;
+    const admin = createAdminClient() as any;
+
+    const { error } = await admin
+        .from('countries')
+        .upsert(
+            {
+                id: countryId,
+                name: countryName,
+            },
+            { onConflict: 'id' },
+        );
+
+    if (error && !error.message?.includes('Could not find the table')) {
+        throw new Error(error.message || 'No se pudo asegurar el país del torneo.');
+    }
+}
+
 async function getTournamentMutationContext(
     supabase: Awaited<ReturnType<typeof createClient>>,
     tournamentId: string
@@ -267,6 +291,10 @@ export async function createEntity(
     const mutationClient = tournamentContext?.writer ?? supabase;
     const actorUserId = tournamentContext?.actorUserId ?? user.id;
 
+    if (type === 'tournament') {
+        await ensureTournamentCountryExists(cleanPayload);
+    }
+
     const { data, error } = await runTournamentWriteWithPriorityFallback(type, cleanPayload, (nextPayload) =>
         mutationClient.from(table).insert(nextPayload).select().single()
     );
@@ -327,6 +355,10 @@ export async function updateEntity(
         : null;
     const mutationClient = tournamentContext?.writer ?? supabase;
     const actorUserId = tournamentContext?.actorUserId ?? user.id;
+
+    if (type === 'tournament') {
+        await ensureTournamentCountryExists(cleanUpdates);
+    }
 
     // Pre-state for audit diff
     const { data: oldData } = await mutationClient.from(table as any).select('*').eq('id', id).single();

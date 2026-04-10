@@ -79,6 +79,7 @@ interface LineupPlayer {
     name: string;
     position?: string;
     role?: string;
+    rating?: number | null;
     isCaptain?: boolean;
     squadMemberId?: string | null;
     divisionId?: string | null;
@@ -96,6 +97,11 @@ interface MatchScore {
     homeTries?: number;
     awayTries?: number;
     notes?: string;
+    manualOverride?: {
+        home: number;
+        away: number;
+        cutoffMinute: number | null;
+    } | null;
 }
 
 interface MatchClock {
@@ -140,6 +146,7 @@ export interface MatchRow {
 
 type ApplyMatchResponseOptions = {
     preserveLineupsIfIncomingEmpty?: boolean;
+    preserveUnsavedScore?: boolean;
     preserveUnsavedEvents?: boolean;
     preserveUnsavedLineups?: boolean;
 };
@@ -167,6 +174,13 @@ function normalizeMatchLineups(lineups: MatchRow['lineups']): MatchLineups {
 function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
     const normalizedHomeTries = Number(score?.homeTries);
     const normalizedAwayTries = Number(score?.awayTries);
+    const manualOverride = score?.manualOverride;
+    const normalizedManualHome = Number(manualOverride?.home);
+    const normalizedManualAway = Number(manualOverride?.away);
+    const normalizedCutoffMinute =
+        manualOverride?.cutoffMinute === null || manualOverride?.cutoffMinute === undefined
+            ? null
+            : Number(manualOverride.cutoffMinute);
 
     return {
         home: Math.max(0, Number(score?.home) || 0),
@@ -174,7 +188,23 @@ function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
         homeTries: Number.isFinite(normalizedHomeTries) ? normalizedHomeTries : undefined,
         awayTries: Number.isFinite(normalizedAwayTries) ? normalizedAwayTries : undefined,
         notes: typeof score?.notes === 'string' ? score.notes : undefined,
+        manualOverride:
+            Number.isFinite(normalizedManualHome) && Number.isFinite(normalizedManualAway)
+                ? {
+                    home: Math.max(0, normalizedManualHome),
+                    away: Math.max(0, normalizedManualAway),
+                    cutoffMinute: Number.isFinite(normalizedCutoffMinute) ? normalizedCutoffMinute : null,
+                }
+                : null,
     };
+}
+
+function normalizeTextValue(value: string | null | undefined) {
+    return value?.trim() || '';
+}
+
+function areTextValuesEqual(left: string | null | undefined, right: string | null | undefined) {
+    return normalizeTextValue(left) === normalizeTextValue(right);
 }
 
 function areMatchScoresEqual(left: MatchScore | null | undefined, right: MatchScore | null | undefined) {
@@ -187,13 +217,22 @@ function areMatchScoresEqual(left: MatchScore | null | undefined, right: MatchSc
         && (normalizedLeft.homeTries ?? null) === (normalizedRight.homeTries ?? null)
         && (normalizedLeft.awayTries ?? null) === (normalizedRight.awayTries ?? null)
         && (normalizedLeft.notes ?? '') === (normalizedRight.notes ?? '')
+        && (normalizedLeft.manualOverride?.home ?? null) === (normalizedRight.manualOverride?.home ?? null)
+        && (normalizedLeft.manualOverride?.away ?? null) === (normalizedRight.manualOverride?.away ?? null)
+        && (normalizedLeft.manualOverride?.cutoffMinute ?? null) === (normalizedRight.manualOverride?.cutoffMinute ?? null)
     );
+}
+
+function getLatestEventMinute(events: MatchEvent[]) {
+    if (events.length === 0) return null;
+    return events.reduce((maxMinute, event) => Math.max(maxMinute, Number(event.minute) || 0), 0);
 }
 
 function buildScoreFromEvents(
     events: MatchEvent[],
     definitionMap: Record<string, MatchEventDefinition>,
     fallbackScore: MatchScore | null | undefined,
+    options?: { fallbackToManualWhenEmpty?: boolean },
 ): MatchScore {
     const baseScore = normalizeMatchScore(fallbackScore);
     let home = 0;
@@ -225,6 +264,15 @@ function buildScoreFromEvents(
     });
 
     if (!hasScoringEvents) {
+        if (options?.fallbackToManualWhenEmpty === false) {
+            return {
+                ...baseScore,
+                home: 0,
+                away: 0,
+                homeTries: hasTryEvents ? homeTries : 0,
+                awayTries: hasTryEvents ? awayTries : 0,
+            };
+        }
         return baseScore;
     }
 
@@ -234,6 +282,42 @@ function buildScoreFromEvents(
         away,
         homeTries: hasTryEvents ? homeTries : baseScore.homeTries,
         awayTries: hasTryEvents ? awayTries : baseScore.awayTries,
+    };
+}
+
+function resolveScoreAgainstEvents(
+    score: MatchScore | null | undefined,
+    events: MatchEvent[],
+    definitionMap: Record<string, MatchEventDefinition>,
+) {
+    const normalizedScore = normalizeMatchScore(score);
+    const manualOverride = normalizedScore.manualOverride;
+
+    if (!manualOverride) {
+        return buildScoreFromEvents(events, definitionMap, normalizedScore);
+    }
+
+    const trailingEvents = events.filter((event) => (
+        manualOverride.cutoffMinute === null || event.minute > manualOverride.cutoffMinute
+    ));
+    const trailingScore = buildScoreFromEvents(
+        trailingEvents,
+        definitionMap,
+        { home: 0, away: 0, homeTries: 0, awayTries: 0 },
+        { fallbackToManualWhenEmpty: false },
+    );
+
+    const baseHomeTries = Number.isFinite(normalizedScore.homeTries) ? Number(normalizedScore.homeTries) : null;
+    const baseAwayTries = Number.isFinite(normalizedScore.awayTries) ? Number(normalizedScore.awayTries) : null;
+    const trailingHomeTries = Number.isFinite(trailingScore.homeTries) ? Number(trailingScore.homeTries) : 0;
+    const trailingAwayTries = Number.isFinite(trailingScore.awayTries) ? Number(trailingScore.awayTries) : 0;
+
+    return {
+        ...normalizedScore,
+        home: manualOverride.home + trailingScore.home,
+        away: manualOverride.away + trailingScore.away,
+        homeTries: baseHomeTries === null && trailingHomeTries === 0 ? undefined : (baseHomeTries ?? 0) + trailingHomeTries,
+        awayTries: baseAwayTries === null && trailingAwayTries === 0 ? undefined : (baseAwayTries ?? 0) + trailingAwayTries,
     };
 }
 
@@ -412,6 +496,23 @@ function getLineupSize(lineups: MatchLineups | null | undefined) {
     return maxCount > 0 ? maxCount : DEFAULT_LINEUP_SIZE;
 }
 
+function normalizeLineupRatingValue(value: unknown) {
+    const parsed =
+        typeof value === 'number' && Number.isFinite(value)
+            ? value
+            : typeof value === 'string'
+                ? Number(value.replace(',', '.'))
+                : Number.NaN;
+
+    if (!Number.isFinite(parsed)) return null;
+    const clamped = Math.min(10, Math.max(0, parsed));
+    return Math.round(clamped * 10) / 10;
+}
+
+function formatLineupRatingInput(value: number | null | undefined) {
+    return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(1) : '';
+}
+
 function buildLineupTemplate(count: number, existing: LineupPlayer[] = []): LineupPlayer[] {
     return Array.from({ length: count }, (_, index) => {
         const number = index + 1;
@@ -422,11 +523,22 @@ function buildLineupTemplate(count: number, existing: LineupPlayer[] = []): Line
             name: current?.name ?? '',
             position: current?.position ?? '',
             role: current?.role ?? (number <= 15 ? 'starter' : 'substitute'),
+            rating: normalizeLineupRatingValue(current?.rating ?? null),
             isCaptain: current?.isCaptain ?? false,
             squadMemberId: current?.squadMemberId ?? null,
             divisionId: current?.divisionId ?? null,
         };
     });
+}
+
+function findLineupPlayerIndex(players: LineupPlayer[], player: LineupPlayer) {
+    return players.findIndex((entry) =>
+        entry === player
+        || (
+            entry.number === player.number
+            && normalizeLookupKey(entry.name) === normalizeLookupKey(player.name)
+            && normalizeLookupKey(entry.role) === normalizeLookupKey(player.role)
+        ));
 }
 
 function normalizeLookupKey(value: string | null | undefined) {
@@ -532,7 +644,7 @@ function buildLineupSelectionFromRoster(current: LineupPlayer, rosterEntry: Matc
     };
 }
 
-function buildLinkedEventPlayers(players: LineupPlayer[], fallbackRoster: MatchRosterPlayer[]) {
+function buildLinkedEventPlayers(players: LineupPlayer[]) {
     const linked = players
         .filter((player) => Boolean(player.name.trim()))
         .map((player) => ({
@@ -547,13 +659,16 @@ function buildLinkedEventPlayers(players: LineupPlayer[], fallbackRoster: MatchR
         unique.set(key, entry);
     });
 
-    fallbackRoster.forEach((entry) => {
-        const key = normalizeLookupKey(entry.name);
-        if (!key || unique.has(key)) return;
-        unique.set(key, { playerId: entry.personId, name: entry.name });
-    });
-
     return Array.from(unique.values()).sort((left, right) => left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }));
+}
+
+function isEventPlayerAvailable(
+    options: Array<{ playerId: string | null; name: string }>,
+    value: string | null | undefined,
+) {
+    const key = normalizeLookupKey(value);
+    if (!key) return false;
+    return options.some((entry) => normalizeLookupKey(entry.name) === key);
 }
 
 function isStarterLineupPlayer(player: LineupPlayer) {
@@ -708,7 +823,8 @@ function toLocalPoints(match: MatchRow): MatchPoints {
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ CLIENT COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function MatchCenterClient({ initialMatch, matchId, onClose }: MatchCenterClientProps) {
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
+    const adminMatchEndpoint = `/api/admin/matches/${matchId}`;
     const initialEvents = normalizeMatchEvents(initialMatch.events);
     const initialLineups = normalizeMatchLineups(initialMatch.lineups);
     const initialScore = normalizeMatchScore(initialMatch.score);
@@ -717,13 +833,17 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const [activeTab, setActiveTab] = useState('resumen');
     const [saving, setSaving] = useState(false);
     const [saveMsg, setSaveMsg] = useState<{ type: 'ok' | 'warn' | 'err'; text: string } | null>(null);
+    const [scoreDraft, setScoreDraft] = useState<MatchScore>(initialScore);
 
     // Editable state for events & lineups (local mirrors of DB JSONB)
     const [localEvents, setLocalEvents] = useState<MatchEvent[]>(initialEvents);
     const [localLineups, setLocalLineups] = useState<MatchLineups>(initialLineups);
+    const persistedMatchRef = useRef<MatchRow>(initialMatch);
+    const matchDraftRef = useRef<MatchRow>(initialMatch);
     const persistedEventsRef = useRef<MatchEvent[]>(initialEvents);
     const persistedLineupsRef = useRef<MatchLineups>(initialLineups);
     const persistedScoreRef = useRef<MatchScore>(initialScore);
+    const scoreDraftRef = useRef<MatchScore>(initialScore);
     const localEventsRef = useRef<MatchEvent[]>(initialEvents);
     const localLineupsRef = useRef<MatchLineups>(initialLineups);
 
@@ -763,6 +883,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     }, [localLineups]);
 
     useEffect(() => {
+        matchDraftRef.current = match;
+    }, [match]);
+
+    useEffect(() => {
+        scoreDraftRef.current = scoreDraft;
+    }, [scoreDraft]);
+
+    useEffect(() => {
         setQuickLineupDrafts((prev) => ({
             home: quickLineupDraftDirty.home ? prev.home : formatQuickLineupDraft(localLineups.home),
             away: quickLineupDraftDirty.away ? prev.away : formatQuickLineupDraft(localLineups.away),
@@ -775,20 +903,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     }), [match.awayRoster, match.homeRoster]);
 
     const eventPlayerOptions = useMemo(() => ({
-        home: buildLinkedEventPlayers(localLineups.home, teamRosters.home),
-        away: buildLinkedEventPlayers(localLineups.away, teamRosters.away),
-    }), [localLineups.away, localLineups.home, teamRosters.away, teamRosters.home]);
+        home: buildLinkedEventPlayers(localLineups.home),
+        away: buildLinkedEventPlayers(localLineups.away),
+    }), [localLineups.away, localLineups.home]);
 
     const updateLineupPlayerValue = useCallback((team: 'home' | 'away', player: LineupPlayer, nextName: string) => {
         setLocalLineups((prev) => {
             const updatedTeam = [...prev[team]];
-            const realIdx = updatedTeam.findIndex((entry) =>
-                entry === player
-                || (
-                    entry.number === player.number
-                    && normalizeLookupKey(entry.name) === normalizeLookupKey(player.name)
-                    && normalizeLookupKey(entry.role) === normalizeLookupKey(player.role)
-                ));
+            const realIdx = findLineupPlayerIndex(updatedTeam, player);
             if (realIdx < 0) return prev;
 
             const rosterEntry = resolveRosterPlayerByName(teamRosters[team], nextName);
@@ -805,6 +927,21 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             return { ...prev, [team]: updatedTeam };
         });
     }, [teamRosters]);
+
+    const updateLineupPlayerRating = useCallback((team: 'home' | 'away', player: LineupPlayer, nextRating: string) => {
+        setLocalLineups((prev) => {
+            const updatedTeam = [...prev[team]];
+            const realIdx = findLineupPlayerIndex(updatedTeam, player);
+            if (realIdx < 0) return prev;
+
+            updatedTeam[realIdx] = {
+                ...updatedTeam[realIdx],
+                rating: nextRating.trim() ? normalizeLineupRatingValue(nextRating) : null,
+            };
+
+            return { ...prev, [team]: updatedTeam };
+        });
+    }, []);
 
     const handleQuickLineupDraftChange = useCallback((team: 'home' | 'away', value: string) => {
         setQuickLineupDrafts((prev) => ({ ...prev, [team]: value }));
@@ -884,30 +1021,33 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         if (!team) {
             return {
                 playerId: null,
-                playerName: value,
+                playerName: '',
             };
         }
 
-        const selected =
-            eventPlayerOptions[team].find((entry) => normalizeLookupKey(entry.name) === normalizeLookupKey(value))
-            || resolveRosterPlayerByName(teamRosters[team], value);
+        const selected = eventPlayerOptions[team].find((entry) => normalizeLookupKey(entry.name) === normalizeLookupKey(value));
 
         return selected
             ? {
-                playerId: 'playerId' in selected ? selected.playerId : selected.personId,
+                playerId: selected.playerId,
                 playerName: selected.name,
             }
             : {
                 playerId: null,
-                playerName: value,
+                playerName: '',
             };
-    }, [eventPlayerOptions, teamRosters]);
+    }, [eventPlayerOptions]);
 
     const applyMatchResponse = useCallback((nextMatch: MatchRow, options?: ApplyMatchResponseOptions) => {
         const nextEvents = normalizeMatchEvents(nextMatch.events);
         const nextLineups = normalizeMatchLineups(nextMatch.lineups);
+        const nextScore = normalizeMatchScore(nextMatch.score);
         const currentLocalEvents = localEventsRef.current;
         const currentLocalLineups = localLineupsRef.current;
+        const currentScoreDraft = scoreDraftRef.current;
+        const hasUnsavedScore =
+            options?.preserveUnsavedScore === true &&
+            !areMatchScoresEqual(currentScoreDraft, persistedScoreRef.current);
         const hasUnsavedEvents =
             options?.preserveUnsavedEvents === true &&
             !areDraftValuesEqual(currentLocalEvents, persistedEventsRef.current);
@@ -923,13 +1063,16 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             hasUnsavedLineups || shouldKeepExistingLineups
                 ? currentLocalLineups
                 : nextLineups;
+        const resolvedScore = hasUnsavedScore ? currentScoreDraft : nextScore;
 
+        persistedMatchRef.current = nextMatch;
         persistedEventsRef.current = nextEvents;
         persistedLineupsRef.current = nextLineups;
-        persistedScoreRef.current = normalizeMatchScore(nextMatch.score);
+        persistedScoreRef.current = nextScore;
         localEventsRef.current = resolvedEvents;
         localLineupsRef.current = resolvedLineups;
         setMatch(nextMatch);
+        setScoreDraft(resolvedScore);
         setLocalEvents(resolvedEvents);
         setLocalLineups(resolvedLineups);
         setLocalPoints(toLocalPoints(nextMatch));
@@ -937,19 +1080,26 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         setDateTimeDraft(toDateTimeLocalInput(nextMatch.date_time));
     }, []);
 
-    const resolveMatchScore = useCallback((
+    const resolveOfficialScore = useCallback((
         nextScore?: MatchScore | null,
         nextEvents?: MatchEvent[],
     ) => {
-        const manualScore = normalizeMatchScore(nextScore ?? match.score);
-        const effectiveEvents = nextEvents ?? localEvents;
-        const hasUnsavedManualScore = !areMatchScoresEqual(manualScore, persistedScoreRef.current);
-        const hasUnsavedEventDraft = !areDraftValuesEqual(effectiveEvents, persistedEventsRef.current);
+        return resolveScoreAgainstEvents(
+            nextScore ?? scoreDraftRef.current,
+            nextEvents ?? localEventsRef.current,
+            eventDefinitionMap,
+        );
+    }, [eventDefinitionMap]);
 
-        return hasUnsavedManualScore || !hasUnsavedEventDraft
-            ? manualScore
-            : buildScoreFromEvents(effectiveEvents, eventDefinitionMap, manualScore);
-    }, [eventDefinitionMap, localEvents, match.score]);
+    const resolveEventDerivedScore = useCallback((
+        nextEvents?: MatchEvent[],
+        fallbackScore?: MatchScore | null,
+    ) => buildScoreFromEvents(
+        nextEvents ?? localEventsRef.current,
+        eventDefinitionMap,
+        normalizeMatchScore(fallbackScore ?? scoreDraftRef.current),
+        { fallbackToManualWhenEmpty: false },
+    ), [eventDefinitionMap]);
 
     const getAutoPointsSnapshot = useCallback((
         nextScore?: MatchScore,
@@ -957,10 +1107,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         nextStatus: string = match.status,
     ) => calculateAutocalculatedPoints(
         nextStatus,
-        resolveMatchScore(nextScore, nextEvents),
+        resolveOfficialScore(nextScore),
         nextEvents,
         pointsRules,
-    ), [localEvents, match.status, pointsRules, resolveMatchScore]);
+    ), [localEvents, match.status, pointsRules, resolveOfficialScore]);
 
     const buildPointsPatchPayload = useCallback((overrides?: {
         score?: MatchScore;
@@ -982,25 +1132,38 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     }, [getAutoPointsSnapshot, localPoints]);
 
     const buildPersistableMatchPayload = useCallback(() => {
-        const payload: Record<string, unknown> = {
-            status: match.status,
-            score: resolveMatchScore(),
-            venue: match.venue || '',
-            notes: match.notes?.trim() || null,
-        };
+        const payload: Record<string, unknown> = {};
+        const persistedMatch = persistedMatchRef.current;
+        const officialScore = resolveOfficialScore();
+
+        if (match.status !== persistedMatch.status) {
+            payload.status = match.status;
+        }
+
+        if (!areMatchScoresEqual(officialScore, persistedScoreRef.current)) {
+            payload.score = officialScore;
+        }
+
+        if ((match.venue || '') !== (persistedMatch.venue || '')) {
+            payload.venue = match.venue || '';
+        }
+
+        const normalizedNotes = match.notes?.trim() || null;
+        const persistedNotes = persistedMatch.notes?.trim() || null;
+        if (normalizedNotes !== persistedNotes) {
+            payload.notes = normalizedNotes;
+        }
 
         if (dateTimeDraft) {
             const [date, time] = dateTimeDraft.split('T');
             const nextDateTime = combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
-            if (nextDateTime) {
+            if (nextDateTime && nextDateTime !== persistedMatch.date_time) {
                 payload.dateTime = nextDateTime;
             }
-        } else if (match.date_time) {
-            payload.dateTime = match.date_time;
         }
 
         return payload;
-    }, [dateTimeDraft, match.date_time, match.notes, match.status, match.venue, resolveMatchScore]);
+    }, [dateTimeDraft, match.notes, match.status, match.venue, resolveOfficialScore]);
 
     const persistMatchPatch = useCallback(async (
         payload: Record<string, unknown>,
@@ -1023,7 +1186,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         const payloadIncludesEvents = Object.prototype.hasOwnProperty.call(effectivePayload, 'events');
         const payloadIncludesLineups = Object.prototype.hasOwnProperty.call(effectivePayload, 'lineups');
         const payloadIncludesScore = Object.prototype.hasOwnProperty.call(effectivePayload, 'score');
-        const effectiveScore = resolveMatchScore(
+        const effectiveScore = resolveOfficialScore(
             payloadIncludesScore ? effectivePayload.score as MatchScore : undefined,
             effectiveEvents,
         );
@@ -1035,8 +1198,16 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 }
                 : effectivePayload;
 
+        const shouldRecalculatePoints =
+            options?.includePoints !== false
+            && (
+                payloadIncludesEvents
+                || payloadIncludesScore
+                || typeof payloadWithScore.status === 'string'
+            );
+
         let pointsPayload: Record<string, unknown> = {};
-        if (options?.includePoints !== false) {
+        if (shouldRecalculatePoints) {
             if (localPoints.points_autocalculated === false) {
                 pointsPayload = buildPointsPatchPayload({
                     score: effectiveScore,
@@ -1044,12 +1215,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                     status: typeof payloadWithScore.status === 'string' ? payloadWithScore.status : undefined,
                 });
             } else {
-                const configuration = await fetchMatchConfiguration(match);
                 pointsPayload = toPointPatchPayload(calculateAutocalculatedPoints(
                     typeof payloadWithScore.status === 'string' ? payloadWithScore.status : match.status,
                     effectiveScore,
                     effectiveEvents,
-                    configuration.pointsRules,
+                    pointsRules,
                 ));
             }
         }
@@ -1061,7 +1231,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 ...pointsPayload,
             };
 
-        const res = await fetch(`/api/matches/${matchId}`, {
+        const res = await fetch(adminMatchEndpoint, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalPayload),
@@ -1079,6 +1249,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 options?.preserveLineupsIfIncomingEmpty
                 ?? warnings.lineupsNotPersisted
                 ?? false,
+            preserveUnsavedScore: options?.preserveUnsavedScore ?? !payloadIncludesScore,
             preserveUnsavedEvents: options?.preserveUnsavedEvents ?? !payloadIncludesEvents,
             preserveUnsavedLineups:
                 options?.preserveUnsavedLineups
@@ -1089,7 +1260,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             match: updatedMatch,
             warnings,
         };
-    }, [applyMatchResponse, buildPointsPatchPayload, localPoints.points_autocalculated, match, matchId, resolveMatchScore]);
+    }, [adminMatchEndpoint, applyMatchResponse, buildPointsPatchPayload, localPoints.points_autocalculated, match.status, pointsRules, resolveOfficialScore]);
 
     /* â”€â”€â”€ REFRESH (for after saves / config changes) â”€â”€â”€ */
     const refreshMatchConfiguration = useCallback(async () => {
@@ -1102,25 +1273,6 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         setPointsRules(configuration.pointsRules);
         setEventDefinitions(configuration.eventDefinitions);
     }, [match.phase_id, match.round_id, match.tournament_id]);
-
-    const fetchMatch = useCallback(async () => {
-        try {
-            const res = await fetch(`/api/matches/${matchId}`, { cache: 'no-store' });
-            const payload = await res.json();
-
-            if (!res.ok) {
-                throw new Error(payload?.error || `HTTP ${res.status}`);
-            }
-
-            applyMatchResponse(payload as MatchRow, {
-                preserveLineupsIfIncomingEmpty: true,
-                preserveUnsavedEvents: true,
-                preserveUnsavedLineups: true,
-            });
-        } catch (err: unknown) {
-            console.error('Error refreshing match:', err);
-        }
-    }, [applyMatchResponse, matchId]);
 
     /* â”€â”€â”€ POINTS: RECALCULATE & SAVE â”€â”€â”€ */
     useEffect(() => {
@@ -1159,14 +1311,15 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 );
             } else {
                 await persistMatchPatch({
-                    ...buildPersistableMatchPayload(),
+                    status: match.status,
+                    score: resolveOfficialScore(),
                     events: localEvents,
                 });
             }
         } finally {
             setSavingPoints(false);
         }
-    }, [buildPersistableMatchPayload, localEvents, localPoints, persistMatchPatch]);
+    }, [localEvents, localPoints, match.status, persistMatchPatch, resolveOfficialScore]);
 
     // Reactive: recalculate whenever score/status/events change, only while in auto mode
     useEffect(() => {
@@ -1179,7 +1332,6 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
 
     /* â”€â”€â”€ REALTIME (live matches) â”€â”€â”€ */
     useEffect(() => {
-        if (match?.status !== 'live') return;
         const channel = supabase
             .channel(`match-${matchId}`)
             .on('postgres_changes', {
@@ -1191,13 +1343,34 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 const updated = payload.new as Record<string, unknown>;
                 const incomingEvents = Array.isArray(updated.events) ? updated.events as MatchEvent[] : null;
                 const incomingLineups = updated.lineups ? updated.lineups as MatchLineups : null;
+                const currentPersistedMatch = persistedMatchRef.current;
+                const currentDraftMatch = matchDraftRef.current;
                 const hasUnsavedEvents = !areDraftValuesEqual(localEventsRef.current, persistedEventsRef.current);
                 const hasUnsavedLineups = !areDraftValuesEqual(localLineupsRef.current, persistedLineupsRef.current);
+                const hasUnsavedScore = !areMatchScoresEqual(scoreDraftRef.current, persistedScoreRef.current);
+                const hasUnsavedStatus = currentDraftMatch.status !== currentPersistedMatch.status;
+                const hasUnsavedVenue = (currentDraftMatch.venue || '') !== (currentPersistedMatch.venue || '');
+                const hasUnsavedNotes = !areTextValuesEqual(currentDraftMatch.notes, currentPersistedMatch.notes);
+                const hasUnsavedDateTime =
+                    toDateTimeLocalInput(currentDraftMatch.date_time) !== toDateTimeLocalInput(currentPersistedMatch.date_time);
                 const incomingScore = updated.score as MatchScore | undefined;
+                const nextPersistedMatch = { ...currentPersistedMatch, ...updated } as MatchRow;
 
-                setMatch(prev => ({ ...prev, ...updated } as unknown as MatchRow));
+                persistedMatchRef.current = nextPersistedMatch;
+                setMatch((prev) => ({
+                    ...prev,
+                    ...updated,
+                    status: hasUnsavedStatus ? prev.status : nextPersistedMatch.status,
+                    venue: hasUnsavedVenue ? prev.venue : nextPersistedMatch.venue,
+                    notes: hasUnsavedNotes ? prev.notes : nextPersistedMatch.notes,
+                    date_time: hasUnsavedDateTime ? prev.date_time : nextPersistedMatch.date_time,
+                } as MatchRow));
                 if (incomingScore) {
-                    persistedScoreRef.current = normalizeMatchScore(incomingScore);
+                    const normalizedIncomingScore = normalizeMatchScore(incomingScore);
+                    persistedScoreRef.current = normalizedIncomingScore;
+                    if (!hasUnsavedScore) {
+                        setScoreDraft(normalizedIncomingScore);
+                    }
                 }
                 if (incomingEvents) {
                     persistedEventsRef.current = incomingEvents;
@@ -1230,25 +1403,37 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                         points_override_reason: String(updated.points_override_reason ?? prev.points_override_reason ?? ''),
                     }));
                 }
+                if (!hasUnsavedDateTime) {
+                    setDateTimeDraft(toDateTimeLocalInput(nextPersistedMatch.date_time));
+                }
             })
             .subscribe();
 
         return () => { supabase.removeChannel(channel); };
-    }, [match?.status, matchId, supabase]);
+    }, [matchId, supabase]);
 
     /* â”€â”€â”€ SAVE â”€â”€â”€ */
     const handleSave = async () => {
         if (!match) return;
+        const payload = buildPersistableMatchPayload();
+        if (eventsDirty) {
+            payload.events = localEvents;
+        }
+        if (lineupsDirty) {
+            payload.lineups = localLineups;
+        }
+        if (Object.keys(payload).length === 0) {
+            setSaveMsg({ type: 'ok', text: 'No hay cambios para guardar' });
+            setTimeout(() => setSaveMsg(null), 2500);
+            return;
+        }
+
         setSaving(true);
         setSaveMsg(null);
         try {
             console.log('[MatchCenter] Saving via API - events:', localEvents.length, 'lineups home:', localLineups.home.length, 'away:', localLineups.away.length);
 
-            const saveResult = await persistMatchPatch({
-                ...buildPersistableMatchPayload(),
-                events: localEvents,
-                lineups: localLineups,
-            });
+            const saveResult = await persistMatchPatch(payload);
             setSaveMsg(
                 saveResult.warnings.lineupsNotPersisted
                     ? { type: 'warn', text: 'Se guardó el partido, pero este entorno no tiene almacenamiento para alineaciones.' }
@@ -1264,29 +1449,24 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     };
 
     /* â”€â”€â”€ DERIVED DATA (all computed, zero hardcode) â”€â”€â”€ */
-    const commitConfigPatch = useCallback(async (
-        payload: Record<string, unknown>,
-        options?: PersistMatchPatchOptions,
-    ) => {
-        try {
-            await persistMatchPatch(payload, options);
-        } catch (err: unknown) {
-            console.error('[MatchCenter] Config save error:', err);
-            setSaveMsg({ type: 'err', text: `Error de red: ${err instanceof Error ? err.message : String(err)}` });
-            await fetchMatch();
-        }
-    }, [fetchMatch, persistMatchPatch]);
-
     const handleScoreInputChange = useCallback((team: 'home' | 'away', value: string) => {
         const parsedValue = Math.max(0, Number.parseInt(value || '0', 10) || 0);
-        setMatch((prev) => ({
-            ...prev,
-            score: {
-                ...(prev.score || { home: 0, away: 0 }),
-                [team]: parsedValue,
+        const currentOfficialScore = resolveOfficialScore();
+        const nextHome = team === 'home' ? parsedValue : currentOfficialScore.home;
+        const nextAway = team === 'away' ? parsedValue : currentOfficialScore.away;
+        const cutoffMinute = getLatestEventMinute(localEventsRef.current);
+
+        setScoreDraft({
+            ...currentOfficialScore,
+            home: nextHome,
+            away: nextAway,
+            manualOverride: {
+                home: nextHome,
+                away: nextAway,
+                cutoffMinute,
             },
-        }));
-    }, []);
+        });
+    }, [resolveOfficialScore]);
 
     const updateLocalEvent = useCallback((eventId: string, patch: Partial<MatchEvent>) => {
         setLocalEvents((prev) =>
@@ -1307,7 +1487,8 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         }));
     }, [lineupSizeInput, localLineups]);
 
-    const score = resolveMatchScore();
+    const score = useMemo(() => resolveOfficialScore(scoreDraft, localEvents), [localEvents, resolveOfficialScore, scoreDraft]);
+    const eventDerivedScore = useMemo(() => resolveEventDerivedScore(localEvents, score), [localEvents, resolveEventDerivedScore, score]);
     const events = localEvents;
     const lineups = localLineups;
 
@@ -1342,6 +1523,39 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         });
     }, [eventDefinitions]);
 
+    useEffect(() => {
+        setLocalEvents((prev) => {
+            let changed = false;
+            const nextEvents = prev.map((event) => {
+                if (!event.team || !event.playerName.trim()) {
+                    return event;
+                }
+
+                const availablePlayers = eventPlayerOptions[event.team];
+                if (isEventPlayerAvailable(availablePlayers, event.playerName)) {
+                    return event;
+                }
+
+                changed = true;
+                return {
+                    ...event,
+                    playerId: null,
+                    playerName: '',
+                };
+            });
+
+            return changed ? nextEvents : prev;
+        });
+    }, [eventPlayerOptions]);
+
+    const scoreMismatch = useMemo(() => (
+        !areMatchScoresEqual(score, eventDerivedScore)
+        && (events.length > 0 || score.home > 0 || score.away > 0)
+    ), [eventDerivedScore, events.length, score]);
+    const scoreSource = useMemo<'manual' | 'events'>(() => (
+        scoreMismatch ? 'manual' : events.length > 0 ? 'events' : 'manual'
+    ), [events.length, scoreMismatch]);
+
     const homeName = match.homeClub?.short_name || match.homeClub?.name || 'Local';
     const awayName = match.awayClub?.short_name || match.awayClub?.name || 'Visitante';
     const homeLogo = match.homeClub?.logo_url || null;
@@ -1352,76 +1566,158 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         ? formatDateInTimeZone(match.date_time, 'es-AR', { day: 'numeric', month: 'short', year: 'numeric' }, APP_TIMEZONE)
         : 'Sin fecha';
 
-    // Parcials: derive from events by minute
-    const scoringEventTypes = eventDefinitions
-        .filter((definition) => definition.category === 'score' && definition.points > 0)
-        .map((definition) => definition.type);
-    const ptEvents = events.filter((event) => scoringEventTypes.includes(event.type) && event.minute <= 40);
-    const stEvents = events.filter((event) => scoringEventTypes.includes(event.type) && event.minute > 40);
+    const summaryStats = useMemo(() => {
+        const needsEventAnalytics = activeTab === 'resumen' || activeTab === 'estadisticas';
+        const winner =
+            score.home > score.away
+                ? 'LOCAL'
+                : score.away > score.home
+                    ? 'VISITANTE'
+                    : score.home === score.away && score.home === 0
+                        ? '--'
+                        : 'EMPATE';
 
-    function calcPeriodScore(periodEvents: MatchEvent[]): { home: number; away: number } {
-        let h = 0, a = 0;
-        periodEvents.forEach(e => {
-            const pts = getConfiguredEventPoints(e.type, eventDefinitionMap);
-            if (e.team === 'home') h += pts;
-            else if (e.team === 'away') a += pts;
+        if (!needsEventAnalytics) {
+            return {
+                ptScore: { home: 0, away: 0 },
+                stScore: { home: 0, away: 0 },
+                teamComparableStats: [] as Array<{ type: string; label: string; h: number; a: number }>,
+                scoringBreakdown: [] as Array<MatchEventDefinition & { homeCount: number; awayCount: number }>,
+                recentEvents: [] as MatchEvent[],
+                totalEvents: events.length,
+                winner,
+                homeBonusOff: false,
+                awayBonusOff: false,
+                bonusOffText: 'No aplica',
+                bonusDefText: 'No aplica',
+            };
+        }
+
+        const offensiveMetricLabel = pointsRules.offensive?.label || 'eventos';
+        const homeOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'home', pointsRules.offensive);
+        const awayOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'away', pointsRules.offensive);
+        const homeBonusOff = pointsRules.offensive ? homeOffensiveMetricCount >= pointsRules.offensive.threshold : false;
+        const awayBonusOff = pointsRules.offensive ? awayOffensiveMetricCount >= pointsRules.offensive.threshold : false;
+        const offensiveThresholdLabel = pointsRules.offensive?.threshold ?? 0;
+        const bonusOffText = !pointsRules.offensive
+            ? 'No aplica'
+            : homeBonusOff && awayBonusOff
+                ? `${homeName} y ${awayName} (${offensiveThresholdLabel}+ ${offensiveMetricLabel})`
+                : homeBonusOff
+                    ? `${homeName} (${homeOffensiveMetricCount} ${offensiveMetricLabel})`
+                    : awayBonusOff
+                        ? `${awayName} (${awayOffensiveMetricCount} ${offensiveMetricLabel})`
+                        : 'No';
+
+        const diff = Math.abs(score.home - score.away);
+        const loser = score.home < score.away ? 'home' : score.home > score.away ? 'away' : null;
+        const bonusDefText = !pointsRules.defensive
+            ? 'No aplica'
+            : loser && diff <= pointsRules.defensive.margin && match.status === 'final'
+                ? `${loser === 'home' ? homeName : awayName} (pierde por ${diff})`
+                : 'No';
+
+        const scoringDefinitions = eventDefinitions.filter((definition) => definition.category === 'score' && definition.points > 0);
+        const comparableDefinitions = eventDefinitions.filter((definition) => definition.team !== 'none');
+        const scoringCounts = new Map<string, { homeCount: number; awayCount: number }>();
+        const comparableCounts = new Map<string, { h: number; a: number }>();
+
+        scoringDefinitions.forEach((definition) => {
+            scoringCounts.set(definition.type, { homeCount: 0, awayCount: 0 });
         });
-        return { home: h, away: a };
-    }
-    const ptScore = calcPeriodScore(ptEvents);
-    const stScore = calcPeriodScore(stEvents);
-    const teamComparableStats = eventDefinitions
-        .filter((definition) => definition.team !== 'none')
-        .map((definition) => ({
-            type: definition.type,
-            label: definition.label,
-            h: events.filter((event) => event.type === definition.type && event.team === 'home').length,
-            a: events.filter((event) => event.type === definition.type && event.team === 'away').length,
-        }))
-        .filter((stat) => stat.h > 0 || stat.a > 0);
-    const scoringBreakdown = eventDefinitions
-        .filter((definition) => definition.category === 'score' && definition.points > 0)
-        .map((definition) => ({
-            ...definition,
-            homeCount: events.filter((event) => event.type === definition.type && event.team === 'home').length,
-            awayCount: events.filter((event) => event.type === definition.type && event.team === 'away').length,
-        }))
-        .filter((definition) => definition.homeCount > 0 || definition.awayCount > 0);
+        comparableDefinitions.forEach((definition) => {
+            comparableCounts.set(definition.type, { h: 0, a: 0 });
+        });
 
-    // Winner
-    const winner = score.home > score.away ? 'LOCAL' : score.away > score.home ? 'VISITANTE' : score.home === score.away && score.home === 0 ? '--' : 'EMPATE';
+        let ptHome = 0;
+        let ptAway = 0;
+        let stHome = 0;
+        let stAway = 0;
 
-    // Bonus ofensivo segun la regla configurada
-    const offensiveMetricLabel = pointsRules.offensive?.label || 'eventos';
-    const homeOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'home', pointsRules.offensive);
-    const awayOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'away', pointsRules.offensive);
-    const homeBonusOff = pointsRules.offensive ? homeOffensiveMetricCount >= pointsRules.offensive.threshold : false;
-    const awayBonusOff = pointsRules.offensive ? awayOffensiveMetricCount >= pointsRules.offensive.threshold : false;
-    const offensiveThresholdLabel = pointsRules.offensive?.threshold ?? 0;
-    const bonusOffText = !pointsRules.offensive
-        ? 'No aplica'
-        : homeBonusOff && awayBonusOff
-            ? `${homeName} y ${awayName} (${offensiveThresholdLabel}+ ${offensiveMetricLabel})`
-            : homeBonusOff
-                ? `${homeName} (${homeOffensiveMetricCount} ${offensiveMetricLabel})`
-                : awayBonusOff
-                    ? `${awayName} (${awayOffensiveMetricCount} ${offensiveMetricLabel})`
-                    : 'No';
+        events.forEach((event) => {
+            const points = getConfiguredEventPoints(event.type, eventDefinitionMap);
 
-    // Bonus defensivo (lose by <=7)
-    const diff = Math.abs(score.home - score.away);
-    const loser = score.home < score.away ? 'home' : score.home > score.away ? 'away' : null;
-    const bonusDefText = !pointsRules.defensive
-        ? 'No aplica'
-        : loser && diff <= pointsRules.defensive.margin && match.status === 'final'
-            ? `${loser === 'home' ? homeName : awayName} (pierde por ${diff})`
-            : 'No';
+            if (points > 0 && event.team === 'home') {
+                if (event.minute <= 40) {
+                    ptHome += points;
+                } else {
+                    stHome += points;
+                }
+            } else if (points > 0 && event.team === 'away') {
+                if (event.minute <= 40) {
+                    ptAway += points;
+                } else {
+                    stAway += points;
+                }
+            }
 
-    // Metrics from events
-    const totalEvents = events.length;
+            if (event.team === 'home' || event.team === 'away') {
+                const comparableCount = comparableCounts.get(event.type);
+                if (comparableCount) {
+                    comparableCount[event.team === 'home' ? 'h' : 'a'] += 1;
+                }
 
-    // Recent events (last 8, descending by minute)
-    const recentEvents = [...events].sort((a, b) => b.minute - a.minute).slice(0, 8);
+                const scoringCount = scoringCounts.get(event.type);
+                if (scoringCount) {
+                    scoringCount[event.team === 'home' ? 'homeCount' : 'awayCount'] += 1;
+                }
+            }
+        });
+
+        return {
+            ptScore: { home: ptHome, away: ptAway },
+            stScore: { home: stHome, away: stAway },
+            teamComparableStats: comparableDefinitions
+                .map((definition) => ({
+                    type: definition.type,
+                    label: definition.label,
+                    h: comparableCounts.get(definition.type)?.h ?? 0,
+                    a: comparableCounts.get(definition.type)?.a ?? 0,
+                }))
+                .filter((stat) => stat.h > 0 || stat.a > 0),
+            scoringBreakdown: scoringDefinitions
+                .map((definition) => ({
+                    ...definition,
+                    homeCount: scoringCounts.get(definition.type)?.homeCount ?? 0,
+                    awayCount: scoringCounts.get(definition.type)?.awayCount ?? 0,
+                }))
+                .filter((definition) => definition.homeCount > 0 || definition.awayCount > 0),
+            recentEvents: activeTab === 'resumen'
+                ? [...events].sort((a, b) => b.minute - a.minute).slice(0, 8)
+                : [],
+            totalEvents: events.length,
+            winner,
+            homeBonusOff,
+            awayBonusOff,
+            bonusOffText,
+            bonusDefText,
+        };
+    }, [activeTab, awayName, eventDefinitionMap, eventDefinitions, events, homeName, match.status, pointsRules, score]);
+    const {
+        ptScore,
+        stScore,
+        teamComparableStats,
+        scoringBreakdown,
+        recentEvents,
+        totalEvents,
+        winner,
+        homeBonusOff,
+        awayBonusOff,
+        bonusOffText,
+        bonusDefText,
+    } = summaryStats;
+    const scoreDirty = !areMatchScoresEqual(score, persistedScoreRef.current);
+    const eventsDirty = !areDraftValuesEqual(events, persistedEventsRef.current);
+    const lineupsDirty = !areDraftValuesEqual(lineups, persistedLineupsRef.current);
+    const statusDirty = match.status !== persistedMatchRef.current.status;
+    const venueDirty = (match.venue || '') !== (persistedMatchRef.current.venue || '');
+    const notesDirty = !areTextValuesEqual(match.notes, persistedMatchRef.current.notes);
+    const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
+    const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
+    const sortedEvents = useMemo(
+        () => (activeTab === 'eventos' ? [...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)) : []),
+        [activeTab, events],
+    );
 
 
     /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -1500,6 +1796,30 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 </div>
             </header>
 
+            {scoreMismatch && (
+                <section style={{
+                    margin: '20px 24px 0',
+                    padding: '14px 18px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    background: 'rgba(120, 53, 15, 0.18)',
+                    color: '#fcd34d',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    flexWrap: 'wrap',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700 }}>
+                        <AlertTriangle size={16} />
+                        <span>Resultado manual guardado. La timeline no coincide con el marcador oficial.</span>
+                    </div>
+                    <span style={{ fontSize: '0.8rem', color: '#fde68a' }}>
+                        Eventos: {eventDerivedScore.home} - {eventDerivedScore.away}
+                    </span>
+                </section>
+            )}
+
             {/* â•â•â•â•â•â•â•â•â•â•â• 2. TABS â•â•â•â•â•â•â•â•â•â•â• */}
             <nav className="match-tabs-nav">
                 {TABS.map(tab => (
@@ -1523,10 +1843,17 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
                             {/* Resultado Extendido */}
                             <article className="mc-partition">
-                                <div className="mc-card-header"><h4>Resultado Extendido</h4></div>
+                                <div className="mc-card-header">
+                                    <h4>Resultado Extendido</h4>
+                                    <span style={{ fontSize: '0.7rem', color: scoreSource === 'manual' ? '#fcd34d' : '#888', textTransform: 'uppercase', fontWeight: 800 }}>
+                                        {scoreSource === 'manual' ? 'Marcador oficial' : 'Alineado con eventos'}
+                                    </span>
+                                </div>
                                 <div className="mc-card-body" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
                                     <div style={{ padding: 16, background: '#111', borderRadius: 8 }}>
-                                        <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Parciales</div>
+                                        <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>
+                                            Parciales {scoreMismatch ? '(segun eventos)' : ''}
+                                        </div>
                                         <div style={{ fontWeight: 800 }}>PT: {ptScore.home} - {ptScore.away}</div>
                                         <div style={{ fontWeight: 800, color: '#888' }}>ST: {stScore.home} - {stScore.away}</div>
                                     </div>
@@ -1549,6 +1876,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             <article className="mc-partition">
                                 <div className="mc-card-header"><h4>Metricas Clave</h4></div>
                                 <div className="mc-card-body">
+                                    {scoreMismatch && (
+                                        <p style={{ marginTop: 0, marginBottom: 16, fontSize: '0.8rem', color: '#888' }}>
+                                            Estas metricas se calculan segun la timeline de eventos y pueden no coincidir con el marcador oficial.
+                                        </p>
+                                    )}
                                     {totalEvents === 0 ? (
                                         <p className="empty-msg">No hay eventos registrados aun. Carga eventos en la pestana &quot;Eventos&quot;.</p>
                                     ) : (
@@ -1743,6 +2075,22 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                                             : 'Sugerencias del plantel disponibles'}
                                                                 </span>
                                                             </div>
+                                                            <label style={{ display: 'grid', gap: 4, minWidth: 88, flexShrink: 0 }}>
+                                                                <span style={{ fontSize: 10, color: '#777', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Puntaje</span>
+                                                                <input
+                                                                    type="number"
+                                                                    min={0}
+                                                                    max={10}
+                                                                    step={0.1}
+                                                                    inputMode="decimal"
+                                                                    value={formatLineupRatingInput(p.rating)}
+                                                                    placeholder="0.0"
+                                                                    className="inline-input"
+                                                                    style={{ textAlign: 'center', opacity: p.name.trim() ? 1 : 0.45 }}
+                                                                    disabled={!p.name.trim()}
+                                                                    onChange={(e) => updateLineupPlayerRating(team, p, e.target.value)}
+                                                                />
+                                                            </label>
                                                             {p.isCaptain && <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--accent)', border: '1px solid var(--accent)', padding: '2px 6px' }}>C</span>}
                                                         </div>
                                                     ))}
@@ -1772,6 +2120,22 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                                             : 'Selecciona un jugador existente o escribe uno nuevo'}
                                                                 </span>
                                                             </div>
+                                                            <label style={{ display: 'grid', gap: 4, minWidth: 88, flexShrink: 0 }}>
+                                                                <span style={{ fontSize: 10, color: '#777', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Puntaje</span>
+                                                                <input
+                                                                    type="number"
+                                                                    min={0}
+                                                                    max={10}
+                                                                    step={0.1}
+                                                                    inputMode="decimal"
+                                                                    value={formatLineupRatingInput(p.rating)}
+                                                                    placeholder="0.0"
+                                                                    className="inline-input"
+                                                                    style={{ textAlign: 'center', opacity: p.name.trim() ? 1 : 0.45, color: '#ccc' }}
+                                                                    disabled={!p.name.trim()}
+                                                                    onChange={(e) => updateLineupPlayerRating(team, p, e.target.value)}
+                                                                />
+                                                            </label>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -1829,7 +2193,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     <div style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
                                         <div>MIN</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCION</div>
                                     </div>
-                                    {[...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)).map((ev) => {
+                                    {sortedEvents.map((ev) => {
                                         const selectedDefinition = eventDefinitionMap[ev.type] || {
                                             type: ev.type,
                                             label: eventTypeLabel(ev.type, eventDefinitions),
@@ -1838,6 +2202,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                             team: 'optional' as const,
                                             player: 'optional' as const,
                                         };
+                                        const availableEventPlayers = ev.team ? eventPlayerOptions[ev.team] : [];
+                                        const selectedPlayerValue = isEventPlayerAvailable(availableEventPlayers, ev.playerName)
+                                            ? ev.playerName
+                                            : '';
 
                                         return (
                                         <div key={ev.id} style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
@@ -1889,14 +2257,39 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                 </select>
                                             </div>
                                             <div style={{ display: 'grid', gap: 6 }}>
-                                                <input
-                                                    type="text" value={selectedDefinition.player === 'none' ? ev.detail : ev.playerName} placeholder={selectedDefinition.player === 'none' ? 'Detalle del evento' : selectedDefinition.player === 'required' ? 'Nombre del jugador' : 'Jugador (opcional)'}
-                                                    className="inline-input" style={{ fontSize: '0.85rem' }}
-                                                    list={selectedDefinition.player !== 'none' && ev.team ? `match-center-event-players-${ev.team}` : undefined}
-                                                    onChange={(e) => updateLocalEvent(ev.id, selectedDefinition.player === 'none'
-                                                        ? { detail: e.target.value }
-                                                        : resolveEventPlayerSelection(ev.team, e.target.value))}
-                                                />
+                                                {selectedDefinition.player === 'none' ? (
+                                                    <input
+                                                        type="text"
+                                                        value={ev.detail}
+                                                        placeholder="Detalle del evento"
+                                                        className="inline-input"
+                                                        style={{ fontSize: '0.85rem' }}
+                                                        onChange={(e) => updateLocalEvent(ev.id, { detail: e.target.value })}
+                                                    />
+                                                ) : (
+                                                    <select
+                                                        value={selectedPlayerValue}
+                                                        disabled={!ev.team || availableEventPlayers.length === 0}
+                                                        className="inline-input inline-select"
+                                                        style={{ fontSize: '0.85rem' }}
+                                                        onChange={(e) => updateLocalEvent(ev.id, resolveEventPlayerSelection(ev.team, e.target.value))}
+                                                    >
+                                                        <option value="">
+                                                            {!ev.team
+                                                                ? 'Seleccioná un equipo'
+                                                                : availableEventPlayers.length === 0
+                                                                    ? 'Sin participantes cargados'
+                                                                    : selectedDefinition.player === 'required'
+                                                                        ? 'Seleccioná un jugador'
+                                                                        : 'Sin jugador'}
+                                                        </option>
+                                                        {availableEventPlayers.map((entry) => (
+                                                            <option key={`${ev.id}-${entry.playerId || entry.name}`} value={entry.name}>
+                                                                {entry.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
                                                 {selectedDefinition.player !== 'none' && (
                                                     <input
                                                         type="text"
@@ -1919,16 +2312,6 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 </>
                             )}
                         </div>
-                        <datalist id="match-center-event-players-home">
-                            {eventPlayerOptions.home.map((entry) => (
-                                <option key={`event-home-${entry.playerId || entry.name}`} value={entry.name} />
-                            ))}
-                        </datalist>
-                        <datalist id="match-center-event-players-away">
-                            {eventPlayerOptions.away.map((entry) => (
-                                <option key={`event-away-${entry.playerId || entry.name}`} value={entry.name} />
-                            ))}
-                        </datalist>
                     </article>
                 )}
 
@@ -1943,7 +2326,12 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             </article>
                         ) : (
                             <article className="mc-partition" style={{ background: '#111' }}>
-                                <div className="mc-card-header"><h4>Comparativo por Equipo</h4></div>
+                                <div className="mc-card-header">
+                                    <h4>Comparativo por Equipo</h4>
+                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', fontWeight: 800 }}>
+                                        {scoreMismatch ? 'Segun eventos' : 'Eventos'}
+                                    </span>
+                                </div>
                                 <div className="mc-card-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                     {teamComparableStats.map(stat => {
                                         const total = stat.h + stat.a || 1;
@@ -2095,13 +2483,9 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 <select
                                     value={match.status}
                                     style={{ borderRadius: 4 }}
-                                    onChange={async (e) => {
+                                    onChange={(e) => {
                                         const nextStatus = e.target.value;
                                         setMatch((prev) => ({ ...prev, status: nextStatus }));
-                                        await commitConfigPatch(
-                                            { status: nextStatus },
-                                            { syncDirtyEvents: true },
-                                        );
                                     }}
                                 >
                                     <option value="scheduled">Programado</option>
@@ -2120,13 +2504,6 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     min={0}
                                     style={{ borderRadius: 4 }}
                                     onChange={(e) => handleScoreInputChange('home', e.target.value)}
-                                    onBlur={async (e) => {
-                                        const newScore = { ...score, home: parseInt(e.target.value) || 0 };
-                                        await commitConfigPatch(
-                                            { score: newScore },
-                                            { syncDirtyEvents: true },
-                                        );
-                                    }}
                                 />
                             </div>
                             <div className="form-group">
@@ -2137,13 +2514,6 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     min={0}
                                     style={{ borderRadius: 4 }}
                                     onChange={(e) => handleScoreInputChange('away', e.target.value)}
-                                    onBlur={async (e) => {
-                                        const newScore = { ...score, away: parseInt(e.target.value) || 0 };
-                                        await commitConfigPatch(
-                                            { score: newScore },
-                                            { syncDirtyEvents: true },
-                                        );
-                                    }}
                                 />
                             </div>
                             <div className="form-group">
@@ -2153,12 +2523,6 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     value={match.venue || ''}
                                     style={{ borderRadius: 4 }}
                                     onChange={(e) => setMatch((prev) => ({ ...prev, venue: e.target.value }))}
-                                    onBlur={async (e) => {
-                                        await commitConfigPatch(
-                                            { venue: e.target.value },
-                                            { includePoints: false },
-                                        );
-                                    }}
                                 />
                             </div>
                             <div className="form-group">
@@ -2168,18 +2532,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     value={dateTimeDraft}
                                     style={{ borderRadius: 4 }}
                                     onChange={(e) => setDateTimeDraft(e.target.value)}
-                                    onBlur={async (e) => {
-                                        if (e.target.value) {
-                                            const [date, time] = e.target.value.split('T');
-                                            const nextDateTime = combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE);
-                                            if (!nextDateTime) return;
-                                            await commitConfigPatch(
-                                                { dateTime: nextDateTime },
-                                                { includePoints: false },
-                                            );
-                                        }
-                                    }}
                                 />
+                            </div>
+                            <div style={{ marginTop: -8, fontSize: '0.78rem', color: scoreDirty ? '#fcd34d' : '#666', lineHeight: 1.5 }}>
+                                {scoreDirty
+                                    ? 'Hay cambios locales sin guardar. Usa el boton Guardar del encabezado para persistir marcador, estado, sede, fecha y notas juntos.'
+                                    : hasUnsavedMatchParameters
+                                        ? 'Hay cambios administrativos sin guardar. El guardado ahora evita recalcular datos del partido si solo cambias sede, fecha o notas.'
+                                        : 'El marcador oficial manda sobre la timeline. Si no coincide con los eventos, la consola lo mostrara como resultado manual.'}
                             </div>
                         </div>
 

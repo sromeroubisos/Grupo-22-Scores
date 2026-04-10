@@ -11,7 +11,7 @@ export default function MatchDashboardRedirect() {
     useEffect(() => {
         // Redirect legacy matches path to the new consolidated Match Center
         if (matchId) {
-            router.replace(`/admin/super/partidos/${matchId}`);
+            router.replace(`/admin/matches/${matchId}/manage`);
         }
     }, [matchId, router]);
 

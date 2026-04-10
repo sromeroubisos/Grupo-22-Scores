@@ -193,7 +193,7 @@ export default function SuperadminPartidosPage() {
     const handleDelete = async (id: string) => {
         if (!confirm('¿Seguro que deseas eliminar este partido?')) return;
         setDeletedIds(prev => new Set([...prev, id]));
-        const response = await fetch(`/api/matches/${encodeURIComponent(id)}`, {
+        const response = await fetch(`/api/admin/matches/${encodeURIComponent(id)}`, {
             method: 'DELETE',
         });
         if (!response.ok) {
@@ -208,7 +208,7 @@ export default function SuperadminPartidosPage() {
 
     const handleStatusChange = async (id: string, newStatus: string) => {
         setStatusOverrides(prev => new Map([...prev, [id, newStatus]]));
-        const response = await fetch(`/api/matches/${encodeURIComponent(id)}`, {
+        const response = await fetch(`/api/admin/matches/${encodeURIComponent(id)}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

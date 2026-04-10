@@ -35,6 +35,7 @@ type PersistedLineupPlayer = {
   name: string;
   position?: string;
   role?: string;
+  rating?: number | null;
   isCaptain?: boolean;
   squadMemberId?: string | null;
   divisionId?: string | null;
@@ -188,6 +189,19 @@ function normalizeLineupRole(role: unknown, jerseyNumber: number) {
   return jerseyNumber <= 15 ? 'titular' : 'suplente';
 }
 
+function normalizeLineupRating(value: unknown) {
+  const parsed =
+    typeof value === 'number' && Number.isFinite(value)
+      ? value
+      : typeof value === 'string'
+        ? Number(value.replace(',', '.'))
+        : Number.NaN;
+
+  if (!Number.isFinite(parsed)) return null;
+  const clamped = Math.min(10, Math.max(0, parsed));
+  return Math.round(clamped * 10) / 10;
+}
+
 function normalizeStoredLineupPlayer(player: unknown, index: number): PersistedLineupPlayer {
   const source = player && typeof player === 'object' ? (player as Record<string, unknown>) : {};
   const preferredNumber =
@@ -203,6 +217,7 @@ function normalizeStoredLineupPlayer(player: unknown, index: number): PersistedL
     name: normalizeText(source.name) || normalizeText(source.playerName),
     position: normalizeText(source.position) || '',
     role: normalizeText(source.role) || (preferredNumber <= 15 ? 'starter' : 'substitute'),
+    rating: normalizeLineupRating(source.rating ?? source.playerRating),
     isCaptain: Boolean(source.isCaptain),
     squadMemberId: normalizeText(source.squadMemberId) || null,
     divisionId: normalizeText(source.divisionId) || null,

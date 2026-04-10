@@ -6,6 +6,7 @@ export type LocalLineupPlayer = {
   name?: string | null;
   position?: string | null;
   role?: string | null;
+  rating?: number | null;
   isCaptain?: boolean | null;
 };
 
@@ -40,6 +41,7 @@ export type LocalPlayerStatsRow = {
   teamName: string;
   number: number | null;
   position: string | null;
+  rating: number | null;
   isCaptain: boolean;
   matchesPlayed: number;
   points: number;
@@ -56,6 +58,19 @@ function text(value: unknown) {
 
 function key(value: unknown) {
   return text(value).toLowerCase();
+}
+
+function lineupRating(value: unknown) {
+  const parsed =
+    typeof value === 'number' && Number.isFinite(value)
+      ? value
+      : typeof value === 'string'
+        ? Number(value.replace(',', '.'))
+        : Number.NaN;
+
+  if (!Number.isFinite(parsed)) return null;
+  const clamped = Math.min(10, Math.max(0, parsed));
+  return Math.round(clamped * 10) / 10;
 }
 
 function toLineupPlayers(raw: unknown) {
@@ -75,6 +90,7 @@ function toLineupPlayers(raw: unknown) {
       name: text(source.name) || text(source.playerName) || '',
       position: text(source.position) || null,
       role: text(source.role) || null,
+      rating: lineupRating(source.rating ?? source.playerRating),
       isCaptain: Boolean(source.isCaptain),
     } satisfies LocalLineupPlayer;
   });
@@ -169,6 +185,7 @@ export function buildLocalPlayerStatsRows(args: {
         teamName,
         number: meta?.number ?? null,
         position: meta?.position ?? null,
+        rating: typeof meta?.rating === 'number' ? meta.rating : null,
         isCaptain: Boolean(meta?.isCaptain),
         matchesPlayed: 1,
         points: 0,
@@ -184,6 +201,7 @@ export function buildLocalPlayerStatsRows(args: {
     if (!current.playerId && playerId) current.playerId = playerId;
     if ((!current.position || current.position === '—') && meta?.position) current.position = meta.position;
     if (current.number == null && meta?.number != null) current.number = meta.number;
+    if (current.rating == null && typeof meta?.rating === 'number') current.rating = meta.rating;
     if (meta?.isCaptain) current.isCaptain = true;
     return current;
   };
@@ -194,6 +212,7 @@ export function buildLocalPlayerStatsRows(args: {
     ensureRow('home', args.homeName, name, text(player.id) || null, {
       number: typeof player.number === 'number' ? player.number : null,
       position: text(player.position) || null,
+      rating: typeof player.rating === 'number' ? player.rating : null,
       isCaptain: Boolean(player.isCaptain),
     });
   });
@@ -204,6 +223,7 @@ export function buildLocalPlayerStatsRows(args: {
     ensureRow('away', args.awayName, name, text(player.id) || null, {
       number: typeof player.number === 'number' ? player.number : null,
       position: text(player.position) || null,
+      rating: typeof player.rating === 'number' ? player.rating : null,
       isCaptain: Boolean(player.isCaptain),
     });
   });

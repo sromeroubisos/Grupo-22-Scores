@@ -66,6 +66,58 @@ export class FixtureService {
     }
   }
 
+  private static areComparableValuesEqual(left: unknown, right: unknown) {
+    return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+  }
+
+  private static shouldSyncRankingsAfterUpdate(
+    existingMatch: {
+      phase_id?: string | null;
+      round_uuid?: string | null;
+      round_id?: string | null;
+      group_id?: string | null;
+      home_club_id?: string | null;
+      away_club_id?: string | null;
+      status?: string | null;
+      score?: unknown;
+      home_base_points?: number | null;
+      away_base_points?: number | null;
+      home_bonus_points?: number | null;
+      away_bonus_points?: number | null;
+      points_autocalculated?: boolean | null;
+      points_override_reason?: string | null;
+    },
+    updateData: Record<string, unknown>,
+  ) {
+    if (
+      updateData.home_division_id !== undefined ||
+      updateData.away_division_id !== undefined ||
+      updateData.category !== undefined
+    ) {
+      return true;
+    }
+
+    const comparablePairs: Array<[unknown, unknown]> = [
+      [updateData.phase_id, existingMatch.phase_id],
+      [updateData.round_uuid, this.getMatchRoundId(existingMatch)],
+      [updateData.group_id, existingMatch.group_id],
+      [updateData.home_club_id, existingMatch.home_club_id],
+      [updateData.away_club_id, existingMatch.away_club_id],
+      [updateData.status, existingMatch.status],
+      [updateData.score, existingMatch.score],
+      [updateData.home_base_points, existingMatch.home_base_points],
+      [updateData.away_base_points, existingMatch.away_base_points],
+      [updateData.home_bonus_points, existingMatch.home_bonus_points],
+      [updateData.away_bonus_points, existingMatch.away_bonus_points],
+      [updateData.points_autocalculated, existingMatch.points_autocalculated],
+      [updateData.points_override_reason, existingMatch.points_override_reason],
+    ];
+
+    return comparablePairs.some(([nextValue, currentValue]) => (
+      nextValue !== undefined && !this.areComparableValuesEqual(nextValue, currentValue)
+    ));
+  }
+
   private static async assertPhaseBelongsToTournament(
     supabase: any,
     tournamentId: string,
@@ -650,7 +702,6 @@ export class FixtureService {
    */
   static async updateMatch(matchId: string, data: Partial<MatchFormData>): Promise<Match | null> {
     const supabase = await this.getWriteClient();
-    const previousRankingSnapshot = await getMatchRankingSnapshot(matchId);
 
     const [
       supportsRoundLabel,
@@ -671,7 +722,7 @@ export class FixtureService {
 
     const { data: existingMatch, error: existingMatchError } = await supabase
       .from('matches')
-      .select('id, tournament_id, phase_id, round_uuid, round_id, home_club_id, away_club_id')
+      .select('id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
       .eq('id', matchId)
       .single();
 
@@ -774,6 +825,11 @@ export class FixtureService {
       return this.mapMatch(fullMatch);
     }
 
+    const shouldSyncRankings = this.shouldSyncRankingsAfterUpdate(existingMatch, updateData);
+    const previousRankingSnapshot = shouldSyncRankings
+      ? await getMatchRankingSnapshot(matchId)
+      : null;
+
     const { data: match, error } = await supabase
       .from('matches')
       .update(updateData)
@@ -786,7 +842,9 @@ export class FixtureService {
       throw new Error(error.message);
     }
 
-    await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
+    if (shouldSyncRankings) {
+      await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
+    }
     return this.mapMatch(match);
   }
 
