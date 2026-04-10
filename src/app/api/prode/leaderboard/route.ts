@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { listPublicProdeUserTotals } from '@/lib/server/prodeCompetitions';
+import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 
 function getStatusCode(error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
@@ -9,6 +10,7 @@ function getStatusCode(error: unknown) {
 
 export async function GET() {
     try {
+        await refreshStoredProdeScoreboards();
         const result = await listPublicProdeUserTotals();
         return NextResponse.json(result);
     } catch (error) {

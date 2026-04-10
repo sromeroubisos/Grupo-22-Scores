@@ -1,8 +1,11 @@
 import ProdeLobby from '@/components/prode/ProdeLobby';
 import { createClient } from '@/lib/supabase/server';
 import { listPublicProdeCompetitions, listPublicProdeUserTotals, listUserPrivateLeagues } from '@/lib/server/prodeCompetitions';
+import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 
 export default async function ProdePage() {
+    await refreshStoredProdeScoreboards();
+
     const supabase = await createClient();
     const {
         data: { session },

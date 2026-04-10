@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { listPublicProdeUserTotals } from '@/lib/server/prodeCompetitions';
+import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 
 export default async function ProdeGlobalRankingPage() {
+    await refreshStoredProdeScoreboards();
     const { schemaReady, data } = await listPublicProdeUserTotals();
 
     return (

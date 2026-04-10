@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getAllTournaments } from '@/lib/data/tournaments';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
+import { applyScoringRulesToPredictionRows, refreshCompetitionScoreboards, resolveProdeScoringRules } from '@/lib/server/prodeScoring';
 import { getTournamentFixtures, getTournamentIds } from '@/lib/services/flashscore';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import type {
@@ -1029,6 +1030,7 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
 
     const competitionId = toSafeString(competitionResult.data.id);
     const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
+    await refreshCompetitionScoreboards(competitionId);
     const [{ eventRows, memberRows, rankingRows, errors }, predictionResult, rulesetResult] = await Promise.all([
         getCompetitionRows(admin, competitionId),
         currentUserId
@@ -1052,7 +1054,9 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
         throw new Error(firstError?.message || 'No se pudo cargar la vista de juego.');
     }
 
-    const events = mapEvents(eventRows, predictionResult.data || []);
+    const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data);
+    const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
+    const events = mapEvents(eventRows, scopedPredictionRows);
     const leaderboardRows = rankingRows.length
         ? rankingRows.map((row) => mapLeaderboardEntry(row, currentUserId))
         : buildFallbackLeaderboard(memberRows, currentUserId);
@@ -1161,6 +1165,7 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
         ownerUserId === currentUserId
         || currentMembershipRole === 'admin'
         || currentMembershipRole === 'owner'
+        || currentMembershipRole === 'moderator'
     );
 
     if (leagueVisibility === 'private' && !isMember) {
@@ -1171,6 +1176,7 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
 
     const competitionId = toSafeString(competitionResult.data.id);
     const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
+    await refreshCompetitionScoreboards(competitionId);
     const [{ eventRows, errors }, rankingResult, predictionResult, rulesetResult] = await Promise.all([
         getCompetitionEventRows(admin, competitionId),
         admin
@@ -1201,7 +1207,9 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
         throw new Error(firstError?.message || 'No se pudo cargar la vista de la liga.');
     }
 
-    const events = mapEvents(eventRows, predictionResult.data || []);
+    const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data, leagueRow);
+    const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
+    const events = mapEvents(eventRows, scopedPredictionRows);
     let leaderboardRows = rankingResult.data?.length
         ? rankingResult.data.map((row) => mapLeaderboardEntry(row, currentUserId))
         : [];

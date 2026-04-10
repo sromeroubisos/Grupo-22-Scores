@@ -667,7 +667,7 @@ export async function listUserPrivateLeagues(userId: string): Promise<SchemaStat
                     inviteCode: toNullableString(row.invite_code),
                     visibility: (toSafeString(row.visibility) || 'private') as 'private' | 'public',
                     role,
-                    canManage: ownerUserId === userId || role === 'admin' || role === 'owner',
+                    canManage: ownerUserId === userId || role === 'admin' || role === 'owner' || role === 'moderator',
                 };
             })
             .sort((left, right) => left.name.localeCompare(right.name, 'es')),

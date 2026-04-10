@@ -65,6 +65,7 @@ type LeagueRulesPayload = {
 };
 
 type CreateLeaguePayload = {
+    action?: 'create_league';
     name?: string;
     description?: string;
     visibility?: 'public' | 'private';
@@ -79,6 +80,11 @@ type CreateLeaguePayload = {
         sourceBinding?: ProdeSourceBinding;
     };
     rules?: LeagueRulesPayload;
+};
+
+type JoinLeaguePayload = {
+    action?: 'join_by_code';
+    inviteCode?: string;
 };
 
 type UpdateLeaguePayload = {
@@ -343,11 +349,102 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = await request.json() as CreateLeaguePayload;
-        const leagueName = ensureString(payload.name);
-        const visibility = payload.visibility === 'public' ? 'public' : 'private';
-        const selectedCompetition = payload.selectedCompetition;
-        const rules = normalizeLeagueRules(payload.rules);
+        const payload = await request.json() as CreateLeaguePayload | JoinLeaguePayload;
+        const action = ensureString(payload.action);
+        const admin = createAdminClient() as unknown as LooseAdminClient;
+        await ensureUserProfile(admin, session.user);
+
+        if (action === 'join_by_code') {
+            const inviteCode = ensureString((payload as JoinLeaguePayload).inviteCode).toUpperCase();
+
+            if (!inviteCode) {
+                return NextResponse.json({ error: 'El codigo de invitacion es obligatorio.' }, { status: 400 });
+            }
+
+            const leagueResult = await admin
+                .from('prode_private_leagues')
+                .select('id, slug, name, competition_id, owner_user_id, metadata')
+                .eq('invite_code', inviteCode)
+                .maybeSingle();
+
+            if (leagueResult.error) {
+                return NextResponse.json({ error: leagueResult.error.message || 'No se pudo buscar la liga privada.' }, { status: 500 });
+            }
+
+            if (!leagueResult.data) {
+                return NextResponse.json({ error: 'No existe una liga privada con ese codigo.' }, { status: 404 });
+            }
+
+            const leagueMetadata = ensureObject(leagueResult.data.metadata);
+            if (getLeagueLifecycle(leagueMetadata) !== 'active') {
+                return NextResponse.json({ error: 'La liga ya no acepta nuevos ingresos.' }, { status: 400 });
+            }
+
+            const competitionId = ensureString(leagueResult.data.competition_id);
+            if (!competitionId) {
+                return NextResponse.json({ error: 'La liga no tiene una competencia asociada valida.' }, { status: 400 });
+            }
+
+            const membershipResult = await admin
+                .from('prode_private_league_members')
+                .select('private_league_id, user_id, role')
+                .eq('private_league_id', ensureString(leagueResult.data.id))
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            if (membershipResult.error) {
+                return NextResponse.json({ error: membershipResult.error.message || 'No se pudo validar tu membresia actual.' }, { status: 500 });
+            }
+
+            const existingRole = ensureString(membershipResult.data?.role);
+            const desiredRole = existingRole || (
+                ensureString(leagueResult.data.owner_user_id) === session.user.id
+                    ? 'owner'
+                    : 'member'
+            );
+
+            const membershipOperations = await Promise.all([
+                admin
+                    .from('prode_competition_members')
+                    .upsert({
+                        competition_id: competitionId,
+                        user_id: session.user.id,
+                        status: 'active',
+                    }, { onConflict: 'competition_id,user_id' }),
+                admin
+                    .from('prode_private_league_members')
+                    .upsert({
+                        private_league_id: ensureString(leagueResult.data.id),
+                        user_id: session.user.id,
+                        role: desiredRole,
+                    }, { onConflict: 'private_league_id,user_id' }),
+            ]);
+
+            const membershipError = membershipOperations.find((result) => result.error)?.error;
+            if (membershipError) {
+                return NextResponse.json({ error: membershipError.message || 'No se pudo completar tu ingreso a la liga.' }, { status: 500 });
+            }
+
+            const leagueSlug = ensureString(leagueResult.data.slug);
+
+            return NextResponse.json({
+                ok: true,
+                joined: !membershipResult.data,
+                leagueId: ensureString(leagueResult.data.id),
+                leagueName: ensureString(leagueResult.data.name),
+                leagueUrl: `/prode/ligas/${encodeURIComponent(leagueSlug)}`,
+                slug: leagueSlug,
+                message: membershipResult.data
+                    ? 'Ya formabas parte de esta liga. Te llevamos directo.'
+                    : 'Ya entraste a la liga privada.',
+            });
+        }
+
+        const createPayload = payload as CreateLeaguePayload;
+        const leagueName = ensureString(createPayload.name);
+        const visibility = createPayload.visibility === 'public' ? 'public' : 'private';
+        const selectedCompetition = createPayload.selectedCompetition;
+        const rules = normalizeLeagueRules(createPayload.rules);
 
         if (!leagueName) {
             return NextResponse.json({ error: 'El nombre de la liga es obligatorio.' }, { status: 400 });
@@ -357,15 +454,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'La competencia base es obligatoria.' }, { status: 400 });
         }
 
-        const admin = createAdminClient() as unknown as LooseAdminClient;
-        await ensureUserProfile(admin, session.user);
-
         const competitionId = await ensureBaseCompetition(admin, selectedCompetition, rules);
         const inviteCodeValue = await generateUniqueInviteCode(admin);
         const leagueSlug = await generateUniqueLeagueSlug(admin, leagueName);
 
         const leagueMetadata = {
-            description: ensureNullableString(payload.description),
+            description: ensureNullableString(createPayload.description),
             lifecycle: 'active',
             rules,
             rulesVersion: 1,
@@ -485,7 +579,7 @@ async function getManagedLeague(admin: LooseAdminClient, leagueId: string, userI
     }
 
     const role = ensureString(membershipResult.data?.role);
-    if (role !== 'admin') {
+    if (role !== 'admin' && role !== 'moderator') {
         throw new Error('No tenes permisos para administrar esta liga.');
     }
 
