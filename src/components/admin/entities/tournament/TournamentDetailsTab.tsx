@@ -88,6 +88,7 @@ function buildInitialDetailsDraft(
         display_name: tournament.display_name || '',
         slug: tournament.slug ?? '',
         season_id: tournament.season_id ?? '2026',
+        priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
         sport_id: tournament.sport_id ?? '',
         union_id: tournament.union_id ?? '',
         country_id: normalizedCountryId,
@@ -206,10 +207,12 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                 ...(isApiManaged ? {
                     display_name: form.name.trim(),
                     logo_url: persistedLogoUrl,
+                    priority: form.priority ?? 0,
                 } : {
                     name: form.name.trim(),
                     slug: form.slug || null,
                     season_id: form.season_id || null,
+                    priority: form.priority ?? 0,
                     sport_id: form.sport_id || null,
                     union_id: form.union_id || null,
                     country: form.country_id ? (selectedCountryLabel || form.country_id) : null,
@@ -260,6 +263,9 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                                 Este torneo se sincroniza automáticamente. Solo puedes editar el <strong>nombre para mostrar</strong> y el <strong>logo</strong>. 
                                 La estructura competitiva y los datos de origen están protegidos para evitar conflictos de sincronización.
                             </p>
+                        </div>
+                        <div className="text-blue-100/70 text-xs leading-relaxed">
+                            Tambien puedes ajustar la <strong>prioridad publica</strong> para definir el orden en que aparece en la vista publica.
                         </div>
                     </div>
                 )}
@@ -386,6 +392,20 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                                 onChange={e => update('season_id', e.target.value)}
                                 disabled={isApiManaged}
                             />
+                        </div>
+                        <div className="manager-input-group">
+                            <label className="manager-field-label">Prioridad Publica</label>
+                            <input
+                                type="number"
+                                placeholder="0"
+                                className="manager-url-input font-black text-[var(--accent)]"
+                                value={String(form.priority ?? 0)}
+                                onChange={e => update('priority', Number.parseInt(e.target.value, 10) || 0)}
+                                min={0}
+                            />
+                            <p className="text-[10px] text-[#888] mt-2 uppercase tracking-tighter">
+                                Mayor numero aparece primero en la vista publica. Si empatan, se ordenan alfabeticamente.
+                            </p>
                         </div>
                         <div className="manager-input-group">
                             <label className="manager-field-label">Deporte</label>

@@ -10,6 +10,7 @@ export interface TournamentDetailsDraft {
     display_name: string;
     slug: string;
     season_id: string;
+    priority: number;
     sport_id: string;
     union_id: string;
     country_id: string;
