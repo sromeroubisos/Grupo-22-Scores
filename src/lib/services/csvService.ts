@@ -10,6 +10,12 @@ export interface CSVRow {
     role: string;
     position?: string;
     division_id?: string;
+    jersey_number?: number;
+    squad_role?: string;
+    status?: string;
+    photo_url?: string;
+    weight?: number;
+    height?: number;
 }
 
 /**
@@ -36,7 +42,12 @@ export async function importPeopleFromCSV(clubId: string, rows: CSVRow[]): Promi
                 role: row.role || 'player',
                 position: row.position,
                 division_id: row.division_id,
-                status: 'active'
+                status: row.status || 'active',
+                jersey_number: row.jersey_number,
+                squad_role: row.squad_role,
+                photo_url: row.photo_url,
+                weight: row.weight,
+                height: row.height,
             });
 
             if (res.success) {

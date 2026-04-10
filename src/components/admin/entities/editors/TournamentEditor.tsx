@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createEntity, updateEntity } from '@/app/admin/entities/actions';
+import { createEntitySafe, updateEntitySafe } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports } from '@/lib/data/sports';
@@ -735,6 +735,10 @@ export function TournamentEditor({
         () => countryOptions.find((option) => option.id === form.country_id)?.label || null,
         [countryOptions, form.country_id],
     );
+    const selectedCountryOption = useMemo(
+        () => countryOptions.find((option) => option.id === form.country_id) || null,
+        [countryOptions, form.country_id],
+    );
 
     const [ruleset, setRuleset] = useState<TournamentRulesetEditorState>(() => {
         const r = { ...rawInitialRuleset };
@@ -1185,8 +1189,8 @@ export function TournamentEditor({
             };
             const payload = {
                 ...form,
-                country: form.country_id ? (selectedCountryLabel || form.country_id) : null,
-                country_id: form.country_id || null,
+                country: form.country_id ? (selectedCountryOption?.label || selectedCountryLabel || form.country_id) : null,
+                country_id: selectedCountryOption?.dbBacked ? selectedCountryOption.id : null,
                 union_id: primaryOrganizerId,
                 format: effectiveFormat,
                 status: form.status === 'live' ? 'published' : form.status,
@@ -1194,13 +1198,19 @@ export function TournamentEditor({
                 ruleset: nextRuleset,
             };
             if (isCreate) {
-                const result = await createEntity('tournament', payload);
+                const result = await createEntitySafe('tournament', payload);
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
                 await syncTournamentPhases(result.id, ruleset.phases);
                 setIsDirty(false);
                 refresh();
                 router.push(`/admin/entities/${result.id}/manage?type=tournament&tab=resumen`);
             } else {
-                await updateEntity('tournament', id, payload);
+                const result = await updateEntitySafe('tournament', id, payload);
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
                 await syncTournamentPhases(id, ruleset.phases);
                 setIsDirty(false);
                 refresh();

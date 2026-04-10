@@ -58,6 +58,15 @@ type ClubRosterEntry = {
   jerseyNumber: number | null;
 };
 
+export type MatchCenterRosterPlayer = {
+  personId: string;
+  name: string;
+  position: string | null;
+  divisionId: string | null;
+  squadMemberId: string | null;
+  jerseyNumber: number | null;
+};
+
 type ClubRosterCache = {
   entries: ClubRosterEntry[];
   byId: Map<string, ClubRosterEntry>;
@@ -314,6 +323,17 @@ function createRosterCache(entries: ClubRosterEntry[], preferredDivisionId: stri
   }
 
   return { entries, byId, byName };
+}
+
+function toPublicRosterEntries(cache: ClubRosterCache): MatchCenterRosterPlayer[] {
+  return cache.entries.map((entry) => ({
+    personId: entry.personId,
+    name: entry.name,
+    position: entry.position,
+    divisionId: entry.divisionId,
+    squadMemberId: entry.squadMemberId,
+    jerseyNumber: entry.jerseyNumber,
+  }));
 }
 
 async function fetchClubRosterCache(
@@ -994,6 +1014,14 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
   const resolvedTournament = tournamentRaw
     ? applyExternalTournamentOverride(tournamentRaw, tournamentOverride)
     : null;
+  const [homeDivisionId, awayDivisionId] = await Promise.all([
+    resolveTeamDivisionId(client, data as MatchContextRow, 'home'),
+    resolveTeamDivisionId(client, data as MatchContextRow, 'away'),
+  ]);
+  const [homeRoster, awayRoster] = await Promise.all([
+    fetchClubRosterCache(client, normalizeText((data as any).home_club_id) || null, homeDivisionId),
+    fetchClubRosterCache(client, normalizeText((data as any).away_club_id) || null, awayDivisionId),
+  ]);
 
   return {
     data: {
@@ -1017,6 +1045,8 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
             sportId: resolvedTournament.sport_id ?? null,
           }
         : null,
+      homeRoster: toPublicRosterEntries(homeRoster),
+      awayRoster: toPublicRosterEntries(awayRoster),
       events,
       lineups: normalizeLineups((data as any).lineups),
       replay_url: (data as any).replay_url ?? null,
@@ -1065,11 +1095,7 @@ export async function persistMatchCenterSupplementalData(
 
   const resolvedLineups =
     payload.lineups !== undefined
-      ? (
-        supportsLineupsColumn
-          ? await resolvePersistedLineups(client, contexts, payload.lineups)
-          : normalizedIncomingLineups
-      )
+      ? await resolvePersistedLineups(client, contexts, payload.lineups)
       : normalizedExistingLineups;
 
   const resolvedEvents =

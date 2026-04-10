@@ -9,7 +9,7 @@ import {
 import PhaseCreator, { type PhaseConfiguration, type Team as PhaseTeam } from '@/app/admin/components/PhaseCreator';
 import LogoUploader from '@/components/LogoUploader';
 import { createClient } from '@/lib/supabase/client';
-import { createEntity, updateEntity } from '@/app/admin/entities/actions';
+import { createEntitySafe, updateEntitySafe } from '@/app/admin/entities/actions';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports } from '@/lib/data/sports';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
@@ -512,6 +512,7 @@ export default function SuperCreateTournament() {
         selectedTeamIds: selectedClubs,
     };
     const selectedSport = sportsCatalog.find((sport) => sport.id === formData.sport);
+    const selectedCountryOption = countryOptions.find((option) => option.id === formData.country) || null;
     const heroTitle = formData.name.trim() || 'Nuevo torneo';
     const heroStatus = formData.visibility === 'public' ? 'READY' : 'DRAFT';
 
@@ -680,9 +681,9 @@ export default function SuperCreateTournament() {
                 age_grade: formData.ageGrade || null,
                 format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || null,
                 country: formData.country
-                    ? (countryOptions.find((option) => option.id === formData.country)?.label || formData.country)
+                    ? (selectedCountryOption?.label || formData.country)
                     : null,
-                country_id: formData.country || null,
+                country_id: selectedCountryOption?.dbBacked ? selectedCountryOption.id : null,
                 union_id: formData.unionId || null,
                 logo_url: formData.logoUrl || null,
                 status: formData.visibility === 'public' ? 'published' : 'draft',
@@ -699,12 +700,18 @@ export default function SuperCreateTournament() {
 
             if (isEdit && tournamentId) {
                 // On edit: don't touch the slug
-                await updateEntity('tournament', tournamentId, payload);
+                const result = await updateEntitySafe('tournament', tournamentId, payload);
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
                 savedId = tournamentId;
             } else {
                 // On create: generate a unique slug
                 payload.slug = `${slugify(formData.name)}-${Date.now()}`;
-                const result = await createEntity('tournament', payload);
+                const result = await createEntitySafe('tournament', payload);
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
                 savedId = result.id;
             }
 

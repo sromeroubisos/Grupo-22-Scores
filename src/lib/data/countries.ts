@@ -757,6 +757,7 @@ export type TournamentCountryOption = {
     label: string;
     code?: string | null;
     flagEmoji?: string | null;
+    dbBacked?: boolean;
 };
 
 type TournamentCountrySource = {
@@ -794,8 +795,14 @@ export const getTournamentCountryOptions = (
     extraCountries: TournamentCountrySource[] = [],
 ): TournamentCountryOption[] => {
     const options = new Map<string, TournamentCountryOption>();
+    const databaseCountryIds = new Set(
+        extraCountries
+            .map((country) => country.id?.trim())
+            .filter((id): id is string => Boolean(id))
+            .map((id) => normalizeCountryKey(id)),
+    );
 
-    const upsertOption = (source: TournamentCountrySource) => {
+    const upsertOption = (source: TournamentCountrySource, preferSourceId = false) => {
         if (!source.id?.trim()) return;
         if (!isTournamentCountrySelectable(source.id)) return;
 
@@ -810,23 +817,28 @@ export const getTournamentCountryOptions = (
 
         if (!label) return;
 
-        if (!options.has(normalizedId)) {
-            options.set(normalizedId, {
-                id: source.id.trim(),
-                label,
-                code: source.code ?? staticCountry?.code ?? null,
-                flagEmoji: source.flagEmoji ?? source.flag_emoji ?? staticCountry?.flagEmoji ?? null,
-            });
+        const existing = options.get(normalizedId);
+        const nextOption: TournamentCountryOption = {
+            id: source.id.trim(),
+            label,
+            code: source.code ?? staticCountry?.code ?? null,
+            flagEmoji: source.flagEmoji ?? source.flag_emoji ?? staticCountry?.flagEmoji ?? null,
+            dbBacked: databaseCountryIds.has(normalizedId),
+        };
+
+        if (!existing || preferSourceId) {
+            options.set(normalizedId, nextOption);
         }
     };
 
     Object.values(COUNTRIES).forEach(upsertOption);
-    extraCountries.forEach(upsertOption);
-    upsertOption({ id: 'international', nameEs: 'Internacional' });
+    extraCountries.forEach((country) => upsertOption(country, true));
+    upsertOption({ id: 'international', nameEs: 'Internacional' }, databaseCountryIds.has('international'));
 
     const internationalOption = options.get('international') ?? {
         id: 'international',
         label: 'Internacional',
+        dbBacked: databaseCountryIds.has('international'),
     };
 
     options.delete('international');

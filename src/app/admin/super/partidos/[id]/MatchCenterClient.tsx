@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Save, Share2, ChevronLeft, Layout, Users, Clock,
@@ -63,6 +63,16 @@ interface MatchLineups {
     home: LineupPlayer[];
     away: LineupPlayer[];
 }
+
+interface MatchRosterPlayer {
+    personId: string;
+    name: string;
+    position: string | null;
+    divisionId: string | null;
+    squadMemberId: string | null;
+    jerseyNumber: number | null;
+}
+
 interface LineupPlayer {
     id?: string;
     number: number;
@@ -111,6 +121,8 @@ export interface MatchRow {
     homeClub?: ClubInfo | null;
     awayClub?: ClubInfo | null;
     tournament?: TournamentInfo | null;
+    homeRoster?: MatchRosterPlayer[] | null;
+    awayRoster?: MatchRosterPlayer[] | null;
     // Points per match
     home_base_points:       number | null;
     away_base_points:       number | null;
@@ -400,6 +412,82 @@ function buildLineupTemplate(count: number, existing: LineupPlayer[] = []): Line
     });
 }
 
+function normalizeLookupKey(value: string | null | undefined) {
+    return String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function normalizeRosterPlayers(roster: MatchRosterPlayer[] | null | undefined): MatchRosterPlayer[] {
+    if (!Array.isArray(roster)) return [];
+
+    const seen = new Set<string>();
+    const normalized: MatchRosterPlayer[] = [];
+
+    roster.forEach((entry) => {
+        const personId = String(entry?.personId || '').trim();
+        const name = String(entry?.name || '').trim();
+        if (!personId || !name) return;
+
+        const dedupeKey = `${personId}:${normalizeLookupKey(name)}`;
+        if (seen.has(dedupeKey)) return;
+        seen.add(dedupeKey);
+
+        normalized.push({
+            personId,
+            name,
+            position: entry.position ?? null,
+            divisionId: entry.divisionId ?? null,
+            squadMemberId: entry.squadMemberId ?? null,
+            jerseyNumber: typeof entry.jerseyNumber === 'number' && Number.isFinite(entry.jerseyNumber)
+                ? entry.jerseyNumber
+                : null,
+        });
+    });
+
+    return normalized.sort((left, right) => left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }));
+}
+
+function resolveRosterPlayerByName(roster: MatchRosterPlayer[], value: string) {
+    const key = normalizeLookupKey(value);
+    if (!key) return null;
+    return roster.find((entry) => normalizeLookupKey(entry.name) === key) || null;
+}
+
+function buildLineupSelectionFromRoster(current: LineupPlayer, rosterEntry: MatchRosterPlayer): LineupPlayer {
+    return {
+        ...current,
+        id: rosterEntry.personId,
+        name: rosterEntry.name,
+        position: rosterEntry.position || current.position || '',
+        squadMemberId: rosterEntry.squadMemberId,
+        divisionId: rosterEntry.divisionId,
+        number: rosterEntry.jerseyNumber ?? current.number,
+    };
+}
+
+function buildLinkedEventPlayers(players: LineupPlayer[], fallbackRoster: MatchRosterPlayer[]) {
+    const linked = players
+        .filter((player) => Boolean(player.name.trim()))
+        .map((player) => ({
+            playerId: player.id || null,
+            name: player.name.trim(),
+        }));
+
+    const unique = new Map<string, { playerId: string | null; name: string }>();
+    linked.forEach((entry) => {
+        const key = normalizeLookupKey(entry.name);
+        if (!key || unique.has(key)) return;
+        unique.set(key, entry);
+    });
+
+    fallbackRoster.forEach((entry) => {
+        const key = normalizeLookupKey(entry.name);
+        if (!key || unique.has(key)) return;
+        unique.set(key, { playerId: entry.personId, name: entry.name });
+    });
+
+    return Array.from(unique.values()).sort((left, right) => left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }));
+}
+
 function isStarterLineupPlayer(player: LineupPlayer) {
     const role = String(player.role || '').trim().toLowerCase();
     return role === 'starter' || role === 'titular' || (!role && player.number <= 15);
@@ -597,6 +685,66 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     useEffect(() => {
         localLineupsRef.current = localLineups;
     }, [localLineups]);
+
+    const teamRosters = useMemo(() => ({
+        home: normalizeRosterPlayers(match.homeRoster),
+        away: normalizeRosterPlayers(match.awayRoster),
+    }), [match.awayRoster, match.homeRoster]);
+
+    const eventPlayerOptions = useMemo(() => ({
+        home: buildLinkedEventPlayers(localLineups.home, teamRosters.home),
+        away: buildLinkedEventPlayers(localLineups.away, teamRosters.away),
+    }), [localLineups.away, localLineups.home, teamRosters.away, teamRosters.home]);
+
+    const updateLineupPlayerValue = useCallback((team: 'home' | 'away', player: LineupPlayer, nextName: string) => {
+        setLocalLineups((prev) => {
+            const updatedTeam = [...prev[team]];
+            const realIdx = updatedTeam.findIndex((entry) =>
+                entry === player
+                || (
+                    entry.number === player.number
+                    && normalizeLookupKey(entry.name) === normalizeLookupKey(player.name)
+                    && normalizeLookupKey(entry.role) === normalizeLookupKey(player.role)
+                ));
+            if (realIdx < 0) return prev;
+
+            const rosterEntry = resolveRosterPlayerByName(teamRosters[team], nextName);
+            updatedTeam[realIdx] = rosterEntry
+                ? buildLineupSelectionFromRoster(updatedTeam[realIdx], rosterEntry)
+                : {
+                    ...updatedTeam[realIdx],
+                    id: undefined,
+                    squadMemberId: null,
+                    divisionId: updatedTeam[realIdx].divisionId ?? null,
+                    name: nextName,
+                };
+
+            return { ...prev, [team]: updatedTeam };
+        });
+    }, [teamRosters]);
+
+    const resolveEventPlayerSelection = useCallback((team: 'home' | 'away' | null, value: string) => {
+        if (!team) {
+            return {
+                playerId: null,
+                playerName: value,
+            };
+        }
+
+        const selected =
+            eventPlayerOptions[team].find((entry) => normalizeLookupKey(entry.name) === normalizeLookupKey(value))
+            || resolveRosterPlayerByName(teamRosters[team], value);
+
+        return selected
+            ? {
+                playerId: 'playerId' in selected ? selected.playerId : selected.personId,
+                playerName: selected.name,
+            }
+            : {
+                playerId: null,
+                playerName: value,
+            };
+    }, [eventPlayerOptions, teamRosters]);
 
     const applyMatchResponse = useCallback((nextMatch: MatchRow, options?: ApplyMatchResponseOptions) => {
         const nextEvents = normalizeMatchEvents(nextMatch.events);
@@ -1381,25 +1529,23 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                     {starters.map((p, idx) => (
                                                         <div key={idx} className="player-row">
                                                             <span className="player-number">{p.number}</span>
-                                                            <input
-                                                                type="text"
-                                                                value={p.name}
-                                                                placeholder="Nombre jugador"
-                                                                className="inline-input"
-                                                                onChange={(e) => {
-                                                                    const updated = [...lineups[team]];
-                                                                    const realIdx = updated.findIndex(x => x.number === p.number);
-                                                                    if (realIdx >= 0) {
-                                                                        updated[realIdx] = {
-                                                                            ...updated[realIdx],
-                                                                            id: undefined,
-                                                                            squadMemberId: null,
-                                                                            name: e.target.value,
-                                                                        };
-                                                                    }
-                                                                    setLocalLineups({ ...lineups, [team]: updated });
-                                                                }}
-                                                            />
+                                                            <div style={{ display: 'grid', gap: 4, flex: 1 }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={p.name}
+                                                                    placeholder="Buscar en el roster o crear nuevo"
+                                                                    className="inline-input"
+                                                                    list={`match-center-roster-${team}`}
+                                                                    onChange={(e) => updateLineupPlayerValue(team, p, e.target.value)}
+                                                                />
+                                                                <span style={{ fontSize: 11, color: p.id ? 'var(--accent)' : '#666' }}>
+                                                                    {p.id
+                                                                        ? 'Vinculado al jugador del club'
+                                                                        : p.name.trim()
+                                                                            ? 'Jugador manual: se vinculara o creara al guardar'
+                                                                            : 'Sugerencias del plantel disponibles'}
+                                                                </span>
+                                                            </div>
                                                             {p.isCaptain && <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--accent)', border: '1px solid var(--accent)', padding: '2px 6px' }}>C</span>}
                                                         </div>
                                                     ))}
@@ -1411,30 +1557,37 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                     {subs.map((p, idx) => (
                                                         <div key={idx} className="player-row">
                                                             <span className="player-number" style={{ borderColor: '#555', color: '#555' }}>{p.number}</span>
-                                                            <input
-                                                                type="text"
-                                                                value={p.name}
-                                                                placeholder="Nombre suplente"
-                                                                className="inline-input"
-                                                                style={{ color: '#ccc' }}
-                                                                onChange={(e) => {
-                                                                    const updated = [...lineups[team]];
-                                                                    const realIdx = updated.findIndex(x => x.number === p.number);
-                                                                    if (realIdx >= 0) {
-                                                                        updated[realIdx] = {
-                                                                            ...updated[realIdx],
-                                                                            id: undefined,
-                                                                            squadMemberId: null,
-                                                                            name: e.target.value,
-                                                                        };
-                                                                    }
-                                                                    setLocalLineups({ ...lineups, [team]: updated });
-                                                                }}
-                                                            />
+                                                            <div style={{ display: 'grid', gap: 4, flex: 1 }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={p.name}
+                                                                    placeholder="Buscar suplente o crear nuevo"
+                                                                    className="inline-input"
+                                                                    style={{ color: '#ccc' }}
+                                                                    list={`match-center-roster-${team}`}
+                                                                    onChange={(e) => updateLineupPlayerValue(team, p, e.target.value)}
+                                                                />
+                                                                <span style={{ fontSize: 11, color: p.id ? 'var(--accent)' : '#666' }}>
+                                                                    {p.id
+                                                                        ? 'Vinculado al jugador del club'
+                                                                        : p.name.trim()
+                                                                            ? 'Jugador manual: se vinculara o creara al guardar'
+                                                                            : 'Selecciona un jugador existente o escribe uno nuevo'}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
                                             </div>
+                                            <datalist id={`match-center-roster-${team}`}>
+                                                {teamRosters[team].map((entry) => (
+                                                    <option
+                                                        key={`${team}-${entry.personId}`}
+                                                        value={entry.name}
+                                                        label={`${entry.position || 'Jugador'}${entry.jerseyNumber ? ` • #${entry.jerseyNumber}` : ''}`}
+                                                    />
+                                                ))}
+                                            </datalist>
                                         </article>
                                     );
                                 })}
@@ -1542,9 +1695,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                                 <input
                                                     type="text" value={selectedDefinition.player === 'none' ? ev.detail : ev.playerName} placeholder={selectedDefinition.player === 'none' ? 'Detalle del evento' : selectedDefinition.player === 'required' ? 'Nombre del jugador' : 'Jugador (opcional)'}
                                                     className="inline-input" style={{ fontSize: '0.85rem' }}
+                                                    list={selectedDefinition.player !== 'none' && ev.team ? `match-center-event-players-${ev.team}` : undefined}
                                                     onChange={(e) => updateLocalEvent(ev.id, selectedDefinition.player === 'none'
                                                         ? { detail: e.target.value }
-                                                        : { playerId: null, playerName: e.target.value })}
+                                                        : resolveEventPlayerSelection(ev.team, e.target.value))}
                                                 />
                                                 {selectedDefinition.player !== 'none' && (
                                                     <input
@@ -1568,6 +1722,16 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                 </>
                             )}
                         </div>
+                        <datalist id="match-center-event-players-home">
+                            {eventPlayerOptions.home.map((entry) => (
+                                <option key={`event-home-${entry.playerId || entry.name}`} value={entry.name} />
+                            ))}
+                        </datalist>
+                        <datalist id="match-center-event-players-away">
+                            {eventPlayerOptions.away.map((entry) => (
+                                <option key={`event-away-${entry.playerId || entry.name}`} value={entry.name} />
+                            ))}
+                        </datalist>
                     </article>
                 )}
 

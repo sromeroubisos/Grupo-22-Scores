@@ -121,21 +121,9 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
     }
 
     function handleRegisterPlayer() {
-        const candidates = activeSquads.length > 0 ? activeSquads : filteredSquads;
-
-        if (candidates.length === 0) {
-            setActionMessage(null);
-            setEditingPlayer(null);
-            setIsAddPlayerOpen(true);
-            return;
-        }
-
-        if (candidates.length === 1) {
-            openRoster(candidates[0].id);
-            return;
-        }
-
-        setActionMessage('Elegi una tarjeta de plantel para abrir su planilla y registrar jugadores.');
+        setActionMessage(null);
+        setEditingPlayer(null);
+        setIsAddPlayerOpen(true);
     }
 
     async function refreshClubPlayers() {

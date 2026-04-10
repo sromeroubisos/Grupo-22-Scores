@@ -315,6 +315,224 @@ async function resolveTeamReference(supabase: any, clubId: string, divisionId?: 
     };
 }
 
+async function fetchClubDivisionIds(supabase: any, clubId: string) {
+    const { data, error } = await supabase
+        .from('club_divisions')
+        .select('id')
+        .eq('club_id', clubId);
+
+    if (error) {
+        if (isMissingTableError(error)) return [];
+        throw error;
+    }
+
+    return ((data ?? []) as Array<{ id?: string | null }>)
+        .map((row) => row.id)
+        .filter((value): value is string => typeof value === 'string' && value.length > 0);
+}
+
+async function syncPlayerSquadMembership(supabase: any, clubId: string, personId: string, nextDivisionId?: string, position?: string) {
+    const divisionIds = new Set<string>(await fetchClubDivisionIds(supabase, clubId));
+    if (nextDivisionId) {
+        divisionIds.add(nextDivisionId);
+    }
+
+    if (divisionIds.size === 0) {
+        return { success: true as const };
+    }
+
+    const scopedDivisionIds = Array.from(divisionIds);
+    const { data: existingRows, error: existingError } = await supabase
+        .from('squad_members')
+        .select('id, division_id, role, jersey_number, order, notes, status')
+        .eq('person_id', personId)
+        .in('division_id', scopedDivisionIds);
+
+    if (existingError) {
+        if (!isMissingTableError(existingError)) {
+            return { success: false as const, error: existingError.message };
+        }
+        return { success: true as const };
+    }
+
+    const rows = (existingRows ?? []) as Array<{
+        id: string;
+        division_id: string | null;
+        role: string | null;
+        jersey_number: number | null;
+        order: number | null;
+        notes: string | null;
+        status: string | null;
+    }>;
+
+    const rowsToDelete = rows.filter((row) => row.division_id && row.division_id !== nextDivisionId);
+    if (rowsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+            .from('squad_members')
+            .delete()
+            .in('id', rowsToDelete.map((row) => row.id));
+
+        if (deleteError && !isMissingTableError(deleteError)) {
+            return { success: false as const, error: deleteError.message };
+        }
+    }
+
+    if (!nextDivisionId) {
+        return { success: true as const };
+    }
+
+    const targetRow = rows.find((row) => row.division_id === nextDivisionId);
+    const nextPosition = position || 'Sin posicion';
+
+    if (targetRow?.id) {
+        const { error: updateError } = await supabase
+            .from('squad_members')
+            .update({
+                position: nextPosition,
+                role: targetRow.role || 'suplente',
+                jersey_number: targetRow.jersey_number,
+                status: targetRow.status || 'disponible',
+                order: targetRow.order ?? 0,
+                notes: targetRow.notes ?? null,
+            })
+            .eq('id', targetRow.id);
+
+        if (updateError && !isMissingTableError(updateError)) {
+            return { success: false as const, error: updateError.message };
+        }
+
+        return { success: true as const };
+    }
+
+    const { error: insertError } = await supabase
+        .from('squad_members')
+        .insert({
+            division_id: nextDivisionId,
+            person_id: personId,
+            position: nextPosition,
+            role: 'suplente',
+            status: 'disponible',
+            order: 0,
+        });
+
+    if (insertError && !isMissingTableError(insertError)) {
+        return { success: false as const, error: insertError.message };
+    }
+
+    return { success: true as const };
+}
+
+type SquadSyncOptions = {
+    nextDivisionId?: string;
+    position?: string;
+    jerseyNumber?: number;
+    squadRole?: string;
+    status?: string;
+};
+
+async function syncPlayerSquadMembershipWithOptions(
+    supabase: any,
+    clubId: string,
+    personId: string,
+    options: SquadSyncOptions,
+) {
+    const divisionIds = new Set<string>(await fetchClubDivisionIds(supabase, clubId));
+    if (options.nextDivisionId) {
+        divisionIds.add(options.nextDivisionId);
+    }
+
+    if (divisionIds.size === 0) {
+        return { success: true as const };
+    }
+
+    const scopedDivisionIds = Array.from(divisionIds);
+    const { data: existingRows, error: existingError } = await supabase
+        .from('squad_members')
+        .select('id, division_id, role, jersey_number, order, notes, status')
+        .eq('person_id', personId)
+        .in('division_id', scopedDivisionIds);
+
+    if (existingError) {
+        if (!isMissingTableError(existingError)) {
+            return { success: false as const, error: existingError.message };
+        }
+        return { success: true as const };
+    }
+
+    const rows = (existingRows ?? []) as Array<{
+        id: string;
+        division_id: string | null;
+        role: string | null;
+        jersey_number: number | null;
+        order: number | null;
+        notes: string | null;
+        status: string | null;
+    }>;
+
+    const rowsToDelete = rows.filter((row) => row.division_id && row.division_id !== options.nextDivisionId);
+    if (rowsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+            .from('squad_members')
+            .delete()
+            .in('id', rowsToDelete.map((row) => row.id));
+
+        if (deleteError && !isMissingTableError(deleteError)) {
+            return { success: false as const, error: deleteError.message };
+        }
+    }
+
+    if (!options.nextDivisionId) {
+        return { success: true as const };
+    }
+
+    const targetRow = rows.find((row) => row.division_id === options.nextDivisionId);
+    const nextPosition = options.position || 'Sin posicion';
+    const nextRole = options.squadRole || targetRow?.role || 'suplente';
+    const nextStatus = options.status || targetRow?.status || 'disponible';
+    const nextJerseyNumber =
+        typeof options.jerseyNumber === 'number' && Number.isFinite(options.jerseyNumber)
+            ? options.jerseyNumber
+            : targetRow?.jersey_number ?? null;
+
+    if (targetRow?.id) {
+        const { error: updateError } = await supabase
+            .from('squad_members')
+            .update({
+                position: nextPosition,
+                role: nextRole,
+                jersey_number: nextJerseyNumber,
+                status: nextStatus,
+                order: targetRow.order ?? 0,
+                notes: targetRow.notes ?? null,
+            })
+            .eq('id', targetRow.id);
+
+        if (updateError && !isMissingTableError(updateError)) {
+            return { success: false as const, error: updateError.message };
+        }
+
+        return { success: true as const };
+    }
+
+    const { error: insertError } = await supabase
+        .from('squad_members')
+        .insert({
+            division_id: options.nextDivisionId,
+            person_id: personId,
+            position: nextPosition,
+            role: nextRole,
+            jersey_number: nextJerseyNumber,
+            status: nextStatus,
+            order: 0,
+        });
+
+    if (insertError && !isMissingTableError(insertError)) {
+        return { success: false as const, error: insertError.message };
+    }
+
+    return { success: true as const };
+}
+
 async function fetchPeopleFromTeamMemberships(clubId: string, divisionId?: string): Promise<PersonWithRole[] | null> {
     const supabase = await createClient();
     const db = supabase as any;
@@ -465,7 +683,9 @@ export async function addPersonToClub(clubId: string, personData: {
     id_number?: string,
     photo_url?: string,
     weight?: number,
-    height?: number
+    height?: number,
+    jersey_number?: number,
+    squad_role?: string
 }) {
     const supabase = await createClient();
     const db = supabase as any;
@@ -526,20 +746,21 @@ export async function addPersonToClub(clubId: string, personData: {
         return { success: false, error: membershipError.message };
     }
 
-    if (personData.role === 'player' && teamReference.legacyDivisionId) {
-        const { error: squadMemberError } = await db
-            .from('squad_members')
-            .insert({
-                division_id: teamReference.legacyDivisionId,
-                person_id: person.id,
-                position: personData.position || 'Sin posicion',
-                role: 'suplente',
-                status: 'disponible',
-                order: 0,
-            });
+    if (personData.role === 'player') {
+        const squadSync = await syncPlayerSquadMembershipWithOptions(
+            db,
+            rosterClubId,
+            person.id,
+            {
+                nextDivisionId: teamReference.legacyDivisionId || undefined,
+                position: personData.position,
+                jerseyNumber: personData.jersey_number,
+                squadRole: personData.squad_role,
+            },
+        );
 
-        if (squadMemberError && !isMissingTableError(squadMemberError)) {
-            return { success: false, error: squadMemberError.message };
+        if (!squadSync.success) {
+            return { success: false, error: squadSync.error };
         }
     }
 
@@ -557,7 +778,9 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
     id_number?: string,
     photo_url?: string,
     weight?: number,
-    height?: number
+    height?: number,
+    jersey_number?: number,
+    squad_role?: string
 }) {
     const supabase = await createClient();
     const db = supabase as any;
@@ -624,6 +847,32 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
 
     if (roleError && !isMissingTableError(roleError)) {
         return { success: false, error: roleError.message };
+    }
+
+    if (personData.role === 'player') {
+        const squadSync = await syncPlayerSquadMembershipWithOptions(
+            db,
+            rosterClubId,
+            personId,
+            {
+                nextDivisionId: teamReference.legacyDivisionId || undefined,
+                position: personData.position,
+                jerseyNumber: personData.jersey_number,
+                squadRole: personData.squad_role,
+            },
+        );
+
+        if (!squadSync.success) {
+            return { success: false, error: squadSync.error };
+        }
+    } else {
+        const squadSync = await syncPlayerSquadMembershipWithOptions(db, rosterClubId, personId, {
+            nextDivisionId: undefined,
+            position: personData.position,
+        });
+        if (!squadSync.success) {
+            return { success: false, error: squadSync.error };
+        }
     }
 
     return { success: true, data: person };

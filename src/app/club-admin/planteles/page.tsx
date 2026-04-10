@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import SectionShell from '../components/SectionShell';
 import SportFilter from '../components/SportFilter';
@@ -70,12 +70,16 @@ export default function ClubPlantelesPage() {
     };
 
     const handleDownloadTemplate = () => {
-        const content = 'first_name,last_name,birth_date,position,player_id\n';
+        const content = [
+            'first_name,last_name,id_number,birth_date,role,position,division_id,jersey_number,squad_role,status,photo_url,weight,height',
+            'Juan,Perez,32123123,2004-05-11,player,Wing,,14,titular,active,,82.5,182',
+            'Tomas,Gomez,29888777,2002-08-20,player,Apertura,,10,suplente,active,,79.3,178',
+        ].join('\n');
         const blob = new Blob([content], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'plantel_template.csv';
+        link.download = 'jugadores_import_template.csv';
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -286,9 +290,9 @@ export default function ClubPlantelesPage() {
                                 <div className={styles.callout}>
                                     <span className={styles.calloutTitle}>Regla clave anti-caos</span>
                                     <ul className={styles.stepList}>
-                                        <li>• Si existe <strong>player_id</strong> → se actualizan datos del jugador.</li>
-                                        <li>• Si no existe → se crea un nuevo perfil de identidad.</li>
-                                        <li>• El sistema auto-limpia espacios y caracteres especiales.</li>
+                                        <li>• Usa encabezados como <strong>first_name</strong>, <strong>last_name</strong>, <strong>position</strong> y <strong>jersey_number</strong>.</li>
+                                        <li>• Si no envias <strong>division_id</strong> → el jugador queda asociado al club.</li>
+                                        <li>• Si envias <strong>division_id</strong> o eliges un plantel destino → tambien se crea el vínculo en el roster.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -301,9 +305,9 @@ export default function ClubPlantelesPage() {
                                     {[
                                         { field: 'Nombre', required: true, mapped: 'first_name' },
                                         { field: 'Apellido', required: true, mapped: 'last_name' },
-                                        { field: 'Fecha Nacimiento', required: true, mapped: 'birth_date' },
+                                        { field: 'Fecha Nacimiento', required: false, mapped: 'birth_date' },
                                         { field: 'Posición', required: false, mapped: 'position' },
-                                        { field: 'ID / Doc', required: false, mapped: 'player_id' },
+                                        { field: 'ID / Doc', required: false, mapped: 'id_number' },
                                     ].map(f => (
                                         <div key={f.field} className={styles.formGroup}>
                                             <label className={styles.formLabel}>{f.field} {f.required && <span style={{ color: '#ef4444' }}>*</span>}</label>

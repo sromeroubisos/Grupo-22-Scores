@@ -85,6 +85,31 @@ const TABLE: Record<EntityType, string> = {
     union: 'unions',
 };
 
+function getActionErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof Error && error.message) {
+        if (error.message === 'Unauthorized') {
+            return 'Tu sesion expiro. Volve a iniciar sesion e intenta de nuevo.';
+        }
+
+        if (error.message === 'Forbidden') {
+            return 'No tenes permisos para crear o editar este torneo con el alcance seleccionado.';
+        }
+
+        return error.message;
+    }
+
+    if (
+        error &&
+        typeof error === 'object' &&
+        'message' in error &&
+        typeof (error as { message?: unknown }).message === 'string'
+    ) {
+        return (error as { message: string }).message;
+    }
+
+    return fallback;
+}
+
 async function runTournamentWriteWithPriorityFallback(
     type: EntityType,
     payload: Record<string, any>,
@@ -260,6 +285,20 @@ export async function createEntity(
     return { success: true, id };
 }
 
+export async function createEntitySafe(
+    type: EntityType,
+    payload: Record<string, any>
+): Promise<{ success: true; id: string } | { success: false; error: string }> {
+    try {
+        return await createEntity(type, payload);
+    } catch (error) {
+        return {
+            success: false,
+            error: getActionErrorMessage(error, 'No se pudo crear la entidad.'),
+        };
+    }
+}
+
 // ── UPDATE ─────────────────────────────────────────────────────────────────
 export async function updateEntity(
     type: EntityType,
@@ -319,6 +358,21 @@ export async function updateEntity(
     revalidatePath(`/${type}s/${id}`);
 
     return { success: true, id };
+}
+
+export async function updateEntitySafe(
+    type: EntityType,
+    id: string,
+    updates: Record<string, any>
+): Promise<{ success: true; id: string } | { success: false; error: string }> {
+    try {
+        return await updateEntity(type, id, updates);
+    } catch (error) {
+        return {
+            success: false,
+            error: getActionErrorMessage(error, 'No se pudo actualizar la entidad.'),
+        };
+    }
 }
 
 export async function updateMatchLive(
