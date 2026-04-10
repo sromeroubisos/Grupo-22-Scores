@@ -15,6 +15,7 @@ import {
     useTournamentDirty,
 } from './TournamentContext';
 import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
+import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
 import './basalt.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -158,7 +159,12 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
         let nextRuleset = { ...(tournament.ruleset || {}) };
 
         if (hasDirtyDetails && drafts.details) {
-            const detailUpdates = buildTournamentDetailsUpdates(tournament, drafts.details as TournamentDetailsDraft);
+            const detailDraft = drafts.details as TournamentDetailsDraft;
+            const persistedLogoUrl = await persistTournamentLogo(id, detailDraft.logo_url);
+            const detailUpdates = buildTournamentDetailsUpdates(tournament, {
+                ...detailDraft,
+                logo_url: persistedLogoUrl || '',
+            });
             Object.assign(updates, detailUpdates);
             if (detailUpdates.ruleset && typeof detailUpdates.ruleset === 'object') {
                 nextRuleset = detailUpdates.ruleset as Record<string, unknown>;

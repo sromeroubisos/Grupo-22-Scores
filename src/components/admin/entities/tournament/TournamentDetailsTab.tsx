@@ -12,6 +12,7 @@ import { Shield, Globe, Image as ImageIcon } from 'lucide-react';
 import LogoUploader from '@/components/LogoUploader';
 import { FlashScoreIntegrationSection } from './FlashScoreIntegrationSection';
 import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
+import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
 import '../club/vitreous-club.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -200,10 +201,11 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
             apiManaged: isApiManaged,
         });
         try {
+            const persistedLogoUrl = await persistTournamentLogo(id, form.logo_url);
             await updateEntity('tournament', id, {
                 ...(isApiManaged ? {
                     display_name: form.name.trim(),
-                    logo_url: form.logo_url || null,
+                    logo_url: persistedLogoUrl,
                 } : {
                     name: form.name.trim(),
                     slug: form.slug || null,
@@ -215,7 +217,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     region: form.region || null,
                     category: form.category || null,
                     age_grade: form.age_grade || null,
-                    logo_url: form.logo_url || null,
+                    logo_url: persistedLogoUrl,
                     ruleset: form.ruleset,
                 })
             });
