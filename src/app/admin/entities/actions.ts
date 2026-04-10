@@ -2,6 +2,13 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import {
+    canManageSportContext,
+    canManageTournamentContext,
+    getTournamentManagementTarget,
+    hasScopedMembershipAccess,
+    requireUserAccessContext,
+} from '@/lib/auth/permissions';
 import { revalidatePath } from 'next/cache';
 import { EntityType } from '@/lib/services/entityResolver';
 import { getMissingTournamentPriorityMessage, isMissingColumnError } from '@/lib/utils/supabaseSchema';
@@ -135,7 +142,7 @@ async function writeAuditLog(
     userId: string,
     type: EntityType,
     entityId: string,
-    action: 'create' | 'update',
+    action: 'create' | 'update' | 'delete',
     changes: Record<string, any>
 ) {
     try {
@@ -151,6 +158,57 @@ async function writeAuditLog(
     } catch (err) {
         console.error('[audit] Failed to write audit log:', err);
     }
+}
+
+function readOptionalScopedId(value: unknown): string | null {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+}
+
+async function getTournamentMutationContext(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    tournamentId: string
+) {
+    const context = await requireUserAccessContext(supabase);
+    const target = await getTournamentManagementTarget(supabase, tournamentId);
+
+    if (!target) {
+        throw new Error(`Tournament not found (${tournamentId})`);
+    }
+
+    if (!canManageTournamentContext(context, target)) {
+        throw new Error('Forbidden');
+    }
+
+    return {
+        actorUserId: context.userId,
+        writer: createAdminClient(),
+    };
+}
+
+async function getTournamentCreateContext(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    payload: Record<string, any>
+) {
+    const context = await requireUserAccessContext(supabase);
+    const sportId = readOptionalScopedId(payload.sport_id);
+    const unionId = readOptionalScopedId(payload.union_id);
+    const canCreate =
+        canManageSportContext(context, sportId) ||
+        hasScopedMembershipAccess(context, 'union', unionId);
+
+    if (!canCreate) {
+        throw new Error('Forbidden');
+    }
+
+    return {
+        actorUserId: context.userId,
+        writer: createAdminClient(),
+    };
 }
 
 // ── CREATE (INSERT) ─────────────────────────────────────────────────────────
@@ -178,9 +236,14 @@ export async function createEntity(
     }
 
     const table = TABLE[type];
+    const tournamentContext = type === 'tournament'
+        ? await getTournamentCreateContext(supabase, cleanPayload)
+        : null;
+    const mutationClient = tournamentContext?.writer ?? supabase;
+    const actorUserId = tournamentContext?.actorUserId ?? user.id;
 
     const { data, error } = await runTournamentWriteWithPriorityFallback(type, cleanPayload, (nextPayload) =>
-        supabase.from(table).insert(nextPayload).select().single()
+        mutationClient.from(table).insert(nextPayload).select().single()
     );
     if (error) {
         throw new Error(error.message);
@@ -188,7 +251,7 @@ export async function createEntity(
 
     const id: string = data.id;
 
-    await writeAuditLog(user.id, type, id, 'create', { initial: cleanPayload });
+    await writeAuditLog(actorUserId, type, id, 'create', { initial: cleanPayload });
 
     revalidatePath('/admin/entities/new');
     revalidatePath(`/admin/entities/${id}/manage`);
@@ -220,12 +283,17 @@ export async function updateEntity(
 
     const cleanUpdates = sanitizeFields(type, updates, 'update');
     const table = TABLE[type];
+    const tournamentContext = type === 'tournament'
+        ? await getTournamentMutationContext(supabase, id)
+        : null;
+    const mutationClient = tournamentContext?.writer ?? supabase;
+    const actorUserId = tournamentContext?.actorUserId ?? user.id;
 
     // Pre-state for audit diff
-    const { data: oldData } = await supabase.from(table as any).select('*').eq('id', id).single();
+    const { data: oldData } = await mutationClient.from(table as any).select('*').eq('id', id).single();
 
     const { data, error } = await runTournamentWriteWithPriorityFallback(type, cleanUpdates, (nextPayload) =>
-        supabase.from(table).update(nextPayload).eq('id', id).select().single()
+        mutationClient.from(table).update(nextPayload).eq('id', id).select().single()
     );
     if (error) {
         throw new Error(error.message);
@@ -244,7 +312,7 @@ export async function updateEntity(
     }
 
     if (Object.keys(changes).length > 0) {
-        await writeAuditLog(user.id, type, id, 'update', changes);
+        await writeAuditLog(actorUserId, type, id, 'update', changes);
     }
 
     revalidatePath(`/admin/entities/${id}/manage`);
@@ -291,10 +359,15 @@ export async function deleteEntity(
     if (!user) throw new Error('Unauthorized');
 
     const table = TABLE[type];
-    const { error } = await supabase.from(table).delete().eq('id', id);
+    const tournamentContext = type === 'tournament'
+        ? await getTournamentMutationContext(supabase, id)
+        : null;
+    const mutationClient = tournamentContext?.writer ?? supabase;
+    const actorUserId = tournamentContext?.actorUserId ?? user.id;
+    const { error } = await mutationClient.from(table).delete().eq('id', id);
     if (error) throw new Error(error.message);
 
-    await writeAuditLog(user.id, type, id, 'update', { deleted: true });
+    await writeAuditLog(actorUserId, type, id, 'delete', { deleted: true });
 
     revalidatePath(`/admin/entities`);
     return { success: true };
@@ -305,10 +378,9 @@ export async function duplicateTournament(
     id: string
 ): Promise<{ success: true; id: string }> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Unauthorized');
+    const { actorUserId, writer } = await getTournamentMutationContext(supabase, id);
 
-    const { data: original, error: fetchError } = await supabase
+    const { data: original, error: fetchError } = await writer
         .from('tournaments')
         .select('*')
         .eq('id', id)
@@ -329,12 +401,12 @@ export async function duplicateTournament(
     };
 
     // Remove ID if zod strips it, or just use it since it's a new insert
-    const { data, error } = await runTournamentWriteWithPriorityFallback('tournament', copy, (nextPayload) =>
-        supabase.from('tournaments').insert(nextPayload).select().single()
+    const { error } = await runTournamentWriteWithPriorityFallback('tournament', copy, (nextPayload) =>
+        writer.from('tournaments').insert(nextPayload).select().single()
     );
     if (error) throw new Error(error.message);
 
-    await writeAuditLog(user.id, 'tournament', newId, 'create', { duplicated_from: id });
+    await writeAuditLog(actorUserId, 'tournament', newId, 'create', { duplicated_from: id });
 
     revalidatePath('/admin/super/torneos');
     return { success: true, id: newId };
