@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, Plus, Save, ShieldAlert, Trash2 } from 'lucide-react';
 import LogoUploader from '@/components/LogoUploader';
 import { useAuth } from '@/context/AuthContext';
+import { getTournamentCountryOptions, resolveTournamentCountryId, resolveTournamentCountryLabel } from '@/lib/data/countries';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 
 type ExternalTournamentPayload = {
@@ -88,6 +89,21 @@ function normalizeInteger(value: unknown): number | null {
     return null;
 }
 
+function normalizeCountryFormValue(country: unknown, countryId: unknown) {
+    const rawCountry = normalizeString(country);
+    const rawCountryId = normalizeString(countryId);
+    const resolvedCountryId = resolveTournamentCountryId(rawCountryId || rawCountry) || rawCountryId || '';
+    const resolvedCountry =
+        resolveTournamentCountryLabel(resolvedCountryId || rawCountry) ||
+        rawCountry ||
+        '';
+
+    return {
+        country: resolvedCountry,
+        country_id: resolvedCountryId,
+    };
+}
+
 function asRecord(value: unknown): ExternalApiRecord | null {
     return value && typeof value === 'object' && !Array.isArray(value)
         ? value as ExternalApiRecord
@@ -168,7 +184,11 @@ function normalizeEditorLabels(labels: ExternalStandingsLabel[]): ExternalStandi
             if (left.position !== right.position) return left.position - right.position;
             return left.name.localeCompare(right.name);
         })
-        .map(({ __positions: _positions, ...label }) => label);
+        .map((label) => {
+            const nextLabel = { ...label };
+            delete nextLabel.__positions;
+            return nextLabel;
+        });
 }
 
 function expandLabelsForSave(labels: ExternalStandingsLabel[]): ExternalStandingsLabel[] {
@@ -409,6 +429,26 @@ export default function ExternalTournamentOverridePage() {
 
     const returnTo = searchParams.get('returnTo') || `/tournaments/${publicTournamentId}`;
     const searchParamsKey = searchParams.toString();
+    const baseCountryOptions = useMemo(() => getTournamentCountryOptions(), []);
+    const countryOptions = useMemo(() => {
+        const normalizedId = normalizeCountryFormValue(form.country, form.country_id).country_id;
+        if (!normalizedId) return baseCountryOptions;
+
+        const existing = baseCountryOptions.find((option) => option.id === normalizedId);
+        if (existing) return baseCountryOptions;
+
+        return [
+            {
+                id: normalizedId,
+                label: form.country || normalizedId,
+            },
+            ...baseCountryOptions,
+        ];
+    }, [baseCountryOptions, form.country, form.country_id]);
+    const selectedCountryOption = useMemo(
+        () => countryOptions.find((option) => option.id === form.country_id) || null,
+        [countryOptions, form.country_id],
+    );
 
     useEffect(() => {
         let cancelled = false;
@@ -477,6 +517,9 @@ export default function ExternalTournamentOverridePage() {
                     url: searchParams.get('url') || '',
                     priority: normalizeInteger(searchParams.get('priority')) ?? 0,
                 };
+                const initialCountry = normalizeCountryFormValue(nextForm.country, nextForm.country_id);
+                nextForm.country = initialCountry.country;
+                nextForm.country_id = initialCountry.country_id;
 
                 const nextStandings: ExternalStandingsPayload = {
                     id: tournamentId,
@@ -497,8 +540,9 @@ export default function ExternalTournamentOverridePage() {
                     nextForm.display_name = externalTournament.display_name || externalTournament.name || nextForm.display_name;
                     nextForm.logo_url = externalTournament.logo_url || nextForm.logo_url;
                     nextForm.sport = externalTournament.sport || nextForm.sport;
-                    nextForm.country = externalTournament.country || nextForm.country;
-                    nextForm.country_id = externalTournament.country_id || nextForm.country_id;
+                    const overrideCountry = normalizeCountryFormValue(externalTournament.country, externalTournament.country_id);
+                    nextForm.country = overrideCountry.country || nextForm.country;
+                    nextForm.country_id = overrideCountry.country_id || nextForm.country_id;
                     nextForm.url = externalTournament.url || nextForm.url;
                     nextForm.priority = normalizeInteger(externalTournament.priority) ?? nextForm.priority ?? 0;
                 }
@@ -535,6 +579,12 @@ export default function ExternalTournamentOverridePage() {
                     nextForm.logo_url = nextForm.logo_url || detailsLogo || '';
                     nextForm.url = nextForm.url || normalizeString(details?.url) || '';
                     nextForm.priority = normalizeInteger(nextForm.priority) ?? normalizeInteger(details?.priority) ?? 0;
+                    const detailsCountry = normalizeCountryFormValue(
+                        normalizeString(asRecord(details?.country)?.name) || normalizeString(details?.country_name) || normalizeString(details?.country),
+                        normalizeString(details?.country_id),
+                    );
+                    nextForm.country = nextForm.country || detailsCountry.country;
+                    nextForm.country_id = nextForm.country_id || detailsCountry.country_id;
                 }
 
                 if (nextStandings.groups.length === 0) {
@@ -564,7 +614,7 @@ export default function ExternalTournamentOverridePage() {
         return () => {
             cancelled = true;
         };
-    }, [authLoading, isExactSuperAdmin, searchParamsKey, tournamentId]);
+    }, [authLoading, isExactSuperAdmin, searchParams, searchParamsKey, tournamentId]);
 
     const previewLogo = useMemo(() => form.logo_url || '', [form.logo_url]);
 
@@ -613,8 +663,8 @@ export default function ExternalTournamentOverridePage() {
                         display_name: form.display_name || form.name || `External tournament ${tournamentId}`,
                         logo_url: form.logo_url || null,
                         sport: form.sport || 'rugby',
-                        country: form.country || null,
-                        country_id: form.country_id || null,
+                        country: selectedCountryOption?.label || form.country || null,
+                        country_id: selectedCountryOption?.id || form.country_id || null,
                         url: form.url || null,
                         priority: normalizeInteger(form.priority) ?? 0,
                     }),
@@ -864,6 +914,40 @@ export default function ExternalTournamentOverridePage() {
                                         padding: '0 14px',
                                     }}
                                 />
+                            </label>
+
+                            <label style={{ display: 'grid', gap: 8 }}>
+                                <span style={{ color: '#9aa4b2', fontSize: 13, fontWeight: 700 }}>Pais del torneo</span>
+                                <select
+                                    value={form.country_id || ''}
+                                    onChange={(event) => {
+                                        const nextCountryId = event.target.value;
+                                        const nextCountryOption = countryOptions.find((option) => option.id === nextCountryId) || null;
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            country_id: nextCountryId,
+                                            country: nextCountryOption?.label || '',
+                                        }));
+                                    }}
+                                    style={{
+                                        height: 44,
+                                        borderRadius: 12,
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        background: '#111723',
+                                        color: '#fff',
+                                        padding: '0 14px',
+                                    }}
+                                >
+                                    <option value="">No especificado</option>
+                                    {countryOptions.map((country) => (
+                                        <option key={country.id} value={country.id}>
+                                            {country.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <span style={{ color: '#6b7280', fontSize: 12 }}>
+                                    Este pais se usa para corregir el agrupado y la etiqueta publica del torneo API.
+                                </span>
                             </label>
 
                             <label style={{ display: 'grid', gap: 8 }}>
@@ -1245,6 +1329,7 @@ export default function ExternalTournamentOverridePage() {
                         <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>{form.display_name || form.name || 'Torneo externo'}</div>
                         <div style={{ color: '#9aa4b2', marginBottom: 4 }}>Tournament ID: {tournamentId}</div>
                         <div style={{ color: '#9aa4b2', marginBottom: 4 }}>Source: {form.source || 'flashscore'}</div>
+                        <div style={{ color: '#9aa4b2', marginBottom: 4 }}>Pais: {selectedCountryOption?.label || form.country || 'No especificado'}</div>
                         <div style={{ color: '#9aa4b2', marginBottom: 20 }}>Prioridad: {form.priority ?? 0}</div>
 
                         <div style={{

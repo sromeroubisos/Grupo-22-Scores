@@ -78,6 +78,7 @@ function buildTournamentDetailsUpdates(
         return {
             display_name: draft.name.trim(),
             logo_url: draft.logo_url || null,
+            priority: typeof draft.priority === 'number' ? draft.priority : 0,
         };
     }
 
@@ -89,6 +90,7 @@ function buildTournamentDetailsUpdates(
         union_id: draft.union_id || null,
         country: draft.country_id ? (draft.country_label || draft.country_id) : null,
         country_id: draft.country_id || null,
+        priority: typeof draft.priority === 'number' ? draft.priority : 0,
         region: draft.region || null,
         category: draft.category || null,
         age_grade: draft.age_grade || null,

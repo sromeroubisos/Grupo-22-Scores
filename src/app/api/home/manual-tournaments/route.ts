@@ -9,6 +9,7 @@ type ManualTournamentRow = {
     display_name: string | null;
     sport_id: string | null;
     legacy_sport?: string | null;
+    country: string | null;
     country_id: string | null;
     logo_url: string | null;
     category: string | null;
@@ -31,6 +32,7 @@ const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = `
     display_name,
     sport_id,
     legacy_sport:sport,
+    country,
     country_id,
     logo_url,
     category,
@@ -47,6 +49,7 @@ const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = `
     name,
     display_name,
     sport_id,
+    country,
     country_id,
     logo_url,
     category,
@@ -64,6 +67,7 @@ const SELECT_WITH_LEGACY_SPORT = `
     display_name,
     sport_id,
     legacy_sport:sport,
+    country,
     country_id,
     logo_url,
     category,
@@ -79,6 +83,7 @@ const SELECT_WITHOUT_LEGACY_SPORT = `
     name,
     display_name,
     sport_id,
+    country,
     country_id,
     logo_url,
     category,

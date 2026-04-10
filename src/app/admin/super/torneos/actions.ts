@@ -11,7 +11,7 @@ type TournamentUpdate = Database['public']['Tables']['tournaments']['Update'];
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const ALLOWED_COLUMNS = [
-    'name', 'slug', 'sport_id', 'country_id', 'union_id',
+    'name', 'slug', 'sport_id', 'country', 'country_id', 'union_id',
     'logo_url', 'banner_url', 'is_visible', 'is_popular',
     'display_name', 'status', 'season_id',
     'category', 'age_grade', 'format', 'ruleset',

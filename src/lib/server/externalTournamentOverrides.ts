@@ -442,7 +442,11 @@ export function applyExternalTournamentOverride<T extends Record<string, unknown
             tournament_logo: resolvedLogo,
             tournament_image_path: resolvedLogo,
         } : {}),
-        ...(normalizedOverride.country ? { country: normalizedOverride.country } : {}),
+        ...(normalizedOverride.country ? {
+            country: normalizedOverride.country,
+            country_name: normalizedOverride.country,
+            countryName: normalizedOverride.country,
+        } : {}),
         ...(normalizedOverride.country_id ? { country_id: normalizedOverride.country_id } : {}),
         ...(normalizedOverride.url ? { url: normalizedOverride.url } : {}),
         ...(typeof normalizedOverride.priority === 'number' && Number.isFinite(normalizedOverride.priority) ? {

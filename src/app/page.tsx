@@ -7,7 +7,7 @@ import styles from './page.module.css';
 import InstallAppButton from '@/components/InstallAppButton';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamentById } from '@/lib/data/tournaments/index';
-import { getCountryById } from '@/lib/data/countries';
+import { getCountryById, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
@@ -154,6 +154,22 @@ interface PublicTournamentListItem {
     isActive?: boolean | null;
     current?: boolean | null;
   }> | null;
+}
+
+interface ManualTournamentApiItem {
+  id: string;
+  name: string;
+  display_name?: string | null;
+  sport_id?: string | null;
+  country?: string | null;
+  country_id?: string | null;
+  priority?: number | null;
+  logo_url?: string | null;
+  category?: string | null;
+  season_id?: string | number | null;
+  is_visible?: boolean | null;
+  age_grade?: string | null;
+  format?: Tournament['format'] | null;
 }
 
 function isFlashScoreTournamentId(value: string): boolean {
@@ -975,15 +991,15 @@ export default function HomePage() {
           return;
         }
 
-        const data = Array.isArray(payload.data) ? payload.data : [];
-        const mapped: Tournament[] = data.map((t: any) => ({
+        const data = Array.isArray(payload.data) ? payload.data as ManualTournamentApiItem[] : [];
+        const mapped: Tournament[] = data.map((t) => ({
           id: t.id,
           name: t.display_name || t.name,
           nameEs: t.display_name || t.name,
           url: `/tournaments/${t.id}`,
           type: 'local',
-          sportId: t.sport_id as any,
-          countryId: (t.country_id || 'Argentina').toLowerCase(),
+          sportId: t.sport_id as Tournament['sportId'],
+          countryId: resolveCountryId(t.country_id, t.country),
           priority: typeof t.priority === 'number' ? t.priority : 0,
           logoUrl: t.logo_url,
           categories: t.category ? [t.category.toLowerCase()] : [],

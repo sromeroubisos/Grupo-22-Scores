@@ -740,8 +740,46 @@ export const COUNTRIES: Record<string, Country> = {
     ...MANUAL_EXTRA_COUNTRIES,
 };
 
+const normalizeCountryLookupValue = (value: string | null | undefined): string => {
+    return String(value || '').trim().toLowerCase();
+};
+
 export const getCountryById = (id: string): Country | undefined => {
     return COUNTRIES[id];
+};
+
+export const findCountryRecord = (
+    countryId?: string | null,
+    fallbackName?: string | null,
+): Country | undefined => {
+    const normalizedId = normalizeCountryLookupValue(countryId);
+    if (normalizedId) {
+        const direct = getCountryById(normalizedId);
+        if (direct) {
+            return direct;
+        }
+    }
+
+    const normalizedName = normalizeCountryLookupValue(fallbackName);
+    if (!normalizedName) {
+        return undefined;
+    }
+
+    return Object.values(COUNTRIES).find((country) => (
+        normalizeCountryLookupValue(country.id) === normalizedName ||
+        normalizeCountryLookupValue(country.name) === normalizedName ||
+        normalizeCountryLookupValue(country.nameEs) === normalizedName ||
+        normalizeCountryLookupValue(country.code) === normalizedName
+    ));
+};
+
+export const resolveCountryId = (
+    countryId?: string | null,
+    fallbackName?: string | null,
+    fallbackId = 'international',
+): string => {
+    const normalizedId = normalizeCountryLookupValue(countryId);
+    return findCountryRecord(countryId, fallbackName)?.id || normalizedId || fallbackId;
 };
 
 export const getCountriesByRegion = (region: Country['region']): Country[] => {

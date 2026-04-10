@@ -6,7 +6,7 @@ import { Star } from 'lucide-react';
 import pageStyles from '../page.module.css';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib/data/tournaments';
-import { getAllCountries, getCountryById } from '@/lib/data/countries';
+import { findCountryRecord, getAllCountries, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -71,6 +71,7 @@ type ManualTournamentApiItem = {
     name: string;
     display_name?: string | null;
     sport_id?: string | null;
+    country?: string | null;
     country_id?: string | null;
     priority?: number | null;
     logo_url?: string | null;
@@ -82,32 +83,6 @@ type ManualTournamentApiItem = {
 };
 
 const ALL_COUNTRIES = getAllCountries();
-
-function normalizeLookupValue(value: string | null | undefined): string {
-    return String(value || '').trim().toLowerCase();
-}
-
-function findCountryRecord(countryId?: string | null, fallbackName?: string | null) {
-    const normalizedId = normalizeLookupValue(countryId);
-    if (normalizedId) {
-        const direct = getCountryById(normalizedId);
-        if (direct) {
-            return direct;
-        }
-    }
-
-    const normalizedName = normalizeLookupValue(fallbackName);
-    if (!normalizedName) {
-        return undefined;
-    }
-
-    return ALL_COUNTRIES.find((country) => (
-        normalizeLookupValue(country.id) === normalizedName ||
-        normalizeLookupValue(country.name) === normalizedName ||
-        normalizeLookupValue(country.nameEs) === normalizedName ||
-        normalizeLookupValue(country.code) === normalizedName
-    ));
-}
 
 function extractRegionFromLocale(locale: string): string | null {
     const safeLocale = locale.trim();
@@ -684,7 +659,7 @@ export default function TorneosPage() {
                     url: `/tournaments/${tournament.id}`,
                     type: 'local',
                     sportId: tournament.sport_id as Tournament['sportId'],
-                    countryId: (tournament.country_id || 'Argentina').toLowerCase(),
+                    countryId: resolveCountryId(tournament.country_id, tournament.country),
                     priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
                     logoUrl: tournament.logo_url || null,
                     categories: tournament.category ? [tournament.category.toLowerCase()] : [],
