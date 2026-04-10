@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
@@ -18,10 +18,39 @@ type AdminClubRow = {
   sport_id?: string | null
 }
 
-export async function GET() {
+const DEFAULT_LIMIT = 500;
+const MAX_LIMIT = 1000;
+
+function parseLimit(value: string | null) {
+  const parsed = Number.parseInt(value || '', 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_LIMIT;
+  return Math.min(parsed, MAX_LIMIT);
+}
+
+function normalizeSport(value: string | null | undefined) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function getSportVariants(sport: string): string[] {
+  const lower = normalizeSport(sport);
+  switch (lower) {
+    case 'rugby': return ['rugby', 'rugby-union', 'rugby-league'];
+    case 'rugby-union': return ['rugby', 'rugby-union'];
+    case 'rugby-league': return ['rugby', 'rugby-league'];
+    case 'football': return ['football', 'soccer'];
+    case 'hockey': return ['hockey', 'field-hockey'];
+    default: return lower ? [lower] : [];
+  }
+}
+
+export async function GET(request: NextRequest) {
   try {
     await requireAdminApiUser();
     const supabase = await getReadClient();
+    const searchParams = request.nextUrl.searchParams;
+    const search = String(searchParams.get('search') || '').trim();
+    const sport = String(searchParams.get('sport') || '').trim();
+    const limit = parseLimit(searchParams.get('limit'));
 
     const variants = [
       'id, name, short_name, logo_url, region, country, sport, sport_id',
@@ -38,10 +67,17 @@ export async function GET() {
     let error: { message?: string | null; details?: string | null; code?: string | null } | null = null;
 
     for (const columns of variants) {
-      const result = await supabase
+      let query = supabase
         .from('clubs')
         .select(columns)
         .order('name', { ascending: true });
+
+      if (search) {
+        const escapedSearch = search.replace(/[%_,]/g, (match) => `\\${match}`);
+        query = query.or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`);
+      }
+
+      const result = await query.limit(limit);
 
       if (!result.error) {
         clubs = result.data || [];
@@ -67,7 +103,15 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(clubs || []);
+    const sportVariants = sport ? getSportVariants(sport) : [];
+    const filteredClubs = sportVariants.length > 0
+      ? (clubs || []).filter((club) => {
+          const clubSport = normalizeSport(club.sport_id || club.sport || null);
+          return sportVariants.includes(clubSport);
+        })
+      : (clubs || []);
+
+    return NextResponse.json(filteredClubs);
   } catch (error) {
     console.error('Unexpected error fetching clubs:', error);
     const message = error instanceof Error ? error.message : 'Internal server error';

@@ -21,25 +21,25 @@ export async function GET() {
         const nextDayStart = new Date(dayStart);
         nextDayStart.setUTCDate(nextDayStart.getUTCDate() + 1);
 
-        const [{ count: todayMatches, error: todayMatchesError }, { count: liveMatches, error: liveMatchesError }, { count: unlinkedTournaments, error: tournamentsError }, { count: unlinkedClubs, error: clubsError }] = await Promise.all([
+        const [{ data: todayMatchesRows, error: todayMatchesError }, { data: liveMatchesRows, error: liveMatchesError }, { data: unlinkedTournamentRows, error: tournamentsError }, { data: unlinkedClubRows, error: clubsError }] = await Promise.all([
             readClient
                 .from('matches')
-                .select('id', { count: 'exact', head: true })
+                .select('id')
                 .gte('date_time', dayStart.toISOString())
                 .lt('date_time', nextDayStart.toISOString()),
             readClient
                 .from('matches')
-                .select('id', { count: 'exact', head: true })
+                .select('id')
                 .eq('status', 'live')
                 .gte('date_time', dayStart.toISOString())
                 .lt('date_time', nextDayStart.toISOString()),
             readClient
                 .from('tournaments')
-                .select('id', { count: 'exact', head: true })
+                .select('id')
                 .is('union_id', null),
             readClient
                 .from('clubs')
-                .select('id', { count: 'exact', head: true })
+                .select('id')
                 .is('union_id', null),
         ]);
 
@@ -50,10 +50,10 @@ export async function GET() {
 
         return NextResponse.json({
             data: {
-                todayMatches: todayMatches ?? 0,
-                liveMatches: liveMatches ?? 0,
-                unlinkedTournaments: unlinkedTournaments ?? 0,
-                unlinkedClubs: unlinkedClubs ?? 0,
+                todayMatches: todayMatchesRows?.length ?? 0,
+                liveMatches: liveMatchesRows?.length ?? 0,
+                unlinkedTournaments: unlinkedTournamentRows?.length ?? 0,
+                unlinkedClubs: unlinkedClubRows?.length ?? 0,
             },
         });
     } catch (error) {

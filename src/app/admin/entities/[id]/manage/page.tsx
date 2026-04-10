@@ -143,13 +143,13 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         const tournamentData = result.data as TournamentRow;
         const needsDetailsData = effectiveTab === 'detalles';
         const needsMatchCount = effectiveTab === 'resumen';
-        const [{ data: unionsData }, { count }, { data: countriesData }, linkedRelations] = await Promise.all([
+        const [{ data: unionsData }, { data: matchRows }, { data: countriesData }, linkedRelations] = await Promise.all([
             needsDetailsData
                 ? supabase.from('unions').select('id, name').order('name')
                 : Promise.resolve({ data: [] as Array<{ id: string; name: string }> }),
             needsMatchCount
-                ? supabase.from('matches').select('id', { count: 'exact', head: true }).eq('tournament_id', id)
-                : Promise.resolve({ count: 0 }),
+                ? supabase.from('matches').select('id').eq('tournament_id', id)
+                : Promise.resolve({ data: [] as Array<{ id: string }> }),
             needsDetailsData
                 ? supabase.from('countries').select('id, name, code, flag_emoji').order('name')
                 : Promise.resolve({ data: [] as Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> }),
@@ -157,7 +157,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         ]);
         tournamentUnions = unionsData ?? [];
         tournamentCountries = countriesData ?? [];
-        tournamentMatchCount = count ?? 0;
+        tournamentMatchCount = matchRows?.length ?? 0;
         if (tournamentData.union_id) {
             tournamentUnionName = tournamentUnions.find(u => u.id === (result.data as TournamentRow).union_id)?.name;
         }

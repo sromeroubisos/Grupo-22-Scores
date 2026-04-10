@@ -155,7 +155,6 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
             loadParticipants();
             loadGroups();
             loadPhases();
-            loadClubs();
         }
     }, [tournamentId]);
 
@@ -224,7 +223,11 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
             const request = beginClientRequest('admin:clubs:catalog', 'mount', {
                 component: 'TournamentParticipantsTab',
             });
-            const response = await fetch('/api/admin/clubs', { cache: 'no-store' });
+            const params = new URLSearchParams({ limit: '500' });
+            if (tournamentSportId) {
+                params.set('sport', tournamentSportId);
+            }
+            const response = await fetch(`/api/admin/clubs?${params.toString()}`, { cache: 'no-store' });
             request.end({
                 status: response.status,
                 error: !response.ok,
@@ -239,6 +242,12 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
             setClubsLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (!isAddDrawerOpen) return;
+        if (clubCatalog.length > 0 || clubsLoading) return;
+        void loadClubs();
+    }, [clubCatalog.length, clubsLoading, isAddDrawerOpen, tournamentSportId]);
 
     // ============================================
     // COMPUTED VALUES
