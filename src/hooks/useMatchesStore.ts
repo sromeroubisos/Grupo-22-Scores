@@ -25,7 +25,8 @@ interface MatchesStoreResult {
 const ERROR_RECOVERY_TTL = 60 * 1000; // 1 minute - retry faster when a source fails
 const PUBLIC_STALE_TTL = 5 * 60 * 1000;     // 5 minutes - shared public cache window
 const PUBLIC_LIVE_POLL_INTERVAL = 60_000;   // 1 minute - live refresh cadence
-const PREFETCH_BATCH_SIZE = 3;
+const PREFETCH_WINDOW_DAYS = 3;
+const PREFETCH_BATCH_SIZE = 2;
 
 // Module-level cache shared across hook instances
 const matchesCache = new Map<string, any[]>();
@@ -70,6 +71,12 @@ export function useMatchesStore(
   const [loading, setLoading] = useState(false);
   const [tick, setTick] = useState(0); // force re-render on cache update
   const [sourceError, setSourceError] = useState<SourceError | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(
+    () => typeof document === 'undefined' || document.visibilityState === 'visible'
+  );
+  const [isOnline, setIsOnline] = useState(
+    () => typeof navigator === 'undefined' || navigator.onLine !== false
+  );
 
   const timeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -80,6 +87,26 @@ export function useMatchesStore(
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prefetchedRef = useRef(false);
   const prevSportRef = useRef(sportId);
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+
+    const handleVisibilityChange = () => {
+      setIsPageVisible(document.visibilityState === 'visible');
+    };
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Convert API sources metadata to a rich error state with scenario discrimination
   function buildSourceError(sources: any): SourceError | null {
@@ -219,11 +246,12 @@ export function useMatchesStore(
       prevSportRef.current = sportId;
     }
 
+    if (!isPageVisible || !isOnline) return;
     if (prefetchedRef.current) return;
     prefetchedRef.current = true;
 
     const controller = new AbortController();
-    const allDates = generateLocalDateKeys(timeZone, 0, 7).map(e => e.dateKey);
+    const allDates = generateLocalDateKeys(timeZone, 0, PREFETCH_WINDOW_DAYS).map(e => e.dateKey);
     // Remove the selectedDate (already fetched)
     const toFetch = allDates.filter(d => d !== selectedDate);
 
@@ -248,7 +276,7 @@ export function useMatchesStore(
       clearTimeout(prefetchTimeout);
       controller.abort();
     };
-  }, [selectedDate, sportId, timeZone, fetchDate]);
+  }, [selectedDate, sportId, timeZone, fetchDate, isPageVisible, isOnline]);
 
   // LIVE polling: only when selectedDate is today
   // Smart control: stops when no live matches remain; restarts via full-refresh path.
@@ -263,6 +291,7 @@ export function useMatchesStore(
       pollingRef.current = null;
     }
 
+    if (!isPageVisible || !isOnline) return;
     if (!isToday) return;
 
     const controller = new AbortController();
@@ -333,7 +362,7 @@ export function useMatchesStore(
         pollingRef.current = null;
       }
     };
-  }, [selectedDate, sportId, timeZone, fetchLive, fetchDate]);
+  }, [selectedDate, sportId, timeZone, fetchLive, fetchDate, isPageVisible, isOnline]);
 
   const liveCount = useMemo(
     () => matches.filter(m => m.status === 'live').length,

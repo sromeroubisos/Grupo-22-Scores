@@ -358,16 +358,217 @@ async function fetchDbLookupMaps(
     };
 }
 
+type PublicDbMatchRow = {
+    id: string;
+    tournament_id: string | null;
+    date_time: string;
+    status: string | null;
+    score?: unknown;
+    round_label?: string | null;
+    round_id?: string | null;
+    venue?: string | null;
+    home_club_id: string | null;
+    away_club_id: string | null;
+    sport_id?: string | null;
+    sport?: string | null;
+};
+
+type PublicDbMatchesResult = {
+    matches: any[];
+    ok: boolean;
+    count: number;
+    reason: string | null;
+    message: string | null;
+};
+
+function mapDbMatchToPublicFeed(
+    match: PublicDbMatchRow,
+    tournamentMap: Map<string, DbTournamentLite>,
+    clubMap: Map<string, DbClubLite>,
+    timeZone: string,
+    liveOnly: boolean,
+) {
+    const tournament = tournamentMap.get(match.tournament_id || '');
+    const homeTeam = clubMap.get(match.home_club_id || '');
+    const awayTeam = clubMap.get(match.away_club_id || '');
+    const resolvedSport = resolveMatchSport(match, tournament, homeTeam, awayTeam);
+    const { localTime } = toLocalMatch(match.date_time, timeZone);
+    const normalizedStatus = match.status || 'scheduled';
+
+    return {
+        id: match.id,
+        tournamentId: match.tournament_id,
+        dateTime: match.date_time,
+        time: localTime,
+        status: normalizedStatus,
+        score: normalizedStatus === 'scheduled' ? null : (match.score ?? null),
+        clock: {
+            running: normalizedStatus === 'live',
+            seconds: 0,
+            period: liveOnly
+                ? 'En Vivo'
+                : (normalizedStatus === 'live' ? 'En Vivo' : (normalizedStatus === 'final' ? 'Final' : '1T')),
+        },
+        roundId: match.round_label || match.round_id || 'General',
+        venue: match.venue || 'Sede',
+        homeClubId: match.home_club_id,
+        awayClubId: match.away_club_id,
+        homeTeam: buildResolvedMatchTeam(homeTeam ? {
+            id: homeTeam.id,
+            name: homeTeam.name,
+            logo_url: homeTeam.logo_url || '',
+            shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC',
+        } : {
+            id: match.home_club_id,
+            name: 'Local',
+            logo: '',
+            shortName: 'LOC',
+        }, 'Local', 'LOC'),
+        awayTeam: buildResolvedMatchTeam(awayTeam ? {
+            id: awayTeam.id,
+            name: awayTeam.name,
+            logo_url: awayTeam.logo_url || '',
+            shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS',
+        } : {
+            id: match.away_club_id,
+            name: 'Visitante',
+            logo: '',
+            shortName: 'VIS',
+        }, 'Visitante', 'VIS'),
+        tournament: tournament ? {
+            id: tournament.id,
+            name: tournament.name,
+            sport: resolvedSport || tournament.sport_id || tournament.sport || null,
+            status: tournament.status || 'published',
+            priority: tournament.priority ?? 0,
+            country: resolveTournamentCountry(tournament),
+        } : {
+            id: match.tournament_id || 'db-local',
+            name: 'Partido Local',
+            sport: resolvedSport,
+            status: 'published',
+            country: 'Internacional',
+        },
+        liveEnabled: normalizedStatus === 'live',
+        source: 'db' as const,
+    };
+}
+
+async function fetchPublicSupabaseMatches(options: {
+    readClientPromise: Promise<Awaited<ReturnType<typeof getReadClient>>>;
+    requestedDate: string;
+    timeZone: string;
+    sport?: string;
+    liveOnly: boolean;
+    trace?: MatchesTraceContext;
+}): Promise<PublicDbMatchesResult> {
+    const startedAt = Date.now();
+    const metricName = options.liveOnly ? 'supabase_live_read_ms' : 'supabase_matches_read_ms';
+
+    try {
+        const supabase = await options.readClientPromise;
+        const sportVariants = options.sport ? getSportVariants(options.sport) : null;
+
+        const utcStart = options.liveOnly
+            ? null
+            : combineLocalDateTimeToUtcIso(options.requestedDate, '00:00:00', options.timeZone);
+        const utcNextDayStart = options.liveOnly
+            ? null
+            : combineLocalDateTimeToUtcIso(addDaysToIsoDate(options.requestedDate, 1), '00:00:00', options.timeZone);
+
+        if (!options.liveOnly && (!utcStart || !utcNextDayStart)) {
+            throw new Error('No se pudo construir el rango horario local para la consulta de partidos.');
+        }
+
+        const { data: dbMatches, error: dbError } = await selectMatchesRowsWithFallback(
+            supabase,
+            async (columns) => {
+                const query = supabase.from('matches').select(columns);
+
+                if (options.liveOnly) {
+                    return await query.eq('status', 'live');
+                }
+
+                return await query
+                    .gte('date_time', utcStart as string)
+                    .lt('date_time', utcNextDayStart as string)
+                    .order('date_time', { ascending: true });
+            },
+        );
+
+        if (dbError) {
+            return {
+                matches: [],
+                ok: false,
+                count: 0,
+                reason: 'database_query_failed',
+                message: 'No se pudieron cargar los partidos desde la base de datos.',
+            };
+        }
+
+        const rows = (dbMatches || []) as PublicDbMatchRow[];
+        const tournamentIds = [...new Set(rows.map((match) => match.tournament_id).filter(Boolean))] as string[];
+        const clubIds = [...new Set(rows.flatMap((match) => [match.home_club_id, match.away_club_id]).filter(Boolean))] as string[];
+        const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
+
+        const matches = rows
+            .filter((match) => {
+                const tournament = tournamentMap.get(match.tournament_id || '');
+                const homeTeam = clubMap.get(match.home_club_id || '');
+                const awayTeam = clubMap.get(match.away_club_id || '');
+
+                if (!isTournamentPubliclyVisible(tournament)) return false;
+                if (!sportVariants) return true;
+
+                const resolvedSport = resolveMatchSport(match, tournament, homeTeam, awayTeam);
+                return resolvedSport ? sportVariants.includes(resolvedSport) : false;
+            })
+            .map((match) => mapDbMatchToPublicFeed(match, tournamentMap, clubMap, options.timeZone, options.liveOnly));
+
+        return {
+            matches,
+            ok: true,
+            count: matches.length,
+            reason: matches.length === 0 ? 'empty_result' : null,
+            message: matches.length === 0 ? 'No hay partidos en base de datos para este filtro.' : null,
+        };
+    } catch (error) {
+        console.error('[matches] Supabase public feed fetch failed:', error);
+        return {
+            matches: [],
+            ok: false,
+            count: 0,
+            reason: 'database_fetch_failed',
+            message: 'No se pudieron cargar los partidos desde la base de datos.',
+        };
+    } finally {
+        if (options.trace) {
+            const durationMs = trackDuration(options.trace.metrics, metricName, startedAt);
+            if (!options.liveOnly) {
+                options.trace.metrics.supabase_read_time_ms = durationMs;
+            }
+            if (durationMs > 250) {
+                logMatchesEvent(
+                    'warn',
+                    options.liveOnly ? 'matches_slow_supabase_live_read' : 'matches_slow_supabase_matches_read',
+                    options.trace,
+                    { threshold_ms: 250 },
+                );
+            }
+        }
+    }
+}
+
 function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | null }) {
     const headers = new Headers();
 
     if (options.liveOnly) {
-        headers.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=30');
+        headers.set('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=180');
         return headers;
     }
 
     if (options.date) {
-        headers.set('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=60');
+        headers.set('Cache-Control', 'public, max-age=120, s-maxage=300, stale-while-revalidate=300');
     }
 
     return headers;
@@ -428,6 +629,7 @@ type MatchesTraceContext = {
 };
 
 const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response';
+const EXTERNAL_MATCHES_PERSIST_TTL_MS = 10 * 60 * 1000;
 const MATCHES_DB_SELECT_COLUMNS = [
     'id',
     'tournament_id',
@@ -447,6 +649,7 @@ const MATCHES_DB_SELECT_VARIANTS = [
 const matchesRefreshLocks = new Map<string, Promise<void>>();
 const matchesInFlightResponses = new Map<string, Promise<MatchesPayload>>();
 const matchesSnapshotPersistLocks = new Map<string, Promise<boolean>>();
+const externalMatchesPersistedAt = new Map<string, number>();
 
 function createTraceId(prefix: 'req' | 'refresh') {
     const randomPart = typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -590,9 +793,38 @@ function buildMatchesCacheKey(params: MatchesRequestParams) {
     ].join(':');
 }
 
+function shouldUsePersistedFeedCache(params: MatchesRequestParams) {
+    return !params.liveOnly;
+}
+
+function buildExternalPersistKey(
+    params: MatchesRequestParams,
+    scope: 'live' | 'daily',
+) {
+    return [
+        'external-catalog',
+        scope,
+        params.sport || 'all',
+        scope === 'daily' ? params.requestedDate : 'current',
+    ].join(':');
+}
+
+function shouldPersistExternalCatalog(
+    key: string,
+    nowMs: number = Date.now(),
+) {
+    const lastPersistedAt = externalMatchesPersistedAt.get(key) || 0;
+    if (nowMs - lastPersistedAt < EXTERNAL_MATCHES_PERSIST_TTL_MS) {
+        return false;
+    }
+
+    externalMatchesPersistedAt.set(key, nowMs);
+    return true;
+}
+
 function getMatchesResponseCachePolicy(params: MatchesRequestParams) {
     if (params.liveOnly) {
-        return { freshTtlSec: 15, staleTtlSec: 45 };
+        return { freshTtlSec: 60, staleTtlSec: 240 };
     }
 
     const todayKey = formatDateKey(new Date(), params.timeZone);
@@ -601,14 +833,14 @@ function getMatchesResponseCachePolicy(params: MatchesRequestParams) {
     );
 
     if (dayDiff === 0) {
-        return { freshTtlSec: 45, staleTtlSec: 120 };
+        return { freshTtlSec: 120, staleTtlSec: 600 };
     }
 
     if (Math.abs(dayDiff) === 1) {
-        return { freshTtlSec: 300, staleTtlSec: 900 };
+        return { freshTtlSec: 600, staleTtlSec: 1800 };
     }
 
-    return { freshTtlSec: 1800, staleTtlSec: 7200 };
+    return { freshTtlSec: 3600, staleTtlSec: 14400 };
 }
 
 function getMatchesFeedState(
@@ -671,7 +903,7 @@ function writeMatchesResponseCache(
         staleTtlMs: policy.staleTtlSec * 1000,
     };
 
-    memoryCache.set(key, entry, Math.ceil(policy.staleTtlMs / 1000));
+    memoryCache.set(key, entry, Math.ceil(policy.staleTtlSec));
 }
 
 async function persistMatchesFeedSnapshot(
@@ -681,7 +913,7 @@ async function persistMatchesFeedSnapshot(
     generatedAt: Date = new Date(),
     trace?: MatchesTraceContext,
 ) {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !shouldUsePersistedFeedCache(params)) {
         return false;
     }
 
@@ -731,6 +963,10 @@ function queuePersistMatchesFeedSnapshot(
     generatedAt: Date = new Date(),
     trace?: MatchesTraceContext,
 ) {
+    if (!shouldUsePersistedFeedCache(params)) {
+        return Promise.resolve(false);
+    }
+
     const existing = matchesSnapshotPersistLocks.get(key);
     if (existing) return existing;
 
@@ -834,9 +1070,18 @@ async function computeMatchesPayload(
 
     try {
         const { date, sport, status, timeZone, requestedDate, liveOnly, useExternal } = params;
+        const readClientPromise = getReadClient();
 
         // Fast path: live=true returns only live matches (for polling)
         if (liveOnly && sport) {
+            const dbLiveMatchesPromise = fetchPublicSupabaseMatches({
+                readClientPromise,
+                requestedDate,
+                timeZone,
+                sport,
+                liveOnly: true,
+                trace,
+            });
             try {
                 const externalFetchStartedAt = Date.now();
                 const liveMatches = await getFlashScoreLiveMatches(sport);
@@ -900,92 +1145,26 @@ async function computeMatchesPayload(
                     addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichLiveStartedAt);
                 }
                 if (liveMatches && liveMatches.length > 0) {
-                    persistFromExternalMatches(liveMatches, sport);
+                    const persistKey = buildExternalPersistKey(params, 'live');
+                    if (shouldPersistExternalCatalog(persistKey)) {
+                        persistFromExternalMatches(liveMatches, sport);
+                    }
                 }
 
                 let finalLiveMatches: any[] = [...enrichedLive];
 
-                // Append DB live matches
                 try {
-                    const supabaseLiveReadStartedAt = Date.now();
-                    const supabase = await getReadClient();
-                    const { data: dbLiveMatches, error: dbError } = await selectMatchesRowsWithFallback(
-                        supabase,
-                        (columns) => supabase
-                            .from('matches')
-                            .select(columns)
-                            .eq('status', 'live'),
-                    );
-
-                    if (!dbError && dbLiveMatches) {
-                        supabaseItemsCount = dbLiveMatches.length;
-                        const tournamentIds = [...new Set(dbLiveMatches.map((m: any) => m.tournament_id).filter(Boolean))];
-                        const clubIds = [...new Set(dbLiveMatches.flatMap((m: any) => [m.home_club_id, m.away_club_id]).filter(Boolean))];
-                        const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
-                        const sportVariants = getSportVariants(sport);
-                        const enrichDbLiveStartedAt = Date.now();
-                        const enrichedDbLive = dbLiveMatches.filter((m: any) => {
-                            const tournament = tournamentMap.get(m.tournament_id);
-                            const homeTeam = clubMap.get(m.home_club_id);
-                            const awayTeam = clubMap.get(m.away_club_id);
-                            if (!isTournamentPubliclyVisible(tournament)) return false;
-                            const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
-                            return resolvedSport ? sportVariants.includes(resolvedSport) : false;
-                        }).map((m: any) => {
-                           const tournament = tournamentMap.get(m.tournament_id);
-                           const homeTeam = clubMap.get(m.home_club_id);
-                           const awayTeam = clubMap.get(m.away_club_id);
-                           const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
-                           const { localTime } = toLocalMatch(m.date_time, timeZone);
-                           return {
-                                id: m.id,
-                                tournamentId: m.tournament_id,
-                                dateTime: m.date_time,
-                                time: localTime,
-                                status: m.status || 'scheduled',
-                                score: m.status === 'scheduled' ? null : (m.score ?? null),
-                                clock: { running: true, seconds: 0, period: 'En Vivo' },
-                                roundId: m.round_label || m.round_id || 'General',
-                                venue: m.venue || 'Sede',
-                                homeClubId: m.home_club_id,
-                                awayClubId: m.away_club_id,
-                                homeTeam: buildResolvedMatchTeam(homeTeam ? {
-                                    id: homeTeam.id,
-                                    name: homeTeam.name,
-                                    logo_url: homeTeam.logo_url || '',
-                                    shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC'
-                                } : { id: m.home_club_id, name: 'Local', logo: '', shortName: 'LOC' }, 'Local', 'LOC'),
-                                awayTeam: buildResolvedMatchTeam(awayTeam ? {
-                                    id: awayTeam.id,
-                                    name: awayTeam.name,
-                                    logo_url: awayTeam.logo_url || '',
-                                    shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS'
-                                } : { id: m.away_club_id, name: 'Visitante', logo: '', shortName: 'VIS' }, 'Visitante', 'VIS'),
-                                tournament: tournament ? {
-                                    id: tournament.id,
-                                    name: tournament.name,
-                                    sport: resolvedSport || tournament.sport_id || tournament.sport || null,
-                                    status: tournament.status || 'published',
-                                    priority: tournament.priority ?? 0,
-                                    country: resolveTournamentCountry(tournament)
-                                } : { id: m.tournament_id || 'db-local', name: 'Partido Local', sport: resolvedSport, status: 'published', country: 'Internacional' },
-                                liveEnabled: m.status === 'live',
-                                source: 'db'
-                           }
-                        });
-                        if (trace) {
-                            addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichDbLiveStartedAt);
-                        }
+                    const dbLiveResult = await dbLiveMatchesPromise;
+                    if (dbLiveResult.ok) {
+                        supabaseItemsCount = dbLiveResult.count;
                         const mergeLiveStartedAt = Date.now();
-                        finalLiveMatches = [...finalLiveMatches, ...enrichedDbLive];
+                        const existingIds = new Set(finalLiveMatches.map((match: { id: string }) => match.id));
+                        finalLiveMatches = [
+                            ...finalLiveMatches,
+                            ...dbLiveResult.matches.filter((match) => !existingIds.has(match.id)),
+                        ];
                         if (trace) {
                             addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeLiveStartedAt);
-                        }
-                    }
-                    if (trace) {
-                        const durationMs = trackDuration(trace.metrics, 'supabase_live_read_ms', supabaseLiveReadStartedAt);
-                        if (durationMs > 250) {
-                            logMatchesEvent('warn', 'matches_slow_supabase_live_read', trace, { threshold_ms: 250 });
                         }
                     }
                 } catch (dbErr) {
@@ -1012,11 +1191,15 @@ async function computeMatchesPayload(
                 console.error('Live-only fetch failed, trying external_match_cache:', e);
                 try {
                     const externalCacheFallbackStartedAt = Date.now();
-                    const supabase = await getReadClient();
+                    const supabase = await readClientPromise;
                     const cachedLive = await getLiveMatches(sport, supabase);
                     externalItemsCount = cachedLive.length;
+                    const dbLiveResult = await dbLiveMatchesPromise;
                     const enriched = await applyStoredTournamentOverridesToMatches(
-                        cachedLive.map(m => mapCachedToEnrichedMatch(m, sport)),
+                        [
+                            ...cachedLive.map(m => mapCachedToEnrichedMatch(m, sport)),
+                            ...dbLiveResult.matches,
+                        ].filter((match, index, arr) => arr.findIndex((candidate) => candidate.id === match.id) === index),
                     );
                     if (trace) {
                         trackDuration(trace.metrics, 'external_cache_fallback_ms', externalCacheFallbackStartedAt);
@@ -1028,7 +1211,7 @@ async function computeMatchesPayload(
                         logSlowComputeStageWarnings(trace);
                         logMatchesEvent('info', 'matches_compute_summary', trace, {
                             external_items_count: externalItemsCount,
-                            supabase_items_count: 0,
+                            supabase_items_count: dbLiveResult.count,
                             merged_items_count: mergedItemsCount,
                             final_items_count: finalItemsCount,
                             fallback_path: 'live_external_cache',
@@ -1060,6 +1243,14 @@ async function computeMatchesPayload(
         let fsMessage: string | null = null;
         let dbReason: string | null = null;
         let dbMessage: string | null = null;
+        const dbMatchesPromise = fetchPublicSupabaseMatches({
+            readClientPromise,
+            requestedDate,
+            timeZone,
+            sport,
+            liveOnly: false,
+            trace,
+        });
 
         if (!useExternal) {
             let matches = db.matches;
@@ -1155,7 +1346,7 @@ async function computeMatchesPayload(
                 if (fsFetchFailed) {
                     try {
                         const externalCacheFallbackStartedAt = Date.now();
-                        const supabaseForCache = await getReadClient();
+                        const supabaseForCache = await readClientPromise;
                         const cached = await getMatchesForDate(date, sport || 'rugby', supabaseForCache);
                         if (cached.length > 0) {
                             const enrichFallbackStartedAt = Date.now();
@@ -1283,7 +1474,10 @@ async function computeMatchesPayload(
                 console.log(`[matches] FlashScore: ${fsCount} matches for date=${date}`);
 
                 if (mergedExternalMatches && mergedExternalMatches.length > 0) {
-                    persistFromExternalMatches(mergedExternalMatches, sport || 'rugby');
+                    const persistKey = buildExternalPersistKey(params, 'daily');
+                    if (shouldPersistExternalCatalog(persistKey)) {
+                        persistFromExternalMatches(mergedExternalMatches, sport || 'rugby');
+                    }
                 }
                 } // end if (!fsFetchFailed)
             } catch (e) {
@@ -1297,120 +1491,19 @@ async function computeMatchesPayload(
         // Always fetch matches stored in the database (created via admin panel)
         // and merge them with external (FlashScore) matches.
         try {
-            const supabase = await getReadClient();
-            const supabaseReadStartedAt = Date.now();
+            const dbResult = await dbMatchesPromise;
+            dbOk = dbResult.ok;
+            dbReason = dbResult.reason;
+            dbMessage = dbResult.message;
+            supabaseItemsCount = dbResult.count;
 
-            // Build the base query for the selected date
-            const utcStart = combineLocalDateTimeToUtcIso(requestedDate, '00:00:00', timeZone);
-            const utcNextDayStart = combineLocalDateTimeToUtcIso(addDaysToIsoDate(requestedDate, 1), '00:00:00', timeZone);
-
-            if (!utcStart || !utcNextDayStart) {
-                throw new Error('No se pudo construir el rango horario local para la consulta de partidos.');
-            }
-
-            // Filter by sport through tournament relationship
-            const sportVariants = sport ? getSportVariants(sport) : null;
-
-            const { data: dbMatches, error: dbError } = await selectMatchesRowsWithFallback(
-                supabase,
-                (columns) => supabase
-                    .from('matches')
-                    .select(columns)
-                    .gte('date_time', utcStart)
-                    .lt('date_time', utcNextDayStart)
-                    .order('date_time', { ascending: true }),
-            );
-
-            if (!dbError && dbMatches) {
-                supabaseItemsCount = dbMatches.length;
-                const tournamentIds = [...new Set(dbMatches.map((m: any) => m.tournament_id).filter(Boolean))];
-                const clubIds = [...new Set(dbMatches.flatMap((m: any) => [m.home_club_id, m.away_club_id]).filter(Boolean))];
-                const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
-
-                dbOk = true;
+            if (dbResult.ok) {
                 const dedupeDbStartedAt = Date.now();
                 const existingIds = new Set(enrichedMatches.map((m: any) => m.id));
                 if (trace) {
                     addDurationMetric(trace.metrics, 'dedupe_matches_ms', Date.now() - dedupeDbStartedAt);
                 }
-
-                const enrichDbStartedAt = Date.now();
-                const enrichedDbMatches = dbMatches
-                    .filter((m: any) => {
-                        if (existingIds.has(m.id)) return false;
-                        const tournament = tournamentMap.get(m.tournament_id);
-                        const homeTeam = clubMap.get(m.home_club_id);
-                        const awayTeam = clubMap.get(m.away_club_id);
-                        if (!isTournamentPubliclyVisible(tournament)) return false;
-                        if (!sportVariants) return true;
-                        const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
-                        return resolvedSport ? sportVariants.includes(resolvedSport) : false;
-                    })
-                    .map((m: any) => {
-                        const tournament = tournamentMap.get(m.tournament_id);
-                        const homeTeam = clubMap.get(m.home_club_id);
-                        const awayTeam = clubMap.get(m.away_club_id);
-                        const resolvedSport = resolveMatchSport(m, tournament, homeTeam, awayTeam);
-                        const { localTime } = toLocalMatch(m.date_time, timeZone);
-                        return {
-                            id: m.id,
-                            tournamentId: m.tournament_id,
-                            dateTime: m.date_time,
-                            time: localTime,
-                            status: m.status || 'scheduled',
-                            score: m.status === 'scheduled' ? null : (m.score ?? null),
-                            clock: {
-                                running: m.status === 'live',
-                                seconds: 0,
-                                period: m.status === 'live' ? 'En Vivo' : (m.status === 'final' ? 'Final' : '1T')
-                            },
-                            roundId: m.round_label || m.round_id || 'General',
-                            venue: m.venue || 'Sede',
-                            homeClubId: m.home_club_id,
-                            awayClubId: m.away_club_id,
-                            homeTeam: buildResolvedMatchTeam(homeTeam ? {
-                                id: homeTeam.id,
-                                name: homeTeam.name,
-                                logo_url: homeTeam.logo_url || '',
-                                shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC'
-                            } : {
-                                id: m.home_club_id,
-                                name: 'Local',
-                                logo: '',
-                                shortName: 'LOC'
-                            }, 'Local', 'LOC'),
-                            awayTeam: buildResolvedMatchTeam(awayTeam ? {
-                                id: awayTeam.id,
-                                name: awayTeam.name,
-                                logo_url: awayTeam.logo_url || '',
-                                shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS'
-                            } : {
-                                id: m.away_club_id,
-                                name: 'Visitante',
-                                logo: '',
-                                shortName: 'VIS'
-                            }, 'Visitante', 'VIS'),
-                            tournament: tournament ? {
-                                id: tournament.id,
-                                name: tournament.name,
-                                sport: resolvedSport || tournament.sport_id || tournament.sport || null,
-                                status: tournament.status || 'published',
-                                priority: tournament.priority ?? 0,
-                                country: resolveTournamentCountry(tournament)
-                            } : {
-                                id: m.tournament_id || 'db-local',
-                                name: 'Partido Local',
-                                sport: resolvedSport,
-                                status: 'published',
-                                country: 'Internacional'
-                            },
-                            liveEnabled: false,
-                            source: 'db' // Mark as database-sourced
-                        };
-                    });
-                if (trace) {
-                    addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichDbStartedAt);
-                }
+                const enrichedDbMatches = dbResult.matches.filter((match) => !existingIds.has(match.id));
 
                 const mergeDbStartedAt = Date.now();
                 enrichedMatches = [...enrichedMatches, ...enrichedDbMatches];
@@ -1422,17 +1515,6 @@ async function computeMatchesPayload(
                 dbReason = dbCount === 0 ? 'empty_result' : null;
                 dbMessage = dbCount === 0 ? 'No hay partidos en base de datos para este filtro.' : null;
                 console.log(`[matches] Supabase: ${dbCount} matches (fallback=${dbFallback})`);
-            } else if (dbError) {
-                dbReason = 'database_query_failed';
-                dbMessage = 'No se pudieron cargar los partidos desde la base de datos.';
-                console.error('[matches] Supabase query failed:', JSON.stringify(dbError));
-            }
-            if (trace) {
-                const durationMs = trackDuration(trace.metrics, 'supabase_matches_read_ms', supabaseReadStartedAt);
-                trace.metrics.supabase_read_time_ms = durationMs;
-                if (durationMs > 250) {
-                    logMatchesEvent('warn', 'matches_slow_supabase_matches_read', trace, { threshold_ms: 250 });
-                }
             }
         } catch (dbFetchError) {
             console.error('Supabase DB matches fetch failed (non-fatal):', dbFetchError);
@@ -1542,60 +1624,62 @@ export async function GET(request: Request) {
     }
 
     try {
-        const readClient = await getReadClient();
-        const persistedLookupStartedAt = Date.now();
-        const persistedSnapshot = await readUsableMatchesFeedSnapshot<MatchesPayload>(
-            readClient,
-            cacheKey,
-            new Date().toISOString(),
-        );
-        const persistedLookupMs = trackDuration(trace.metrics, 'persisted_cache_lookup_ms', persistedLookupStartedAt);
-        if (persistedLookupMs > 300) {
-            logMatchesEvent('warn', 'matches_slow_persisted_lookup', trace, { threshold_ms: 300 });
-        }
-
-        if (persistedSnapshot) {
-            const persistedState = getMatchesFeedState(
-                persistedSnapshot.generatedAt,
-                persistedSnapshot.expiresAt,
-                params,
-                persistedSnapshot.staleUntil,
+        if (shouldUsePersistedFeedCache(params)) {
+            const readClient = await getReadClient();
+            const persistedLookupStartedAt = Date.now();
+            const persistedSnapshot = await readUsableMatchesFeedSnapshot<MatchesPayload>(
+                readClient,
+                cacheKey,
+                new Date().toISOString(),
             );
-            trace.metrics.persisted_payload_bytes = persistedSnapshot.payloadSizeBytes || 0;
-
-            if (persistedState.state === 'fresh') {
-                writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
-                const serializeStartedAt = Date.now();
-                const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
-                trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
-                finalizeRequestMetrics(trace, requestStartedAt);
-                attachObservabilityHeaders(response, trace, 'PERSISTED-HIT');
-                logMatchesEvent('info', 'matches_cache_persisted_hit', trace, { cache_status: 'PERSISTED-HIT', persisted_snapshot_state: 'fresh' });
-                return response;
+            const persistedLookupMs = trackDuration(trace.metrics, 'persisted_cache_lookup_ms', persistedLookupStartedAt);
+            if (persistedLookupMs > 300) {
+                logMatchesEvent('warn', 'matches_slow_persisted_lookup', trace, { threshold_ms: 300 });
             }
 
-            if (persistedState.state === 'stale') {
-                writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
-                void refreshMatchesResponseCache(cacheKey, params, trace.requestId);
-                const serializeStartedAt = Date.now();
-                const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
-                trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
-                finalizeRequestMetrics(trace, requestStartedAt);
-                attachObservabilityHeaders(response, trace, 'PERSISTED-STALE');
-                logMatchesEvent('info', 'matches_cache_persisted_stale', trace, { cache_status: 'PERSISTED-STALE', persisted_snapshot_state: 'stale' });
-                return response;
-            }
-        }
+            if (persistedSnapshot) {
+                const persistedState = getMatchesFeedState(
+                    persistedSnapshot.generatedAt,
+                    persistedSnapshot.expiresAt,
+                    params,
+                    persistedSnapshot.staleUntil,
+                );
+                trace.metrics.persisted_payload_bytes = persistedSnapshot.payloadSizeBytes || 0;
 
-        const persistedMetaStartedAt = Date.now();
-        const persistedSnapshotMeta = await readMatchesFeedSnapshotMetadata(readClient, cacheKey);
-        if (persistedSnapshotMeta) {
-            trackDuration(trace.metrics, 'persisted_metadata_recheck_ms', persistedMetaStartedAt);
-            trace.metrics.persisted_payload_bytes = persistedSnapshotMeta.payloadSizeBytes || 0;
-            logMatchesEvent('info', 'matches_cache_persisted_expired', trace, {
-                cache_status: 'EXPIRED',
-                persisted_snapshot_state: 'expired',
-            });
+                if (persistedState.state === 'fresh') {
+                    writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
+                    const serializeStartedAt = Date.now();
+                    const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
+                    trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+                    finalizeRequestMetrics(trace, requestStartedAt);
+                    attachObservabilityHeaders(response, trace, 'PERSISTED-HIT');
+                    logMatchesEvent('info', 'matches_cache_persisted_hit', trace, { cache_status: 'PERSISTED-HIT', persisted_snapshot_state: 'fresh' });
+                    return response;
+                }
+
+                if (persistedState.state === 'stale') {
+                    writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
+                    void refreshMatchesResponseCache(cacheKey, params, trace.requestId);
+                    const serializeStartedAt = Date.now();
+                    const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
+                    trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
+                    finalizeRequestMetrics(trace, requestStartedAt);
+                    attachObservabilityHeaders(response, trace, 'PERSISTED-STALE');
+                    logMatchesEvent('info', 'matches_cache_persisted_stale', trace, { cache_status: 'PERSISTED-STALE', persisted_snapshot_state: 'stale' });
+                    return response;
+                }
+            }
+
+            const persistedMetaStartedAt = Date.now();
+            const persistedSnapshotMeta = await readMatchesFeedSnapshotMetadata(readClient, cacheKey);
+            if (persistedSnapshotMeta) {
+                trackDuration(trace.metrics, 'persisted_metadata_recheck_ms', persistedMetaStartedAt);
+                trace.metrics.persisted_payload_bytes = persistedSnapshotMeta.payloadSizeBytes || 0;
+                logMatchesEvent('info', 'matches_cache_persisted_expired', trace, {
+                    cache_status: 'EXPIRED',
+                    persisted_snapshot_state: 'expired',
+                });
+            }
         }
 
         const payload = await getOrComputeMatchesPayload(cacheKey, params, trace);
