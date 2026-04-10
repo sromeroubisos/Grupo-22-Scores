@@ -7,11 +7,12 @@ import { createPortal } from 'react-dom';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
-export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket';
+export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups';
 type ExportDateValue = string | number | Date;
 type MatchExportMode = 'schedule' | 'result';
 type MatchExportLayout = 'classic' | 'editorial4x5';
 type StandingsExportMode = 'table' | 'groups';
+type LineupExportMode = 'both' | 'home' | 'away';
 
 interface StandingsRowData {
     pos: number;
@@ -119,6 +120,35 @@ interface PlayerStatsData {
     stats: Array<{ label: string; value: number | string; highlight?: boolean }>;
 }
 
+interface LineupExportPlayerData {
+    id?: string | null;
+    number?: number | string | null;
+    name: string;
+    position?: string | null;
+    role?: string | null;
+    isCaptain?: boolean | null;
+}
+
+interface LineupExportTeamData {
+    name: string;
+    logo?: string;
+    lineupLabel?: string;
+    starters: LineupExportPlayerData[];
+}
+
+interface LineupsData {
+    title?: string;
+    subtitle?: string;
+    tournament: string;
+    tournamentLogo?: string;
+    date?: string;
+    time?: string;
+    venue?: string;
+    kickoffAt?: ExportDateValue | null;
+    homeTeam: LineupExportTeamData;
+    awayTeam: LineupExportTeamData;
+}
+
 interface PlayoffBracketMatchData {
     match_id?: string | number;
     home_team?: {
@@ -162,7 +192,7 @@ interface PlayoffBracketData {
     rounds: PlayoffBracketRoundData[];
 }
 
-type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData;
+type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData;
 type CanvasFormat = { width: number; height: number };
 type SafeArea = { top: number; bottom: number; centerX: number; width: number; height: number };
 type MatchBackgroundUpload = { name: string; src: string };
@@ -329,6 +359,11 @@ const MATCH_EXPORT_LAYOUT_OPTIONS: Array<{ value: MatchExportLayout; label: stri
     { value: 'classic', label: 'Clasico', description: 'Panel actual con marcador y estadisticas' },
     { value: 'editorial4x5', label: 'Editorial 4:5', description: 'Foto full-bleed con overlay para Instagram post' },
 ];
+const LINEUP_EXPORT_MODE_OPTIONS: Array<{ value: LineupExportMode; label: string; description: string }> = [
+    { value: 'both', label: 'Dos equipos', description: 'Lista las dos formaciones del partido en una sola pieza' },
+    { value: 'home', label: 'Solo local', description: 'Centra la pieza en la formacion del equipo local' },
+    { value: 'away', label: 'Solo visitante', description: 'Centra la pieza en la formacion del equipo visitante' },
+];
 const EDITORIAL_LAYOUT_PRESETS: MatchEditorialLayoutPreset[] = [
     {
         id: 'balanced',
@@ -466,6 +501,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const [isMatchModeDropdownOpen, setIsMatchModeDropdownOpen] = useState(false);
     const [matchExportLayout, setMatchExportLayout] = useState<MatchExportLayout>('classic');
     const [isMatchLayoutDropdownOpen, setIsMatchLayoutDropdownOpen] = useState(false);
+    const [lineupExportMode, setLineupExportMode] = useState<LineupExportMode>('both');
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -661,6 +697,11 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as MatchStatsData;
         return buildAutoEditorialContextLabel(applyMatchExportMode(exportData, 'result'));
     }, [customTournamentName, data, selectedTimeZonePreset, template]);
+    const isEditorialGradientMode = template === 'matchStats' && matchExportLayout === 'editorial4x5';
+    const savedColorGradientPresets = useMemo(
+        () => savedGradientPresets.filter((preset) => !preset.gradientImage),
+        [savedGradientPresets]
+    );
     const baseMatchScore = useMemo(() => {
         if (template !== 'matchStats') return null;
         const matchData = data as MatchStatsData;
@@ -688,8 +729,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         if (template === 'dailyMatches') return 'Agenda del dia · Seleccion multiple';
         if (template === 'standings') return standingsExportMode === 'groups' ? 'Tabla por grupos' : 'Tabla corrida';
         if (template === 'playoffBracket') return 'Cuadro eliminatorio';
+        if (template === 'lineups') return `Alineaciones · ${getLineupExportModeLabel(lineupExportMode)}`;
         return 'Configuracion de exportacion';
-    }, [matchExportLayout, matchExportMode, standingsExportMode, template]);
+    }, [lineupExportMode, matchExportLayout, matchExportMode, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
         if (template === 'matchStats') {
@@ -698,6 +740,8 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             chips.push(standingsExportMode === 'groups' ? 'Grupos' : 'Tabla');
         } else if (template === 'dailyMatches') {
             chips.push(`Partidos ${selectedMatchIndices.size}/10`);
+        } else if (template === 'lineups') {
+            chips.push(getLineupExportModeLabel(lineupExportMode));
         }
         chips.push(selectedPaletteName);
 
@@ -709,6 +753,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         return chips.slice(0, 4);
     }, [
         customTournamentName,
+        lineupExportMode,
         matchExportLayout,
         selectedFormatConfig.label,
         selectedMatchIndices.size,
@@ -730,7 +775,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setSelectedPaletteId(palette.id);
         setBgColor(palette.bg);
         setAccentColor(palette.accent);
-        if (template === 'matchStats' && matchExportLayout === 'editorial4x5') {
+        if (isEditorialGradientMode) {
             setEditorialGradientRightColor(palette.accent);
         }
     };
@@ -839,9 +884,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const nextPreset: SavedMatchGradientPreset = {
             id: buildPresetId('gradient'),
             name,
-            gradientLeftColor: editorialGradientLeftColor,
-            gradientRightColor: editorialGradientRightColor,
-            gradientImage: editorialGradientUpload ? { ...editorialGradientUpload } : null,
+            gradientLeftColor: isEditorialGradientMode ? editorialGradientLeftColor : bgColor,
+            gradientRightColor: isEditorialGradientMode ? editorialGradientRightColor : accentColor,
+            gradientImage: isEditorialGradientMode && editorialGradientUpload ? { ...editorialGradientUpload } : null,
         };
 
         const nextPresets = upsertSavedGradientPreset(savedGradientPresets, nextPreset);
@@ -858,10 +903,14 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const applySavedGradientPreset = (preset: SavedMatchGradientPreset) => {
-        setEditorialGradientLeftColor(preset.gradientLeftColor);
-        setEditorialGradientRightColor(preset.gradientRightColor);
-        setEditorialGradientUpload(preset.gradientImage ? { ...preset.gradientImage } : null);
         setSelectedPaletteId('custom');
+        setBgColor(preset.gradientLeftColor);
+        setAccentColor(preset.gradientRightColor);
+        if (isEditorialGradientMode) {
+            setEditorialGradientLeftColor(preset.gradientLeftColor);
+            setEditorialGradientRightColor(preset.gradientRightColor);
+            setEditorialGradientUpload(preset.gradientImage ? { ...preset.gradientImage } : null);
+        }
         setStatus(`Gradiente "${preset.name}" aplicado`);
         window.setTimeout(() => setStatus(''), 2200);
     };
@@ -1025,6 +1074,8 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 const matchesData = exportData as DailyMatchesData;
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
                 await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+            } else if (template === 'lineups') {
+                await drawLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
             } else if (template === 'playoffBracket') {
                 await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
             } else {
@@ -1106,6 +1157,27 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                     <p className={styles.modalHint}>El layout editorial usa siempre canvas 1080x1350 para respetar la composicion 4:5.</p>
                                 )}
                             </div>
+
+                            {template === 'lineups' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Vista</label>
+                                    <div className={styles.formatOptions}>
+                                        {LINEUP_EXPORT_MODE_OPTIONS.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                className={`${styles.formatBtn} ${lineupExportMode === option.value ? styles.active : ''}`}
+                                                onClick={() => setLineupExportMode(option.value)}
+                                                type="button"
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        {LINEUP_EXPORT_MODE_OPTIONS.find((option) => option.value === lineupExportMode)?.description}
+                                    </p>
+                                </div>
+                            )}
 
                             {template === 'matchStats' && (
                                 <div className={styles.modalSection}>
@@ -1798,6 +1870,54 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         <input type="color" value={accentColor} onChange={(event) => handleAccentColorChange(event.target.value)} />
                                     </div>
                                 </div>
+                                {!isEditorialGradientMode && (
+                                    <div className={styles.presetLibraryCard}>
+                                        <div className={styles.presetLibrarySection}>
+                                            <div className={styles.presetLibraryHeader}>
+                                                <span className={styles.presetLibraryTitle}>Tus gradientes</span>
+                                                <span className={styles.presetLibraryMeta}>Se guardan en este navegador</span>
+                                            </div>
+                                            <div className={styles.gradientUploadRow}>
+                                                <input
+                                                    className={styles.textInput}
+                                                    value={gradientPresetName}
+                                                    onChange={(event) => setGradientPresetName(event.target.value)}
+                                                    placeholder="Ej: Verde noche"
+                                                />
+                                                <button className={styles.secondaryBtn} onClick={handleSaveGradientPreset} type="button">
+                                                    Guardar gradiente
+                                                </button>
+                                            </div>
+                                            {savedColorGradientPresets.length > 0 ? (
+                                                <div className={styles.gradientPresetGrid}>
+                                                    {savedColorGradientPresets.map((preset) => {
+                                                        const isActive = bgColor === preset.gradientLeftColor
+                                                            && accentColor === preset.gradientRightColor;
+                                                        return (
+                                                            <button
+                                                                key={preset.id}
+                                                                className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
+                                                                onClick={() => applySavedGradientPreset(preset)}
+                                                                title={`Aplicar ${preset.name}`}
+                                                                type="button"
+                                                            >
+                                                                <span
+                                                                    className={styles.gradientPresetSwatch}
+                                                                    style={{ background: `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
+                                                                />
+                                                                <span className={styles.gradientPresetName}>{preset.name}</span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <div className={styles.emptyPresetState}>
+                                                    Todavia no guardaste gradientes personalizados para esta paleta.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -1839,7 +1959,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
     if (template === 'standings') return (data as StandingsData).title || '';
     if (template === 'playoffBracket') return (data as PlayoffBracketData).title || '';
-    if (template === 'dailyMatches' || template === 'matchStats') return (data as DailyMatchesData | MatchStatsData).tournament || '';
+    if (template === 'dailyMatches' || template === 'matchStats' || template === 'lineups') return (data as DailyMatchesData | MatchStatsData | LineupsData).tournament || '';
     return '';
 }
 
@@ -1859,6 +1979,10 @@ function getMatchExportModeLabel(mode: MatchExportMode): string {
 
 function getMatchExportLayoutLabel(layout: MatchExportLayout): string {
     return MATCH_EXPORT_LAYOUT_OPTIONS.find((option) => option.value === layout)?.label || 'Clasico';
+}
+
+function getLineupExportModeLabel(mode: LineupExportMode): string {
+    return LINEUP_EXPORT_MODE_OPTIONS.find((option) => option.value === mode)?.label || 'Dos equipos';
 }
 
 function getEditorialLayoutPreset(id?: string): MatchEditorialLayoutPreset {
@@ -2371,6 +2495,14 @@ function buildExportData(
         return {
             ...bracketData,
             title: tournamentName || bracketData.title,
+        };
+    }
+
+    if (template === 'lineups') {
+        const lineupsData = data as LineupsData;
+        return {
+            ...lineupsData,
+            tournament: tournamentName || lineupsData.tournament,
         };
     }
 
@@ -4358,6 +4490,337 @@ async function drawDailyMatches(
             y + rowHeight / 2 + (isStory ? 38 : 32)
         );
         ctx.restore();
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, isDark);
+}
+
+function getLineupMetaLabel(data: LineupsData) {
+    const parts = [
+        data.subtitle?.trim(),
+        [data.date?.trim(), data.time?.trim()].filter(Boolean).join(' · '),
+        data.venue?.trim(),
+    ].filter(Boolean);
+
+    return parts.join('  //  ');
+}
+
+function getSelectedLineupTeams(data: LineupsData, mode: LineupExportMode): Array<LineupExportTeamData & { side: 'home' | 'away' }> {
+    const teams = [
+        { ...data.homeTeam, side: 'home' as const },
+        { ...data.awayTeam, side: 'away' as const },
+    ];
+
+    if (mode === 'home') return [teams[0]];
+    if (mode === 'away') return [teams[1]];
+    return teams;
+}
+
+function isLineupStarter(player: LineupExportPlayerData, index: number) {
+    const role = String(player.role || '').trim().toLowerCase();
+    if (role === 'starter' || role === 'titular') return true;
+    if (role === 'substitute' || role === 'suplente' || role === 'finisher') return false;
+
+    const shirtNumber = Number(player.number);
+    if (Number.isFinite(shirtNumber)) {
+        return shirtNumber <= 15;
+    }
+
+    return index < 15;
+}
+
+async function drawLineups(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    lineupExportMode: LineupExportMode,
+) {
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const textColor = getTextColor(isDark);
+    const mutedColor = getMutedColor(isDark, 0.72);
+    const softColor = getMutedColor(isDark, 0.1);
+    const safe = getSafeArea(canvas);
+    const isStory = format.height > format.width;
+    const metaLabel = getLineupMetaLabel(data);
+    const selectedTeams = getSelectedLineupTeams(data, lineupExportMode).map((team) => ({
+        ...team,
+        starters: Array.isArray(team.starters)
+            ? team.starters.filter((player) => player && String(player.name || '').trim()).slice(0, 23)
+            : [],
+    }));
+    const isSingleTeam = selectedTeams.length === 1;
+    const totalPlayers = selectedTeams.reduce((sum, team) => sum + team.starters.length, 0);
+    const [tournamentLogo, homeLogo, awayLogo] = await Promise.all([
+        loadImage(data.tournamentLogo || ''),
+        loadImage(data.homeTeam.logo || ''),
+        loadImage(data.awayTeam.logo || ''),
+    ]);
+    const teamLogoMap = {
+        home: homeLogo,
+        away: awayLogo,
+    } as const;
+
+    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
+    drawCenteredPill(
+        ctx,
+        safe.centerX,
+        isStory ? 74 : 56,
+        isSingleTeam ? 'FORMACION CONFIRMADA' : 'ALINEACIONES CONFIRMADAS',
+        accentColor,
+        getContrastColor(accentColor),
+        `800 ${isStory ? 24 : 20}px ${FONT_BODY}`,
+        26,
+        isStory ? 48 : 42,
+    );
+    drawTournamentRibbon(
+        ctx,
+        canvas,
+        data.tournament,
+        tournamentLogo,
+        data.tournamentLogo,
+        accentColor,
+        isDark,
+        isStory ? 166 : 138,
+        isStory ? 26 : 22,
+    );
+
+    if (metaLabel) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = mutedColor;
+        ctx.font = `600 ${isStory ? 18 : 15}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, metaLabel.toUpperCase(), canvas.width - 140), safe.centerX, isStory ? 208 : 178);
+        ctx.restore();
+    }
+
+    const panelX = isStory ? 38 : 46;
+    const panelY = isStory ? 248 : 220;
+    const panelWidth = canvas.width - panelX * 2;
+    const panelHeight = safe.bottom - panelY - (isStory ? 22 : 18);
+    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
+
+    if (totalPlayers === 0) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = mutedColor;
+        ctx.font = `700 ${isStory ? 24 : 20}px ${FONT_BODY}`;
+        ctx.fillText('No hay alineaciones confirmadas para exportar.', safe.centerX, panelY + panelHeight / 2);
+        ctx.restore();
+        drawBrandFooter(ctx, canvas, brandLogo, isDark);
+        return;
+    }
+
+    const contentX = panelX + 18;
+    const contentY = panelY + 18;
+    const contentWidth = panelWidth - 36;
+    const contentHeight = panelHeight - 36;
+    const columnGap = isSingleTeam ? 0 : (isStory ? 22 : 18);
+    const columnWidth = isSingleTeam ? contentWidth : (contentWidth - columnGap) / 2;
+    const headerHeight = isSingleTeam ? (isStory ? 126 : 118) : (isStory ? 112 : 102);
+
+    if (!isSingleTeam) {
+        ctx.save();
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(panelX + panelWidth / 2, contentY + 10);
+        ctx.lineTo(panelX + panelWidth / 2, panelY + panelHeight - 26);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    selectedTeams.forEach((team, index) => {
+        const columnX = isSingleTeam
+            ? contentX
+            : contentX + index * (columnWidth + columnGap);
+        const logoImage = teamLogoMap[team.side];
+        const players = [...team.starters].sort((left, right) => Number(left.number ?? 0) - Number(right.number ?? 0));
+        const starters = players.filter((player, playerIndex) => isLineupStarter(player, playerIndex));
+        const finishers = players.filter((player, playerIndex) => !isLineupStarter(player, playerIndex));
+        const startersCount = starters.length;
+        const finishersCount = finishers.length;
+        const listTop = contentY + headerHeight + 16;
+        const finishersLabelHeight = finishersCount > 0 ? (isSingleTeam ? 28 : 24) : 0;
+        const starterGap = isSingleTeam ? 7 : 6;
+        const finisherGap = isSingleTeam ? 6 : 5;
+        const finishersTopPadding = finishersCount > 0 ? 18 : 0;
+        const availableHeight = contentHeight - headerHeight - 16 - finishersLabelHeight - finishersTopPadding;
+        const starterWeight = startersCount > 0 ? startersCount : 0;
+        const finisherWeight = finishersCount > 0 ? finishersCount * 0.68 : 0;
+        const weightTotal = Math.max(1, starterWeight + finisherWeight);
+        const starterRowHeight = startersCount > 0
+            ? Math.max(
+                isSingleTeam ? 26 : 24,
+                Math.min(
+                    isSingleTeam ? 36 : 34,
+                    (availableHeight * (starterWeight / weightTotal) - starterGap * Math.max(startersCount - 1, 0)) / startersCount,
+                ),
+            )
+            : 0;
+        const finisherRowHeight = finishersCount > 0
+            ? Math.max(
+                isSingleTeam ? 18 : 17,
+                Math.min(
+                    isSingleTeam ? 25 : 23,
+                    (availableHeight * (finisherWeight / weightTotal) - finisherGap * Math.max(finishersCount - 1, 0)) / finishersCount,
+                ),
+            )
+            : 0;
+        const starterRowRadius = Math.max(12, Math.round(starterRowHeight * 0.42));
+        const finisherRowRadius = Math.max(10, Math.round(finisherRowHeight * 0.42));
+        const rowInset = isSingleTeam ? 16 : 12;
+        const numberWidth = isSingleTeam ? 60 : 48;
+        const positionWidth = columnWidth > 360 ? 72 : 56;
+        const titleMaxWidth = columnWidth - (isSingleTeam ? 176 : 140);
+        const subtitleY = contentY + (isSingleTeam ? 86 : 76);
+
+        ctx.save();
+        ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.12 : 0.08);
+        ctx.beginPath();
+        ctx.roundRect(columnX, contentY, columnWidth, headerHeight, 30);
+        ctx.fill();
+        ctx.strokeStyle = hexToRGBA(accentColor, isDark ? 0.22 : 0.14);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        drawLogoBadge(ctx, {
+            x: columnX + (isSingleTeam ? 54 : 44),
+            y: contentY + headerHeight / 2,
+            size: isSingleTeam ? 72 : 58,
+            img: logoImage,
+            label: team.name,
+            rawLogo: team.logo,
+            isDark,
+        });
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = textColor;
+        setFittedFont(ctx, team.name.toUpperCase(), titleMaxWidth, '800', isSingleTeam ? 42 : 30, FONT_DISPLAY, 18);
+        ctx.fillText(team.name.toUpperCase(), columnX + (isSingleTeam ? 106 : 88), contentY + (isSingleTeam ? 58 : 50));
+
+        ctx.fillStyle = mutedColor;
+        ctx.font = `800 ${isSingleTeam ? 15 : 13}px ${FONT_BODY}`;
+        ctx.fillText((team.lineupLabel || 'Titulares').toUpperCase(), columnX + (isSingleTeam ? 106 : 88), subtitleY);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = accentColor;
+        ctx.font = `800 ${isSingleTeam ? 16 : 14}px ${FONT_MONO}`;
+        ctx.fillText(`${players.length} JUG.`, columnX + columnWidth - 22, subtitleY);
+        ctx.restore();
+
+        if (players.length === 0) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = mutedColor;
+            ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
+            ctx.fillText('Sin titulares confirmados', columnX + columnWidth / 2, contentY + headerHeight + 56);
+            ctx.restore();
+            return;
+        }
+
+        starters.forEach((player, playerIndex) => {
+            const rowY = listTop + playerIndex * (starterRowHeight + starterGap);
+            const rowNumber = player.number ?? playerIndex + 1;
+            const playerName = `${player.name}${player.isCaptain ? ' (C)' : ''}`.trim().toUpperCase();
+            const positionLabel = String(player.position || '').trim().toUpperCase();
+            const textX = columnX + rowInset + numberWidth + 16;
+            const textWidth = Math.max(110, columnWidth - rowInset * 2 - numberWidth - positionWidth - 22);
+            const positionX = columnX + columnWidth - rowInset - 4;
+
+            ctx.save();
+            ctx.fillStyle = playerIndex % 2 === 0
+                ? hexToRGBA(accentColor, isDark ? 0.08 : 0.06)
+                : softColor;
+            ctx.beginPath();
+            ctx.roundRect(columnX, rowY, columnWidth, starterRowHeight, starterRowRadius);
+            ctx.fill();
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.06)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = accentColor;
+            ctx.font = `800 ${isSingleTeam ? 18 : 16}px ${FONT_MONO}`;
+            ctx.fillText(String(rowNumber).padStart(2, '0'), columnX + rowInset + numberWidth / 2, rowY + starterRowHeight / 2 + 1);
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = textColor;
+            setFittedFont(ctx, playerName, textWidth, '800', isSingleTeam ? 17 : 15, FONT_BODY, 11);
+            ctx.fillText(playerName, textX, rowY + starterRowHeight / 2 + 1);
+
+            if (positionLabel) {
+                ctx.textAlign = 'right';
+                ctx.fillStyle = mutedColor;
+                ctx.font = `700 ${isSingleTeam ? 10 : 9}px ${FONT_BODY}`;
+                ctx.fillText(truncateTextToWidth(ctx, positionLabel, positionWidth), positionX, rowY + starterRowHeight / 2 + 1);
+            }
+
+            ctx.restore();
+        });
+
+        if (finishersCount > 0) {
+            const finishersLabelY = listTop + startersCount * (starterRowHeight + starterGap) + 10;
+
+            ctx.save();
+            ctx.fillStyle = mutedColor;
+            ctx.font = `800 ${isSingleTeam ? 13 : 11}px ${FONT_BODY}`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText('FINISHERS', columnX, finishersLabelY + finishersLabelHeight - 6);
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = accentColor;
+            ctx.font = `800 ${isSingleTeam ? 13 : 11}px ${FONT_MONO}`;
+            ctx.fillText(String(finishersCount).padStart(2, '0'), columnX + columnWidth, finishersLabelY + finishersLabelHeight - 6);
+            ctx.restore();
+
+            finishers.forEach((player, finisherIndex) => {
+                const rowY = finishersLabelY + finishersLabelHeight + finishersTopPadding + finisherIndex * (finisherRowHeight + finisherGap);
+                const rowNumber = player.number ?? startersCount + finisherIndex + 1;
+                const playerName = `${player.name}${player.isCaptain ? ' (C)' : ''}`.trim().toUpperCase();
+                const positionLabel = String(player.position || '').trim().toUpperCase();
+                const textX = columnX + rowInset + numberWidth + 12;
+                const textWidth = Math.max(96, columnWidth - rowInset * 2 - numberWidth - positionWidth - 18);
+                const positionX = columnX + columnWidth - rowInset - 2;
+
+                ctx.save();
+                ctx.fillStyle = finisherIndex % 2 === 0
+                    ? hexToRGBA(accentColor, isDark ? 0.05 : 0.04)
+                    : hexToRGBA(isDark ? '#ffffff' : '#0f172a', isDark ? 0.035 : 0.03);
+                ctx.beginPath();
+                ctx.roundRect(columnX, rowY, columnWidth, finisherRowHeight, finisherRowRadius);
+                ctx.fill();
+                ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.05)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = accentColor;
+                ctx.font = `800 ${isSingleTeam ? 15 : 14}px ${FONT_MONO}`;
+                ctx.fillText(String(rowNumber).padStart(2, '0'), columnX + rowInset + numberWidth / 2, rowY + finisherRowHeight / 2 + 1);
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = textColor;
+                setFittedFont(ctx, playerName, textWidth, '800', isSingleTeam ? 13 : 12, FONT_BODY, 9);
+                ctx.fillText(playerName, textX, rowY + finisherRowHeight / 2 + 1);
+
+                if (positionLabel) {
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = mutedColor;
+                    ctx.font = `700 ${isSingleTeam ? 9 : 8}px ${FONT_BODY}`;
+                    ctx.fillText(truncateTextToWidth(ctx, positionLabel, positionWidth), positionX, rowY + finisherRowHeight / 2 + 1);
+                }
+
+                ctx.restore();
+            });
+        }
     });
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);

@@ -539,6 +539,36 @@
     gap: 24px;
 }
 
+.lineupsToolbar {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 18px 20px;
+    border: 1px solid var(--stroke);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.lineupsToolbarCopy {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.lineupsToolbarHint {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 62ch;
+}
+
+.lineupsExportAction {
+    flex-shrink: 0;
+}
+
 .playerList {
     display: flex;
     flex-direction: column;
@@ -796,6 +826,19 @@
 
     .tabContent {
         grid-template-columns: 1fr;
+    }
+
+    .lineupsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .lineupsToolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lineupsExportAction {
+        width: 100%;
     }
 }
 

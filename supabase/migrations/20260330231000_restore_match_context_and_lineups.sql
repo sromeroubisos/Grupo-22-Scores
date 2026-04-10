@@ -2,10 +2,41 @@ BEGIN;
 
 ALTER TABLE public.matches
     ADD COLUMN IF NOT EXISTS category TEXT,
-    ADD COLUMN IF NOT EXISTS home_division_id UUID REFERENCES public.club_divisions(id) ON DELETE SET NULL,
-    ADD COLUMN IF NOT EXISTS away_division_id UUID REFERENCES public.club_divisions(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS home_division_id UUID,
+    ADD COLUMN IF NOT EXISTS away_division_id UUID,
     ADD COLUMN IF NOT EXISTS lineups JSONB DEFAULT '{"home": [], "away": []}'::jsonb,
     ADD COLUMN IF NOT EXISTS events JSONB DEFAULT '[]'::jsonb;
+
+DO $$
+BEGIN
+    IF to_regclass('public.club_divisions') IS NOT NULL THEN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM pg_constraint
+            WHERE conname = 'matches_home_division_id_fkey'
+              AND conrelid = 'public.matches'::regclass
+        ) THEN
+            ALTER TABLE public.matches
+                ADD CONSTRAINT matches_home_division_id_fkey
+                FOREIGN KEY (home_division_id)
+                REFERENCES public.club_divisions(id)
+                ON DELETE SET NULL;
+        END IF;
+
+        IF NOT EXISTS (
+            SELECT 1
+            FROM pg_constraint
+            WHERE conname = 'matches_away_division_id_fkey'
+              AND conrelid = 'public.matches'::regclass
+        ) THEN
+            ALTER TABLE public.matches
+                ADD CONSTRAINT matches_away_division_id_fkey
+                FOREIGN KEY (away_division_id)
+                REFERENCES public.club_divisions(id)
+                ON DELETE SET NULL;
+        END IF;
+    END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_matches_home_division_id ON public.matches(home_division_id);
 CREATE INDEX IF NOT EXISTS idx_matches_away_division_id ON public.matches(away_division_id);

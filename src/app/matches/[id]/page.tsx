@@ -183,6 +183,44 @@ function normalizeComparableTeamValue(value: unknown) {
         .replace(/[\u0300-\u036f]/g, '');
 }
 
+function extractDisplayLineupPlayers(rawPlayers: unknown) {
+    const players = Array.isArray(rawPlayers) ? rawPlayers : [];
+
+    return players
+        .map((player, index) => {
+            const source = player && typeof player === 'object' ? player as Record<string, unknown> : {};
+            const name = String(
+                source.name ||
+                source.playerName ||
+                source.PLAYER_NAME ||
+                source.player_name ||
+                ''
+            ).trim();
+
+            if (!name) return null;
+
+            const rawNumber = source.number ?? source.jerseyNumber ?? source.PLAYER_NUMBER ?? source.player_number ?? index + 1;
+            const numericNumber = Number(rawNumber);
+
+            return {
+                id: String(source.id || source.playerId || source.PLAYER_ID || source.player_id || '').trim() || null,
+                name,
+                number: Number.isFinite(numericNumber) ? numericNumber : index + 1,
+                position: String(source.position || source.PLAYER_POSITION || source.player_position || '').trim() || null,
+                role: String(source.role || source.PLAYER_ROLE || source.player_role || '').trim() || null,
+                isCaptain: Boolean(source.isCaptain || source.IS_CAPTAIN || source.player_captain || source.captain),
+            };
+        })
+        .filter((player): player is {
+            id: string | null;
+            name: string;
+            number: number;
+            position: string | null;
+            role: string | null;
+            isCaptain: boolean;
+        } => Boolean(player));
+}
+
 function getComparableTeamId(value: unknown) {
     return String(value || '').trim().toLowerCase();
 }
@@ -984,6 +1022,17 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const localHomeLineup = localLineups.home.filter((player) => Boolean(player.name));
     const localAwayLineup = localLineups.away.filter((player) => Boolean(player.name));
     const hasLocalLineups = localHomeLineup.length > 0 || localAwayLineup.length > 0;
+    const displayHomeLineup = extractDisplayLineupPlayers(
+        hasLocalLineups
+            ? localHomeLineup
+            : (matchData.lineups?.HOME_STARTING_LINEUPS || matchData.lineups?.home_team?.starting_lineups || [])
+    );
+    const displayAwayLineup = extractDisplayLineupPlayers(
+        hasLocalLineups
+            ? localAwayLineup
+            : (matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || [])
+    );
+    const hasAnyLineups = displayHomeLineup.length > 0 || displayAwayLineup.length > 0;
     const motorsportRows = (Array.isArray(matchData.standings) && matchData.standings.length > 0
         ? matchData.standings
         : [
@@ -1713,18 +1762,50 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                         {activeTab === 'lineups' && (
                             <div className={styles.lineupsContainer}>
-                                {(hasLocalLineups ||
-                                    (matchData.lineups?.HOME_STARTING_LINEUPS || matchData.lineups?.home_team?.starting_lineups || []).length > 0 ||
-                                    (matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || []).length > 0) ? (
+                                {hasAnyLineups ? (
                                     <div className={styles.lineupsGrid}>
+                                        <div className={styles.lineupsToolbar}>
+                                            <div className={styles.lineupsToolbarCopy}>
+                                                <div className={styles.panelTitle} style={{ marginBottom: 8 }}>Alineaciones confirmadas</div>
+                                                <p className={styles.lineupsToolbarHint}>
+                                                    Exporta una pieza para post o historia con ambos equipos o una sola formacion, sin salir del lenguaje visual que ya usa la vista publica.
+                                                </p>
+                                            </div>
+                                            <ExportImage
+                                                className={styles.lineupsExportAction}
+                                                template="lineups"
+                                                filename={`alineaciones-${matchData.home.name}-${matchData.away.name}`}
+                                                data={{
+                                                    tournament: matchData.tournament,
+                                                    tournamentLogo: matchData.tournamentLogo,
+                                                    date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
+                                                    time: matchData.time,
+                                                    venue: matchData.venue,
+                                                    kickoffAt: matchData.date,
+                                                    homeTeam: {
+                                                        name: matchData.home.name,
+                                                        logo: matchData.home.logo,
+                                                        lineupLabel: 'Titulares',
+                                                        starters: displayHomeLineup,
+                                                    },
+                                                    awayTeam: {
+                                                        name: matchData.away.name,
+                                                        logo: matchData.away.logo,
+                                                        lineupLabel: 'Titulares',
+                                                        starters: displayAwayLineup,
+                                                    },
+                                                }}
+                                            />
+                                        </div>
+
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.home.name}</div>
                                             <div className={styles.playerList}>
-                                                {(hasLocalLineups ? localHomeLineup : (matchData.lineups?.HOME_STARTING_LINEUPS || matchData.lineups?.home_team?.starting_lineups || [])).map((p: any, i: number) => {
-                                                    const pId = hasLocalLineups ? p.id : (p.PLAYER_ID || p.player_id || p.id);
-                                                    const pName = hasLocalLineups ? p.name : (p.PLAYER_NAME || p.player_name);
-                                                    const pNumber = hasLocalLineups ? p.number : (p.PLAYER_NUMBER || p.player_number);
-                                                    const pPosition = hasLocalLineups ? p.position : (p.PLAYER_POSITION || p.player_position);
+                                                {displayHomeLineup.map((p, i: number) => {
+                                                    const pId = p.id;
+                                                    const pName = p.name;
+                                                    const pNumber = p.number;
+                                                    const pPosition = p.position || p.role;
                                                     return (
                                                         <div key={i} className={styles.playerItem}>
                                                             <span>
@@ -1740,11 +1821,11 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.away.name}</div>
                                             <div className={styles.playerList}>
-                                                {(hasLocalLineups ? localAwayLineup : (matchData.lineups?.AWAY_STARTING_LINEUPS || matchData.lineups?.away_team?.starting_lineups || [])).map((p: any, i: number) => {
-                                                    const pId = hasLocalLineups ? p.id : (p.PLAYER_ID || p.player_id || p.id);
-                                                    const pName = hasLocalLineups ? p.name : (p.PLAYER_NAME || p.player_name);
-                                                    const pNumber = hasLocalLineups ? p.number : (p.PLAYER_NUMBER || p.player_number);
-                                                    const pPosition = hasLocalLineups ? p.position : (p.PLAYER_POSITION || p.player_position);
+                                                {displayAwayLineup.map((p, i: number) => {
+                                                    const pId = p.id;
+                                                    const pName = p.name;
+                                                    const pNumber = p.number;
+                                                    const pPosition = p.position || p.role;
                                                     return (
                                                         <div key={i} className={styles.playerItem}>
                                                             <span>

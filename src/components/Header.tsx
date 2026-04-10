@@ -115,7 +115,7 @@ export default function Header() {
     }, [pathname]);
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
-    const canSeeProde = user?.role === 'super_admin';
+    const canSeeProde = true;
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
     const isProdeRoute = pathname?.startsWith('/prode') ?? false;

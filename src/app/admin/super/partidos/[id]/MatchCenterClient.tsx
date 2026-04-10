@@ -84,6 +84,12 @@ interface LineupPlayer {
     divisionId?: string | null;
 }
 
+type QuickLineupEntry = {
+    number: number | null;
+    name: string;
+    isCaptain: boolean;
+};
+
 interface MatchScore {
     home: number;
     away: number;
@@ -237,6 +243,17 @@ function hasAnyLineupPlayers(lineups: MatchLineups | null | undefined) {
 
 function areDraftValuesEqual(left: unknown, right: unknown) {
     return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+}
+
+function areMatchPointsEqual(left: MatchPoints | null | undefined, right: MatchPoints | null | undefined) {
+    return (
+        Number(left?.home_base_points ?? 0) === Number(right?.home_base_points ?? 0)
+        && Number(left?.away_base_points ?? 0) === Number(right?.away_base_points ?? 0)
+        && Number(left?.home_bonus_points ?? 0) === Number(right?.home_bonus_points ?? 0)
+        && Number(left?.away_bonus_points ?? 0) === Number(right?.away_bonus_points ?? 0)
+        && Boolean(left?.points_autocalculated ?? true) === Boolean(right?.points_autocalculated ?? true)
+        && String(left?.points_override_reason ?? '') === String(right?.points_override_reason ?? '')
+    );
 }
 
 export interface MatchPoints {
@@ -414,6 +431,57 @@ function buildLineupTemplate(count: number, existing: LineupPlayer[] = []): Line
 
 function normalizeLookupKey(value: string | null | undefined) {
     return String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function stripLeadingTeamAlias(value: string, aliases: string[]) {
+    const normalizedValue = value.trim();
+    const matchingAlias = aliases.find((alias) => {
+        const normalizedAlias = normalizeLookupKey(alias);
+        return normalizedAlias && normalizeLookupKey(normalizedValue).startsWith(`${normalizedAlias} `);
+    });
+
+    if (!matchingAlias) return normalizedValue;
+    return normalizedValue
+        .slice(matchingAlias.trim().length)
+        .replace(/^[\s\-–—.)]+/, '')
+        .trim();
+}
+
+function formatQuickLineupDraft(players: LineupPlayer[]) {
+    return players
+        .filter((player) => Boolean(player.name.trim()))
+        .sort((left, right) => left.number - right.number)
+        .map((player) => `${player.number} - ${player.name.trim()}${player.isCaptain ? ' (C)' : ''}`)
+        .join('\n');
+}
+
+function parseQuickLineupDraft(value: string, teamAliases: string[] = []) {
+    return value
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line, index) => {
+            const withoutBullet = line.replace(/^[\-*•]+\s*/, '');
+            const captainPattern = /\((c|cap|captain)\)$/i;
+            const isCaptain = captainPattern.test(withoutBullet);
+            const normalizedLine = withoutBullet.replace(captainPattern, '').trim();
+            const match = normalizedLine.match(/^(\d{1,2})\s*(?:[-.)]|–|—)?\s*(.+)$/);
+
+            if (match) {
+                return {
+                    number: Number.parseInt(match[1], 10),
+                    name: stripLeadingTeamAlias(match[2].trim(), teamAliases),
+                    isCaptain,
+                } satisfies QuickLineupEntry;
+            }
+
+            return {
+                number: index + 1,
+                name: stripLeadingTeamAlias(normalizedLine, teamAliases),
+                isCaptain,
+            } satisfies QuickLineupEntry;
+        })
+        .filter((entry) => Boolean(entry.name));
 }
 
 function normalizeRosterPlayers(roster: MatchRosterPlayer[] | null | undefined): MatchRosterPlayer[] {
@@ -667,8 +735,16 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         () => getDefaultMatchEventDefinitions(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
     );
     const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(initialMatch.lineups)));
+    const [quickLineupDrafts, setQuickLineupDrafts] = useState<{ home: string; away: string }>(() => ({
+        home: formatQuickLineupDraft(initialLineups.home),
+        away: formatQuickLineupDraft(initialLineups.away),
+    }));
+    const [quickLineupDraftDirty, setQuickLineupDraftDirty] = useState<{ home: boolean; away: boolean }>({
+        home: false,
+        away: false,
+    });
     const [dateTimeDraft, setDateTimeDraft] = useState(() => toDateTimeLocalInput(initialMatch.date_time));
-    const eventDefinitionMap = buildMatchEventDefinitionMap(eventDefinitions);
+    const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(eventDefinitions), [eventDefinitions]);
 
     useEffect(() => {
         persistedEventsRef.current = normalizeMatchEvents(match.events);
@@ -685,6 +761,13 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     useEffect(() => {
         localLineupsRef.current = localLineups;
     }, [localLineups]);
+
+    useEffect(() => {
+        setQuickLineupDrafts((prev) => ({
+            home: quickLineupDraftDirty.home ? prev.home : formatQuickLineupDraft(localLineups.home),
+            away: quickLineupDraftDirty.away ? prev.away : formatQuickLineupDraft(localLineups.away),
+        }));
+    }, [localLineups.away, localLineups.home, quickLineupDraftDirty.away, quickLineupDraftDirty.home]);
 
     const teamRosters = useMemo(() => ({
         home: normalizeRosterPlayers(match.homeRoster),
@@ -722,6 +805,80 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             return { ...prev, [team]: updatedTeam };
         });
     }, [teamRosters]);
+
+    const handleQuickLineupDraftChange = useCallback((team: 'home' | 'away', value: string) => {
+        setQuickLineupDrafts((prev) => ({ ...prev, [team]: value }));
+        setQuickLineupDraftDirty((prev) => ({ ...prev, [team]: true }));
+    }, []);
+
+    const resetQuickLineupDraft = useCallback((team: 'home' | 'away') => {
+        setQuickLineupDrafts((prev) => ({
+            ...prev,
+            [team]: formatQuickLineupDraft(localLineupsRef.current[team]),
+        }));
+        setQuickLineupDraftDirty((prev) => ({ ...prev, [team]: false }));
+    }, []);
+
+    const applyQuickLineupDraft = useCallback((team: 'home' | 'away') => {
+        const club = team === 'home' ? match.homeClub : match.awayClub;
+        const parsedEntries = parseQuickLineupDraft(quickLineupDrafts[team], [
+            club?.name || '',
+            club?.short_name || '',
+            team === 'home' ? 'local' : 'visitante',
+            team === 'home' ? 'home' : 'away',
+        ]);
+        if (parsedEntries.length === 0) {
+            setSaveMsg({ type: 'warn', text: 'Pegá al menos un jugador para aplicar la carga rápida.' });
+            return;
+        }
+
+        const nextSize = Math.max(getLineupSize(localLineupsRef.current), parsedEntries.length);
+        setLineupSizeInput(String(nextSize));
+        setLocalLineups((prev) => {
+            const nextHome = buildLineupTemplate(nextSize, team === 'home' ? [] : prev.home);
+            const nextAway = buildLineupTemplate(nextSize, team === 'away' ? [] : prev.away);
+            const updatedTeam = buildLineupTemplate(nextSize, []);
+
+            parsedEntries.forEach((entry, index) => {
+                const rosterEntry = resolveRosterPlayerByName(teamRosters[team], entry.name);
+                const base = rosterEntry
+                    ? buildLineupSelectionFromRoster(updatedTeam[index], rosterEntry)
+                    : {
+                        ...updatedTeam[index],
+                        id: undefined,
+                        squadMemberId: null,
+                        divisionId: updatedTeam[index].divisionId ?? null,
+                        name: entry.name,
+                        position: updatedTeam[index].position ?? '',
+                    };
+
+                updatedTeam[index] = {
+                    ...base,
+                    name: rosterEntry?.name || entry.name,
+                    number: entry.number ?? index + 1,
+                    role: index < 15 ? 'starter' : 'substitute',
+                    isCaptain: entry.isCaptain,
+                };
+            });
+
+            const nextLineups = {
+                home: team === 'home' ? updatedTeam : nextHome,
+                away: team === 'away' ? updatedTeam : nextAway,
+            };
+
+            setQuickLineupDrafts((currentDrafts) => ({
+                ...currentDrafts,
+                [team]: formatQuickLineupDraft(nextLineups[team]),
+            }));
+            setQuickLineupDraftDirty((currentDirty) => ({
+                ...currentDirty,
+                [team]: false,
+            }));
+            return nextLineups;
+        });
+
+        setSaveMsg({ type: 'ok', text: `Lista rápida aplicada para ${team === 'home' ? 'local' : 'visitante'}. Guardá para persistir.` });
+    }, [match.awayClub, match.homeClub, quickLineupDrafts, teamRosters]);
 
     const resolveEventPlayerSelection = useCallback((team: 'home' | 'away' | null, value: string) => {
         if (!team) {
@@ -986,7 +1143,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     }, [match.tournament_id, refreshMatchConfiguration]);
 
     const handleRecalculate = useCallback(() => {
-        setLocalPoints(getAutoPointsSnapshot());
+        setLocalPoints((prev) => {
+            const next = getAutoPointsSnapshot();
+            return areMatchPointsEqual(prev, next) ? prev : next;
+        });
     }, [getAutoPointsSnapshot]);
 
     const handleSavePoints = useCallback(async () => {
@@ -1011,7 +1171,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     // Reactive: recalculate whenever score/status/events change, only while in auto mode
     useEffect(() => {
         if (localPoints.points_autocalculated === false) return;
-        setLocalPoints(getAutoPointsSnapshot());
+        setLocalPoints((prev) => {
+            const next = getAutoPointsSnapshot();
+            return areMatchPointsEqual(prev, next) ? prev : next;
+        });
     }, [getAutoPointsSnapshot, localPoints.points_autocalculated]);
 
     /* â”€â”€â”€ REALTIME (live matches) â”€â”€â”€ */
@@ -1520,6 +1683,40 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                                                 {club?.logo_url && <img src={club.logo_url} alt={club.name} width={24} style={{ objectFit: 'contain' }} />}
                                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0 }}>{club?.name || (team === 'home' ? 'Local' : 'Visitante')}</h3>
+                                            </div>
+                                            <div className="quick-lineup-card">
+                                                <div className="quick-lineup-header">
+                                                    <div>
+                                                        <strong>Carga rápida</strong>
+                                                        <span>Pegá una lista ordenada. Formato sugerido: `1 - Nombre Apellido`.</span>
+                                                    </div>
+                                                    <div className="quick-lineup-actions">
+                                                        <button
+                                                            className="mc-btn mc-btn-outline"
+                                                            type="button"
+                                                            onClick={() => resetQuickLineupDraft(team)}
+                                                        >
+                                                            <RefreshCw size={14} /> Usar actual
+                                                        </button>
+                                                        <button
+                                                            className="mc-btn mc-btn-primary"
+                                                            type="button"
+                                                            onClick={() => applyQuickLineupDraft(team)}
+                                                        >
+                                                            <Plus size={14} /> Aplicar lista
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <textarea
+                                                    className="quick-lineup-textarea"
+                                                    value={quickLineupDrafts[team]}
+                                                    onChange={(event) => handleQuickLineupDraftChange(team, event.target.value)}
+                                                    placeholder={`1 - Nombre Apellido\n2 - Nombre Apellido\n3 - Nombre Apellido`}
+                                                    rows={8}
+                                                />
+                                                <p className="quick-lineup-hint">
+                                                    Se cargan de arriba hacia abajo en las posiciones de la planilla. Si el jugador ya existe en el roster, se vincula automáticamente; si no, queda listo para crearse al guardar.
+                                                </p>
                                             </div>
                                             <div style={{ background: '#111', borderRadius: 8, border: '1px solid #222', overflow: 'hidden' }}>
                                                 <div style={{ background: '#222', padding: '10px 16px', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.05em', color: '#888' }}>

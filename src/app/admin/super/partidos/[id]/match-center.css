@@ -414,6 +414,73 @@
     border: 1px solid var(--accent);
 }
 
+.quick-lineup-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.quick-lineup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.quick-lineup-header strong {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.quick-lineup-header span {
+    display: block;
+    font-size: 0.78rem;
+    color: #888;
+    line-height: 1.45;
+}
+
+.quick-lineup-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.quick-lineup-textarea {
+    width: 100%;
+    min-height: 180px;
+    resize: vertical;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 14px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    outline: none;
+    transition: var(--transition);
+}
+
+.quick-lineup-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.quick-lineup-hint {
+    margin: 10px 0 0;
+    font-size: 0.72rem;
+    color: #777;
+    line-height: 1.5;
+}
+
 /* FORMS */
 .form-group {
     margin-bottom: 20px;
@@ -516,6 +583,20 @@
 @media (max-width: 600px) {
     .match-main-line {
         gap: 12px;
+    }
+
+    .quick-lineup-header {
+        flex-direction: column;
+    }
+
+    .quick-lineup-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .quick-lineup-actions .mc-btn {
+        flex: 1 1 0;
+        justify-content: center;
     }
 
     .team-logo-mini {

@@ -1075,9 +1075,8 @@ export async function persistMatchCenterSupplementalData(
     throw new Error('El partido que intentas actualizar no existe.');
   }
 
-  const [supportsEventsColumn, supportsLineupsColumn, supportsRelationalEvents] = await Promise.all([
+  const [supportsEventsColumn, supportsRelationalEvents] = await Promise.all([
     payload.events !== undefined ? supportsMatchesColumn(client, 'events') : Promise.resolve(false),
-    payload.lineups !== undefined ? supportsMatchesColumn(client, 'lineups') : Promise.resolve(false),
     payload.events !== undefined ? supportsMatchEventsTable(client) : Promise.resolve(false),
   ]);
 
@@ -1110,33 +1109,40 @@ export async function persistMatchCenterSupplementalData(
   const shouldPersistAwayDivisionId =
     !normalizeText((match as any).away_division_id) && Boolean(contexts.away.divisionId);
 
-  const [supportsHomeDivisionColumn, supportsAwayDivisionColumn] = await Promise.all([
-    shouldPersistHomeDivisionId ? supportsMatchesColumn(client, 'home_division_id') : Promise.resolve(false),
-    shouldPersistAwayDivisionId ? supportsMatchesColumn(client, 'away_division_id') : Promise.resolve(false),
-  ]);
+  let persistedLineups = false;
 
-  const directUpdates: Record<string, unknown> = {};
-
-  if (payload.lineups !== undefined && supportsLineupsColumn) {
-    directUpdates.lineups = resolvedLineups;
-  }
-
-  if (shouldPersistHomeDivisionId && supportsHomeDivisionColumn) {
-    directUpdates.home_division_id = contexts.home.divisionId;
-  }
-
-  if (shouldPersistAwayDivisionId && supportsAwayDivisionColumn) {
-    directUpdates.away_division_id = contexts.away.divisionId;
-  }
-
-  if (Object.keys(directUpdates).length > 0) {
-    const { error: updateError } = await client
+  if (payload.lineups !== undefined) {
+    const { error: lineupsUpdateError } = await client
       .from('matches')
-      .update(directUpdates)
+      .update({ lineups: resolvedLineups })
       .eq('id', matchId);
 
-    if (updateError) {
-      throw new Error(updateError.message || 'No se pudo actualizar el partido.');
+    if (!lineupsUpdateError) {
+      persistedLineups = true;
+    } else if (!isMissingColumnError(lineupsUpdateError, 'lineups')) {
+      throw new Error(lineupsUpdateError.message || 'No se pudieron guardar las alineaciones del partido.');
+    }
+  }
+
+  if (shouldPersistHomeDivisionId) {
+    const { error: divisionUpdateError } = await client
+      .from('matches')
+      .update({ home_division_id: contexts.home.divisionId })
+      .eq('id', matchId);
+
+    if (divisionUpdateError && !isMissingColumnError(divisionUpdateError, 'home_division_id')) {
+      throw new Error(divisionUpdateError.message || 'No se pudo guardar la division local del partido.');
+    }
+  }
+
+  if (shouldPersistAwayDivisionId) {
+    const { error: divisionUpdateError } = await client
+      .from('matches')
+      .update({ away_division_id: contexts.away.divisionId })
+      .eq('id', matchId);
+
+    if (divisionUpdateError && !isMissingColumnError(divisionUpdateError, 'away_division_id')) {
+      throw new Error(divisionUpdateError.message || 'No se pudo guardar la division visitante del partido.');
     }
   }
 
@@ -1190,7 +1196,7 @@ export async function persistMatchCenterSupplementalData(
   }
 
   return {
-    persistedLineups: supportsLineupsColumn,
+    persistedLineups,
     lineups: payload.lineups !== undefined ? resolvedLineups : normalizedExistingLineups,
   };
 }
