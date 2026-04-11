@@ -18,6 +18,7 @@ import {
   toInputDateInTimeZone,
   toInputTimeInTimeZone,
 } from '@/lib/timezone';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import type {
   TournamentFixture,
   TournamentPhase,
@@ -53,6 +54,42 @@ export class FixtureService {
     }
 
     return createClient();
+  }
+
+  private static async selectMatchForUpdate(
+    supabase: any,
+    matchId: string,
+  ) {
+    const variants = [
+      'id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason',
+      'id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock',
+      'id, tournament_id, phase_id, round_id, group_id, home_club_id, away_club_id, status, score',
+      'id, tournament_id, phase_id, home_club_id, away_club_id, status, score',
+    ];
+
+    let lastError: { message?: string | null; details?: string | null; code?: string | null } | null = null;
+
+    for (const columns of variants) {
+      const result = await supabase
+        .from('matches')
+        .select(columns)
+        .eq('id', matchId)
+        .single();
+
+      if (!result.error && result.data) {
+        return { data: result.data, error: null };
+      }
+
+      lastError = result.error;
+      const selectedColumns = columns.split(',').map((value) => value.trim()).filter(Boolean);
+      const hasMissingColumn = selectedColumns.some((column) => isMissingColumnError(result.error, column));
+
+      if (!hasMissingColumn) {
+        return { data: null, error: result.error };
+      }
+    }
+
+    return { data: null, error: lastError };
   }
 
   private static async syncClubRankingsAfterMatchChange(
@@ -239,19 +276,19 @@ export class FixtureService {
     return this._supportsRoundLabel ?? false;
   }
 
-  static async checkMatchColumnSupport(column: string): Promise<boolean> {
+  static async checkMatchColumnSupport(column: string, providedClient?: any): Promise<boolean> {
     if (this._matchColumnSupport.has(column)) {
       return this._matchColumnSupport.get(column) ?? false;
     }
 
     try {
-      const supabase = await createClient();
+      const supabase = providedClient ?? await createClient();
       const { error } = await supabase
         .from('matches')
         .select(column)
         .limit(0);
 
-      const supported = !error;
+      const supported = !error && !isMissingColumnError(error, column);
       this._matchColumnSupport.set(column, supported);
       return supported;
     } catch {
@@ -700,8 +737,12 @@ export class FixtureService {
   /**
    * Update a match
    */
-  static async updateMatch(matchId: string, data: Partial<MatchFormData>): Promise<Match | null> {
-    const supabase = await this.getWriteClient();
+  static async updateMatch(
+    matchId: string,
+    data: Partial<MatchFormData>,
+    providedClient?: any,
+  ): Promise<Match | null> {
+    const supabase = providedClient ?? await this.getWriteClient();
 
     const [
       supportsRoundLabel,
@@ -710,21 +751,19 @@ export class FixtureService {
       supportsCategory,
       supportsBroadcastUrl,
       supportsReplayUrl,
+      supportsClock,
     ] = await Promise.all([
       this.checkRoundLabelSupport(),
-      data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
-      data.awaySquadId !== undefined ? this.checkMatchColumnSupport('away_division_id') : Promise.resolve(false),
-      data.category !== undefined ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
-      data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url') : Promise.resolve(false),
-      data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url') : Promise.resolve(false),
+      data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id', supabase) : Promise.resolve(false),
+      data.awaySquadId !== undefined ? this.checkMatchColumnSupport('away_division_id', supabase) : Promise.resolve(false),
+      data.category !== undefined ? this.checkMatchColumnSupport('category', supabase) : Promise.resolve(false),
+      data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url', supabase) : Promise.resolve(false),
+      data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url', supabase) : Promise.resolve(false),
+      data.clock !== undefined ? this.checkMatchColumnSupport('clock', supabase) : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] updateMatch - round_label: ${supportsRoundLabel}`);
 
-    const { data: existingMatch, error: existingMatchError } = await supabase
-      .from('matches')
-      .select('id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
-      .eq('id', matchId)
-      .single();
+    const { data: existingMatch, error: existingMatchError } = await this.selectMatchForUpdate(supabase, matchId);
 
     if (existingMatchError || !existingMatch) {
       throw new Error('El partido que intentás actualizar no existe.');
@@ -805,7 +844,7 @@ export class FixtureService {
     if (supportsBroadcastUrl && data.streamUrl !== undefined) updateData.broadcast_url = data.streamUrl || null;
     if (supportsReplayUrl && data.replayUrl !== undefined) updateData.replay_url = data.replayUrl || null;
     if (data.score !== undefined) updateData.score = data.score;
-    if (data.clock !== undefined) updateData.clock = data.clock;
+    if (supportsClock && data.clock !== undefined) updateData.clock = data.clock;
     if (data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
     if (data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;
     if (data.homeBonusPoints !== undefined) updateData.home_bonus_points = data.homeBonusPoints;

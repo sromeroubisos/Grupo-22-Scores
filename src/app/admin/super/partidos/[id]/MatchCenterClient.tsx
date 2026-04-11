@@ -165,6 +165,7 @@ type PersistMatchPatchOptions = {
 
 type PersistMatchWarnings = {
     lineupsNotPersisted?: boolean;
+    clockNotPersisted?: boolean;
 };
 
 function normalizeMatchEvents(events: MatchRow['events']): MatchEvent[] {
@@ -277,7 +278,26 @@ function formatMatchClock(clock: MatchClock | null | undefined) {
     const seconds = String(normalizedClock.seconds || 0).padStart(2, '0');
     const period = (normalizedClock.period || '').trim();
 
-    return period ? `${minute}:${seconds} · ${period}` : `${minute}:${seconds}`;
+    return period ? `${minute}:${seconds} - ${period}` : `${minute}:${seconds}`;
+}
+
+function deriveClockFromKickoff(
+    dateTime: string | null | undefined,
+    fallbackPeriod?: string | null,
+): MatchClock | null {
+    if (!dateTime) return null;
+
+    const kickoff = new Date(dateTime);
+    if (Number.isNaN(kickoff.getTime())) return null;
+
+    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - kickoff.getTime()) / 1000));
+
+    return {
+        minute: Math.floor(elapsedSeconds / 60),
+        seconds: elapsedSeconds % 60,
+        period: (fallbackPeriod || '').trim() || '1T',
+        running: true,
+    };
 }
 
 function normalizeTextValue(value: string | null | undefined) {
@@ -931,7 +951,14 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     const initialEvents = normalizeMatchEvents(initialMatch.events);
     const initialLineups = normalizeMatchLineups(initialMatch.lineups);
     const initialScore = normalizeMatchScore(initialMatch.score);
-    const initialClock = normalizeMatchClock(initialMatch.clock);
+    const kickoffClock = initialMatch.status === 'live'
+        ? deriveClockFromKickoff(initialMatch.date_time, initialMatch.clock?.period)
+        : null;
+    const initialClock = normalizeMatchClock(
+        initialMatch.clock?.minute || initialMatch.clock?.seconds || initialMatch.clock?.period
+            ? initialMatch.clock
+            : kickoffClock,
+    );
 
     const [match, setMatch] = useState<MatchRow>(initialMatch);
     const [activeTab, setActiveTab] = useState('resumen');
@@ -972,6 +999,11 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     });
     const [dateTimeDraft, setDateTimeDraft] = useState(() => toDateTimeLocalInput(initialMatch.date_time));
     const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(eventDefinitions), [eventDefinitions]);
+    const draftKickoffIso = useMemo(() => {
+        if (!dateTimeDraft) return match.date_time;
+        const [date, time] = dateTimeDraft.split('T');
+        return combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE) || match.date_time;
+    }, [dateTimeDraft, match.date_time]);
 
     useEffect(() => {
         persistedEventsRef.current = normalizeMatchEvents(match.events);
@@ -1374,7 +1406,10 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 ?? warnings.lineupsNotPersisted
                 ?? false,
             preserveUnsavedScore: options?.preserveUnsavedScore ?? !payloadIncludesScore,
-            preserveUnsavedClock: options?.preserveUnsavedClock ?? !payloadIncludesClock,
+            preserveUnsavedClock:
+                options?.preserveUnsavedClock
+                ?? warnings.clockNotPersisted
+                ?? !payloadIncludesClock,
             preserveUnsavedEvents: options?.preserveUnsavedEvents ?? !payloadIncludesEvents,
             preserveUnsavedLineups:
                 options?.preserveUnsavedLineups
@@ -1587,6 +1622,24 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
         if (match.status === 'live' || !clockDraft.running) return;
         setClockDraft((prev) => ({ ...normalizeMatchClock(prev), running: false }));
     }, [clockDraft.running, match.status]);
+
+    useEffect(() => {
+        const persistedClock = normalizeMatchClock(persistedClockRef.current);
+        const currentClock = normalizeMatchClock(clockDraftRef.current);
+        const hasManualClock =
+            Boolean(persistedClock.minute || persistedClock.seconds || persistedClock.period)
+            || Boolean(currentClock.minute || currentClock.seconds || currentClock.period);
+
+        if (match.status !== 'live' || hasManualClock) return;
+
+        const derivedClock = deriveClockFromKickoff(draftKickoffIso, currentClock.period || persistedClock.period);
+        if (!derivedClock) return;
+
+        setClockDraft((prev) => {
+            const normalizedPrev = normalizeMatchClock(prev);
+            return areMatchClocksEqual(normalizedPrev, derivedClock) ? normalizedPrev : derivedClock;
+        });
+    }, [draftKickoffIso, match.status]);
 
     useEffect(() => {
         if (!clockDraft.running) return;
@@ -2824,6 +2877,21 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                             }}
                                         >
                                             {clockDraft.running ? 'Pausar' : 'Iniciar'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mc-btn mc-btn-outline"
+                                            style={{ border: '1px solid rgba(255,255,255,0.16)', background: '#111827', color: '#e5e7eb' }}
+                                            onClick={() => {
+                                                const derivedClock = deriveClockFromKickoff(draftKickoffIso, clockDraft.period);
+                                                if (!derivedClock) return;
+                                                setClockDraft(derivedClock);
+                                                if (match.status !== 'live') {
+                                                    setMatch((prev) => ({ ...prev, status: 'live' }));
+                                                }
+                                            }}
+                                        >
+                                            Sincronizar inicio
                                         </button>
                                         <button
                                             type="button"

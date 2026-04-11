@@ -367,12 +367,23 @@ export async function PATCH(
 
     console.log('[API PATCH /matches]', matchId, 'keys:', Object.keys(body));
 
-    const { events, lineups, ...matchFields } = body as Record<string, unknown>;
-    const hasFixtureFieldUpdate = Object.keys(matchFields).length > 0;
+    const { events, lineups, ...rawMatchFields } = body as Record<string, unknown>;
+    const matchFields = { ...rawMatchFields };
     const writeClient = await getWriteClient();
+    let clockNotPersisted = false;
+
+    if (Object.prototype.hasOwnProperty.call(matchFields, 'clock')) {
+      const supportsClock = await FixtureService.checkMatchColumnSupport('clock', writeClient);
+      if (!supportsClock) {
+        delete matchFields.clock;
+        clockNotPersisted = true;
+      }
+    }
+
+    const hasFixtureFieldUpdate = Object.keys(matchFields).length > 0;
 
     if (hasFixtureFieldUpdate) {
-      await FixtureService.updateMatch(matchId, matchFields);
+      await FixtureService.updateMatch(matchId, matchFields, writeClient);
     }
 
     const supplemental = await persistMatchCenterSupplementalData(writeClient, matchId, {
@@ -391,8 +402,10 @@ export async function PATCH(
 
     const matchCenterWarnings =
       lineups !== undefined && !supplemental.persistedLineups
-        ? { lineupsNotPersisted: true }
-        : null;
+        ? { lineupsNotPersisted: true, ...(clockNotPersisted ? { clockNotPersisted: true } : {}) }
+        : clockNotPersisted
+          ? { clockNotPersisted: true }
+          : null;
 
     return NextResponse.json(
       matchCenterWarnings
