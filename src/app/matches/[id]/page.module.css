@@ -162,6 +162,23 @@
     min-width: 0;
 }
 
+.teamNameRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.visitor .teamNameRow {
+    justify-content: flex-end;
+}
+
+.teamNameLink {
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
 .teamLabel {
     font-size: 11px;
     text-transform: uppercase;
@@ -171,12 +188,33 @@
 }
 
 .teamName {
-    font-size: 32px;
+    font-size: clamp(24px, 2.2vw, 32px);
     font-weight: 900;
-    line-height: 1.1;
-    white-space: nowrap;
+    line-height: 1.12;
     overflow: hidden;
-    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-width: 320px;
+    text-wrap: balance;
+}
+
+.teamFavoriteButton {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 999px;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--stroke);
+    color: var(--muted);
+}
+
+.teamFavoriteButton:hover {
+    background: rgba(var(--color-accent-rgb), 0.12);
+    border-color: rgba(var(--color-accent-rgb), 0.35);
 }
 
 .centerCol {
@@ -891,6 +929,10 @@
         text-align: left;
     }
 
+    .visitor .teamNameRow {
+        justify-content: center;
+    }
+
     .centerCol {
         order: -1;
     }
@@ -906,6 +948,14 @@
 
     .lineupsExportAction {
         width: 100%;
+    }
+
+    .playerMetricsToolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .playerMetricSelectors {
+        justify-content: flex-start;
     }
 }
 
@@ -1044,6 +1094,248 @@
     background: rgba(255, 255, 255, 0.01);
     border: 1px dashed var(--stroke);
     border-radius: 20px;
+}
+
+.playersTableSection {
+    display: grid;
+    gap: 18px;
+}
+
+.playerMetricsToolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: start;
+    padding: 16px 18px;
+    border-radius: 18px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.playerMetricsSummary {
+    display: grid;
+    gap: 6px;
+}
+
+.playerMetricsSummary p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.playerMetricsEyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.playerMetricSelectors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.playerMetricSelectWrap {
+    display: grid;
+    gap: 6px;
+    min-width: 168px;
+}
+
+.playerMetricSelectLabel {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.playerMetricSelect {
+    min-height: 42px;
+    padding: 0 12px;
+    border-radius: 12px;
+    border: 1px solid var(--stroke);
+    background: rgba(8, 10, 14, 0.72);
+    color: var(--text);
+    font: inherit;
+}
+
+.playerMetricOrderSelect {
+    min-height: 38px;
+    padding: 0 12px;
+    border-radius: 12px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    font: inherit;
+}
+
+.playerMetricChip {
+    justify-self: start;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.playerMetricSortButton {
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 12px;
+    border: 1px solid var(--stroke);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.playerMetricSortButton:hover {
+    color: var(--text);
+    border-color: rgba(var(--color-accent-rgb), 0.25);
+}
+
+.playerMetricSortButtonActive {
+    color: var(--accent);
+    border-color: rgba(var(--color-accent-rgb), 0.4);
+    background: rgba(var(--color-accent-rgb), 0.12);
+}
+
+.playerStatsTableWrap {
+    overflow-x: auto;
+    border: 1px solid var(--stroke);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.playerStatsTable {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+}
+
+.playerStatsTable thead th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.playerStatsTable tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.playerStatsTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.playerStatsNameCell {
+    min-width: 260px;
+}
+
+.playerStatsNameWrap {
+    display: grid;
+    gap: 4px;
+}
+
+.playerStatsPrimary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-weight: 700;
+}
+
+.playerStatsNameLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.playerStatsSecondary {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.playerStatsBadge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.playerStatsTeamCell {
+    min-width: 180px;
+}
+
+.playerStatsTeamTag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.teamTagHome {
+    border-color: rgba(var(--color-accent-rgb), 0.28);
+    background: rgba(var(--color-accent-rgb), 0.12);
+}
+
+.teamTagAway {
+    border-color: rgba(148, 163, 184, 0.24);
+    background: rgba(148, 163, 184, 0.1);
+}
+
+.playerStatsMetricHeader,
+.playerStatsMetricCell {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.playerStatsHeaderButton {
+    width: 100%;
+    display: inline-flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+
+.playerStatsHeaderButtonActive {
+    color: var(--accent);
+}
+
+.playerStatsMetricCell {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
 }
 
 /* Commentary Styles */
@@ -2059,7 +2351,6 @@
         font-size: 13px;
         font-weight: 500;
         line-height: 1.3;
-        white-space: normal;
         text-align: center;
         max-width: 100px;
         color: var(--text);
@@ -2069,6 +2360,19 @@
         -webkit-line-clamp: 2;
         line-clamp: 2;
         -webkit-box-orient: vertical;
+    }
+
+    .teamNameRow {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .teamFavoriteButton {
+        width: 32px;
+        height: 32px;
     }
 
     .teamLabel {

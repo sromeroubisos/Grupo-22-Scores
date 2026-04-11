@@ -5,12 +5,17 @@ import { createClient } from '@/lib/supabase/client';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { EntityType } from '@/lib/types/user';
 import {
+    buildClubCandidateIds,
+    buildTournamentCandidateIds,
     clearFavoritesLocalCache,
     FAVORITES_LOCAL_CACHE_KEY,
     FAVORITES_LOCAL_CACHE_OWNER_KEY,
     fetchResolvedFavorites,
+    sanitizeResolvedFavorites,
     type ResolvedFavorite,
 } from '@/lib/favorites/fetchFavorites';
+import { clearFavoritesCache, updateFavoriteSet } from '@/lib/favoritesCache';
+import { dispatchFavoriteUpdated, FAVORITES_UPDATED_EVENT, type FavoriteUpdatedDetail } from '@/lib/favorites/events';
 import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 import { measureAsync, warnIfDuplicateWindow } from '@/lib/perf/measure';
 
@@ -28,6 +33,40 @@ type ToggleLeagueFavoriteOptions = {
     sportId?: string | null;
 };
 
+type MutationResult = PromiseLike<{ error?: unknown; data?: Array<{ sort_order?: number }> | null }>;
+type DeleteChain = {
+    eq: (column: string, value: unknown) => DeleteChain;
+    in: (column: string, values: string[]) => MutationResult;
+};
+type SelectChain = {
+    eq: (column: string, value: unknown) => SelectChain;
+    order: (column: string, options: { ascending: boolean }) => SelectChain;
+    limit: (count: number) => MutationResult;
+};
+type MutationTableClient = {
+    upsert: (values: unknown, options?: unknown) => MutationResult;
+    delete: () => DeleteChain;
+    select: (columns: string) => SelectChain;
+};
+type MutationFromClient = {
+    from: (table: string) => MutationTableClient;
+};
+
+type FavoritePersistenceMutation = {
+    entityId: string;
+    entityType: EntityType;
+    isFavorite: boolean;
+};
+type LeaguePreferencePersistenceMutation = {
+    leagueId: string;
+    isFavorite: boolean;
+    sportId?: string | null;
+};
+type TournamentFollowPersistenceMutation = {
+    tournamentId: string;
+    isFavorite: boolean;
+};
+
 const PENDING_FAVORITE_NAME = 'Pendiente de sincronizar';
 
 function readLS(userId?: string | null): FavoriteItem[] {
@@ -41,7 +80,7 @@ function readLS(userId?: string | null): FavoriteItem[] {
         }
 
         const raw = localStorage.getItem(LS_KEY);
-        return raw ? (JSON.parse(raw) as FavoriteItem[]) : [];
+        return raw ? sanitizeResolvedFavorites(JSON.parse(raw) as FavoriteItem[]) : [];
     } catch {
         return [];
     }
@@ -83,6 +122,84 @@ function resolveTournamentFollowerId(entityId: string, followerTournamentId?: st
 
 function isPendingFavorite(favorite: FavoriteItem): boolean {
     return !favorite.name.trim() || favorite.name === PENDING_FAVORITE_NAME;
+}
+
+function normalizeEntityId(value: string): string {
+    return String(value).trim();
+}
+
+function isCompetitionEntityType(entityType: EntityType): boolean {
+    return entityType === 'league' || entityType === 'tournament';
+}
+
+function getCompetitionPersistenceTypes(entityType: EntityType): EntityType[] {
+    return isCompetitionEntityType(entityType)
+        ? ['league', 'tournament']
+        : [entityType];
+}
+
+function favoriteMatchesEntity(
+    favorite: FavoriteItem,
+    entityId: string,
+    entityType?: EntityType,
+): boolean {
+    const favoriteFamily = isCompetitionEntityType(favorite.entity_type) ? 'competition' : favorite.entity_type;
+    const targetFamily = entityType
+        ? (isCompetitionEntityType(entityType) ? 'competition' : entityType)
+        : favoriteFamily;
+
+    if (favoriteFamily !== targetFamily) {
+        return false;
+    }
+
+    const favoriteAliases = favoriteFamily === 'club'
+        ? buildClubCandidateIds(favorite.id)
+        : favoriteFamily === 'competition'
+            ? buildTournamentCandidateIds(favorite.id)
+            : [normalizeEntityId(favorite.id)];
+
+    const targetAliases = targetFamily === 'club'
+        ? buildClubCandidateIds(entityId)
+        : targetFamily === 'competition'
+            ? buildTournamentCandidateIds(entityId)
+            : [normalizeEntityId(entityId)];
+
+    const favoriteAliasSet = new Set(favoriteAliases.map(normalizeEntityId));
+    return targetAliases.some((alias) => favoriteAliasSet.has(normalizeEntityId(alias)));
+}
+
+function createOptimisticFavorite(
+    entityId: string,
+    entityType: EntityType,
+    metadata?: Partial<FavoriteItem>,
+): FavoriteItem {
+    const normalizedEntityType = isCompetitionEntityType(entityType) ? 'league' : entityType;
+    const normalizedId = normalizeEntityId(entityId);
+    const fallbackName = normalizedEntityType === 'club' ? normalizedId : 'Liga';
+
+    return {
+        id: normalizedId,
+        entity_type: normalizedEntityType,
+        name: metadata?.name?.trim() || fallbackName,
+        logo_url: metadata?.logo_url ?? null,
+        color: metadata?.color ?? null,
+        type_label: metadata?.type_label || (normalizedEntityType === 'club' ? 'Club' : 'Torneo'),
+        created_at: metadata?.created_at || new Date().toISOString(),
+    };
+}
+
+function applyFavoriteMutation(
+    prev: FavoriteItem[],
+    favorite: FavoriteItem,
+    isFavorite: boolean,
+): FavoriteItem[] {
+    const next = prev.filter((entry) => !favoriteMatchesEntity(entry, favorite.id, favorite.entity_type));
+
+    if (!isFavorite) {
+        return next;
+    }
+
+    return [favorite, ...next];
 }
 
 function readString(value: unknown): string | null {
@@ -244,10 +361,413 @@ export function useFavorites() {
     const [error, setError] = useState<string | null>(null);
 
     const supabase = useMemo(() => createClient(), []);
-    const supabaseUntyped = supabase as any;
+    const supabaseUntyped = supabase as unknown as MutationFromClient;
     const requestIdRef = useRef(0);
     const activeUserIdRef = useRef<string | null>(null);
     const attemptedClientResolutionsRef = useRef<Set<string>>(new Set());
+    const favoritesRef = useRef<FavoriteItem[]>([]);
+    const favoritePersistenceQueueRef = useRef<Map<string, FavoritePersistenceMutation>>(new Map());
+    const leaguePreferenceQueueRef = useRef<Map<string, LeaguePreferencePersistenceMutation>>(new Map());
+    const tournamentFollowQueueRef = useRef<Map<string, TournamentFollowPersistenceMutation>>(new Map());
+    const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isFlushingRef = useRef(false);
+    const flushPromiseRef = useRef<Promise<void> | null>(null);
+
+    const syncFavoriteMutation = useCallback((
+        userId: string,
+        entityId: string,
+        entityType: EntityType,
+        isFavorite: boolean,
+        metadata?: Partial<FavoriteItem>,
+    ) => {
+        clearFavoritesCache(`Favorite updated: ${entityType}:${entityId}`);
+        updateFavoriteSet(userId, entityType, entityId, isFavorite);
+
+        if (isCompetitionEntityType(entityType)) {
+            updateFavoriteSet(userId, 'league', entityId, isFavorite);
+            updateFavoriteSet(userId, 'tournament', entityId, isFavorite);
+        }
+
+        dispatchFavoriteUpdated({
+            userId,
+            entityId,
+            entityType,
+            isFavorite,
+            name: metadata?.name,
+            logo_url: metadata?.logo_url,
+            color: metadata?.color,
+            type_label: metadata?.type_label,
+            created_at: metadata?.created_at,
+        });
+    }, []);
+
+    useEffect(() => {
+        favoritesRef.current = favorites;
+    }, [favorites]);
+
+    const flushPersistenceQueues = useCallback(() => {
+        if (flushPromiseRef.current) {
+            return flushPromiseRef.current;
+        }
+
+        if (flushTimerRef.current !== null) {
+            clearTimeout(flushTimerRef.current);
+            flushTimerRef.current = null;
+        }
+
+        const favoriteMutations = Array.from(favoritePersistenceQueueRef.current.values());
+        const leaguePreferenceMutations = Array.from(leaguePreferenceQueueRef.current.values());
+        const tournamentFollowMutations = Array.from(tournamentFollowQueueRef.current.values());
+
+        if (
+            favoriteMutations.length === 0 &&
+            leaguePreferenceMutations.length === 0 &&
+            tournamentFollowMutations.length === 0
+        ) {
+            return Promise.resolve();
+        }
+
+        favoritePersistenceQueueRef.current.clear();
+        leaguePreferenceQueueRef.current.clear();
+        tournamentFollowQueueRef.current.clear();
+        isFlushingRef.current = true;
+
+        const flushPromise = (async () => {
+            try {
+                let userId = activeUserIdRef.current?.trim() || '';
+                if (!userId) {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    userId = session?.user?.id?.trim() || '';
+                    if (userId) {
+                        activeUserIdRef.current = userId;
+                    }
+                }
+
+                if (!userId) {
+                    return;
+                }
+
+                const tasks: Array<PromiseLike<unknown>> = [];
+
+                const favoriteAdds = favoriteMutations.filter((mutation) => mutation.isFavorite);
+                const favoriteRemovals = favoriteMutations.filter((mutation) => !mutation.isFavorite);
+
+                if (favoriteAdds.length > 0) {
+                    tasks.push(
+                        supabaseUntyped
+                            .from('favorites')
+                            .upsert(
+                                favoriteAdds.map((mutation) => ({
+                                    user_id: userId,
+                                    entity_type: mutation.entityType,
+                                    entity_id: mutation.entityId,
+                                })),
+                                { onConflict: 'user_id,entity_type,entity_id' },
+                            ),
+                    );
+                }
+
+                const favoriteRemovalGroups = new Map<EntityType, Set<string>>();
+
+                favoriteRemovals.forEach((mutation) => {
+                    getCompetitionPersistenceTypes(mutation.entityType).forEach((persistedType) => {
+                        const currentIds = favoriteRemovalGroups.get(persistedType) ?? new Set<string>();
+                        currentIds.add(mutation.entityId);
+                        favoriteRemovalGroups.set(persistedType, currentIds);
+                    });
+                });
+
+                favoriteRemovalGroups.forEach((entityIds, entityType) => {
+                    if (entityIds.size === 0) return;
+
+                    tasks.push(
+                        supabaseUntyped
+                            .from('favorites')
+                            .delete()
+                            .eq('user_id', userId)
+                            .eq('entity_type', entityType)
+                            .in('entity_id', Array.from(entityIds)),
+                    );
+                });
+
+                const leaguePreferenceAdds = leaguePreferenceMutations.filter((mutation) => mutation.isFavorite && mutation.sportId?.trim());
+                const leaguePreferenceRemovals = leaguePreferenceMutations.filter((mutation) => !mutation.isFavorite);
+
+                if (leaguePreferenceRemovals.length > 0) {
+                    tasks.push(
+                        supabaseUntyped
+                            .from('user_favorite_leagues')
+                            .delete()
+                            .eq('user_id', userId)
+                            .in('league_id', leaguePreferenceRemovals.map((mutation) => mutation.leagueId)),
+                    );
+                }
+
+                if (leaguePreferenceAdds.length > 0) {
+                    const { data: existingRows, error: existingError } = await supabaseUntyped
+                        .from('user_favorite_leagues')
+                        .select('sort_order')
+                        .eq('user_id', userId)
+                        .order('sort_order', { ascending: false })
+                        .limit(1);
+
+                    if (existingError) {
+                        throw existingError;
+                    }
+
+                    const highestSortOrder = existingRows?.[0]?.sort_order;
+                    const baseSortOrder = typeof highestSortOrder === 'number' ? highestSortOrder + 1 : 0;
+
+                    tasks.push(
+                        supabaseUntyped
+                            .from('user_favorite_leagues')
+                            .upsert(
+                                leaguePreferenceAdds.map((mutation, index) => ({
+                                    user_id: userId,
+                                    league_id: mutation.leagueId,
+                                    sport_id: mutation.sportId!.trim(),
+                                    sort_order: baseSortOrder + index,
+                                })),
+                                { onConflict: 'user_id,league_id' },
+                            ),
+                    );
+                }
+
+                const tournamentFollowAdds = tournamentFollowMutations.filter((mutation) => mutation.isFavorite);
+                const tournamentFollowRemovals = tournamentFollowMutations.filter((mutation) => !mutation.isFavorite);
+
+                if (tournamentFollowAdds.length > 0) {
+                    tasks.push(
+                        supabaseUntyped
+                            .from('tournament_followers')
+                            .upsert(
+                                tournamentFollowAdds.map((mutation) => ({
+                                    user_id: userId,
+                                    tournament_id: mutation.tournamentId,
+                                })),
+                                { onConflict: 'user_id,tournament_id' },
+                            ),
+                    );
+                }
+
+                if (tournamentFollowRemovals.length > 0) {
+                    tasks.push(
+                        supabaseUntyped
+                            .from('tournament_followers')
+                            .delete()
+                            .eq('user_id', userId)
+                            .in('tournament_id', tournamentFollowRemovals.map((mutation) => mutation.tournamentId)),
+                    );
+                }
+
+                const results = await Promise.all(tasks);
+                const failed = results.find((result) => {
+                    if (typeof result !== 'object' || result === null) return false;
+                    return 'error' in result && Boolean((result as { error?: unknown }).error);
+                });
+
+                if (failed && typeof failed === 'object' && failed !== null && 'error' in failed) {
+                    throw (failed as { error?: unknown }).error;
+                }
+            } catch (error) {
+                console.error('Error flushing favorites persistence queue:', error);
+
+                favoriteMutations.forEach((mutation) => {
+                    favoritePersistenceQueueRef.current.set(`${mutation.entityType}:${mutation.entityId}`, mutation);
+                });
+                leaguePreferenceMutations.forEach((mutation) => {
+                    leaguePreferenceQueueRef.current.set(mutation.leagueId, mutation);
+                });
+                tournamentFollowMutations.forEach((mutation) => {
+                    tournamentFollowQueueRef.current.set(mutation.tournamentId, mutation);
+                });
+
+                throw error;
+            } finally {
+                isFlushingRef.current = false;
+                flushPromiseRef.current = null;
+
+                if (
+                    favoritePersistenceQueueRef.current.size > 0 ||
+                    leaguePreferenceQueueRef.current.size > 0 ||
+                    tournamentFollowQueueRef.current.size > 0
+                ) {
+                    flushTimerRef.current = setTimeout(() => {
+                        flushTimerRef.current = null;
+                        void flushPersistenceQueues().catch(() => {
+                            // The queue is preserved on failure and can retry later.
+                        });
+                    }, 400);
+                }
+            }
+        })();
+
+        flushPromiseRef.current = flushPromise;
+        return flushPromise;
+    }, [supabase, supabaseUntyped]);
+
+    const flushAllPersistenceQueues = useCallback(async () => {
+        while (
+            flushPromiseRef.current !== null ||
+            favoritePersistenceQueueRef.current.size > 0 ||
+            leaguePreferenceQueueRef.current.size > 0 ||
+            tournamentFollowQueueRef.current.size > 0
+        ) {
+            await flushPersistenceQueues();
+        }
+    }, [flushPersistenceQueues]);
+
+    const persistFavoriteState = useCallback(async (
+        userId: string,
+        entityId: string,
+        entityType: EntityType,
+        isFavorite: boolean,
+    ) => {
+        const normalizedEntityId = normalizeEntityId(entityId);
+        const normalizedEntityType = isCompetitionEntityType(entityType) ? 'league' : entityType;
+        const aliasIds = normalizedEntityType === 'club'
+            ? buildClubCandidateIds(normalizedEntityId)
+            : isCompetitionEntityType(entityType)
+                ? buildTournamentCandidateIds(normalizedEntityId)
+                : [normalizedEntityId];
+
+        if (isFavorite) {
+            const { error: upsertError } = await supabaseUntyped
+                .from('favorites')
+                .upsert({
+                    user_id: userId,
+                    entity_type: normalizedEntityType,
+                    entity_id: normalizedEntityId,
+                }, { onConflict: 'user_id,entity_type,entity_id' });
+
+            if (upsertError) {
+                throw upsertError;
+            }
+
+            if (isCompetitionEntityType(entityType)) {
+                const { error: cleanupError } = await supabaseUntyped
+                    .from('favorites')
+                    .delete()
+                    .eq('user_id', userId)
+                    .eq('entity_type', 'tournament')
+                    .in('entity_id', [normalizedEntityId]);
+
+                if (cleanupError) {
+                    throw cleanupError;
+                }
+            }
+
+            return;
+        }
+
+        const persistedTypes = isCompetitionEntityType(entityType)
+            ? ['league', 'tournament']
+            : [normalizedEntityType];
+
+        const deletionTasks = persistedTypes.map((persistedType) => (
+            supabaseUntyped
+                .from('favorites')
+                .delete()
+                .eq('user_id', userId)
+                .eq('entity_type', persistedType)
+                .in('entity_id', aliasIds)
+        ));
+
+        const deletionResults = await Promise.all(deletionTasks);
+        const deletionFailure = deletionResults.find((result) => result?.error);
+        if (deletionFailure?.error) {
+            throw deletionFailure.error;
+        }
+    }, [supabaseUntyped]);
+
+    const persistLeaguePreferenceState = useCallback(async (
+        userId: string,
+        entityId: string,
+        shouldFollow: boolean,
+        sportId?: string | null,
+    ) => {
+        const leagueId = normalizeEntityId(entityId);
+        if (!leagueId) return;
+
+        if (!shouldFollow) {
+            const { error } = await supabaseUntyped
+                .from('user_favorite_leagues')
+                .delete()
+                .eq('user_id', userId)
+                .in('league_id', [leagueId]);
+
+            if (error) {
+                throw error;
+            }
+
+            return;
+        }
+
+        const normalizedSportId = typeof sportId === 'string' ? sportId.trim() : '';
+        if (!normalizedSportId) return;
+
+        const { data: existingRows, error: existingError } = await supabaseUntyped
+            .from('user_favorite_leagues')
+            .select('sort_order')
+            .eq('user_id', userId)
+            .order('sort_order', { ascending: false })
+            .limit(1);
+
+        if (existingError) {
+            throw existingError;
+        }
+
+        const highestSortOrder = existingRows?.[0]?.sort_order;
+        const nextSortOrder = typeof highestSortOrder === 'number' ? highestSortOrder + 1 : 0;
+
+        const { error: upsertError } = await supabaseUntyped
+            .from('user_favorite_leagues')
+            .upsert({
+                user_id: userId,
+                league_id: leagueId,
+                sport_id: normalizedSportId,
+                sort_order: nextSortOrder,
+            }, { onConflict: 'user_id,league_id' });
+
+        if (upsertError) {
+            throw upsertError;
+        }
+    }, [supabaseUntyped]);
+
+    const persistTournamentFollowState = useCallback(async (
+        userId: string,
+        entityId: string,
+        shouldFollow: boolean,
+        followerTournamentId?: string | null,
+    ) => {
+        const tournamentId = resolveTournamentFollowerId(entityId, followerTournamentId);
+        if (!tournamentId) return;
+
+        if (shouldFollow) {
+            const { error } = await supabaseUntyped
+                .from('tournament_followers')
+                .upsert({
+                    user_id: userId,
+                    tournament_id: tournamentId,
+                }, { onConflict: 'user_id,tournament_id' });
+
+            if (error) {
+                throw error;
+            }
+
+            return;
+        }
+
+        const { error } = await supabaseUntyped
+            .from('tournament_followers')
+            .delete()
+            .eq('user_id', userId)
+            .in('tournament_id', [tournamentId]);
+
+        if (error) {
+            throw error;
+        }
+    }, [supabaseUntyped]);
 
     useEffect(() => {
         const pendingFavorites = favorites.filter((favorite) => (
@@ -313,6 +833,8 @@ export function useFavorites() {
         setError(null);
 
         try {
+            await flushAllPersistenceQueues();
+
             const { data: { session }, error: sessionErr } = await measureAsync(
                 'favorites_get_session',
                 async () => supabase.auth.getSession(),
@@ -374,7 +896,7 @@ export function useFavorites() {
                 setLoading(false);
             }
         }
-    }, [supabase]);
+    }, [flushAllPersistenceQueues, supabase]);
 
     useEffect(() => {
         fetchFavorites();
@@ -396,75 +918,132 @@ export function useFavorites() {
         return () => subscription.unsubscribe();
     }, [fetchFavorites, supabase]);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return undefined;
+
+        const handleFavoriteUpdated = (event: Event) => {
+            const detail = (event as CustomEvent<FavoriteUpdatedDetail>).detail;
+            const eventUserId = typeof detail?.userId === 'string' ? detail.userId.trim() : '';
+            const activeUserId = activeUserIdRef.current?.trim() || '';
+
+            if (eventUserId && activeUserId && eventUserId !== activeUserId) {
+                return;
+            }
+
+            const optimisticFavorite = createOptimisticFavorite(detail.entityId, detail.entityType, {
+                name: detail.name,
+                logo_url: detail.logo_url,
+                color: detail.color,
+                type_label: detail.type_label,
+                created_at: detail.created_at,
+            });
+
+            setFavorites((prev) => {
+                const next = applyFavoriteMutation(prev, optimisticFavorite, detail.isFavorite);
+                writeLS(activeUserIdRef.current, next);
+                return next;
+            });
+        };
+
+        window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoriteUpdated);
+        return () => window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoriteUpdated);
+    }, []);
+
     const isFavorite = useCallback(
-        (entityId: string) => favorites.some((favorite) => String(favorite.id) === String(entityId)),
+        (entityId: string, entityType?: EntityType) => favorites.some((favorite) => (
+            favoriteMatchesEntity(favorite, entityId, entityType)
+        )),
         [favorites],
     );
 
     const toggleFavorite = useCallback(async (item: Omit<FavoriteItem, 'created_at'>) => {
         const { id, entity_type } = item;
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+            console.error('Error checking session before toggling favorite:', sessionError);
+        }
+
+        if (!session) {
+            redirectToLogin();
+            return;
+        }
+
+        activeUserIdRef.current = session.user.id;
+        const willBeFavorite = !favoritesRef.current.some((favorite) => favoriteMatchesEntity(favorite, String(id), entity_type));
+        const optimisticFavorite = createOptimisticFavorite(String(id), entity_type, item);
 
         setFavorites((prev) => {
-            const exists = prev.some((favorite) => String(favorite.id) === String(id));
-            const next = exists
-                ? prev.filter((favorite) => String(favorite.id) !== String(id))
-                : [{ ...item, created_at: new Date().toISOString() } as FavoriteItem, ...prev];
+            const next = applyFavoriteMutation(prev, optimisticFavorite, willBeFavorite);
+            favoritesRef.current = next;
             writeLS(activeUserIdRef.current, next);
             return next;
         });
 
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-            activeUserIdRef.current = session.user.id;
+        syncFavoriteMutation(session.user.id, String(id), entity_type, willBeFavorite, optimisticFavorite);
 
-            await supabase.rpc('toggle_favorite', {
-                p_entity_type: entity_type,
-                p_entity_id: String(id),
-            });
+        try {
+            await persistFavoriteState(session.user.id, String(id), entity_type, willBeFavorite);
+            clearFavoritesCache(`Favorite persisted: ${entity_type}:${id}`);
         } catch (err) {
             console.error('Error toggling favorite:', err);
+            setError('No se pudo actualizar el favorito.');
+            setFavorites((prev) => {
+                const next = applyFavoriteMutation(prev, optimisticFavorite, !willBeFavorite);
+                favoritesRef.current = next;
+                writeLS(activeUserIdRef.current, next);
+                return next;
+            });
+            syncFavoriteMutation(session.user.id, String(id), entity_type, !willBeFavorite, optimisticFavorite);
         }
-    }, [supabase]);
+    }, [persistFavoriteState, supabase, syncFavoriteMutation]);
 
     const isLeagueFavorite = useCallback(
         (entityId: string) => favorites.some((favorite) => (
-            String(favorite.id) === String(entityId) &&
-            ['league', 'tournament'].includes(favorite.entity_type)
+            favoriteMatchesEntity(favorite, entityId, 'league')
         )),
         [favorites],
     );
 
     const removeLeagueFavoriteEntries = useCallback(async (
+        userId: string,
         entityId: string,
         entityTypes: EntityType[],
     ) => {
         if (entityTypes.length === 0) return;
 
+        const optimisticFavorites = entityTypes.map((entityType) => createOptimisticFavorite(entityId, entityType));
+
         setFavorites((prev) => {
-            const next = prev.filter((favorite) => !(
-                String(favorite.id) === String(entityId) &&
-                entityTypes.includes(favorite.entity_type)
-            ));
+            const next = prev.filter((favorite) => !(favoriteMatchesEntity(favorite, entityId) && entityTypes.includes(favorite.entity_type)));
+            favoritesRef.current = next;
             writeLS(activeUserIdRef.current, next);
             return next;
         });
 
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-            activeUserIdRef.current = session.user.id;
+        optimisticFavorites.forEach((favorite) => {
+            syncFavoriteMutation(userId, favorite.id, favorite.entity_type, false, favorite);
+        });
 
-            await Promise.all(entityTypes.map(async (entityType) => {
-                await supabase.rpc('toggle_favorite', {
-                    p_entity_type: entityType,
-                    p_entity_id: String(entityId),
-                });
-            }));
+        try {
+            await persistFavoriteState(userId, entityId, 'league', false);
+            clearFavoritesCache(`League favorite removed: ${entityId}`);
         } catch (err) {
             console.error('Error removing league favorite entries:', err);
+            setError('No se pudo quitar la liga de favoritos.');
+            setFavorites((prev) => {
+                const next = optimisticFavorites.reduce<FavoriteItem[]>((acc, favorite) => (
+                    applyFavoriteMutation(acc, favorite, true)
+                ), prev);
+                favoritesRef.current = next;
+                writeLS(activeUserIdRef.current, next);
+                return next;
+            });
+            optimisticFavorites.forEach((favorite) => {
+                syncFavoriteMutation(userId, favorite.id, favorite.entity_type, true, favorite);
+            });
         }
-    }, [supabase]);
+    }, [persistFavoriteState, syncFavoriteMutation]);
 
     const ensureTournamentFollowState = useCallback(async (
         userId: string,
@@ -472,36 +1051,8 @@ export function useFavorites() {
         shouldFollow: boolean,
         followerTournamentId?: string | null,
     ) => {
-        const tournamentId = resolveTournamentFollowerId(entityId, followerTournamentId);
-        if (!tournamentId) return;
-
-        try {
-            const { data, error } = await supabaseUntyped
-                .from('tournament_followers')
-                .select('tournament_id')
-                .eq('user_id', userId)
-                .eq('tournament_id', tournamentId)
-                .maybeSingle();
-
-            if (error) {
-                console.error('Error checking tournament follow state:', error);
-                return;
-            }
-
-            const isFollowing = Boolean(data?.tournament_id);
-            if (isFollowing === shouldFollow) return;
-
-            const { error: toggleError } = await supabase.rpc('toggle_tournament_follow', {
-                p_tournament_id: tournamentId,
-            });
-
-            if (toggleError) {
-                console.error('Error syncing tournament follow state:', toggleError);
-            }
-        } catch (err) {
-            console.error('Unexpected error syncing tournament follow state:', err);
-        }
-    }, [supabase, supabaseUntyped]);
+        await persistTournamentFollowState(userId, entityId, shouldFollow, followerTournamentId);
+    }, [persistTournamentFollowState]);
 
     const syncFavoriteLeaguePreference = useCallback(async (
         userId: string,
@@ -511,64 +1062,9 @@ export function useFavorites() {
     ) => {
         const leagueId = String(entityId).trim();
         if (!leagueId) return;
-
-        try {
-            if (!shouldFollow) {
-                const { error } = await supabaseUntyped
-                    .from('user_favorite_leagues')
-                    .delete()
-                    .eq('user_id', userId)
-                    .eq('league_id', leagueId);
-
-                if (error) {
-                    console.error('Error removing favorite league preference:', error);
-                    return;
-                }
-
-                notifyFavoriteLeaguePreferenceUpdated(leagueId, false);
-                return;
-            }
-
-            const normalizedSportId = typeof sportId === 'string' ? sportId.trim() : '';
-            if (!normalizedSportId) {
-                console.warn('Skipping favorite league preference sync because sportId is missing:', leagueId);
-                return;
-            }
-
-            const { data: existingRows, error: existingError } = await supabaseUntyped
-                .from('user_favorite_leagues')
-                .select('sort_order')
-                .eq('user_id', userId)
-                .order('sort_order', { ascending: false })
-                .limit(1);
-
-            if (existingError) {
-                console.error('Error loading favorite league preferences:', existingError);
-                return;
-            }
-
-            const highestSortOrder = existingRows?.[0]?.sort_order;
-            const nextSortOrder = typeof highestSortOrder === 'number' ? highestSortOrder + 1 : 0;
-
-            const { error: upsertError } = await supabaseUntyped
-                .from('user_favorite_leagues')
-                .upsert({
-                    user_id: userId,
-                    league_id: leagueId,
-                    sport_id: normalizedSportId,
-                    sort_order: nextSortOrder,
-                }, { onConflict: 'user_id,league_id' });
-
-            if (upsertError) {
-                console.error('Error saving favorite league preference:', upsertError);
-                return;
-            }
-
-            notifyFavoriteLeaguePreferenceUpdated(leagueId, true);
-        } catch (err) {
-            console.error('Unexpected error syncing favorite league preference:', err);
-        }
-    }, [supabaseUntyped]);
+        notifyFavoriteLeaguePreferenceUpdated(leagueId, shouldFollow);
+        await persistLeaguePreferenceState(userId, leagueId, shouldFollow, sportId);
+    }, [persistLeaguePreferenceState]);
 
     const toggleLeagueFavorite = useCallback(async (
         entityId: string,
@@ -591,9 +1087,9 @@ export function useFavorites() {
             }
 
             const existingFavoriteTypes = Array.from(new Set(
-                favorites
+                favoritesRef.current
                     .filter((favorite) => (
-                        String(favorite.id) === String(entityId) &&
+                        favoriteMatchesEntity(favorite, entityId) &&
                         ['league', 'tournament'].includes(favorite.entity_type)
                     ))
                     .map((favorite) => favorite.entity_type)
@@ -611,29 +1107,46 @@ export function useFavorites() {
                     type_label: options?.type_label ?? 'Torneo',
                 });
             } else {
-                await removeLeagueFavoriteEntries(entityId, existingFavoriteTypes);
+                await removeLeagueFavoriteEntries(session.user.id, entityId, existingFavoriteTypes);
             }
 
-            await Promise.all([
-                syncFavoriteLeaguePreference(
-                    session.user.id,
-                    entityId,
-                    shouldFollow,
-                    options?.sportId,
-                ),
-                ensureTournamentFollowState(
-                    session.user.id,
-                    entityId,
-                    shouldFollow,
-                    options?.followerTournamentId,
-                ),
-            ]);
+            if (shouldFollow) {
+                await Promise.all([
+                    syncFavoriteLeaguePreference(
+                        session.user.id,
+                        entityId,
+                        shouldFollow,
+                        options?.sportId,
+                    ),
+                    ensureTournamentFollowState(
+                        session.user.id,
+                        entityId,
+                        shouldFollow,
+                        options?.followerTournamentId,
+                    ),
+                ]);
+            } else {
+                await Promise.all([
+                    syncFavoriteLeaguePreference(
+                        session.user.id,
+                        entityId,
+                        shouldFollow,
+                        options?.sportId,
+                    ),
+                    ensureTournamentFollowState(
+                        session.user.id,
+                        entityId,
+                        shouldFollow,
+                        options?.followerTournamentId,
+                    ),
+                ]);
+            }
         } catch (err) {
             console.error('Error toggling league favorite:', err);
+            setError('No se pudo actualizar la liga favorita.');
         }
     }, [
         ensureTournamentFollowState,
-        favorites,
         removeLeagueFavoriteEntries,
         supabase,
         syncFavoriteLeaguePreference,
@@ -677,5 +1190,5 @@ export function useFavorite(entityType: EntityType, entityId: string) {
         });
     }, [entityId, entityType, toggleFavorite]);
 
-    return { isFavorited: isFavorite(entityId), loading, toggle };
+    return { isFavorited: isFavorite(entityId, entityType), loading, toggle };
 }

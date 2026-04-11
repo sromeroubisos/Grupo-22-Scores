@@ -87,46 +87,76 @@ function uniqueStrings(values: Array<string | null | undefined>): string[] {
     return Array.from(new Set(values.filter((value): value is string => Boolean(value && value.trim())).map((value) => value.trim())));
 }
 
-function buildClubCandidateIds(entityId: string): string[] {
+export function buildClubCandidateIds(entityId: string): string[] {
     const raw = entityId.trim();
     if (!raw) return [];
 
     const lower = raw.toLowerCase();
     const values = [raw, lower];
+    let stripped = raw;
 
     if (lower.startsWith('fs-team-')) {
-        const stripped = raw.slice(8);
+        stripped = raw.slice(8);
         values.push(stripped, stripped.toLowerCase(), `fs-${stripped}`, `fs-${stripped.toLowerCase()}`);
     } else if (lower.startsWith('fs-')) {
-        const stripped = raw.slice(3);
+        stripped = raw.slice(3);
         values.push(stripped, stripped.toLowerCase(), `fs-team-${stripped}`, `fs-team-${stripped.toLowerCase()}`);
     } else if (lower.startsWith('ras-team-')) {
-        const stripped = raw.slice(9);
+        stripped = raw.slice(9);
         values.push(stripped, stripped.toLowerCase());
     } else if (lower.startsWith('espn-team-')) {
-        const stripped = raw.slice(10);
+        stripped = raw.slice(10);
         values.push(stripped, stripped.toLowerCase());
+    }
+
+    const aliasSeed = stripped.trim();
+    if (aliasSeed && !isUuid(aliasSeed)) {
+        const aliasSeedLower = aliasSeed.toLowerCase();
+        values.push(
+            `fs-${aliasSeed}`,
+            `fs-${aliasSeedLower}`,
+            `fs-team-${aliasSeed}`,
+            `fs-team-${aliasSeedLower}`,
+            `ras-team-${aliasSeed}`,
+            `ras-team-${aliasSeedLower}`,
+            `espn-team-${aliasSeed}`,
+            `espn-team-${aliasSeedLower}`,
+        );
     }
 
     return uniqueStrings(values);
 }
 
-function buildTournamentCandidateIds(entityId: string): string[] {
+export function buildTournamentCandidateIds(entityId: string): string[] {
     const raw = entityId.trim();
     if (!raw) return [];
 
     const lower = raw.toLowerCase();
     const values = [raw, lower];
+    let stripped = raw;
 
     if (lower.startsWith('fs-')) {
-        const stripped = raw.slice(3);
+        stripped = raw.slice(3);
         values.push(stripped, stripped.toLowerCase());
     } else if (lower.startsWith('ras-league-')) {
-        const stripped = raw.slice('ras-league-'.length);
+        stripped = raw.slice('ras-league-'.length);
         values.push(stripped, stripped.toLowerCase());
     } else if (lower.startsWith('espn-league-')) {
-        const stripped = raw.slice('espn-league-'.length);
+        stripped = raw.slice('espn-league-'.length);
         values.push(stripped, stripped.toLowerCase());
+    }
+
+    const aliasSeed = stripped.trim();
+    if (aliasSeed && !isUuid(aliasSeed)) {
+        const aliasSeedLower = aliasSeed.toLowerCase();
+        values.push(
+            `fs-${aliasSeed}`,
+            `fs-${aliasSeedLower}`,
+            `ras-league-${aliasSeed}`,
+            `ras-league-${aliasSeedLower}`,
+            `espn-league-${aliasSeed}`,
+            `espn-league-${aliasSeedLower}`,
+        );
     }
 
     return uniqueStrings(values);
@@ -206,9 +236,101 @@ function favoriteKey(favorite: Pick<ResolvedFavorite, 'entity_type' | 'id'>): st
     return `${favorite.entity_type}:${favorite.id}`;
 }
 
+function normalizeFavoriteId(value: string): string {
+    return value.trim();
+}
+
+function isCompetitionEntityType(entityType: EntityType): boolean {
+    return entityType === 'league' || entityType === 'tournament';
+}
+
 function hasUsableName(favorite: Pick<ResolvedFavorite, 'id' | 'name'>): boolean {
     const name = favorite.name.trim();
     return Boolean(name) && name !== PENDING_FAVORITE_NAME && name !== favorite.id;
+}
+
+function hasRenderableIdentity(favorite: Pick<ResolvedFavorite, 'id' | 'name' | 'logo_url' | 'color'>): boolean {
+    if (hasUsableName(favorite)) return true;
+
+    const logoUrl = typeof favorite.logo_url === 'string' ? favorite.logo_url.trim() : '';
+    const color = typeof favorite.color === 'string' ? favorite.color.trim() : '';
+    return Boolean(logoUrl || color);
+}
+
+function normalizeResolvedFavorite(favorite: ResolvedFavorite): ResolvedFavorite {
+    const id = normalizeFavoriteId(favorite.id);
+    const entityType = isCompetitionEntityType(favorite.entity_type) ? 'league' : favorite.entity_type;
+    const normalizedName = favorite.name.trim();
+    const normalizedTypeLabel = favorite.type_label.trim();
+
+    return {
+        ...favorite,
+        id,
+        entity_type: entityType,
+        name: normalizedName || PENDING_FAVORITE_NAME,
+        logo_url: typeof favorite.logo_url === 'string' && favorite.logo_url.trim() ? favorite.logo_url.trim() : null,
+        color: typeof favorite.color === 'string' && favorite.color.trim() ? favorite.color.trim() : null,
+        type_label: normalizedTypeLabel || (entityType === 'club' ? 'Club' : entityType === 'league' ? 'Torneo' : 'Favorito'),
+        created_at: typeof favorite.created_at === 'string' && favorite.created_at.trim()
+            ? favorite.created_at
+            : new Date().toISOString(),
+    };
+}
+
+function favoriteFamilyKey(favorite: Pick<ResolvedFavorite, 'entity_type' | 'id'>): string {
+    const family = isCompetitionEntityType(favorite.entity_type) ? 'competition' : favorite.entity_type;
+    const aliases = family === 'club'
+        ? buildClubCandidateIds(favorite.id)
+        : family === 'competition'
+            ? buildTournamentCandidateIds(favorite.id)
+            : [normalizeFavoriteId(favorite.id)];
+    const canonicalId = aliases
+        .map(normalizeFavoriteId)
+        .filter(Boolean)
+        .sort((left, right) => left.localeCompare(right))[0] || normalizeFavoriteId(favorite.id);
+    return `${family}:${canonicalId}`;
+}
+
+function favoritePriority(favorite: ResolvedFavorite): number {
+    let score = 0;
+
+    if (hasUsableName(favorite)) score += 8;
+    if (favorite.logo_url) score += 3;
+    if (favorite.color) score += 1;
+    if (favorite.type_label !== 'Favorito') score += 1;
+    if (favorite.entity_type === 'club') score += 1;
+
+    return score;
+}
+
+function mergeResolvedFavorite(existing: ResolvedFavorite, incoming: ResolvedFavorite): ResolvedFavorite {
+    const normalizedExisting = normalizeResolvedFavorite(existing);
+    const normalizedIncoming = normalizeResolvedFavorite(incoming);
+    const existingScore = favoritePriority(normalizedExisting);
+    const incomingScore = favoritePriority(normalizedIncoming);
+    const preferred = incomingScore > existingScore ? normalizedIncoming : normalizedExisting;
+    const fallback = preferred === normalizedIncoming ? normalizedExisting : normalizedIncoming;
+
+    return {
+        ...preferred,
+        id: preferred.id || fallback.id,
+        entity_type: isCompetitionEntityType(preferred.entity_type) || isCompetitionEntityType(fallback.entity_type)
+            ? 'league'
+            : preferred.entity_type,
+        name: hasUsableName(preferred)
+            ? preferred.name
+            : hasUsableName(fallback)
+                ? fallback.name
+                : preferred.name,
+        logo_url: preferred.logo_url || fallback.logo_url || null,
+        color: preferred.color || fallback.color || null,
+        type_label: preferred.type_label !== 'Favorito'
+            ? preferred.type_label
+            : fallback.type_label,
+        created_at: normalizedExisting.created_at > normalizedIncoming.created_at
+            ? normalizedExisting.created_at
+            : normalizedIncoming.created_at,
+    };
 }
 
 function readCachedFavorites(userId?: string | null): ResolvedFavorite[] {
@@ -266,6 +388,24 @@ function mergeWithCachedFavorites(items: ResolvedFavorite[], userId?: string | n
                 : cachedFavorite.type_label || favorite.type_label,
         };
     });
+}
+
+export function sanitizeResolvedFavorites(items: ResolvedFavorite[], userId?: string | null): ResolvedFavorite[] {
+    const deduped = new Map<string, ResolvedFavorite>();
+
+    items
+        .map(normalizeResolvedFavorite)
+        .filter((favorite) => favorite.id.length > 0)
+        .forEach((favorite) => {
+            const key = favoriteFamilyKey(favorite);
+            const existing = deduped.get(key);
+            deduped.set(key, existing ? mergeResolvedFavorite(existing, favorite) : favorite);
+        });
+
+    return mergeWithCachedFavorites(Array.from(deduped.values()), userId)
+        .map(normalizeResolvedFavorite)
+        .filter(hasRenderableIdentity)
+        .sort((left, right) => right.created_at.localeCompare(left.created_at));
 }
 
 function isSyntheticMatchVote(entityType: unknown, entityId: unknown) {
@@ -456,20 +596,29 @@ async function fetchFavoritesFallback(
 }
 
 export async function fetchResolvedFavorites(supabase: SupabaseClient, userId?: string | null): Promise<ResolvedFavorite[]> {
-    const fallback = await fetchFavoritesFallback(supabase);
-    if (fallback.ok) {
-        return mergeWithCachedFavorites(fallback.items, userId);
-    }
+    const [fallback, v2] = await Promise.all([
+        fetchFavoritesFallback(supabase),
+        tryFavoritesRpc(supabase, 'get_my_favorites_enriched_v2'),
+    ]);
 
-    const v2 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched_v2');
+    const sources: ResolvedFavorite[] = [];
+
     if (v2 && v2.length > 0) {
-        return mergeWithCachedFavorites(v2, userId);
+        sources.push(...v2);
+    } else {
+        const v1 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched');
+        if (v1 && v1.length > 0) {
+            sources.push(...v1);
+        }
     }
 
-    const v1 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched');
-    if (v1 && v1.length > 0) {
-        return mergeWithCachedFavorites(v1, userId);
+    if (fallback.ok && fallback.items.length > 0) {
+        sources.push(...fallback.items);
     }
 
-    return [];
+    if (sources.length === 0) {
+        return [];
+    }
+
+    return sanitizeResolvedFavorites(sources, userId);
 }

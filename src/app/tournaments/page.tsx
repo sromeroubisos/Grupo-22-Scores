@@ -8,6 +8,7 @@ import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib/data/tournaments';
 import { findCountryRecord, getAllCountries, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types';
+import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
@@ -281,7 +282,8 @@ function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tourna
 
 export default function TorneosPage() {
     const { selectedSport, setSelectedSport, activeSports } = useSport();
-    const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
+    const { favoriteSportIds } = useUserPreferences();
+    const { isLeagueFavorite } = useFavorites();
 
     const [manualTournamentsList, setManualTournamentsList] = useState<Tournament[]>([]);
     const [rugbyCountrySummaries, setRugbyCountrySummaries] = useState<RugbyPublicCountrySummary[]>([]);
@@ -462,8 +464,8 @@ export default function TorneosPage() {
     }, [groupedTournaments, searchQuery]);
 
     const compareSidebarTournaments = useCallback((left: Tournament, right: Tournament) => {
-        const leftFavorite = favoriteLeagueIds.includes(left.id);
-        const rightFavorite = favoriteLeagueIds.includes(right.id);
+        const leftFavorite = isLeagueFavorite(left.id);
+        const rightFavorite = isLeagueFavorite(right.id);
 
         if (leftFavorite && !rightFavorite) return -1;
         if (!leftFavorite && rightFavorite) return 1;
@@ -477,13 +479,13 @@ export default function TorneosPage() {
         }
 
         return compareTournamentsByPriority(left, right);
-    }, [favoriteLeagueIds, hasRugbyPublicCatalog]);
+    }, [hasRugbyPublicCatalog, isLeagueFavorite]);
 
     const recommendedTournaments = useMemo(() => {
         const recommended = new Map<string, Tournament>();
 
         recommendedCatalog
-            .filter((tournament) => favoriteLeagueIds.includes(tournament.id))
+            .filter((tournament) => isLeagueFavorite(tournament.id))
             .sort(compareSidebarTournaments)
             .forEach((tournament) => {
                 recommended.set(tournament.id, tournament);
@@ -502,7 +504,7 @@ export default function TorneosPage() {
         }
 
         return [...recommended.values()].slice(0, 8);
-    }, [compareSidebarTournaments, favoriteLeagueIds, recommendedCatalog, userCountryId]);
+    }, [compareSidebarTournaments, isLeagueFavorite, recommendedCatalog, userCountryId]);
 
     const loadRugbyCountryTournaments = useCallback(async (countryId: string) => {
         if (!hasRugbyPublicCatalog || countryId === 'international') {
@@ -876,7 +878,7 @@ export default function TorneosPage() {
                                             borderRadius: '10px',
                                         }}
                                     >
-                                        {favoriteLeagueIds.includes(tournament.id) && (
+                                        {isLeagueFavorite(tournament.id) && (
                                             <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                                         )}
                                         <span>{tournament.name}</span>
@@ -925,7 +927,7 @@ export default function TorneosPage() {
                                                 className={pageStyles.accordionItemLink}
                                                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                                             >
-                                                {favoriteLeagueIds.includes(tournament.id) && (
+                                                {isLeagueFavorite(tournament.id) && (
                                                     <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                                                 )}
                                                 <span>{tournament.name}</span>
@@ -988,7 +990,7 @@ export default function TorneosPage() {
                                             .map((tournament) => {
                                                 const hasSubItems = Boolean(tournament.seasons && tournament.seasons.length > 0);
                                                 const isLeagueExpanded = expandedLeagueIds.has(tournament.id);
-                                                const isFavLeague = favoriteLeagueIds.includes(tournament.id);
+                                                const isFavLeague = isLeagueFavorite(tournament.id);
 
                                                 if (hasSubItems) {
                                                     return (

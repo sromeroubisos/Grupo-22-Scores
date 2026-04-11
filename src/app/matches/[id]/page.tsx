@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ExportImage from '@/components/ExportImage';
+import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import styles from './page.module.css';
 import {
@@ -340,6 +341,431 @@ function getDisplayLineupBadges(
     return badges;
 }
 
+type PlayerMetricKind = 'number' | 'percent' | 'duration' | 'rating';
+type PlayerMetricSortDirection = 'desc' | 'asc';
+
+type PlayerMetricMeta = {
+    id: string;
+    label: string;
+    shortLabel: string;
+    kind: PlayerMetricKind;
+};
+
+type PlayerStatsTableRow = {
+    key: string;
+    playerId: string | null;
+    name: string;
+    team: 'home' | 'away' | null;
+    teamName: string;
+    number: number | null;
+    position: string | null;
+    rating: number | null;
+    isCaptain: boolean;
+    metrics: Record<string, number | string | null>;
+};
+
+const PLAYER_METRIC_PRESETS: Record<string, PlayerMetricMeta> = {
+    points: { id: 'points', label: 'Puntos', shortLabel: 'Pts', kind: 'number' },
+    tries: { id: 'tries', label: 'Tries', shortLabel: 'Tries', kind: 'number' },
+    assists: { id: 'assists', label: 'Asistencias', shortLabel: 'Ast', kind: 'number' },
+    tackles: { id: 'tackles', label: 'Tackles', shortLabel: 'Tkl', kind: 'number' },
+    minutes: { id: 'minutes', label: 'Tiempo jugado', shortLabel: 'Min', kind: 'duration' },
+    matchesPlayed: { id: 'matchesPlayed', label: 'Partidos jugados', shortLabel: 'PJ', kind: 'number' },
+    yellowCards: { id: 'yellowCards', label: 'Amarillas', shortLabel: 'YC', kind: 'number' },
+    redCards: { id: 'redCards', label: 'Rojas', shortLabel: 'RC', kind: 'number' },
+    conversionsMade: { id: 'conversionsMade', label: 'Conversiones', shortLabel: 'Conv', kind: 'number' },
+    conversionAttempts: { id: 'conversionAttempts', label: 'Intentos de conversion', shortLabel: 'Int.', kind: 'number' },
+    conversionRate: { id: 'conversionRate', label: 'Tasa de conversion', shortLabel: 'Conv %', kind: 'percent' },
+    penalties: { id: 'penalties', label: 'Penales', shortLabel: 'Pen', kind: 'number' },
+    dropGoals: { id: 'dropGoals', label: 'Drop goals', shortLabel: 'Drop', kind: 'number' },
+    goals: { id: 'goals', label: 'Goles', shortLabel: 'Gol', kind: 'number' },
+    rating: { id: 'rating', label: 'Rating', shortLabel: 'Rat', kind: 'rating' },
+    events: { id: 'events', label: 'Intervenciones', shortLabel: 'Ev', kind: 'number' },
+};
+
+const PLAYER_METRIC_ALIASES: Array<[RegExp, string]> = [
+    [/^(pts?|points?|puntos?)$/, 'points'],
+    [/^(tries?|ensayos?)$/, 'tries'],
+    [/^(assists?|asistencias?)$/, 'assists'],
+    [/^(tackles?|placajes?)$/, 'tackles'],
+    [/^(minutes?|mins?|minutes_played|played_minutes|time_played|time_on_field|tiempo|tiempo_jugado)$/, 'minutes'],
+    [/^(matches_played|games_played|played|partidos_jugados|pj)$/, 'matchesPlayed'],
+    [/^(yellow_cards?|yellowcards?|tarjetas?_amarillas?|amarillas?|yc)$/, 'yellowCards'],
+    [/^(red_cards?|redcards?|tarjetas?_rojas?|rojas?|rc)$/, 'redCards'],
+    [/^(conversions?|successful_conversions|conversions_made|conversiones?)$/, 'conversionsMade'],
+    [/^(conversion_attempts|conversions_attempted|intentos_de_conversion)$/, 'conversionAttempts'],
+    [/^(conversion_rate|conversion_pct|conversion_percentage|tasa_de_conversion|porcentaje_de_conversion)$/, 'conversionRate'],
+    [/^(penalties?|penalty_goals?|penales?)$/, 'penalties'],
+    [/^(drop_goals?|dropgoals?)$/, 'dropGoals'],
+    [/^(goals?|goles?)$/, 'goals'],
+    [/^(rating|player_rating|puntaje|calificacion)$/, 'rating'],
+    [/^(events?|intervenciones?)$/, 'events'],
+];
+
+function readTextValue(value: unknown) {
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+function parseNumericStat(value: unknown) {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+        const normalized = value.replace(',', '.').trim();
+        if (!normalized) return null;
+        const match = normalized.match(/-?\d+(\.\d+)?/);
+        if (!match) return null;
+        const parsed = Number(match[0]);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+}
+
+function readRecordValue(value: unknown) {
+    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : null;
+}
+
+function normalizePlayerMetricKey(value: unknown) {
+    const normalized = String(value || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[%().]/g, '')
+        .replace(/[^\w\s-]/g, ' ')
+        .replace(/[\s/-]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+
+    if (!normalized) return null;
+
+    for (const [pattern, metricId] of PLAYER_METRIC_ALIASES) {
+        if (pattern.test(normalized)) return metricId;
+    }
+
+    return normalized;
+}
+
+function formatMetricLabel(value: string) {
+    return value
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getPlayerMetricMeta(metricId: string, fallbackLabel?: string | null): PlayerMetricMeta {
+    const preset = PLAYER_METRIC_PRESETS[metricId];
+    if (preset) return preset;
+
+    const label = fallbackLabel?.trim() || formatMetricLabel(metricId);
+    return {
+        id: metricId,
+        label,
+        shortLabel: label,
+        kind: label.includes('%') ? 'percent' : 'number',
+    };
+}
+
+function formatPlayerMetricValue(metricId: string, value: number | string | null | undefined, fallbackLabel?: string | null) {
+    if (value == null || value === '') return '—';
+
+    const meta = getPlayerMetricMeta(metricId, fallbackLabel);
+    const numericValue = parseNumericStat(value);
+
+    if (numericValue == null) {
+        return String(value);
+    }
+
+    if (meta.kind === 'percent') {
+        const fixed = Number.isInteger(numericValue) ? numericValue.toFixed(0) : numericValue.toFixed(1);
+        return `${fixed}%`;
+    }
+
+    if (meta.kind === 'duration') {
+        return `${Math.round(numericValue)} min`;
+    }
+
+    if (meta.kind === 'rating') {
+        return numericValue.toFixed(1);
+    }
+
+    return Number.isInteger(numericValue) ? numericValue.toString() : numericValue.toFixed(1);
+}
+
+function resolvePlayerSideFromTeamName(teamName: string, homeName: string, awayName: string) {
+    const normalizedTeamName = normalizeComparableTeamValue(teamName);
+    if (!normalizedTeamName) return null;
+    if (normalizedTeamName === normalizeComparableTeamValue(homeName)) return 'home';
+    if (normalizedTeamName === normalizeComparableTeamValue(awayName)) return 'away';
+    return null;
+}
+
+function chooseDefaultPlayerMetrics(metricIds: string[]) {
+    const preferred = [
+        'points',
+        'conversionRate',
+        'minutes',
+        'tries',
+        'assists',
+        'rating',
+        'tackles',
+        'conversionsMade',
+        'yellowCards',
+        'redCards',
+        'events',
+        'matchesPlayed',
+    ];
+
+    const selected: string[] = [];
+
+    preferred.forEach((metricId) => {
+        if (metricIds.includes(metricId) && !selected.includes(metricId) && selected.length < 3) {
+            selected.push(metricId);
+        }
+    });
+
+    metricIds.forEach((metricId) => {
+        if (!selected.includes(metricId) && selected.length < 3) {
+            selected.push(metricId);
+        }
+    });
+
+    return selected;
+}
+
+function buildPlayerStatsTableData(args: {
+    localPlayerRows: LocalPlayerStatsRow[];
+    playerStats: any;
+    homeName: string;
+    awayName: string;
+}) {
+    const rows = new Map<string, PlayerStatsTableRow>();
+    const metricLabels = new Map<string, string>();
+
+    const registerMetric = (metricId: string, label?: string | null) => {
+        if (!metricLabels.has(metricId)) {
+            metricLabels.set(metricId, label?.trim() || getPlayerMetricMeta(metricId, label).label);
+        }
+    };
+
+    const ensureRow = (input: {
+        playerId?: string | null;
+        name?: string | null;
+        team?: 'home' | 'away' | null;
+        teamName?: string | null;
+        number?: number | null;
+        position?: string | null;
+        rating?: number | null;
+        isCaptain?: boolean;
+    }) => {
+        const playerName = readTextValue(input.name);
+        const teamName = readTextValue(input.teamName) || (input.team === 'home' ? args.homeName : input.team === 'away' ? args.awayName : '');
+        const normalizedName = normalizeComparableTeamValue(playerName || teamName);
+        const playerId = readTextValue(input.playerId) || null;
+        const team = input.team || resolvePlayerSideFromTeamName(teamName, args.homeName, args.awayName);
+        const key = playerId || `${team || 'neutral'}:${normalizedName}`;
+
+        if (!playerName && !playerId) return null;
+
+        if (!rows.has(key)) {
+            rows.set(key, {
+                key,
+                playerId,
+                name: playerName || 'Jugador',
+                team,
+                teamName: teamName || (team === 'home' ? args.homeName : team === 'away' ? args.awayName : 'Equipo'),
+                number: input.number ?? null,
+                position: input.position ?? null,
+                rating: typeof input.rating === 'number' ? input.rating : null,
+                isCaptain: Boolean(input.isCaptain),
+                metrics: {},
+            });
+        }
+
+        const row = rows.get(key)!;
+        if (!row.playerId && playerId) row.playerId = playerId;
+        if (playerName && row.name === 'Jugador') row.name = playerName;
+        if (!row.team && team) row.team = team;
+        if ((!row.teamName || row.teamName === 'Equipo') && teamName) row.teamName = teamName;
+        if (row.number == null && input.number != null) row.number = input.number;
+        if (!row.position && input.position) row.position = input.position;
+        if (row.rating == null && typeof input.rating === 'number') row.rating = input.rating;
+        if (input.isCaptain) row.isCaptain = true;
+        return row;
+    };
+
+    const setMetric = (row: PlayerStatsTableRow | null, metricId: string | null, rawValue: unknown, label?: string | null) => {
+        if (!row || !metricId) return;
+        const numericValue = parseNumericStat(rawValue);
+        const normalizedValue = numericValue ?? (typeof rawValue === 'string' ? rawValue.trim() : null);
+        if (normalizedValue == null || normalizedValue === '') return;
+
+        row.metrics[metricId] = normalizedValue;
+        registerMetric(metricId, label);
+
+        if (metricId === 'rating' && numericValue != null && row.rating == null) {
+            row.rating = numericValue;
+        }
+    };
+
+    args.localPlayerRows.forEach((player) => {
+        const row = ensureRow({
+            playerId: player.playerId,
+            name: player.name,
+            team: player.team,
+            teamName: player.teamName,
+            number: player.number,
+            position: player.position,
+            rating: player.rating,
+            isCaptain: player.isCaptain,
+        });
+
+        setMetric(row, 'points', player.points, 'Puntos');
+        setMetric(row, 'tries', player.tries, 'Tries');
+        setMetric(row, 'tackles', player.tackles, 'Tackles');
+        setMetric(row, 'yellowCards', player.yellowCards, 'Amarillas');
+        setMetric(row, 'redCards', player.redCards, 'Rojas');
+        setMetric(row, 'events', player.events, 'Intervenciones');
+        setMetric(row, 'matchesPlayed', player.matchesPlayed, 'Partidos jugados');
+        if (typeof player.rating === 'number') {
+            setMetric(row, 'rating', player.rating, 'Rating');
+        }
+    });
+
+    const playerArray = Array.isArray(args.playerStats?.players) ? args.playerStats.players : [];
+    playerArray.forEach((entry: any, index: number) => {
+        const source = readRecordValue(entry) || {};
+        const statsRecord = readRecordValue(source.stats);
+        const teamRecord = readRecordValue(source.team);
+        const teamName =
+            readTextValue(source.team_name) ||
+            readTextValue(source.teamName) ||
+            readTextValue(teamRecord?.name);
+        const row = ensureRow({
+            playerId: readTextValue(source.player_id) || readTextValue(source.id) || readTextValue(source.playerId) || null,
+            name: readTextValue(source.player_name) || readTextValue(source.name) || `Jugador ${index + 1}`,
+            team: resolvePlayerSideFromTeamName(teamName, args.homeName, args.awayName),
+            teamName,
+            number: parseNumericStat(source.number ?? source.player_number ?? source.shirt_number),
+            position: readTextValue(source.position) || readTextValue(source.player_position) || null,
+            rating: parseNumericStat(source.rating ?? source.player_rating),
+            isCaptain: Boolean(source.is_captain || source.captain || source.isCaptain),
+        });
+
+        [
+            ['points', source.points ?? statsRecord?.points],
+            ['tries', source.tries ?? statsRecord?.tries],
+            ['assists', source.assists ?? statsRecord?.assists],
+            ['tackles', source.tackles ?? statsRecord?.tackles],
+            ['minutes', source.minutes ?? source.minutes_played ?? source.time_played ?? source.played_minutes ?? statsRecord?.minutes ?? statsRecord?.minutes_played ?? statsRecord?.time_played ?? statsRecord?.played_minutes],
+            ['matchesPlayed', source.played ?? source.matches_played ?? source.games_played ?? statsRecord?.played ?? statsRecord?.matches_played ?? statsRecord?.games_played],
+            ['yellowCards', source.yellow_cards ?? source.yellowCards ?? source.yc ?? statsRecord?.yellow_cards ?? statsRecord?.yellowCards ?? statsRecord?.yc],
+            ['redCards', source.red_cards ?? source.redCards ?? source.rc ?? statsRecord?.red_cards ?? statsRecord?.redCards ?? statsRecord?.rc],
+            ['conversionsMade', source.conversions ?? source.conversions_made ?? source.successful_conversions ?? statsRecord?.conversions ?? statsRecord?.conversions_made ?? statsRecord?.successful_conversions],
+            ['conversionAttempts', source.conversion_attempts ?? source.conversions_attempted ?? statsRecord?.conversion_attempts ?? statsRecord?.conversions_attempted],
+            ['conversionRate', source.conversion_rate ?? source.conversion_pct ?? source.conversion_percentage ?? statsRecord?.conversion_rate ?? statsRecord?.conversion_pct ?? statsRecord?.conversion_percentage],
+            ['penalties', source.penalties ?? source.penalty_goals ?? statsRecord?.penalties ?? statsRecord?.penalty_goals],
+            ['dropGoals', source.drop_goals ?? source.dropGoals ?? statsRecord?.drop_goals ?? statsRecord?.dropGoals],
+            ['goals', source.goals ?? statsRecord?.goals],
+            ['rating', source.rating ?? source.player_rating ?? statsRecord?.rating ?? statsRecord?.player_rating],
+        ].forEach(([metricId, value]) => {
+            setMetric(row, String(metricId), value);
+        });
+    });
+
+    const statGroups = Array.isArray(args.playerStats?.stat_groups) ? args.playerStats.stat_groups : [];
+    statGroups.forEach((group: any) => {
+        const groupRecord = readRecordValue(group) || {};
+        const stats = Array.isArray(groupRecord.stats) ? groupRecord.stats : [];
+
+        stats.forEach((entry: any) => {
+            const statRecord = readRecordValue(entry) || {};
+            const metricLabel = readTextValue(statRecord.name) || readTextValue(groupRecord.group_name) || 'Metric';
+            const metricId = normalizePlayerMetricKey(metricLabel);
+            if (!metricId) return;
+
+            ([
+                ['home', readRecordValue(statRecord.home_team)],
+                ['away', readRecordValue(statRecord.away_team)],
+            ] as const).forEach(([teamSide, teamRecord]) => {
+                if (!teamRecord) return;
+
+                const row = ensureRow({
+                    playerId: readTextValue(teamRecord.player_id) || readTextValue(teamRecord.id) || readTextValue(teamRecord.playerId) || null,
+                    name: readTextValue(teamRecord.player_name) || readTextValue(teamRecord.name) || 'Jugador',
+                    team: teamSide,
+                    teamName: teamSide === 'home' ? args.homeName : args.awayName,
+                });
+
+                setMetric(row, metricId, teamRecord.value ?? teamRecord.stat_value ?? teamRecord.stat, metricLabel);
+            });
+        });
+    });
+
+    rows.forEach((row) => {
+        const conversionsMade = parseNumericStat(row.metrics.conversionsMade);
+        const conversionAttempts = parseNumericStat(row.metrics.conversionAttempts);
+        if (row.metrics.conversionRate == null && conversionsMade != null && conversionAttempts != null && conversionAttempts > 0) {
+            row.metrics.conversionRate = Number(((conversionsMade / conversionAttempts) * 100).toFixed(1));
+            registerMetric('conversionRate', 'Tasa de conversion');
+        }
+
+        if (row.metrics.rating == null && typeof row.rating === 'number') {
+            row.metrics.rating = row.rating;
+            registerMetric('rating', 'Rating');
+        }
+    });
+
+    const metricIds = Array.from(metricLabels.keys()).sort((left, right) => {
+        const leftIndex = Object.keys(PLAYER_METRIC_PRESETS).indexOf(left);
+        const rightIndex = Object.keys(PLAYER_METRIC_PRESETS).indexOf(right);
+        if (leftIndex === -1 && rightIndex === -1) return left.localeCompare(right);
+        if (leftIndex === -1) return 1;
+        if (rightIndex === -1) return -1;
+        return leftIndex - rightIndex;
+    });
+
+    const resolvedRows = Array.from(rows.values()).filter((row) => Object.keys(row.metrics).length > 0);
+
+    return {
+        rows: resolvedRows,
+        metricIds,
+        metricLabels: Object.fromEntries(metricLabels),
+    };
+}
+
+function comparePlayerMetricValues(
+    left: PlayerStatsTableRow,
+    right: PlayerStatsTableRow,
+    metricSorts: Array<{ metricId: string; direction: PlayerMetricSortDirection }>,
+    primarySortIndex: number,
+) {
+    const prioritizedSorts = metricSorts.length === 0
+        ? []
+        : [
+            metricSorts[Math.max(0, Math.min(primarySortIndex, metricSorts.length - 1))],
+            ...metricSorts.filter((_, index) => index !== Math.max(0, Math.min(primarySortIndex, metricSorts.length - 1))),
+        ];
+
+    for (const metricSort of prioritizedSorts) {
+        const { metricId, direction } = metricSort;
+        const leftValue = parseNumericStat(left.metrics[metricId]) ?? Number.NEGATIVE_INFINITY;
+        const rightValue = parseNumericStat(right.metrics[metricId]) ?? Number.NEGATIVE_INFINITY;
+        if (rightValue !== leftValue) {
+            return direction === 'asc'
+                ? leftValue - rightValue
+                : rightValue - leftValue;
+        }
+    }
+
+    const leftRating = typeof left.rating === 'number' ? left.rating : Number.NEGATIVE_INFINITY;
+    const rightRating = typeof right.rating === 'number' ? right.rating : Number.NEGATIVE_INFINITY;
+    if (rightRating !== leftRating) return rightRating - leftRating;
+
+    return left.name.localeCompare(right.name, 'es');
+}
+
+function canFavoriteTeam(team: { id?: string | null }) {
+    const teamId = String(team.id || '').trim();
+    return Boolean(teamId && teamId !== 'home' && teamId !== 'away');
+}
+
 function getComparableTeamId(value: unknown) {
     return String(value || '').trim().toLowerCase();
 }
@@ -489,6 +915,9 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     });
 
     const [activeTab, setActiveTab] = useState('summary');
+    const [selectedPlayerMetrics, setSelectedPlayerMetrics] = useState<string[]>([]);
+    const [selectedPlayerMetricOrders, setSelectedPlayerMetricOrders] = useState<PlayerMetricSortDirection[]>([]);
+    const [activePlayerSortSlot, setActivePlayerSortSlot] = useState(0);
     const statusRef = useRef<string>('scheduled');
     const [showAllEvents, setShowAllEvents] = useState(false);
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
@@ -1096,6 +1525,95 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         return () => window.clearInterval(intervalId);
     }, [state.kind, state.matchData?.date, state.matchData?.status]);
 
+    const playerStatsTable = useMemo(() => buildPlayerStatsTableData({
+        localPlayerRows: state.localPlayerRows,
+        playerStats: state.playerStats,
+        homeName: state.matchData?.home?.name || 'Local',
+        awayName: state.matchData?.away?.name || 'Visitante',
+    }), [state.localPlayerRows, state.matchData?.away?.name, state.matchData?.home?.name, state.playerStats]);
+
+    useEffect(() => {
+        setSelectedPlayerMetrics((previous) => {
+            const availableMetricIds = playerStatsTable.metricIds;
+            if (availableMetricIds.length === 0) return [];
+
+            const next = previous.filter((metricId) => availableMetricIds.includes(metricId));
+            const defaults = chooseDefaultPlayerMetrics(availableMetricIds);
+
+            defaults.forEach((metricId) => {
+                if (!next.includes(metricId) && next.length < Math.min(3, availableMetricIds.length)) {
+                    next.push(metricId);
+                }
+            });
+
+            availableMetricIds.forEach((metricId) => {
+                if (!next.includes(metricId) && next.length < Math.min(3, availableMetricIds.length)) {
+                    next.push(metricId);
+                }
+            });
+
+            return next.slice(0, Math.min(3, availableMetricIds.length));
+        });
+    }, [playerStatsTable.metricIds]);
+
+    useEffect(() => {
+        const targetLength = selectedPlayerMetrics.length;
+        setSelectedPlayerMetricOrders((previous) => {
+            const next = previous.slice(0, targetLength);
+            while (next.length < targetLength) {
+                next.push('desc');
+            }
+            return next;
+        });
+    }, [selectedPlayerMetrics]);
+
+    useEffect(() => {
+        setActivePlayerSortSlot((previous) => {
+            if (selectedPlayerMetrics.length === 0) return 0;
+            return Math.max(0, Math.min(previous, selectedPlayerMetrics.length - 1));
+        });
+    }, [selectedPlayerMetrics.length]);
+
+    const displayedPlayerMetrics = selectedPlayerMetrics.length > 0
+        ? selectedPlayerMetrics
+        : chooseDefaultPlayerMetrics(playerStatsTable.metricIds);
+    const displayedPlayerMetricSorts = displayedPlayerMetrics.map((metricId, index) => ({
+        metricId,
+        direction: selectedPlayerMetricOrders[index] || 'desc',
+    }));
+
+    const sortedPlayerStatsRows = useMemo(() => {
+        if (playerStatsTable.rows.length === 0) return [];
+        return [...playerStatsTable.rows].sort((left, right) => comparePlayerMetricValues(
+            left,
+            right,
+            displayedPlayerMetricSorts,
+            activePlayerSortSlot,
+        ));
+    }, [activePlayerSortSlot, displayedPlayerMetricSorts, playerStatsTable.rows]);
+
+    const handlePlayerMetricChange = (slotIndex: number, nextMetricId: string) => {
+        setSelectedPlayerMetrics((current) => {
+            const next = [...current];
+            const duplicateIndex = next.findIndex((metricId, index) => metricId === nextMetricId && index !== slotIndex);
+
+            if (duplicateIndex >= 0) {
+                next[duplicateIndex] = next[slotIndex];
+            }
+
+            next[slotIndex] = nextMetricId;
+            return next;
+        });
+    };
+
+    const handlePlayerMetricOrderChange = (slotIndex: number, nextDirection: PlayerMetricSortDirection) => {
+        setSelectedPlayerMetricOrders((current) => {
+            const next = [...current];
+            next[slotIndex] = nextDirection;
+            return next;
+        });
+    };
+
     if (state.kind === 'loading') return (
         <div className={styles.page} style={{ minHeight: '100vh', background: 'var(--bg-primary, #0f1117)' }}>
             <div style={{ background: 'linear-gradient(135deg, #1a1f2e 0%, #16213e 100%)', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -1619,9 +2137,19 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             </Link>
                             <div className={styles.teamInfo}>
                                 <div className={styles.teamLabel}>Anfitrion</div>
-                                <Link href={buildTeamHref(matchData.home, matchData.sportId)} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <div className={styles.teamName} title={matchData.home.name}>{matchData.home.name}</div>
-                                </Link>
+                                <div className={styles.teamNameRow}>
+                                    <Link href={buildTeamHref(matchData.home, matchData.sportId)} className={styles.teamNameLink}>
+                                        <div className={styles.teamName} title={matchData.home.name}>{matchData.home.name}</div>
+                                    </Link>
+                                    {canFavoriteTeam(matchData.home) && (
+                                        <FavoriteButton
+                                            entityType="club"
+                                            entityId={String(matchData.home.id)}
+                                            size={18}
+                                            className={styles.teamFavoriteButton}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -1693,9 +2221,19 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             </Link>
                             <div className={styles.teamInfo}>
                                 <div className={styles.teamLabel}>Visitante</div>
-                                <Link href={buildTeamHref(matchData.away, matchData.sportId)} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <div className={styles.teamName} title={matchData.away.name}>{matchData.away.name}</div>
-                                </Link>
+                                <div className={styles.teamNameRow}>
+                                    <Link href={buildTeamHref(matchData.away, matchData.sportId)} className={styles.teamNameLink}>
+                                        <div className={styles.teamName} title={matchData.away.name}>{matchData.away.name}</div>
+                                    </Link>
+                                    {canFavoriteTeam(matchData.away) && (
+                                        <FavoriteButton
+                                            entityType="club"
+                                            entityId={String(matchData.away.id)}
+                                            size={18}
+                                            className={styles.teamFavoriteButton}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2279,7 +2817,120 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         {activeTab === 'players' && (
                             <div className={styles.playersStatsView}>
                                 <div className={styles.panelTitle}>Estadísticas de Jugadores</div>
-                                {state.localPlayerRows.length > 0 ? (
+                                {playerStatsTable.rows.length > 0 ? (
+                                    <div className={styles.playersTableSection}>
+                                        <div className={styles.playerMetricsToolbar}>
+                                            <div className={styles.playerMetricsSummary}>
+                                                <span className={styles.playerMetricsEyebrow}>Tabla configurable</span>
+                                                <p>Elegi tres estadisticas para comparar la tabla de jugadores y reordenarla segun el criterio que necesites.</p>
+                                            </div>
+                                            <div className={styles.playerMetricSelectors}>
+                                                {displayedPlayerMetrics.map((metricId, index) => {
+                                                    const metricMeta = getPlayerMetricMeta(metricId, playerStatsTable.metricLabels[metricId]);
+                                                    const sortDirection = displayedPlayerMetricSorts[index]?.direction || 'desc';
+                                                    const isActiveSort = activePlayerSortSlot === index;
+                                                    return (
+                                                        <label key={`${metricId}-${index}`} className={styles.playerMetricSelectWrap}>
+                                                            <span className={styles.playerMetricSelectLabel}>Columna {index + 1}</span>
+                                                            <select
+                                                                className={styles.playerMetricSelect}
+                                                                value={metricId}
+                                                                onChange={(event) => handlePlayerMetricChange(index, event.target.value)}
+                                                            >
+                                                                {playerStatsTable.metricIds.map((optionId) => {
+                                                                    const optionMeta = getPlayerMetricMeta(optionId, playerStatsTable.metricLabels[optionId]);
+                                                                    return (
+                                                                        <option key={optionId} value={optionId}>
+                                                                            {optionMeta.label}
+                                                                        </option>
+                                                                    );
+                                                                })}
+                                                            </select>
+                                                            <select
+                                                                className={styles.playerMetricOrderSelect}
+                                                                value={sortDirection}
+                                                                onChange={(event) => handlePlayerMetricOrderChange(index, event.target.value as PlayerMetricSortDirection)}
+                                                            >
+                                                                <option value="desc">Mayor a menor</option>
+                                                                <option value="asc">Menor a mayor</option>
+                                                            </select>
+                                                            <span className={styles.playerMetricChip}>{metricMeta.shortLabel}</span>
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.playerMetricSortButton} ${isActiveSort ? styles.playerMetricSortButtonActive : ''}`}
+                                                                onClick={() => setActivePlayerSortSlot(index)}
+                                                            >
+                                                                {isActiveSort ? 'Orden activo' : 'Usar para ordenar'}
+                                                            </button>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.playerStatsTableWrap}>
+                                            <table className={styles.playerStatsTable}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Jugador</th>
+                                                        <th>Equipo</th>
+                                                        {displayedPlayerMetrics.map((metricId, metricIndex) => {
+                                                            const metricMeta = getPlayerMetricMeta(metricId, playerStatsTable.metricLabels[metricId]);
+                                                            const sortDirection = displayedPlayerMetricSorts[metricIndex]?.direction || 'desc';
+                                                            const isActiveSort = activePlayerSortSlot === metricIndex;
+                                                            return (
+                                                                <th key={metricId} className={styles.playerStatsMetricHeader}>
+                                                                    <button
+                                                                        type="button"
+                                                                        className={`${styles.playerStatsHeaderButton} ${isActiveSort ? styles.playerStatsHeaderButtonActive : ''}`}
+                                                                        onClick={() => setActivePlayerSortSlot(metricIndex)}
+                                                                    >
+                                                                        <span>{metricMeta.label}</span>
+                                                                        <span>{sortDirection === 'desc' ? '↓' : '↑'}</span>
+                                                                    </button>
+                                                                </th>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {sortedPlayerStatsRows.map((player) => (
+                                                        <tr key={player.key}>
+                                                            <td className={styles.playerStatsNameCell}>
+                                                                <div className={styles.playerStatsNameWrap}>
+                                                                    <div className={styles.playerStatsPrimary}>
+                                                                        {player.playerId ? (
+                                                                            <Link href={`/players/${player.playerId}`} className={styles.playerStatsNameLink}>
+                                                                                {player.name}
+                                                                            </Link>
+                                                                        ) : (
+                                                                            <span>{player.name}</span>
+                                                                        )}
+                                                                        {player.number != null && <span className={styles.playerStatsBadge}>#{player.number}</span>}
+                                                                        {player.isCaptain && <span className={styles.playerStatsBadge}>Cap.</span>}
+                                                                    </div>
+                                                                    <div className={styles.playerStatsSecondary}>
+                                                                        {player.position || 'Sin posicion'}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className={styles.playerStatsTeamCell}>
+                                                                <span className={`${styles.playerStatsTeamTag} ${player.team === 'home' ? styles.teamTagHome : player.team === 'away' ? styles.teamTagAway : ''}`}>
+                                                                    {player.teamName}
+                                                                </span>
+                                                            </td>
+                                                            {displayedPlayerMetrics.map((metricId) => (
+                                                                <td key={`${player.key}-${metricId}`} className={styles.playerStatsMetricCell}>
+                                                                    {formatPlayerMetricValue(metricId, player.metrics[metricId], playerStatsTable.metricLabels[metricId])}
+                                                                </td>
+                                                            ))}
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ) : state.localPlayerRows.length > 0 ? (
                                     <div style={{ display: 'grid', gap: '12px' }}>
                                         {state.localPlayerRows.map((player) => (
                                             <div key={player.key} className={styles.playerStatRow} style={{ padding: '14px 16px', display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'center' }}>

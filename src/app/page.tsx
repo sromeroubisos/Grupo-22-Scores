@@ -406,7 +406,7 @@ export default function HomePage() {
   const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
 
   const { selectedSport, setSelectedSport, activeSports } = useSport();
-  const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
+  const { favoriteSportIds } = useUserPreferences();
 
   // Sort active sports: favorites first, then rest in original order
   const sortedActiveSports = useMemo(() => {
@@ -745,8 +745,8 @@ export default function HomePage() {
   ), [matchesByLeague]);
 
   const compareSidebarTournaments = useCallback((left: Tournament, right: Tournament) => {
-    const leftFavorite = favoriteLeagueIds.includes(left.id);
-    const rightFavorite = favoriteLeagueIds.includes(right.id);
+    const leftFavorite = isLeagueFavorite(left.id);
+    const rightFavorite = isLeagueFavorite(right.id);
 
     if (leftFavorite && !rightFavorite) return -1;
     if (!leftFavorite && rightFavorite) return 1;
@@ -760,7 +760,7 @@ export default function HomePage() {
     }
 
     return compareTournamentsByPriority(left, right);
-  }, [favoriteLeagueIds, hasRugbyPublicCatalog]);
+  }, [hasRugbyPublicCatalog, isLeagueFavorite]);
 
   const loadRugbyCountryTournaments = useCallback(async (countryId: string) => {
     if (!hasRugbyPublicCatalog || countryId === 'international') {
@@ -1210,7 +1210,7 @@ export default function HomePage() {
                         className={styles.accordionItemLink}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        {favoriteLeagueIds.includes(tournament.id) && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
+                        {isLeagueFavorite(tournament.id) && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                         <span>{tournament.name}</span>
                       </Link>
                     ))}
@@ -1268,7 +1268,7 @@ export default function HomePage() {
                         // Check if tournament has sub-items (Seasons)
                         const hasSubItems = tournament.seasons && tournament.seasons.length > 0;
                         const isLeagueExpanded = expandedLeagueIds.has(tournament.id);
-                        const isFavLeague = favoriteLeagueIds.includes(tournament.id);
+                        const isFavLeague = isLeagueFavorite(tournament.id);
 
                         if (hasSubItems) {
                           return (
@@ -1504,7 +1504,7 @@ export default function HomePage() {
                             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                             onClick={() => setMobileTournamentsOpen(false)}
                           >
-                            {favoriteLeagueIds.includes(tournament.id) && (
+                            {isLeagueFavorite(tournament.id) && (
                               <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                             )}
                             <span>{tournament.name}</span>
@@ -1563,7 +1563,7 @@ export default function HomePage() {
                               style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                               onClick={() => setMobileTournamentsOpen(false)}
                             >
-                              {favoriteLeagueIds.includes(tournament.id) && (
+                              {isLeagueFavorite(tournament.id) && (
                                 <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                               )}
                               <span>{tournament.name}</span>
