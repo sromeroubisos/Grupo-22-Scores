@@ -91,10 +91,11 @@ export default function ResultadosPage() {
                     roundLabel: formatRoundLabel(match.roundId),
                     home: String(match.homeTeam?.name || 'Local'),
                     homeLogo: resolveTeamLogo(match.homeTeam),
-                    homeScore: typeof match.score?.home === 'number' ? match.score.home : null,
+                    homeScore: typeof match.score?.home === 'number' ? match.score.home : (status === 'scheduled' ? null : 0),
                     away: String(match.awayTeam?.name || 'Visitante'),
                     awayLogo: resolveTeamLogo(match.awayTeam),
-                    awayScore: typeof match.score?.away === 'number' ? match.score.away : null,
+                    awayScore: typeof match.score?.away === 'number' ? match.score.away : (status === 'scheduled' ? null : 0),
+                    status: status,
                     dateTime: match.dateTime,
                 };
 

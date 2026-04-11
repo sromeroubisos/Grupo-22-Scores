@@ -678,10 +678,10 @@ export default function HomePage() {
         time: timeStr,
         home: match.homeTeam?.name || 'Local',
         homeLogo: resolveTeamLogo(match.homeTeam),
-        homeScore: match.score?.home,
+        homeScore: typeof match.score?.home === 'number' ? match.score.home : (status === 'scheduled' ? null : 0),
         away: match.awayTeam?.name || 'Visita',
         awayLogo: resolveTeamLogo(match.awayTeam),
-        awayScore: match.score?.away,
+        awayScore: typeof match.score?.away === 'number' ? match.score.away : (status === 'scheduled' ? null : 0),
         status: status,
         // minutes will be calculated by the MatchRow component using the original dateTime
         minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,

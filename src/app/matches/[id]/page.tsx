@@ -14,12 +14,61 @@ import {
     type LocalPlayerStatsRow,
 } from '@/lib/localMatchData';
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
+import { SPORTS } from '@/lib/data/sports';
 import { APP_TIMEZONE } from '@/lib/timezone';
+import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { useAuth } from '@/context/AuthContext';
 
 const USER_TZ = APP_TIMEZONE;
+
+function formatClockLabel(
+    clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null } | null | undefined,
+    syncedAt?: string | null,
+) {
+    if (!clock) return '';
+
+    const minute = Number(clock.minute);
+    const seconds = Number(clock.seconds);
+    let totalSeconds =
+        (Number.isFinite(minute) ? Math.max(0, Math.trunc(minute)) : 0) * 60
+        + (Number.isFinite(seconds) ? Math.max(0, Math.trunc(seconds)) : 0);
+
+    if (clock.running && syncedAt) {
+        const syncedTime = new Date(syncedAt);
+        if (!Number.isNaN(syncedTime.getTime())) {
+            totalSeconds += Math.max(0, Math.floor((Date.now() - syncedTime.getTime()) / 1000));
+        }
+    }
+
+    const safeMinute = Math.floor(totalSeconds / 60);
+    const safeSeconds = totalSeconds % 60;
+    const period = String(clock.period || '').trim();
+    const time = `${String(safeMinute).padStart(2, '0')}:${String(safeSeconds).padStart(2, '0')}`;
+    return period ? `${time} - ${period}` : time;
+}
+
+function resolvePublicMatchTime(
+    dateTime: string | null | undefined,
+    sportId: string | null | undefined,
+    status: string | null | undefined,
+    clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null } | null | undefined,
+    syncedAt?: string | null,
+) {
+    const normalizedStatus = String(status || '').toLowerCase();
+
+    if (normalizedStatus === 'live') {
+        const clockLabel = formatClockLabel(clock, syncedAt);
+        if (clockLabel) return clockLabel;
+
+        const sport = SPORTS[(sportId || 'football') as keyof typeof SPORTS] || SPORTS.football;
+        return calculateVirtualMatchTime(dateTime, sport, 'live') || 'En Vivo';
+    }
+
+    if (!dateTime) return '--:--';
+    return new Date(dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ });
+}
 
 function isExternalEntityId(value?: string) {
     return Boolean(value) && /^[A-Za-z0-9]+$/.test(value || '');
@@ -847,9 +896,9 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 status: matchData.status || 'scheduled',
                                 sportId,
                                 date: matchData.dateTime,
-                                time: matchData.dateTime
-                                    ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
-                                    : '--:--',
+                                time: resolvePublicMatchTime(matchData.dateTime, sportId, matchData.status, matchData.clock, matchData.updatedAt || matchData.updated_at || null),
+                                clock: matchData.clock || null,
+                                updatedAt: matchData.updatedAt || matchData.updated_at || null,
                                 phaseId: phaseId || null,
                                 groupId: groupId || null,
                                 tournament: matchData.tournament?.name || 'Partido Local',
@@ -936,9 +985,9 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 status: matchData.status || 'scheduled',
                                 sportId,
                                 date: matchData.dateTime,
-                                time: matchData.dateTime
-                                    ? new Date(matchData.dateTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: USER_TZ })
-                                    : '--:--',
+                                time: resolvePublicMatchTime(matchData.dateTime, sportId, matchData.status, matchData.clock, matchData.updatedAt || matchData.updated_at || null),
+                                clock: matchData.clock || null,
+                                updatedAt: matchData.updatedAt || matchData.updated_at || null,
                                 phaseId: phaseId || null,
                                 groupId: groupId || null,
                                 tournament: matchData.tournament?.name || 'Partido Local',
@@ -1032,6 +1081,18 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
         if (visibleTabs.some((tab) => tab.id === activeTab)) return;
         setActiveTab('summary');
     }, [activeTab, visibleTabs]);
+
+    const [liveClockTick, setLiveClockTick] = useState(0);
+
+    useEffect(() => {
+        if (state.kind !== 'ok' || state.matchData?.status !== 'live') return;
+
+        const intervalId = window.setInterval(() => {
+            setLiveClockTick((value) => value + 1);
+        }, 1000);
+
+        return () => window.clearInterval(intervalId);
+    }, [state.kind, state.matchData?.date, state.matchData?.status]);
 
     if (state.kind === 'loading') return (
         <div className={styles.page} style={{ minHeight: '100vh', background: 'var(--bg-primary, #0f1117)' }}>
@@ -1133,6 +1194,15 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                 timeZone: USER_TZ,
             })
     );
+    const liveDisplayTime = resolvePublicMatchTime(
+        matchData.date,
+        matchData.sportId,
+        matchData.status,
+        matchData.clock,
+        matchData.updatedAt || matchData.updated_at || null,
+    );
+    void liveClockTick;
+    const matchTimerText = liveDisplayTime || matchTimeText;
     const motorsportTournamentHref = buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason);
     const motorsportStatusLabel = getMotorsportStatusLabel(matchData.status);
     const motorsportTitle = matchData.round || matchData.tournament || 'Evento Motorsport';
@@ -1575,7 +1645,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                             tournament: matchData.tournament,
                                             tournamentLogo: matchData.tournamentLogo,
                                             date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
-                                            time: matchData.time,
+                                            time: matchTimerText,
                                             kickoffAt: matchData.date,
                                             venue: matchData.venue,
                                             stats: statsData || []
@@ -1595,7 +1665,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 </div>
                             )}
                             <div className={styles.matchTimer}>
-                                <span>{matchData.time}</span>
+                                <span>{matchTimerText}</span>
                                 <span style={{ opacity: 0.3 }}>|</span>
                                 <span>{matchData.status === 'live' ? 'En Juego' : matchData.status === 'final' ? 'FT' : 'Pendiente'}</span>
                             </div>
@@ -1632,7 +1702,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     <div className={styles.infoBar}>
                         <div className={styles.infoChip}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-                            <span><strong>{new Date(matchData.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: USER_TZ })}</strong> {matchData.time}</span>
+                            <span><strong>{new Date(matchData.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: USER_TZ })}</strong> {matchTimerText}</span>
                         </div>
                         <div className={styles.infoChip}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
@@ -1849,7 +1919,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                                     tournament: matchData.tournament,
                                                     tournamentLogo: matchData.tournamentLogo,
                                                     date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
-                                                    time: matchData.time,
+                                                    time: matchTimerText,
                                                     venue: matchData.venue,
                                                     kickoffAt: matchData.date,
                                                     homeTeam: {
@@ -2361,7 +2431,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     tournament: matchData.tournament,
                                     tournamentLogo: matchData.tournamentLogo,
                                     date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
-                                    time: matchData.time,
+                                    time: matchTimerText,
                                     kickoffAt: matchData.date,
                                     stats: statsData
                                 }}
