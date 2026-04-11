@@ -69,6 +69,8 @@ type RankingClubRow = {
     name: string;
     short_name?: string | null;
     logo_url?: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
 };
 
 type RankingApplicationRow = {
@@ -639,7 +641,7 @@ async function getClubById(
 ) {
     const { data, error } = await supabase
         .from('clubs')
-        .select('id, name, short_name, logo_url')
+        .select('id, name, short_name, logo_url, sport, sport_id')
         .eq('id', clubId)
         .single();
 
@@ -648,6 +650,17 @@ async function getClubById(
     }
 
     return data as RankingClubRow;
+}
+
+function assertClubMatchesRankingSport(ranking: RankingRow, club: RankingClubRow) {
+    const rankingSport = canonicalizeSportId(ranking.sport || null);
+    const clubSport = canonicalizeSportId(club.sport_id || club.sport || null);
+
+    if (!rankingSport || !clubSport || rankingSport === clubSport) {
+        return;
+    }
+
+    throw new Error('El club seleccionado no corresponde al deporte de este ranking.');
 }
 
 async function getRankingEntryById(
@@ -1821,12 +1834,14 @@ export async function createClubRankingEntry(
     }
 
     const supabase = getAdminClient();
-    await getRankingRow(supabase, rankingId);
+    const ranking = await getRankingRow(supabase, rankingId);
 
     const [club, existingEntry] = await Promise.all([
         getClubById(supabase, input.clubId),
         getRankingEntryByClubId(supabase, rankingId, input.clubId),
     ]);
+
+    assertClubMatchesRankingSport(ranking, club);
 
     if (existingEntry) {
         throw new Error('Ese club ya forma parte del ranking.');
@@ -1887,6 +1902,8 @@ export async function updateClubRankingEntry(
         getClubById(supabase, input.clubId),
     ]);
     const duplicateEntry = await getRankingEntryByClubId(supabase, rankingId, input.clubId);
+
+    assertClubMatchesRankingSport(ranking, club);
 
     if (duplicateEntry && duplicateEntry.id !== existingEntry.id) {
         throw new Error('Ese club ya forma parte del ranking.');

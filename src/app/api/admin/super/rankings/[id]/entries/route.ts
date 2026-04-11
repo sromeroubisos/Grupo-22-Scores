@@ -15,7 +15,8 @@ function getStatusCode(error: unknown) {
         message.includes('seleccionar') ||
         message.includes('numerico') ||
         message.includes('No se encontro') ||
-        message.includes('ya forma parte')
+        message.includes('ya forma parte') ||
+        message.includes('deporte')
     ) {
         return 400;
     }

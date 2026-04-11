@@ -12,8 +12,15 @@ export type ResolvedFavorite = {
 };
 
 export const FAVORITES_LOCAL_CACHE_KEY = 'g22_favorites_v4_fix';
+export const FAVORITES_LOCAL_CACHE_OWNER_KEY = `${FAVORITES_LOCAL_CACHE_KEY}:owner`;
 const PENDING_FAVORITE_NAME = 'Pendiente de sincronizar';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function clearFavoritesLocalCache(): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(FAVORITES_LOCAL_CACHE_KEY);
+    window.localStorage.removeItem(FAVORITES_LOCAL_CACHE_OWNER_KEY);
+}
 
 type RpcFavoriteRow = {
     entity_id?: unknown;
@@ -204,9 +211,15 @@ function hasUsableName(favorite: Pick<ResolvedFavorite, 'id' | 'name'>): boolean
     return Boolean(name) && name !== PENDING_FAVORITE_NAME && name !== favorite.id;
 }
 
-function readCachedFavorites(): ResolvedFavorite[] {
+function readCachedFavorites(userId?: string | null): ResolvedFavorite[] {
     try {
         if (typeof window === 'undefined') return [];
+        const expectedOwner = typeof userId === 'string' ? userId.trim() : '';
+        const cachedOwner = window.localStorage.getItem(FAVORITES_LOCAL_CACHE_OWNER_KEY)?.trim() || '';
+
+        if (!expectedOwner || !cachedOwner || cachedOwner !== expectedOwner) {
+            return [];
+        }
 
         const raw = window.localStorage.getItem(FAVORITES_LOCAL_CACHE_KEY);
         if (!raw) return [];
@@ -231,8 +244,8 @@ function readCachedFavorites(): ResolvedFavorite[] {
     }
 }
 
-function mergeWithCachedFavorites(items: ResolvedFavorite[]): ResolvedFavorite[] {
-    const cached = new Map(readCachedFavorites().map((favorite) => [favoriteKey(favorite), favorite]));
+function mergeWithCachedFavorites(items: ResolvedFavorite[], userId?: string | null): ResolvedFavorite[] {
+    const cached = new Map(readCachedFavorites(userId).map((favorite) => [favoriteKey(favorite), favorite]));
     if (cached.size === 0) return items;
 
     return items.map((favorite) => {
@@ -442,20 +455,20 @@ async function fetchFavoritesFallback(
     return { ok: true, items };
 }
 
-export async function fetchResolvedFavorites(supabase: SupabaseClient): Promise<ResolvedFavorite[]> {
+export async function fetchResolvedFavorites(supabase: SupabaseClient, userId?: string | null): Promise<ResolvedFavorite[]> {
     const fallback = await fetchFavoritesFallback(supabase);
     if (fallback.ok) {
-        return mergeWithCachedFavorites(fallback.items);
+        return mergeWithCachedFavorites(fallback.items, userId);
     }
 
     const v2 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched_v2');
     if (v2 && v2.length > 0) {
-        return mergeWithCachedFavorites(v2);
+        return mergeWithCachedFavorites(v2, userId);
     }
 
     const v1 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched');
     if (v1 && v1.length > 0) {
-        return mergeWithCachedFavorites(v1);
+        return mergeWithCachedFavorites(v1, userId);
     }
 
     return [];

@@ -2448,12 +2448,17 @@ async function readRemotePresetRows(
     userId: string,
     presetType: ExportPresetKind,
 ): Promise<PersistedExportPresetRow[]> {
+    const maxRows = presetType === 'gradient'
+        ? MAX_SAVED_EDITORIAL_GRADIENT_PRESETS
+        : MAX_SAVED_EDITORIAL_PRESETS;
+
     const { data, error } = await supabase
         .from(EXPORT_PRESETS_TABLE)
         .select('id, name, payload, updated_at')
         .eq('user_id', userId)
         .eq('preset_type', presetType)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(maxRows);
 
     if (error) {
         throw error;

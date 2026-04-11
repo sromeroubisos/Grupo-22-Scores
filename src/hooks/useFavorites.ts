@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/client';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { EntityType } from '@/lib/types/user';
 import {
+    clearFavoritesLocalCache,
     FAVORITES_LOCAL_CACHE_KEY,
+    FAVORITES_LOCAL_CACHE_OWNER_KEY,
     fetchResolvedFavorites,
     type ResolvedFavorite,
 } from '@/lib/favorites/fetchFavorites';
@@ -28,9 +30,16 @@ type ToggleLeagueFavoriteOptions = {
 
 const PENDING_FAVORITE_NAME = 'Pendiente de sincronizar';
 
-function readLS(): FavoriteItem[] {
+function readLS(userId?: string | null): FavoriteItem[] {
     try {
         if (typeof window === 'undefined') return [];
+        const expectedOwner = typeof userId === 'string' ? userId.trim() : '';
+        const cachedOwner = localStorage.getItem(FAVORITES_LOCAL_CACHE_OWNER_KEY)?.trim() || '';
+
+        if (!expectedOwner || !cachedOwner || cachedOwner !== expectedOwner) {
+            return [];
+        }
+
         const raw = localStorage.getItem(LS_KEY);
         return raw ? (JSON.parse(raw) as FavoriteItem[]) : [];
     } catch {
@@ -38,9 +47,12 @@ function readLS(): FavoriteItem[] {
     }
 }
 
-function writeLS(items: FavoriteItem[]): void {
+function writeLS(userId: string | null | undefined, items: FavoriteItem[]): void {
     try {
         if (typeof window === 'undefined') return;
+        const normalizedUserId = typeof userId === 'string' ? userId.trim() : '';
+        if (!normalizedUserId) return;
+        localStorage.setItem(FAVORITES_LOCAL_CACHE_OWNER_KEY, normalizedUserId);
         localStorage.setItem(LS_KEY, JSON.stringify(items));
     } catch {
         // Ignore localStorage quota errors.
@@ -234,14 +246,8 @@ export function useFavorites() {
     const supabase = useMemo(() => createClient(), []);
     const supabaseUntyped = supabase as any;
     const requestIdRef = useRef(0);
+    const activeUserIdRef = useRef<string | null>(null);
     const attemptedClientResolutionsRef = useRef<Set<string>>(new Set());
-
-    useEffect(() => {
-        const cached = readLS();
-        if (cached.length > 0) {
-            setFavorites(cached);
-        }
-    }, []);
 
     useEffect(() => {
         const pendingFavorites = favorites.filter((favorite) => (
@@ -278,7 +284,7 @@ export function useFavorites() {
                     const patch = resolvedMap.get(`${favorite.entity_type}:${favorite.id}`);
                     return patch ? { ...favorite, ...patch } : favorite;
                 });
-                writeLS(next);
+                writeLS(activeUserIdRef.current, next);
                 return next;
             });
         })();
@@ -321,16 +327,25 @@ export function useFavorites() {
             if (myId !== requestIdRef.current) return;
 
             if (sessionErr || !session) {
+                activeUserIdRef.current = null;
+                clearFavoritesLocalCache();
                 setFavorites([]);
                 setHasMore(false);
                 return;
+            }
+
+            activeUserIdRef.current = session.user.id;
+
+            const cached = readLS(session.user.id);
+            if (cached.length > 0) {
+                setFavorites(cached);
             }
 
             const favoritesRequest = beginClientRequest('favorites:resolved', 'hook_refresh', {
                 hook: 'useFavorites',
             });
             const t0 = performance.now();
-            const items = await fetchResolvedFavorites(supabase);
+            const items = await fetchResolvedFavorites(supabase, session.user.id);
             const t1 = performance.now();
             favoritesRequest.end({
                 rows: items.length,
@@ -346,7 +361,7 @@ export function useFavorites() {
             });
 
             setFavorites(items);
-            writeLS(items);
+            writeLS(session.user.id, items);
             setHasMore(false);
         } catch (err: unknown) {
             if (myId !== requestIdRef.current) return;
@@ -369,8 +384,9 @@ export function useFavorites() {
                 fetchFavorites();
             } else if (event === 'SIGNED_OUT') {
                 requestIdRef.current++;
+                activeUserIdRef.current = null;
                 setFavorites([]);
-                writeLS([]);
+                clearFavoritesLocalCache();
                 setHasMore(false);
                 setLoading(false);
                 setError(null);
@@ -393,13 +409,14 @@ export function useFavorites() {
             const next = exists
                 ? prev.filter((favorite) => String(favorite.id) !== String(id))
                 : [{ ...item, created_at: new Date().toISOString() } as FavoriteItem, ...prev];
-            writeLS(next);
+            writeLS(activeUserIdRef.current, next);
             return next;
         });
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
+            activeUserIdRef.current = session.user.id;
 
             await supabase.rpc('toggle_favorite', {
                 p_entity_type: entity_type,
@@ -429,13 +446,14 @@ export function useFavorites() {
                 String(favorite.id) === String(entityId) &&
                 entityTypes.includes(favorite.entity_type)
             ));
-            writeLS(next);
+            writeLS(activeUserIdRef.current, next);
             return next;
         });
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
+            activeUserIdRef.current = session.user.id;
 
             await Promise.all(entityTypes.map(async (entityType) => {
                 await supabase.rpc('toggle_favorite', {

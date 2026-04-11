@@ -135,7 +135,7 @@ export default function ProfilePage() {
 
         (async () => {
             try {
-                const data = await fetchResolvedFavorites(supabase);
+                const data = await fetchResolvedFavorites(supabase, user.id);
                 if (!alive) return;
                 setFavorites(data);
             } catch (err: unknown) {

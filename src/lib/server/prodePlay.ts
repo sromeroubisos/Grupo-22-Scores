@@ -49,6 +49,11 @@ interface LooseMutationClient {
     };
 }
 
+type UserIdentity = {
+    name: string;
+    avatarUrl: string | null;
+};
+
 type BaseMatchRow = {
     sourceType: 'local' | 'external';
     localMatchId: string | null;
@@ -85,6 +90,14 @@ function toRecord(value: unknown) {
     return value && typeof value === 'object' && !Array.isArray(value)
         ? value as Record<string, unknown>
         : {};
+}
+
+function toRelatedRecord(value: unknown) {
+    if (Array.isArray(value)) {
+        return toRecord(value[0]);
+    }
+
+    return toRecord(value);
 }
 
 function toBoolean(value: unknown) {
@@ -427,6 +440,49 @@ function isMissingRelationError(error: QueryError) {
     return message.includes('does not exist') || message.includes('schema cache') || message.includes('Could not find');
 }
 
+function resolveUserIdentity(source: unknown, fallback?: UserIdentity | null): UserIdentity {
+    const userRow = toRelatedRecord(source);
+    const name = toNullableString(userRow.name)
+        || (() => {
+            const email = toNullableString(userRow.email);
+            return email ? email.split('@')[0] || null : null;
+        })()
+        || fallback?.name
+        || 'Usuario';
+
+    return {
+        name,
+        avatarUrl: toNullableString(userRow.avatar_url) || fallback?.avatarUrl || null,
+    };
+}
+
+async function loadUserIdentityMap(admin: LooseMutationClient, userIds: string[]) {
+    const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)));
+    const identityMap = new Map<string, UserIdentity>();
+
+    if (!uniqueUserIds.length) {
+        return identityMap;
+    }
+
+    const result = await admin
+        .from('users')
+        .select('id, name, avatar_url, email')
+        .in('id', uniqueUserIds);
+
+    if (result.error) {
+        throw new Error(result.error.message || 'No se pudieron cargar los nombres de usuario del prode.');
+    }
+
+    (result.data || []).forEach((row) => {
+        const userId = toSafeString(row.id);
+        if (!userId) return;
+
+        identityMap.set(userId, resolveUserIdentity(row));
+    });
+
+    return identityMap;
+}
+
 function mapPrediction(row: AnyRow): ProdePlayPrediction {
     return {
         id: toSafeString(row.id),
@@ -441,14 +497,18 @@ function mapPrediction(row: AnyRow): ProdePlayPrediction {
     };
 }
 
-function mapLeaderboardEntry(row: AnyRow, currentUserId: string | null): ProdePlayLeaderboardEntry {
-    const userRow = toRecord(row.users);
+function mapLeaderboardEntry(
+    row: AnyRow,
+    currentUserId: string | null,
+    userIdentityMap?: Map<string, UserIdentity>,
+): ProdePlayLeaderboardEntry {
     const userId = toSafeString(row.user_id);
+    const userIdentity = resolveUserIdentity(row.users, userIdentityMap?.get(userId));
 
     return {
         userId,
-        userName: toSafeString(userRow.name) || 'Usuario',
-        avatarUrl: toNullableString(userRow.avatar_url),
+        userName: userIdentity.name,
+        avatarUrl: userIdentity.avatarUrl,
         totalPoints: toFiniteNumber(row.total_points),
         exactHits: toFiniteNumber(row.exact_hits),
         correctOutcomes: toFiniteNumber(row.correct_outcomes),
@@ -457,14 +517,18 @@ function mapLeaderboardEntry(row: AnyRow, currentUserId: string | null): ProdePl
     };
 }
 
-function buildFallbackLeaderboard(memberRows: AnyRow[], currentUserId: string | null) {
+function buildFallbackLeaderboard(
+    memberRows: AnyRow[],
+    currentUserId: string | null,
+    userIdentityMap?: Map<string, UserIdentity>,
+) {
     return memberRows.map((row, index) => {
-        const userRow = toRecord(row.users);
         const userId = toSafeString(row.user_id);
+        const userIdentity = resolveUserIdentity(row.users, userIdentityMap?.get(userId));
         return {
             userId,
-            userName: toSafeString(userRow.name) || 'Usuario',
-            avatarUrl: toNullableString(userRow.avatar_url),
+            userName: userIdentity.name,
+            avatarUrl: userIdentity.avatarUrl,
             totalPoints: 0,
             exactHits: 0,
             correctOutcomes: 0,
@@ -1057,9 +1121,13 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
     const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data);
     const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
     const events = mapEvents(eventRows, scopedPredictionRows);
+    const leaderboardUserIds = (rankingRows.length ? rankingRows : memberRows)
+        .map((row) => toSafeString(row.user_id))
+        .filter(Boolean);
+    const userIdentityMap = await loadUserIdentityMap(admin, leaderboardUserIds);
     const leaderboardRows = rankingRows.length
-        ? rankingRows.map((row) => mapLeaderboardEntry(row, currentUserId))
-        : buildFallbackLeaderboard(memberRows, currentUserId);
+        ? rankingRows.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap))
+        : buildFallbackLeaderboard(memberRows, currentUserId, userIdentityMap);
     const nextLockAt = events.filter((event) => event.isOpen).map((event) => event.locksAt)[0] || null;
 
     return {
@@ -1210,8 +1278,10 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
     const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data, leagueRow);
     const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
     const events = mapEvents(eventRows, scopedPredictionRows);
+    const rankingUserIds = (rankingResult.data || []).map((row) => toSafeString(row.user_id)).filter(Boolean);
+    const userIdentityMap = await loadUserIdentityMap(admin, rankingUserIds.length ? rankingUserIds : leagueMembershipRows.map((row) => toSafeString(row.user_id)));
     let leaderboardRows = rankingResult.data?.length
-        ? rankingResult.data.map((row) => mapLeaderboardEntry(row, currentUserId))
+        ? rankingResult.data.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap))
         : [];
 
     if (!leaderboardRows.length) {
@@ -1224,7 +1294,7 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
             throw new Error(fallbackMemberResult.error.message || 'No se pudo cargar el ranking base de la liga.');
         }
 
-        leaderboardRows = buildFallbackLeaderboard(fallbackMemberResult.data || [], currentUserId);
+        leaderboardRows = buildFallbackLeaderboard(fallbackMemberResult.data || [], currentUserId, userIdentityMap);
     }
 
     const nextLockAt = events.filter((event) => event.isOpen).map((event) => event.locksAt)[0] || null;

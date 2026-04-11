@@ -1,4 +1,5 @@
 import { getReadClient } from '@/lib/supabase/read';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getProdeSourceSummary, normalizeProdeSourceBinding } from '@/lib/prode/source';
 import type {
     ProdeBaseCompetitionOption,
@@ -28,6 +29,11 @@ interface SupabaseClientLike {
 interface SupabaseRpcClientLike extends SupabaseClientLike {
     rpc(fn: string, args?: Record<string, unknown>): PromiseLike<{ data: AnyRow[] | null; error: QueryError }>;
 }
+
+type UserIdentity = {
+    name: string;
+    avatarUrl: string | null;
+};
 
 function isMissingRelationError(error: { code?: string; message?: string } | null | undefined) {
     if (!error) return false;
@@ -67,6 +73,14 @@ function toRecord(value: unknown) {
     return value && typeof value === 'object' && !Array.isArray(value)
         ? value as Record<string, unknown>
         : {};
+}
+
+function toRelatedRecord(value: unknown) {
+    if (Array.isArray(value)) {
+        return toRecord(value[0]);
+    }
+
+    return toRecord(value);
 }
 
 function toSentenceCase(value: string | null) {
@@ -114,6 +128,49 @@ function getSportLabel(value: string | null) {
         default:
             return value;
     }
+}
+
+function resolveUserIdentity(source: unknown, fallback?: UserIdentity | null): UserIdentity {
+    const userRow = toRelatedRecord(source);
+    const name = toNullableString(userRow.name)
+        || (() => {
+            const email = toNullableString(userRow.email);
+            return email ? email.split('@')[0] || null : null;
+        })()
+        || fallback?.name
+        || 'Usuario';
+
+    return {
+        name,
+        avatarUrl: toNullableString(userRow.avatar_url) || fallback?.avatarUrl || null,
+    };
+}
+
+async function loadUserIdentityMap(client: SupabaseClientLike, userIds: string[]) {
+    const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)));
+    const identityMap = new Map<string, UserIdentity>();
+
+    if (!uniqueUserIds.length) {
+        return identityMap;
+    }
+
+    const { data, error } = await client
+        .from('users')
+        .select('id, name, avatar_url, email')
+        .in('id', uniqueUserIds);
+
+    if (error) {
+        throw new Error(error.message || 'No se pudieron cargar los nombres del ranking del prode.');
+    }
+
+    ((data || []) as AnyRow[]).forEach((row) => {
+        const userId = toSafeString(row.id);
+        if (!userId) return;
+
+        identityMap.set(userId, resolveUserIdentity(row));
+    });
+
+    return identityMap;
 }
 
 function getPrivateLeagueLifecycle(row: AnyRow) {
@@ -540,7 +597,7 @@ export async function getPublicProdeCompetitionDetail(slug: string): Promise<Sch
 }
 
 export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicProdeUserTotal[]>> {
-    const supabase = await getReadClient() as unknown as SupabaseClientLike;
+    const supabase = createAdminClient() as unknown as SupabaseClientLike;
     const { data: rows, error } = await supabase
         .from('prode_user_totals')
         .select([
@@ -551,7 +608,6 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
             'competitions_joined',
             'competitions_scored',
             'position',
-            'users!inner(name, avatar_url)',
         ].join(','))
         .order('position', { ascending: true });
 
@@ -562,14 +618,20 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
         throw new Error(error.message || 'No se pudo cargar la tabla total del prode.');
     }
 
+    const totalsRows = (rows || []) as AnyRow[];
+    const userIdentityMap = await loadUserIdentityMap(
+        supabase,
+        totalsRows.map((row) => toSafeString(row.user_id)),
+    );
+
     return {
         schemaReady: true,
-        data: ((rows || []) as AnyRow[]).map((row) => {
-            const userRow = toRecord(row.users);
+        data: totalsRows.map((row) => {
+            const userIdentity = resolveUserIdentity(row.users, userIdentityMap.get(toSafeString(row.user_id)));
             return {
                 userId: toSafeString(row.user_id),
-                userName: toSafeString(userRow.name) || 'Usuario',
-                avatarUrl: toNullableString(userRow.avatar_url),
+                userName: userIdentity.name,
+                avatarUrl: userIdentity.avatarUrl,
                 totalPoints: toFiniteNumber(row.total_points),
                 exactHits: toFiniteNumber(row.exact_hits),
                 correctOutcomes: toFiniteNumber(row.correct_outcomes),

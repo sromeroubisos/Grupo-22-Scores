@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supabase/supabase-js';
 import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
+import { clearFavoritesLocalCache } from '@/lib/favorites/fetchFavorites';
 import {
     getOnboardingMetadataStatus,
     getOnboardingStorageStatus,
@@ -113,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (typeof window !== 'undefined') {
             window.localStorage.removeItem('g22_user');
         }
+        clearFavoritesLocalCache();
         void supabase.auth.signOut({ scope: 'local' }).catch(() => { });
 
         if (isMounted.current) {
@@ -363,6 +365,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                     clearFavoritesCache(`Auth event: ${event}`);
+                    clearFavoritesLocalCache();
                 }
             } catch (err) {
                 console.error('[AuthContext] Error handling auth state change:', err);
@@ -405,6 +408,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(null);
                 localStorage.removeItem('g22_user');
             }
+            clearFavoritesLocalCache();
         } catch (error) {
             console.error('Error logging out:', error);
             clearSupabaseBrowserSession();
