@@ -92,6 +92,14 @@ export type MatchCenterEventInput = {
   detail?: string | null;
 };
 
+export type MatchCenterClockInput = {
+  minute?: number | null;
+  seconds?: number | null;
+  period?: string | null;
+  running?: boolean | null;
+  syncedAt?: string | null;
+} | null | undefined;
+
 export type MatchCenterLineupsInput = {
   home?: unknown[];
   away?: unknown[];
@@ -99,6 +107,7 @@ export type MatchCenterLineupsInput = {
 
 const EMPTY_LINEUPS = { home: [] as PersistedLineupPlayer[], away: [] as PersistedLineupPlayer[] };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CLOCK_SNAPSHOT_EVENT_TYPE = '__clock_state__';
 
 function isMissingMatchEventsTableError(error: SupabaseLikeError) {
   if (!error) return false;
@@ -245,6 +254,91 @@ function normalizeEventInput(event: MatchCenterEventInput) {
     playerId: normalizeText(event.playerId) || null,
     playerName: normalizeText(event.playerName),
     detail: normalizeText(event.detail),
+  };
+}
+
+function normalizeClockPayload(clock: MatchCenterClockInput) {
+  if (!clock || typeof clock !== 'object') return null;
+
+  const minuteValue = Number(clock.minute);
+  const secondsValue = Number(clock.seconds);
+  const syncedAt = normalizeText(clock.syncedAt);
+
+  return {
+    minute: Number.isFinite(minuteValue) ? Math.max(0, Math.trunc(minuteValue)) : 0,
+    seconds: Number.isFinite(secondsValue) ? Math.max(0, Math.trunc(secondsValue)) : 0,
+    period: normalizeText(clock.period),
+    running: Boolean(clock.running),
+    syncedAt: syncedAt || new Date().toISOString(),
+  };
+}
+
+function isClockSnapshotRecord(source: Record<string, unknown>) {
+  return normalizeText(source.type) === CLOCK_SNAPSHOT_EVENT_TYPE
+    || normalizeText(source.event_type) === CLOCK_SNAPSHOT_EVENT_TYPE
+    || normalizeText(source.kind) === 'clock_state';
+}
+
+function extractClockSnapshotFromDetails(details: Record<string, unknown>) {
+  const normalized = normalizeClockPayload({
+    minute: details.minute,
+    seconds: details.seconds,
+    period: details.period,
+    running: details.running,
+    syncedAt: details.syncedAt,
+  });
+
+  return normalized ? { ...normalized, syncedAt: normalized.syncedAt || null } : null;
+}
+
+function buildClockSnapshotJsonEvent(clock: NonNullable<ReturnType<typeof normalizeClockPayload>>) {
+  return {
+    id: `clock-${crypto.randomUUID()}`,
+    minute: clock.minute,
+    type: CLOCK_SNAPSHOT_EVENT_TYPE,
+    team: null,
+    playerId: null,
+    playerName: '',
+    detail: '',
+    kind: 'clock_state',
+    seconds: clock.seconds,
+    period: clock.period,
+    running: clock.running,
+    syncedAt: clock.syncedAt,
+  };
+}
+
+function findClockSnapshotJsonEvent(events: unknown[]) {
+  for (const row of events) {
+    const source = row && typeof row === 'object' ? row as Record<string, unknown> : null;
+    if (source && isClockSnapshotRecord(source)) {
+      return source;
+    }
+  }
+
+  return null;
+}
+
+function buildClockSnapshotRelationalEvent(
+  match: { id: string; home_club_id?: string | null; away_club_id?: string | null },
+  clock: NonNullable<ReturnType<typeof normalizeClockPayload>>,
+) {
+  return {
+    id: crypto.randomUUID(),
+    match_id: match.id,
+    club_id: null,
+    player_id: null,
+    player_name: null,
+    event_type: CLOCK_SNAPSHOT_EVENT_TYPE,
+    minute: clock.minute,
+    details: {
+      kind: 'clock_state',
+      minute: clock.minute,
+      seconds: clock.seconds,
+      period: clock.period,
+      running: clock.running,
+      syncedAt: clock.syncedAt,
+    },
   };
 }
 
@@ -998,6 +1092,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
   }
 
   let events: ReturnType<typeof normalizeEventInput>[] = [];
+  let supplementalClock: ReturnType<typeof extractClockSnapshotFromDetails> = null;
   let loadedFromRelationalTable = false;
 
   const { data: eventRows, error: eventsError } = await client
@@ -1008,13 +1103,29 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
 
   if (!eventsError) {
     loadedFromRelationalTable = true;
-    events = (eventRows || []).map((row: any) => mapStoredEvent(row, data));
+    events = (eventRows || []).flatMap((row: any) => {
+      const details = row?.details && typeof row.details === 'object' ? row.details as Record<string, unknown> : {};
+      if (normalizeText(row?.event_type) === CLOCK_SNAPSHOT_EVENT_TYPE || normalizeText(details.kind) === 'clock_state') {
+        supplementalClock = extractClockSnapshotFromDetails(details);
+        return [];
+      }
+
+      return [mapStoredEvent(row, data)];
+    });
   } else if (!isMissingMatchEventsTableError(eventsError)) {
     console.error('[matchCenterService] Failed to load match events:', eventsError);
   }
 
   if ((!loadedFromRelationalTable || events.length === 0) && Array.isArray((data as any).events)) {
-    events = ((data as any).events as unknown[]).map((row) => mapJsonEvent(row));
+    events = ((data as any).events as unknown[]).flatMap((row) => {
+      const source = row && typeof row === 'object' ? row as Record<string, unknown> : {};
+      if (isClockSnapshotRecord(source)) {
+        supplementalClock = extractClockSnapshotFromDetails(source);
+        return [];
+      }
+
+      return [mapJsonEvent(row)];
+    });
   }
 
   const homeClubRaw = (data as any).homeClub;
@@ -1051,6 +1162,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
       category: (data as any).category ?? null,
       roundLabel: (data as any).round_label ?? null,
       roundId: (data as any).round_id ?? null,
+      clock: (data as any).clock ?? supplementalClock ?? null,
       homeClub: homeClubRaw ? { ...homeClubRaw, logo: homeClubRaw.logo_url ?? null } : null,
       awayClub: awayClubRaw ? { ...awayClubRaw, logo: awayClubRaw.logo_url ?? null } : null,
       tournament: resolvedTournament
@@ -1078,6 +1190,7 @@ export async function persistMatchCenterSupplementalData(
   payload: {
     events?: MatchCenterEventInput[];
     lineups?: MatchCenterLineupsInput;
+    clock?: MatchCenterClockInput;
   },
 ) {
   const { data: match, error: matchError } = await client
@@ -1090,9 +1203,11 @@ export async function persistMatchCenterSupplementalData(
     throw new Error('El partido que intentas actualizar no existe.');
   }
 
+  const normalizedClock = normalizeClockPayload(payload.clock);
+
   const [supportsEventsColumn, supportsRelationalEvents] = await Promise.all([
     payload.events !== undefined ? supportsMatchesColumn(client, 'events') : Promise.resolve(false),
-    payload.events !== undefined ? supportsMatchEventsTable(client) : Promise.resolve(false),
+    payload.events !== undefined || payload.clock !== undefined ? supportsMatchEventsTable(client) : Promise.resolve(false),
   ]);
 
   if (payload.events !== undefined && !supportsRelationalEvents && !supportsEventsColumn) {
@@ -1118,6 +1233,14 @@ export async function persistMatchCenterSupplementalData(
       : Array.isArray((match as any).events)
         ? ((match as any).events as unknown[]).map((row) => mapJsonEvent(row))
         : [];
+  const existingClockSnapshotJsonEvent = Array.isArray((match as any).events)
+    ? findClockSnapshotJsonEvent((match as any).events as unknown[])
+    : null;
+  const nextJsonEvents = normalizedClock
+    ? [...resolvedEvents, buildClockSnapshotJsonEvent(normalizedClock)]
+    : payload.clock === undefined && existingClockSnapshotJsonEvent
+      ? [...resolvedEvents, existingClockSnapshotJsonEvent]
+      : resolvedEvents;
 
   const shouldPersistHomeDivisionId =
     !normalizeText((match as any).home_division_id) && Boolean(contexts.home.divisionId);
@@ -1125,6 +1248,7 @@ export async function persistMatchCenterSupplementalData(
     !normalizeText((match as any).away_division_id) && Boolean(contexts.away.divisionId);
 
   let persistedLineups = false;
+  let persistedClock = payload.clock === undefined;
 
   if (payload.lineups !== undefined) {
     const { error: lineupsUpdateError } = await client
@@ -1164,7 +1288,7 @@ export async function persistMatchCenterSupplementalData(
   if (payload.events !== undefined && supportsRelationalEvents) {
     const { data: existingRows, error: existingRowsError } = await client
       .from('match_events')
-      .select('id')
+      .select('id, event_type')
       .eq('match_id', matchId);
 
     if (existingRowsError) {
@@ -1184,6 +1308,7 @@ export async function persistMatchCenterSupplementalData(
 
     const incomingIds = new Set(eventRows.map((row) => String(row.id)));
     const idsToDelete = (existingRows || [])
+      .filter((row: { id: string; event_type?: string | null }) => normalizeText(row.event_type) !== CLOCK_SNAPSHOT_EVENT_TYPE)
       .map((row: { id: string }) => String(row.id))
       .filter((id: string) => !incomingIds.has(id));
 
@@ -1199,19 +1324,63 @@ export async function persistMatchCenterSupplementalData(
     }
   }
 
-  if (payload.events !== undefined && supportsEventsColumn) {
+  if (payload.clock !== undefined && supportsRelationalEvents) {
+    const { data: existingClockRows, error: existingClockRowsError } = await client
+      .from('match_events')
+      .select('id')
+      .eq('match_id', matchId)
+      .eq('event_type', CLOCK_SNAPSHOT_EVENT_TYPE);
+
+    if (existingClockRowsError) {
+      throw new Error(existingClockRowsError.message || 'No se pudo preparar el reloj del partido.');
+    }
+
+    const clockIdsToDelete = (existingClockRows || [])
+      .map((row: { id: string }) => String(row.id))
+      .filter(Boolean);
+
+    if (clockIdsToDelete.length > 0) {
+      const { error: deleteClockError } = await client
+        .from('match_events')
+        .delete()
+        .in('id', clockIdsToDelete);
+
+      if (deleteClockError) {
+        throw new Error(deleteClockError.message || 'No se pudo limpiar el reloj anterior del partido.');
+      }
+    }
+
+    if (normalizedClock) {
+      const { error: insertClockError } = await client
+        .from('match_events')
+        .insert(buildClockSnapshotRelationalEvent(match, normalizedClock));
+
+      if (insertClockError) {
+        throw new Error(insertClockError.message || 'No se pudo guardar el reloj del partido.');
+      }
+    }
+
+    persistedClock = true;
+  }
+
+  if ((payload.events !== undefined || (payload.clock !== undefined && !supportsRelationalEvents)) && supportsEventsColumn) {
     const { error: eventsUpdateError } = await client
       .from('matches')
-      .update({ events: resolvedEvents })
+      .update({ events: nextJsonEvents })
       .eq('id', matchId);
 
     if (eventsUpdateError) {
       throw new Error(eventsUpdateError.message || 'No se pudieron sincronizar los eventos del partido.');
     }
+
+    if (payload.clock !== undefined) {
+      persistedClock = true;
+    }
   }
 
   return {
     persistedLineups,
+    persistedClock,
     lineups: payload.lineups !== undefined ? resolvedLineups : normalizedExistingLineups,
   };
 }

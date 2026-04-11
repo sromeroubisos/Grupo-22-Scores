@@ -24,7 +24,7 @@ import { useAuth } from '@/context/AuthContext';
 const USER_TZ = APP_TIMEZONE;
 
 function formatClockLabel(
-    clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null } | null | undefined,
+    clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null; syncedAt?: string | null } | null | undefined,
     syncedAt?: string | null,
 ) {
     if (!clock) return '';
@@ -35,8 +35,10 @@ function formatClockLabel(
         (Number.isFinite(minute) ? Math.max(0, Math.trunc(minute)) : 0) * 60
         + (Number.isFinite(seconds) ? Math.max(0, Math.trunc(seconds)) : 0);
 
-    if (clock.running && syncedAt) {
-        const syncedTime = new Date(syncedAt);
+    const effectiveSyncedAt = clock?.syncedAt || syncedAt;
+
+    if (clock.running && effectiveSyncedAt) {
+        const syncedTime = new Date(effectiveSyncedAt);
         if (!Number.isNaN(syncedTime.getTime())) {
             totalSeconds += Math.max(0, Math.floor((Date.now() - syncedTime.getTime()) / 1000));
         }
@@ -53,7 +55,7 @@ function resolvePublicMatchTime(
     dateTime: string | null | undefined,
     sportId: string | null | undefined,
     status: string | null | undefined,
-    clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null } | null | undefined,
+    clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null; syncedAt?: string | null } | null | undefined,
     syncedAt?: string | null,
 ) {
     const normalizedStatus = String(status || '').toLowerCase();

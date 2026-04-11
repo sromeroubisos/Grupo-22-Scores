@@ -370,13 +370,11 @@ export async function PATCH(
     const { events, lineups, ...rawMatchFields } = body as Record<string, unknown>;
     const matchFields = { ...rawMatchFields };
     const writeClient = await getWriteClient();
-    let clockNotPersisted = false;
 
     if (Object.prototype.hasOwnProperty.call(matchFields, 'clock')) {
       const supportsClock = await FixtureService.checkMatchColumnSupport('clock', writeClient);
       if (!supportsClock) {
         delete matchFields.clock;
-        clockNotPersisted = true;
       }
     }
 
@@ -389,6 +387,9 @@ export async function PATCH(
     const supplemental = await persistMatchCenterSupplementalData(writeClient, matchId, {
       events: Array.isArray(events) ? events : undefined,
       lineups: lineups as { home?: unknown[]; away?: unknown[] } | null | undefined,
+      clock: Object.prototype.hasOwnProperty.call(rawMatchFields, 'clock')
+        ? rawMatchFields.clock as { minute?: unknown; seconds?: unknown; period?: unknown; running?: unknown; syncedAt?: unknown } | null | undefined
+        : undefined,
     });
 
     const { data: match, error: matchError } = await fetchMatchCenterMatch(writeClient, matchId);
@@ -402,8 +403,8 @@ export async function PATCH(
 
     const matchCenterWarnings =
       lineups !== undefined && !supplemental.persistedLineups
-        ? { lineupsNotPersisted: true, ...(clockNotPersisted ? { clockNotPersisted: true } : {}) }
-        : clockNotPersisted
+        ? { lineupsNotPersisted: true, ...(!supplemental.persistedClock ? { clockNotPersisted: true } : {}) }
+        : !supplemental.persistedClock
           ? { clockNotPersisted: true }
           : null;
 
