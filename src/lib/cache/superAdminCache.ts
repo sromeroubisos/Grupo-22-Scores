@@ -321,7 +321,7 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
  */
 async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
     const supabase = getSupabase();
-    const [{ data, error }, { data: favRows }] = await Promise.all([
+    const [{ data, error }] = await Promise.all([
         supabase
             .from('tournaments')
             .select(`
@@ -330,20 +330,11 @@ async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
                 country:countries(name),
                 union:unions(name)
             `),
-        supabase
-            .from('favorites')
-            .select('entity_id')
-            .in('entity_type', ['tournament', 'league']),
     ]);
 
     if (error) {
         console.warn('[Cache] Fallback query failed:', error);
         throw error;
-    }
-
-    const favMap = new Map<string, number>();
-    for (const row of favRows ?? []) {
-        favMap.set(row.entity_id, (favMap.get(row.entity_id) ?? 0) + 1);
     }
 
     return (data || []).map(t => {
@@ -355,7 +346,7 @@ async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
             organization_name: (row.union as any)?.name || null,
             sport: row.sport_id,
             country: (row.country as any)?.name || row.country_id,
-            followers_count: favMap.get(row.id) ?? 0,
+            followers_count: 0,
             is_followed_by_user: false,
             priority: typeof row.priority === 'number' ? row.priority : 0,
             display_name: row.display_name || row.name,

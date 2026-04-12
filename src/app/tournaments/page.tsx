@@ -116,6 +116,18 @@ function resolveCountryIdFromLocale(locale: string): string | null {
     return ALL_COUNTRIES.find((country) => country.code.toUpperCase() === region)?.id || null;
 }
 
+function normalizeLookupValue(value: unknown): string {
+    if (value === null || value === undefined) {
+        return '';
+    }
+
+    return String(value)
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
+
 function CountryFlag({
     countryId,
     countryName,
@@ -317,7 +329,7 @@ export default function TorneosPage() {
     );
     const hasRugbyPublicCatalog = selectedSport.id === 'rugby' && rugbyPublicCatalogReady;
 
-    const searchTerm = searchQuery.trim().toLowerCase();
+    const searchTerm = normalizeLookupValue(searchQuery);
 
     const localTournaments = useMemo(() => {
         const sportManualTournaments = manualTournamentsList.filter((tournament) => tournament.sportId === selectedSport.id);
@@ -437,20 +449,21 @@ export default function TorneosPage() {
         if (!searchQuery) return audienceFiltered.slice(0, 10);
 
         return audienceFiltered.filter((tournament) =>
-            tournament.name.toLowerCase().includes(searchQuery.toLowerCase()),
+            normalizeLookupValue(tournament.name).includes(searchTerm),
         );
-    }, [internationalTournaments, searchQuery, selectedAudience]);
+    }, [internationalTournaments, searchQuery, searchTerm, selectedAudience]);
 
     const filteredGroups = useMemo(() => {
         if (!searchQuery) return groupedTournaments;
 
         const filtered: typeof groupedTournaments = {};
         Object.entries(groupedTournaments).forEach(([countryId, group]) => {
+            const normalizedCountryName = normalizeLookupValue(group.countryName);
             const matchingTournaments = group.tournaments.filter((tournament) =>
-                tournament.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                group.countryName.toLowerCase().includes(searchQuery.toLowerCase()),
+                normalizeLookupValue(tournament.name).includes(searchTerm) ||
+                normalizedCountryName.includes(searchTerm),
             );
-            const matchesCountry = group.countryName.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCountry = normalizedCountryName.includes(searchTerm);
 
             if (matchingTournaments.length > 0 || matchesCountry) {
                 filtered[countryId] = {
@@ -461,7 +474,7 @@ export default function TorneosPage() {
         });
 
         return filtered;
-    }, [groupedTournaments, searchQuery]);
+    }, [groupedTournaments, searchQuery, searchTerm]);
 
     const compareSidebarTournaments = useCallback((left: Tournament, right: Tournament) => {
         const leftFavorite = isLeagueFavorite(left.id);

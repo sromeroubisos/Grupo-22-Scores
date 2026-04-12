@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { canManageTournamentContext, getTournamentManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES, hasFederationAdminAccess } from '@/lib/auth/roles';
 import { FixtureService } from '@/lib/services/fixtureService';
-import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 import { createClient } from '@/lib/supabase/server';
 import { createApiPerfTracker } from '@/lib/perf/api';
 
@@ -75,11 +75,11 @@ export async function POST(
 
         const tournamentIdForStandings = match.tournamentId;
         const phaseIdForStandings = match.phaseId;
-        if (match.status === 'final' && tournamentIdForStandings && phaseIdForStandings) {
-            recalculateAndPersistStandings(
+        if (tournamentIdForStandings && phaseIdForStandings) {
+            recalculatePhaseStandingsScopes(
                 tournamentIdForStandings,
                 phaseIdForStandings,
-                match.groupId ?? null,
+                'general',
             ).catch((error) =>
                 console.error('[POST match] Auto-recalculate standings failed:', error)
             );

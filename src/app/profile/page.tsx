@@ -15,16 +15,12 @@ import {
     Lock,
     LogOut,
     Send,
-    ShieldCheck,
-    Star,
     Trophy,
     User,
     Users,
 } from 'lucide-react';
 
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { fetchResolvedFavorites, type ResolvedFavorite } from '@/lib/favorites/fetchFavorites';
-import { createClient } from '@/lib/supabase/client';
 import { getActiveSports } from '@/lib/data/sports';
 import { useAuth } from '@/context/AuthContext';
 import ProdeLobby from '@/components/prode/ProdeLobby';
@@ -32,8 +28,7 @@ import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUser
 
 import styles from './profile.module.css';
 
-type MainTab = 'favoritos' | 'prode' | 'perfil';
-type FavoriteItem = ResolvedFavorite;
+type MainTab = 'prode' | 'perfil';
 type ProfileActionKind = 'collaborator' | 'tournament';
 
 type FormStatus =
@@ -73,9 +68,7 @@ type TournamentRequestPayload = {
 };
 
 interface ProfileStats {
-    total: number;
-    clubes: number;
-    torneos: number;
+    sports: number;
 }
 
 interface ProfileUser {
@@ -87,11 +80,11 @@ interface ProfileUser {
 }
 
 function resolveMainTab(value: string | null): MainTab {
-    if (value === 'favoritos' || value === 'prode' || value === 'perfil') {
+    if (value === 'prode' || value === 'perfil') {
         return value;
     }
 
-    return 'favoritos';
+    return 'perfil';
 }
 
 async function sendProfileRequest(
@@ -114,50 +107,20 @@ async function sendProfileRequest(
 
 export default function ProfilePage() {
     const { user, logout } = useAuth();
+    const { favoriteSportIds } = useUserPreferences();
     const searchParams = useSearchParams();
-    const [activeTab, setActiveTab] = useState<MainTab>('favoritos');
-    const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
-    const [favLoading, setFavLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<MainTab>('perfil');
     const [activeRequestForm, setActiveRequestForm] = useState<ProfileActionKind | null>(null);
-    const supabase = createClient();
 
     useEffect(() => {
         setActiveTab(resolveMainTab(searchParams.get('tab')));
     }, [searchParams]);
 
-    useEffect(() => {
-        if (!user?.id) {
-            setFavLoading(false);
-            return;
-        }
-
-        let alive = true;
-
-        (async () => {
-            try {
-                const data = await fetchResolvedFavorites(supabase, user.id);
-                if (!alive) return;
-                setFavorites(data);
-            } catch (err: unknown) {
-                if (err instanceof DOMException && err.name === 'AbortError') return;
-            } finally {
-                if (alive) setFavLoading(false);
-            }
-        })();
-
-        return () => {
-            alive = false;
-        };
-    }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
     const stats: ProfileStats = {
-        total: favorites.length,
-        clubes: favorites.filter(favorite => favorite.entity_type === 'club').length,
-        torneos: favorites.filter(favorite => ['league', 'tournament'].includes(favorite.entity_type)).length,
+        sports: favoriteSportIds.length,
     };
 
     const topTabs: { key: MainTab; label: string }[] = [
-        { key: 'favoritos', label: 'Favoritos' },
         { key: 'prode', label: 'Prode' },
         { key: 'perfil', label: 'Perfil' },
     ];
@@ -179,10 +142,6 @@ export default function ProfilePage() {
                     </nav>
 
                     <div className={`${styles.mainContent} ${activeTab === 'prode' ? styles.mainContentProde : ''}`}>
-                        {activeTab === 'favoritos' && (
-                            <SeguidosPanel favorites={favorites} loading={favLoading} />
-                        )}
-
                         {activeTab === 'prode' && (
                             <ProdePanel />
                         )}
@@ -262,11 +221,7 @@ function ProfileHeader({
                     {user?.role === 'super_admin' || user?.role === 'admin_general' ? 'Administrador' : 'Usuario'}
                 </div>
                 <div className={styles.statsRow}>
-                    <span className={styles.stat}><strong>{stats.total}</strong> Seguidos</span>
-                    <span className={styles.statDivider}>.</span>
-                    <span className={styles.stat}><strong>{stats.clubes}</strong> Clubes</span>
-                    <span className={styles.statDivider}>.</span>
-                    <span className={styles.stat}><strong>{stats.torneos}</strong> Torneos</span>
+                    <span className={styles.stat}><strong>{stats.sports}</strong> Deportes favoritos</span>
                 </div>
             </div>
 
@@ -813,77 +768,6 @@ function FormStatusBanner({ status }: { status: FormStatus }) {
     );
 }
 
-function SeguidosPanel({
-    favorites,
-    loading,
-}: {
-    favorites: FavoriteItem[];
-    loading: boolean;
-}) {
-    if (loading) {
-        return (
-            <div className={styles.skeletonGrid}>
-                {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className={styles.skeletonCard} />
-                ))}
-            </div>
-        );
-    }
-
-    if (favorites.length === 0) {
-        return (
-            <EmptySection
-                icon={<Star size={40} color="var(--color-text-tertiary)" />}
-                title="Sin seguidos"
-                message="Segui clubes y torneos para verlos aca."
-                action={<Link href="/" className={styles.btnAccent}>Explorar</Link>}
-            />
-        );
-    }
-
-    return (
-        <div>
-            <div className={styles.seguridosHeader}>
-                <span className={styles.seguridosCount}>{favorites.length} seguidos</span>
-                <Link href="/favorites" className={styles.linkAccent}>Gestionar -&gt;</Link>
-            </div>
-            <div className={styles.seguridosGrid}>
-                {favorites.map(favorite => (
-                    <Link
-                        key={`${favorite.entity_type}-${favorite.id}`}
-                        href="/favorites"
-                        className={styles.seguridoCard}
-                    >
-                        {favorite.logo_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={favorite.logo_url} alt={favorite.name} className={styles.seguridoImg} />
-                        ) : (
-                            <div
-                                className={styles.seguridoImg}
-                                style={{
-                                    background: favorite.color || 'var(--color-bg-tertiary)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                {favorite.entity_type === 'club'
-                                    ? <ShieldCheck size={20} color="var(--color-text-tertiary)" />
-                                    : <Trophy size={20} color="var(--color-text-tertiary)" />
-                                }
-                            </div>
-                        )}
-                        <span className={styles.seguridoName}>{favorite.name}</span>
-                        <span className={styles.seguridoType}>
-                            {favorite.entity_type === 'club' ? 'Club' : 'Liga'}
-                        </span>
-                    </Link>
-                ))}
-            </div>
-        </div>
-    );
-}
-
 function EmptySection({
     icon,
     title,
@@ -1009,7 +893,7 @@ function ProdePanel() {
 
 function SettingsPanel({ logout }: { logout: () => void }) {
     const router = useRouter();
-    const { favoriteSportIds, favoriteLeagueIds } = useUserPreferences();
+    const { favoriteSportIds } = useUserPreferences();
     const allSports = getActiveSports();
     const favoriteSports = allSports.filter(sport => favoriteSportIds.includes(sport.id));
 
@@ -1038,12 +922,6 @@ function SettingsPanel({ logout }: { logout: () => void }) {
                                 {sport.icon} {sport.nameEs}
                             </span>
                         ))}
-
-                        {favoriteLeagueIds.length > 0 && (
-                            <span className={styles.preferenceChipMuted}>
-                                {favoriteLeagueIds.length} liga{favoriteLeagueIds.length !== 1 ? 's' : ''}
-                            </span>
-                        )}
                     </div>
                 ) : (
                     <p className={styles.preferenceEmptyText}>

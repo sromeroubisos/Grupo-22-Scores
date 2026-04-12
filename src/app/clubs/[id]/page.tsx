@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { ArrowLeft, ChevronRight, Star } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
+import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import ExportImage from '@/components/ExportImage';
@@ -545,18 +546,20 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                     Editar logo
                                 </Link>
                             ) : null}
-                            <button
-                                className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
-                                onClick={() => toggleFavorite({
-                                    name: teamName,
-                                    logo_url: teamLogoUrl || null,
-                                    type_label: 'Club',
-                                })}
-                                type="button"
-                            >
-                                <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />
-                                {isFavorited ? 'Siguiendo' : 'Seguir'}
-                            </button>
+                            {FAVORITES_ENABLED && (
+                                <button
+                                    className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
+                                    onClick={() => toggleFavorite({
+                                        name: teamName,
+                                        logo_url: teamLogoUrl || null,
+                                        type_label: 'Club',
+                                    })}
+                                    type="button"
+                                >
+                                    <Star size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                                    {isFavorited ? 'Siguiendo' : 'Seguir'}
+                                </button>
+                            )}
                         </div>
                     </div>
 

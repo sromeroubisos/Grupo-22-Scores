@@ -243,7 +243,7 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
     return null;
 }
 
-function buildImageResponse(source: string, url: URL) {
+async function buildImageResponse(source: string, url: URL) {
     const normalizedSource = normalizeSourceUrl(source);
 
     if (normalizedSource.startsWith('data:')) {
@@ -264,6 +264,34 @@ function buildImageResponse(source: string, url: URL) {
                 'Cache-Control': 'public, max-age=3600',
             },
         });
+    }
+
+    if (normalizedSource.startsWith('http://') || normalizedSource.startsWith('https://')) {
+        try {
+            // Fetch the image server-side to bypass potential CORS/hotlinking issues
+            const imgResponse = await fetch(normalizedSource, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Referer': 'https://www.flashscore.com/',
+                },
+                next: { revalidate: 86400 }, // Cache on Vercel/Next for a day
+            });
+
+            if (imgResponse.ok) {
+                const contentType = imgResponse.headers.get('Content-Type') || 'image/png';
+                const buffer = await imgResponse.arrayBuffer();
+
+                return new NextResponse(Buffer.from(buffer), {
+                    headers: {
+                        'Content-Type': contentType,
+                        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                });
+            }
+        } catch (error) {
+            console.error(`[LogoProxy] Failed to fetch ${normalizedSource}:`, error);
+        }
     }
 
     const target = normalizedSource.startsWith('http://') || normalizedSource.startsWith('https://')

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, memo, type MouseEvent } from 'react';
 import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
@@ -12,6 +12,7 @@ import type { Tournament } from '@/lib/types'; // Keep this for existing tournam
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -127,6 +128,7 @@ interface LeagueMatches {
   leagueId: string;
   logoUrl?: string | null;
   favoriteLeagueId?: string;
+  favoriteLeagueIds?: string[];
   country: string;
   flag: string;
   round: string;
@@ -265,12 +267,33 @@ const LiveMinute = ({ dateTime, sport }: { dateTime: string, sport: any }) => {
   return <>{calculateVirtualMatchTime(dateTime, sport, 'live') || 'En Vivo'}</>;
 };
 
-const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport }: { 
+const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showClubFavorites, isClubFavorite, onToggleClubFavorite }: { 
   match: Match & { _dateTime: string }, 
   selectedSport: any, 
   styles: any,
-  isIndividualSport: boolean
+  isIndividualSport: boolean,
+  showClubFavorites?: boolean,
+  isClubFavorite?: (clubId: string) => boolean,
+  onToggleClubFavorite?: (clubId: string, clubName: string, logoUrl?: string) => void,
 }) => {
+  const homeClubId = typeof match.homeClubId === 'string' ? match.homeClubId.trim() : '';
+  const awayClubId = typeof match.awayClubId === 'string' ? match.awayClubId.trim() : '';
+  const canToggleHomeClub = Boolean(showClubFavorites && homeClubId);
+  const canToggleAwayClub = Boolean(showClubFavorites && awayClubId);
+  const isHomeClubFavorite = canToggleHomeClub && isClubFavorite ? isClubFavorite(homeClubId) : false;
+  const isAwayClubFavorite = canToggleAwayClub && isClubFavorite ? isClubFavorite(awayClubId) : false;
+
+  const handleClubFavoriteClick = (
+    event: MouseEvent<HTMLButtonElement>,
+    clubId: string,
+    clubName: string,
+    logoUrl?: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleClubFavorite?.(clubId, clubName, logoUrl);
+  };
+
   return (
     <Link
       href={`/matches/${match.id}`}
@@ -291,61 +314,87 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport }: {
 
       <div className={styles.matchTeams}>
         <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : ''}`}>
-          <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-            {match.homeLogo ? (
-              <img
-                src={match.homeLogo}
-                alt={match.home}
-                className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.style.display = 'none';
-                  (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
-                }}
-              />
-            ) : null}
-            <span className={styles.logoFallback} style={match.homeLogo ? { display: 'none' } : {}}>
-              {isIndividualSport ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              )}
+          <div className={styles.matchTeamIdentity}>
+            <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
+              {match.homeLogo ? (
+                <img
+                  src={match.homeLogo}
+                  alt={match.home}
+                  className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.style.display = 'none';
+                    (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
+                  }}
+                />
+              ) : null}
+              <span className={styles.logoFallback} style={match.homeLogo ? { display: 'none' } : {}}>
+                {isIndividualSport ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                )}
+              </span>
             </span>
-          </span>
-          <span className={styles.teamName}>{match.home}</span>
+            <span className={styles.teamName}>{match.home}</span>
+            {canToggleHomeClub ? (
+              <button
+                type="button"
+                className={`${styles.clubFavoriteBtn} ${isHomeClubFavorite ? styles.clubFavoriteBtnActive : ''}`}
+                onClick={(event) => handleClubFavoriteClick(event, homeClubId, match.home, match.homeLogo)}
+                aria-label={isHomeClubFavorite ? `Dejar de seguir a ${match.home}` : `Seguir a ${match.home}`}
+                title={isHomeClubFavorite ? 'Dejar de seguir' : 'Seguir'}
+              >
+                <Star size={13} fill={isHomeClubFavorite ? 'currentColor' : 'none'} />
+              </button>
+            ) : null}
+          </div>
           <span className={styles.teamScore}>{match.homeScore ?? '-'}</span>
         </div>
         <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : ''}`}>
-          <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-            {match.awayLogo ? (
-              <img
-                src={match.awayLogo}
-                alt={match.away}
-                className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.style.display = 'none';
-                  (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
-                }}
-              />
-            ) : null}
-            <span className={styles.logoFallback} style={match.awayLogo ? { display: 'none' } : {}}>
-              {isIndividualSport ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              )}
+          <div className={styles.matchTeamIdentity}>
+            <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
+              {match.awayLogo ? (
+                <img
+                  src={match.awayLogo}
+                  alt={match.away}
+                  className={isIndividualSport ? styles.logoImgRound : styles.logoImgSquare}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.style.display = 'none';
+                    (e.currentTarget.nextElementSibling as HTMLElement)?.style.removeProperty('display');
+                  }}
+                />
+              ) : null}
+              <span className={styles.logoFallback} style={match.awayLogo ? { display: 'none' } : {}}>
+                {isIndividualSport ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                )}
+              </span>
             </span>
-          </span>
-          <span className={styles.teamName}>{match.away}</span>
+            <span className={styles.teamName}>{match.away}</span>
+            {canToggleAwayClub ? (
+              <button
+                type="button"
+                className={`${styles.clubFavoriteBtn} ${isAwayClubFavorite ? styles.clubFavoriteBtnActive : ''}`}
+                onClick={(event) => handleClubFavoriteClick(event, awayClubId, match.away, match.awayLogo)}
+                aria-label={isAwayClubFavorite ? `Dejar de seguir a ${match.away}` : `Seguir a ${match.away}`}
+                title={isAwayClubFavorite ? 'Dejar de seguir' : 'Seguir'}
+              >
+                <Star size={13} fill={isAwayClubFavorite ? 'currentColor' : 'none'} />
+              </button>
+            ) : null}
+          </div>
           <span className={styles.teamScore}>{match.awayScore ?? '-'}</span>
         </div>
       </div>
@@ -433,7 +482,59 @@ export default function HomePage() {
   const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
 
   // Favorites hook
-  const { toggleLeagueFavorite, isLeagueFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, toggleLeagueFavorite, isLeagueFavorite, isFavorite } = useFavorites();
+
+  const isClubFavorite = useCallback(
+    (clubId: string) => isFavorite(clubId, 'club'),
+    [isFavorite],
+  );
+
+  const toggleClubFavorite = useCallback((clubId: string, clubName: string, logoUrl?: string) => {
+    void toggleFavorite({
+      id: clubId,
+      entity_type: 'club',
+      name: clubName,
+      logo_url: logoUrl || null,
+      type_label: 'Club',
+    });
+  }, [toggleFavorite]);
+
+  const getLeagueFavoriteIds = useCallback((league: LeagueMatches) => {
+    const rawIds = league.favoriteLeagueIds?.length
+      ? league.favoriteLeagueIds
+      : [league.favoriteLeagueId || league.leagueId];
+
+    return Array.from(new Set(rawIds.map((value) => String(value || '').trim()).filter(Boolean)));
+  }, []);
+
+  const isLeagueGroupFavorite = useCallback((league: LeagueMatches) => (
+    getLeagueFavoriteIds(league).some((leagueId) => isLeagueFavorite(leagueId))
+  ), [getLeagueFavoriteIds, isLeagueFavorite]);
+
+  const toggleLeagueGroupFavorite = useCallback(async (league: LeagueMatches) => {
+    const leagueIds = getLeagueFavoriteIds(league);
+    const followedIds = leagueIds.filter((leagueId) => isLeagueFavorite(leagueId));
+
+    if (followedIds.length > 0) {
+      await Promise.all(
+        followedIds.map((leagueId) => toggleLeagueFavorite(leagueId, {
+          name: league.league,
+          logo_url: league.logoUrl || null,
+          sportId: selectedSport.id,
+          forceIsFavorite: false,
+        })),
+      );
+      return;
+    }
+
+    const primaryLeagueId = leagueIds[0] || league.leagueId;
+    await toggleLeagueFavorite(primaryLeagueId, {
+      name: league.league,
+      logo_url: league.logoUrl || null,
+      sportId: selectedSport.id,
+      forceIsFavorite: true,
+    });
+  }, [getLeagueFavoriteIds, isLeagueFavorite, selectedSport.id, toggleLeagueFavorite]);
 
   // Sports list handled by context (to respect global configuration)
 
@@ -654,6 +755,7 @@ export default function HomePage() {
           leagueId: groupKey,
           logoUrl: overriddenTournament?.logoUrl || (tournament as any)?.logoUrl || (tournament as any)?.logo_url || null,
           favoriteLeagueId,
+          favoriteLeagueIds: favoriteLeagueId ? [favoriteLeagueId] : [],
           country: countryName,
           flag: '',
           round: match.roundId?.startsWith('F') ? match.roundId.replace('F', 'Fecha ') : (match.roundId || 'General'),
@@ -665,6 +767,14 @@ export default function HomePage() {
         }
       } else if (tournamentPriority > groups[groupKey].priority) {
         groups[groupKey].priority = tournamentPriority;
+      }
+
+      if (favoriteLeagueId) {
+        const currentFavoriteIds = groups[groupKey].favoriteLeagueIds || [];
+        if (!currentFavoriteIds.includes(favoriteLeagueId)) {
+          currentFavoriteIds.push(favoriteLeagueId);
+        }
+        groups[groupKey].favoriteLeagueIds = currentFavoriteIds;
       }
 
       const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
@@ -698,40 +808,56 @@ export default function HomePage() {
 
     // Sort: favorited leagues first, then tournament priority, then alphabetically by name
     return leaguesArray.sort((a, b) => {
-      const aIsFavorite = isLeagueFavorite(a.leagueId);
-      const bIsFavorite = isLeagueFavorite(b.leagueId);
+      const aIsFavorite = isLeagueGroupFavorite(a);
+      const bIsFavorite = isLeagueGroupFavorite(b);
 
       if (aIsFavorite && !bIsFavorite) return -1;
       if (!aIsFavorite && bIsFavorite) return 1;
       if (a.priority !== b.priority) return b.priority - a.priority;
       return a.league.localeCompare(b.league);
     });
-  }, [isLeagueFavorite, loadedRugbyTournamentMap, matches, resolveMatchAudience, selectedAudience, selectedSport.id, userTimeZone]);
-
-  const displayedMatchesByLeague = useMemo<LeagueMatches[]>(() => {
-    if (!showLiveOnly) return matchesByLeague;
-
-    return matchesByLeague
-      .map((league) => ({
-        ...league,
-        matches: league.matches.filter((match) => match.status === 'live'),
-      }))
-      .filter((league) => league.matches.length > 0);
-  }, [matchesByLeague, showLiveOnly]);
+  }, [isLeagueGroupFavorite, loadedRugbyTournamentMap, matches, resolveMatchAudience, selectedAudience, selectedSport.id, userTimeZone]);
 
   const favoriteClubMatches = useMemo(() => {
     const result: (Match & { leagueName: string })[] = [];
+    const seenMatchIds = new Set<string>();
     for (const leagueGroup of matchesByLeague) {
       for (const m of leagueGroup.matches) {
         const hId = (m as any).homeClubId;
         const aId = (m as any).awayClubId;
-        if ((hId && isFavorite(hId)) || (aId && isFavorite(aId))) {
+        const isFavoriteClubMatch = (hId && isFavorite(hId, 'club')) || (aId && isFavorite(aId, 'club'));
+        const matchKey = String(m.id);
+
+        if (isFavoriteClubMatch && !seenMatchIds.has(matchKey)) {
+          seenMatchIds.add(matchKey);
           result.push({ ...m, leagueName: leagueGroup.league });
         }
       }
     }
     return result;
   }, [matchesByLeague, isFavorite]);
+
+  const favoriteClubMatchIds = useMemo(() => (
+    new Set(favoriteClubMatches.map((match) => String(match.id)))
+  ), [favoriteClubMatches]);
+
+  const displayedMatchesByLeague = useMemo<LeagueMatches[]>(() => {
+    const withoutFavoriteClubMatches = matchesByLeague
+      .map((league) => ({
+        ...league,
+        matches: league.matches.filter((match) => !favoriteClubMatchIds.has(String(match.id))),
+      }))
+      .filter((league) => league.matches.length > 0);
+
+    if (!showLiveOnly) return withoutFavoriteClubMatches;
+
+    return withoutFavoriteClubMatches
+      .map((league) => ({
+        ...league,
+        matches: league.matches.filter((match) => match.status === 'live'),
+      }))
+      .filter((league) => league.matches.length > 0);
+  }, [favoriteClubMatchIds, matchesByLeague, showLiveOnly]);
 
   const displayedFavoriteClubMatches = useMemo(() =>
     showLiveOnly ? favoriteClubMatches.filter(m => m.status === 'live') : favoriteClubMatches,
@@ -1167,6 +1293,7 @@ export default function HomePage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={styles.sidebarSearchInput}
+                suppressHydrationWarning
               />
             </div>
 
@@ -1701,7 +1828,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && displayedMatchesByLeague.length === 0 && !sourceError && (
+              {!loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && !sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
                   <h3>
@@ -1721,7 +1848,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && displayedMatchesByLeague.length === 0 && sourceError && (
+              {!loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
                   <h3>No se pudieron cargar los partidos</h3>
@@ -1744,7 +1871,15 @@ export default function HomePage() {
                     <div className={styles.matchesList}>
                       {displayedFavoriteClubMatches.map((match) => (
                         <div key={match.id}>
-                          <MatchRow match={match as any} selectedSport={selectedSport} styles={styles} isIndividualSport={isIndividualSport} />
+                          <MatchRow
+                            match={match as any}
+                            selectedSport={selectedSport}
+                            styles={styles}
+                            isIndividualSport={isIndividualSport}
+                            showClubFavorites={FAVORITES_ENABLED}
+                            isClubFavorite={isClubFavorite}
+                            onToggleClubFavorite={toggleClubFavorite}
+                          />
                           <div style={{ fontSize: '11px', color: 'var(--text-secondary, #888)', padding: '0 12px 6px', marginTop: '-4px' }}>
                             {match.leagueName}
                           </div>
@@ -1757,8 +1892,7 @@ export default function HomePage() {
 
               {!loading && displayedMatchesByLeague.map((league) => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
-                const favoriteLeagueId = league.favoriteLeagueId || league.leagueId;
-                const isFavorite = isLeagueFavorite(favoriteLeagueId);
+                const isFavoriteLeague = isLeagueGroupFavorite(league);
 
                 if (isMotorsportSport) {
                   const eventMatch = league.matches[0];
@@ -1766,23 +1900,21 @@ export default function HomePage() {
 
                   return (
                     <div key={league.leagueId} className={styles.motorsportStandaloneCard}>
-                      <div className={styles.motorsportStandaloneActions}>
-                        <button
-                          className={`${styles.leagueFavoriteBtn} ${styles.motorsportLeagueFavoriteBtn}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleLeagueFavorite(favoriteLeagueId, {
-                              name: league.league,
-                              logo_url: league.logoUrl || null,
-                              sportId: selectedSport.id,
-                            });
-                          }}
-                          aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-                        >
-                          <Star size={18} fill={isFavorite ? "currentColor" : "none"} strokeWidth={isFavorite ? 0 : 2} />
-                        </button>
-                      </div>
+                      {FAVORITES_ENABLED && (
+                        <div className={styles.motorsportStandaloneActions}>
+                          <button
+                            className={`${styles.leagueFavoriteBtn} ${styles.motorsportLeagueFavoriteBtn}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void toggleLeagueGroupFavorite(league);
+                            }}
+                            aria-label={isFavoriteLeague ? "Quitar de favoritos" : "Agregar a favoritos"}
+                          >
+                            <Star size={18} fill={isFavoriteLeague ? "currentColor" : "none"} strokeWidth={isFavoriteLeague ? 0 : 2} />
+                          </button>
+                        </div>
+                      )}
                       <MotorsportMatchRow
                         match={eventMatch as any}
                         styles={styles}
@@ -1812,21 +1944,19 @@ export default function HomePage() {
                       </Link>
 
                       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button
-                          className={styles.leagueFavoriteBtn}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleLeagueFavorite(favoriteLeagueId, {
-                              name: league.league,
-                              logo_url: league.logoUrl || null,
-                              sportId: selectedSport.id,
-                            });
-                          }}
-                          aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-                        >
-                          <Star size={18} fill={isFavorite ? "currentColor" : "none"} strokeWidth={isFavorite ? 0 : 2} />
-                        </button>
+                        {FAVORITES_ENABLED && (
+                          <button
+                            className={styles.leagueFavoriteBtn}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void toggleLeagueGroupFavorite(league);
+                            }}
+                            aria-label={isFavoriteLeague ? "Quitar de favoritos" : "Agregar a favoritos"}
+                          >
+                            <Star size={18} fill={isFavoriteLeague ? "currentColor" : "none"} strokeWidth={isFavoriteLeague ? 0 : 2} />
+                          </button>
+                        )}
 
                         <svg
                           className={styles.chevronHeader}
@@ -1845,7 +1975,10 @@ export default function HomePage() {
                             match={match as any} 
                             selectedSport={selectedSport} 
                             styles={styles} 
-                            isIndividualSport={isIndividualSport} 
+                            isIndividualSport={isIndividualSport}
+                            showClubFavorites={FAVORITES_ENABLED}
+                            isClubFavorite={isClubFavorite}
+                            onToggleClubFavorite={toggleClubFavorite}
                           />
                         ))}
                       </div>

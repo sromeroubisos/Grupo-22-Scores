@@ -40,7 +40,7 @@ export default function NotFound() {
                         <div className={styles.nf__grid}>
                             <Link className={styles.chip} href="/matches">🏉 Partidos</Link>
                             <Link className={styles.chip} href="/tournaments">🏆 Ligas</Link>
-                            <Link className={styles.chip} href="/favorites">⭐ Favoritos</Link>
+                            <Link className={styles.chip} href="/profile">👤 Perfil</Link>
                             <Link className={styles.chip} href="/search">🔎 Buscar</Link>
                         </div>
                     </div>

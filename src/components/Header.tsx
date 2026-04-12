@@ -9,6 +9,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
 import { resolveAdminPanel } from '@/lib/auth/roles';
+import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 
 export default function Header() {
     const { user, logout } = useAuth();
@@ -189,6 +190,7 @@ export default function Header() {
                         aria-label="Buscar" 
                         style={{ background: 'transparent', border: 'none', padding: '8px', cursor: 'pointer', color: 'inherit', display: 'flex' }}
                         onClick={() => router.push('/search')}
+                        suppressHydrationWarning
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
@@ -230,7 +232,6 @@ export default function Header() {
                             </svg>
                         </button>
 
-
                         {/* DROPDOWN - Controlled by class 'show' or inline styles based on state */}
                         <div className={`g22-user-menu ${isUserMenuOpen ? 'show' : ''}`} style={isUserMenuOpen ? { opacity: 1, visibility: 'visible', transform: 'translateY(0)' } : {}}>
                             {user && (
@@ -260,10 +261,12 @@ export default function Header() {
                                     </div>
 
                                     <div style={{ padding: '8px 0' }}>
-                                        <Link href="/favorites" onClick={() => setIsUserMenuOpen(false)}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l3.1 6.3 7 1-5 4.9 1.2 6.9L12 18l-6.3 3.1 1.2-6.9-5-4.9 7-1L12 3z" /></svg>
-                                            Mis Seguidos
-                                        </Link>
+                                        {FAVORITES_ENABLED && (
+                                            <Link href="/favorites" onClick={() => setIsUserMenuOpen(false)}>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l3.1 6.3 7 1-5 4.9 1.2 6.9L12 18l-6.3 3.1 1.2-6.9-5-4.9 7-1L12 3z" /></svg>
+                                                Mis Seguidos
+                                            </Link>
+                                        )}
 
                                         <Link href="/profile?tab=prode" onClick={() => setIsUserMenuOpen(false)}>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

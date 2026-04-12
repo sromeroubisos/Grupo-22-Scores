@@ -368,16 +368,8 @@ export const tournamentService = {
    * Toggles the follow status for a tournament.
    */
   async toggleFollow(tournamentId: string) {
-    const { data, error } = await supabase.rpc('toggle_tournament_follow', {
-      p_tournament_id: tournamentId
-    });
-
-    if (error) {
-      console.error('Error toggling tournament follow:', error);
-      throw error;
-    }
-
-    return data as boolean; // Returns true if followed, false if unfollowed
+    void tournamentId;
+    return false;
   },
 
   /**

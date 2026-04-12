@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { CIRCUIT_GLOBAL_SENTINEL } from '@/components/admin/entities/tournament/standings/types';
+import {
+    FINAL_STANDINGS_STATUSES,
+    filterMatchesForGroupScope,
+    isFinalStandingsStatus,
+} from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 
 // --- Circuit placement points helpers ---
@@ -144,7 +149,7 @@ async function handleCircuitGlobalStandings(tournamentId: string, supabase: any)
             .select('id', { count: 'exact', head: true })
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phase.id)
-            .eq('status', 'final');
+            .in('status', [...FINAL_STANDINGS_STATUSES]);
         totalFinalMatches += phaseMatchCount ?? 0;
 
         for (const row of rows) {
@@ -293,13 +298,12 @@ export async function GET(
                 (scopedGroupId
                     ? supabase
                         .from('matches')
-                        .select('id, status')
+                        .select('id, status, group_id, home_club_id, away_club_id')
                         .eq('tournament_id', tournamentId)
                         .eq('phase_id', phaseId)
-                        .eq('group_id', scopedGroupId)
                     : supabase
                         .from('matches')
-                        .select('id, status')
+                        .select('id, status, group_id, home_club_id, away_club_id')
                         .eq('tournament_id', tournamentId)
                         .eq('phase_id', phaseId)),
             ]);
@@ -346,10 +350,10 @@ export async function GET(
                 };
             });
 
-            const allMatches = matches || [];
+            const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], scopedGroupId);
             const metrics = {
-                counted_matches: allMatches.filter((match) => match.status === 'final').length,
-                pending_results: allMatches.filter((match) => ['scheduled', 'live', 'suspended', 'delayed', 'postponed'].includes(match.status)).length,
+                counted_matches: scopedMatches.filter((match) => isFinalStandingsStatus(match.status)).length,
+                pending_results: scopedMatches.filter((match) => ['scheduled', 'live', 'suspended', 'delayed', 'postponed'].includes(String(match.status ?? ''))).length,
                 manual_overrides: table.length,
             };
 
@@ -380,9 +384,7 @@ export async function GET(
                 .select('id, home_club_id, away_club_id, score, events, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
                 .eq('tournament_id', tournamentId)
                 .eq('phase_id', phaseId)
-                .eq('status', 'final');
-
-            if (scopedGroupId) query = query.eq('group_id', scopedGroupId);
+                .in('status', [...FINAL_STANDINGS_STATUSES]);
             const { data, error } = await query;
             return {
                 data: data as StandingMatchRow[] | null,
@@ -396,9 +398,7 @@ export async function GET(
                 .select('id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
                 .eq('tournament_id', tournamentId)
                 .eq('phase_id', phaseId)
-                .eq('status', 'final');
-
-            if (scopedGroupId) query = query.eq('group_id', scopedGroupId);
+                .in('status', [...FINAL_STANDINGS_STATUSES]);
             const { data, error } = await query;
             return {
                 data: data as StandingMatchRowWithoutEvents[] | null,
@@ -412,35 +412,38 @@ export async function GET(
         );
         if (mError) throw mError;
 
+        const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], scopedGroupId);
+
         // 4. Compute standings
         const table = StandingsEngine.generateTable(
             participants || [],
-            matches || [],
+            scopedMatches,
             resolvedRules,
             tableType,
         );
 
         // 5. Metrics
-        const finalMatches = matches || [];
         const metrics = {
-            counted_matches: finalMatches.length,
+            counted_matches: scopedMatches.length,
             pending_results: 0,
             manual_overrides:
-                finalMatches.filter((match) => match.points_autocalculated === false).length +
+                scopedMatches.filter((match) => match.points_autocalculated === false).length +
                 (resolvedRules.adjustments?.length || 0),
         };
 
         // Count non-final matches for this phase
-        let pendingQuery = supabase
+        const { data: pendingMatches, error: pendingError } = await supabase
             .from('matches')
-            .select('id', { count: 'exact', head: true })
+            .select('id, group_id, home_club_id, away_club_id, status')
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phaseId)
             .in('status', ['scheduled', 'live', 'suspended', 'delayed', 'postponed']);
-
-        if (scopedGroupId) pendingQuery = pendingQuery.eq('group_id', scopedGroupId);
-        const { count: pendingCount } = await pendingQuery;
-        metrics.pending_results = pendingCount || 0;
+        if (pendingError) throw pendingError;
+        metrics.pending_results = filterMatchesForGroupScope(
+            pendingMatches || [],
+            participants || [],
+            scopedGroupId,
+        ).length;
 
         // 6. last_calculated_at from persisted standings
         let lastCalculatedAt: string | null = null;

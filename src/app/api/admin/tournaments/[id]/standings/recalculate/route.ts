@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
+import {
+    recalculateAndPersistStandings,
+    recalculatePhaseStandingsScopes,
+} from '@/lib/server/recalculateStandings';
 
 export async function POST(
     request: NextRequest,
@@ -15,7 +18,9 @@ export async function POST(
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
         }
 
-        const result = await recalculateAndPersistStandings(tournamentId, phaseId, groupId, tableType);
+        const result = groupId
+            ? await recalculateAndPersistStandings(tournamentId, phaseId, groupId, tableType)
+            : await recalculatePhaseStandingsScopes(tournamentId, phaseId, tableType);
 
         if (!result.ok) {
             return NextResponse.json({ error: 'Failed to recalculate standings' }, { status: 500 });

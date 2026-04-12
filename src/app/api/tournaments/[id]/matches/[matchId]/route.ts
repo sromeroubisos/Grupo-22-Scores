@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
-import { recalculateAndPersistStandings } from '@/lib/server/recalculateStandings';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
 export async function PATCH(
     request: NextRequest,
@@ -11,6 +11,7 @@ export async function PATCH(
         await requireAdminApiUser();
         const { matchId } = await params;
         const body = await request.json();
+        const previousMatch = await FixtureService.getMatch(matchId);
 
         const match = await FixtureService.updateMatch(matchId, body);
 
@@ -21,14 +22,24 @@ export async function PATCH(
             );
         }
 
-        // Auto-recalculate standings when a match result is finalized or score changes on a final match
-        const tournamentIdForStandings = match.tournamentId;
-        const phaseIdForStandings = match.phaseId;
-        if (match.status === 'final' && tournamentIdForStandings && phaseIdForStandings) {
-            recalculateAndPersistStandings(
-                tournamentIdForStandings,
-                phaseIdForStandings,
-                match.groupId ?? null,
+        const affectedScopes = new Map<string, { tournamentId: string; phaseId: string }>();
+        const previousScope = previousMatch?.tournamentId && previousMatch?.phaseId
+            ? { tournamentId: previousMatch.tournamentId, phaseId: previousMatch.phaseId }
+            : null;
+        const nextScope = match.tournamentId && match.phaseId
+            ? { tournamentId: match.tournamentId, phaseId: match.phaseId }
+            : null;
+
+        [previousScope, nextScope].forEach((scope) => {
+            if (!scope) return;
+            affectedScopes.set(`${scope.tournamentId}:${scope.phaseId}`, scope);
+        });
+
+        if (affectedScopes.size > 0) {
+            Promise.all(
+                [...affectedScopes.values()].map((scope) =>
+                    recalculatePhaseStandingsScopes(scope.tournamentId, scope.phaseId, 'general'),
+                ),
             ).catch((err) =>
                 console.error('[PATCH match] Auto-recalculate standings failed:', err)
             );
@@ -52,12 +63,23 @@ export async function DELETE(
     try {
         await requireAdminApiUser();
         const { matchId } = await params;
+        const previousMatch = await FixtureService.getMatch(matchId);
         const success = await FixtureService.deleteMatch(matchId);
 
         if (!success) {
             return NextResponse.json(
                 { error: 'Failed to delete match' },
                 { status: 500 }
+            );
+        }
+
+        if (success && previousMatch?.tournamentId && previousMatch?.phaseId) {
+            recalculatePhaseStandingsScopes(
+                previousMatch.tournamentId,
+                previousMatch.phaseId,
+                'general',
+            ).catch((err) =>
+                console.error('[DELETE match] Auto-recalculate standings failed:', err)
             );
         }
 

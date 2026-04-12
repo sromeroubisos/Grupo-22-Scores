@@ -5,6 +5,10 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import {
+    FINAL_STANDINGS_STATUSES,
+    filterMatchesForGroupScope,
+} from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 
 export async function recalculatePhaseStandingsScopes(
@@ -123,9 +127,8 @@ export async function recalculateAndPersistStandings(
                 : 'id, home_club_id, away_club_id, score, status, date_time, phase_id, group_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason')
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phaseId)
-            .eq('status', 'final');
+            .in('status', [...FINAL_STANDINGS_STATUSES]);
 
-        if (groupId) query = query.eq('group_id', groupId);
         return query;
     };
 
@@ -138,10 +141,12 @@ export async function recalculateAndPersistStandings(
         return { ok: false, rows_calculated: 0 };
     }
 
+    const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], groupId);
+
     // 4. Run engine
     const table = StandingsEngine.generateTable(
         participants || [],
-        matches || [],
+        scopedMatches,
         resolvedRules,
         tableType,
     );

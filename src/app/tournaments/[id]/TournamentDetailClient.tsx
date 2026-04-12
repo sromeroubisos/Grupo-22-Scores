@@ -8,6 +8,7 @@ import { getTournamentById } from '@/lib/data/tournaments';
 import { ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
 import ExportImage from '@/components/ExportImage';
 import { useFavorites } from '@/hooks/useFavorites';
+import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
@@ -3064,8 +3065,9 @@ export default function TournamentDetailPage({
                                         Editar torneo
                                     </Link>
                                 )}
-                                <button
-                                    className={`${styles.followBtn} ${isLeagueFavorite(favoriteTournamentId) ? styles.followBtnActive : ''}`}
+                                {FAVORITES_ENABLED && (
+                                    <button
+                                        className={`${styles.followBtn} ${isLeagueFavorite(favoriteTournamentId) ? styles.followBtnActive : ''}`}
                                     onClick={() => toggleLeagueFavorite(favoriteTournamentId, {
                                         name: tournamentName,
                                         logo_url: tournamentLogo || null,
@@ -3075,7 +3077,8 @@ export default function TournamentDetailPage({
                                     type="button"
                                 >
                                     {isLeagueFavorite(favoriteTournamentId) ? '★ Siguiendo' : '☆ Seguir'}
-                                </button>
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

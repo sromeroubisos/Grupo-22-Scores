@@ -1,5 +1,5 @@
-// Proxy handler (Next.js 16 format)
-// This proxy handles Auth initialization via Supabase SSR (updateSession).
+// Middleware handler
+// This middleware handles Auth initialization via Supabase SSR (updateSession).
 // Because auth requires cookie interception on requests, this is kept here.
 
 import { NextResponse } from 'next/server'
@@ -31,7 +31,7 @@ function shouldBypassSessionRefresh(pathname: string): boolean {
     return SESSION_REFRESH_BYPASS_PREFIXES.some(prefix => pathname.startsWith(prefix))
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname, searchParams } = request.nextUrl;
 
     // 1. Skip proxy-level auth refresh for routes that do not need it.

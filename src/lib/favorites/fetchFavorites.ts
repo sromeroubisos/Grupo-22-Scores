@@ -11,7 +11,7 @@ export type ResolvedFavorite = {
     created_at: string;
 };
 
-export const FAVORITES_LOCAL_CACHE_KEY = 'g22_favorites_v4_fix';
+export const FAVORITES_LOCAL_CACHE_KEY = 'g22_favorites_v5_fix';
 export const FAVORITES_LOCAL_CACHE_OWNER_KEY = `${FAVORITES_LOCAL_CACHE_KEY}:owner`;
 const PENDING_FAVORITE_NAME = 'Pendiente de sincronizar';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -68,6 +68,14 @@ type ExternalTournamentRow = {
     logo_url?: unknown;
 };
 
+type PersonLookupRow = {
+    id?: unknown;
+    full_name?: unknown;
+    name?: unknown;
+    photo_url?: unknown;
+    avatar_url?: unknown;
+};
+
 type ExternalLookupClient = {
     from: (table: string) => {
         select: (columns: string) => {
@@ -80,7 +88,7 @@ type ExternalLookupClient = {
 };
 
 function isEntityType(value: unknown): value is EntityType {
-    return typeof value === 'string' && ['club', 'league', 'tournament', 'match', 'player'].includes(value);
+    return typeof value === 'string' && ['club', 'team', 'league', 'tournament', 'match', 'player'].includes(value);
 }
 
 function uniqueStrings(values: Array<string | null | undefined>): string[] {
@@ -244,13 +252,30 @@ function isCompetitionEntityType(entityType: EntityType): boolean {
     return entityType === 'league' || entityType === 'tournament';
 }
 
+function isClubEntityType(entityType: EntityType): boolean {
+    return entityType === 'club' || entityType === 'team';
+}
+
+function getDefaultTypeLabel(entityType: EntityType): string {
+    if (entityType === 'club') return 'Club';
+    if (entityType === 'league' || entityType === 'tournament') return 'Torneo';
+    if (entityType === 'player') return 'Jugador';
+    if (entityType === 'team') return 'Equipo';
+    if (entityType === 'match') return 'Partido';
+    return 'Favorito';
+}
+
 function hasUsableName(favorite: Pick<ResolvedFavorite, 'id' | 'name'>): boolean {
     const name = favorite.name.trim();
     return Boolean(name) && name !== PENDING_FAVORITE_NAME && name !== favorite.id;
 }
 
-function hasRenderableIdentity(favorite: Pick<ResolvedFavorite, 'id' | 'name' | 'logo_url' | 'color'>): boolean {
+function hasRenderableIdentity(favorite: Pick<ResolvedFavorite, 'id' | 'name' | 'logo_url' | 'color' | 'entity_type'>): boolean {
     if (hasUsableName(favorite)) return true;
+
+    if (favorite.entity_type === 'player') {
+        return true;
+    }
 
     const logoUrl = typeof favorite.logo_url === 'string' ? favorite.logo_url.trim() : '';
     const color = typeof favorite.color === 'string' ? favorite.color.trim() : '';
@@ -259,7 +284,11 @@ function hasRenderableIdentity(favorite: Pick<ResolvedFavorite, 'id' | 'name' | 
 
 function normalizeResolvedFavorite(favorite: ResolvedFavorite): ResolvedFavorite {
     const id = normalizeFavoriteId(favorite.id);
-    const entityType = isCompetitionEntityType(favorite.entity_type) ? 'league' : favorite.entity_type;
+    const entityType = isCompetitionEntityType(favorite.entity_type)
+        ? 'league'
+        : isClubEntityType(favorite.entity_type)
+            ? 'club'
+            : favorite.entity_type;
     const normalizedName = favorite.name.trim();
     const normalizedTypeLabel = favorite.type_label.trim();
 
@@ -270,7 +299,7 @@ function normalizeResolvedFavorite(favorite: ResolvedFavorite): ResolvedFavorite
         name: normalizedName || PENDING_FAVORITE_NAME,
         logo_url: typeof favorite.logo_url === 'string' && favorite.logo_url.trim() ? favorite.logo_url.trim() : null,
         color: typeof favorite.color === 'string' && favorite.color.trim() ? favorite.color.trim() : null,
-        type_label: normalizedTypeLabel || (entityType === 'club' ? 'Club' : entityType === 'league' ? 'Torneo' : 'Favorito'),
+        type_label: normalizedTypeLabel || getDefaultTypeLabel(entityType),
         created_at: typeof favorite.created_at === 'string' && favorite.created_at.trim()
             ? favorite.created_at
             : new Date().toISOString(),
@@ -278,7 +307,11 @@ function normalizeResolvedFavorite(favorite: ResolvedFavorite): ResolvedFavorite
 }
 
 function favoriteFamilyKey(favorite: Pick<ResolvedFavorite, 'entity_type' | 'id'>): string {
-    const family = isCompetitionEntityType(favorite.entity_type) ? 'competition' : favorite.entity_type;
+    const family = isCompetitionEntityType(favorite.entity_type)
+        ? 'competition'
+        : isClubEntityType(favorite.entity_type)
+            ? 'club'
+            : favorite.entity_type;
     const aliases = family === 'club'
         ? buildClubCandidateIds(favorite.id)
         : family === 'competition'
@@ -421,7 +454,9 @@ function mapRpcRow(row: RpcFavoriteRow): ResolvedFavorite {
         name: typeof row.name === 'string' && row.name.trim() ? row.name : PENDING_FAVORITE_NAME,
         logo_url: typeof row.logo_url === 'string' ? row.logo_url : null,
         color: typeof row.color === 'string' ? row.color : null,
-        type_label: typeof row.type_label === 'string' && row.type_label.trim() ? row.type_label : 'Favorito',
+        type_label: typeof row.type_label === 'string' && row.type_label.trim()
+            ? row.type_label
+            : getDefaultTypeLabel(isEntityType(row.entity_type) ? row.entity_type : 'club'),
         created_at: typeof row.created_at === 'string' ? row.created_at : new Date().toISOString(),
     };
 }
@@ -487,7 +522,11 @@ async function fetchFavoritesFallback(
     const tournamentIds = favorites
         .filter((row) => row.entity_type === 'league' || row.entity_type === 'tournament')
         .map((row) => row.entity_id);
+    const playerIds = favorites
+        .filter((row) => row.entity_type === 'player')
+        .map((row) => row.entity_id);
     const internalTournamentIds = tournamentIds.filter(isUuid);
+    const internalPlayerIds = playerIds.filter(isUuid);
     const externalClubCandidateIds = uniqueStrings(clubIds.flatMap(buildClubCandidateIds));
     const externalTournamentCandidateIds = uniqueStrings(tournamentIds.flatMap(buildTournamentCandidateIds));
     const externalLookupClient = supabase as unknown as ExternalLookupClient;
@@ -499,6 +538,7 @@ async function fetchFavoritesFallback(
         tournamentsByExternalIdRes,
         externalClubsRes,
         externalTournamentsRes,
+        peopleRes,
     ] = await Promise.all([
         clubIds.length > 0
             ? supabase.from('clubs').select('id, external_id, name, logo_url, primary_color').in('id', clubIds)
@@ -517,6 +557,9 @@ async function fetchFavoritesFallback(
             : Promise.resolve({ data: [], error: null }),
         externalTournamentCandidateIds.length > 0
             ? externalLookupClient.from('external_tournaments').select('id, name, display_name, logo_url').in('id', externalTournamentCandidateIds)
+            : Promise.resolve({ data: [], error: null }),
+        internalPlayerIds.length > 0
+            ? supabase.from('people').select('id, full_name, name, photo_url, avatar_url').in('id', internalPlayerIds)
             : Promise.resolve({ data: [], error: null }),
     ]);
 
@@ -576,10 +619,36 @@ async function fetchFavoritesFallback(
         });
     });
 
+    const playerMap = new Map<string, { name: string; logo_url: string | null; color: null; type_label: string }>();
+    ((peopleRes.data || []) as PersonLookupRow[]).forEach((person) => {
+        const id = typeof person.id === 'string' ? person.id.trim() : '';
+        const name = typeof person.full_name === 'string' && person.full_name.trim()
+            ? person.full_name.trim()
+            : typeof person.name === 'string' && person.name.trim()
+                ? person.name.trim()
+                : '';
+        if (!id || !name) return;
+
+        playerMap.set(id, {
+            name,
+            logo_url: typeof person.photo_url === 'string' && person.photo_url.trim()
+                ? person.photo_url.trim()
+                : typeof person.avatar_url === 'string' && person.avatar_url.trim()
+                    ? person.avatar_url.trim()
+                    : null,
+            color: null,
+            type_label: 'Jugador',
+        });
+    });
+
     const items = favorites.map((favorite) => {
-        const resolved = favorite.entity_type === 'club'
+        const resolved = (favorite.entity_type === 'club' || favorite.entity_type === 'team')
             ? clubMap.get(favorite.entity_id) || externalClubMap.get(favorite.entity_id) || buildClubCandidateIds(favorite.entity_id).map((candidate) => externalClubMap.get(candidate)).find(Boolean)
-            : tournamentMap.get(favorite.entity_id) || externalTournamentMap.get(favorite.entity_id) || buildTournamentCandidateIds(favorite.entity_id).map((candidate) => externalTournamentMap.get(candidate)).find(Boolean);
+            : favorite.entity_type === 'league' || favorite.entity_type === 'tournament'
+                ? tournamentMap.get(favorite.entity_id) || externalTournamentMap.get(favorite.entity_id) || buildTournamentCandidateIds(favorite.entity_id).map((candidate) => externalTournamentMap.get(candidate)).find(Boolean)
+                : favorite.entity_type === 'player'
+                    ? playerMap.get(favorite.entity_id)
+                    : null;
 
         return {
             id: favorite.entity_id,

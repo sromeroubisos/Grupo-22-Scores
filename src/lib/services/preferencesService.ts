@@ -27,6 +27,10 @@ export interface LeagueItem {
     logoUrl: string | null
 }
 
+function isUuidLike(value: string) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.trim())
+}
+
 // ─── Onboarding Status ────────────────────────────────────────────────────────
 
 export async function getOnboardingStatus(
@@ -130,22 +134,9 @@ export async function getFavoriteLeagues(
     supabase: SupabaseClient,
     userId: string
 ): Promise<FavoriteLeagueEntry[]> {
-    const { data, error } = await supabase
-        .from('user_favorite_leagues')
-        .select('league_id, sport_id, sort_order')
-        .eq('user_id', userId)
-        .order('sort_order', { ascending: true })
-
-    if (error) {
-        console.error('[preferencesService] getFavoriteLeagues error:', error.message)
-        return []
-    }
-
-    return (data ?? []).map((r: any) => ({
-        leagueId: r.league_id,
-        sportId: r.sport_id,
-        sortOrder: r.sort_order,
-    }))
+    void supabase
+    void userId
+    return []
 }
 
 export async function saveFavoriteLeagues(
@@ -153,34 +144,9 @@ export async function saveFavoriteLeagues(
     userId: string,
     leagues: { leagueId: string; sportId: string }[]
 ): Promise<void> {
-    // Delete all existing league favorites for this user
-    const { error: deleteError } = await supabase
-        .from('user_favorite_leagues')
-        .delete()
-        .eq('user_id', userId)
-
-    if (deleteError) {
-        console.error('[preferencesService] saveFavoriteLeagues delete error:', deleteError.message)
-        throw deleteError
-    }
-
-    if (leagues.length === 0) return
-
-    const rows = leagues.map((l, index) => ({
-        user_id: userId,
-        league_id: l.leagueId,
-        sport_id: l.sportId,
-        sort_order: index,
-    }))
-
-    const { error: insertError } = await supabase
-        .from('user_favorite_leagues')
-        .insert(rows)
-
-    if (insertError) {
-        console.error('[preferencesService] saveFavoriteLeagues insert error:', insertError.message)
-        throw insertError
-    }
+    void supabase
+    void userId
+    void leagues
 }
 
 // ─── League Discovery ─────────────────────────────────────────────────────────

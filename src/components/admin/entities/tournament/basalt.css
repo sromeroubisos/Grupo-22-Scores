@@ -4808,6 +4808,29 @@ select.basalt-input {
     backdrop-filter: blur(20px);
 }
 
+.basalt-sheet-backdrop {
+    z-index: 180;
+}
+
+.basalt-tabs-sheet {
+    z-index: 181;
+    overflow: hidden;
+}
+
+.basalt-tabs-sheet-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overscroll-behavior: contain;
+}
+
+.operation-side-sheet-backdrop {
+    z-index: 182;
+}
+
+.operation-fixture-side-sheet {
+    z-index: 183;
+}
+
 .basalt-action-footer-copy {
     display: flex;
     flex-direction: column;

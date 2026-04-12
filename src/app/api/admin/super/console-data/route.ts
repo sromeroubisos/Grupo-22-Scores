@@ -236,7 +236,6 @@ export async function GET(request: NextRequest) {
             const [
                 { data: clubs, error: clubsError },
                 { data: unions, error: unionsError },
-                { data: clubFavs, error: clubFavsError },
             ] = await Promise.all([
                 selectWithFallback<ClubConsoleRow>(
                     readClient.from('clubs'),
@@ -254,21 +253,9 @@ export async function GET(request: NextRequest) {
                             error: { code?: string | null; message?: string | null; details?: string | null } | null;
                         }>,
                     AUXILIARY_QUERY_TIMEOUT_MS,
-                    { data: [] as UnionConsoleRow[], error: null },
-                    'clubs unions lookup'
-                ),
-                withSoftTimeout(
-                    readClient
-                        .from('favorites')
-                        .select('entity_id')
-                        .eq('entity_type', 'club') as PromiseLike<{
-                            data: { entity_id: string }[] | null;
-                            error: { code?: string | null; message?: string | null; details?: string | null } | null;
-                        }>,
-                    AUXILIARY_QUERY_TIMEOUT_MS,
-                    { data: [] as { entity_id: string }[], error: null },
-                    'clubs favorites lookup'
-                ),
+                        { data: [] as UnionConsoleRow[], error: null },
+                        'clubs unions lookup'
+                    ),
             ]);
 
             if (clubsError) return jsonError('Failed to load clubs', 500, clubsError.message);
@@ -277,20 +264,12 @@ export async function GET(request: NextRequest) {
                 console.warn('[ConsoleData] Failed to load unions for clubs, continuing without union labels:', unionsError.message);
             }
 
-            if (clubFavsError) {
-                console.warn('[ConsoleData] Failed to load club favorites, continuing with zero follower counts:', clubFavsError.message);
-            }
-
             const unionMap = new Map(((unionsError ? [] : unions) ?? []).map((union) => [union.id, union]));
-            const clubFavMap = new Map<string, number>();
-            for (const row of (clubFavsError ? [] : clubFavs) ?? []) {
-                clubFavMap.set(row.entity_id, (clubFavMap.get(row.entity_id) ?? 0) + 1);
-            }
             const data = (clubs ?? []).map((club) => ({
                 ...club,
                 sport: club.sport || club.sport_id || null,
                 union: club.union_id ? unionMap.get(club.union_id) ?? null : null,
-                followers_count: clubFavMap.get(club.id) ?? 0,
+                followers_count: 0,
             }));
 
             return NextResponse.json({ data });
@@ -299,7 +278,6 @@ export async function GET(request: NextRequest) {
         if (resource === 'tournaments') {
             const [
                 tournamentsResult,
-                { data: favoriteRows, error: favoritesError },
             ] = await Promise.all([
                 selectWithFallback<TournamentAdminListRow>(
                     readClient.from('tournaments'),
@@ -313,31 +291,10 @@ export async function GET(request: NextRequest) {
                     ],
                     { column: 'updated_at', ascending: false }
                 ),
-                withSoftTimeout(
-                    readClient
-                        .from('favorites')
-                        .select('entity_id')
-                        .in('entity_type', ['tournament', 'league']) as PromiseLike<{
-                            data: { entity_id: string }[] | null;
-                            error: QueryError;
-                        }>,
-                    AUXILIARY_QUERY_TIMEOUT_MS,
-                    { data: [] as { entity_id: string }[], error: null },
-                    'tournaments favorites lookup'
-                ),
             ]);
 
             const { data: tournaments, error: tournamentsError } = tournamentsResult;
             if (tournamentsError) return jsonError('Failed to load tournaments', 500, tournamentsError.message);
-
-            if (favoritesError) {
-                console.warn('[ConsoleData] Failed to load tournament favorites, continuing with zero follower counts:', favoritesError.message);
-            }
-
-            const favoriteMap = new Map<string, number>();
-            for (const row of (favoritesError ? [] : favoriteRows) ?? []) {
-                favoriteMap.set(row.entity_id, (favoriteMap.get(row.entity_id) ?? 0) + 1);
-            }
 
             const data = (tournaments ?? []).map((tournament) => ({
                 id: tournament.id,
@@ -354,7 +311,7 @@ export async function GET(request: NextRequest) {
                 is_active: Boolean(tournament.is_active ?? (tournament.status === 'active' || tournament.status === 'published')),
                 display_order: typeof tournament.display_order === 'number' ? tournament.display_order : null,
                 priority: typeof tournament.priority === 'number' ? tournament.priority : null,
-                followers_count: favoriteMap.get(tournament.id) ?? 0,
+                followers_count: 0,
                 is_followed_by_user: false,
                 created_at: tournament.created_at ?? '',
                 updated_at: tournament.updated_at ?? '',

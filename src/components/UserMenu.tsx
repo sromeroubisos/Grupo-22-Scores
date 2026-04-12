@@ -5,6 +5,7 @@ import { User, Settings, Star, LogOut, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
+import { FAVORITES_ENABLED } from '@/lib/favorites/config'
 import styles from './UserMenu.module.css'
 
 export default function UserMenu() {
@@ -94,10 +95,12 @@ export default function UserMenu() {
                         Perfil
                     </Link>
 
-                    <Link href="/profile?tab=favorites" className={styles.menuItem} onClick={() => setIsOpen(false)}>
-                        <Star size={16} />
-                        Favoritos
-                    </Link>
+                    {FAVORITES_ENABLED && (
+                        <Link href="/profile?tab=favoritos" className={styles.menuItem} onClick={() => setIsOpen(false)}>
+                            <Star size={16} />
+                            Favoritos
+                        </Link>
+                    )}
 
                     {isSuperAdmin && (
                         <>

@@ -1,3 +1,7 @@
+import {
+    buildClubCandidateIds,
+    buildTournamentCandidateIds,
+} from '@/lib/favorites/fetchFavorites';
 import type { EntityType } from '@/lib/types/user';
 
 export const FAVORITES_UPDATED_EVENT = 'favorites:updated';
@@ -22,20 +26,39 @@ function isCompetitionEntityType(entityType: EntityType): boolean {
     return entityType === 'league' || entityType === 'tournament';
 }
 
+function isClubEntityType(entityType: EntityType): boolean {
+    return entityType === 'club' || entityType === 'team';
+}
+
+/**
+ * Checks if a favorite event detail matches a specific entity, considering aliases.
+ */
 export function favoriteEventMatches(
     detail: Pick<FavoriteUpdatedDetail, 'entityId' | 'entityType'>,
     entityId: string,
     entityType: EntityType,
 ): boolean {
-    if (normalizeEntityId(detail.entityId) !== normalizeEntityId(entityId)) {
-        return false;
+    const detailId = normalizeEntityId(detail.entityId);
+    const targetId = normalizeEntityId(entityId);
+
+    // If exact match, we're done
+    if (detailId === targetId) {
+        return true;
     }
 
-    if (isCompetitionEntityType(detail.entityType) || isCompetitionEntityType(entityType)) {
-        return isCompetitionEntityType(detail.entityType) && isCompetitionEntityType(entityType);
+    // Handle aliases for clubs
+    if (isClubEntityType(detail.entityType) && isClubEntityType(entityType)) {
+        const detailAliases = buildClubCandidateIds(detailId);
+        return detailAliases.includes(targetId);
     }
 
-    return detail.entityType === entityType;
+    // Handle aliases for competitions
+    if (isCompetitionEntityType(detail.entityType) && isCompetitionEntityType(entityType)) {
+        const detailAliases = buildTournamentCandidateIds(detailId);
+        return detailAliases.includes(targetId);
+    }
+
+    return false;
 }
 
 export function dispatchFavoriteUpdated(detail: FavoriteUpdatedDetail): void {

@@ -151,6 +151,41 @@ async function resolveTournamentLinkedIds(
     return uniqueNormalizedIds(linkedIds);
 }
 
+export async function resolveTournamentLeaguePreferenceIds(
+    supabase: BrowserSupabaseClient,
+    entityId: string,
+): Promise<string[]> {
+    const normalizedEntityId = normalizeEntityId(entityId);
+    if (!normalizedEntityId) {
+        return [];
+    }
+
+    return resolveTournamentLinkedIds(supabase, normalizedEntityId);
+}
+
+export async function resolveTournamentFollowerTournamentId(
+    supabase: BrowserSupabaseClient,
+    entityId: string,
+    preferredTournamentId?: string | null,
+): Promise<string | null> {
+    const preferredId = normalizeEntityId(preferredTournamentId ?? '');
+    if (preferredId && isUuid(preferredId)) {
+        return preferredId;
+    }
+
+    const normalizedEntityId = normalizeEntityId(entityId);
+    if (!normalizedEntityId) {
+        return null;
+    }
+
+    if (isUuid(normalizedEntityId)) {
+        return normalizedEntityId;
+    }
+
+    const linkedIds = await resolveTournamentLinkedIds(supabase, normalizedEntityId);
+    return linkedIds.find(isUuid) ?? null;
+}
+
 async function resolveLinkedFavoriteIds(
     supabase: BrowserSupabaseClient,
     entityId: string,

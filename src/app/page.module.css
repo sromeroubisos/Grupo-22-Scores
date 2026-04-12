@@ -807,6 +807,8 @@
     border-bottom: 1px solid var(--color-border);
     min-height: 64px;
     /* Target row height */
+    text-decoration: none;
+    color: inherit;
 }
 
 .motorsportHomeRow {
@@ -982,6 +984,14 @@
     /* Fixed height per team row */
 }
 
+.matchTeamIdentity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
 .teamLogo {
     width: 20px;
     height: 20px;
@@ -1032,6 +1042,32 @@
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
+}
+
+.clubFavoriteBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.clubFavoriteBtn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-primary);
+    transform: scale(1.04);
+}
+
+.clubFavoriteBtnActive {
+    color: var(--color-accent);
 }
 
 .winner .teamName {

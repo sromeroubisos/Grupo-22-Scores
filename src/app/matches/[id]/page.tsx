@@ -7,6 +7,7 @@ import ExportImage from '@/components/ExportImage';
 import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import styles from './page.module.css';
+import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
     buildLocalPlayerStatsRows,
     buildLocalTeamStats,
@@ -2147,6 +2148,9 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                             entityId={String(matchData.home.id)}
                                             size={18}
                                             className={styles.teamFavoriteButton}
+                                            name={matchData.home.name}
+                                            logoUrl={matchData.home.logo || null}
+                                            typeLabel="Club"
                                         />
                                     )}
                                 </div>
@@ -2231,6 +2235,9 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                             entityId={String(matchData.away.id)}
                                             size={18}
                                             className={styles.teamFavoriteButton}
+                                            name={matchData.away.name}
+                                            logoUrl={matchData.away.logo || null}
+                                            typeLabel="Club"
                                         />
                                     )}
                                 </div>
@@ -3013,22 +3020,24 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     </section>
 
                     <aside className={styles.sidebarColumn}>
-                        <section className={styles.panelBlock}>
-                            <MatchWinnerVoteCard
-                                matchId={matchData.id || id}
-                                status={matchData.status}
-                                homeTeam={{
-                                    name: matchData.home.name,
-                                    logo: matchData.home.logo,
-                                }}
-                                awayTeam={{
-                                    name: matchData.away.name,
-                                    logo: matchData.away.logo,
-                                }}
-                                homeScore={typeof matchData.home.score === 'number' ? matchData.home.score : null}
-                                awayScore={typeof matchData.away.score === 'number' ? matchData.away.score : null}
-                            />
-                        </section>
+                        {FAVORITES_ENABLED && (
+                            <section className={styles.panelBlock}>
+                                <MatchWinnerVoteCard
+                                    matchId={matchData.id || id}
+                                    status={matchData.status}
+                                    homeTeam={{
+                                        name: matchData.home.name,
+                                        logo: matchData.home.logo,
+                                    }}
+                                    awayTeam={{
+                                        name: matchData.away.name,
+                                        logo: matchData.away.logo,
+                                    }}
+                                    homeScore={typeof matchData.home.score === 'number' ? matchData.home.score : null}
+                                    awayScore={typeof matchData.away.score === 'number' ? matchData.away.score : null}
+                                />
+                            </section>
+                        )}
 
                         {matchData.form && Array.isArray(matchData.form) && matchData.form.length > 0 && (
                             <section className={styles.panelBlock}>

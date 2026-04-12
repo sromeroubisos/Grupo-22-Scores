@@ -101,6 +101,7 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                     placeholder="nombre@ejemplo.com"
                     autoComplete="email"
                     required
+                    suppressHydrationWarning
                 />
             </div>
 
@@ -116,6 +117,7 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                         placeholder="••••••••"
                         autoComplete="current-password"
                         required
+                        suppressHydrationWarning
                     />
                     <button
                         type="button"

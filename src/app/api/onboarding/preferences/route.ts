@@ -4,11 +4,8 @@ import { getActiveSports } from '@/lib/data/sports'
 import { buildOnboardingMetadata, getOnboardingMetadataStatus } from '@/lib/onboardingStatus'
 import {
     completeOnboarding,
-    getFavoriteLeagues,
     getFavoriteSports,
-    getLeaguesBySports,
     getOnboardingStatus,
-    saveFavoriteLeagues,
     saveFavoriteSports,
 } from '@/lib/services/preferencesService'
 import { createClient } from '@/lib/supabase/server'
@@ -24,7 +21,6 @@ type SportOption = {
 type SavePreferencesPayload = {
     skipped?: boolean
     sportIds?: unknown
-    leagues?: unknown
 }
 
 type SportRow = {
@@ -33,6 +29,14 @@ type SportRow = {
     name_es: string | null
     icon: string | null
     display_order: number | null
+}
+
+async function clearLeagueFavoritesState(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    userId: string
+) {
+    void supabase
+    void userId
 }
 
 function buildFallbackSports(): SportOption[] {
@@ -81,34 +85,9 @@ async function getSports(supabase: Awaited<ReturnType<typeof createClient>>) {
     return mapped.length > 0 ? mapped : buildFallbackSports()
 }
 
-function parseSportIds(value: string | null) {
-    if (!value) return []
-
-    return value
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean)
-}
-
 function normalizeSportIds(value: unknown) {
     if (!Array.isArray(value)) return []
     return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
-}
-
-function normalizeLeagues(value: unknown) {
-    if (!Array.isArray(value)) return []
-
-    return value
-        .filter((item): item is { leagueId: string; sportId: string } => (
-            typeof item === 'object' &&
-            item !== null &&
-            typeof (item as { leagueId?: unknown }).leagueId === 'string' &&
-            typeof (item as { sportId?: unknown }).sportId === 'string'
-        ))
-        .map(item => ({
-            leagueId: item.leagueId,
-            sportId: item.sportId,
-        }))
 }
 
 export async function GET(request: NextRequest) {
@@ -132,19 +111,16 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ onboardingCompleted })
         }
 
-        const sportIds = parseSportIds(request.nextUrl.searchParams.get('sportIds'))
-        const [sports, leagues, favoriteSports, favoriteLeagues] = await Promise.all([
+        const [sports, favoriteSports] = await Promise.all([
             getSports(supabase),
-            sportIds.length > 0 ? getLeaguesBySports(supabase, sportIds) : Promise.resolve([]),
             userId ? getFavoriteSports(supabase, userId) : Promise.resolve([]),
-            userId ? getFavoriteLeagues(supabase, userId) : Promise.resolve([]),
         ])
 
         return NextResponse.json({
             sports,
-            leagues,
+            leagues: [],
             favoriteSports,
-            favoriteLeagues,
+            favoriteLeagues: [],
         })
     } catch (error) {
         console.error('[api/onboarding/preferences] GET error:', error)
@@ -172,20 +148,20 @@ export async function POST(request: NextRequest) {
         }
 
         if (payload.skipped) {
+            await clearLeagueFavoritesState(supabase, userId)
             await completeOnboarding(supabase, userId, { skipped: true })
             await persistMetadataFallback(true)
             return NextResponse.json({ ok: true, onboardingCompleted: true })
         }
 
         const sportIds = normalizeSportIds(payload.sportIds)
-        const leagues = normalizeLeagues(payload.leagues).filter(league => sportIds.includes(league.sportId))
 
         await saveFavoriteSports(supabase, userId, sportIds)
-        await saveFavoriteLeagues(supabase, userId, leagues)
+        await clearLeagueFavoritesState(supabase, userId)
         await completeOnboarding(supabase, userId, {
             skipped: false,
             sportsCompleted: sportIds.length > 0,
-            leaguesCompleted: leagues.length > 0,
+            leaguesCompleted: false,
         })
         await persistMetadataFallback(false)
 

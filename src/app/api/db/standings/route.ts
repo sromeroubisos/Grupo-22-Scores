@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import {
+    FINAL_STANDINGS_STATUSES,
+    filterMatchesForGroupScope,
+} from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
-
-const FINAL_STATUSES = ['final', 'finished', 'ft'] as const;
 
 type PhaseRow = {
     id: string;
@@ -239,10 +241,9 @@ export async function GET(req: NextRequest) {
                         points_override_reason
                     `)
                     .eq('tournament_id', tournamentId)
-                    .in('status', [...FINAL_STATUSES]);
+                    .in('status', [...FINAL_STANDINGS_STATUSES]);
 
                 if (fallbackPhaseId) query = query.eq('phase_id', fallbackPhaseId);
-                if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
                 return query;
             },
             () => {
@@ -255,10 +256,9 @@ export async function GET(req: NextRequest) {
                         points_override_reason
                     `)
                     .eq('tournament_id', tournamentId)
-                    .in('status', [...FINAL_STATUSES]);
+                    .in('status', [...FINAL_STANDINGS_STATUSES]);
 
                 if (fallbackPhaseId) query = query.eq('phase_id', fallbackPhaseId);
-                if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
                 return query;
             },
         ),
@@ -278,9 +278,13 @@ export async function GET(req: NextRequest) {
         ? (persistedRes.data as PersistedStandingRow[]).map(mapPersistedStanding)
         : [];
     const participants = Array.isArray(participantsRes.data) ? (participantsRes.data as ParticipantRow[]) : [];
-    const finalMatches = Array.isArray(matchesRes.data)
+    const finalMatches = filterMatchesForGroupScope(
+        Array.isArray(matchesRes.data)
         ? (matchesRes.data as FinalMatchRow[]).map((match) => ({ ...match, status: 'final' }))
-        : [];
+        : [],
+        participants,
+        requestedGroupId,
+    );
 
     const resolvedRules = StandingsEngine.resolveRules(
         activePhase?.settings ?? {},
