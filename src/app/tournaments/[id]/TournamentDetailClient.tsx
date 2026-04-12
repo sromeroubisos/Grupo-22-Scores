@@ -2108,7 +2108,7 @@ export default function TournamentDetailPage({
         const candidate = String((initialData?.tournament as any)?.id || tournamentData?.id || '').trim();
         return UUID_RE.test(candidate) ? candidate : null;
     })();
-    const favoriteTournamentId = adminTournamentId || id;
+    const favoriteTournamentId = id;
     const externalTournamentEditorHref = (() => {
         if (!externalTournamentOverrideId) return null;
 

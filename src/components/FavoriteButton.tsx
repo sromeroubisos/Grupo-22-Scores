@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Star } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { EntityType } from '@/lib/types/user';
+import { persistFavoriteState } from '@/lib/favorites/persistence';
 import { clearFavoritesCache, getFavoriteSet, updateFavoriteSet } from '@/lib/favoritesCache';
 import {
     dispatchFavoriteUpdated,
@@ -11,6 +12,10 @@ import {
     FAVORITES_UPDATED_EVENT,
     type FavoriteUpdatedDetail,
 } from '@/lib/favorites/events';
+import { 
+    buildClubCandidateIds, 
+    buildTournamentCandidateIds 
+} from '@/lib/favorites/fetchFavorites';
 import styles from './FavoriteButton.module.css';
 
 interface FavoriteButtonProps {
@@ -71,7 +76,20 @@ export default function FavoriteButton({
             if (!isMounted.current) return;
 
             if (favSet) {
-                setIsFavorited(favSet.has(entityId));
+                if (favSet.has(entityId)) {
+                    setIsFavorited(true);
+                } else {
+                    // Check aliases
+                    let hasAliasFavorited = false;
+                    if (entityType === 'club') {
+                        const candidates = buildClubCandidateIds(entityId);
+                        hasAliasFavorited = candidates.some(c => favSet.has(c));
+                    } else if (entityType === 'league' || entityType === 'tournament') {
+                        const candidates = buildTournamentCandidateIds(entityId);
+                        hasAliasFavorited = candidates.some(c => favSet.has(c));
+                    }
+                    setIsFavorited(hasAliasFavorited);
+                }
             }
         } catch (error: unknown) {
             // Ignore AbortErrors
@@ -135,27 +153,14 @@ export default function FavoriteButton({
         }
 
         try {
-            const { data, error } = await supabase
-                .rpc('toggle_favorite', {
-                    p_entity_type: entityType,
-                    p_entity_id: entityId
-                });
-
-            if (error) throw error;
-
-            if (isMounted.current) {
-                setIsFavorited(data as boolean);
+            if (!userId) {
+                throw new Error('User session not available');
             }
 
-            if (userId && (data as boolean) !== nextIsFavorite) {
-                clearFavoritesCache(`FavoriteButton confirm: ${entityType}:${entityId}`);
-                updateFavoriteSet(userId, entityType, entityId, data as boolean);
-                dispatchFavoriteUpdated({
-                    userId,
-                    entityId,
-                    entityType,
-                    isFavorite: data as boolean,
-                });
+            await persistFavoriteState(supabase, userId, entityId, entityType, nextIsFavorite);
+
+            if (isMounted.current) {
+                setIsFavorited(nextIsFavorite);
             }
         } catch (error: unknown) {
             if (isAbortLikeError(error)) return;
@@ -187,8 +192,8 @@ export default function FavoriteButton({
             onClick={toggleFavorite}
             disabled={isLoading}
             className={`${styles.favoriteButton} ${className}`}
-            title={isFavorited ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-            aria-label={isFavorited ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            title={isFavorited ? 'Dejar de seguir' : 'Seguir'}
+            aria-label={isFavorited ? 'Dejar de seguir' : 'Seguir'}
         >
             <Star
                 size={size}
@@ -201,7 +206,7 @@ export default function FavoriteButton({
             />
             {showLabel && (
                 <span className={styles.label}>
-                    {isFavorited ? 'Favorito' : 'Favorito'}
+                    {isFavorited ? 'Siguiendo' : 'Seguir'}
                 </span>
             )}
         </button>

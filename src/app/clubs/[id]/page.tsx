@@ -166,7 +166,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
 
     const [selectedSport, setSelectedSport] = useState<string>('all');
     const [selectedSquadTab, setSelectedSquadTab] = useState<string>('');
-    const favoriteClubId = resolvedClubId || id;
+    const favoriteClubId = id;
     const { isFavorited, toggle: toggleFavorite } = useFavorite('club', favoriteClubId);
 
     // Keep provider-prefixed IDs so the API route can detect the correct external source.
