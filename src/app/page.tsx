@@ -1909,7 +1909,7 @@ export default function HomePage() {
                               e.stopPropagation();
                               void toggleLeagueGroupFavorite(league);
                             }}
-                            aria-label={isFavoriteLeague ? "Quitar de favoritos" : "Agregar a favoritos"}
+                            aria-label={isFavoriteLeague ? "Dejar de seguir torneo" : "Seguir torneo"}
                           >
                             <Star size={18} fill={isFavoriteLeague ? "currentColor" : "none"} strokeWidth={isFavoriteLeague ? 0 : 2} />
                           </button>
@@ -1952,7 +1952,7 @@ export default function HomePage() {
                               e.stopPropagation();
                               void toggleLeagueGroupFavorite(league);
                             }}
-                            aria-label={isFavoriteLeague ? "Quitar de favoritos" : "Agregar a favoritos"}
+                            aria-label={isFavoriteLeague ? "Dejar de seguir torneo" : "Seguir torneo"}
                           >
                             <Star size={18} fill={isFavoriteLeague ? "currentColor" : "none"} strokeWidth={isFavoriteLeague ? 0 : 2} />
                           </button>

@@ -553,6 +553,8 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
                                         name: teamName,
                                         logo_url: teamLogoUrl || null,
                                         type_label: 'Club',
+                                        canonical_id: resolvedClubId || null,
+                                        sport_id: preferredSport || null,
                                     })}
                                     type="button"
                                 >

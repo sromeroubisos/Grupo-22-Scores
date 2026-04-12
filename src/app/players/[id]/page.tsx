@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { ArrowLeft, Star } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
-import { FAVORITES_ENABLED } from '@/lib/favorites/config';
+import { FAVORITE_PLAYERS_ENABLED } from '@/lib/favorites/config';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 const TABS = [
@@ -157,7 +157,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                                 )}
                             </div>
                         </div>
-                        {FAVORITES_ENABLED && (
+                        {FAVORITE_PLAYERS_ENABLED && (
                             <button
                                 className={`${styles.followBtn} ${isFavorited ? styles.followBtnActive : ''}`}
                                 onClick={() => toggleFavorite({

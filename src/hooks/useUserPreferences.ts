@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { useAuth } from '@/context/AuthContext'
-import { getFavoriteSports } from '@/lib/services/preferencesService'
+import { getFavoriteLeagues, getFavoriteSports } from '@/lib/services/preferencesService'
 import { createClient } from '@/lib/supabase/client'
 
 interface UserPreferences {
@@ -16,14 +16,18 @@ export function useUserPreferences(): UserPreferences {
     const { user } = useAuth()
     const userId = user?.id
     const [favoriteSportIds, setFavoriteSportIds] = useState<string[]>([])
+    const [favoriteLeagueIds, setFavoriteLeagueIds] = useState<string[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         if (!userId) {
             setFavoriteSportIds([])
+            setFavoriteLeagueIds([])
             setIsLoading(false)
             return
         }
+
+        const activeUserId = userId
 
         const supabase = createClient()
         let cancelled = false
@@ -32,9 +36,13 @@ export function useUserPreferences(): UserPreferences {
             setIsLoading(true)
 
             try {
-                const sports = await getFavoriteSports(supabase, userId)
+                const [sports, leagues] = await Promise.all([
+                    getFavoriteSports(supabase, activeUserId),
+                    getFavoriteLeagues(supabase, activeUserId),
+                ])
                 if (!cancelled) {
                     setFavoriteSportIds(sports)
+                    setFavoriteLeagueIds(leagues.map((entry) => entry.leagueId))
                 }
             } catch (err) {
                 console.error('[useUserPreferences] load error:', err)
@@ -54,7 +62,7 @@ export function useUserPreferences(): UserPreferences {
 
     return {
         favoriteSportIds,
-        favoriteLeagueIds: [],
+        favoriteLeagueIds,
         isLoading,
     }
 }

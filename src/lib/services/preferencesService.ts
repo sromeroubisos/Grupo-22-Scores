@@ -134,9 +134,24 @@ export async function getFavoriteLeagues(
     supabase: SupabaseClient,
     userId: string
 ): Promise<FavoriteLeagueEntry[]> {
-    void supabase
-    void userId
-    return []
+    const supabaseAny = supabase as any
+    const { data, error } = await supabaseAny
+        .from('user_favorite_leagues')
+        .select('league_id, sport_id, sort_order')
+        .eq('user_id', userId)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('[preferencesService] getFavoriteLeagues error:', error.message)
+        return []
+    }
+
+    return (data ?? []).map((row: any) => ({
+        leagueId: String(row.league_id),
+        sportId: String(row.sport_id || ''),
+        sortOrder: typeof row.sort_order === 'number' ? row.sort_order : 0,
+    }))
 }
 
 export async function saveFavoriteLeagues(
@@ -144,9 +159,35 @@ export async function saveFavoriteLeagues(
     userId: string,
     leagues: { leagueId: string; sportId: string }[]
 ): Promise<void> {
-    void supabase
-    void userId
-    void leagues
+    const supabaseAny = supabase as any
+    const { error: deleteError } = await supabaseAny
+        .from('user_favorite_leagues')
+        .delete()
+        .eq('user_id', userId)
+
+    if (deleteError) {
+        console.error('[preferencesService] saveFavoriteLeagues delete error:', deleteError.message)
+        throw deleteError
+    }
+
+    if (leagues.length === 0) return
+
+    const rows = leagues.map((league, index) => ({
+        user_id: userId,
+        league_id: league.leagueId,
+        sport_id: league.sportId,
+        display_name: league.leagueId,
+        sort_order: index,
+    }))
+
+    const { error: insertError } = await supabaseAny
+        .from('user_favorite_leagues')
+        .insert(rows)
+
+    if (insertError) {
+        console.error('[preferencesService] saveFavoriteLeagues insert error:', insertError.message)
+        throw insertError
+    }
 }
 
 // ─── League Discovery ─────────────────────────────────────────────────────────

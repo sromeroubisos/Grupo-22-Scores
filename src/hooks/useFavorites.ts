@@ -1,5 +1,32 @@
-import { useCallback } from 'react';
-import { FAVORITES_ENABLED } from '@/lib/favorites/config';
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import {
+    FAVORITES_ENABLED,
+    FAVORITE_CLUBS_ENABLED,
+    FAVORITE_LEAGUES_ENABLED,
+} from '@/lib/favorites/config';
+import {
+    dispatchFavoriteUpdated,
+    FAVORITES_UPDATED_EVENT,
+    favoriteEventMatches,
+    type FavoriteUpdatedDetail,
+} from '@/lib/favorites/events';
+import { createClient } from '@/lib/supabase/client';
+import {
+    getFollowingErrorMessage,
+    getFollowedClubs,
+    getFollowedLeagues,
+    isFollowingSchemaMissingError,
+    matchesClubFollow,
+    matchesLeagueFollow,
+    toggleClubFollow,
+    toggleLeagueFollow,
+    type ClubFollowRow,
+    type LeagueFollowRow,
+} from '@/lib/services/followingService';
 import type { EntityType } from '@/lib/types/user';
 
 export type FavoriteItem = {
@@ -22,36 +49,304 @@ type ToggleLeagueFavoriteOptions = {
     forceIsFavorite?: boolean;
 };
 
-export function useFavorites() {
-    const noopAsync = useCallback(async () => {}, []);
-    const alwaysFalse = useCallback(() => false, []);
-    const emptyRefresh = useCallback(async () => {}, []);
+type ToggleFavoriteInput = {
+    id: string;
+    entity_type: EntityType;
+    name?: string;
+    logo_url?: string | null;
+    color?: string | null;
+    type_label?: string;
+    sport_id?: string | null;
+    canonical_id?: string | null;
+    forceIsFavorite?: boolean;
+};
 
+function toLeagueFavoriteItem(row: LeagueFollowRow): FavoriteItem {
     return {
-        favorites: [] as FavoriteItem[],
-        hasMore: false,
-        loading: false,
-        error: FAVORITES_ENABLED ? null : null,
-        isFavorite: alwaysFalse,
-        toggleFavorite: noopAsync,
-        isLeagueFavorite: alwaysFalse,
-        toggleLeagueFavorite: async (_entityId: string, _nameOrOptions?: string | ToggleLeagueFavoriteOptions) => {},
-        loadMore: () => {},
-        refresh: emptyRefresh,
+        id: row.league_id,
+        entity_type: 'league',
+        name: row.display_name,
+        logo_url: row.logo_url,
+        color: null,
+        type_label: 'Torneo',
+        created_at: row.created_at,
     };
 }
 
-export function useFavorite(_entityType: EntityType, _entityId: string) {
-    const toggle = useCallback(async (_metadata?: {
+function toClubFavoriteItem(row: ClubFollowRow): FavoriteItem {
+    return {
+        id: row.club_id,
+        entity_type: 'club',
+        name: row.display_name,
+        logo_url: row.logo_url,
+        color: null,
+        type_label: 'Club',
+        created_at: row.created_at,
+    };
+}
+
+function isClubEntityType(entityType: EntityType): boolean {
+    return entityType === 'club' || entityType === 'team';
+}
+
+function isLeagueEntityType(entityType: EntityType): boolean {
+    return entityType === 'league' || entityType === 'tournament';
+}
+
+export function useFavorites() {
+    const pathname = usePathname();
+    const { login, user } = useAuth();
+    const supabase = createClient();
+
+    const [leagueRows, setLeagueRows] = useState<LeagueFollowRow[]>([]);
+    const [clubRows, setClubRows] = useState<ClubFollowRow[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const refresh = useCallback(async () => {
+        if (!FAVORITES_ENABLED || !user?.id) {
+            setLeagueRows([]);
+            setClubRows([]);
+            setError(null);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const [leagues, clubs] = await Promise.all([
+                FAVORITE_LEAGUES_ENABLED ? getFollowedLeagues(supabase, user.id) : Promise.resolve([]),
+                FAVORITE_CLUBS_ENABLED ? getFollowedClubs(supabase, user.id) : Promise.resolve([]),
+            ]);
+
+            setLeagueRows(leagues);
+            setClubRows(clubs);
+            setError(null);
+        } catch (err) {
+            const message = isFollowingSchemaMissingError(err)
+                ? 'Falta aplicar la migracion de seguidos en Supabase.'
+                : getFollowingErrorMessage(err);
+
+            if (isFollowingSchemaMissingError(err)) {
+                console.warn('[useFavorites] following schema not available yet.');
+            } else {
+                console.error('[useFavorites] refresh error:', err);
+            }
+
+            setLeagueRows([]);
+            setClubRows([]);
+            setError(message);
+        } finally {
+            setLoading(false);
+        }
+    }, [supabase, user?.id]);
+
+    useEffect(() => {
+        void refresh();
+    }, [refresh]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || !user?.id) return;
+
+        const handleFavoritesUpdated = (event: Event) => {
+            const customEvent = event as CustomEvent<FavoriteUpdatedDetail>;
+            const detail = customEvent.detail;
+            if (!detail) return;
+            if (detail.userId && detail.userId !== user.id) return;
+            void refresh();
+        };
+
+        window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesUpdated as EventListener);
+        return () => {
+            window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesUpdated as EventListener);
+        };
+    }, [refresh, user?.id]);
+
+    const favorites = useMemo(() => (
+        [
+            ...leagueRows.map(toLeagueFavoriteItem),
+            ...clubRows.map(toClubFavoriteItem),
+        ].sort((left, right) => right.created_at.localeCompare(left.created_at))
+    ), [clubRows, leagueRows]);
+
+    const ensureAuthenticated = useCallback(() => {
+        if (user) return true;
+
+        const returnTo = typeof window !== 'undefined'
+            ? `${window.location.pathname}${window.location.search}`
+            : pathname || undefined;
+        login('fan', returnTo);
+        return false;
+    }, [login, pathname, user]);
+
+    const isLeagueFavorite = useCallback((entityId: string) => {
+        if (!FAVORITES_ENABLED || !FAVORITE_LEAGUES_ENABLED) return false;
+        return leagueRows.some((row) => matchesLeagueFollow(row, entityId));
+    }, [leagueRows]);
+
+    const isFavorite = useCallback((entityId: string, entityType: EntityType) => {
+        if (!FAVORITES_ENABLED) return false;
+
+        if (isClubEntityType(entityType)) {
+            return FAVORITE_CLUBS_ENABLED && clubRows.some((row) => matchesClubFollow(row, entityId));
+        }
+
+        if (isLeagueEntityType(entityType)) {
+            return FAVORITE_LEAGUES_ENABLED && leagueRows.some((row) => matchesLeagueFollow(row, entityId));
+        }
+
+        return false;
+    }, [clubRows, leagueRows]);
+
+    const toggleLeagueFavorite = useCallback(async (
+        entityId: string,
+        nameOrOptions?: string | ToggleLeagueFavoriteOptions,
+    ) => {
+        if (!FAVORITES_ENABLED || !FAVORITE_LEAGUES_ENABLED) return;
+        if (!ensureAuthenticated() || !user?.id) return;
+
+        const options = typeof nameOrOptions === 'string'
+            ? { name: nameOrOptions }
+            : (nameOrOptions || {});
+
+        try {
+            const result = await toggleLeagueFollow(supabase, user.id, {
+                entityId,
+                name: options.name,
+                logoUrl: options.logo_url,
+                sportId: options.sportId,
+                canonicalLeagueId: options.followerTournamentId || null,
+                forceIsFavorite: options.forceIsFavorite,
+            });
+
+            dispatchFavoriteUpdated({
+                userId: user.id,
+                entityId,
+                entityType: 'league',
+                isFavorite: result.isFollowing,
+                name: options.name,
+                logo_url: options.logo_url,
+                type_label: options.type_label || 'Torneo',
+            });
+
+            setError(null);
+            await refresh();
+        } catch (err) {
+            const message = isFollowingSchemaMissingError(err)
+                ? 'La tabla user_favorite_leagues todavia no esta disponible para la API. Recarga el schema de Supabase o verifica que la migracion se ejecuto en el proyecto correcto.'
+                : getFollowingErrorMessage(err);
+            console.error('[useFavorites] toggleLeagueFavorite error:', message, err);
+            setError(message);
+        }
+    }, [ensureAuthenticated, refresh, supabase, user?.id]);
+
+    const toggleFavorite = useCallback(async (item: ToggleFavoriteInput) => {
+        if (!FAVORITES_ENABLED) return;
+        if (!ensureAuthenticated() || !user?.id) return;
+
+        if (isClubEntityType(item.entity_type) && FAVORITE_CLUBS_ENABLED) {
+            try {
+                const result = await toggleClubFollow(supabase, user.id, {
+                    entityId: item.id,
+                    name: item.name,
+                    logoUrl: item.logo_url,
+                    sportId: item.sport_id,
+                    canonicalClubId: item.canonical_id || null,
+                    forceIsFavorite: item.forceIsFavorite,
+                });
+
+                dispatchFavoriteUpdated({
+                    userId: user.id,
+                    entityId: item.id,
+                    entityType: 'club',
+                    isFavorite: result.isFollowing,
+                    name: item.name,
+                    logo_url: item.logo_url,
+                    type_label: item.type_label || 'Club',
+                });
+
+                setError(null);
+                await refresh();
+            } catch (err) {
+                const message = isFollowingSchemaMissingError(err)
+                    ? 'La tabla user_favorite_clubs todavia no esta disponible para la API. Recarga el schema de Supabase o verifica que la migracion se ejecuto en el proyecto correcto.'
+                    : getFollowingErrorMessage(err);
+                console.error('[useFavorites] toggleClubFavorite error:', message, err);
+                setError(message);
+            }
+            return;
+        }
+
+        if (isLeagueEntityType(item.entity_type) && FAVORITE_LEAGUES_ENABLED) {
+            await toggleLeagueFavorite(item.id, {
+                name: item.name,
+                logo_url: item.logo_url,
+                sportId: item.sport_id,
+                followerTournamentId: item.canonical_id || null,
+                forceIsFavorite: item.forceIsFavorite,
+                type_label: item.type_label,
+            });
+        }
+    }, [ensureAuthenticated, refresh, supabase, toggleLeagueFavorite, user?.id]);
+
+    const loadMore = useCallback(() => {}, []);
+
+    return {
+        favorites,
+        hasMore: false,
+        loading,
+        error,
+        isFavorite,
+        toggleFavorite,
+        isLeagueFavorite,
+        toggleLeagueFavorite,
+        loadMore,
+        refresh,
+    };
+}
+
+export function useFavorite(entityType: EntityType, entityId: string) {
+    const { isFavorite, loading, toggleFavorite } = useFavorites();
+
+    const isFavorited = useMemo(() => {
+        if (isClubEntityType(entityType) || isLeagueEntityType(entityType)) {
+            return isFavorite(entityId, entityType);
+        }
+
+        return false;
+    }, [entityId, entityType, isFavorite]);
+
+    const toggle = useCallback(async (metadata?: {
         name?: string;
         logo_url?: string | null;
         color?: string | null;
         type_label?: string;
-    }) => {}, []);
+        sport_id?: string | null;
+        canonical_id?: string | null;
+        forceIsFavorite?: boolean;
+    }) => {
+        if (!isClubEntityType(entityType) && !isLeagueEntityType(entityType)) {
+            return;
+        }
+
+        await toggleFavorite({
+            id: entityId,
+            entity_type: entityType,
+            ...metadata,
+        });
+    }, [entityId, entityType, toggleFavorite]);
 
     return {
-        isFavorited: false,
-        loading: false,
+        isFavorited,
+        loading,
         toggle,
     };
+}
+
+export function favoriteMatchesEntity(
+    item: Pick<FavoriteUpdatedDetail, 'entityId' | 'entityType'>,
+    entityId: string,
+    entityType: EntityType,
+) {
+    return favoriteEventMatches(item, entityId, entityType);
 }

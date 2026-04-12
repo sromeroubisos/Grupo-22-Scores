@@ -10,6 +10,7 @@ DROP FUNCTION IF EXISTS public.is_favorited(TEXT, TEXT);
 DROP FUNCTION IF EXISTS public.toggle_favorite(TEXT, TEXT);
 DROP FUNCTION IF EXISTS public.toggle_tournament_follow(UUID);
 
+DROP TABLE IF EXISTS public.user_favorite_clubs;
 DROP TABLE IF EXISTS public.user_favorite_leagues;
 DROP TABLE IF EXISTS public.tournament_followers;
 DROP TABLE IF EXISTS public.favorites;

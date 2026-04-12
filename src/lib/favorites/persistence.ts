@@ -48,6 +48,7 @@ async function resolveClubLinkedIds(
     supabase: BrowserSupabaseClient,
     entityId: string,
 ): Promise<string[]> {
+    const supabaseAny = supabase as any;
     const aliasIds = buildClubCandidateIds(entityId);
 
     if (aliasIds.length === 0) {
@@ -55,11 +56,11 @@ async function resolveClubLinkedIds(
     }
 
     const [byIdRes, byExternalIdRes] = await Promise.all([
-        supabase
+        supabaseAny
             .from('clubs')
             .select('id, external_id')
             .in('id', aliasIds),
-        supabase
+        supabaseAny
             .from('clubs')
             .select('id, external_id')
             .in('external_id', aliasIds),
@@ -94,6 +95,55 @@ async function resolveClubLinkedIds(
     ];
 
     return uniqueNormalizedIds(linkedIds);
+}
+
+export async function resolveClubPreferenceIds(
+    supabase: BrowserSupabaseClient,
+    entityId: string,
+): Promise<string[]> {
+    const normalizedEntityId = normalizeEntityId(entityId);
+    if (!normalizedEntityId) {
+        return [];
+    }
+
+    return resolveClubLinkedIds(supabase, normalizedEntityId);
+}
+
+export async function resolveClubCanonicalPreferenceId(
+    supabase: BrowserSupabaseClient,
+    entityId: string,
+): Promise<string | null> {
+    const linkedIds = await resolveClubPreferenceIds(supabase, entityId);
+    if (linkedIds.length === 0) {
+        return null;
+    }
+
+    const supabaseAny = supabase as any;
+    const [byIdRes, byExternalIdRes] = await Promise.all([
+        supabaseAny
+            .from('clubs')
+            .select('id, external_id')
+            .in('id', linkedIds),
+        supabaseAny
+            .from('clubs')
+            .select('id, external_id')
+            .in('external_id', linkedIds),
+    ]);
+
+    if (byIdRes.error) {
+        throw byIdRes.error;
+    }
+
+    if (byExternalIdRes.error) {
+        throw byExternalIdRes.error;
+    }
+
+    const canonicalRows = [
+        ...((byIdRes.data ?? []) as Array<{ id: string; external_id: string | null }>),
+        ...((byExternalIdRes.data ?? []) as Array<{ id: string; external_id: string | null }>),
+    ];
+
+    return canonicalRows.find((row) => typeof row.id === 'string' && row.id.trim())?.id ?? null;
 }
 
 async function resolveTournamentLinkedIds(

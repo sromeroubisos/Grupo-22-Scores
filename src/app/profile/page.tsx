@@ -20,6 +20,7 @@ import {
     Users,
 } from 'lucide-react';
 
+import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { getActiveSports } from '@/lib/data/sports';
 import { useAuth } from '@/context/AuthContext';
@@ -69,6 +70,7 @@ type TournamentRequestPayload = {
 
 interface ProfileStats {
     sports: number;
+    following: number;
 }
 
 interface ProfileUser {
@@ -108,6 +110,7 @@ async function sendProfileRequest(
 export default function ProfilePage() {
     const { user, logout } = useAuth();
     const { favoriteSportIds } = useUserPreferences();
+    const { favorites } = useFavorites();
     const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState<MainTab>('perfil');
     const [activeRequestForm, setActiveRequestForm] = useState<ProfileActionKind | null>(null);
@@ -118,6 +121,7 @@ export default function ProfilePage() {
 
     const stats: ProfileStats = {
         sports: favoriteSportIds.length,
+        following: favorites.length,
     };
 
     const topTabs: { key: MainTab; label: string }[] = [
@@ -222,6 +226,7 @@ function ProfileHeader({
                 </div>
                 <div className={styles.statsRow}>
                     <span className={styles.stat}><strong>{stats.sports}</strong> Deportes favoritos</span>
+                    <span className={styles.stat}><strong>{stats.following}</strong> Siguiendo</span>
                 </div>
             </div>
 
@@ -929,6 +934,14 @@ function SettingsPanel({ logout }: { logout: () => void }) {
                     </p>
                 )}
             </div>
+
+            <Link href="/favorites" className={styles.settingItem}>
+                <div className={styles.settingInfo}>
+                    <h4>Siguiendo</h4>
+                    <p>Clubes y torneos guardados</p>
+                </div>
+                <ChevronRight size={16} color="var(--color-text-tertiary)" />
+            </Link>
 
             <div className={styles.settingItem}>
                 <div className={styles.settingInfo}>

@@ -96,9 +96,9 @@ export default function UserMenu() {
                     </Link>
 
                     {FAVORITES_ENABLED && (
-                        <Link href="/profile?tab=favoritos" className={styles.menuItem} onClick={() => setIsOpen(false)}>
+                        <Link href="/favorites" className={styles.menuItem} onClick={() => setIsOpen(false)}>
                             <Star size={16} />
-                            Favoritos
+                            Siguiendo
                         </Link>
                     )}
 
