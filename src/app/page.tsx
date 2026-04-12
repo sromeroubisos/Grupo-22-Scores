@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback, memo, type MouseEvent } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, memo, type CSSProperties, type MouseEvent } from 'react';
 import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
@@ -88,6 +88,25 @@ function cleanLeagueName(name: string, country?: string | null): string {
     return name.slice(name.indexOf(':') + 1).trim();
   }
   return name;
+}
+
+const NEUTRAL_LEAGUE_CARD_STYLES: Array<CSSProperties & Record<string, string>> = [
+  {
+    '--league-surface-dark': 'rgba(29, 29, 32, 0.96)',
+    '--league-surface-light': 'rgba(128, 128, 136, 0.14)',
+    '--league-border': 'rgba(166, 166, 176, 0.18)',
+    '--league-divider': 'rgba(196, 196, 204, 0.1)',
+  },
+  {
+    '--league-surface-dark': 'rgba(19, 19, 22, 0.98)',
+    '--league-surface-light': 'rgba(96, 96, 104, 0.1)',
+    '--league-border': 'rgba(122, 122, 130, 0.16)',
+    '--league-divider': 'rgba(170, 170, 178, 0.08)',
+  },
+];
+
+function getLeagueColorStyle(cardIndex: number): CSSProperties {
+  return NEUTRAL_LEAGUE_CARD_STYLES[Math.abs(cardIndex) % NEUTRAL_LEAGUE_CARD_STYLES.length];
 }
 
 function normalizeTournamentLookupKey(value: string | null | undefined): string {
@@ -1858,7 +1877,7 @@ export default function HomePage() {
               )}
 
               {!loading && displayedFavoriteClubMatches.length > 0 && (
-                <div className={styles.leagueSection}>
+                <div className={styles.leagueSection} style={getLeagueColorStyle(0)}>
                   <div className={styles.leagueSectionHeader}>
                     <div className={styles.leagueInfo}>
                       <Star size={16} fill="currentColor" style={{ color: 'var(--accent, #f59e0b)' }} />
@@ -1890,9 +1909,12 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && displayedMatchesByLeague.map((league) => {
+              {!loading && displayedMatchesByLeague.map((league, leagueIndex) => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
                 const isFavoriteLeague = isLeagueGroupFavorite(league);
+                const leagueColorStyle = getLeagueColorStyle(
+                  leagueIndex + (displayedFavoriteClubMatches.length > 0 ? 1 : 0)
+                );
 
                 if (isMotorsportSport) {
                   const eventMatch = league.matches[0];
@@ -1924,7 +1946,7 @@ export default function HomePage() {
                 }
 
                 return (
-                  <div key={league.leagueId} className={styles.leagueSection}>
+                  <div key={league.leagueId} className={styles.leagueSection} style={leagueColorStyle}>
                     <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
                       onClick={() => toggleCompetitionCollapse(league.leagueId)}
                       style={{ cursor: 'pointer' }}
