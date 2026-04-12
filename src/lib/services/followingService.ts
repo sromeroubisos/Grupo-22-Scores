@@ -41,6 +41,7 @@ type ToggleLeagueFollowInput = {
     sportId?: string | null;
     canonicalLeagueId?: string | null;
     forceIsFavorite?: boolean;
+    existingRows?: LeagueFollowRow[];
 };
 
 type ToggleClubFollowInput = {
@@ -50,6 +51,7 @@ type ToggleClubFollowInput = {
     sportId?: string | null;
     canonicalClubId?: string | null;
     forceIsFavorite?: boolean;
+    existingRows?: ClubFollowRow[];
 };
 
 function normalizeValue(value: string | null | undefined): string {
@@ -226,7 +228,7 @@ export async function toggleLeagueFollow(
         return { isFollowing: false };
     }
 
-    const existingRows = await getFollowedLeagues(supabase, userId);
+    const existingRows = input.existingRows ?? await getFollowedLeagues(supabase, userId);
     const canonicalLeagueId = normalizeValue(
         input.canonicalLeagueId || await resolveTournamentFollowerTournamentId(supabase, entityId, input.canonicalLeagueId),
     ) || null;
@@ -289,7 +291,7 @@ export async function toggleClubFollow(
         return { isFollowing: false };
     }
 
-    const existingRows = await getFollowedClubs(supabase, userId);
+    const existingRows = input.existingRows ?? await getFollowedClubs(supabase, userId);
     const canonicalClubId = normalizeValue(
         input.canonicalClubId || await resolveClubCanonicalPreferenceId(supabase, entityId),
     ) || null;

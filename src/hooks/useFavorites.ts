@@ -93,6 +93,46 @@ function isLeagueEntityType(entityType: EntityType): boolean {
     return entityType === 'league' || entityType === 'tournament';
 }
 
+function buildLeagueRowFromDetail(detail: FavoriteUpdatedDetail): LeagueFollowRow {
+    return {
+        league_id: detail.entityId,
+        canonical_league_id: null,
+        sport_id: null,
+        display_name: detail.name?.trim() || detail.entityId,
+        logo_url: detail.logo_url || null,
+        created_at: detail.created_at || new Date().toISOString(),
+    };
+}
+
+function buildClubRowFromDetail(detail: FavoriteUpdatedDetail): ClubFollowRow {
+    return {
+        club_id: detail.entityId,
+        canonical_club_id: null,
+        sport_id: null,
+        display_name: detail.name?.trim() || detail.entityId,
+        logo_url: detail.logo_url || null,
+        created_at: detail.created_at || new Date().toISOString(),
+    };
+}
+
+function applyLeagueDetail(rows: LeagueFollowRow[], detail: FavoriteUpdatedDetail): LeagueFollowRow[] {
+    const remaining = rows.filter((row) => !matchesLeagueFollow(row, detail.entityId));
+    if (!detail.isFavorite) {
+        return remaining;
+    }
+
+    return [buildLeagueRowFromDetail(detail), ...remaining];
+}
+
+function applyClubDetail(rows: ClubFollowRow[], detail: FavoriteUpdatedDetail): ClubFollowRow[] {
+    const remaining = rows.filter((row) => !matchesClubFollow(row, detail.entityId));
+    if (!detail.isFavorite) {
+        return remaining;
+    }
+
+    return [buildClubRowFromDetail(detail), ...remaining];
+}
+
 export function useFavorites() {
     const pathname = usePathname();
     const { login, user } = useAuth();
@@ -153,7 +193,15 @@ export function useFavorites() {
             const detail = customEvent.detail;
             if (!detail) return;
             if (detail.userId && detail.userId !== user.id) return;
-            void refresh();
+
+            if (isLeagueEntityType(detail.entityType)) {
+                setLeagueRows((current) => applyLeagueDetail(current, detail));
+                return;
+            }
+
+            if (isClubEntityType(detail.entityType)) {
+                setClubRows((current) => applyClubDetail(current, detail));
+            }
         };
 
         window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesUpdated as EventListener);
@@ -208,6 +256,24 @@ export function useFavorites() {
         const options = typeof nameOrOptions === 'string'
             ? { name: nameOrOptions }
             : (nameOrOptions || {});
+        const matchedRows = leagueRows.filter((row) => matchesLeagueFollow(row, entityId));
+        const currentlyFavorite = matchedRows.length > 0;
+        const nextIsFavorite = typeof options.forceIsFavorite === 'boolean'
+            ? options.forceIsFavorite
+            : !currentlyFavorite;
+        const optimisticDetail: FavoriteUpdatedDetail = {
+            userId: user.id,
+            entityId,
+            entityType: 'league',
+            isFavorite: nextIsFavorite,
+            name: options.name,
+            logo_url: options.logo_url,
+            type_label: options.type_label || 'Torneo',
+            created_at: new Date().toISOString(),
+        };
+        const previousLeagueRows = leagueRows;
+
+        setLeagueRows((current) => applyLeagueDetail(current, optimisticDetail));
 
         try {
             const result = await toggleLeagueFollow(supabase, user.id, {
@@ -217,6 +283,7 @@ export function useFavorites() {
                 sportId: options.sportId,
                 canonicalLeagueId: options.followerTournamentId || null,
                 forceIsFavorite: options.forceIsFavorite,
+                existingRows: matchedRows,
             });
 
             dispatchFavoriteUpdated({
@@ -230,21 +297,40 @@ export function useFavorites() {
             });
 
             setError(null);
-            await refresh();
         } catch (err) {
+            setLeagueRows(previousLeagueRows);
             const message = isFollowingSchemaMissingError(err)
                 ? 'La tabla user_favorite_leagues todavia no esta disponible para la API. Recarga el schema de Supabase o verifica que la migracion se ejecuto en el proyecto correcto.'
                 : getFollowingErrorMessage(err);
             console.error('[useFavorites] toggleLeagueFavorite error:', message, err);
             setError(message);
         }
-    }, [ensureAuthenticated, refresh, supabase, user?.id]);
+    }, [ensureAuthenticated, leagueRows, supabase, user?.id]);
 
     const toggleFavorite = useCallback(async (item: ToggleFavoriteInput) => {
         if (!FAVORITES_ENABLED) return;
         if (!ensureAuthenticated() || !user?.id) return;
 
         if (isClubEntityType(item.entity_type) && FAVORITE_CLUBS_ENABLED) {
+            const matchedRows = clubRows.filter((row) => matchesClubFollow(row, item.id));
+            const currentlyFavorite = matchedRows.length > 0;
+            const nextIsFavorite = typeof item.forceIsFavorite === 'boolean'
+                ? item.forceIsFavorite
+                : !currentlyFavorite;
+            const optimisticDetail: FavoriteUpdatedDetail = {
+                userId: user.id,
+                entityId: item.id,
+                entityType: 'club',
+                isFavorite: nextIsFavorite,
+                name: item.name,
+                logo_url: item.logo_url,
+                type_label: item.type_label || 'Club',
+                created_at: new Date().toISOString(),
+            };
+            const previousClubRows = clubRows;
+
+            setClubRows((current) => applyClubDetail(current, optimisticDetail));
+
             try {
                 const result = await toggleClubFollow(supabase, user.id, {
                     entityId: item.id,
@@ -253,6 +339,7 @@ export function useFavorites() {
                     sportId: item.sport_id,
                     canonicalClubId: item.canonical_id || null,
                     forceIsFavorite: item.forceIsFavorite,
+                    existingRows: matchedRows,
                 });
 
                 dispatchFavoriteUpdated({
@@ -266,8 +353,8 @@ export function useFavorites() {
                 });
 
                 setError(null);
-                await refresh();
             } catch (err) {
+                setClubRows(previousClubRows);
                 const message = isFollowingSchemaMissingError(err)
                     ? 'La tabla user_favorite_clubs todavia no esta disponible para la API. Recarga el schema de Supabase o verifica que la migracion se ejecuto en el proyecto correcto.'
                     : getFollowingErrorMessage(err);
@@ -287,7 +374,7 @@ export function useFavorites() {
                 type_label: item.type_label,
             });
         }
-    }, [ensureAuthenticated, refresh, supabase, toggleLeagueFavorite, user?.id]);
+    }, [clubRows, ensureAuthenticated, supabase, toggleLeagueFavorite, user?.id]);
 
     const loadMore = useCallback(() => {}, []);
 
