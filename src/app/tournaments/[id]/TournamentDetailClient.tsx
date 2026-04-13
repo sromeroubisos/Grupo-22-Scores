@@ -1444,15 +1444,19 @@ export default function TournamentDetailPage({
     const [tournamentData, setTournamentData] = useState<any>(preloaded?.tournamentMeta ?? null);
     const [standings, setStandings] = useState<any[]>(preloaded?.standings ?? []);
     const [standingsForm, setStandingsForm] = useState<any[]>([]);
+    const [standingsFormTeamLabels, setStandingsFormTeamLabels] = useState<any[]>([]);
     const [standingsHtFt, setStandingsHtFt] = useState<any[]>([]);
+    const [standingsHtFtTeamLabels, setStandingsHtFtTeamLabels] = useState<any[]>([]);
     const [standingsOverUnder, setStandingsOverUnder] = useState<any[]>([]);
+    const [standingsOverUnderTeamLabels, setStandingsOverUnderTeamLabels] = useState<any[]>([]);
+    const [customStandingsTables, setCustomStandingsTables] = useState<any[]>([]);
     const [archives, setArchives] = useState<any[]>([]);
     const [results, setResults] = useState<any[]>(preloaded?.results ?? []);
     const [fixtures, setFixtures] = useState<any[]>(preloaded?.fixtures ?? []);
     const [details, setDetails] = useState<any>(null);
     const [topScorers, setTopScorers] = useState<any[]>([]);
     const [draw, setDraw] = useState<any[]>(preloaded?.draw ?? []);
-    const [standingsView, setStandingsView] = useState<'overall' | 'form' | 'htft' | 'overunder'>('overall');
+    const [standingsView, setStandingsView] = useState<string>('overall');
     const [dbParticipants, setDbParticipants] = useState<any[]>(preloaded?.dbParticipants ?? []);
     const [dbPhases, setDbPhases] = useState<any[]>(preloaded?.dbPhases ?? []);
     const [activeDbPhase, setActiveDbPhase] = useState<any>(preloaded?.activePhase ?? null);
@@ -1773,6 +1777,17 @@ export default function TournamentDetailPage({
                 if (Array.isArray(payload.teamLabels)) {
                     setDbTeamLabels(normalizeTeamLabelAssignments(payload.teamLabels));
                 }
+                setStandingsFormTeamLabels(normalizeTeamLabelAssignments(Array.isArray(payload.standingsFormTeamLabels) ? payload.standingsFormTeamLabels : []));
+                setStandingsHtFtTeamLabels(normalizeTeamLabelAssignments(Array.isArray(payload.standingsHtFtTeamLabels) ? payload.standingsHtFtTeamLabels : []));
+                setStandingsOverUnderTeamLabels(normalizeTeamLabelAssignments(Array.isArray(payload.standingsOverUnderTeamLabels) ? payload.standingsOverUnderTeamLabels : []));
+                setCustomStandingsTables(
+                    Array.isArray(payload.customStandingsTables)
+                        ? payload.customStandingsTables.map((table: any) => ({
+                            ...table,
+                            teamLabels: normalizeTeamLabelAssignments(Array.isArray(table?.teamLabels) ? table.teamLabels : []),
+                        }))
+                        : [],
+                );
                 setDraw((current) => Array.isArray(payload.draw) ? payload.draw : current);
                 setTopScorers(payload.topScorers || []);
                 setArchives(payload.archives || []);
@@ -1808,7 +1823,8 @@ export default function TournamentDetailPage({
         standings.length > 0 ||
         standingsForm.length > 0 ||
         standingsHtFt.length > 0 ||
-        standingsOverUnder.length > 0
+        standingsOverUnder.length > 0 ||
+        customStandingsTables.length > 0
     ));
 
     useEffect(() => {
@@ -1857,6 +1873,22 @@ export default function TournamentDetailPage({
         setActiveTab('summary');
     }, [activeTab, navigationTabs]);
 
+    useEffect(() => {
+        const availableViews = new Set<string>(['overall']);
+        if (standingsForm.length > 0) availableViews.add('form');
+        if (standingsOverUnder.length > 0) availableViews.add('overunder');
+        if (standingsHtFt.length > 0) availableViews.add('htft');
+        customStandingsTables.forEach((table: any) => {
+            if (typeof table?.key === 'string' && table.key.trim()) {
+                availableViews.add(table.key);
+            }
+        });
+
+        if (!availableViews.has(standingsView)) {
+            setStandingsView('overall');
+        }
+    }, [customStandingsTables, standingsForm.length, standingsHtFt.length, standingsOverUnder.length, standingsView]);
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -1888,18 +1920,45 @@ export default function TournamentDetailPage({
     const selectedStandingsScopeView = shouldUseStandingsScopeViews && visibleStandingsScopeViews.length > 0
         ? (visibleStandingsScopeViews.find((view) => view.id === activeStandingsScope) || visibleStandingsScopeViews[0] || null)
         : null;
+    const selectedCustomStandingsTable = !selectedStandingsScopeView && !isCircuitTournament
+        ? (customStandingsTables.find((table: any) => table?.key === standingsView) || null)
+        : null;
+    const activeStandingsRenderer = selectedStandingsScopeView || isCircuitTournament
+        ? 'standard'
+        : selectedCustomStandingsTable?.source_key === 'standingsHtFt'
+            ? 'htft'
+            : selectedCustomStandingsTable?.source_key === 'standingsOverUnder'
+                ? 'overunder'
+                : standingsView === 'htft'
+                    ? 'htft'
+                    : standingsView === 'overunder'
+                        ? 'overunder'
+                        : 'standard';
     const isCircuitGlobalTable = selectedStandingsScopeView?.kind === 'global';
     const baseStandingsSource = selectedStandingsScopeView?.standings ?? standings;
     const overallRows = flattenStandingsRows(standings);
     const standingsSource = selectedStandingsScopeView
         ? baseStandingsSource
-        : standingsView === 'form'
+        : selectedCustomStandingsTable
+            ? (Array.isArray(selectedCustomStandingsTable.standings) ? selectedCustomStandingsTable.standings : [])
+            : standingsView === 'form'
             ? standingsForm
             : standingsView === 'htft'
                 ? standingsHtFt
                 : standingsView === 'overunder'
                     ? standingsOverUnder
                     : standings;
+    const activeStandingsTeamLabels = selectedStandingsScopeView || isCircuitTournament
+        ? dbTeamLabels
+        : selectedCustomStandingsTable
+            ? (Array.isArray(selectedCustomStandingsTable.teamLabels) ? selectedCustomStandingsTable.teamLabels : [])
+            : standingsView === 'form'
+                ? standingsFormTeamLabels
+                : standingsView === 'htft'
+                    ? standingsHtFtTeamLabels
+                    : standingsView === 'overunder'
+                        ? standingsOverUnderTeamLabels
+                        : dbTeamLabels;
     const activeRows = normalizeStandingsRows(standingsSource);
     const activeFlatRows = flattenStandingsRows(standingsSource);
     const motorsportOverallGroups = isMotorsportTournament ? splitMotorsportStandingsRows(overallRows) : null;
@@ -2198,8 +2257,8 @@ export default function TournamentDetailPage({
     const motorsportDriverRaceColumns = isMotorsportTournament ? collectMotorsportRaceColumns(motorsportStandingsRows) : [];
     const motorsportTeamRaceColumns = isMotorsportTournament ? collectMotorsportRaceColumns(motorsportTeamRows) : [];
     const motorsportLeaders = standingsPreviewRows.slice(0, 3);
-    const standingsLegendItems = collectStandingsLegendItems(activeFlatRows, dbTeamLabels);
-    const standingsPreviewLegendItems = collectStandingsLegendItems(standingsPreviewRows, dbTeamLabels);
+    const standingsLegendItems = collectStandingsLegendItems(activeFlatRows, activeStandingsTeamLabels);
+    const standingsPreviewLegendItems = collectStandingsLegendItems(standingsPreviewRows, activeStandingsTeamLabels);
     const standingsExportColumnLabels = standingsColumnMode === 'circuit-global'
         ? {
             played: 'ET',
@@ -2211,7 +2270,7 @@ export default function TournamentDetailPage({
         : undefined;
     const mapStandingsRowForExport = (row: any, idx: number) => {
         const fallbackTeam = resolveTeamFallback(row);
-        const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
+        const rowLabel = resolveStandingsRowLabel(row, activeStandingsTeamLabels);
         const goalDifference =
             typeof row.goal_difference === 'number'
                 ? row.goal_difference
@@ -2541,7 +2600,7 @@ export default function TournamentDetailPage({
             teamUrl: getStandingsTeamUrl(row),
             league: row.team?.league || row.participant?.league || null,
         }, tournamentData?.sportId);
-        const rowLabel = resolveStandingsRowLabel(row, dbTeamLabels);
+        const rowLabel = resolveStandingsRowLabel(row, activeStandingsTeamLabels);
         const accentColor = rowLabel?.color ?? null;
         const rowAccentStyle = buildRowAccentStyle(accentColor);
         const goalDifference =
@@ -3476,9 +3535,18 @@ export default function TournamentDetailPage({
                             {!isMotorsportTournament && !selectedStandingsScopeView && !isCircuitTournament && (
                                 <div className={styles.pillsGroup}>
                                     <button className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overall')}>General</button>
-                                    <button className={`${styles.pillBtn} ${standingsView === 'form' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('form')}>Forma</button>
-                                    <button className={`${styles.pillBtn} ${standingsView === 'overunder' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overunder')}>Over/Under</button>
-                                    <button className={`${styles.pillBtn} ${standingsView === 'htft' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('htft')}>HT/FT</button>
+                                    {standingsForm.length > 0 && <button className={`${styles.pillBtn} ${standingsView === 'form' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('form')}>Forma</button>}
+                                    {standingsOverUnder.length > 0 && <button className={`${styles.pillBtn} ${standingsView === 'overunder' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overunder')}>Over/Under</button>}
+                                    {standingsHtFt.length > 0 && <button className={`${styles.pillBtn} ${standingsView === 'htft' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('htft')}>HT/FT</button>}
+                                    {customStandingsTables.map((table: any) => (
+                                        <button
+                                            key={table.key}
+                                            className={`${styles.pillBtn} ${standingsView === table.key ? styles.pillBtnActive : ''}`}
+                                            onClick={() => setStandingsView(table.key)}
+                                        >
+                                            {table.name || table.key}
+                                        </button>
+                                    ))}
                                 </div>
                             )}
                             <ExportImage
@@ -3518,7 +3586,7 @@ export default function TournamentDetailPage({
                             <>
                                 {activeRows.length === 0 && <p className={styles.emptyState}>Tabla no disponible.</p>}
 
-                                {activeRows.length > 0 && (selectedStandingsScopeView || isCircuitTournament || standingsView === 'overall' || standingsView === 'form') && (
+                                {activeRows.length > 0 && activeStandingsRenderer === 'standard' && (
                                     <div className={styles.standingsContainer}>
                                         {activeRows[0]?.rows ? (
                                             <div className={styles.groupsStack}>
@@ -3546,7 +3614,7 @@ export default function TournamentDetailPage({
                             </>
                         )}
 
-                        {!selectedStandingsScopeView && !isCircuitTournament && activeRows.length > 0 && standingsView === 'overunder' && (
+                        {!selectedStandingsScopeView && !isCircuitTournament && activeRows.length > 0 && activeStandingsRenderer === 'overunder' && (
                             <div className={styles.sectionCard}>
                                 <div className={styles.tableScroll}>
                                     <div className={styles.tableCard} style={{ minWidth: 600 }}>
@@ -3573,7 +3641,7 @@ export default function TournamentDetailPage({
                             </div>
                         )}
 
-                        {!selectedStandingsScopeView && !isCircuitTournament && activeRows.length > 0 && standingsView === 'htft' && (
+                        {!selectedStandingsScopeView && !isCircuitTournament && activeRows.length > 0 && activeStandingsRenderer === 'htft' && (
                             <div className={styles.sectionCard}>
                                 <div className={styles.tableScroll}>
                                     <div className={styles.tableCard} style={{ minWidth: 980 }}>

@@ -95,11 +95,20 @@ export async function PATCH(
             groups: Array.isArray(body?.groups) ? body.groups : [],
             assignments: Array.isArray(body?.assignments) ? body.assignments : [],
             labels: Array.isArray(body?.labels) ? body.labels : [],
+            tables: Array.isArray(body?.tables) ? body.tables : [],
         });
+        const databasePayload = {
+            id: payload.id,
+            source: payload.source,
+            groups: payload.groups,
+            assignments: payload.assignments,
+            labels: payload.labels,
+            updated_at: payload.updated_at,
+        };
 
         const { error } = await client
             .from('external_tournament_standings_overrides')
-            .upsert(payload, { onConflict: 'id' });
+            .upsert(databasePayload, { onConflict: 'id' });
 
         if (error) {
             if (error.message?.includes('Could not find the table')) {
@@ -127,6 +136,19 @@ export async function PATCH(
                 labels: payload.labels?.length ?? 0,
             });
             return NextResponse.json({ ok: false, error: dbMessage }, { status: 500 });
+        }
+
+        try {
+            await upsertExternalTournamentStandingsOverride(payload);
+        } catch (fileError) {
+            const fileMessage = fileError instanceof Error ? fileError.message : 'Unknown storage error';
+            return NextResponse.json(
+                {
+                    ok: false,
+                    error: `La configuracion editorial se guardo en base de datos, pero no se pudo persistir el archivo de soporte para tablas API custom: ${fileMessage}`,
+                },
+                { status: 500 },
+            );
         }
 
         return NextResponse.json({ ok: true, data: payload, storage: 'database' });

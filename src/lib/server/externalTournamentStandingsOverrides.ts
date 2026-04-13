@@ -26,13 +26,34 @@ export type ExternalTournamentStandingsLabel = {
     group_id?: string | null;
 };
 
+export type ExternalTournamentStandingsTable = {
+    id: string;
+    key: string;
+    name: string;
+    source_key?: string | null;
+    order_index?: number | null;
+    groups?: ExternalTournamentStandingsGroup[];
+    assignments?: ExternalTournamentStandingsAssignment[];
+    labels?: ExternalTournamentStandingsLabel[];
+};
+
 export type ExternalTournamentStandingsOverrideRecord = {
     id: string;
     source?: string | null;
     groups?: ExternalTournamentStandingsGroup[];
     assignments?: ExternalTournamentStandingsAssignment[];
     labels?: ExternalTournamentStandingsLabel[];
+    tables?: ExternalTournamentStandingsTable[];
     updated_at?: string | null;
+};
+
+export type AppliedExternalTournamentStandingsTable = {
+    id: string;
+    key: string;
+    name: string;
+    source_key: string;
+    standings: any[];
+    teamLabels: any[];
 };
 
 type ExternalTournamentStandingsOverrideStore = Record<string, ExternalTournamentStandingsOverrideRecord>;
@@ -51,6 +72,13 @@ const STORE_DIR = path.join(process.cwd(), 'storage');
 const STORE_PATH = path.join(STORE_DIR, 'external-tournament-standings-overrides.json');
 const UNGROUPED_GROUP_ID = '__external_ungrouped__';
 const STANDINGS_OVERRIDE_SELECT = 'id, source, groups, assignments, labels, updated_at';
+const BUILTIN_STANDINGS_TABLES = [
+    { key: 'standings', name: 'Tabla general' },
+    { key: 'standingsForm', name: 'Forma' },
+    { key: 'standingsOverUnder', name: 'Over/Under' },
+    { key: 'standingsHtFt', name: 'HT/FT' },
+] as const;
+const BUILTIN_STANDINGS_TABLE_KEYS = new Set<string>(BUILTIN_STANDINGS_TABLES.map((table) => table.key));
 
 function normalizeString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -84,6 +112,43 @@ function slugify(value: string): string {
 function deriveId(value: string, prefix: string) {
     const slug = slugify(value);
     return slug ? `${prefix}-${slug}` : `${prefix}-${Date.now()}`;
+}
+
+function normalizeStandingsTableKey(value: unknown, fallbackIndex: number) {
+    const raw = normalizeString(value);
+    if (!raw) return `custom-table-${fallbackIndex + 1}`;
+    if (BUILTIN_STANDINGS_TABLE_KEYS.has(raw)) return raw;
+
+    const slug = slugify(raw);
+    return slug ? `custom-${slug}` : `custom-table-${fallbackIndex + 1}`;
+}
+
+function normalizeStandingsSourceKey(value: unknown) {
+    const raw = normalizeString(value);
+    if (!raw) return 'standings';
+    return BUILTIN_STANDINGS_TABLE_KEYS.has(raw) ? raw : 'standings';
+}
+
+function getBuiltInStandingsTableName(key: string) {
+    return BUILTIN_STANDINGS_TABLES.find((table) => table.key === key)?.name || null;
+}
+
+function buildPrimaryStandingsTable(
+    id: string,
+    groups: ExternalTournamentStandingsGroup[],
+    assignments: ExternalTournamentStandingsAssignment[],
+    labels: ExternalTournamentStandingsLabel[],
+): ExternalTournamentStandingsTable {
+    return {
+        id: `${id}:standings`,
+        key: 'standings',
+        name: getBuiltInStandingsTableName('standings') || 'Tabla general',
+        source_key: 'standings',
+        order_index: 0,
+        groups,
+        assignments,
+        labels,
+    };
 }
 
 function getGroupIdFromContainer(group: any, index: number): string {
@@ -325,6 +390,73 @@ function normalizeLabels(
     return normalized;
 }
 
+function normalizeTables(
+    tournamentId: string,
+    rawTables: unknown,
+    fallback?: {
+        groups: ExternalTournamentStandingsGroup[];
+        assignments: ExternalTournamentStandingsAssignment[];
+        labels: ExternalTournamentStandingsLabel[];
+    },
+): ExternalTournamentStandingsTable[] {
+    const normalized: ExternalTournamentStandingsTable[] = [];
+    const seenKeys = new Set<string>();
+
+    if (Array.isArray(rawTables)) {
+        rawTables.forEach((rawTable, index) => {
+            if (!rawTable || typeof rawTable !== 'object') return;
+
+            const tableRecord = rawTable as Record<string, unknown>;
+            const key = normalizeStandingsTableKey(tableRecord.key, index);
+            if (seenKeys.has(key)) return;
+
+            const groups = normalizeGroups(tableRecord.groups);
+            const validGroupIds = new Set(groups.map((group) => group.id));
+            const labels = normalizeLabels(tableRecord.labels, validGroupIds);
+            const assignments = normalizeAssignments(tableRecord.assignments, validGroupIds);
+
+            seenKeys.add(key);
+            normalized.push({
+                id: normalizeString(tableRecord.id) || `${tournamentId}:${key}`,
+                key,
+                name: normalizeString(tableRecord.name) || getBuiltInStandingsTableName(key) || `Tabla ${index + 1}`,
+                source_key: normalizeStandingsSourceKey(tableRecord.source_key ?? key),
+                order_index: normalizeInteger(tableRecord.order_index ?? index) ?? index,
+                groups,
+                assignments,
+                labels,
+            });
+        });
+    }
+
+    if (normalized.length === 0 && fallback) {
+        normalized.push(buildPrimaryStandingsTable(tournamentId, fallback.groups, fallback.assignments, fallback.labels));
+    }
+
+    const hasPrimaryTable = normalized.some((table) => table.key === 'standings');
+    if (!hasPrimaryTable && fallback && (
+        fallback.groups.length > 0 ||
+        fallback.assignments.length > 0 ||
+        fallback.labels.length > 0
+    )) {
+        normalized.unshift(buildPrimaryStandingsTable(tournamentId, fallback.groups, fallback.assignments, fallback.labels));
+    }
+
+    return normalized
+        .sort((left, right) => (left.order_index ?? 0) - (right.order_index ?? 0))
+        .map((table, index) => ({
+            ...table,
+            order_index: index,
+        }));
+}
+
+function getPrimaryTable(
+    tables: ExternalTournamentStandingsTable[],
+): ExternalTournamentStandingsTable | null {
+    if (tables.length === 0) return null;
+    return tables.find((table) => table.key === 'standings') || tables[0] || null;
+}
+
 export function normalizeExternalTournamentStandingsOverrideRecord(
     record: ExternalTournamentStandingsOverrideRecord,
 ): ExternalTournamentStandingsOverrideRecord {
@@ -337,14 +469,17 @@ export function normalizeExternalTournamentStandingsOverrideRecord(
     const validGroupIds = new Set(groups.map((group) => group.id));
     const assignments = normalizeAssignments(record.assignments, validGroupIds);
     const labels = normalizeLabels(record.labels, validGroupIds);
+    const tables = normalizeTables(id, record.tables, { groups, assignments, labels });
+    const primaryTable = getPrimaryTable(tables);
 
     return {
         id,
         source: normalizeString(record.source) || 'external-api',
-        groups,
-        assignments,
-        labels,
-        updated_at: new Date().toISOString(),
+        groups: primaryTable?.groups || groups,
+        assignments: primaryTable?.assignments || assignments,
+        labels: primaryTable?.labels || labels,
+        tables,
+        updated_at: normalizeString(record.updated_at) || new Date().toISOString(),
     };
 }
 
@@ -358,13 +493,18 @@ function mapDatabaseStandingsOverride(
 
     const groups = normalizeGroups(row.groups);
     const validGroupIds = new Set(groups.map((group) => group.id));
+    const assignments = normalizeAssignments(row.assignments, validGroupIds);
+    const labels = normalizeLabels(row.labels, validGroupIds);
+    const tables = normalizeTables(id, row.tables, { groups, assignments, labels });
+    const primaryTable = getPrimaryTable(tables);
 
     return {
         id,
         source: normalizeString(row.source) || 'external-api',
-        groups,
-        assignments: normalizeAssignments(row.assignments, validGroupIds),
-        labels: normalizeLabels(row.labels, validGroupIds),
+        groups: primaryTable?.groups || groups,
+        assignments: primaryTable?.assignments || assignments,
+        labels: primaryTable?.labels || labels,
+        tables,
         updated_at: normalizeString(row.updated_at),
     };
 }
@@ -453,10 +593,25 @@ export async function getExternalTournamentStandingsOverride(
 
     const databaseLookup = buildDatabaseOverrideLookup(databaseOverrides);
 
-    return (
-        findDatabaseOverrideByCandidates(databaseLookup, candidates) ||
-        findStoredOverrideByCandidates(store, candidates)
-    );
+    const databaseRecord = findDatabaseOverrideByCandidates(databaseLookup, candidates);
+    const storedRecord = findStoredOverrideByCandidates(store, candidates);
+
+    if (!databaseRecord && !storedRecord) return null;
+    if (!databaseRecord) return storedRecord;
+    if (!storedRecord) return databaseRecord;
+
+    return normalizeExternalTournamentStandingsOverrideRecord({
+        ...databaseRecord,
+        ...storedRecord,
+        source: storedRecord.source || databaseRecord.source,
+        groups: Array.isArray(storedRecord.groups) ? storedRecord.groups : databaseRecord.groups,
+        assignments: Array.isArray(storedRecord.assignments) ? storedRecord.assignments : databaseRecord.assignments,
+        labels: Array.isArray(storedRecord.labels) ? storedRecord.labels : databaseRecord.labels,
+        tables: Array.isArray(storedRecord.tables) && storedRecord.tables.length > 0
+            ? storedRecord.tables
+            : databaseRecord.tables,
+        updated_at: storedRecord.updated_at || databaseRecord.updated_at,
+    });
 }
 
 export async function upsertExternalTournamentStandingsOverride(
@@ -473,6 +628,27 @@ export async function upsertExternalTournamentStandingsOverride(
     await writeStore(store);
 
     return normalized;
+}
+
+function resolveOverrideTable(
+    override: ExternalTournamentStandingsOverrideRecord | null | undefined,
+    tableKey: string,
+): ExternalTournamentStandingsTable | null {
+    if (!override) return null;
+
+    const normalizedTables = Array.isArray(override.tables) && override.tables.length > 0
+        ? normalizeTables(override.id, override.tables, {
+            groups: Array.isArray(override.groups) ? override.groups : [],
+            assignments: Array.isArray(override.assignments) ? override.assignments : [],
+            labels: Array.isArray(override.labels) ? override.labels : [],
+        })
+        : normalizeTables(override.id, [], {
+            groups: Array.isArray(override.groups) ? override.groups : [],
+            assignments: Array.isArray(override.assignments) ? override.assignments : [],
+            labels: Array.isArray(override.labels) ? override.labels : [],
+        });
+
+    return normalizedTables.find((table) => table.key === tableKey) || null;
 }
 
 function buildAssignmentLookup(
@@ -660,22 +836,24 @@ function buildSyntheticTeamLabels(
     }));
 }
 
-export function applyExternalTournamentStandingsOverride(
+function applyExternalTournamentStandingsTableOverride(
+    tournamentId: string,
     standings: any,
-    override: ExternalTournamentStandingsOverrideRecord | null | undefined,
+    tableOverride: Pick<ExternalTournamentStandingsTable, 'groups' | 'assignments' | 'labels'> | null | undefined,
+    updatedAt?: string | null,
 ): { standings: any[]; teamLabels: any[] } {
     const preparedStandings = ensureStandingsGroupMetadata(Array.isArray(standings) ? standings : []);
-    if (!override) {
+    if (!tableOverride) {
         return {
             standings: preparedStandings,
             teamLabels: [],
         };
     }
 
-    const groups = Array.isArray(override.groups) ? override.groups : [];
-    const labels = Array.isArray(override.labels) ? override.labels : [];
-    const assignments = Array.isArray(override.assignments) ? override.assignments : [];
-    const teamLabels = buildSyntheticTeamLabels(override.id, labels, override.updated_at);
+    const groups = Array.isArray(tableOverride.groups) ? tableOverride.groups : [];
+    const labels = Array.isArray(tableOverride.labels) ? tableOverride.labels : [];
+    const assignments = Array.isArray(tableOverride.assignments) ? tableOverride.assignments : [];
+    const teamLabels = buildSyntheticTeamLabels(tournamentId, labels, updatedAt);
     const assignmentLookup = buildAssignmentLookup(assignments);
 
     if (groups.length === 0) {
@@ -744,5 +922,94 @@ export function applyExternalTournamentStandingsOverride(
     return {
         standings: groupedStandings.length > 0 ? groupedStandings : preparedStandings,
         teamLabels,
+    };
+}
+
+export function applyExternalTournamentStandingsOverride(
+    standings: any,
+    override: ExternalTournamentStandingsOverrideRecord | null | undefined,
+    tableKey = 'standings',
+): { standings: any[]; teamLabels: any[] } {
+    if (!override) {
+        return applyExternalTournamentStandingsTableOverride('external', standings, null, null);
+    }
+
+    const tableOverride = resolveOverrideTable(override, tableKey);
+    return applyExternalTournamentStandingsTableOverride(
+        override.id,
+        standings,
+        tableOverride || {
+            groups: override.groups,
+            assignments: override.assignments,
+            labels: override.labels,
+        },
+        override.updated_at,
+    );
+}
+
+export function applyExternalTournamentStandingsOverrideSet(
+    sources: {
+        standings?: any;
+        standingsForm?: any;
+        standingsHtFt?: any;
+        standingsOverUnder?: any;
+    },
+    override: ExternalTournamentStandingsOverrideRecord | null | undefined,
+): {
+    standings: any[];
+    standingsForm: any[];
+    standingsHtFt: any[];
+    standingsOverUnder: any[];
+    teamLabels: any[];
+    standingsFormTeamLabels: any[];
+    standingsHtFtTeamLabels: any[];
+    standingsOverUnderTeamLabels: any[];
+    customTables: AppliedExternalTournamentStandingsTable[];
+} {
+    const overall = applyExternalTournamentStandingsOverride(sources.standings, override, 'standings');
+    const form = applyExternalTournamentStandingsOverride(sources.standingsForm, override, 'standingsForm');
+    const htft = applyExternalTournamentStandingsOverride(sources.standingsHtFt, override, 'standingsHtFt');
+    const overUnder = applyExternalTournamentStandingsOverride(sources.standingsOverUnder, override, 'standingsOverUnder');
+    const tables = Array.isArray(override?.tables) ? override.tables : [];
+
+    const customTables = tables
+        .filter((table) => !BUILTIN_STANDINGS_TABLE_KEYS.has(table.key))
+        .map((table) => {
+            const sourceKey = normalizeStandingsSourceKey(table.source_key);
+            const sourceRows =
+                sourceKey === 'standingsForm'
+                    ? sources.standingsForm
+                    : sourceKey === 'standingsHtFt'
+                        ? sources.standingsHtFt
+                        : sourceKey === 'standingsOverUnder'
+                            ? sources.standingsOverUnder
+                            : sources.standings;
+            const applied = applyExternalTournamentStandingsTableOverride(
+                override?.id || 'external',
+                sourceRows,
+                table,
+                override?.updated_at,
+            );
+
+            return {
+                id: table.id,
+                key: table.key,
+                name: table.name,
+                source_key: sourceKey,
+                standings: applied.standings,
+                teamLabels: applied.teamLabels,
+            };
+        });
+
+    return {
+        standings: overall.standings,
+        standingsForm: form.standings,
+        standingsHtFt: htft.standings,
+        standingsOverUnder: overUnder.standings,
+        teamLabels: overall.teamLabels,
+        standingsFormTeamLabels: form.teamLabels,
+        standingsHtFtTeamLabels: htft.teamLabels,
+        standingsOverUnderTeamLabels: overUnder.teamLabels,
+        customTables,
     };
 }

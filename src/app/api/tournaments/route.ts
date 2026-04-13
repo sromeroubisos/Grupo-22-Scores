@@ -45,7 +45,7 @@ import {
     getExternalTournamentOverride,
 } from '@/lib/server/externalTournamentOverrides';
 import {
-    applyExternalTournamentStandingsOverride,
+    applyExternalTournamentStandingsOverrideSet,
     getExternalTournamentStandingsOverride,
 } from '@/lib/server/externalTournamentStandingsOverrides';
 import { createApiPerfTracker } from '@/lib/perf/api';
@@ -715,7 +715,14 @@ export async function GET(request: Request) {
 
             let detailsPayload: any = bundle.details;
             let standingsPayload: any = bundle.standings;
+            let standingsFormPayload: any = bundle.standingsForm;
+            let standingsHtFtPayload: any = bundle.standingsHtFt;
+            let standingsOverUnderPayload: any = bundle.standingsOverUnder;
             let externalStandingsTeamLabels: any[] = [];
+            let externalStandingsFormTeamLabels: any[] = [];
+            let externalStandingsHtFtTeamLabels: any[] = [];
+            let externalStandingsOverUnderTeamLabels: any[] = [];
+            let customStandingsTables: any[] = [];
 
             if (externalOverrideId) {
                 const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
@@ -730,9 +737,24 @@ export async function GET(request: Request) {
 
                 const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
                 if (externalStandingsOverride) {
-                    const overriddenStandings = applyExternalTournamentStandingsOverride(standingsPayload, externalStandingsOverride);
+                    const overriddenStandings = applyExternalTournamentStandingsOverrideSet(
+                        {
+                            standings: standingsPayload,
+                            standingsForm: standingsFormPayload,
+                            standingsHtFt: standingsHtFtPayload,
+                            standingsOverUnder: standingsOverUnderPayload,
+                        },
+                        externalStandingsOverride,
+                    );
                     standingsPayload = overriddenStandings.standings;
+                    standingsFormPayload = overriddenStandings.standingsForm;
+                    standingsHtFtPayload = overriddenStandings.standingsHtFt;
+                    standingsOverUnderPayload = overriddenStandings.standingsOverUnder;
                     externalStandingsTeamLabels = overriddenStandings.teamLabels;
+                    externalStandingsFormTeamLabels = overriddenStandings.standingsFormTeamLabels;
+                    externalStandingsHtFtTeamLabels = overriddenStandings.standingsHtFtTeamLabels;
+                    externalStandingsOverUnderTeamLabels = overriddenStandings.standingsOverUnderTeamLabels;
+                    customStandingsTables = overriddenStandings.customTables;
                 }
             }
 
@@ -793,10 +815,14 @@ export async function GET(request: Request) {
                 results: bundle.results,
                 fixtures: bundle.fixtures,
                 standings: standingsPayload,
-                standingsForm: bundle.standingsForm,
-                standingsHtFt: bundle.standingsHtFt,
-                standingsOverUnder: bundle.standingsOverUnder,
+                standingsForm: standingsFormPayload,
+                standingsHtFt: standingsHtFtPayload,
+                standingsOverUnder: standingsOverUnderPayload,
                 teamLabels: externalStandingsTeamLabels,
+                standingsFormTeamLabels: externalStandingsFormTeamLabels,
+                standingsHtFtTeamLabels: externalStandingsHtFtTeamLabels,
+                standingsOverUnderTeamLabels: externalStandingsOverUnderTeamLabels,
+                customStandingsTables,
                 topScorers: bundle.topScorers,
                 draw: bundle.draw,
                 archives: bundle.archives,
@@ -820,7 +846,14 @@ export async function GET(request: Request) {
 
             let detailsPayload: any = bundle.details;
             let standingsPayload: any = bundle.standings;
+            let standingsFormPayload: any = bundle.standingsForm;
+            let standingsHtFtPayload: any = bundle.standingsHtFt;
+            let standingsOverUnderPayload: any = bundle.standingsOverUnder;
             let externalStandingsTeamLabels: any[] = [];
+            let externalStandingsFormTeamLabels: any[] = [];
+            let externalStandingsHtFtTeamLabels: any[] = [];
+            let externalStandingsOverUnderTeamLabels: any[] = [];
+            let customStandingsTables: any[] = [];
 
             if (externalOverrideId) {
                 const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
@@ -835,9 +868,24 @@ export async function GET(request: Request) {
 
                 const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
                 if (externalStandingsOverride) {
-                    const overriddenStandings = applyExternalTournamentStandingsOverride(standingsPayload, externalStandingsOverride);
+                    const overriddenStandings = applyExternalTournamentStandingsOverrideSet(
+                        {
+                            standings: standingsPayload,
+                            standingsForm: standingsFormPayload,
+                            standingsHtFt: standingsHtFtPayload,
+                            standingsOverUnder: standingsOverUnderPayload,
+                        },
+                        externalStandingsOverride,
+                    );
                     standingsPayload = overriddenStandings.standings;
+                    standingsFormPayload = overriddenStandings.standingsForm;
+                    standingsHtFtPayload = overriddenStandings.standingsHtFt;
+                    standingsOverUnderPayload = overriddenStandings.standingsOverUnder;
                     externalStandingsTeamLabels = overriddenStandings.teamLabels;
+                    externalStandingsFormTeamLabels = overriddenStandings.standingsFormTeamLabels;
+                    externalStandingsHtFtTeamLabels = overriddenStandings.standingsHtFtTeamLabels;
+                    externalStandingsOverUnderTeamLabels = overriddenStandings.standingsOverUnderTeamLabels;
+                    customStandingsTables = overriddenStandings.customTables;
                 }
             }
 
@@ -898,10 +946,14 @@ export async function GET(request: Request) {
                 results: bundle.results,
                 fixtures: bundle.fixtures,
                 standings: standingsPayload,
-                standingsForm: bundle.standingsForm,
-                standingsHtFt: bundle.standingsHtFt,
-                standingsOverUnder: bundle.standingsOverUnder,
+                standingsForm: standingsFormPayload,
+                standingsHtFt: standingsHtFtPayload,
+                standingsOverUnder: standingsOverUnderPayload,
                 teamLabels: externalStandingsTeamLabels,
+                standingsFormTeamLabels: externalStandingsFormTeamLabels,
+                standingsHtFtTeamLabels: externalStandingsHtFtTeamLabels,
+                standingsOverUnderTeamLabels: externalStandingsOverUnderTeamLabels,
+                customStandingsTables,
                 topScorers: bundle.topScorers,
                 draw: bundle.draw,
                 archives: bundle.archives,
@@ -1179,10 +1231,14 @@ export async function GET(request: Request) {
         const baseStandings = standingsSource === 'snapshot' ? (standingsSnapshot?.payload || []) : (rawStandings || []);
         const preparedStandings = enrichStandingsRowsWithTeamAssets(baseStandings, teamAssets);
         let finalStandings = preparedStandings;
-        const finalStandingsForm = enrichStandingsRowsWithTeamAssets(standingsFormPayload, teamAssets);
-        const finalStandingsHtFt = enrichStandingsRowsWithTeamAssets(standingsHtFtPayload, teamAssets);
-        const finalStandingsOverUnder = enrichStandingsRowsWithTeamAssets(standingsOverUnderPayload, teamAssets);
+        let finalStandingsForm = enrichStandingsRowsWithTeamAssets(standingsFormPayload, teamAssets);
+        let finalStandingsHtFt = enrichStandingsRowsWithTeamAssets(standingsHtFtPayload, teamAssets);
+        let finalStandingsOverUnder = enrichStandingsRowsWithTeamAssets(standingsOverUnderPayload, teamAssets);
         let externalStandingsTeamLabels: any[] = [];
+        let externalStandingsFormTeamLabels: any[] = [];
+        let externalStandingsHtFtTeamLabels: any[] = [];
+        let externalStandingsOverUnderTeamLabels: any[] = [];
+        let customStandingsTables: any[] = [];
 
         if (externalOverrideId) {
             const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
@@ -1197,9 +1253,24 @@ export async function GET(request: Request) {
 
             const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
             if (externalStandingsOverride) {
-                const overriddenStandings = applyExternalTournamentStandingsOverride(preparedStandings, externalStandingsOverride);
+                const overriddenStandings = applyExternalTournamentStandingsOverrideSet(
+                    {
+                        standings: preparedStandings,
+                        standingsForm: finalStandingsForm,
+                        standingsHtFt: finalStandingsHtFt,
+                        standingsOverUnder: finalStandingsOverUnder,
+                    },
+                    externalStandingsOverride,
+                );
                 finalStandings = overriddenStandings.standings;
+                finalStandingsForm = overriddenStandings.standingsForm;
+                finalStandingsHtFt = overriddenStandings.standingsHtFt;
+                finalStandingsOverUnder = overriddenStandings.standingsOverUnder;
                 externalStandingsTeamLabels = overriddenStandings.teamLabels;
+                externalStandingsFormTeamLabels = overriddenStandings.standingsFormTeamLabels;
+                externalStandingsHtFtTeamLabels = overriddenStandings.standingsHtFtTeamLabels;
+                externalStandingsOverUnderTeamLabels = overriddenStandings.standingsOverUnderTeamLabels;
+                customStandingsTables = overriddenStandings.customTables;
             }
         }
 
@@ -1334,6 +1405,10 @@ export async function GET(request: Request) {
             standingsHtFt: finalStandingsHtFt,
             standingsOverUnder: finalStandingsOverUnder,
             teamLabels: externalStandingsTeamLabels,
+            standingsFormTeamLabels: externalStandingsFormTeamLabels,
+            standingsHtFtTeamLabels: externalStandingsHtFtTeamLabels,
+            standingsOverUnderTeamLabels: externalStandingsOverUnderTeamLabels,
+            customStandingsTables,
             topScorers: topScorersPayload,
             draw: drawPayload,
             archives: archivesPayload
@@ -1379,7 +1454,14 @@ export async function GET(request: Request) {
             const fallbackArchives = readFallback('archives', []);
             let fallbackDetailsPayload = fallbackDetails;
             let fallbackStandingsPayload = fallbackStandings;
+            let fallbackStandingsFormPayload = fallbackStandingsForm;
+            let fallbackStandingsHtFtPayload = fallbackStandingsHtFt;
+            let fallbackStandingsOverUnderPayload = fallbackStandingsOverUnder;
             let fallbackTeamLabels: any[] = [];
+            let fallbackStandingsFormTeamLabels: any[] = [];
+            let fallbackStandingsHtFtTeamLabels: any[] = [];
+            let fallbackStandingsOverUnderTeamLabels: any[] = [];
+            let fallbackCustomStandingsTables: any[] = [];
 
             if (externalOverrideId) {
                 const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
@@ -1394,9 +1476,24 @@ export async function GET(request: Request) {
 
                 const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
                 if (externalStandingsOverride) {
-                    const overriddenStandings = applyExternalTournamentStandingsOverride(fallbackStandings, externalStandingsOverride);
+                    const overriddenStandings = applyExternalTournamentStandingsOverrideSet(
+                        {
+                            standings: fallbackStandings,
+                            standingsForm: fallbackStandingsForm,
+                            standingsHtFt: fallbackStandingsHtFt,
+                            standingsOverUnder: fallbackStandingsOverUnder,
+                        },
+                        externalStandingsOverride,
+                    );
                     fallbackStandingsPayload = overriddenStandings.standings;
+                    fallbackStandingsFormPayload = overriddenStandings.standingsForm;
+                    fallbackStandingsHtFtPayload = overriddenStandings.standingsHtFt;
+                    fallbackStandingsOverUnderPayload = overriddenStandings.standingsOverUnder;
                     fallbackTeamLabels = overriddenStandings.teamLabels;
+                    fallbackStandingsFormTeamLabels = overriddenStandings.standingsFormTeamLabels;
+                    fallbackStandingsHtFtTeamLabels = overriddenStandings.standingsHtFtTeamLabels;
+                    fallbackStandingsOverUnderTeamLabels = overriddenStandings.standingsOverUnderTeamLabels;
+                    fallbackCustomStandingsTables = overriddenStandings.customTables;
                 }
             }
 
@@ -1414,10 +1511,14 @@ export async function GET(request: Request) {
                     results: fallbackResults,
                     fixtures: fallbackFixtures,
                     standings: fallbackStandingsPayload,
-                    standingsForm: fallbackStandingsForm,
-                    standingsHtFt: fallbackStandingsHtFt,
-                    standingsOverUnder: fallbackStandingsOverUnder,
+                    standingsForm: fallbackStandingsFormPayload,
+                    standingsHtFt: fallbackStandingsHtFtPayload,
+                    standingsOverUnder: fallbackStandingsOverUnderPayload,
                     teamLabels: fallbackTeamLabels,
+                    standingsFormTeamLabels: fallbackStandingsFormTeamLabels,
+                    standingsHtFtTeamLabels: fallbackStandingsHtFtTeamLabels,
+                    standingsOverUnderTeamLabels: fallbackStandingsOverUnderTeamLabels,
+                    customStandingsTables: fallbackCustomStandingsTables,
                     topScorers: fallbackTopScorers,
                     draw: fallbackDraw,
                     archives: fallbackArchives

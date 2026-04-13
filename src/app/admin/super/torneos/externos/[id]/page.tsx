@@ -54,6 +54,28 @@ type ExternalStandingsPayload = {
     labels: ExternalStandingsLabel[];
 };
 
+type ExternalStandingsTable = ExternalStandingsPayload & {
+    key: string;
+    name: string;
+    source_key?: string | null;
+    order_index?: number | null;
+    builtIn?: boolean;
+};
+
+type ExternalStandingsEditorPayload = {
+    id: string;
+    source?: string | null;
+    tables: ExternalStandingsTable[];
+};
+
+type ApiStandingsTable = {
+    key: string;
+    name: string;
+    sourceKey: string;
+    rows: StandingsPreviewRow[];
+    builtIn: boolean;
+};
+
 type ApiResponseEnvelope = {
     ok?: boolean;
     error?: string;
@@ -73,6 +95,13 @@ type StandingsPreviewRow = {
     groupId: string | null;
     groupName: string | null;
 };
+
+const BUILTIN_STANDINGS_TABLES = [
+    { key: 'standings', name: 'Tabla general' },
+    { key: 'standingsForm', name: 'Forma' },
+    { key: 'standingsOverUnder', name: 'Over/Under' },
+    { key: 'standingsHtFt', name: 'HT/FT' },
+] as const;
 
 function normalizeString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -147,6 +176,99 @@ function formatLabelPositions(positions: number[]) {
     return positions.join(', ');
 }
 
+function getBuiltinTableName(key: string) {
+    return BUILTIN_STANDINGS_TABLES.find((table) => table.key === key)?.name || null;
+}
+
+function normalizeStandingsTableKey(value: unknown, index: number) {
+    const raw = normalizeString(value);
+    if (!raw) return `custom-table-${index + 1}`;
+
+    const builtin = BUILTIN_STANDINGS_TABLES.find((table) => table.key === raw);
+    if (builtin) return builtin.key;
+
+    const slug = slugify(raw);
+    return slug ? `custom-${slug}` : `custom-table-${index + 1}`;
+}
+
+function normalizeStandingsTableName(key: string, value: unknown, index: number) {
+    return normalizeString(value) || getBuiltinTableName(key) || `Tabla ${index + 1}`;
+}
+
+function normalizeStandingsTableSourceKey(value: unknown) {
+    const raw = normalizeString(value);
+    if (!raw) return 'standings';
+    return BUILTIN_STANDINGS_TABLES.some((table) => table.key === raw) ? raw : 'standings';
+}
+
+function normalizeEditorTable(table: Partial<ExternalStandingsTable>, index: number): ExternalStandingsTable {
+    const key = normalizeStandingsTableKey(table.key, index);
+
+    return {
+        id: normalizeString(table.id) || `${key}-${index + 1}`,
+        key,
+        name: normalizeStandingsTableName(key, table.name, index),
+        source: normalizeString(table.source) || 'external-api',
+        source_key: normalizeStandingsTableSourceKey(table.source_key ?? key),
+        groups: Array.isArray(table.groups) ? table.groups : [],
+        assignments: Array.isArray(table.assignments) ? table.assignments : [],
+        labels: normalizeEditorLabels(Array.isArray(table.labels) ? table.labels : []),
+        order_index: normalizeInteger(table.order_index ?? index) ?? index,
+        builtIn: BUILTIN_STANDINGS_TABLES.some((entry) => entry.key === key),
+    };
+}
+
+function ensureEditorTables(
+    tables: ExternalStandingsTable[],
+    apiTables: ApiStandingsTable[],
+    tournamentId: string,
+): ExternalStandingsTable[] {
+    const merged = new Map<string, ExternalStandingsTable>();
+    const sourceKeysWithRows = new Set(
+        apiTables
+            .filter((table) => table.rows.length > 0)
+            .map((table) => table.key),
+    );
+
+    const normalizedExisting = tables.map((table, index) => normalizeEditorTable(table, index));
+
+    BUILTIN_STANDINGS_TABLES.forEach((table, index) => {
+        const existing = normalizedExisting.find((entry) => entry.key === table.key);
+        if (existing) {
+            merged.set(table.key, { ...existing, builtIn: true, order_index: index });
+            return;
+        }
+
+        if (table.key !== 'standings' && !sourceKeysWithRows.has(table.key)) {
+            return;
+        }
+
+        merged.set(table.key, {
+            id: `${tournamentId}:${table.key}`,
+            key: table.key,
+            name: table.name,
+            source: 'external-api',
+            source_key: table.key,
+            groups: [],
+            assignments: [],
+            labels: [],
+            order_index: index,
+            builtIn: true,
+        });
+    });
+
+    normalizedExisting
+        .filter((table) => !merged.has(table.key))
+        .forEach((table, index) => {
+            merged.set(table.key, {
+                ...table,
+                order_index: BUILTIN_STANDINGS_TABLES.length + index,
+            });
+        });
+
+    return [...merged.values()].sort((left, right) => (left.order_index ?? 0) - (right.order_index ?? 0));
+}
+
 function normalizeEditorLabels(labels: ExternalStandingsLabel[]): ExternalStandingsLabel[] {
     const grouped = new Map<string, ExternalStandingsLabel & { __positions: number[] }>();
 
@@ -185,8 +307,8 @@ function normalizeEditorLabels(labels: ExternalStandingsLabel[]): ExternalStandi
             return left.name.localeCompare(right.name);
         })
         .map((label) => {
-            const nextLabel = { ...label };
-            delete nextLabel.__positions;
+            const { __positions, ...nextLabel } = label;
+            void __positions;
             return nextLabel;
         });
 }
@@ -373,6 +495,33 @@ function deriveLabels(teamLabels: unknown[]): ExternalStandingsLabel[] {
     );
 }
 
+function buildApiTablesFromPayload(payload: ExternalApiRecord | null | undefined): ApiStandingsTable[] {
+    const candidates: ApiStandingsTable[] = BUILTIN_STANDINGS_TABLES.map((table) => ({
+        key: table.key,
+        name: table.name,
+        sourceKey: table.key,
+        rows: extractPreviewRows(Array.isArray(payload?.[table.key]) ? payload?.[table.key] as unknown[] : []),
+        builtIn: true,
+    }));
+
+    const rawCustomTables = Array.isArray(payload?.customStandingsTables) ? payload?.customStandingsTables as unknown[] : [];
+    const customTables = rawCustomTables.flatMap((rawTable, index) => {
+        const record = asRecord(rawTable);
+        if (!record) return [];
+
+        const key = normalizeStandingsTableKey(record.key, index);
+        return [{
+            key,
+            name: normalizeStandingsTableName(key, record.name, index),
+            sourceKey: normalizeStandingsTableSourceKey(record.source_key),
+            rows: extractPreviewRows(Array.isArray(record.standings) ? record.standings : []),
+            builtIn: false,
+        }];
+    });
+
+    return [...candidates, ...customTables];
+}
+
 async function readApiEnvelope(response: Response): Promise<{ payload: ApiResponseEnvelope; text: string }> {
     const text = await response.text().catch(() => '');
 
@@ -406,7 +555,9 @@ export default function ExternalTournamentOverridePage() {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [standingsRows, setStandingsRows] = useState<StandingsPreviewRow[]>([]);
+    const [viewportWidth, setViewportWidth] = useState(0);
+    const [apiTables, setApiTables] = useState<ApiStandingsTable[]>([]);
+    const [activeTableId, setActiveTableId] = useState<string>('standings');
     const [form, setForm] = useState<ExternalTournamentPayload>({
         id: tournamentId,
         source: searchParams.get('source') || 'flashscore',
@@ -419,12 +570,10 @@ export default function ExternalTournamentOverridePage() {
         url: searchParams.get('url') || '',
         priority: normalizeInteger(searchParams.get('priority')) ?? 0,
     });
-    const [standingsForm, setStandingsForm] = useState<ExternalStandingsPayload>({
+    const [standingsEditor, setStandingsEditor] = useState<ExternalStandingsEditorPayload>({
         id: tournamentId,
         source: 'external-api',
-        groups: [],
-        assignments: [],
-        labels: [],
+        tables: [],
     });
 
     const returnTo = searchParams.get('returnTo') || `/tournaments/${publicTournamentId}`;
@@ -449,6 +598,46 @@ export default function ExternalTournamentOverridePage() {
         () => countryOptions.find((option) => option.id === form.country_id) || null,
         [countryOptions, form.country_id],
     );
+    const activeTable = useMemo(
+        () => standingsEditor.tables.find((table) => table.id === activeTableId) || standingsEditor.tables[0] || null,
+        [activeTableId, standingsEditor.tables],
+    );
+    const activeSourceTable = useMemo(
+        () => apiTables.find((table) => table.key === (activeTable?.source_key || activeTable?.key || 'standings')) || null,
+        [activeTable, apiTables],
+    );
+    const activeStandingsRows = useMemo(
+        () => activeSourceTable?.rows || [],
+        [activeSourceTable],
+    );
+    const isCompactLayout = viewportWidth > 0 && viewportWidth < 700;
+    const isMediumLayout = viewportWidth > 0 && viewportWidth < 1080;
+    const pagePadding = isCompactLayout ? '20px 14px 56px' : isMediumLayout ? '28px 18px 60px' : '32px 20px 60px';
+    const cardPadding = isCompactLayout ? 16 : isMediumLayout ? 20 : 24;
+    const mainGridTemplateColumns = isMediumLayout ? 'minmax(0, 1fr)' : 'minmax(0, 1.12fr) minmax(320px, 0.88fr)';
+    const tableSelectorColumns = isCompactLayout ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) minmax(170px, 220px) auto';
+    const standingsRowColumns = isMediumLayout ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) minmax(280px, 360px)';
+    const labelGridColumns = isCompactLayout
+        ? 'minmax(0, 1fr)'
+        : isMediumLayout
+            ? 'repeat(2, minmax(0, 1fr))'
+            : 'minmax(0, 1fr) 140px 130px 180px auto';
+
+    useEffect(() => {
+        const updateViewportWidth = () => {
+            const nextWidth = Math.round(window.visualViewport?.width || window.innerWidth || 0);
+            setViewportWidth(nextWidth);
+        };
+
+        updateViewportWidth();
+        window.addEventListener('resize', updateViewportWidth);
+        window.visualViewport?.addEventListener('resize', updateViewportWidth);
+
+        return () => {
+            window.removeEventListener('resize', updateViewportWidth);
+            window.visualViewport?.removeEventListener('resize', updateViewportWidth);
+        };
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -521,17 +710,16 @@ export default function ExternalTournamentOverridePage() {
                 nextForm.country = initialCountry.country;
                 nextForm.country_id = initialCountry.country_id;
 
-                const nextStandings: ExternalStandingsPayload = {
+                const nextEditor: ExternalStandingsEditorPayload = {
                     id: tournamentId,
                     source: 'external-api',
-                    groups: [],
-                    assignments: [],
-                    labels: [],
+                    tables: [],
                 };
 
                 let publicStandings: unknown[] = [];
                 let publicRows: StandingsPreviewRow[] = [];
                 let publicTeamLabels: unknown[] = [];
+                let publicApiTables: ApiStandingsTable[] = [];
 
                 if (metaResponse.status === 'fulfilled' && metaResponse.value.ok && metaResponse.value.payload?.data) {
                     const externalTournament = metaResponse.value.payload.data as ExternalTournamentPayload;
@@ -548,18 +736,19 @@ export default function ExternalTournamentOverridePage() {
                 }
 
                 if (standingsOverrideResponse.status === 'fulfilled' && standingsOverrideResponse.value.ok && standingsOverrideResponse.value.payload?.data) {
-                    const override = standingsOverrideResponse.value.payload.data as ExternalStandingsPayload;
-                    nextStandings.source = override.source || 'external-api';
-                    nextStandings.groups = Array.isArray(override.groups) ? override.groups : [];
-                    nextStandings.assignments = Array.isArray(override.assignments) ? override.assignments : [];
-                    nextStandings.labels = normalizeEditorLabels(Array.isArray(override.labels) ? override.labels : []);
+                    const override = standingsOverrideResponse.value.payload.data as ExternalStandingsEditorPayload & ExternalStandingsPayload;
+                    nextEditor.source = override.source || 'external-api';
+                    nextEditor.tables = Array.isArray(override.tables)
+                        ? override.tables.map((table, index) => normalizeEditorTable(table, index))
+                        : [];
                 }
 
                 if (publicResponse.status === 'fulfilled' && publicResponse.value.ok && publicResponse.value.payload?.ok) {
-                    const payload = publicResponse.value.payload;
+                    const payload = asRecord(publicResponse.value.payload);
                     publicStandings = Array.isArray(payload?.standings) ? payload.standings : [];
                     publicRows = extractPreviewRows(publicStandings);
                     publicTeamLabels = Array.isArray(payload?.teamLabels) ? payload.teamLabels : [];
+                    publicApiTables = buildApiTablesFromPayload(payload);
 
                     const details = asRecord(payload?.details);
                     const detailsName =
@@ -587,19 +776,33 @@ export default function ExternalTournamentOverridePage() {
                     nextForm.country_id = nextForm.country_id || detailsCountry.country_id;
                 }
 
-                if (nextStandings.groups.length === 0) {
-                    nextStandings.groups = deriveGroupsFromStandings(publicStandings);
-                }
-                if (nextStandings.assignments.length === 0) {
-                    nextStandings.assignments = deriveAssignments(publicRows);
-                }
-                if (nextStandings.labels.length === 0) {
-                    nextStandings.labels = deriveLabels(publicTeamLabels);
-                }
+                nextEditor.tables = ensureEditorTables(nextEditor.tables, publicApiTables, tournamentId)
+                    .map((table, index) => {
+                        if (table.key !== 'standings') return table;
+                        if (
+                            table.groups.length > 0 ||
+                            table.assignments.length > 0 ||
+                            table.labels.length > 0
+                        ) {
+                            return table;
+                        }
+
+                        return {
+                            ...table,
+                            groups: deriveGroupsFromStandings(publicStandings),
+                            assignments: deriveAssignments(publicRows),
+                            labels: deriveLabels(publicTeamLabels),
+                            order_index: index,
+                        };
+                    });
 
                 setForm(nextForm);
-                setStandingsForm(nextStandings);
-                setStandingsRows(publicRows);
+                setStandingsEditor(nextEditor);
+                setApiTables(publicApiTables);
+                setActiveTableId((current) => {
+                    const stillExists = nextEditor.tables.some((table) => table.id === current);
+                    return stillExists ? current : (nextEditor.tables[0]?.id || 'standings');
+                });
             } catch (loadError) {
                 if (!cancelled) {
                     const message = loadError instanceof Error ? loadError.message : 'No se pudo cargar el editor externo.';
@@ -653,6 +856,7 @@ export default function ExternalTournamentOverridePage() {
         setError(null);
 
         try {
+            const primaryTable = standingsEditor.tables.find((table) => table.key === 'standings') || standingsEditor.tables[0] || null;
             const [metaResponse, standingsResponse] = await Promise.all([
                 fetch(`/api/admin/super/external-tournaments/${encodeURIComponent(tournamentId)}`, {
                     method: 'PATCH',
@@ -673,10 +877,18 @@ export default function ExternalTournamentOverridePage() {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        source: standingsForm.source || 'external-api',
-                        groups: standingsForm.groups,
-                        assignments: standingsForm.assignments,
-                        labels: expandLabelsForSave(standingsForm.labels),
+                        source: standingsEditor.source || 'external-api',
+                        groups: primaryTable?.groups || [],
+                        assignments: primaryTable?.assignments || [],
+                        labels: expandLabelsForSave(primaryTable?.labels || []),
+                        tables: standingsEditor.tables.map((table) => {
+                            const { builtIn, labels, ...persistedTable } = table;
+                            void builtIn;
+                            return {
+                                ...persistedTable,
+                                labels: expandLabelsForSave(labels),
+                            };
+                        }),
                     }),
                 }),
             ]);
@@ -709,17 +921,77 @@ export default function ExternalTournamentOverridePage() {
         }
     }
 
+    function updateTable(tableId: string, updater: (table: ExternalStandingsTable) => ExternalStandingsTable) {
+        setStandingsEditor((current) => ({
+            ...current,
+            tables: current.tables.map((table) => table.id === tableId ? updater(table) : table),
+        }));
+    }
+
+    function addTable() {
+        const nextIndex = standingsEditor.tables.filter((table) => !table.builtIn).length + 1;
+        const nextTable: ExternalStandingsTable = {
+            id: `${tournamentId}:custom:${Date.now()}`,
+            key: `custom-${Date.now()}`,
+            name: `Nueva tabla ${nextIndex}`,
+            source: 'external-api',
+            source_key: 'standings',
+            groups: [],
+            assignments: [],
+            labels: [],
+            order_index: standingsEditor.tables.length,
+            builtIn: false,
+        };
+
+        setStandingsEditor((current) => ({
+            ...current,
+            tables: [...current.tables, nextTable].map((table, index) => ({ ...table, order_index: index })),
+        }));
+        setApiTables((current) => ([
+            ...current,
+            {
+                key: nextTable.key,
+                name: nextTable.name,
+                sourceKey: 'standings',
+                rows: [],
+                builtIn: false,
+            },
+        ]));
+        setActiveTableId(nextTable.id);
+    }
+
+    function updateTableMeta(tableId: string, patch: Partial<ExternalStandingsTable>) {
+        updateTable(tableId, (table) => ({ ...table, ...patch }));
+    }
+
+    function removeTable(tableId: string) {
+        const table = standingsEditor.tables.find((entry) => entry.id === tableId);
+        if (!table || table.builtIn) return;
+
+        setStandingsEditor((current) => ({
+            ...current,
+            tables: current.tables
+                .filter((entry) => entry.id !== tableId)
+                .map((entry, index) => ({ ...entry, order_index: index })),
+        }));
+        setApiTables((current) => current.filter((entry) => entry.key !== table.key));
+        if (activeTableId === tableId) {
+            const fallback = standingsEditor.tables.find((entry) => entry.id !== tableId) || null;
+            setActiveTableId(fallback?.id || 'standings');
+        }
+    }
+
     function getRowGroupValue(row: StandingsPreviewRow) {
-        return standingsForm.assignments.find((assignment) => assignment.id === row.id)?.group_id || '';
+        return activeTable?.assignments.find((assignment) => assignment.id === row.id)?.group_id || '';
     }
 
     function getRowPointsValue(row: StandingsPreviewRow) {
-        const points = standingsForm.assignments.find((assignment) => assignment.id === row.id)?.points;
+        const points = activeTable?.assignments.find((assignment) => assignment.id === row.id)?.points;
         return typeof points === 'number' && Number.isFinite(points) ? points : '';
     }
 
     function getRowAdjustedPoints(row: StandingsPreviewRow) {
-        const adjustment = standingsForm.assignments.find((assignment) => assignment.id === row.id)?.points;
+        const adjustment = activeTable?.assignments.find((assignment) => assignment.id === row.id)?.points;
         const basePoints = row.points ?? 0;
         const normalizedAdjustment =
             typeof adjustment === 'number' && Number.isFinite(adjustment)
@@ -734,8 +1006,10 @@ export default function ExternalTournamentOverridePage() {
     }
 
     function updateRowAssignment(row: StandingsPreviewRow, patch: Partial<ExternalStandingsAssignment>) {
-        setStandingsForm((current) => {
-            const existing = current.assignments.find((assignment) => assignment.id === row.id);
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => {
+            const existing = table.assignments.find((assignment) => assignment.id === row.id);
             const nextAssignment: ExternalStandingsAssignment = {
                 id: row.id,
                 team_id: row.teamId,
@@ -745,16 +1019,16 @@ export default function ExternalTournamentOverridePage() {
                 points: typeof existing?.points === 'number' && Number.isFinite(existing.points) ? existing.points : null,
                 ...patch,
             };
-            const assignments = current.assignments.filter((assignment) => assignment.id !== row.id);
+            const assignments = table.assignments.filter((assignment) => assignment.id !== row.id);
             const hasGroup = Boolean(nextAssignment.group_id);
             const hasPoints = typeof nextAssignment.points === 'number' && Number.isFinite(nextAssignment.points);
 
             if (!hasGroup && !hasPoints) {
-                return { ...current, assignments };
+                return { ...table, assignments };
             }
 
             return {
-                ...current,
+                ...table,
                 assignments: [...assignments, nextAssignment],
             };
         });
@@ -771,46 +1045,54 @@ export default function ExternalTournamentOverridePage() {
     }
 
     function addGroup() {
-        setStandingsForm((current) => ({
-            ...current,
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
             groups: [
-                ...current.groups,
+                ...table.groups,
                 {
-                    id: `ext-group-${Date.now()}-${current.groups.length + 1}`,
-                    name: `Grupo ${String.fromCharCode(65 + current.groups.length)}`,
-                    order_index: current.groups.length,
+                    id: `ext-group-${Date.now()}-${table.groups.length + 1}`,
+                    name: `Grupo ${String.fromCharCode(65 + table.groups.length)}`,
+                    order_index: table.groups.length,
                 },
             ],
         }));
     }
 
     function updateGroup(groupId: string, name: string) {
-        setStandingsForm((current) => ({
-            ...current,
-            groups: current.groups.map((group) => group.id === groupId ? { ...group, name } : group),
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
+            groups: table.groups.map((group) => group.id === groupId ? { ...group, name } : group),
         }));
     }
 
     function removeGroup(groupId: string) {
-        setStandingsForm((current) => ({
-            ...current,
-            groups: current.groups.filter((group) => group.id !== groupId),
-            assignments: current.assignments.filter((assignment) => assignment.group_id !== groupId),
-            labels: current.labels.filter((label) => label.group_id !== groupId),
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
+            groups: table.groups.filter((group) => group.id !== groupId),
+            assignments: table.assignments.filter((assignment) => assignment.group_id !== groupId),
+            labels: table.labels.filter((label) => label.group_id !== groupId),
         }));
     }
 
     function addLabel() {
-        setStandingsForm((current) => ({
-            ...current,
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
             labels: [
-                ...current.labels,
+                ...table.labels,
                 {
-                    id: `label-${Date.now()}-${current.labels.length + 1}`,
+                    id: `label-${Date.now()}-${table.labels.length + 1}`,
                     name: 'Nueva etiqueta',
                     color: '#00a365',
-                    position: current.labels.length + 1,
-                    positions_input: String(current.labels.length + 1),
+                    position: table.labels.length + 1,
+                    positions_input: String(table.labels.length + 1),
                     group_id: null,
                 },
             ],
@@ -818,16 +1100,20 @@ export default function ExternalTournamentOverridePage() {
     }
 
     function updateLabel(labelId: string, patch: Partial<ExternalStandingsLabel>) {
-        setStandingsForm((current) => ({
-            ...current,
-            labels: current.labels.map((label) => label.id === labelId ? { ...label, ...patch } : label),
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
+            labels: table.labels.map((label) => label.id === labelId ? { ...label, ...patch } : label),
         }));
     }
 
     function updateLabelPositions(labelId: string, rawValue: string) {
-        setStandingsForm((current) => ({
-            ...current,
-            labels: current.labels.map((label) => {
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
+            labels: table.labels.map((label) => {
                 if (label.id !== labelId) return label;
                 const positions = parseLabelPositions(rawValue, label.position);
                 return {
@@ -840,9 +1126,11 @@ export default function ExternalTournamentOverridePage() {
     }
 
     function normalizeLabelPositionsInput(labelId: string) {
-        setStandingsForm((current) => ({
-            ...current,
-            labels: current.labels.map((label) => {
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
+            labels: table.labels.map((label) => {
                 if (label.id !== labelId) return label;
                 const positions = parseLabelPositions(label.positions_input ?? label.position, label.position);
                 return {
@@ -855,15 +1143,17 @@ export default function ExternalTournamentOverridePage() {
     }
 
     function removeLabel(labelId: string) {
-        setStandingsForm((current) => ({
-            ...current,
-            labels: current.labels.filter((label) => label.id !== labelId),
+        if (!activeTable) return;
+
+        updateTable(activeTable.id, (table) => ({
+            ...table,
+            labels: table.labels.filter((label) => label.id !== labelId),
         }));
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#06070a', color: '#f5f7fb', padding: '32px 20px 60px' }}>
-            <div style={{ maxWidth: 960, margin: '0 auto' }}>
+        <div style={{ minHeight: '100vh', background: '#06070a', color: '#f5f7fb', padding: pagePadding }}>
+            <div style={{ maxWidth: 1320, margin: '0 auto', width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
                     <div>
                         <Link href={returnTo} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#9aa4b2', marginBottom: 16 }}>
@@ -887,14 +1177,16 @@ export default function ExternalTournamentOverridePage() {
                             borderRadius: 999,
                             padding: '10px 16px',
                             cursor: 'pointer',
+                            width: isCompactLayout ? '100%' : 'auto',
+                            justifyContent: 'center',
                         }}
                     >
                         Cerrar
                     </button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.35fr) minmax(280px, 0.75fr)', gap: 24 }}>
-                    <section style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: 24 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: mainGridTemplateColumns, gap: isCompactLayout ? 16 : 24, alignItems: 'start' }}>
+                    <section style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: cardPadding }}>
                         <div style={{ display: 'grid', gap: 16 }}>
                             <label style={{ display: 'grid', gap: 8 }}>
                                 <span style={{ color: '#9aa4b2', fontSize: 13, fontWeight: 700 }}>Nombre visible</span>
@@ -1047,38 +1339,155 @@ export default function ExternalTournamentOverridePage() {
                         </div>
                     </section>
 
-                    <section style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: 24 }}>
+                    <section style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: cardPadding }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
                             <div>
-                                <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Grupos de standings</div>
+                                <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Tablas API y grupos</div>
                                 <div style={{ color: '#9aa4b2', maxWidth: 620 }}>
-                                    Reordena publicamente la tabla externa y ajusta puntos sumando o restando sobre lo que ya trae la API.
+                                    Cada tabla se configura por separado, como una fase. Elegi la tabla activa, su base API y despues edita grupos, ajustes y etiquetas.
                                 </div>
                             </div>
-                            <button
-                                type="button"
-                                onClick={addGroup}
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: 8,
-                                    borderRadius: 999,
-                                    border: '1px solid rgba(255,255,255,0.12)',
-                                    background: 'transparent',
-                                    color: '#fff',
-                                    padding: '10px 16px',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                <Plus size={16} />
-                                Agregar grupo
-                            </button>
+                            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                <button
+                                    type="button"
+                                    onClick={addTable}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                        borderRadius: 999,
+                                        border: '1px solid rgba(255,255,255,0.12)',
+                                        background: 'transparent',
+                                        color: '#fff',
+                                        padding: '10px 16px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <Plus size={16} />
+                                    Agregar tabla
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={addGroup}
+                                    disabled={!activeTable}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                        borderRadius: 999,
+                                        border: '1px solid rgba(255,255,255,0.12)',
+                                        background: 'transparent',
+                                        color: '#fff',
+                                        padding: '10px 16px',
+                                        cursor: activeTable ? 'pointer' : 'not-allowed',
+                                        opacity: activeTable ? 1 : 0.5,
+                                    }}
+                                >
+                                    <Plus size={16} />
+                                    Agregar grupo
+                                </button>
+                            </div>
                         </div>
 
+                        <div style={{ display: 'grid', gap: 10, marginBottom: 18 }}>
+                            {standingsEditor.tables.length === 0 ? (
+                                <div style={{ color: '#9aa4b2' }}>Sin tablas configuradas.</div>
+                            ) : standingsEditor.tables.map((table) => (
+                                <div
+                                    key={table.id}
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: tableSelectorColumns,
+                                        gap: 12,
+                                        alignItems: 'center',
+                                        borderRadius: 16,
+                                        border: activeTable?.id === table.id ? '1px solid rgba(110,231,183,0.45)' : '1px solid rgba(255,255,255,0.08)',
+                                        background: activeTable?.id === table.id ? 'rgba(12,32,22,0.92)' : '#0d1016',
+                                        padding: 12,
+                                    }}
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTableId(table.id)}
+                                        style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: '#fff',
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                        }}
+                                    >
+                                        <div style={{ fontWeight: 800 }}>{table.name}</div>
+                                        <div style={{ color: '#9aa4b2', fontSize: 12 }}>
+                                            key: {table.key}
+                                        </div>
+                                    </button>
+                                    <select
+                                        value={table.source_key || 'standings'}
+                                        onChange={(event) => updateTableMeta(table.id, { source_key: event.target.value })}
+                                        style={{
+                                            height: 40,
+                                            borderRadius: 12,
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            background: '#111723',
+                                            color: '#fff',
+                                            padding: '0 12px',
+                                        }}
+                                    >
+                                        {BUILTIN_STANDINGS_TABLES
+                                            .filter((entry) => entry.key === 'standings' || apiTables.some((tableEntry) => tableEntry.key === entry.key && tableEntry.rows.length > 0))
+                                            .map((entry) => (
+                                                <option key={entry.key} value={entry.key}>
+                                                    {entry.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                    {!table.builtIn ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeTable(table.id)}
+                                            style={{
+                                                width: 40,
+                                                height: 40,
+                                                borderRadius: 12,
+                                                border: '1px solid rgba(255,255,255,0.12)',
+                                                background: 'transparent',
+                                                color: '#fca5a5',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    ) : (
+                                        <span style={{ color: '#6ee7b7', fontSize: 11, fontWeight: 800, justifySelf: 'center' }}>BASE</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {activeTable ? (
+                            <label style={{ display: 'grid', gap: 8, marginBottom: 18 }}>
+                                <span style={{ color: '#9aa4b2', fontSize: 13, fontWeight: 700 }}>Nombre visible de la tabla activa</span>
+                                <input
+                                    value={activeTable.name}
+                                    onChange={(event) => updateTableMeta(activeTable.id, { name: event.target.value })}
+                                    style={{
+                                        height: 42,
+                                        borderRadius: 12,
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        background: '#0d1016',
+                                        color: '#fff',
+                                        padding: '0 14px',
+                                    }}
+                                />
+                            </label>
+                        ) : null}
+
                         <div style={{ display: 'grid', gap: 12, marginBottom: 18 }}>
-                            {standingsForm.groups.length === 0 ? (
-                                <div style={{ color: '#9aa4b2' }}>Sin grupos configurados.</div>
-                            ) : standingsForm.groups.map((group, index) => (
+                            {!activeTable || activeTable.groups.length === 0 ? (
+                                <div style={{ color: '#9aa4b2' }}>Sin grupos configurados para esta tabla.</div>
+                            ) : activeTable.groups.map((group, index) => (
                                 <div key={group.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
                                     <input
                                         value={group.name}
@@ -1113,9 +1522,9 @@ export default function ExternalTournamentOverridePage() {
                         </div>
 
                         <div style={{ display: 'grid', gap: 10 }}>
-                            {standingsRows.length === 0 ? (
-                                <div style={{ color: '#9aa4b2' }}>No se pudieron cargar filas de la tabla externa.</div>
-                            ) : standingsRows.map((row) => {
+                            {activeStandingsRows.length === 0 ? (
+                                <div style={{ color: '#9aa4b2' }}>No se pudieron cargar filas para la base API seleccionada.</div>
+                            ) : activeStandingsRows.map((row) => {
                                 const pointsPreview = getRowAdjustedPoints(row);
 
                                 return (
@@ -1123,7 +1532,7 @@ export default function ExternalTournamentOverridePage() {
                                         key={row.id}
                                         style={{
                                             display: 'grid',
-                                            gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 360px)',
+                                            gridTemplateColumns: standingsRowColumns,
                                             gap: 12,
                                             alignItems: 'center',
                                             borderRadius: 16,
@@ -1149,10 +1558,10 @@ export default function ExternalTournamentOverridePage() {
                                                     : <span style={{ color: '#6b7280', fontSize: 11, fontWeight: 800 }}>SIN</span>}
                                             </div>
                                             <div style={{ minWidth: 0 }}>
-                                                <div style={{ fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <div style={{ fontWeight: 800, whiteSpace: isCompactLayout ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', wordBreak: 'break-word' }}>
                                                     {row.position ? `${row.position}. ` : ''}{row.name}
                                                 </div>
-                                                <div style={{ color: '#9aa4b2', fontSize: 12 }}>
+                                                <div style={{ color: '#9aa4b2', fontSize: 12, lineHeight: 1.5, wordBreak: 'break-word' }}>
                                                     {row.groupName ? `Origen: ${row.groupName}` : 'Tabla general'} · API: {pointsPreview.basePoints} pts · ajuste: {pointsPreview.adjustment >= 0 ? '+' : ''}{pointsPreview.adjustment} · total: {pointsPreview.total}
                                                 </div>
                                             </div>
@@ -1196,7 +1605,7 @@ export default function ExternalTournamentOverridePage() {
                                                     }}
                                                 >
                                                     <option value="">Sin grupo custom</option>
-                                                    {standingsForm.groups.map((group) => (
+                                                    {(activeTable?.groups || []).map((group) => (
                                                         <option key={group.id} value={group.id}>
                                                             {group.name}
                                                         </option>
@@ -1210,17 +1619,18 @@ export default function ExternalTournamentOverridePage() {
                         </div>
                     </section>
 
-                    <section style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: 24 }}>
+                    <section style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: cardPadding }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
                             <div>
                                 <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 6 }}>Etiquetas de tabla</div>
                                 <div style={{ color: '#9aa4b2', maxWidth: 620 }}>
-                                    Define etiquetas por posicion y opcionalmente por grupo.
+                                    Define etiquetas por posicion y opcionalmente por grupo para la tabla activa.
                                 </div>
                             </div>
                             <button
                                 type="button"
                                 onClick={addLabel}
+                                disabled={!activeTable}
                                 style={{
                                     display: 'inline-flex',
                                     alignItems: 'center',
@@ -1230,7 +1640,8 @@ export default function ExternalTournamentOverridePage() {
                                     background: 'transparent',
                                     color: '#fff',
                                     padding: '10px 16px',
-                                    cursor: 'pointer',
+                                    cursor: activeTable ? 'pointer' : 'not-allowed',
+                                    opacity: activeTable ? 1 : 0.5,
                                 }}
                             >
                                 <Plus size={16} />
@@ -1239,10 +1650,10 @@ export default function ExternalTournamentOverridePage() {
                         </div>
 
                         <div style={{ display: 'grid', gap: 12 }}>
-                            {standingsForm.labels.length === 0 ? (
+                            {!activeTable || activeTable.labels.length === 0 ? (
                                 <div style={{ color: '#9aa4b2' }}>Sin etiquetas configuradas.</div>
-                            ) : standingsForm.labels.map((label) => (
-                                <div key={label.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 140px 130px 180px auto', gap: 12, alignItems: 'center' }}>
+                            ) : activeTable.labels.map((label) => (
+                                <div key={label.id} style={{ display: 'grid', gridTemplateColumns: labelGridColumns, gap: 12, alignItems: 'center' }}>
                                     <input
                                         value={label.name}
                                         onChange={(event) => updateLabel(label.id, { name: event.target.value })}
@@ -1298,7 +1709,7 @@ export default function ExternalTournamentOverridePage() {
                                         }}
                                     >
                                         <option value="">Toda la tabla</option>
-                                        {standingsForm.groups.map((group) => (
+                                        {(activeTable?.groups || []).map((group) => (
                                             <option key={group.id} value={group.id}>
                                                 {group.name}
                                             </option>
@@ -1324,7 +1735,7 @@ export default function ExternalTournamentOverridePage() {
                         </div>
                     </section>
 
-                    <aside style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: 24, height: 'fit-content' }}>
+                    <aside style={{ background: 'rgba(18,20,26,0.94)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: cardPadding, height: 'fit-content', position: isMediumLayout ? 'relative' : 'sticky', top: isMediumLayout ? undefined : 24 }}>
                         <div style={{ color: '#9aa4b2', fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Torneo API</div>
                         <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>{form.display_name || form.name || 'Torneo externo'}</div>
                         <div style={{ color: '#9aa4b2', marginBottom: 4 }}>Tournament ID: {tournamentId}</div>
@@ -1333,8 +1744,8 @@ export default function ExternalTournamentOverridePage() {
                         <div style={{ color: '#9aa4b2', marginBottom: 20 }}>Prioridad: {form.priority ?? 0}</div>
 
                         <div style={{
-                            width: 112,
-                            height: 112,
+                            width: isCompactLayout ? 88 : 112,
+                            height: isCompactLayout ? 88 : 112,
                             borderRadius: 20,
                             background: '#0d1016',
                             border: '1px solid rgba(255,255,255,0.08)',
