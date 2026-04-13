@@ -3,7 +3,7 @@ import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { findExternalTeamLogoOverride } from '@/lib/server/externalTeamLogoOverrides';
-import { getTeamDetails } from '@/lib/services/flashscore';
+import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
@@ -23,7 +23,7 @@ function normalizeSourceUrl(source: string): string {
     return trimmed;
 }
 
-function extractIdFromTeamUrl(value: string): string | null {
+function extractIdFromEntityUrl(value: string): string | null {
     const trimmed = value.trim();
     if (!trimmed) return null;
 
@@ -42,7 +42,8 @@ function extractIdFromTeamUrl(value: string): string | null {
         .filter(Boolean);
 
     if (segments.length < 2) return null;
-    if (segments[0].toLowerCase() !== 'team') return null;
+    const entityType = segments[0].toLowerCase();
+    if (entityType !== 'team' && entityType !== 'player') return null;
 
     const candidate = segments[segments.length - 1];
     if (!candidate || !/^[a-z0-9]+$/i.test(candidate)) return null;
@@ -51,7 +52,7 @@ function extractIdFromTeamUrl(value: string): string | null {
 }
 
 function addCandidate(candidates: Set<string>, value: string) {
-    const extractedFromUrl = extractIdFromTeamUrl(value);
+    const extractedFromUrl = extractIdFromEntityUrl(value);
     const raw = (extractedFromUrl || value).trim();
     if (!raw) return;
 
@@ -164,11 +165,6 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
     if (teamName) addCandidate(candidateSet, teamName);
     const candidates = Array.from(candidateSet);
 
-    const storedOverride = await findExternalTeamLogoOverride(key, teamUrl, teamName, ...candidates);
-    if (storedOverride?.logo_url) {
-        return storedOverride.logo_url;
-    }
-
     try {
         const readClient = await getReadClient();
         const idCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate));
@@ -228,9 +224,16 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
         // Ignore missing table/schema issues and fall back to the original logo.
     }
 
+    const storedOverride = await findExternalTeamLogoOverride(key, teamUrl, teamName, ...candidates);
+    if (storedOverride?.logo_url) {
+        return storedOverride.logo_url;
+    }
+
     if (teamUrl) {
         try {
-            const details = await getTeamDetails(teamUrl);
+            const details = teamUrl.includes('/player/')
+                ? await getPlayerDetails(teamUrl)
+                : await getTeamDetails(teamUrl);
             const liveLogo = extractTeamDetailsLogo(details);
             if (liveLogo) {
                 return liveLogo;
