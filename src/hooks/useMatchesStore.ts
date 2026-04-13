@@ -25,15 +25,16 @@ interface MatchesStoreResult {
 const ERROR_RECOVERY_TTL = 60 * 1000; // 1 minute - retry faster when a source fails
 const PUBLIC_STALE_TTL = 5 * 60 * 1000;     // 5 minutes - shared public cache window
 const PUBLIC_LIVE_POLL_INTERVAL = 60_000;   // 1 minute - live refresh cadence
-const PREFETCH_WINDOW_DAYS = 3;
+const PREFETCH_WINDOW_DAYS = 7;
 const PREFETCH_BATCH_SIZE = 2;
+const MATCHES_STORE_CACHE_VERSION = 'v2';
 
 // Module-level cache shared across hook instances
 const matchesCache = new Map<string, any[]>();
 const lastFetchedAt = new Map<string, number>();
 
 function cacheKey(date: string, sportId: string) {
-  return `${date}__${sportId}`;
+  return `${MATCHES_STORE_CACHE_VERSION}__${date}__${sportId}`;
 }
 
 // ─── Live reconciliation ─────────────────────────────────────────────────────

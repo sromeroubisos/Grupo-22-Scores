@@ -690,6 +690,16 @@ export default function HomePage() {
     return resolveTournamentAudience({ name: cleanedName || tournament.name });
   }, [tournamentAudienceById, tournamentAudienceByName]);
 
+  const shouldIncludeMatchForAudience = useCallback((tournament: { id?: string | null; name?: string | null; country?: string | null }) => {
+    if (selectedAudience === 'mayores') {
+      // Default sports feed should remain broad so API matches from prior/future days
+      // are still visible even when the tournament only exposes youth hints.
+      return true;
+    }
+
+    return resolveMatchAudience(tournament) === 'juveniles';
+  }, [resolveMatchAudience, selectedAudience]);
+
   // Filter logic
   const filteredInternational = useMemo(() => {
     const baseInternationalTournaments = internationalTournaments;
@@ -746,7 +756,7 @@ export default function HomePage() {
     matches.forEach(match => {
       const tournament = match.tournament;
       if (!tournament) return;
-      if (resolveMatchAudience(tournament) !== selectedAudience) return;
+      if (!shouldIncludeMatchForAudience(tournament)) return;
 
       const overriddenTournament = tournament.id ? loadedRugbyTournamentMap.get(String(tournament.id)) : undefined;
       const rawCountryName = overriddenTournament
@@ -797,10 +807,11 @@ export default function HomePage() {
       }
 
       const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
+      const normalizedMatchStatus = String(match.status || '').trim().toLowerCase();
 
       let status: 'live' | 'scheduled' | 'finished' = 'scheduled';
-      if (match.status === 'live') status = 'live';
-      if (match.status === 'final') status = 'finished';
+      if (normalizedMatchStatus === 'live' || normalizedMatchStatus === 'in_play') status = 'live';
+      if (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft') status = 'finished';
 
       groups[groupKey].matches.push({
         id: match.id,
@@ -819,7 +830,11 @@ export default function HomePage() {
         awayClubId: match.awayClubId,
         venue: match.venue || undefined,
         eventLabel: (match as any).eventName || undefined,
-        footerLabel: match.status === 'live' ? 'Telemetry' : match.status === 'final' ? 'Race data' : 'Event details',
+        footerLabel: normalizedMatchStatus === 'live'
+          ? 'Telemetry'
+          : (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft')
+            ? 'Race data'
+            : 'Event details',
       } as any);
     });
 
@@ -835,7 +850,7 @@ export default function HomePage() {
       if (a.priority !== b.priority) return b.priority - a.priority;
       return a.league.localeCompare(b.league);
     });
-  }, [isLeagueGroupFavorite, loadedRugbyTournamentMap, matches, resolveMatchAudience, selectedAudience, selectedSport.id, userTimeZone]);
+  }, [isLeagueGroupFavorite, loadedRugbyTournamentMap, matches, selectedSport.id, shouldIncludeMatchForAudience, userTimeZone]);
 
   const favoriteClubMatches = useMemo(() => {
     const result: (Match & { leagueName: string })[] = [];
@@ -945,7 +960,7 @@ export default function HomePage() {
       }
 
       const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
-        cache: 'force-cache',
+        cache: 'no-store',
       });
       const payload = await response.json().catch(() => ({}));
 
@@ -1059,7 +1074,7 @@ export default function HomePage() {
         });
 
         const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
-          cache: 'force-cache',
+          cache: 'no-store',
           signal: controller.signal,
         });
         const payload = await response.json().catch(() => ({}));

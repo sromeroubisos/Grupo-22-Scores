@@ -21,3 +21,15 @@ export async function requireAdminApiContext(): Promise<UserAccessContext> {
 
   return context;
 }
+
+export function isUnauthorizedApiError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Unauthorized';
+}
+
+export function getApiErrorMessage(error: unknown, fallback = 'Internal server error'): string {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
+export function getApiErrorStatus(error: unknown, fallback = 500): number {
+  return isUnauthorizedApiError(error) ? 401 : fallback;
+}

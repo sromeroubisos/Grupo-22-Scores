@@ -79,5 +79,129 @@
       }
     ],
     "updated_at": "2026-04-01T08:53:48.390Z"
+  },
+  "fs-00h828zi": {
+    "id": "fs-00h828zi",
+    "source": "external-api",
+    "groups": [],
+    "assignments": [],
+    "labels": [
+      {
+        "id": "label-1775285104298-1",
+        "name": "Campeó y Ascenso",
+        "color": "#00a365",
+        "position": 1,
+        "group_id": null
+      },
+      {
+        "id": "label-1775285112098-2",
+        "name": "Descenso",
+        "color": "#ff0000",
+        "position": 6,
+        "group_id": null
+      }
+    ],
+    "tables": [
+      {
+        "id": "fs-00h828zi:standings",
+        "key": "standings",
+        "name": "Tabla general",
+        "source_key": "standings",
+        "order_index": 0,
+        "groups": [],
+        "assignments": [],
+        "labels": [
+          {
+            "id": "label-1775285104298-1",
+            "name": "Campeó y Ascenso",
+            "color": "#00a365",
+            "position": 1,
+            "group_id": null
+          },
+          {
+            "id": "label-1775285112098-2",
+            "name": "Descenso",
+            "color": "#ff0000",
+            "position": 6,
+            "group_id": null
+          }
+        ]
+      },
+      {
+        "id": "fs-00h828zi:custom:1776101108897",
+        "key": "custom-custom-custom-custom-custom-custom-custom-custom-custom-custom-custom-custom-custom-1776101108897",
+        "name": "Tabla Total - 2024-26",
+        "source_key": "standings",
+        "order_index": 1,
+        "groups": [],
+        "assignments": [
+          {
+            "id": "team:yxxb3s7l",
+            "team_id": "YXXb3s7l",
+            "team_name": "Czech Republic",
+            "team_url": "/team/czech-republic/YXXb3s7l/",
+            "group_id": null,
+            "points": 16
+          },
+          {
+            "id": "team:jpan4nir",
+            "team_id": "jPAn4Nir",
+            "team_name": "Poland",
+            "team_url": "/team/poland/jPAn4Nir/",
+            "group_id": null,
+            "points": 22
+          },
+          {
+            "id": "team:gdn321mf",
+            "team_id": "GdN321Mf",
+            "team_name": "Sweden",
+            "team_url": "/team/sweden/GdN321Mf/",
+            "group_id": null,
+            "points": 19
+          },
+          {
+            "id": "team:0dpo7nsd",
+            "team_id": "0dpo7Nsd",
+            "team_name": "Denmark",
+            "team_url": "/team/denmark/0dpo7Nsd/",
+            "group_id": null,
+            "points": 5
+          },
+          {
+            "id": "team:kdd8ohzl",
+            "team_id": "Kdd8ohZl",
+            "team_name": "Croatia",
+            "team_url": "/team/croatia/Kdd8ohZl/",
+            "group_id": null,
+            "points": 6
+          },
+          {
+            "id": "team:ya0cpcle",
+            "team_id": "Ya0CpCle",
+            "team_name": "Lithuania",
+            "team_url": "/team/lithuania/Ya0CpCle/",
+            "group_id": null,
+            "points": 5
+          }
+        ],
+        "labels": [
+          {
+            "id": "label-1776101158737-1",
+            "name": "Ascenso",
+            "color": "#00a365",
+            "position": 1,
+            "group_id": null
+          },
+          {
+            "id": "label-1776101459410-2",
+            "name": "Descenso",
+            "color": "#ff0000",
+            "position": 6,
+            "group_id": null
+          }
+        ]
+      }
+    ],
+    "updated_at": "2026-04-13T17:31:48.063Z"
   }
 }

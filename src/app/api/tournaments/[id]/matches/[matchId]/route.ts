@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
@@ -47,11 +47,11 @@ export async function PATCH(
 
         return NextResponse.json(match);
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Internal server error';
+        const message = getApiErrorMessage(error);
         console.error('Error in PATCH /api/tournaments/[id]/matches/[matchId]:', error);
         return NextResponse.json(
             { error: message },
-            { status: 500 }
+            { status: getApiErrorStatus(error) }
         );
     }
 }
@@ -85,11 +85,11 @@ export async function DELETE(
 
         return NextResponse.json({ success: true });
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Internal server error';
+        const message = getApiErrorMessage(error);
         console.error('Error in DELETE /api/tournaments/[id]/matches/[matchId]:', error);
         return NextResponse.json(
             { error: message },
-            { status: 500 }
+            { status: getApiErrorStatus(error) }
         );
     }
 }

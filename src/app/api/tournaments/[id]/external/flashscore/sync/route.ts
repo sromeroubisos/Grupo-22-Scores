@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { FixtureService } from '@/lib/services/fixtureService';
 import {
@@ -96,8 +96,8 @@ export async function POST(
 
         return NextResponse.json(result);
     } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Internal server error';
+        const message = getApiErrorMessage(err);
         console.error('Error in POST /external/flashscore/sync:', err);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return NextResponse.json({ error: message }, { status: getApiErrorStatus(err) });
     }
 }

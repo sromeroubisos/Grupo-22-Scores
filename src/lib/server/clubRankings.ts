@@ -1217,6 +1217,29 @@ async function markRankingStale(
     }
 }
 
+async function rebuildRankingAfterInvalidIncremental(
+    supabase: ReturnType<typeof getAdminClient>,
+    ranking: RankingRow,
+    match: MatchSnapshot,
+    reason: string,
+) {
+    try {
+        await rebuildRankingInternal(ranking.id);
+        const refreshedRanking = await getRankingRow(supabase, ranking.id);
+        Object.assign(ranking, refreshedRanking);
+        return true;
+    } catch (error) {
+        console.error('[clubRankings] Automatic rebuild failed, keeping ranking stale:', {
+            rankingId: ranking.id,
+            matchId: match.id,
+            reason,
+            error,
+        });
+        await markRankingStale(supabase, ranking, match, reason);
+        return false;
+    }
+}
+
 async function applyManualAdjustments(
     supabase: ReturnType<typeof getAdminClient>,
     rankingId: string,
@@ -2185,6 +2208,11 @@ export async function syncClubRankingsForMatchUpdate(
     const supabase = getAdminClient();
     const currentMatch = await getMatchSnapshot(matchId);
     const normalizedPreviousMatch = normalizeMatchSnapshot(previousMatch);
+    const hasKnownMatchChange = !currentMatch
+        || (
+            normalizedPreviousMatch !== null
+            && hasMeaningfulMatchChange(normalizedPreviousMatch, currentMatch)
+        );
     const candidateRankings = await resolveRankingsForMatchUpdate(
         supabase,
         matchId,
@@ -2206,11 +2234,8 @@ export async function syncClubRankingsForMatchUpdate(
             .maybeSingle();
 
         if (application) {
-            if (
-                !currentMatch ||
-                hasMeaningfulMatchChange(normalizedPreviousMatch ?? null, currentMatch)
-            ) {
-                await markRankingStale(
+            if (hasKnownMatchChange) {
+                await rebuildRankingAfterInvalidIncremental(
                     supabase,
                     ranking,
                     currentMatch ?? normalizedPreviousMatch ?? {
@@ -2240,6 +2265,12 @@ export async function syncClubRankingsForMatchUpdate(
         }
 
         if (ranking.stale_from_match_id) {
+            await rebuildRankingAfterInvalidIncremental(
+                supabase,
+                ranking,
+                currentMatch,
+                ranking.stale_reason || 'El ranking estaba pendiente de recalculo y se reconstruyo automaticamente.',
+            );
             processedRankings += 1;
             continue;
         }
@@ -2252,7 +2283,7 @@ export async function syncClubRankingsForMatchUpdate(
         if (ranking.last_incremental_match_id) {
             const lastAppliedMatch = await getMatchSnapshot(ranking.last_incremental_match_id);
             if (lastAppliedMatch && compareMatchOrder(currentMatch, lastAppliedMatch) < 0) {
-                await markRankingStale(
+                await rebuildRankingAfterInvalidIncremental(
                     supabase,
                     ranking,
                     currentMatch,

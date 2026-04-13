@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createClient } from '@/lib/supabase/server';
 
@@ -80,11 +80,11 @@ export async function POST(
             );
         }
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Internal server error';
+        const message = getApiErrorMessage(error);
         console.error('Error in POST /api/tournaments/[id]/fixture/generate-matches:', error);
         return NextResponse.json(
             { error: message },
-            { status: 500 }
+            { status: getApiErrorStatus(error) }
         );
     }
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { FixtureImportService } from '@/lib/services/fixtureImportService';
 import { FIXTURE_IMPORT_SCHEMA_MESSAGE, isFixtureImportSchemaError } from '@/lib/utils/fixtureImportErrors';
@@ -79,10 +79,10 @@ export async function POST(
             );
         }
 
-        const message = error instanceof Error ? error.message : 'Internal server error';
+        const message = getApiErrorMessage(error);
         return NextResponse.json(
             { error: message },
-            { status: message === 'Unauthorized' ? 403 : 500 }
+            { status: getApiErrorStatus(error) }
         );
     }
 }

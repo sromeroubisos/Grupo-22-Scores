@@ -20,7 +20,7 @@ const CACHE_TTL_MATCHES = 60;   // 60 seconds for match lists default
 const CACHE_TTL_LIVE = 5;       // 5 seconds for live matches
 const CACHE_TTL_DETAILS = 30;   // 30 seconds for match details
 const CACHE_TTL_TOURNAMENTS = 24 * 60 * 60; // 24 hours for tournaments
-const CACHE_TTL_CATALOG = 7 * 24 * 60 * 60; // 7 days for countries and leagues catalog
+const CACHE_TTL_CATALOG = 60;   // 60 seconds for countries and leagues catalog
 const CACHE_TTL_TEAMS = 24 * 60 * 60;       // 24 hours for teams
 const CACHE_TTL_PLAYERS = 24 * 60 * 60;     // 24 hours for player info
 
@@ -68,6 +68,7 @@ const SPORT_MAPPING: Record<string, number> = {
 // Prevents thundering-herd when the browser fires many concurrent requests
 // (main fetch + prefetch for 7 days + live polling) that all miss the cache.
 const inflightRequests = new Map<string, Promise<any>>();
+let flashScoreSearchSupported: boolean | null = null;
 
 const MAX_CONCURRENT_API = 3;
 let activeApiCalls = 0;
@@ -428,47 +429,75 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
     return finalMatch;
 }
 
-export function mapStatus(matchStatusObj: any, simpleStatus?: string): MatchStatus {
-    // Priority to match_status object from user provided JSON
-    // Priority to match_status object from user provided JSON
-    if (matchStatusObj) {
-        // Explicitly check type first
-        if (matchStatusObj.type === 'inprogress') return 'live';
-        if (matchStatusObj.type === 'finished') return 'final';
-        if (matchStatusObj.type === 'postponed') return 'postponed';
-        if (matchStatusObj.type === 'canceled' || matchStatusObj.type === 'cancelled') return 'cancelled';
+function normalizeStatusToken(value: unknown): string {
+    return String(value || '').trim().toLowerCase();
+}
 
-        if (matchStatusObj.is_finished) return 'final';
-        if (matchStatusObj.is_in_progress || matchStatusObj.is_started) return 'live';
-        if (matchStatusObj.is_postponed) return 'postponed';
-        if (matchStatusObj.is_cancelled) return 'cancelled';
+function isFinalStatusToken(value: unknown): boolean {
+    const token = normalizeStatusToken(value);
+    return token === 'ft'
+        || token === 'full time'
+        || token === 'finished'
+        || token === 'final'
+        || token === 'ended'
+        || token === 'after extra time'
+        || token === 'after penalties'
+        || token === 'aet'
+        || token === 'pen'
+        || token.includes('finished')
+        || token.includes('full time')
+        || token.includes('after penalties')
+        || token.includes('after extra time');
+}
 
-        // If type or boolean flags are ambiguous but we have a code like "1st half"
-        if (matchStatusObj.code) {
-            const code = String(matchStatusObj.code).toLowerCase();
-            if (code === 'ht' || code.includes('half') || code.includes('period') || code.includes('quarter') || code.includes('live')) return 'live';
-        }
-    }
+function isLiveStatusToken(value: unknown): boolean {
+    const token = normalizeStatusToken(value);
+    if (!token) return false;
 
-    // Fallback to string status
-    const s = String(simpleStatus || '').toLowerCase();
-
-    // Comprehensive list of live status indicators for various sports
     const liveIndicators = [
         'live', 'playing', 'current', 'inprogress',
         '1st half', '2nd half', '1st period', '2nd period', '3rd period',
         '1st quarter', '2nd quarter', '3rd quarter', '4th quarter',
         'set 1', 'set 2', 'set 3', 'set 4', 'set 5',
         'inning', 'batting', 'fielding',
-        'timeout', 'break', 'halftime', 'ht', 'pause'
+        'timeout', 'break', 'halftime', 'ht', 'pause',
+        'q1', 'q2', 'q3', 'q4', 'ot'
     ];
 
-    if (s.includes('finished') || s.includes('final') || s.includes('ended') || s.includes('full time') || s === 'ft') return 'final';
+    return liveIndicators.some((indicator) => token.includes(indicator));
+}
 
-    if (liveIndicators.some(indicator => s.includes(indicator))) return 'live';
+export function mapStatus(matchStatusObj: any, simpleStatus?: string): MatchStatus {
+    if (matchStatusObj) {
+        const type = normalizeStatusToken(matchStatusObj.type);
+        const stage = normalizeStatusToken(matchStatusObj.stage);
+        const code = normalizeStatusToken(matchStatusObj.code);
 
-    if (s.includes('postponed') || s.includes('aplazado')) return 'postponed';
-    if (s.includes('cancelled') || s.includes('cancelado') || s.includes('abandoned')) return 'cancelled';
+        if (type === 'inprogress') return 'live';
+        if (type === 'finished') return 'final';
+        if (type === 'postponed') return 'postponed';
+        if (type === 'canceled' || type === 'cancelled') return 'cancelled';
+
+        if (matchStatusObj.is_finished) return 'final';
+        if (matchStatusObj.is_postponed) return 'postponed';
+        if (matchStatusObj.is_cancelled) return 'cancelled';
+        if (matchStatusObj.is_in_progress) return 'live';
+
+        if (isFinalStatusToken(stage) || isFinalStatusToken(code)) return 'final';
+        if (isLiveStatusToken(stage) || isLiveStatusToken(code)) return 'live';
+
+        if (matchStatusObj.is_started) {
+            return isFinalStatusToken(stage) || isFinalStatusToken(code) ? 'final' : 'live';
+        }
+    }
+
+    const normalizedSimpleStatus = normalizeStatusToken(simpleStatus);
+
+    if (isFinalStatusToken(normalizedSimpleStatus)) return 'final';
+    if (isLiveStatusToken(normalizedSimpleStatus)) return 'live';
+
+    if (normalizedSimpleStatus.includes('postponed') || normalizedSimpleStatus.includes('aplazado')) return 'postponed';
+    if (normalizedSimpleStatus.includes('cancelled') || normalizedSimpleStatus.includes('cancelado') || normalizedSimpleStatus.includes('abandoned')) return 'cancelled';
 
     return 'scheduled';
 }
@@ -1217,18 +1246,32 @@ export async function getFixturesByTournamentOrSeason(tournamentTemplateId: stri
 }
 
 export async function searchFlashScore(query: string) {
+    if (flashScoreSearchSupported === false) {
+        return null;
+    }
+
     const cacheKey = `search-${query.toLowerCase()}`;
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;
 
     const url = `https://${API_HOST}/api/flashscore/v2/search?query=${encodeURIComponent(query)}`;
-    const { data } = await apiFetch<any>(url, {
+    const { data, debug } = await apiFetch<any>(url, {
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'Search',
         silent: true,
         cacheTtl: 60
     });
 
-    if (data) memoryCache.set(cacheKey, data, 60);
+    if (!data && debug.status === 404) {
+        flashScoreSearchSupported = false;
+        console.warn('[FlashScore] Search endpoint unavailable (404). Disabling provider search fallback.');
+        return null;
+    }
+
+    if (data) {
+        flashScoreSearchSupported = true;
+        memoryCache.set(cacheKey, data, 60);
+    }
+
     return data;
 }

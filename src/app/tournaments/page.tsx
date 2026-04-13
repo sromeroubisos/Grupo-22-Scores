@@ -557,7 +557,7 @@ export default function TorneosPage() {
             }
 
             const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
-                cache: 'force-cache',
+                cache: 'no-store',
             });
             const payload = await response.json().catch(() => ({}));
 
@@ -717,7 +717,7 @@ export default function TorneosPage() {
                 });
 
                 const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
-                    cache: 'force-cache',
+                    cache: 'no-store',
                     signal: controller.signal,
                 });
                 const payload = await response.json().catch(() => ({}));

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { createClient } from '@/lib/supabase/server';
 import { FixtureService } from '@/lib/services/fixtureService';
 import {
@@ -97,7 +97,10 @@ export async function POST(
         }
 
         return NextResponse.json(result);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json(
+            { error: getApiErrorMessage(error) },
+            { status: getApiErrorStatus(error) }
+        );
     }
 }

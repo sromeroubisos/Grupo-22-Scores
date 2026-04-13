@@ -464,6 +464,10 @@ export default function SuperRankingsPage() {
     );
     const selectedSummary = useMemo(() => (selectedRanking ? summariesById[selectedRanking.id] ?? null : null), [selectedRanking, summariesById]);
     const selectedDetail = useMemo(() => (selectedRanking ? detailsById[selectedRanking.id] ?? null : null), [detailsById, selectedRanking]);
+    const selectedPersistedSummary = useMemo(
+        () => selectedDetail?.ranking ?? selectedSummary,
+        [selectedDetail, selectedSummary],
+    );
     const currentHeaders = useMemo(() => !selectedRanking?.preview || !selectedRanking.selectedSheet ? [] : selectedRanking.preview.headersBySheet[selectedRanking.selectedSheet] ?? [], [selectedRanking]);
     const currentRows = useMemo(() => !selectedRanking?.preview || !selectedRanking.selectedSheet ? [] : selectedRanking.preview.rowsBySheet[selectedRanking.selectedSheet] ?? [], [selectedRanking]);
     const catalogClubs = useMemo(
@@ -856,7 +860,7 @@ export default function SuperRankingsPage() {
         return `${previewRows.length} filas visibles.`;
     }, [currentRows.length, previewRows.length, unresolvedRowDetails.length]);
     const clubSelectValue = selectedRanking?.selectedClubHeader && currentHeaders.includes(selectedRanking.selectedClubHeader) ? selectedRanking.selectedClubHeader : '__auto__';
-    const selectedResultsSeason = selectedSummary?.results_season ?? (Number.isFinite(Number(selectedRanking?.season)) ? Number(selectedRanking?.season) + 1 : null);
+    const selectedResultsSeason = selectedPersistedSummary?.results_season ?? (Number.isFinite(Number(selectedRanking?.season)) ? Number(selectedRanking?.season) + 1 : null);
     const rankingExportSubtitle = selectedRanking?.description.trim()
         || `Base ${selectedRanking?.season || '-'} / resultados ${selectedResultsSeason || '-'}`;
     const publicRankingHref = selectedRanking ? `/rankings?sport=${encodeURIComponent(selectedRanking.sport)}&ranking=${encodeURIComponent(selectedRanking.id)}` : '/rankings';
@@ -866,12 +870,12 @@ export default function SuperRankingsPage() {
         ? getRankingClubName(selectedInspectorEntry)
         : entryEditor.sourceName || selectedInspectorClub?.name || 'Nuevo club';
     const activeEntriesCount = selectedDetail?.entries.filter((entry) => entry.is_active !== false).length ?? 0;
-    const hasSeasonBootstrap = Boolean(selectedSummary?.backfill_completed_at);
-    const persistedRankingName = selectedSummary?.name.trim() ?? '';
-    const persistedRankingDescription = (selectedSummary?.description ?? '').trim();
+    const hasSeasonBootstrap = Boolean(selectedPersistedSummary?.backfill_completed_at);
+    const persistedRankingName = selectedPersistedSummary?.name.trim() ?? '';
+    const persistedRankingDescription = (selectedPersistedSummary?.description ?? '').trim();
     const draftRankingName = selectedRanking?.name.trim() ?? '';
     const draftRankingDescription = selectedRanking?.description.trim() ?? '';
-    const canPersistMetadata = Boolean(selectedRanking && selectedSummary);
+    const canPersistMetadata = Boolean(selectedRanking && selectedPersistedSummary);
     const metadataDirty = canPersistMetadata
         && (
             draftRankingName !== persistedRankingName
@@ -1227,13 +1231,13 @@ export default function SuperRankingsPage() {
                                 <div className={styles.metricBadge}><span>Activos</span><strong>{activeEntriesCount}</strong></div>
                                 <div className={styles.metricBadge}><span>Overrides</span><strong>{selectedDetail?.manualAdjustments.length ?? 0}</strong></div>
                                 <div className={styles.metricBadge}><span>Puntero</span><strong>{currentLeader?.club?.short_name || currentLeader?.club?.name || '-'}</strong></div>
-                                <div className={styles.metricBadge}><span>Ultima sync</span><strong>{formatDateTime(selectedSummary?.updated_at || selectedSummary?.backfill_completed_at)}</strong></div>
+                                <div className={styles.metricBadge}><span>Ultima sync</span><strong>{formatDateTime(selectedPersistedSummary?.updated_at || selectedPersistedSummary?.backfill_completed_at)}</strong></div>
                             </div>
                             <div className={styles.toolbarActions}>
                                 <button className={styles.secondaryBtn} onClick={downloadTemplate} type="button"><Download size={14} />Plantilla</button>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleSaveBase} disabled={!selectedRanking || savingBase}>{savingBase ? <RefreshCw size={14} className={styles.spin} /> : <Save size={14} />}Guardar base</button>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleBackfill} disabled={!selectedSummary || backfilling || hasSeasonBootstrap}>{backfilling ? <RefreshCw size={14} className={styles.spin} /> : <RefreshCw size={14} />}{hasSeasonBootstrap ? 'Inicializado' : 'Inicializar 2026'}</button>
-                                <button type="button" className={styles.secondaryBtn} onClick={() => selectedSummary?.stale_from_match_id ? handleRecalculateFromMatch(selectedSummary.stale_from_match_id) : undefined} disabled={!selectedSummary?.stale_from_match_id || Boolean(recalculatingMatchId)}>{recalculatingMatchId ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular</button>
+                                <button type="button" className={styles.secondaryBtn} onClick={() => selectedPersistedSummary?.stale_from_match_id ? handleRecalculateFromMatch(selectedPersistedSummary.stale_from_match_id) : undefined} disabled={!selectedPersistedSummary?.stale_from_match_id || Boolean(recalculatingMatchId)}>{recalculatingMatchId ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular</button>
                                 <Link href={publicRankingHref} className={styles.secondaryBtn}><ArrowUpRight size={14} />Ver publica</Link>
                             </div>
                         </div>
@@ -1301,7 +1305,7 @@ export default function SuperRankingsPage() {
                                     <p className={styles.workspaceSubtitle}>Base {selectedRanking?.season || '-'} / resultados {selectedResultsSeason || '-'}</p>
                                 </div>
                                 <div className={styles.surfaceHeaderActions}>
-                                    <span className={`${styles.statusChip} ${selectedSummary ? selectedSummary.stale_from_match_id ? styles.statusChipWarning : styles.statusChipSuccess : styles.statusChipNeutral}`}>{selectedSummary ? selectedSummary.stale_from_match_id ? 'Requiere recalc' : 'OK' : 'Sin guardar'}</span>
+                                    <span className={`${styles.statusChip} ${selectedPersistedSummary ? selectedPersistedSummary.stale_from_match_id ? styles.statusChipWarning : styles.statusChipSuccess : styles.statusChipNeutral}`}>{selectedPersistedSummary ? selectedPersistedSummary.stale_from_match_id ? 'Requiere recalc' : 'OK' : 'Sin guardar'}</span>
                                     <button
                                         type="button"
                                         className={styles.createBtn}
@@ -1379,7 +1383,7 @@ export default function SuperRankingsPage() {
                                     </div>
                                 </div>
                             </> : <div className={styles.emptyPreview}>Guarda la base para persistir este ranking.</div>}
-                            {selectedSummary?.stale_reason ? <div className={styles.staleNotice}><AlertCircle size={16} /><span>{selectedSummary.stale_reason}</span></div> : null}
+                            {selectedPersistedSummary?.stale_reason ? <div className={styles.staleNotice}><AlertCircle size={16} /><span>{selectedPersistedSummary.stale_reason}</span></div> : null}
                         </div>
                     </div>
                     <aside className={styles.inspector}>
@@ -1577,7 +1581,7 @@ export default function SuperRankingsPage() {
                             <div className={styles.actionStrip}>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleSaveBase} disabled={!selectedRanking || savingBase}>{savingBase ? <RefreshCw size={14} className={styles.spin} /> : <Save size={14} />}Guardar base</button>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleBackfill} disabled={!selectedSummary || backfilling}>{backfilling ? <RefreshCw size={14} className={styles.spin} /> : <RefreshCw size={14} />}Backfill</button>
-                                <button type="button" className={styles.secondaryBtn} onClick={() => selectedSummary?.stale_from_match_id ? handleRecalculateFromMatch(selectedSummary.stale_from_match_id) : undefined} disabled={!selectedSummary?.stale_from_match_id || Boolean(recalculatingMatchId)}>{recalculatingMatchId ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular stale</button>
+                                <button type="button" className={styles.secondaryBtn} onClick={() => selectedPersistedSummary?.stale_from_match_id ? handleRecalculateFromMatch(selectedPersistedSummary.stale_from_match_id) : undefined} disabled={!selectedPersistedSummary?.stale_from_match_id || Boolean(recalculatingMatchId)}>{recalculatingMatchId ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular stale</button>
                                 <Link href={publicRankingHref} className={styles.secondaryBtn}><ArrowUpRight size={14} />Ver publica</Link>
                             </div>
                             <div className={styles.uploadPanel}>
@@ -1791,8 +1795,8 @@ export default function SuperRankingsPage() {
                         <div className={baseStyles.card}>
                             <div className={baseStyles.cardHeader}>
                                 <h2 className={baseStyles.cardTitle}>Ranking actual</h2>
-                                <span className={`${baseStyles.pill} ${selectedSummary ? selectedSummary.stale_from_match_id ? baseStyles.pillWarning : baseStyles.pillSuccess : baseStyles.pillNeutral}`}>
-                                    {selectedSummary ? selectedSummary.stale_from_match_id ? 'Requiere recalc' : 'OK' : 'Sin guardar'}
+                                <span className={`${baseStyles.pill} ${selectedPersistedSummary ? selectedPersistedSummary.stale_from_match_id ? baseStyles.pillWarning : baseStyles.pillSuccess : baseStyles.pillNeutral}`}>
+                                    {selectedPersistedSummary ? selectedPersistedSummary.stale_from_match_id ? 'Requiere recalc' : 'OK' : 'Sin guardar'}
                                 </span>
                             </div>
                             {loadingDetailId === selectedRanking?.id && !selectedDetail ? <div className={styles.emptyPreview}>Cargando detalle...</div> : selectedDetail ? <>
@@ -1934,7 +1938,7 @@ export default function SuperRankingsPage() {
                                     </div>
                                 </div>
                             </> : <div className={styles.emptyPreview}>Guarda la base para persistir este ranking.</div>}
-                            {selectedSummary?.stale_reason ? <div className={styles.staleNotice}><AlertCircle size={16} /><span>{selectedSummary.stale_reason}</span></div> : null}
+                            {selectedPersistedSummary?.stale_reason ? <div className={styles.staleNotice}><AlertCircle size={16} /><span>{selectedPersistedSummary.stale_reason}</span></div> : null}
                         </div>
                     </div>
                     <aside className={styles.sidebarColumn}>

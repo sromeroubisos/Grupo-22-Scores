@@ -22,6 +22,9 @@ import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
 const RUGBY_FLASHSCORE_SPORT_KEY = 'rugby';
 const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade';
@@ -29,7 +32,7 @@ const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, countr
 const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
 const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
 const FLAT_CACHE_CONTROL = 'public, max-age=300, stale-while-revalidate=600';
-const CATALOG_CACHE_CONTROL = 'public, max-age=86400, stale-while-revalidate=604800';
+const CATALOG_CACHE_CONTROL = 'no-store, no-cache, must-revalidate';
 
 type PublicTournamentRow = {
     id: string;
@@ -780,11 +783,11 @@ function getTournamentsFeedType(params: PublicTournamentsRequestParams): Tournam
 
 function getPublicTournamentsCachePolicy(params: PublicTournamentsRequestParams) {
     if (params.flashScoreCatalogEnabled && params.scope === 'summary') {
-        return { freshTtlSec: 6 * 60 * 60, staleTtlSec: 7 * 24 * 60 * 60 };
+        return { freshTtlSec: 60, staleTtlSec: 5 * 60 };
     }
 
     if (params.flashScoreCatalogEnabled && params.scope === 'country') {
-        return { freshTtlSec: 60 * 60, staleTtlSec: 24 * 60 * 60 };
+        return { freshTtlSec: 60, staleTtlSec: 5 * 60 };
     }
 
     if (params.search || params.forceFullCatalog) {

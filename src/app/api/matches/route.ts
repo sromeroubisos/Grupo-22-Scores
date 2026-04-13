@@ -628,7 +628,9 @@ type MatchesTraceContext = {
     parentRequestId?: string;
 };
 
-const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response';
+// Bump the cache namespace when response-shaping logic changes so we don't
+// keep serving stale persisted snapshots for historical dates.
+const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v2';
 const EXTERNAL_MATCHES_PERSIST_TTL_MS = 10 * 60 * 1000;
 const MATCHES_DB_SELECT_COLUMNS = [
     'id',
