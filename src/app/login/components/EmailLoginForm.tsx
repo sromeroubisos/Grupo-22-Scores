@@ -29,6 +29,10 @@ function sanitizeReturnTo(raw: string | null, roleIntent?: string | null): strin
     return '/'
 }
 
+function normalizeEmail(value: string): string {
+    return value.trim().toLowerCase()
+}
+
 export default function EmailLoginForm({ onError }: { onError: (msg: string | null) => void }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -43,25 +47,38 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
         e.preventDefault()
         onError(null)
 
-        if (!email.trim() || !password.trim()) {
-            onError('Por favor completá todos los campos')
+        const normalizedEmail = normalizeEmail(email)
+
+        if (!normalizedEmail || !password.trim()) {
+            onError('Por favor completa todos los campos')
             return
         }
 
         setLoading(true)
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
-                email,
+                email: normalizedEmail,
                 password,
             })
 
             if (error) {
+                if (
+                    error.message.includes('supabase_auth_unreachable')
+                    || error.message.includes('Supabase auth request failed')
+                    || error.message.includes('Failed to fetch')
+                ) {
+                    onError('No pudimos contactar el servicio de autenticacion. Intenta de nuevo en unos segundos.')
+                    return
+                }
+
                 if (error.message.includes('Invalid login credentials')) {
-                    throw new Error('Credenciales incorrectas. Verificá tu email y contraseña.')
+                    onError('Credenciales incorrectas. Verifica tu email y contrasena.')
+                    return
                 }
 
                 if (error.message.includes('Email not confirmed')) {
-                    throw new Error('Tu email todavía no fue confirmado. Revisá tu correo y abrí el enlace de confirmación antes de iniciar sesión.')
+                    onError('Tu email todavia no fue confirmado. Revisa tu correo y abre el enlace de confirmacion antes de iniciar sesion.')
+                    return
                 }
 
                 throw error
@@ -82,7 +99,7 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
             window.location.assign(returnTo)
         } catch (error: unknown) {
             console.error('[EmailLoginForm] Login error:', error)
-            onError(error instanceof Error ? error.message : 'Ocurrió un error al iniciar sesión')
+            onError(error instanceof Error ? error.message : 'Ocurrio un error al iniciar sesion')
         } finally {
             setLoading(false)
         }
@@ -106,7 +123,7 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
             </div>
 
             <div className={styles.inputGroup}>
-                <label className={styles.label} htmlFor="password">Contraseña</label>
+                <label className={styles.label} htmlFor="password">Contrasena</label>
                 <div className={styles.inputWrapper}>
                     <input
                         id="password"
@@ -123,7 +140,7 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                         type="button"
                         className={styles.togglePass}
                         onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
                     >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>

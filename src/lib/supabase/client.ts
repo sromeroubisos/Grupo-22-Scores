@@ -1,10 +1,11 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { Database } from './types'
-import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase';
-import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
+import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase'
+import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure'
 
 let client: ReturnType<typeof createBrowserClient<Database>> | undefined
 let clearedAuthSessionAt = 0
+const SUPABASE_AUTH_TIMEOUT_MS = 15000
 
 function getSupabaseBrowserStorageKey() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -72,9 +73,44 @@ export function createClient() {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     const storageKey = getSupabaseBrowserStorageKey() || undefined
     const instrumentedFetch = createInstrumentedSupabaseFetch('client', url, fetch)
+
+    const withAuthTimeout = async (input: string | URL | Request, init?: RequestInit) => {
+        if (typeof window === 'undefined' || !url || !isSupabaseAuthRequest(input, url)) {
+            return instrumentedFetch(input, init)
+        }
+
+        const controller = new AbortController()
+        const timeoutId = window.setTimeout(() => {
+            controller.abort(new DOMException('Supabase auth timeout', 'AbortError'))
+        }, SUPABASE_AUTH_TIMEOUT_MS)
+
+        const upstreamSignal = init?.signal
+        const abortFromUpstream = () => controller.abort(upstreamSignal?.reason)
+
+        if (upstreamSignal) {
+            if (upstreamSignal.aborted) {
+                abortFromUpstream()
+            } else {
+                upstreamSignal.addEventListener('abort', abortFromUpstream, { once: true })
+            }
+        }
+
+        try {
+            return await instrumentedFetch(input, {
+                ...init,
+                signal: controller.signal,
+            })
+        } finally {
+            window.clearTimeout(timeoutId)
+            if (upstreamSignal) {
+                upstreamSignal.removeEventListener('abort', abortFromUpstream)
+            }
+        }
+    }
+
     const browserFetch = async (input: string | URL | Request, init?: RequestInit) => {
         try {
-            return await instrumentedFetch(input, init)
+            return await withAuthTimeout(input, init)
         } catch (error) {
             if (url && isSupabaseAuthRequest(input, url)) {
                 clearBrokenSupabaseSessionOnce()
@@ -84,8 +120,7 @@ export function createClient() {
         }
     }
 
-
-    const startedAt = nowMs();
+    const startedAt = nowMs()
     client = createBrowserClient<Database>(
         url || 'https://placeholder.supabase.co',
         key || 'placeholder-key',
@@ -113,9 +148,9 @@ export function createClient() {
 }
 
 export async function runClientSupabaseLatencyCheck(table = 'matches') {
-    const supabase = createClient();
+    const supabase = createClient()
     return runSupabaseLatencyProbe(supabase, {
         runtime: 'client',
         table,
-    });
+    })
 }

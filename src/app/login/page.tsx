@@ -4,47 +4,46 @@ import styles from './login.module.css'
 import OAuthButtons from './components/OAuthButtons'
 import EmailLoginForm from './components/EmailLoginForm'
 import AuthErrorBanner from './components/AuthErrorBanner'
-import { useState, useEffect, Suspense } from 'react'
+import AuthSuccessBanner from './components/AuthSuccessBanner'
+import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-
 
 function LoginContent() {
     const searchParams = useSearchParams()
     const errorParam = searchParams.get('error')
+    const messageParam = searchParams.get('message')
     const [error, setError] = useState<string | null>(null)
-    const [configError, setConfigError] = useState(false)
-
-    useEffect(() => {
-        if (errorParam) {
-            if (errorParam === 'auth-code-error') {
-                setError('No pudimos verificar tu sesión. Intenta nuevamente.')
-            } else {
-                setError('Ocurrió un error de autenticación.')
-            }
-        }
-
-        // Check for configuration
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
-            setConfigError(true)
-        }
-    }, [errorParam])
-
+    const derivedError =
+        error ?? (
+            errorParam === 'auth-code-error'
+                ? 'No pudimos verificar tu sesion. Intenta nuevamente.'
+                : errorParam
+                    ? 'Ocurrio un error de autenticacion.'
+                    : null
+        )
+    const success =
+        messageParam === 'password-updated'
+            ? 'Tu contrasena fue actualizada. Ya podes iniciar sesion con la nueva clave.'
+            : null
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const configError = !supabaseUrl || supabaseUrl.includes('placeholder')
 
     return (
         <div className={styles.loginCard}>
-            {configError && (
+            {configError ? (
                 <div className={styles.configWarning}>
-                    ⚠️ Configuración incompleta: Revisa .env.local
+                    Configuracion incompleta: revisa `.env.local`
                 </div>
-            )}
-            <AuthErrorBanner message={error} />
+            ) : null}
+
+            <AuthErrorBanner message={derivedError} />
+            <AuthSuccessBanner message={success} />
 
             <div className={styles.cardHeader}>
                 <span className={styles.logo}>G22SCORES</span>
-                <h1 className={styles.title}>Iniciar sesión</h1>
-                <p className={styles.subtitle}>Elegí un método para continuar</p>
+                <h1 className={styles.title}>Iniciar sesion</h1>
+                <p className={styles.subtitle}>Elige un metodo para continuar</p>
             </div>
 
             <OAuthButtons />
@@ -55,12 +54,18 @@ function LoginContent() {
 
             <EmailLoginForm onError={setError} />
 
+            <div className={styles.secondaryLinks}>
+                <Link href="/auth/forgot-password" className={styles.link}>
+                    Olvide mi contrasena
+                </Link>
+            </div>
+
             <div className={styles.footerLink}>
-                ¿No tenés cuenta? <Link href="/register" className={styles.linkAccent}>Registrate</Link>
+                No tenes cuenta? <Link href="/register" className={styles.linkAccent}>Registrate</Link>
             </div>
 
             <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--basalt-600)', marginTop: '24px' }}>
-                Al continuar, aceptás nuestros <Link href="/terms" className={styles.link}>Términos</Link> y <Link href="/privacy" className={styles.link}>Privacidad</Link>.
+                Al continuar, aceptas nuestros <Link href="/terms" className={styles.link}>Terminos</Link> y <Link href="/privacy" className={styles.link}>Privacidad</Link>.
             </div>
         </div>
     )

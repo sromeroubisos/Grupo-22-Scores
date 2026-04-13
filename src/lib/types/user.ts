@@ -40,13 +40,13 @@ export interface UserProfile {
 
 // Super Admin constant
 export const SUPER_ADMIN_EMAIL = 'superadmin@g22scores.com';
-const AUTHORIZED_SUPER_ADMINS = [SUPER_ADMIN_EMAIL, 'deportesgrupo@gmail.com', 'sromeroubisos@gmail.com'];
+export const AUTHORIZED_SUPER_ADMIN_EMAILS = [SUPER_ADMIN_EMAIL, 'deportesgrupo@gmail.com', 'sromeroubisos@gmail.com'] as const;
 
 // Helper to check if email is super admin
 export function isSuperAdminEmail(email?: string | null): boolean {
     if (!email) return false;
     const lowerEmail = email.toLowerCase();
-    return AUTHORIZED_SUPER_ADMINS.some(adminEmail => adminEmail.toLowerCase() === lowerEmail);
+    return AUTHORIZED_SUPER_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === lowerEmail);
 }
 
 // Helper to check if user is super admin
