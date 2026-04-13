@@ -113,6 +113,11 @@ function ClubAdminScaffold({ children }: { children: React.ReactNode }) {
                                         Familia {activeClub.familyRootName}
                                     </span>
                                 )}
+                                {activeClub && (
+                                    <span style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>
+                                        Gestión {activeClub.managementType === 'club_family' ? 'por familia de club' : 'por club'}
+                                    </span>
+                                )}
                             </div>
                         )}
                         {error && (
@@ -150,7 +155,8 @@ export default function ClubAdminLayout({ children }: { children: React.ReactNod
     const router = useRouter();
     const hasClubMembership = Boolean(
         user?.memberships?.some((membership) =>
-            membership.scopeType === 'club' && ['admin', 'operator', 'editor'].includes(membership.role)
+            ['club', 'club_family'].includes(membership.scopeType) &&
+            ['admin', 'operator', 'editor'].includes(membership.role)
         )
     );
     const canAccessClubPanel = Boolean(

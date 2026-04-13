@@ -23,6 +23,7 @@ import {
     inferEspnMotorsportLeague,
     parseEspnMotorsportTournamentId,
 } from '@/lib/services/espnMotorsport';
+import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getReadClient } from '@/lib/supabase/read';
 import { db } from '@/lib/mock-db';
 import {
@@ -31,6 +32,7 @@ import {
 import { getTabSnapshot, hasMeaningfulPayload, upsertTabSnapshot } from '@/lib/sync/tabSnapshots';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import {
+    getTournamentFlashScoreConfig,
     isAmericanFootballSport,
     isFlashScoreEnabledForSport,
     isMotorsportSport,
@@ -367,6 +369,148 @@ function enrichStandingsRowsWithTeamAssets(
     });
 }
 
+function buildExternalStandingsParticipants(...matchGroups: any[][]) {
+    const participants = new Map<string, any>();
+
+    const register = (team: any, fallbackName?: any, fallbackLogo?: any) => {
+        const teamId = getMatchTeamId(team);
+        const teamName = getMatchTeamName(team, fallbackName);
+        if (!teamId || !teamName) return;
+
+        const current = participants.get(teamId);
+        participants.set(teamId, {
+            id: current?.id || teamId,
+            club_id: current?.club_id || teamId,
+            name: current?.name || teamName,
+            clubs: {
+                name: current?.clubs?.name || teamName,
+                logo_url: current?.clubs?.logo_url || getMatchTeamLogo(team, fallbackLogo) || null,
+            },
+        });
+    };
+
+    matchGroups
+        .filter(Array.isArray)
+        .flat()
+        .forEach((match: any) => {
+            register(match?.home_team, match?.event_home_team || match?.home_team_name, match?.home_team_logo);
+            register(match?.away_team, match?.event_away_team || match?.away_team_name, match?.away_team_logo);
+        });
+
+    return Array.from(participants.values());
+}
+
+function buildExternalFinalMatches(matches: any[]) {
+    if (!Array.isArray(matches)) return [];
+
+    return matches
+        .map((match: any) => {
+            const homeId = getMatchTeamId(match?.home_team, match?.home_team_id || match?.home_club_id);
+            const awayId = getMatchTeamId(match?.away_team, match?.away_team_id || match?.away_club_id);
+            if (!homeId || !awayId) return null;
+
+            const timestamp = Number(match?.timestamp || match?.start_time || match?.time || match?.event_timestamp || 0);
+            return {
+                id: match?.match_id || match?.event_key || match?.id || `${homeId}-${awayId}-${timestamp || 'na'}`,
+                home_club_id: homeId,
+                away_club_id: awayId,
+                score: {
+                    home: Number(match?.scores?.home ?? match?.home_score ?? 0),
+                    away: Number(match?.scores?.away ?? match?.away_score ?? 0),
+                },
+                status: 'final',
+                date_time: timestamp ? new Date(timestamp * 1000).toISOString() : null,
+                events: null,
+                points_autocalculated: true,
+            };
+        })
+        .filter(Boolean);
+}
+
+function mapCalculatedExternalStanding(row: any) {
+    return {
+        position: row.position ?? 0,
+        team: {
+            id: row.teamId ?? row.team?.id ?? null,
+            name: row.team?.name ?? 'Equipo',
+            logo: row.team?.logo ?? '',
+            image_path: row.team?.logo ?? undefined,
+            small_image_path: row.team?.logo ?? undefined,
+            source: 'local-calculated',
+            provider: 'local-calculated',
+        },
+        participant: {
+            id: row.participantId ?? row.teamId ?? row.team?.id ?? null,
+            name: row.team?.name ?? 'Equipo',
+            logo: row.team?.logo ?? '',
+            image_path: row.team?.logo ?? undefined,
+            small_image_path: row.team?.logo ?? undefined,
+            source: 'local-calculated',
+            provider: 'local-calculated',
+        },
+        team_id: row.teamId ?? row.team?.id ?? null,
+        team_name: row.team?.name ?? 'Equipo',
+        team_logo: row.team?.logo ?? '',
+        played: row.played ?? 0,
+        won: row.won ?? 0,
+        drawn: row.drawn ?? 0,
+        lost: row.lost ?? 0,
+        scored: row.points_for ?? 0,
+        conceded: row.points_against ?? 0,
+        points: row.total_points ?? 0,
+        difference: row.difference ?? 0,
+        matches_total: row.played ?? 0,
+        wins_total: row.won ?? 0,
+        draws_total: row.drawn ?? 0,
+        losses_total: row.lost ?? 0,
+        goals_for: row.points_for ?? 0,
+        goals_against: row.points_against ?? 0,
+        goal_difference: row.difference ?? 0,
+        points_total: row.total_points ?? 0,
+        bonus_points: (row.bonus_offensive ?? 0) + (row.bonus_defensive ?? 0),
+        form: Array.isArray(row.form) ? row.form.join('') : (row.form ?? ''),
+        source: 'local-calculated',
+        provider: 'local-calculated',
+    };
+}
+
+function buildFallbackResolvedRules(sportId: string, tournamentRuleset: any) {
+    const resolved = StandingsEngine.resolveRules({}, tournamentRuleset ?? {});
+    if (sportId !== 'basketball') return resolved;
+
+    const hasExplicitPoints =
+        tournamentRuleset?.points?.win != null ||
+        tournamentRuleset?.pointsSystem?.win != null ||
+        tournamentRuleset?.pointsWin != null;
+
+    if (hasExplicitPoints) return resolved;
+
+    return {
+        ...resolved,
+        points_for_win: 2,
+        points_for_draw: 0,
+        points_for_loss: 1,
+        tiebreakers: Array.isArray(resolved?.tiebreakers) && resolved.tiebreakers.length > 0
+            ? resolved.tiebreakers
+            : ['points_difference', 'won'],
+    };
+}
+
+function buildLocalFallbackStandings(
+    sportId: string,
+    results: any[],
+    fixtures: any[],
+    tournamentRuleset: any,
+) {
+    const participants = buildExternalStandingsParticipants(results, fixtures);
+    const finalMatches = buildExternalFinalMatches(results);
+    if (participants.length === 0 || finalMatches.length === 0) return [];
+
+    const resolvedRules = buildFallbackResolvedRules(sportId, tournamentRuleset);
+    const calculated = StandingsEngine.generateTable(participants, finalMatches, resolvedRules);
+    return calculated.map(mapCalculatedExternalStanding);
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -612,6 +756,15 @@ export async function GET(request: Request) {
         },
     );
     const resolvedSportId = dbTournamentMeta?.sport_id || localTournament?.sportId || sport;
+    const dbFlashScoreConfig = getTournamentFlashScoreConfig(dbTournamentMeta as any);
+
+    tournamentId = tournamentId || dbFlashScoreConfig?.tournament_id;
+    stageId = stageId || dbFlashScoreConfig?.tournament_stage_id;
+    templateId = templateId || dbFlashScoreConfig?.tournament_template_id;
+    seasonId = seasonId || (dbFlashScoreConfig?.season_id != null ? String(dbFlashScoreConfig.season_id) : undefined);
+    if (!url && dbFlashScoreConfig?.tournament_url) {
+        url = dbFlashScoreConfig.tournament_url;
+    }
 
     const hasFsPrefix = id.toLowerCase().startsWith('fs-');
     const rawId = hasFsPrefix ? id.slice(3) : id;
@@ -1229,7 +1382,17 @@ export async function GET(request: Request) {
         }
 
         const baseStandings = standingsSource === 'snapshot' ? (standingsSnapshot?.payload || []) : (rawStandings || []);
-        const preparedStandings = enrichStandingsRowsWithTeamAssets(baseStandings, teamAssets);
+        const fallbackCalculatedStandings =
+            resolvedSportId === 'basketball' && !hasMeaningfulPayload(baseStandings)
+                ? buildLocalFallbackStandings(
+                    resolvedSportId,
+                    Array.isArray(resultsPayload) ? resultsPayload : [],
+                    Array.isArray(fixturesPayload) ? fixturesPayload : [],
+                    dbTournamentMeta?.ruleset || localTournament?.ruleset,
+                )
+                : [];
+        const standingsBasePayload = hasMeaningfulPayload(baseStandings) ? baseStandings : fallbackCalculatedStandings;
+        const preparedStandings = enrichStandingsRowsWithTeamAssets(standingsBasePayload, teamAssets);
         let finalStandings = preparedStandings;
         let finalStandingsForm = enrichStandingsRowsWithTeamAssets(standingsFormPayload, teamAssets);
         let finalStandingsHtFt = enrichStandingsRowsWithTeamAssets(standingsHtFtPayload, teamAssets);
@@ -1336,7 +1499,7 @@ export async function GET(request: Request) {
             }
         }
 
-        if (standingsSource === 'api' && hasMeaningfulPayload(preparedStandings)) {
+        if ((standingsSource === 'api' || hasMeaningfulPayload(fallbackCalculatedStandings)) && hasMeaningfulPayload(preparedStandings)) {
             upsertTabSnapshot({ ...snapshotKey, tab: 'standings', payload: preparedStandings, fetchStatus: 'ok' });
             tabSources.standings = 'api';
         } else if (standingsSource === 'snapshot') {

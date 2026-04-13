@@ -1049,6 +1049,16 @@
     height: 18px;
 }
 
+.flagAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 14px;
+    line-height: 1;
+}
+
 .teamName {
     font-size: 0.95rem;
     /* ~15px */

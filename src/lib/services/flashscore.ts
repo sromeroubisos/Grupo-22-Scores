@@ -381,6 +381,10 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
 
         homeTeamLogo: evt.home_team?.image_path || evt.home_team?.small_image_path || evt.home_team?.smaill_image_path || evt.home_team?.logo || evt.home_team?.player_image || '',
         awayTeamLogo: evt.away_team?.image_path || evt.away_team?.small_image_path || evt.away_team?.smaill_image_path || evt.away_team?.logo || evt.away_team?.player_image || '',
+        homeTeamImagePath: evt.home_team?.image_path || evt.home_team?.small_image_path || evt.home_team?.smaill_image_path || evt.home_team?.player_image || '',
+        awayTeamImagePath: evt.away_team?.image_path || evt.away_team?.small_image_path || evt.away_team?.smaill_image_path || evt.away_team?.player_image || '',
+        homeTeamUrl: evt.home_team?.team_url || evt.home_team?.player_url || '',
+        awayTeamUrl: evt.away_team?.team_url || evt.away_team?.player_url || '',
 
         currentMinute: evt.match_status?.stage || undefined,
 

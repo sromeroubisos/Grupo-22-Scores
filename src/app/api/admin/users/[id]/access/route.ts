@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireGlobalAdminContext } from '@/lib/auth/permissions';
-import { APP_ROLES, getDefaultScopeForRole, isAppRole, type MembershipRole, type MembershipScope } from '@/lib/auth/roles';
+import {
+    APP_ROLES,
+    getAllowedScopesForRole,
+    getDefaultScopeForRole,
+    isAppRole,
+    type MembershipRole,
+    type MembershipScope,
+} from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 const accessPayloadSchema = z.object({
     role: z.string().min(1),
-    scopeType: z.enum(['union', 'sport', 'tournament', 'match', 'club']),
+    scopeType: z.enum(['union', 'sport', 'tournament', 'match', 'club', 'club_family']),
     membershipRole: z.enum(['admin', 'editor', 'operator', 'viewer']).default('admin'),
     scopeIds: z.array(z.string().min(1)).default([]),
 });
@@ -63,7 +70,7 @@ export async function GET(
             data: payload,
             meta: {
                 roles: APP_ROLES,
-                scopeTypes: ['union', 'sport', 'tournament', 'match', 'club'],
+                scopeTypes: ['union', 'sport', 'tournament', 'match', 'club', 'club_family'],
                 membershipRoles: ['admin', 'editor', 'operator', 'viewer'],
             },
         });
@@ -100,10 +107,12 @@ export async function PUT(
         }
 
         const defaultScope = getDefaultScopeForRole(role);
-        if (defaultScope && defaultScope !== scopeType) {
+        const allowedScopes = getAllowedScopesForRole(role);
+        if (allowedScopes && !allowedScopes.includes(scopeType as MembershipScope)) {
             return badRequest('El tipo de usuario no coincide con el alcance elegido', {
                 role,
                 expectedScopeType: defaultScope,
+                allowedScopeTypes: allowedScopes,
                 receivedScopeType: scopeType,
             });
         }
@@ -130,11 +139,18 @@ export async function PUT(
             return NextResponse.json({ error: 'No se pudo actualizar el rol del usuario', details: roleError.message }, { status: 500 });
         }
 
-        const { error: deleteError } = await admin
+        let deleteQuery = admin
             .from('memberships')
             .delete()
-            .eq('user_id', targetUserId)
-            .eq('scope_type', scopeType);
+            .eq('user_id', targetUserId);
+
+        if (scopeType === 'club' || scopeType === 'club_family') {
+            deleteQuery = deleteQuery.in('scope_type', ['club', 'club_family']);
+        } else {
+            deleteQuery = deleteQuery.eq('scope_type', scopeType);
+        }
+
+        const { error: deleteError } = await deleteQuery;
 
         if (deleteError) {
             return NextResponse.json({ error: 'No se pudieron limpiar los accesos existentes', details: deleteError.message }, { status: 500 });

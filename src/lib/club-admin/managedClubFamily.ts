@@ -35,6 +35,7 @@ export interface ManagedClubSummary {
     familyRootId: string;
     familyRootName: string | null;
     accessRole: string;
+    managementType: 'club' | 'club_family';
     accessSource: 'direct' | 'family';
     isDirect: boolean;
 }
@@ -199,7 +200,7 @@ export async function getManagedClubSummaries(
 }> {
     const directMemberships = (memberships || []).filter(
         (membership) =>
-            membership.scopeType === 'club' &&
+            (membership.scopeType === 'club' || membership.scopeType === 'club_family') &&
             membership.scopeId &&
             MANAGEMENT_MEMBERSHIP_ROLES.has(membership.role as MembershipRole)
     );
@@ -211,23 +212,31 @@ export async function getManagedClubSummaries(
     const familyAccess = new Map<string, {
         familyRootId: string;
         accessRole: string;
+        managementType: 'club' | 'club_family';
         isDirect: boolean;
     }>();
     const defaultClubId = directMemberships[0]?.scopeId ?? null;
 
     for (const membership of directMemberships) {
         const scopeId = membership.scopeId!;
-        const family = await resolveClubFamilyIds(supabase, scopeId);
+        const managementType = membership.scopeType === 'club_family' ? 'club_family' : 'club';
+        const family = managementType === 'club_family'
+            ? await resolveClubFamilyIds(supabase, scopeId)
+            : { rootClubId: scopeId, clubIds: [scopeId] };
 
         for (const familyClubId of family.clubIds) {
             const current = familyAccess.get(familyClubId);
             const nextPriority = rolePriority(membership.role);
             const currentPriority = current ? rolePriority(current.accessRole) : -1;
 
-            if (!current || nextPriority > currentPriority) {
+            const prefersBroaderManagement =
+                current?.managementType === 'club' && managementType === 'club_family';
+
+            if (!current || nextPriority > currentPriority || (nextPriority === currentPriority && prefersBroaderManagement)) {
                 familyAccess.set(familyClubId, {
                     familyRootId: family.rootClubId,
                     accessRole: membership.role,
+                    managementType,
                     isDirect: familyClubId === scopeId,
                 });
                 continue;
@@ -267,6 +276,7 @@ export async function getManagedClubSummaries(
                 familyRootId: access.familyRootId,
                 familyRootName: rootClub?.name || null,
                 accessRole: access.accessRole,
+                managementType: access.managementType,
                 accessSource: access.isDirect ? 'direct' : 'family',
                 isDirect: access.isDirect,
             } satisfies ManagedClubSummary;

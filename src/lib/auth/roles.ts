@@ -14,7 +14,7 @@ export type AppUserRole =
     | 'gestor_partidos'
     | 'gestor_clubes';
 
-export type MembershipScope = 'union' | 'sport' | 'tournament' | 'match' | 'club';
+export type MembershipScope = 'union' | 'sport' | 'tournament' | 'match' | 'club' | 'club_family';
 export type MembershipRole = 'admin' | 'editor' | 'operator' | 'viewer';
 
 export interface MembershipLike {
@@ -103,6 +103,8 @@ export const DEFAULT_SCOPE_FOR_ROLE: Partial<Record<AppUserRole, MembershipScope
     gestor_clubes: 'club',
 };
 
+export const CLUB_MEMBERSHIP_SCOPE_TYPES = new Set<MembershipScope>(['club', 'club_family']);
+
 const ADMIN_PANEL_ROLES = new Set<AppUserRole>([
     'admin_union',
     'admin_torneo',
@@ -114,7 +116,7 @@ const ADMIN_PANEL_ROLES = new Set<AppUserRole>([
 ]);
 
 const EDITORIAL_PANEL_ROLES = new Set<AppUserRole>(['redactor']);
-const CLUB_PANEL_SCOPE_TYPES = new Set<MembershipScope>(['club']);
+const CLUB_PANEL_SCOPE_TYPES = CLUB_MEMBERSHIP_SCOPE_TYPES;
 const ADMIN_PANEL_SCOPE_TYPES = new Set<MembershipScope>(['union', 'sport', 'tournament', 'match']);
 
 function hasAdminPanelMembershipAccess(memberships?: MembershipLike[] | null) {
@@ -172,6 +174,17 @@ export function getRoleLabel(role?: string | null): string {
 export function getDefaultScopeForRole(role?: string | null): MembershipScope | null {
     const normalized = normalizeRole(role);
     return DEFAULT_SCOPE_FOR_ROLE[normalized] ?? null;
+}
+
+export function getAllowedScopesForRole(role?: string | null): MembershipScope[] | null {
+    const normalized = normalizeRole(role);
+
+    if (normalized === 'admin_club' || normalized === 'gestor_clubes') {
+        return ['club', 'club_family'];
+    }
+
+    const defaultScope = DEFAULT_SCOPE_FOR_ROLE[normalized];
+    return defaultScope ? [defaultScope] : null;
 }
 
 export function hasMembershipRoleAccess(

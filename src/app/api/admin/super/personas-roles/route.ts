@@ -18,7 +18,7 @@ type AppUserRow = {
 type MembershipRow = {
     id: string;
     user_id: string;
-    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
+    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club' | 'club_family';
     scope_id: string;
     role: 'admin' | 'editor' | 'operator' | 'viewer';
     created_at: string | null;
@@ -232,6 +232,7 @@ export async function GET() {
         const sportIds = extractScopeIds(memberships, 'sport');
         const unionIds = extractScopeIds(memberships, 'union');
         const clubIds = extractScopeIds(memberships, 'club');
+        const clubFamilyIds = extractScopeIds(memberships, 'club_family');
         const directTournamentIds = extractScopeIds(memberships, 'tournament');
         const matchIds = extractScopeIds(memberships, 'match');
 
@@ -244,7 +245,7 @@ export async function GET() {
         ] = await Promise.all([
             selectNamedEntities(admin, 'sports', sportIds),
             selectNamedEntities(admin, 'unions', unionIds),
-            selectNamedEntities(admin, 'clubs', clubIds),
+            selectNamedEntities(admin, 'clubs', uniqueIds([...clubIds, ...clubFamilyIds])),
             selectNamedEntities(admin, 'tournaments', directTournamentIds),
             matchIds.length > 0
                 ? admin
@@ -309,6 +310,7 @@ export async function GET() {
         clubsResult.data.forEach((club) => {
             if (club.name) {
                 entityNames[`club:${club.id}`] = club.name;
+                entityNames[`club_family:${club.id}`] = `Familia ${club.name}`;
             }
         });
 

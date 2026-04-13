@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { hasEditorialAccess } from '@/lib/auth/roles';
+import { hasEditorialAccess, type MembershipScope } from '@/lib/auth/roles';
 import { NextResponse } from 'next/server';
 import type { Database } from '@/lib/database.types';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -131,8 +131,8 @@ export async function GET(req: Request) {
 
             const membershipRows = (memberships || []) as MembershipRow[];
             const mappedMemberships = membershipRows.map((m) => ({
-                scopeType: m.scope_type,
-                scopeId: m.scope_id,
+                scopeType: m.scope_type as MembershipScope,
+                scopeId: m.scope_id ?? undefined,
                 role: m.role
             }));
 
@@ -191,8 +191,8 @@ async function verifyEditorialUser() {
 
     const membershipRows = (memberships || []) as MembershipRow[];
     const mappedMemberships = membershipRows.map((m) => ({
-        scopeType: m.scope_type,
-        scopeId: m.scope_id,
+        scopeType: m.scope_type as MembershipScope,
+        scopeId: m.scope_id ?? undefined,
         role: m.role
     }));
 

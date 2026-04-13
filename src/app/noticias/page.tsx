@@ -6,7 +6,7 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 type MembershipRow = {
-    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
+    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club' | 'club_family';
     scope_id?: string | null;
     role: string;
 };
@@ -44,7 +44,7 @@ export default async function NoticiasPage() {
         // Map memberships to the structure expected by the auth helpers
         const mappedMemberships = ((memberships || []) as MembershipRow[]).map((m) => ({
             scopeType: m.scope_type,
-            scopeId: m.scope_id,
+            scopeId: m.scope_id ?? undefined,
             role: m.role
         }));
 

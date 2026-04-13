@@ -32,6 +32,7 @@ export interface ClubManagementTarget {
     clubId: string;
     sportId: string | null;
     unionId: string | null;
+    familyRootId: string;
     familyClubIds: string[];
 }
 
@@ -175,8 +176,9 @@ export function canManageClubContext(
     }
 
     return (
+        hasScopedMembershipAccess(context, 'club', target.clubId, allowedRoles) ||
         target.familyClubIds.some((clubId) =>
-            hasScopedMembershipAccess(context, 'club', clubId, allowedRoles)
+            hasScopedMembershipAccess(context, 'club_family', clubId, allowedRoles)
         ) ||
         hasScopedMembershipAccess(context, 'sport', target.sportId, allowedRoles) ||
         hasScopedMembershipAccess(context, 'union', target.unionId, allowedRoles)
@@ -235,7 +237,7 @@ export async function getClubManagementTarget(
         return null;
     }
 
-    const family = await resolveClubFamilyIds(supabase as any, data.id).catch(() => ({
+    const family = await resolveClubFamilyIds(supabase, data.id).catch(() => ({
         rootClubId: data.id,
         clubIds: [data.id],
     }));
@@ -244,6 +246,7 @@ export async function getClubManagementTarget(
         clubId: data.id,
         sportId: data.sport_id ?? null,
         unionId: data.union_id ?? null,
+        familyRootId: family.rootClubId,
         familyClubIds: family.clubIds,
     };
 }

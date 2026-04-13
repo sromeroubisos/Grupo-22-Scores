@@ -11,7 +11,9 @@ export function resolveManagedClubId(user?: ClubScopedUserLike | null): string |
     }
 
     const scopedMembership = user.memberships?.find(
-        (membership) => membership.scopeType === 'club' && membership.scopeId
+        (membership) =>
+            (membership.scopeType === 'club' || membership.scopeType === 'club_family') &&
+            membership.scopeId
     );
 
     return scopedMembership?.scopeId ?? user.clubId ?? null;

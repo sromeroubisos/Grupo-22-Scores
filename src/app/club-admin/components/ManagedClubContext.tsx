@@ -23,6 +23,7 @@ export interface ManagedClubOption {
     familyRootId: string;
     familyRootName: string | null;
     accessRole: string;
+    managementType: 'club' | 'club_family';
     accessSource: 'direct' | 'family';
     isDirect: boolean;
 }

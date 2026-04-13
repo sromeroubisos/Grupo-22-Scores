@@ -7,7 +7,7 @@ import styles from './page.module.css';
 import InstallAppButton from '@/components/InstallAppButton';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamentById } from '@/lib/data/tournaments/index';
-import { getCountryById, resolveCountryId } from '@/lib/data/countries';
+import { findCountryRecord, getCountryById, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
@@ -141,6 +141,45 @@ interface Match {
   eventLabel?: string;
   footerLabel?: string;
 }
+
+type IndividualParticipantAsset = {
+  imagePath: string;
+  flagEmoji: string;
+};
+
+type MatchDetailsSide = {
+  image_path?: string | null;
+  small_image_path?: string | null;
+};
+
+type MatchDrawEntry = {
+  match_id?: string | number | null;
+  home_team?: {
+    country?: {
+      name?: string | null;
+    } | null;
+  } | null;
+  away_team?: {
+    country?: {
+      name?: string | null;
+    } | null;
+  } | null;
+};
+
+type MatchDetailsResponse = {
+  details?: {
+    home_team?: MatchDetailsSide | null;
+    away_team?: MatchDetailsSide | null;
+  } | null;
+  draw?: Array<{
+    matches?: MatchDrawEntry[] | null;
+  }> | null;
+};
+
+const individualMatchAssetCache = new Map<string, {
+  home: IndividualParticipantAsset;
+  away: IndividualParticipantAsset;
+}>();
 
 interface LeagueMatches {
   league: string;
@@ -286,6 +325,113 @@ const LiveMinute = ({ dateTime, sport }: { dateTime: string, sport: any }) => {
   return <>{calculateVirtualMatchTime(dateTime, sport, 'live') || 'En Vivo'}</>;
 };
 
+function getCountryFlagEmoji(countryName: unknown): string {
+  if (typeof countryName !== 'string' || !countryName.trim()) return '';
+  return findCountryRecord(undefined, countryName)?.flagEmoji || '';
+}
+
+function extractIndividualAssets(payload: MatchDetailsResponse, matchId: string) {
+  const detailsHome = payload?.details?.home_team || {};
+  const detailsAway = payload?.details?.away_team || {};
+  let homeCountryName = '';
+  let awayCountryName = '';
+
+  const rounds = Array.isArray(payload?.draw) ? payload.draw : [];
+  for (const round of rounds) {
+    const matches = Array.isArray(round?.matches) ? round.matches : [];
+    const currentMatch = matches.find((item) => String(item?.match_id || '') === matchId);
+    if (!currentMatch) continue;
+    homeCountryName = currentMatch?.home_team?.country?.name || '';
+    awayCountryName = currentMatch?.away_team?.country?.name || '';
+    break;
+  }
+
+  return {
+    home: {
+      imagePath: detailsHome?.image_path || detailsHome?.small_image_path || '',
+      flagEmoji: getCountryFlagEmoji(homeCountryName),
+    },
+    away: {
+      imagePath: detailsAway?.image_path || detailsAway?.small_image_path || '',
+      flagEmoji: getCountryFlagEmoji(awayCountryName),
+    },
+  };
+}
+
+function IndividualMatchAvatar({
+  matchId,
+  sportId,
+  side,
+  fallbackLogo,
+  name,
+  styles,
+}: {
+  matchId: string;
+  sportId: string;
+  side: 'home' | 'away';
+  fallbackLogo?: string;
+  name: string;
+  styles: any;
+}) {
+  const [asset, setAsset] = useState<IndividualParticipantAsset>(() => {
+    const cached = individualMatchAssetCache.get(matchId);
+    return cached ? (side === 'home' ? cached.home : cached.away) : { imagePath: '', flagEmoji: '' };
+  });
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (sportId !== 'tennis') return;
+    if (!matchId) return;
+
+    if (individualMatchAssetCache.has(matchId)) return;
+
+    const controller = new AbortController();
+
+    fetch(`/api/matches/${encodeURIComponent(matchId)}?sport=${encodeURIComponent(sportId)}`, {
+      signal: controller.signal,
+      cache: 'no-store',
+    })
+      .then((res) => res.ok ? res.json() as Promise<MatchDetailsResponse> : null)
+      .then((payload) => {
+        if (!payload || controller.signal.aborted) return;
+        const next = extractIndividualAssets(payload, matchId);
+        individualMatchAssetCache.set(matchId, next);
+        setAsset(side === 'home' ? next.home : next.away);
+      })
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, [matchId, side, sportId]);
+
+  const preferredLogo = fallbackLogo && fallbackLogo !== failedSrc ? fallbackLogo : '';
+  const resolvedImage = preferredLogo || asset.imagePath;
+
+  if (resolvedImage) {
+    return (
+      <img
+        src={resolvedImage}
+        alt={name}
+        className={styles.logoImgRound}
+        onError={() => {
+          setFailedSrc(resolvedImage);
+        }}
+      />
+    );
+  }
+
+  if (asset.flagEmoji) {
+    return <span className={styles.flagAvatar} aria-hidden>{asset.flagEmoji}</span>;
+  }
+
+  return (
+    <span className={styles.logoFallback}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+      </svg>
+    </span>
+  );
+}
+
 const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showClubFavorites, isClubFavorite, onToggleClubFavorite }: { 
   match: Match & { _dateTime: string }, 
   selectedSport: any, 
@@ -301,6 +447,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
   const canToggleAwayClub = Boolean(showClubFavorites && awayClubId);
   const isHomeClubFavorite = canToggleHomeClub && isClubFavorite ? isClubFavorite(homeClubId) : false;
   const isAwayClubFavorite = canToggleAwayClub && isClubFavorite ? isClubFavorite(awayClubId) : false;
+  const shouldEnhanceIndividualAvatar = isIndividualSport && selectedSport?.id === 'tennis';
 
   const handleClubFavoriteClick = (
     event: MouseEvent<HTMLButtonElement>,
@@ -335,7 +482,17 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
         <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : ''}`}>
           <div className={styles.matchTeamIdentity}>
             <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-              {match.homeLogo ? (
+              {shouldEnhanceIndividualAvatar ? (
+                <IndividualMatchAvatar
+                  key={`home-${match.id}-${match.homeLogo || 'none'}`}
+                  matchId={String(match.id)}
+                  sportId={selectedSport?.id || 'tennis'}
+                  side="home"
+                  fallbackLogo={match.homeLogo}
+                  name={match.home}
+                  styles={styles}
+                />
+              ) : match.homeLogo ? (
                 <img
                   src={match.homeLogo}
                   alt={match.home}
@@ -347,7 +504,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
                   }}
                 />
               ) : null}
-              <span className={styles.logoFallback} style={match.homeLogo ? { display: 'none' } : {}}>
+              <span className={styles.logoFallback} style={shouldEnhanceIndividualAvatar || match.homeLogo ? { display: 'none' } : {}}>
                 {isIndividualSport ? (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
@@ -377,7 +534,17 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
         <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : ''}`}>
           <div className={styles.matchTeamIdentity}>
             <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
-              {match.awayLogo ? (
+              {shouldEnhanceIndividualAvatar ? (
+                <IndividualMatchAvatar
+                  key={`away-${match.id}-${match.awayLogo || 'none'}`}
+                  matchId={String(match.id)}
+                  sportId={selectedSport?.id || 'tennis'}
+                  side="away"
+                  fallbackLogo={match.awayLogo}
+                  name={match.away}
+                  styles={styles}
+                />
+              ) : match.awayLogo ? (
                 <img
                   src={match.awayLogo}
                   alt={match.away}
@@ -389,7 +556,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
                   }}
                 />
               ) : null}
-              <span className={styles.logoFallback} style={match.awayLogo ? { display: 'none' } : {}}>
+              <span className={styles.logoFallback} style={shouldEnhanceIndividualAvatar || match.awayLogo ? { display: 'none' } : {}}>
                 {isIndividualSport ? (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />

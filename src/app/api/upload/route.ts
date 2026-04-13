@@ -6,7 +6,7 @@ import { createClient as createServerClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 type MembershipRow = {
-    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
+    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club' | 'club_family';
     scope_id?: string | null;
     role: string;
 };
@@ -34,7 +34,7 @@ async function verifyEditorialUser() {
 
     const mappedMemberships = ((memberships || []) as MembershipRow[]).map((m) => ({
         scopeType: m.scope_type,
-        scopeId: m.scope_id,
+        scopeId: m.scope_id ?? undefined,
         role: m.role
     }));
 

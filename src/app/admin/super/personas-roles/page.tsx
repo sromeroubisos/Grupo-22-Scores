@@ -19,10 +19,16 @@ type AppUserRow = {
 type MembershipRow = {
     id: string;
     user_id: string;
-    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club';
+    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club' | 'club_family';
     scope_id: string;
     role: 'admin' | 'editor' | 'operator' | 'viewer';
     created_at: string | null;
+};
+
+type ClubCatalogItem = {
+    id: string;
+    label: string;
+    meta?: string;
 };
 
 type RoleAssignment = {
@@ -121,6 +127,7 @@ const SCOPE_ROLE_LABELS: Record<MembershipRow['scope_type'], string> = {
     tournament: 'Gestor de Torneos',
     match: 'Gestor de Partidos',
     club: 'Gestor de Clubes',
+    club_family: 'Familia de Club',
 };
 
 const LOCAL_ROLE_LABELS: Record<MembershipRow['role'], string> = {
@@ -144,15 +151,58 @@ export default function PersonasRolesPage() {
     const [editingRole, setEditingRole] = useState<string>('');
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [clubCatalog, setClubCatalog] = useState<ClubCatalogItem[]>([]);
+    const [loadingClubCatalog, setLoadingClubCatalog] = useState(false);
+    const [clubManagementType, setClubManagementType] = useState<'club' | 'club_family'>('club');
+    const [clubMembershipRole, setClubMembershipRole] = useState<MembershipRow['role']>('admin');
+    const [clubScopeId, setClubScopeId] = useState('');
+
+    const loadClubCatalog = useCallback(async () => {
+        if (clubCatalog.length > 0) {
+            return;
+        }
+
+        setLoadingClubCatalog(true);
+        try {
+            const response = await fetch('/api/catalog/clubs?limit=200', {
+                cache: 'no-store',
+                credentials: 'include',
+            });
+            const payload = await response.json() as { data?: ClubCatalogItem[]; error?: string };
+            if (!response.ok) {
+                throw new Error(payload.error || 'No se pudo cargar el catálogo de clubes');
+            }
+
+            setClubCatalog(payload.data ?? []);
+        } catch (err) {
+            setSaveError(err instanceof Error ? err.message : 'No se pudo cargar el catálogo de clubes');
+        } finally {
+            setLoadingClubCatalog(false);
+        }
+    }, [clubCatalog.length]);
 
     const openEdit = useCallback((user: AppUserRow) => {
+        const clubAssignments = memberships.filter(
+            (membership) =>
+                membership.user_id === user.id &&
+                (membership.scope_type === 'club' || membership.scope_type === 'club_family')
+        );
+        const primaryClubAssignment = clubAssignments[0] ?? null;
+
         setEditingUser(user);
         setEditingRole(user.role);
+        setClubManagementType(primaryClubAssignment?.scope_type === 'club_family' ? 'club_family' : 'club');
+        setClubMembershipRole(primaryClubAssignment?.role ?? 'admin');
+        setClubScopeId(primaryClubAssignment?.scope_id ?? '');
         setSaveError(null);
-    }, []);
+        void loadClubCatalog();
+    }, [loadClubCatalog, memberships]);
 
     const closeEdit = useCallback(() => {
         setEditingUser(null);
+        setClubManagementType('club');
+        setClubMembershipRole('admin');
+        setClubScopeId('');
         setSaveError(null);
     }, []);
 
@@ -161,13 +211,40 @@ export default function PersonasRolesPage() {
         setSaving(true);
         setSaveError(null);
         try {
-            const response = await fetch(`/api/admin/super/personas-roles/${editingUser.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ role: editingRole }),
-            });
-            const payload = await response.json() as { data?: { id: string; role: string }; error?: string };
+            const needsClubScope = editingRole === 'gestor_clubes' || editingRole === 'admin_club';
+            if (needsClubScope && !clubScopeId) {
+                setSaveError('Seleccioná un club o una familia de club para este usuario.');
+                return;
+            }
+
+            const response = await fetch(
+                needsClubScope
+                    ? `/api/admin/users/${editingUser.id}/access`
+                    : `/api/admin/super/personas-roles/${editingUser.id}`,
+                {
+                    method: needsClubScope ? 'PUT' : 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(
+                        needsClubScope
+                            ? {
+                                role: editingRole,
+                                scopeType: clubManagementType,
+                                membershipRole: clubMembershipRole,
+                                scopeIds: [clubScopeId],
+                            }
+                            : { role: editingRole }
+                    ),
+                }
+            );
+            const payload = await response.json() as {
+                data?: {
+                    id?: string;
+                    role?: string;
+                    memberships?: MembershipRow[];
+                };
+                error?: string;
+            };
             if (!response.ok) {
                 setSaveError(payload.error || 'Error al guardar');
                 return;
@@ -175,13 +252,38 @@ export default function PersonasRolesPage() {
             setUsers((prev) =>
                 prev.map((u) => (u.id === editingUser.id ? { ...u, role: editingRole } : u))
             );
+
+            if (needsClubScope) {
+                setMemberships((prev) => {
+                    const next = prev.filter(
+                        (membership) =>
+                            membership.user_id !== editingUser.id ||
+                            (membership.scope_type !== 'club' && membership.scope_type !== 'club_family')
+                    );
+
+                    const nextClubMemberships = ((payload.data?.memberships ?? []) as MembershipRow[]).filter(
+                        (membership) =>
+                            membership.scope_type === 'club' || membership.scope_type === 'club_family'
+                    );
+
+                    return [...next, ...nextClubMemberships];
+                });
+            }
+
             closeEdit();
         } catch (err) {
             setSaveError(err instanceof Error ? err.message : 'Error desconocido');
         } finally {
             setSaving(false);
         }
-    }, [editingUser, editingRole, closeEdit]);
+    }, [
+        clubManagementType,
+        clubMembershipRole,
+        clubScopeId,
+        closeEdit,
+        editingRole,
+        editingUser,
+    ]);
 
     useEffect(() => {
         void fetchUsers();
@@ -395,6 +497,23 @@ export default function PersonasRolesPage() {
             );
         });
     }, [derivedRoleAssignments, searchQuery]);
+
+    const editingClubAssignments = useMemo(
+        () =>
+            editingUser
+                ? memberships.filter(
+                    (membership) =>
+                        membership.user_id === editingUser.id &&
+                        (membership.scope_type === 'club' || membership.scope_type === 'club_family')
+                )
+                : [],
+        [editingUser, memberships]
+    );
+
+    const selectedClubLabel = useMemo(
+        () => clubCatalog.find((club) => club.id === clubScopeId)?.label ?? clubScopeId,
+        [clubCatalog, clubScopeId]
+    );
 
     return (
         <>
@@ -912,6 +1031,150 @@ export default function PersonasRolesPage() {
                         </select>
                     </div>
 
+                    {(editingRole === 'gestor_clubes' || editingRole === 'admin_club') && (
+                        <div style={{ marginBottom: 24, display: 'grid', gap: 16 }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: 12, color: 'var(--basalt-400)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                    Tipo de gestión
+                                </label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setClubManagementType('club')}
+                                        style={{
+                                            borderRadius: 10,
+                                            border: clubManagementType === 'club' ? '1px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.12)',
+                                            background: clubManagementType === 'club' ? 'rgba(52,211,153,0.12)' : 'var(--basalt-900, #0a0d10)',
+                                            color: '#fff',
+                                            padding: '12px 14px',
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <strong style={{ display: 'block', marginBottom: 4 }}>Club</strong>
+                                        <span style={{ fontSize: 12, color: 'var(--basalt-400)' }}>Acceso solamente al club elegido.</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setClubManagementType('club_family')}
+                                        style={{
+                                            borderRadius: 10,
+                                            border: clubManagementType === 'club_family' ? '1px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.12)',
+                                            background: clubManagementType === 'club_family' ? 'rgba(52,211,153,0.12)' : 'var(--basalt-900, #0a0d10)',
+                                            color: '#fff',
+                                            padding: '12px 14px',
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <strong style={{ display: 'block', marginBottom: 4 }}>Familia de club</strong>
+                                        <span style={{ fontSize: 12, color: 'var(--basalt-400)' }}>Expande el acceso a todos los clubes de la familia operativa.</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 12, color: 'var(--basalt-400)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Nivel interno
+                                    </label>
+                                    <select
+                                        value={clubMembershipRole}
+                                        onChange={(e) => setClubMembershipRole(e.target.value as MembershipRow['role'])}
+                                        style={{
+                                            width: '100%',
+                                            background: 'var(--basalt-900, #0a0d10)',
+                                            border: '1px solid rgba(255,255,255,0.12)',
+                                            borderRadius: 10,
+                                            color: '#fff',
+                                            padding: '10px 14px',
+                                            fontSize: 14,
+                                        }}
+                                    >
+                                        <option value="admin">Admin</option>
+                                        <option value="editor">Editor</option>
+                                        <option value="operator">Operador</option>
+                                        <option value="viewer">Lectura</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 12, color: 'var(--basalt-400)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {clubManagementType === 'club_family' ? 'Familia base' : 'Club'}
+                                    </label>
+                                    <select
+                                        value={clubScopeId}
+                                        onChange={(e) => setClubScopeId(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            background: 'var(--basalt-900, #0a0d10)',
+                                            border: '1px solid rgba(255,255,255,0.12)',
+                                            borderRadius: 10,
+                                            color: '#fff',
+                                            padding: '10px 14px',
+                                            fontSize: 14,
+                                        }}
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        {clubCatalog.map((club) => (
+                                            <option key={club.id} value={club.id}>
+                                                {club.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div style={{ fontSize: 12, color: 'var(--basalt-400)', marginTop: 6 }}>
+                                        {loadingClubCatalog
+                                            ? 'Cargando clubes...'
+                                            : clubManagementType === 'club_family'
+                                                ? 'Usá el club base de la familia. Internamente el acceso se expande al resto.'
+                                                : 'Este usuario queda limitado al club seleccionado.'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {editingClubAssignments.length > 0 && (
+                                <div style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <div style={{ fontSize: 12, color: 'var(--basalt-400)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Acceso actual
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                        {editingClubAssignments.map((membership) => (
+                                            <span
+                                                key={membership.id}
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: 6,
+                                                    padding: '6px 10px',
+                                                    borderRadius: 999,
+                                                    background: 'rgba(52,211,153,0.12)',
+                                                    border: '1px solid rgba(52,211,153,0.22)',
+                                                    fontSize: 12,
+                                                }}
+                                            >
+                                                {membership.scope_type === 'club_family' ? 'Familia' : 'Club'}:
+                                                {' '}
+                                                {entityNames[`${membership.scope_type}:${membership.scope_id}`] || membership.scope_id}
+                                                {' '}
+                                                ·
+                                                {' '}
+                                                {LOCAL_ROLE_LABELS[membership.role]}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {clubScopeId && (
+                                <div style={{ fontSize: 12, color: 'var(--basalt-400)' }}>
+                                    Se va a guardar como <strong style={{ color: '#fff' }}>{clubManagementType === 'club_family' ? 'familia de club' : 'club'}</strong>
+                                    {' '}sobre{' '}
+                                    <strong style={{ color: '#fff' }}>{selectedClubLabel}</strong>.
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Error */}
                     {saveError && (
                         <div style={{ color: '#f87171', fontSize: 13, marginBottom: 16, padding: '8px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: 8 }}>
@@ -928,7 +1191,21 @@ export default function PersonasRolesPage() {
                             className={`${styles.btn} ${styles.btnPrimary}`}
                             type="button"
                             onClick={() => void handleSaveRole()}
-                            disabled={saving || editingRole === editingUser.role}
+                            disabled={
+                                saving ||
+                                (
+                                    editingRole === editingUser.role &&
+                                    (
+                                        (editingRole !== 'gestor_clubes' && editingRole !== 'admin_club') ||
+                                        (editingClubAssignments.length === 1 && editingClubAssignments.some(
+                                            (membership) =>
+                                                membership.scope_type === clubManagementType &&
+                                                membership.scope_id === clubScopeId &&
+                                                membership.role === clubMembershipRole
+                                        ))
+                                    )
+                                )
+                            }
                         >
                             {saving ? 'Guardando...' : 'Guardar cambios'}
                         </button>

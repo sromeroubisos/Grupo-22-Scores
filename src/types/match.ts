@@ -45,6 +45,10 @@ export interface Match {
 
     homeTeamLogo?: string;        // Optional for external matches
     awayTeamLogo?: string;        // Optional for external matches
+    homeTeamImagePath?: string;
+    awayTeamImagePath?: string;
+    homeTeamUrl?: string;
+    awayTeamUrl?: string;
 
     scheduledAt: Date | null;
     venueId?: string;

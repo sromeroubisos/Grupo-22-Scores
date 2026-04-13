@@ -50,6 +50,15 @@ import {
   type ExternalTournamentOverrideRecord,
 } from '@/lib/server/externalTournamentOverrides';
 
+function jsonNoStore(body: unknown, init?: ResponseInit) {
+  const headers = new Headers(init?.headers);
+  headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  return NextResponse.json(body, {
+    ...init,
+    headers,
+  });
+}
+
 function normalizeString(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim();
@@ -143,7 +152,9 @@ async function getFlashScoreMatchBundle(matchId: string) {
   const startTimeMs = Number(tsTotal) * 1000;
   const nowDays = Math.floor(Date.now() / 86400000);
   const matchDays = Math.floor(startTimeMs / 86400000);
-  const matchDayOffset = Math.max(-7, Math.min(7, matchDays - nowDays));
+  const rawMatchDayOffset = matchDays - nowDays;
+  const canFetchDayMatches = rawMatchDayOffset >= -7 && rawMatchDayOffset <= 7;
+  const matchDayOffset = Math.max(-7, Math.min(7, rawMatchDayOffset));
 
   const results = await Promise.allSettled([
     getFlashScoreMatchSummary(matchId),
@@ -152,7 +163,7 @@ async function getFlashScoreMatchBundle(matchId: string) {
     getFlashScoreStandingsForm(matchId),
     getFlashScoreMatchLineups(matchId),
     getFlashScoreMatchStandings(matchId),
-    getFlashScoreMatchesRaw(matchDayOffset, sportId),
+    canFetchDayMatches ? getFlashScoreMatchesRaw(matchDayOffset, sportId) : Promise.resolve([]),
     getFlashScorePlayerStats(matchId),
     getFlashScoreMatchCommentary(matchId),
     getFlashScoreMatchDraw(matchId),
@@ -290,67 +301,67 @@ export async function GET(
     if (rugbyMatchId) {
       const bundle = await getRugbyApiSportsMatchBundle(rugbyMatchId);
       if (!bundle) {
-        return NextResponse.json(
+        return jsonNoStore(
           { error: 'Match not found' },
           { status: 404 }
         );
       }
 
-      return NextResponse.json(bundle);
+      return jsonNoStore(bundle);
     }
 
     if (espnMatchId) {
       const bundle = await getEspnAmericanFootballMatchBundle(espnMatchId);
       if (!bundle) {
-        return NextResponse.json(
+        return jsonNoStore(
           { error: 'Match not found' },
           { status: 404 }
         );
       }
 
-      return NextResponse.json(bundle);
+      return jsonNoStore(bundle);
     }
 
     if (espnMotorsportMatchId) {
       const bundle = await getEspnMotorsportMatchBundle(matchId);
       if (!bundle) {
-        return NextResponse.json(
+        return jsonNoStore(
           { error: 'Match not found' },
           { status: 404 }
         );
       }
 
-      return NextResponse.json(bundle);
+      return jsonNoStore(bundle);
     }
 
     if (isFlashScoreMatchId(matchId)) {
       const bundle = await getFlashScoreMatchBundle(matchId);
 
       if (!bundle) {
-        return NextResponse.json(
+        return jsonNoStore(
           { error: 'Match not found' },
           { status: 404 }
         );
       }
 
-      return NextResponse.json(bundle);
+      return jsonNoStore(bundle);
     }
 
     const readClient = await getReadClient();
     const { data: match, error: matchError } = await fetchMatchCenterMatch(readClient, matchId);
 
     if (matchError || !match) {
-      return NextResponse.json(
+      return jsonNoStore(
         { error: 'Match not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(match);
+    return jsonNoStore(match);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in GET /api/matches/[id]:', error);
-    return NextResponse.json(
+    return jsonNoStore(
       { error: message },
       { status: 500 }
     );

@@ -22,7 +22,7 @@ import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
 import { useAuth } from '@/context/AuthContext';
-import { getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
+import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 
 // Tabs
 const BASE_TABS = [
@@ -96,6 +96,16 @@ function isEspnAmericanFootballTournamentId(value: string) {
 
 function isEspnMotorsportTournamentId(value: string) {
     return /^espn-racing-league-[a-z0-9-]+$/i.test(value);
+}
+
+function hasConfiguredFlashScoreSource(tournament: any): boolean {
+    const config = getTournamentFlashScoreConfig(tournament as any);
+    return Boolean(
+        config?.tournament_id ||
+        config?.tournament_stage_id ||
+        config?.tournament_template_id ||
+        config?.season_id
+    );
 }
 
 type StandingsScopeView = {
@@ -505,7 +515,13 @@ function isGroupedStandingsData(rows: any[]): boolean {
 function normalizeStandingsRows(raw: any[]): any[] {
     if (!Array.isArray(raw) || raw.length === 0) return [];
     if (isGroupedStandingsData(raw)) return raw;
-    if (raw[0]?.team_id || raw[0]?.participant || raw[0]?.name || raw[0]?.team) return raw;
+    if (
+        raw[0]?.team_id ||
+        raw[0]?.participant ||
+        raw[0]?.name ||
+        raw[0]?.team ||
+        raw[0]?.team_name
+    ) return raw;
     return [];
 }
 
@@ -1367,7 +1383,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             type: isCircuitCompetition ? 'circuit' : 'league',
             categories: [],
             priority: 0,
-            __isDbOnly: !tournament.url,
+            __isDbOnly: !tournament.url && !hasConfiguredFlashScoreSource(tournament),
         } : null,
         results: sortMatchesByDate(allMatches.filter((match: any) => match.status === 'finished'), 'desc'),
         fixtures: sortMatchesByDate(allMatches.filter((match: any) => match.status !== 'finished'), 'asc'),
@@ -1491,10 +1507,14 @@ export default function TournamentDetailPage({
             // Skip refetch when SSR already has a real name; still run when logo is missing so `/api/db/tournaments/[id]` can fill `banner_url`.
             if (preloaded && !shouldRetryDbSnapshot) {
                 const meta = preloaded.tournamentMeta;
+                const catalogTournament = getTournamentById(id);
                 const hasName = Boolean(meta?.name) && meta?.name !== 'Cargando...';
                 const hasLogo = Boolean(String(meta?.logoUrl || '').trim());
                 const hasRugbyExternalConfig = Boolean(getTournamentRugbyApiSportsConfig(meta as any)?.league_id);
-                if (hasName && hasLogo && !hasRugbyExternalConfig) {
+                const hasKnownExternalUrl = Boolean(String(meta?.url || catalogTournament?.url || '').trim());
+                const hasFlashScoreConfig = hasConfiguredFlashScoreSource(meta) || hasConfiguredFlashScoreSource(catalogTournament);
+                const isDbOnlySnapshot = Boolean(meta?.__isDbOnly) && !hasKnownExternalUrl && !hasFlashScoreConfig;
+                if (hasName && hasLogo && isDbOnlySnapshot && !hasRugbyExternalConfig) {
                     setLoading(false);
                     return;
                 }
@@ -1514,6 +1534,13 @@ export default function TournamentDetailPage({
 
                 if (shouldPreferDbSource) {
                     const dbStoredUrl = (initialData?.tournament as any)?.url || '';
+                    const fallbackCatalogUrl = localTournament?.url || preloaded?.tournamentMeta?.url || '';
+                    const resolvedTournamentUrl = dbStoredUrl || fallbackCatalogUrl;
+                    const hasFlashScoreExternalConfig = Boolean(
+                        hasConfiguredFlashScoreSource(initialData?.tournament) ||
+                        hasConfiguredFlashScoreSource(preloaded?.tournamentMeta) ||
+                        hasConfiguredFlashScoreSource(localTournament)
+                    );
                     const hasRugbyExternalConfig = Boolean(
                         getTournamentRugbyApiSportsConfig(initialData?.tournament as any)?.league_id ||
                         getTournamentRugbyApiSportsConfig(preloaded?.tournamentMeta as any)?.league_id,
@@ -1525,12 +1552,12 @@ export default function TournamentDetailPage({
                         sportId: preloaded?.tournamentMeta?.sportId || localTournament?.sportId || (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : 'rugby')),
                         countryId: preloaded?.tournamentMeta?.countryId || localTournament?.countryId || 'international',
                         name: preloaded?.tournamentMeta?.name || localTournament?.name || 'Cargando...',
-                        url: dbStoredUrl,
+                        url: resolvedTournamentUrl,
                         type: preloaded?.tournamentMeta?.type || localTournament?.type || 'league',
                         categories: localTournament?.categories || [],
                         priority: localTournament?.priority || 0,
                         // Rugby API-Sports tournaments can be externally linked without a FlashScore URL.
-                        __isDbOnly: !dbStoredUrl && !hasRugbyExternalConfig,
+                        __isDbOnly: !resolvedTournamentUrl && !hasRugbyExternalConfig && !hasFlashScoreExternalConfig,
                     } as any;
                 }
 
@@ -1550,6 +1577,7 @@ export default function TournamentDetailPage({
                         // UUID → DB-only tournament. Skip metadata round-trip;
                         // metadata will be included in the /data response below.
                         const dbStoredUrl = (initialData?.tournament as any)?.url || '';
+                        const hasFlashScoreExternalConfig = hasConfiguredFlashScoreSource(initialData?.tournament);
                         const hasRugbyExternalConfig = Boolean(
                             getTournamentRugbyApiSportsConfig(initialData?.tournament as any)?.league_id,
                         );
@@ -1562,7 +1590,7 @@ export default function TournamentDetailPage({
                             countryId: 'international',
                             categories: [],
                             priority: 0,
-                            __isDbOnly: !dbStoredUrl && !hasRugbyExternalConfig,
+                            __isDbOnly: !dbStoredUrl && !hasRugbyExternalConfig && !hasFlashScoreExternalConfig,
                             __dbLookupCandidate: !UUID_RE.test(id),
                         } as any;
                     }
@@ -1635,7 +1663,10 @@ export default function TournamentDetailPage({
                                                 : (tournamentMeta?.type || 'league'),
                                             categories: [],
                                             priority: 0,
-                                            __isDbOnly: !dbStoredUrl && !getTournamentRugbyApiSportsConfig(t as any)?.league_id,
+                                            __isDbOnly:
+                                                !dbStoredUrl &&
+                                                !getTournamentRugbyApiSportsConfig(t as any)?.league_id &&
+                                                !hasConfiguredFlashScoreSource(t),
                                         };
                                         if (resolvedLogo) setCachedLogo(String(t.id || id), resolvedLogo);
                                     }
@@ -1702,14 +1733,22 @@ export default function TournamentDetailPage({
                 }
 
                 const finalUrl = localTournament?.url || urlParam;
+                const flashScoreConfig =
+                    getTournamentFlashScoreConfig(localTournament) ||
+                    getTournamentFlashScoreConfig(preloaded?.tournamentMeta) ||
+                    getTournamentFlashScoreConfig(initialData?.tournament);
                 const query = new URLSearchParams();
                 query.set('id', id);
                 if (finalUrl) query.set('url', finalUrl);
                 if (nameParam) query.set('name', nameParam);
                 if (localTournament?.sportId) query.set('sport', localTournament.sportId);
                 if (overrideTournamentId) query.set('tournament_id', overrideTournamentId);
+                else if (flashScoreConfig?.tournament_id) query.set('tournament_id', String(flashScoreConfig.tournament_id));
                 if (overrideStageId) query.set('tournament_stage_id', overrideStageId);
+                else if (flashScoreConfig?.tournament_stage_id) query.set('tournament_stage_id', String(flashScoreConfig.tournament_stage_id));
+                if (flashScoreConfig?.tournament_template_id) query.set('tournament_template_id', String(flashScoreConfig.tournament_template_id));
                 if (overrideSeason) query.set('season', overrideSeason);
+                else if (flashScoreConfig?.season_id != null) query.set('season_id', String(flashScoreConfig.season_id));
 
                 const res = await fetch(`/api/tournaments?${query.toString()}`, {
                     cache: 'no-store',
@@ -1811,10 +1850,6 @@ export default function TournamentDetailPage({
         () => dbPhases.some((phase: any) => isKnockoutPhaseType(phase?.phase_type)),
         [dbPhases],
     );
-    const shouldUseIntegratedBracketView = !hasDbKnockoutPhase && (
-        Boolean(details?.current_stage_has_cup_trees) || isKnockoutPhaseType(activeDbPhase?.phase_type)
-    );
-    const hasDedicatedPlayoffTab = hasDbKnockoutPhase || (!shouldUseIntegratedBracketView && draw.length > 0);
     const visibleStandingsScopeViews = useMemo(
         () => standingsScopeViews.filter((view) => view.kind === 'global' || !isKnockoutPhaseType(view.phase?.phase_type)),
         [standingsScopeViews],
@@ -1826,6 +1861,10 @@ export default function TournamentDetailPage({
         standingsOverUnder.length > 0 ||
         customStandingsTables.length > 0
     ));
+    const shouldUseIntegratedBracketView = !hasDbKnockoutPhase && !hasVisibleStandingsData && (
+        Boolean(details?.current_stage_has_cup_trees) || isKnockoutPhaseType(activeDbPhase?.phase_type)
+    );
+    const hasDedicatedPlayoffTab = hasDbKnockoutPhase || (!shouldUseIntegratedBracketView && draw.length > 0);
 
     useEffect(() => {
         if (shouldUseIntegratedBracketView && activeTab === 'playoff') {
@@ -1850,10 +1889,11 @@ export default function TournamentDetailPage({
         isEspnMotorsportTournamentId(String(tournamentData?.externalId || '')) ||
         isEspnMotorsportTournamentId(String(details?.tournament_id || ''))
     );
+    const shouldForceStandingsTabVisible = tournamentData?.sportId === 'basketball';
     const navigationTabs = useMemo(() => (
         BASE_TABS
             .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && (tab.id === 'stats' || tab.id === 'playoff')))
-            .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData && !shouldForceStandingsTabVisible))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
@@ -1866,7 +1906,7 @@ export default function TournamentDetailPage({
                 if (tab.id === 'teams') return { ...tab, label: 'Equipos' };
                 return tab;
             })
-    ), [hasDedicatedPlayoffTab, hasVisibleStandingsData, isLimitedExternalProvider, isMotorsportTournament, shouldUseIntegratedBracketView]);
+    ), [hasDedicatedPlayoffTab, hasVisibleStandingsData, isLimitedExternalProvider, isMotorsportTournament, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;

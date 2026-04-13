@@ -17,6 +17,7 @@ import {
 } from '@/lib/localMatchData';
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { SPORTS } from '@/lib/data/sports';
+import { findCountryRecord } from '@/lib/data/countries';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
@@ -218,6 +219,61 @@ function mapMatchStatus(matchStatusObj: any, simpleStatus?: string) {
 
 function getTeamLogo(team: any) {
     return resolveTeamLogo(team);
+}
+
+function getCountryFlagEmoji(countryName: unknown) {
+    if (typeof countryName !== 'string' || !countryName.trim()) return '';
+    return findCountryRecord(undefined, countryName)?.flagEmoji || '';
+}
+
+function getDrawParticipantCountryName(draw: any, matchId: string, side: 'home' | 'away') {
+    const rounds = Array.isArray(draw) ? draw : [];
+    for (const round of rounds) {
+        const matches = Array.isArray(round?.matches) ? round.matches : [];
+        const currentMatch = matches.find((item: any) => String(item?.match_id || '') === matchId);
+        if (!currentMatch) continue;
+        return side === 'home'
+            ? (currentMatch?.home_team?.country?.name || '')
+            : (currentMatch?.away_team?.country?.name || '');
+    }
+    return '';
+}
+
+function getScoreboardParticipantVisual(team: any, sportId: unknown) {
+    if (sportId === 'tennis') {
+        return {
+            image: team?.imagePath || team?.smallImagePath || team?.logo || '',
+            flagEmoji: team?.countryFlagEmoji || getCountryFlagEmoji(team?.countryName),
+        };
+    }
+
+    return {
+        image: team?.logo || '',
+        flagEmoji: '',
+    };
+}
+
+function ScoreboardParticipantAvatar({ imageSrc, flagEmoji }: { imageSrc: string; flagEmoji: string }) {
+    const [imageFailed, setImageFailed] = useState(false);
+
+    if (imageSrc && !imageFailed) {
+        return (
+            <img
+                src={imageSrc}
+                className={styles.crestImage}
+                alt=""
+                onError={() => {
+                    setImageFailed(true);
+                }}
+            />
+        );
+    }
+
+    if (flagEmoji) {
+        return <div className={styles.crestFlag} aria-hidden>{flagEmoji}</div>;
+    }
+
+    return <div className={styles.crestPlaceholder} aria-hidden />;
 }
 
 function resolveMatchTeamLogo(primaryTeam: any, fallbackTeam?: any, fallbackLogo?: string | null) {
@@ -969,7 +1025,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
             try {
                 if (isExternalMatch) {
-                    const apiRes = await fetch(`/api/matches/${id}`, { signal: controller.signal });
+                    const apiRes = await fetch(`/api/matches/${id}`, {
+                        signal: controller.signal,
+                        cache: 'no-store',
+                    });
                     const payload = await apiRes.json().catch(() => null);
 
                     if (!apiRes.ok) {
@@ -1082,6 +1141,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                     const initialHomeScore = evt.scores?.home ?? evt.HOME_SCORE_CURRENT ?? baseMatch.scoreHome;
                     const initialAwayScore = evt.scores?.away ?? evt.AWAY_SCORE_CURRENT ?? baseMatch.scoreAway;
+                    const initialHomeCountryName = getDrawParticipantCountryName(drawRes, String(evt.match_id || evt.EVENT_ID || id), 'home');
+                    const initialAwayCountryName = getDrawParticipantCountryName(drawRes, String(evt.match_id || evt.EVENT_ID || id), 'away');
 
                     statusRef.current = fsStatus;
                     const resolvedHomeLogo = resolveMatchTeamLogo(evt.home_team, baseMatch.home, baseMatch.home?.logo);
@@ -1097,8 +1158,26 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                             category: evt.country?.name || evt.COUNTRY_NAME || baseMatch.category || 'Internacional',
                             tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
                             tournamentLogo: resolveTournamentLogo(evt, (baseMatch as any)?.tournamentLogo || null),
-                            home: { ...baseMatch.home, logo: resolvedHomeLogo, score: initialHomeScore, teamUrl: evt.home_team?.team_url || '' },
-                            away: { ...baseMatch.away, logo: resolvedAwayLogo, score: initialAwayScore, teamUrl: evt.away_team?.team_url || '' },
+                            home: {
+                                ...baseMatch.home,
+                                logo: resolvedHomeLogo,
+                                score: initialHomeScore,
+                                teamUrl: evt.home_team?.team_url || '',
+                                imagePath: evt.home_team?.image_path || evt.home_team?.small_image_path || '',
+                                smallImagePath: evt.home_team?.small_image_path || evt.home_team?.image_path || '',
+                                countryName: initialHomeCountryName || '',
+                                countryFlagEmoji: getCountryFlagEmoji(initialHomeCountryName),
+                            },
+                            away: {
+                                ...baseMatch.away,
+                                logo: resolvedAwayLogo,
+                                score: initialAwayScore,
+                                teamUrl: evt.away_team?.team_url || '',
+                                imagePath: evt.away_team?.image_path || evt.away_team?.small_image_path || '',
+                                smallImagePath: evt.away_team?.small_image_path || evt.away_team?.image_path || '',
+                                countryName: initialAwayCountryName || '',
+                                countryFlagEmoji: getCountryFlagEmoji(initialAwayCountryName),
+                            },
                             lineups: null,
                             standings: [],
                             h2h: [],
@@ -1255,6 +1334,8 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
 
                     setState(prev => {
                         if (!prev.matchData) return prev;
+                        const resolvedHomeCountryName = getDrawParticipantCountryName(resolvedDraw, String(evt.match_id || evt.EVENT_ID || id), 'home') || prev.matchData.home?.countryName || '';
+                        const resolvedAwayCountryName = getDrawParticipantCountryName(resolvedDraw, String(evt.match_id || evt.EVENT_ID || id), 'away') || prev.matchData.away?.countryName || '';
 
                         return {
                             ...prev,
@@ -1268,12 +1349,20 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                     logo: resolveMatchTeamLogo(evt.home_team, prev.matchData.home, prev.matchData.home?.logo),
                                     score: hScoreFinal,
                                     teamUrl: evt.home_team?.team_url || '',
+                                    imagePath: evt.home_team?.image_path || evt.home_team?.small_image_path || prev.matchData.home?.imagePath || '',
+                                    smallImagePath: evt.home_team?.small_image_path || evt.home_team?.image_path || prev.matchData.home?.smallImagePath || '',
+                                    countryName: resolvedHomeCountryName,
+                                    countryFlagEmoji: getCountryFlagEmoji(resolvedHomeCountryName),
                                 },
                                 away: {
                                     ...prev.matchData.away,
                                     logo: resolveMatchTeamLogo(evt.away_team, prev.matchData.away, prev.matchData.away?.logo),
                                     score: aScoreFinal,
                                     teamUrl: evt.away_team?.team_url || '',
+                                    imagePath: evt.away_team?.image_path || evt.away_team?.small_image_path || prev.matchData.away?.imagePath || '',
+                                    smallImagePath: evt.away_team?.small_image_path || evt.away_team?.image_path || prev.matchData.away?.smallImagePath || '',
+                                    countryName: resolvedAwayCountryName,
+                                    countryFlagEmoji: getCountryFlagEmoji(resolvedAwayCountryName),
                                 },
                                 lineups: lineupsRes?.DATA || lineupsRes || null,
                                 standings: resolvedStandings,
@@ -1294,7 +1383,10 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                 } else {
                     // DATABASE MATCH LOGIC - Fetch from Supabase via API
                     try {
-                        const res = await fetch(`/api/matches/${id}`, { signal: controller.signal });
+                        const res = await fetch(`/api/matches/${id}`, {
+                            signal: controller.signal,
+                            cache: 'no-store',
+                        });
                         if (res.ok) {
                             const matchData = await res.json();
 
@@ -2118,22 +2210,20 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                 {/* Layer 2: Scoreboard */}
                 <section className={styles.scoreboardCard}>
                     <div className={styles.scoreboardGrid}>
+                        {(() => {
+                            const homeVisual = getScoreboardParticipantVisual(matchData.home, matchData.sportId);
+                            const awayVisual = getScoreboardParticipantVisual(matchData.away, matchData.sportId);
+                            return (
+                                <>
                         {/* Local */}
                         <div className={styles.teamCol}>
                             <Link href={buildTeamHref(matchData.home, matchData.sportId)} style={{ textDecoration: 'none' }}>
                                 <div className={styles.crestWrapper}>
-                                    {matchData.home.logo ? (
-                                        <img
-                                            src={matchData.home.logo}
-                                            className={styles.crestImage}
-                                            alt=""
-                                            onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
-                                            }}
-                                        />
-                                    ) : (
-                                        <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }} />
-                                    )}
+                                    <ScoreboardParticipantAvatar
+                                        key={`home-${matchData.home.id || matchData.home.name}-${homeVisual.image}-${homeVisual.flagEmoji}`}
+                                        imageSrc={homeVisual.image}
+                                        flagEmoji={homeVisual.flagEmoji}
+                                    />
                                 </div>
                             </Link>
                             <div className={styles.teamInfo}>
@@ -2209,18 +2299,11 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                         <div className={`${styles.teamCol} ${styles.visitor}`}>
                             <Link href={buildTeamHref(matchData.away, matchData.sportId)} style={{ textDecoration: 'none' }}>
                                 <div className={styles.crestWrapper}>
-                                    {matchData.away.logo ? (
-                                        <img
-                                            src={matchData.away.logo}
-                                            className={styles.crestImage}
-                                            alt=""
-                                            onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
-                                            }}
-                                        />
-                                    ) : (
-                                        <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }} />
-                                    )}
+                                    <ScoreboardParticipantAvatar
+                                        key={`away-${matchData.away.id || matchData.away.name}-${awayVisual.image}-${awayVisual.flagEmoji}`}
+                                        imageSrc={awayVisual.image}
+                                        flagEmoji={awayVisual.flagEmoji}
+                                    />
                                 </div>
                             </Link>
                             <div className={styles.teamInfo}>
@@ -2243,6 +2326,9 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                                 </div>
                             </div>
                         </div>
+                                </>
+                            );
+                        })()}
                     </div>
 
                     {/* Metadata Chips */}

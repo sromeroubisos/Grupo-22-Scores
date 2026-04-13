@@ -126,6 +126,10 @@ function buildResolvedMatchTeam(
             source: team?.source || '',
             team_url: team?.team_url || team?.teamUrl || '',
         }),
+        image_path: team?.image_path || team?.small_image_path || team?.logo || team?.logo_url || null,
+        small_image_path: team?.small_image_path || team?.image_path || team?.logo || team?.logo_url || null,
+        team_url: team?.team_url || team?.teamUrl || null,
+        teamUrl: team?.team_url || team?.teamUrl || null,
         shortName,
     };
 }
@@ -562,13 +566,12 @@ async function fetchPublicSupabaseMatches(options: {
 function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | null }) {
     const headers = new Headers();
 
-    if (options.liveOnly) {
-        headers.set('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=180');
-        return headers;
-    }
-
-    if (options.date) {
-        headers.set('Cache-Control', 'public, max-age=120, s-maxage=300, stale-while-revalidate=300');
+    // The route already maintains its own application-level caches.
+    // Avoid browser HTTP caching so the UI does not get stuck with an empty
+    // "today" snapshot while the server-side cache has already refreshed.
+    if (options.liveOnly || options.date) {
+        headers.set('Cache-Control', 'private, no-store, no-cache, max-age=0, must-revalidate');
+        headers.set('Pragma', 'no-cache');
     }
 
     return headers;
@@ -630,7 +633,7 @@ type MatchesTraceContext = {
 
 // Bump the cache namespace when response-shaping logic changes so we don't
 // keep serving stale persisted snapshots for historical dates.
-const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v2';
+const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v3';
 const EXTERNAL_MATCHES_PERSIST_TTL_MS = 10 * 60 * 1000;
 const MATCHES_DB_SELECT_COLUMNS = [
     'id',
@@ -1123,15 +1126,21 @@ async function computeMatchesPayload(
                             id: m.homeTeamId,
                             name: m.homeTeamName,
                             logo: m.homeTeamLogo || '',
+                            image_path: m.homeTeamImagePath || m.homeTeamLogo || '',
+                            small_image_path: m.homeTeamImagePath || m.homeTeamLogo || '',
                             shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC',
                             source: 'flashscore',
+                            team_url: m.homeTeamUrl || '',
                         }, 'Local', 'LOC'),
                         awayTeam: buildResolvedMatchTeam({
                             id: m.awayTeamId,
                             name: m.awayTeamName,
                             logo: m.awayTeamLogo || '',
+                            image_path: m.awayTeamImagePath || m.awayTeamLogo || '',
+                            small_image_path: m.awayTeamImagePath || m.awayTeamLogo || '',
                             shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS',
                             source: 'flashscore',
+                            team_url: m.awayTeamUrl || '',
                         }, 'Visitante', 'VIS'),
                         tournament: {
                             id: m.tournamentId,
@@ -1432,15 +1441,21 @@ async function computeMatchesPayload(
                             id: m.homeTeamId,
                             name: m.homeTeamName,
                             logo: m.homeTeamLogo || '',
+                            image_path: m.homeTeamImagePath || m.homeTeamLogo || '',
+                            small_image_path: m.homeTeamImagePath || m.homeTeamLogo || '',
                             shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC',
                             source: 'flashscore',
+                            team_url: m.homeTeamUrl || '',
                         }, 'Local', 'LOC'),
                         awayTeam: buildResolvedMatchTeam({
                             id: m.awayTeamId,
                             name: m.awayTeamName,
                             logo: m.awayTeamLogo || '',
+                            image_path: m.awayTeamImagePath || m.awayTeamLogo || '',
+                            small_image_path: m.awayTeamImagePath || m.awayTeamLogo || '',
                             shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS',
                             source: 'flashscore',
+                            team_url: m.awayTeamUrl || '',
                         }, 'Visitante', 'VIS'),
                         tournament: {
                             id: m.tournamentId,

@@ -27,7 +27,7 @@ const PUBLIC_STALE_TTL = 5 * 60 * 1000;     // 5 minutes - shared public cache w
 const PUBLIC_LIVE_POLL_INTERVAL = 60_000;   // 1 minute - live refresh cadence
 const PREFETCH_WINDOW_DAYS = 7;
 const PREFETCH_BATCH_SIZE = 2;
-const MATCHES_STORE_CACHE_VERSION = 'v2';
+const MATCHES_STORE_CACHE_VERSION = 'v3';
 
 // Module-level cache shared across hook instances
 const matchesCache = new Map<string, any[]>();
@@ -149,7 +149,10 @@ export function useMatchesStore(
     async (date: string, signal?: AbortSignal): Promise<{ matches: any[]; sources?: any }> => {
       try {
         const url = `/api/matches?date=${date}&sport=${sportId}&external=true&tz=${encodeURIComponent(timeZone)}`;
-        const res = await fetch(url, { signal });
+        const res = await fetch(url, {
+          signal,
+          cache: 'no-store',
+        });
         if (!res.ok) return { matches: [] };
         const data = await res.json();
         const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
@@ -177,7 +180,10 @@ export function useMatchesStore(
     async (signal?: AbortSignal): Promise<any[]> => {
       try {
         const url = `/api/matches?sport=${sportId}&live=true`;
-        const res = await fetch(url, { signal });
+        const res = await fetch(url, {
+          signal,
+          cache: 'no-store',
+        });
         if (!res.ok) return [];
         const data = await res.json();
         return Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));

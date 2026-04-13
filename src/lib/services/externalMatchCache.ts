@@ -19,6 +19,9 @@ export interface CachedTeam {
     name: string;
     logo: string;
     shortName: string;
+    image_path?: string;
+    small_image_path?: string;
+    team_url?: string;
 }
 
 export interface CachedExternalMatch {
@@ -45,9 +48,10 @@ function normalizeCachedTeam(team: CachedTeam): CachedTeam {
             name: team.name,
             short_name: team.shortName,
             logo: team.logo,
-            image_path: team.logo,
-            small_image_path: team.logo,
+            image_path: team.image_path || team.logo,
+            small_image_path: team.small_image_path || team.image_path || team.logo,
             logo_url: team.logo,
+            team_url: team.team_url || '',
         }),
     };
 }
@@ -77,13 +81,19 @@ export function mapFlashScoreMatchToCached(m: Match, sport: string): CachedExter
             id: m.homeTeamId,
             name: m.homeTeamName,
             logo: m.homeTeamLogo || '',
-            shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC'
+            shortName: m.homeTeamName?.substring(0, 3).toUpperCase() || 'LOC',
+            image_path: m.homeTeamImagePath || m.homeTeamLogo || '',
+            small_image_path: m.homeTeamImagePath || m.homeTeamLogo || '',
+            team_url: m.homeTeamUrl || '',
         }),
         away_team: normalizeCachedTeam({
             id: m.awayTeamId,
             name: m.awayTeamName,
             logo: m.awayTeamLogo || '',
-            shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS'
+            shortName: m.awayTeamName?.substring(0, 3).toUpperCase() || 'VIS',
+            image_path: m.awayTeamImagePath || m.awayTeamLogo || '',
+            small_image_path: m.awayTeamImagePath || m.awayTeamLogo || '',
+            team_url: m.awayTeamUrl || '',
         }),
         score: {
             home: m.score?.home ?? null,
