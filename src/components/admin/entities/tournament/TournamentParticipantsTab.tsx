@@ -24,7 +24,6 @@ import {
     AlertCircle, CheckCircle2
 } from 'lucide-react';
 import './tournament-participants-flash.css';
-import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { Database } from '@/lib/database.types';
 
 // Context & Drawers
@@ -106,7 +105,7 @@ interface Props {
 // MAIN COMPONENT
 // ============================================
 
-export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
+export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     usePerfComponentLifecycle('TournamentParticipantsTab', {
         tournamentId: tournamentId || 'unknown',
     });
@@ -138,10 +137,6 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
 
     // Toast
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-    const tournamentSportId = useMemo(
-        () => canonicalizeSportId(data?.sport_id || null),
-        [data?.sport_id]
-    );
 
     const getErrorMessage = (err: unknown, fallback: string) =>
         err instanceof Error && err.message ? err.message : fallback;
@@ -220,21 +215,25 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
     const loadClubs = async () => {
         try {
             setClubsLoading(true);
-            const request = beginClientRequest('admin:clubs:catalog', 'mount', {
+            const request = beginClientRequest('clubs:catalog', 'mount', {
                 component: 'TournamentParticipantsTab',
             });
-            const params = new URLSearchParams({ limit: '500' });
-            if (tournamentSportId) {
-                params.set('sport', tournamentSportId);
-            }
-            const response = await fetch(`/api/admin/clubs?${params.toString()}`, { cache: 'no-store' });
+            const response = await fetch('/api/clubs', { cache: 'no-store' });
             request.end({
                 status: response.status,
                 error: !response.ok,
             });
             if (!response.ok) throw new Error('Error al cargar clubes');
-            const data = await response.json();
-            setClubCatalog(Array.isArray(data) ? data : []);
+            const payload = await response.json();
+            const data = Array.isArray(payload?.data) ? payload.data : [];
+            setClubCatalog(data.map((club: ClubCatalogItem & { slug?: string | null }) => ({
+                id: club.id,
+                name: club.name,
+                short_name: club.short_name ?? club.slug ?? null,
+                logo_url: club.logo_url ?? null,
+                sport: club.sport ?? null,
+                sport_id: club.sport_id ?? null,
+            })));
         } catch (err) {
             console.error('Error loading clubs:', err);
             showToast('error', 'No se pudo cargar la base de clubes');
@@ -244,10 +243,10 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
     };
 
     useEffect(() => {
-        if (!isAddDrawerOpen) return;
+        if (!isAddDrawerOpen && !editingParticipant) return;
         if (clubCatalog.length > 0 || clubsLoading) return;
         void loadClubs();
-    }, [clubCatalog.length, clubsLoading, isAddDrawerOpen, tournamentSportId]);
+    }, [clubCatalog.length, clubsLoading, editingParticipant, isAddDrawerOpen]);
 
     // ============================================
     // COMPUTED VALUES
@@ -333,17 +332,6 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
         });
         return counts;
     }, [participants]);
-
-    const sportFilteredClubCatalog = useMemo(() => {
-        if (!tournamentSportId) {
-            return clubCatalog;
-        }
-
-        return clubCatalog.filter((club) => {
-            const clubSport = canonicalizeSportId(club.sport_id || club.sport || null);
-            return clubSport === tournamentSportId;
-        });
-    }, [clubCatalog, tournamentSportId]);
 
     useEffect(() => {
         if (phasesWithGroups.length === 0) {
@@ -927,7 +915,7 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
                 isOpen={isAddDrawerOpen}
                 onClose={() => setIsAddDrawerOpen(false)}
                 onAdd={handleCreateFromClubCatalog}
-                clubs={sportFilteredClubCatalog}
+                clubs={clubCatalog}
                 phases={phasesWithGroups}
                 groups={groups}
                 existingParticipants={participants}
@@ -941,7 +929,7 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
                 }}
                 onSave={(data) => handleUpdate(editingParticipant!.id, data)}
                 participant={editingParticipant}
-                clubs={sportFilteredClubCatalog}
+                clubs={clubCatalog}
                 phases={phasesWithGroups}
                 groups={groups}
                 existingParticipants={participants}
