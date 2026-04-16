@@ -7,6 +7,7 @@ import {
     normalizeExternalTournamentStandingsOverrideRecord,
     upsertExternalTournamentStandingsOverride,
 } from '@/lib/server/externalTournamentStandingsOverrides';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 type MinimalUpsertClient = {
     from: (table: string) => {
@@ -103,12 +104,40 @@ export async function PATCH(
             groups: payload.groups,
             assignments: payload.assignments,
             labels: payload.labels,
+            tables: payload.tables,
             updated_at: payload.updated_at,
         };
 
-        const { error } = await client
+        let { error } = await client
             .from('external_tournament_standings_overrides')
             .upsert(databasePayload, { onConflict: 'id' });
+
+        if (error && isMissingColumnError(error, 'tables')) {
+            const fallbackPayload = {
+                id: payload.id,
+                source: payload.source,
+                groups: payload.groups,
+                assignments: payload.assignments,
+                labels: payload.labels,
+                updated_at: payload.updated_at,
+            };
+
+            const fallbackResult = await client
+                .from('external_tournament_standings_overrides')
+                .upsert(fallbackPayload, { onConflict: 'id' });
+
+            error = fallbackResult.error;
+
+            if (!error) {
+                return NextResponse.json(
+                    {
+                        ok: false,
+                        error: "La configuracion basica se guardo, pero faltan las tablas custom porque `external_tournament_standings_overrides.tables` no existe todavia. Aplica la migracion `20260416120000_add_tables_to_external_tournament_standings_overrides.sql` y recarga el schema cache.",
+                    },
+                    { status: 500 },
+                );
+            }
+        }
 
         if (error) {
             if (error.message?.includes('Could not find the table')) {
@@ -141,14 +170,10 @@ export async function PATCH(
         try {
             await upsertExternalTournamentStandingsOverride(payload);
         } catch (fileError) {
-            const fileMessage = fileError instanceof Error ? fileError.message : 'Unknown storage error';
-            return NextResponse.json(
-                {
-                    ok: false,
-                    error: `La configuracion editorial se guardo en base de datos, pero no se pudo persistir el archivo de soporte para tablas API custom: ${fileMessage}`,
-                },
-                { status: 500 },
-            );
+            console.warn('[external-tournaments-standings][PATCH] file cache persistence skipped', {
+                id,
+                error: fileError instanceof Error ? fileError.message : 'Unknown storage error',
+            });
         }
 
         return NextResponse.json({ ok: true, data: payload, storage: 'database' });

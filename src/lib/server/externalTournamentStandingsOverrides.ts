@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { buildExternalTournamentOverrideCandidates } from '@/lib/server/externalTournamentOverrides';
 import { getReadClient } from '@/lib/supabase/read';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 export type ExternalTournamentStandingsGroup = {
     id: string;
@@ -71,7 +72,8 @@ type MinimalReadClient = {
 const STORE_DIR = path.join(process.cwd(), 'storage');
 const STORE_PATH = path.join(STORE_DIR, 'external-tournament-standings-overrides.json');
 const UNGROUPED_GROUP_ID = '__external_ungrouped__';
-const STANDINGS_OVERRIDE_SELECT = 'id, source, groups, assignments, labels, updated_at';
+const STANDINGS_OVERRIDE_SELECT = 'id, source, groups, assignments, labels, tables, updated_at';
+const STANDINGS_OVERRIDE_SELECT_WITHOUT_TABLES = 'id, source, groups, assignments, labels, updated_at';
 const BUILTIN_STANDINGS_TABLES = [
     { key: 'standings', name: 'Tabla general' },
     { key: 'standingsForm', name: 'Forma' },
@@ -565,10 +567,19 @@ async function getDatabaseExternalTournamentStandingsOverrides(
     try {
         const readClient = await getReadClient();
         const client = readClient as unknown as MinimalReadClient;
-        const { data, error } = await client
+        let { data, error } = await client
             .from('external_tournament_standings_overrides')
             .select(STANDINGS_OVERRIDE_SELECT)
             .in('id', candidateIds);
+
+        if (error && isMissingColumnError(error, 'tables')) {
+            const fallback = await client
+                .from('external_tournament_standings_overrides')
+                .select(STANDINGS_OVERRIDE_SELECT_WITHOUT_TABLES)
+                .in('id', candidateIds);
+            data = fallback.data;
+            error = fallback.error;
+        }
 
         if (error || !Array.isArray(data)) return [];
 
