@@ -4814,6 +4814,11 @@ select.basalt-input {
 
 .basalt-tabs-sheet {
     z-index: 181;
+    top: 0;
+    bottom: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-top: calc(18px + env(safe-area-inset-top, 0px));
     overflow: hidden;
 }
 
