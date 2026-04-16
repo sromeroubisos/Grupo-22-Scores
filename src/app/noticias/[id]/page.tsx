@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { hasEditorialAccess } from '@/lib/auth/roles';
-import { createClient } from '@/lib/supabase/server';
+import { getServerAuthRole } from '@/lib/auth/newsAccess';
+import { hasNewsManagementAccess } from '@/lib/auth/roles';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -15,34 +15,8 @@ type NewsPageProps = {
 
 export default async function NewsPage({ params }: NewsPageProps) {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-        data: { session },
-    } = await supabase.auth.getSession();
-
-    let canManageNews = false;
-
-    if (session?.user?.id) {
-        const { data: userData } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-
-        const { data: memberships } = await supabase
-            .from('memberships')
-            .select('scope_type, scope_id, role')
-            .eq('user_id', session.user.id);
-
-        canManageNews = hasEditorialAccess(
-            userData?.role || session.user.user_metadata?.role,
-            (memberships || []).map((membership) => ({
-                scopeType: membership.scope_type,
-                scopeId: membership.scope_id,
-                role: membership.role,
-            })),
-        );
-    }
+    const { supabase, role } = await getServerAuthRole();
+    const canManageNews = hasNewsManagementAccess(role);
 
     let query = supabase.from('news').select('*').eq('id', id);
 
@@ -66,7 +40,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
 
     const paragraphs = (news.content || '')
         .split(/\n{2,}/)
-        .map((paragraph) => paragraph.trim())
+        .map((paragraph: string) => paragraph.trim())
         .filter(Boolean);
 
     const readingWords = `${news.summary || ''} ${news.content || ''}`
@@ -121,7 +95,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
                 <section className={styles.bodyCard}>
                     <div className={styles.bodyContent}>
                         {paragraphs.length > 0 ? (
-                            paragraphs.map((paragraph, index) => (
+                            paragraphs.map((paragraph: string, index: number) => (
                                 <p
                                     key={`${news.id}-paragraph-${index}`}
                                     className={index === 0 ? styles.leadParagraph : undefined}
@@ -145,7 +119,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
                         </Link>
                         {canManageNews && (
                             <Link
-                                href={`/admin/editorial/edit/${news.id}`}
+                                href={`/admin/super/noticias/editar/${news.id}`}
                                 className={`${styles.actionLink} ${styles.primaryLink}`}
                             >
                                 Editar noticia

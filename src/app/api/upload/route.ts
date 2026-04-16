@@ -1,47 +1,11 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { hasEditorialAccess } from '@/lib/auth/roles';
+import { requireNewsSuperAdminServer } from '@/lib/auth/newsAccess';
 import { NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-type MembershipRow = {
-    scope_type: 'union' | 'sport' | 'tournament' | 'match' | 'club' | 'club_family';
-    scope_id?: string | null;
-    role: string;
-};
-
 async function verifyEditorialUser() {
-    const supabase = await createServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session?.user?.id) {
-        throw new Error('Unauthorized');
-    }
-
-    const { data: userData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-
-    const userRole = userData?.role || session.user.user_metadata?.role;
-
-    const { data: memberships } = await supabase
-        .from('memberships')
-        .select('scope_type, scope_id, role')
-        .eq('user_id', session.user.id);
-
-    const mappedMemberships = ((memberships || []) as MembershipRow[]).map((m) => ({
-        scopeType: m.scope_type,
-        scopeId: m.scope_id ?? undefined,
-        role: m.role
-    }));
-
-    if (!hasEditorialAccess(userRole, mappedMemberships)) {
-        throw new Error('Unauthorized');
-    }
-    return true;
+    await requireNewsSuperAdminServer();
 }
 
 export async function POST(req: Request) {

@@ -1,15 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
-import { hasEditorialAccess, type MembershipScope } from '@/lib/auth/roles';
+import { getServerAuthRole, requireNewsSuperAdminServer } from '@/lib/auth/newsAccess';
+import { hasNewsManagementAccess } from '@/lib/auth/roles';
 import { NextResponse } from 'next/server';
 import type { Database } from '@/lib/database.types';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
-
-type MembershipRow = Pick<
-    Database['public']['Tables']['memberships']['Row'],
-    'scope_type' | 'scope_id' | 'role'
->;
 
 type NewsRow = Database['public']['Tables']['news']['Row'];
 type NewsInsert = Database['public']['Tables']['news']['Insert'];
@@ -108,36 +103,10 @@ async function updateNewsWithSchemaFallback(
 
 export async function GET(req: Request) {
     try {
-        const supabase = await createClient();
+        const { supabase, role } = await getServerAuthRole();
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
-        const { data: { session } } = await supabase.auth.getSession();
-
-        let canManageNews = false;
-
-        if (session?.user?.id) {
-            const { data: userData } = await supabase
-                .from('users')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
-
-            const userRole = userData?.role || session.user.user_metadata?.role;
-
-            const { data: memberships } = await supabase
-                .from('memberships')
-                .select('scope_type, scope_id, role')
-                .eq('user_id', session.user.id);
-
-            const membershipRows = (memberships || []) as MembershipRow[];
-            const mappedMemberships = membershipRows.map((m) => ({
-                scopeType: m.scope_type as MembershipScope,
-                scopeId: m.scope_id ?? undefined,
-                role: m.role
-            }));
-
-            canManageNews = hasEditorialAccess(userRole, mappedMemberships);
-        }
+        const canManageNews = hasNewsManagementAccess(role);
 
         if (id) {
             let singleQuery = supabase.from('news').select('*').eq('id', id);
@@ -169,42 +138,12 @@ export async function GET(req: Request) {
 }
 
 async function verifyEditorialUser() {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session?.user?.id) {
-        throw new Error('Unauthorized');
-    }
-
-    const { data: userData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-
-    const userRole = userData?.role || session.user.user_metadata?.role;
-
-    const { data: memberships } = await supabase
-        .from('memberships')
-        .select('scope_type, scope_id, role')
-        .eq('user_id', session.user.id);
-
-    const membershipRows = (memberships || []) as MembershipRow[];
-    const mappedMemberships = membershipRows.map((m) => ({
-        scopeType: m.scope_type as MembershipScope,
-        scopeId: m.scope_id ?? undefined,
-        role: m.role
-    }));
-
-    if (!hasEditorialAccess(userRole, mappedMemberships)) {
-        throw new Error('Unauthorized');
-    }
-    return { supabase, session };
+    return requireNewsSuperAdminServer();
 }
 
 export async function POST(req: Request) {
     try {
-        await verifyEditorialUser();
+        const { session } = await verifyEditorialUser();
         const admin = createAdminClient();
         const body = await req.json() as NewsRequestBody;
 
@@ -219,6 +158,7 @@ export async function POST(req: Request) {
         }
 
         const payload: NewsInsert = {
+            author_id: session.user.id,
             title: normalizedTitle,
             summary,
             content,

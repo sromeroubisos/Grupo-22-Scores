@@ -93,7 +93,7 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
     }, [activeMenuId]);
 
     const handleEdit = (item: NewsItem) => {
-        router.push(`/admin/editorial/edit/${item.id}`);
+        router.push(`/admin/super/noticias/editar/${item.id}`);
     };
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
@@ -129,8 +129,18 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
 
             if (!response.ok) throw new Error('Failed to update status');
 
+            const payload = await response.json();
+            const updatedItem = payload?.data as NewsItem | undefined;
+
             setNews((currentNews) =>
-                currentNews.map((n) => (n.id === item.id ? { ...n, status: newStatus } : n))
+                currentNews.map((n) => (n.id === item.id
+                    ? {
+                        ...n,
+                        ...(updatedItem || {}),
+                        status: updatedItem?.status || newStatus,
+                        published_at: updatedItem?.published_at ?? (newStatus === 'published' ? new Date().toISOString() : null),
+                    }
+                    : n))
             );
         } catch (error) {
             console.error(error);
@@ -186,7 +196,7 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
                         <button
                             type="button"
                             className={`${styles.btn} ${styles.btnPrimary}`}
-                            onClick={() => router.push('/admin/editorial')}
+                            onClick={() => router.push('/admin/super/noticias/nueva')}
                         >
                             <Plus size={14} /> Creacion
                         </button>

@@ -4,7 +4,7 @@ export type AppUserRole =
     | 'entrenador'
     | 'redactor'
     | 'admin_general'
-    | 'super_admin' // Added explicitly
+    | 'super_admin'
     | 'admin_union'
     | 'admin_torneo'
     | 'operador'
@@ -46,7 +46,7 @@ export const APP_ROLES: AppUserRole[] = [
 ];
 
 const ROLE_ALIASES: Record<string, AppUserRole> = {
-    super_admin: 'super_admin', // Identity mapping
+    super_admin: 'super_admin',
     admin_general: 'admin_general',
     redactor: 'redactor',
     editor_noticias: 'redactor',
@@ -166,6 +166,10 @@ export function isGlobalAdminRole(role?: string | null): boolean {
     return normalized === 'admin_general' || normalized === 'super_admin';
 }
 
+export function isSuperAdminRole(role?: string | null): boolean {
+    return normalizeRole(role) === 'super_admin';
+}
+
 export function getRoleLabel(role?: string | null): string {
     const normalized = normalizeRole(role);
     return ROLE_LABELS[normalized];
@@ -252,6 +256,14 @@ export function hasEditorialAccess(
     void memberships;
     const normalized = normalizeRole(role);
     return isGlobalAdminRole(normalized) || EDITORIAL_PANEL_ROLES.has(normalized);
+}
+
+export function hasNewsManagementAccess(
+    role?: string | null,
+    _memberships?: MembershipLike[] | null
+): boolean {
+    void _memberships;
+    return isSuperAdminRole(role);
 }
 
 export function hasFederationAdminAccess(
