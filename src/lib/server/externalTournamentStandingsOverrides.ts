@@ -76,6 +76,7 @@ const STANDINGS_OVERRIDE_SELECT = 'id, source, groups, assignments, labels, tabl
 const STANDINGS_OVERRIDE_SELECT_WITHOUT_TABLES = 'id, source, groups, assignments, labels, updated_at';
 const BUILTIN_STANDINGS_TABLES = [
     { key: 'standings', name: 'Tabla general' },
+    { key: 'luckyLoser', name: 'Lucky Loser' },
     { key: 'standingsForm', name: 'Forma' },
     { key: 'standingsOverUnder', name: 'Over/Under' },
     { key: 'standingsHtFt', name: 'HT/FT' },
@@ -232,6 +233,19 @@ function getStandingsTeamUrl(row: any) {
     return row?.team?.team_url || row?.participant?.team_url || row?.team_url || null;
 }
 
+function getStandingsRowIdentity(row: any): string | null {
+    const teamId = normalizeString(getStandingsTeamId(row));
+    if (teamId) return `team:${teamId.toLowerCase()}`;
+
+    const teamUrl = normalizeTeamUrl(getStandingsTeamUrl(row));
+    if (teamUrl) return `url:${teamUrl.toLowerCase()}`;
+
+    const teamName = normalizeString(getStandingsTeamName(row));
+    if (teamName) return `name:${teamName.toLowerCase()}`;
+
+    return null;
+}
+
 function isGroupedStandings(rows: any[]): boolean {
     return Array.isArray(rows) && rows.length > 0 && Array.isArray(rows[0]?.rows);
 }
@@ -282,6 +296,96 @@ function ensureStandingsGroupMetadata(rows: any[]): any[] {
                 : [],
         };
     });
+}
+
+function splitPreparedStandingsDuplicateRows(rows: any[]): { primary: any[]; luckyLoser: any[] } {
+    if (!Array.isArray(rows) || rows.length === 0) {
+        return {
+            primary: [],
+            luckyLoser: [],
+        };
+    }
+
+    const seen = new Set<string>();
+    const luckyLoserRows: any[] = [];
+
+    if (!isGroupedStandings(rows)) {
+        const primaryRows: any[] = [];
+
+        rows.forEach((row: any, index: number) => {
+            const normalizedRow = {
+                ...row,
+                __original_position: normalizeInteger(row?.__original_position ?? row?.position) ?? index + 1,
+            };
+            const identity = getStandingsRowIdentity(normalizedRow);
+
+            if (identity && seen.has(identity)) {
+                luckyLoserRows.push({
+                    ...normalizedRow,
+                    group_id: null,
+                });
+                return;
+            }
+
+            if (identity) {
+                seen.add(identity);
+            }
+
+            primaryRows.push(normalizedRow);
+        });
+
+        return {
+            primary: rankStandingsRows(primaryRows),
+            luckyLoser: rankStandingsRows(luckyLoserRows).map((row) => ({
+                ...row,
+                group_id: null,
+            })),
+        };
+    }
+
+    const primaryGroups = rows
+        .map((group: any) => {
+            const nextRows: any[] = [];
+
+            (Array.isArray(group?.rows) ? group.rows : []).forEach((row: any, rowIndex: number) => {
+                const normalizedRow = {
+                    ...row,
+                    __original_position: normalizeInteger(row?.__original_position ?? row?.position) ?? rowIndex + 1,
+                };
+                const identity = getStandingsRowIdentity(normalizedRow);
+
+                if (identity && seen.has(identity)) {
+                    luckyLoserRows.push({
+                        ...normalizedRow,
+                        group_id: null,
+                    });
+                    return;
+                }
+
+                if (identity) {
+                    seen.add(identity);
+                }
+
+                nextRows.push(normalizedRow);
+            });
+
+            return {
+                ...group,
+                rows: rankStandingsRows(nextRows).map((row) => ({
+                    ...row,
+                    group_id: normalizeString(row?.group_id) || normalizeString(group?.group_id),
+                })),
+            };
+        })
+        .filter((group) => group.rows.length > 0);
+
+    return {
+        primary: primaryGroups,
+        luckyLoser: rankStandingsRows(luckyLoserRows).map((row) => ({
+            ...row,
+            group_id: null,
+        })),
+    };
 }
 
 async function ensureStoreDir() {
@@ -977,18 +1081,46 @@ export function applyExternalTournamentStandingsOverrideSet(
     standingsOverUnderTeamLabels: any[];
     customTables: AppliedExternalTournamentStandingsTable[];
 } {
-    const overall = applyExternalTournamentStandingsOverride(sources.standings, override, 'standings');
+    const preparedOverallSource = ensureStandingsGroupMetadata(Array.isArray(sources.standings) ? sources.standings : []);
+    const splitOverallSource = splitPreparedStandingsDuplicateRows(preparedOverallSource);
+    const normalizedTables = Array.isArray(override?.tables)
+        ? normalizeTables(override?.id || 'external', override.tables, {
+            groups: Array.isArray(override?.groups) ? override.groups : [],
+            assignments: Array.isArray(override?.assignments) ? override.assignments : [],
+            labels: Array.isArray(override?.labels) ? override.labels : [],
+        })
+        : [];
+    const luckyLoserTableOverride = normalizedTables.find((table) => table.key === 'luckyLoser') || (
+        splitOverallSource.luckyLoser.length > 0
+            ? {
+                id: `${override?.id || 'external'}:luckyLoser`,
+                key: 'luckyLoser',
+                name: getBuiltInStandingsTableName('luckyLoser') || 'Lucky Loser',
+                source_key: 'standings',
+                order_index: normalizedTables.length,
+                groups: [],
+                assignments: [],
+                labels: [],
+            }
+            : null
+    );
+
+    const overall = applyExternalTournamentStandingsOverride(splitOverallSource.primary, override, 'standings');
     const form = applyExternalTournamentStandingsOverride(sources.standingsForm, override, 'standingsForm');
     const htft = applyExternalTournamentStandingsOverride(sources.standingsHtFt, override, 'standingsHtFt');
     const overUnder = applyExternalTournamentStandingsOverride(sources.standingsOverUnder, override, 'standingsOverUnder');
-    const tables = Array.isArray(override?.tables) ? override.tables : [];
+    const extraTables = luckyLoserTableOverride && !normalizedTables.some((table) => table.key === 'luckyLoser')
+        ? [...normalizedTables, luckyLoserTableOverride]
+        : normalizedTables;
 
-    const customTables = tables
-        .filter((table) => !BUILTIN_STANDINGS_TABLE_KEYS.has(table.key))
+    const customTables = extraTables
+        .filter((table) => table.key === 'luckyLoser' || !BUILTIN_STANDINGS_TABLE_KEYS.has(table.key))
         .map((table) => {
             const sourceKey = normalizeStandingsSourceKey(table.source_key);
             const sourceRows =
-                sourceKey === 'standingsForm'
+                table.key === 'luckyLoser'
+                    ? splitOverallSource.luckyLoser
+                    : sourceKey === 'standingsForm'
                     ? sources.standingsForm
                     : sourceKey === 'standingsHtFt'
                         ? sources.standingsHtFt
