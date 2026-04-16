@@ -6,6 +6,7 @@ import { Database } from '@/lib/database.types';
 import { Shield, MapPin, Palette, Plus, X, Image as ImageIcon, ChevronRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import LogoUploader from '@/components/LogoUploader';
+import { SPORTS } from '@/lib/data/sports';
 import { fetchDivisions, type Division } from '@/lib/services/divisionService';
 import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 
@@ -52,6 +53,16 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
     useEffect(() => {
         setForm(data);
     }, [data]);
+
+    const sportOptions = Object.values(SPORTS)
+        .slice()
+        .sort((left, right) => {
+            if (left.isActive !== right.isActive) {
+                return left.isActive ? -1 : 1;
+            }
+
+            return (left.priority ?? 999) - (right.priority ?? 999);
+        });
 
     const linkedDivisionCategoryKeys = new Set(
         linkedDivisions.map((division) => normalizeSegmentValue(division.category || division.name))
@@ -315,6 +326,21 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                             <option value="">Seleccionar Union</option>
                             {unions.map((union) => (
                                 <option key={union.id} value={union.id}>{union.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="manager-input-group">
+                        <label className="manager-field-label">Deporte Vinculado</label>
+                        <select
+                            className="manager-url-select"
+                            value={form.sport || ''}
+                            onChange={(e) => updateField({ sport: e.target.value || null })}
+                        >
+                            <option value="">Seleccionar deporte</option>
+                            {sportOptions.map((sport) => (
+                                <option key={sport.id} value={sport.id}>
+                                    {sport.nameEs || sport.name}
+                                </option>
                             ))}
                         </select>
                     </div>

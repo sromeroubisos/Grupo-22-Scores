@@ -229,9 +229,10 @@ export function ClubManageShell({ id, data, unions }: ClubManageShellProps) {
                 .filter((sport): sport is string => Boolean(sport))
         )
     );
+    const configuredSportLabel = formatSportLabel(form.sport);
     const primarySportLabel = linkedSports.length > 1
         ? 'Multideporte'
-        : linkedSports[0] || (legacyCategories.length > 0 ? 'Rugby' : 'Deporte');
+        : linkedSports[0] || configuredSportLabel || (legacyCategories.length > 0 ? 'Rugby' : 'Deporte');
     const squadCount = linkedDivisions.length > 0 ? linkedDivisions.length : legacyCategories.length;
 
     // Handle form updates via custom events
