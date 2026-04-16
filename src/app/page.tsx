@@ -117,6 +117,8 @@ function normalizeTournamentLookupKey(value: string | null | undefined): string 
     .trim();
 }
 
+const FAVORITE_TEAMS_SECTION_ID = '__favorite-teams__';
+
 function getTournamentCountryName(tournament: { country?: unknown } | null | undefined): string {
   return typeof tournament?.country === 'string' && tournament.country.trim()
     ? tournament.country
@@ -2060,15 +2062,33 @@ export default function HomePage() {
 
               {!loading && displayedFavoriteClubMatches.length > 0 && (
                 <div className={styles.leagueSection} style={getLeagueColorStyle(0)}>
-                  <div className={styles.leagueSectionHeader}>
+                  <div
+                    className={`${styles.leagueSectionHeader} ${collapsedLeagues.has(FAVORITE_TEAMS_SECTION_ID) ? styles.collapsed : ''}`}
+                    onClick={() => toggleCompetitionCollapse(FAVORITE_TEAMS_SECTION_ID)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className={styles.leagueInfo}>
                       <Star size={16} fill="currentColor" style={{ color: 'var(--accent, #f59e0b)' }} />
                       <div className={styles.leagueMeta}>
                         <span className={styles.leagueSectionName} style={{ marginLeft: 8 }}>Mis Equipos</span>
                       </div>
                     </div>
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                      <svg
+                        className={styles.chevronHeader}
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        aria-hidden="true"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className={styles.matchesListWrapper}>
+                  <div className={`${styles.matchesListWrapper} ${collapsedLeagues.has(FAVORITE_TEAMS_SECTION_ID) ? styles.collapsed : ''}`}>
                     <div className={styles.matchesList}>
                       {displayedFavoriteClubMatches.map((match) => (
                         <div key={match.id}>
