@@ -2,7 +2,6 @@ import { notFound, redirect } from 'next/navigation';
 import MatchCenterClient from './MatchCenterClient';
 import type { MatchRow } from './MatchCenterClient';
 import { loadManagedMatchCenterMatch } from '@/lib/server/matchCenterAdmin';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -14,10 +13,6 @@ export default async function MatchCenterPage({ params }: PageProps) {
 
     try {
         const result = await loadManagedMatchCenterMatch(matchId);
-        const { context } = result;
-        if (!isGlobalAdminRole(context.role)) {
-            redirect(`/admin/matches/${matchId}/manage`);
-        }
         match = result.match as unknown as MatchRow;
     } catch (error: unknown) {
         if (error instanceof Error && error.message === 'Unauthorized') {

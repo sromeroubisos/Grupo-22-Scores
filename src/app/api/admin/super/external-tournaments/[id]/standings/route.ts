@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -31,7 +32,7 @@ async function requireExactSuperAdmin() {
         throw new Error('Unauthorized');
     }
 
-    if (user.role !== 'super_admin') {
+    if (!isGlobalAdminRole(user.role)) {
         throw new Error('Forbidden: Super admin access required');
     }
 

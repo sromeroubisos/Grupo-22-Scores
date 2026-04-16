@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { User, isSuperAdmin as checkSuperAdmin } from '@/lib/types/user'
+import { User } from '@/lib/types/user'
+import { isGlobalAdminRole } from '@/lib/auth/roles'
 
 /**
  * Get the current authenticated user from the session
@@ -33,7 +34,7 @@ export async function getCurrentUser(): Promise<User | null> {
  */
 export async function isSuperAdmin(): Promise<boolean> {
     const user = await getCurrentUser()
-    return checkSuperAdmin(user)
+    return isGlobalAdminRole(user?.role)
 }
 
 /**
@@ -55,7 +56,7 @@ export async function requireAuth(): Promise<User> {
 export async function requireSuperAdmin(): Promise<User> {
     const user = await requireAuth()
 
-    if (!checkSuperAdmin(user)) {
+    if (!isGlobalAdminRole(user.role)) {
         throw new Error('Forbidden: Super admin access required')
     }
 

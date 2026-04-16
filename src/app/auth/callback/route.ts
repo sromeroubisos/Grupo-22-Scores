@@ -47,8 +47,8 @@ export async function GET(request: Request) {
                     .single()
 
                 if (!existingUser) {
-                    const { isSuperAdminEmail } = await import('@/lib/types/user')
-                    const role = isSuperAdminEmail(user.email) ? 'super_admin' : 'fan'
+                    const { getReservedAdminRole } = await import('@/lib/types/user')
+                    const role = getReservedAdminRole(user.email) ?? 'fan'
 
                     await supabase.from('users').insert({
                         id: user.id,
@@ -58,9 +58,19 @@ export async function GET(request: Request) {
                         role,
                     })
                 } else {
+                    const { getReservedAdminRole } = await import('@/lib/types/user')
+                    const reservedRole = getReservedAdminRole(user.email)
+                    const updates: { last_login_at: string; role?: 'super_admin' | 'admin_general' } = {
+                        last_login_at: new Date().toISOString(),
+                    }
+
+                    if (reservedRole) {
+                        updates.role = reservedRole
+                    }
+
                     await supabase
                         .from('users')
-                        .update({ last_login_at: new Date().toISOString() })
+                        .update(updates)
                         .eq('id', user.id)
                 }
             } catch (syncError) {

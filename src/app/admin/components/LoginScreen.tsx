@@ -62,7 +62,7 @@ export default function LoginScreen({ returnTo }: LoginScreenProps) {
 
                         <div className="space-y-4">
                             <button
-                                onClick={() => navigate('admin_general')}
+                                onClick={() => navigate('super_admin')}
                                 className="w-full flex items-center gap-6 p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-[#00ff88]/40 hover:bg-[#00ff88]/5 transition-all duration-500 group/btn relative overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ff88]/5 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
@@ -72,8 +72,8 @@ export default function LoginScreen({ returnTo }: LoginScreenProps) {
                                 </div>
 
                                 <div className="text-left flex-1">
-                                    <h3 className="font-black text-sm text-white uppercase tracking-wider group-hover/btn:text-[#00ff88] transition-colors">Command Center</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Full System Override</p>
+                                    <h3 className="font-black text-sm text-white uppercase tracking-wider group-hover/btn:text-[#00ff88] transition-colors">Super Admin</h3>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Acceso total al panel</p>
                                 </div>
 
                                 <span className="material-symbols-outlined text-slate-700 group-hover/btn:text-[#00ff88] group-hover/btn:translate-x-2 transition-all">
@@ -90,8 +90,8 @@ export default function LoginScreen({ returnTo }: LoginScreenProps) {
                                 </div>
 
                                 <div className="text-left flex-1">
-                                    <h3 className="font-black text-sm text-white uppercase tracking-wider group-hover/btn:text-blue-400 transition-colors">Operator Portal</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Read-Only Archives</p>
+                                    <h3 className="font-black text-sm text-white uppercase tracking-wider group-hover/btn:text-blue-400 transition-colors">Fan</h3>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Navegacion publica</p>
                                 </div>
 
                                 <span className="material-symbols-outlined text-slate-700 group-hover/btn:text-blue-400 group-hover/btn:translate-x-2 transition-all">

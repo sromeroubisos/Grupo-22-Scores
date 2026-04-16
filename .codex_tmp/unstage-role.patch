@@ -1,0 +1,12 @@
+diff --git a/src/app/admin/super/torneos/externos/[id]/page.tsx b/src/app/admin/super/torneos/externos/[id]/page.tsx
+--- a/src/app/admin/super/torneos/externos/[id]/page.tsx
++++ b/src/app/admin/super/torneos/externos/[id]/page.tsx
+@@ -620,7 +620,7 @@ export default function ExternalTournamentOverridePage() {
+     const { user, isLoading: authLoading } = useAuth();
+     const tournamentId = String(params?.id || '').trim();
+     const publicTournamentId = tournamentId.toLowerCase().startsWith('fs-') ? tournamentId : `fs-${tournamentId}`;
+-    const isExactSuperAdmin = isGlobalAdminRole(user?.role);
++    const isExactSuperAdmin = user?.role === 'super_admin';
+ 
+     const [loading, setLoading] = useState(true);
+     const [saving, setSaving] = useState(false);

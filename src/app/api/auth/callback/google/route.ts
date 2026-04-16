@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { SUPER_ADMIN_EMAIL } from '@/lib/types/user'
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
@@ -26,9 +25,8 @@ export async function GET(request: Request) {
                     .single()
 
                 if (!existingUser) {
-                    const { isSuperAdminEmail } = await import('@/lib/types/user')
-                    // 'fan' is the correct default role (CHECK: role IN ('fan', 'super_admin'))
-                    const role = isSuperAdminEmail(user.email) ? 'super_admin' : 'fan'
+                    const { getReservedAdminRole } = await import('@/lib/types/user')
+                    const role = getReservedAdminRole(user.email) ?? 'fan'
                     const { error: insertError } = await admin.from('users').insert({
                         id: user.id,
                         email: user.email!,
@@ -40,9 +38,19 @@ export async function GET(request: Request) {
                         console.error('Error creating user profile:', insertError.message)
                     }
                 } else {
+                    const { getReservedAdminRole } = await import('@/lib/types/user')
+                    const reservedRole = getReservedAdminRole(user.email)
+                    const updates: { last_login_at: string; role?: 'super_admin' | 'admin_general' } = {
+                        last_login_at: new Date().toISOString(),
+                    }
+
+                    if (reservedRole) {
+                        updates.role = reservedRole
+                    }
+
                     await admin
                         .from('users')
-                        .update({ last_login_at: new Date().toISOString() })
+                        .update(updates)
                         .eq('id', user.id)
                 }
             } catch (syncError) {

@@ -11,7 +11,7 @@ import {
     setOnboardingStorageStatus,
 } from '@/lib/onboardingStatus';
 import {
-    completeOnboarding,
+    ensureOnboardingStatus,
     getOnboardingStatus,
 } from '@/lib/services/preferencesService';
 import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client';
@@ -38,12 +38,6 @@ interface AuthContextType {
     logout: () => void;
     refreshOnboardingStatus: () => Promise<void>;
 }
-
-type MembershipRow = {
-    scope_type: MembershipLike['scopeType'];
-    scope_id: MembershipLike['scopeId'];
-    role: MembershipLike['role'];
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -105,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const rehydrateMissingOnboardingStatus = useCallback((userId: string) => {
-        completeOnboarding(supabase, userId, { skipped: true }).catch(() => { });
+        ensureOnboardingStatus(supabase, userId).catch(() => { });
     }, [supabase]);
 
     const resetBrokenSession = useCallback((reason: string) => {
@@ -158,15 +152,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (profile) {
                 console.log('[AuthContext] Profile found in DB');
-                const [membershipsResult, onboarding] = await measureAsync(
+                const onboarding = await measureAsync(
                     'restore_user_dependencies',
-                    async () => Promise.all([
-                        supabase
-                            .from('memberships')
-                            .select('scope_type, scope_id, role')
-                            .eq('user_id', sbUser.id),
-                        getOnboardingStatus(supabase, sbUser.id),
-                    ]),
+                    async () => getOnboardingStatus(supabase, sbUser.id),
                     {
                         runtime: 'client',
                         tags: ['AUTH'],
@@ -177,18 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     },
                 );
 
-                if (membershipsResult.error) {
-                    console.warn('[AuthContext] Memberships fetch error:', membershipsResult.error.message);
-                }
-
                 if (!isMounted.current) return;
-
-                const membershipRows = (membershipsResult.data || []) as MembershipRow[];
-                const memberships: MembershipLike[] = membershipRows.map((membership) => ({
-                    scopeType: membership.scope_type,
-                    scopeId: membership.scope_id,
-                    role: membership.role,
-                }));
 
                 let onboardingCompleted = false;
                 let onboardingSkipped = false;
@@ -216,15 +193,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     email: profile.email || sbUser.email || '',
                     role: normalizeRole(profile.role),
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
-                    memberships,
+                    memberships: [],
                     onboardingCompleted,
                 };
 
                 console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role, 'onboardingCompleted:', onboardingCompleted);
                 setUser(finalUser);
             } else {
-                const { isSuperAdminEmail } = await import('@/lib/types/user');
-                const fallbackRole = isSuperAdminEmail(sbUser.email) ? 'super_admin' : 'fan';
+                const { getReservedAdminRole } = await import('@/lib/types/user');
+                const fallbackRole = getReservedAdminRole(sbUser.email) ?? 'fan';
 
                 if (fallbackOnboarding.completed) {
                     setOnboardingStorageStatus(sbUser.id, { skipped: fallbackOnboarding.skipped });

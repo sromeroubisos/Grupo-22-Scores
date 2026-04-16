@@ -12,17 +12,17 @@ const footerLinks = {
     recursos: [
         { href: '/clubs', label: 'Clubes' },
         { href: '/players', label: 'Jugadores' },
-        { href: '/estadisticas', label: 'Estadísticas' },
+        { href: '/estadisticas', label: 'Estadisticas' },
         { href: '/exportar', label: 'Exportar contenido' },
     ],
     organizacion: [
-        { href: '/admin', label: 'Panel de administración' },
-        { href: '/operadores', label: 'Gestión de operadores' },
+        { href: '/admin', label: 'Panel de administracion' },
+        { href: '/profile', label: 'Mi perfil' },
         { href: '/integraciones', label: 'Integraciones' },
         { href: '/ayuda', label: 'Centro de ayuda' },
     ],
     legal: [
-        { href: '/terminos', label: 'Términos de uso' },
+        { href: '/terminos', label: 'Terminos de uso' },
         { href: '/privacidad', label: 'Privacidad' },
         { href: '/contacto', label: 'Contacto' },
     ],
@@ -32,9 +32,7 @@ export default function Footer() {
     return (
         <footer className={styles.footer}>
             <div className={`container ${styles.footerContainer}`}>
-                {/* Top Section */}
                 <div className={styles.footerTop}>
-                    {/* Brand */}
                     <div className={styles.brand}>
                         <Link href="/" className={styles.logo}>
                             <div className={styles.logoIcon}>
@@ -49,7 +47,7 @@ export default function Footer() {
                         </Link>
                         <p className={styles.brandDescription}>
                             La plataforma oficial para torneos deportivos. Resultados en tiempo real,
-                            estadísticas confiables y experiencia profesional para fans, clubes y federaciones.
+                            estadisticas confiables y experiencia profesional para fans, clubes y federaciones.
                         </p>
                         <div className={styles.socialLinks}>
                             <a href="#" className={styles.socialLink} aria-label="Twitter">
@@ -70,7 +68,6 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Links */}
                     <div className={styles.linksGrid}>
                         <div className={styles.linkColumn}>
                             <h4 className={styles.linkTitle}>Plataforma</h4>
@@ -99,7 +96,7 @@ export default function Footer() {
                         </div>
 
                         <div className={styles.linkColumn}>
-                            <h4 className={styles.linkTitle}>Organización</h4>
+                            <h4 className={styles.linkTitle}>Organizacion</h4>
                             <ul className={styles.linkList}>
                                 {footerLinks.organizacion.map((link) => (
                                     <li key={link.href}>
@@ -126,10 +123,8 @@ export default function Footer() {
                     </div>
                 </div>
 
-                {/* Divider */}
                 <div className={styles.divider}></div>
 
-                {/* Bottom Section */}
                 <div className={styles.footerBottom}>
                     <p className={styles.copyright}>
                         © 2026 G22 Scores. Todos los derechos reservados.

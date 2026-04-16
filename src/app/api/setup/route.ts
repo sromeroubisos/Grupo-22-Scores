@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { AUTHORIZED_SUPER_ADMIN_EMAILS, SUPER_ADMIN_EMAIL } from '@/lib/types/user'
+import {
+    AUTHORIZED_SUPER_ADMIN_EMAILS,
+    SUPER_ADMIN_EMAIL,
+} from '@/lib/types/user'
 
 const SUPER_ADMIN_PASSWORD = 'SuperAdmin123!'
 
@@ -18,6 +21,7 @@ function getErrorMessage(error: unknown): string {
 async function ensureAdminAccount(
     supabase: ReturnType<typeof createClient>,
     email: string,
+    role: 'super_admin',
 ): Promise<SetupResult> {
     const result: SetupResult = {}
 
@@ -69,7 +73,7 @@ async function ensureAdminAccount(
 
     const { data: publicUser, error: publicUserError } = await supabase
         .from('users')
-        .update({ role: 'super_admin' })
+        .update({ role })
         .eq('email', email)
         .select('id, role')
         .maybeSingle()
@@ -128,7 +132,7 @@ export async function GET() {
     if (serviceKey) {
         const adminResults = await Promise.all(
             AUTHORIZED_SUPER_ADMIN_EMAILS.map(async (email) => {
-                const accountResult = await ensureAdminAccount(supabase, email)
+                const accountResult = await ensureAdminAccount(supabase, email, 'super_admin')
                 return [email, accountResult] as const
             }),
         )

@@ -21,6 +21,7 @@ import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 
@@ -2195,8 +2196,8 @@ export default function TournamentDetailPage({
     const fixturesPageTitle = isMotorsportTournament ? 'Proximas carreras' : 'Fixture';
     const standingsCardTitle = isMotorsportTournament ? 'Pilotos' : 'Posiciones';
     const infoParticipantsLabel = isMotorsportTournament ? 'Competidores' : 'Equipos';
-    const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
-    const isExactSuperAdmin = user?.role === 'super_admin';
+    const isSuperAdminUser = isGlobalAdminRole(user?.role);
+    const isExactSuperAdmin = isGlobalAdminRole(user?.role);
     const externalTournamentOverrideId = resolveExternalTournamentId({
         routeId: id,
         externalId: tournamentData?.externalId ?? tournamentData?.external_id,

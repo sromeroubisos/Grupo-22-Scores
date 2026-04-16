@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
@@ -103,6 +104,24 @@ async function resolveSharedRosterOwnerClubId(clubId: string, supabaseClient?: a
     }
 
     return clubId;
+}
+
+async function resolveRosterScope(
+    clubId: string,
+    supabaseClient?: any,
+    divisionId?: string,
+) {
+    const familyDivision = parseFamilyDivisionId(divisionId);
+    const sharedRosterOwnerClubId = await resolveSharedRosterOwnerClubId(clubId, supabaseClient);
+    const rosterOwnerClubId = familyDivision?.rosterOwnerClubId ?? sharedRosterOwnerClubId;
+    const rosterDivisionId = familyDivision || rosterOwnerClubId !== clubId
+        ? undefined
+        : divisionId;
+
+    return {
+        rosterOwnerClubId,
+        rosterDivisionId,
+    };
 }
 
 function mapPersonRecord(person: any, membership: any, divisionName?: string, divisionId?: string): PersonWithRole {
@@ -651,21 +670,26 @@ async function fetchPeopleFromLegacy(clubId: string, divisionId?: string): Promi
 }
 
 export async function fetchPeopleByClub(clubId: string): Promise<PersonWithRole[]> {
-    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId);
-    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterClubId);
+    const supabase = await createClient();
+    const rosterOwnerClubId = await resolveSharedRosterOwnerClubId(clubId, supabase as any);
+    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterOwnerClubId);
     if (newLayerPeople && newLayerPeople.length > 0) return newLayerPeople;
-    return fetchPeopleFromLegacy(rosterClubId);
+    return fetchPeopleFromLegacy(rosterOwnerClubId);
 }
 
 export async function fetchPeopleByDivision(clubId: string, divisionId: string): Promise<PersonWithRole[]> {
-    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId);
-    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterClubId, divisionId);
+    const familyDivision = parseFamilyDivisionId(divisionId);
+    const supabase = await createClient();
+    const rosterScope = await resolveRosterScope(clubId, supabase as any, divisionId);
+    const rosterClubId = familyDivision?.rosterOwnerClubId ?? rosterScope.rosterOwnerClubId;
+    const effectiveDivisionId = familyDivision ? undefined : rosterScope.rosterDivisionId;
+    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterClubId, effectiveDivisionId);
     if (newLayerPeople && newLayerPeople.length > 0) return newLayerPeople;
 
-    const legacyPeople = await fetchPeopleFromLegacy(rosterClubId, divisionId);
+    const legacyPeople = await fetchPeopleFromLegacy(rosterClubId, effectiveDivisionId);
     if (legacyPeople.length > 0) return legacyPeople;
 
-    if (rosterClubId !== clubId) {
+    if (familyDivision && rosterClubId !== clubId) {
         return fetchPeopleByClub(rosterClubId);
     }
 
@@ -689,9 +713,11 @@ export async function addPersonToClub(clubId: string, personData: {
 }) {
     const supabase = await createClient();
     const db = supabase as any;
-    const familyDivision = parseFamilyDivisionId(personData.division_id);
-    const rosterClubId = familyDivision?.rosterOwnerClubId ?? await resolveSharedRosterOwnerClubId(clubId, db);
-    const rosterDivisionId = familyDivision ? undefined : rosterClubId === clubId ? personData.division_id : undefined;
+    const { rosterOwnerClubId: rosterClubId, rosterDivisionId } = await resolveRosterScope(
+        clubId,
+        db,
+        personData.division_id,
+    );
 
     const { data: person, error: personError } = await insertPersonRecord(supabase, {
         ...personData,
@@ -784,9 +810,11 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
 }) {
     const supabase = await createClient();
     const db = supabase as any;
-    const familyDivision = parseFamilyDivisionId(personData.division_id);
-    const rosterClubId = familyDivision?.rosterOwnerClubId ?? await resolveSharedRosterOwnerClubId(clubId, db);
-    const rosterDivisionId = familyDivision ? undefined : rosterClubId === clubId ? personData.division_id : undefined;
+    const { rosterOwnerClubId: rosterClubId, rosterDivisionId } = await resolveRosterScope(
+        clubId,
+        db,
+        personData.division_id,
+    );
 
     const { data: person, error: personError } = await updatePersonRecord(supabase, personId, personData);
     if (personError) {
@@ -881,8 +909,11 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
 export async function deletePersonFromClub(clubId: string, personId: string, divisionId?: string) {
     const supabase = await createClient();
     const db = supabase as any;
-    const rosterClubId = await resolveSharedRosterOwnerClubId(clubId, db);
-    const rosterDivisionId = rosterClubId === clubId ? divisionId : undefined;
+    const { rosterOwnerClubId: rosterClubId, rosterDivisionId } = await resolveRosterScope(
+        clubId,
+        db,
+        divisionId,
+    );
 
     let teamReference;
     try {

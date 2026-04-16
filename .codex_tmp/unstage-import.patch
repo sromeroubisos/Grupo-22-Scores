@@ -1,0 +1,10 @@
+diff --git a/src/app/admin/super/torneos/externos/[id]/page.tsx b/src/app/admin/super/torneos/externos/[id]/page.tsx
+--- a/src/app/admin/super/torneos/externos/[id]/page.tsx
++++ b/src/app/admin/super/torneos/externos/[id]/page.tsx
+@@ -6,7 +6,6 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
+ import { ArrowLeft, CheckCircle2, Plus, Save, ShieldAlert, Trash2 } from 'lucide-react';
+ import LogoUploader from '@/components/LogoUploader';
+ import { useAuth } from '@/context/AuthContext';
+-import { isGlobalAdminRole } from '@/lib/auth/roles';
+ import { getTournamentCountryOptions, resolveTournamentCountryId, resolveTournamentCountryLabel } from '@/lib/data/countries';
+ import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';

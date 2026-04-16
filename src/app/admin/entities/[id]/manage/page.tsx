@@ -42,14 +42,13 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
     const offset = parseInt(offsetParam || '0', 10);
     const limit = 20;
 
-    // ── Legacy redirect: old crear path & new entity creation ───────────────
+    // Legacy redirect: old crear path & new entity creation
     if (id === 'crear' || id === 'new') {
         const target = type
             ? `/admin/entities/new?type=${type}`
             : `/admin/entities/new`;
         redirect(target);
     }
-
 
     // 1. Check Auth & Permissions (Basic check, RLS enforces mutations later)
     const supabase = await createClient();
@@ -95,13 +94,13 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                             No logramos identificar automáticamente la entidad con ID <code className="bg-background px-1.5 py-0.5 rounded text-foreground">{id}</code>. Selecciona qué quieres gestionar:
                         </p>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl">
-                            {(['club', 'tournament', 'match', 'player'] as const).map(t => (
+                            {(['club', 'tournament', 'match', 'player'] as const).map((entityTypeOption) => (
                                 <a
-                                    key={t}
-                                    href={`/admin/entities/${id}/manage?type=${t}`}
+                                    key={entityTypeOption}
+                                    href={`/admin/entities/${id}/manage?type=${entityTypeOption}`}
                                     className="px-6 py-8 bg-surface border border-divider rounded-xl hover:border-accent-blue hover:text-accent-blue hover:bg-surface-hover transition-all flex flex-col items-center gap-3 group"
                                 >
-                                    <span className="text-sm font-semibold capitalize group-hover:underline">{t}</span>
+                                    <span className="text-sm font-semibold capitalize group-hover:underline">{entityTypeOption}</span>
                                 </a>
                             ))}
                         </div>
@@ -159,7 +158,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         tournamentCountries = countriesData ?? [];
         tournamentMatchCount = matchRows?.length ?? 0;
         if (tournamentData.union_id) {
-            tournamentUnionName = tournamentUnions.find(u => u.id === (result.data as TournamentRow).union_id)?.name;
+            tournamentUnionName = tournamentUnions.find((unionItem) => unionItem.id === tournamentData.union_id)?.name;
         }
 
         const activeParams = new URLSearchParams();
@@ -177,12 +176,12 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                     return items;
                 }
 
-                const params = new URLSearchParams(activeParams.toString());
+                const paramsForItem = new URLSearchParams(activeParams.toString());
                 items.push({
                     id: item.linkedTournamentId,
                     label: item.season || item.linkedTournamentName,
                     subtitle: item.linkedTournamentName,
-                    href: `/admin/entities/${item.linkedTournamentId}/manage?${params.toString()}`,
+                    href: `/admin/entities/${item.linkedTournamentId}/manage?${paramsForItem.toString()}`,
                     isCurrent: false,
                 });
                 return items;
@@ -229,7 +228,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         );
     }
 
-    // ── Tournament: full-screen shell (no sidebar, logo header, mobile pager) ──
+    // Tournament: full-screen shell (no sidebar, logo header, mobile pager)
     if (isTournament) {
         return (
             <TournamentManageShell
@@ -309,7 +308,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         );
     }
 
-    // ── Non-tournament: standard entity layout with sidebar + header + tabs ──
+    // Non-tournament: standard entity layout with sidebar + header + tabs
     return (
         <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
             <EntityHeader entity={result} fromContext={from} />
@@ -334,9 +333,9 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
                 {isRelatedTab && relatedData && (
                     <div className="animate-in fade-in duration-300 space-y-6">
-                        {relatedData.sections.map((section, idx) => (
+                        {relatedData.sections.map((section, index) => (
                             <RelatedSection
-                                key={idx}
+                                key={index}
                                 data={section}
                                 baseUrl={baseUrlParams}
                                 pathname={`/admin/entities/${id}/manage`}
@@ -353,7 +352,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                                     No disponible en el esquema
                                 </h4>
                                 <ul className="list-disc pl-5 text-sm text-system-secondary space-y-1">
-                                    {relatedData.notSupported.map((msg, i) => <li key={i}>{msg}</li>)}
+                                    {relatedData.notSupported.map((message, index) => <li key={index}>{message}</li>)}
                                 </ul>
                             </div>
                         )}

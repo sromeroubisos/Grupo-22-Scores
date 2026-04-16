@@ -18,9 +18,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const pathname = usePathname();
     const router = useRouter();
     const { user, isAuthenticated, isLoading } = useAuth();
-    const isCoachPanel = pathname?.startsWith('/entrenador');
-    const isManagementPage = pathname?.startsWith('/admin') || pathname?.startsWith('/club-admin') || isCoachPanel;
+    const isManagementPage = pathname?.startsWith('/admin');
     const isOnboardingPage = pathname?.startsWith('/onboarding');
+    const returnTo = pathname || '/';
 
     useEffect(() => {
         if (isLoading) return;
@@ -35,12 +35,11 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             isAuthenticated &&
             user &&
             user.onboardingCompleted === false &&
-            !isOnboardingPage &&
-            !isManagementPage
+            !isOnboardingPage
         ) {
-            router.push('/onboarding/preferences');
+            router.push(`/onboarding/preferences?returnTo=${encodeURIComponent(returnTo)}`);
         }
-    }, [isLoading, isManagementPage, isAuthenticated, user, isOnboardingPage, router]);
+    }, [isLoading, isManagementPage, isAuthenticated, user, isOnboardingPage, returnTo, router]);
 
     // Onboarding pages get a blank layout (no header/footer/nav)
     if (isOnboardingPage) {
@@ -54,7 +53,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     if (isManagementPage) {
         return (
             <SportProvider>
-                {!isCoachPanel && <Header />}
+                <Header />
                 {children}
             </SportProvider>
         );

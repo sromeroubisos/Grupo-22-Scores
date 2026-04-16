@@ -25,6 +25,11 @@ type TournamentRow = {
     slug: string | null;
 };
 
+type DivisionRow = {
+    id: string;
+    name: string | null;
+};
+
 type MatchScoreRow =
     | {
         home?: number | null;
@@ -41,10 +46,15 @@ type MatchRow = {
     status: string | null;
     venue: string | null;
     score: MatchScoreRow;
+    tournament_id: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
+    home_division_id: string | null;
+    away_division_id: string | null;
     home: ClubRow | ClubRow[] | null;
     away: ClubRow | ClubRow[] | null;
+    home_division: DivisionRow | DivisionRow[] | null;
+    away_division: DivisionRow | DivisionRow[] | null;
     tournament: TournamentRow | TournamentRow[] | null;
 };
 
@@ -115,6 +125,8 @@ function normalizeMatch(row: MatchRow, clubId: string): ClubDashboardMatch {
     const isHome = row.home_club_id === clubId;
     const home = normalizeClub(unwrapRelationRow(row.home));
     const away = normalizeClub(unwrapRelationRow(row.away));
+    const homeDivision = unwrapRelationRow(row.home_division);
+    const awayDivision = unwrapRelationRow(row.away_division);
     const tournament = unwrapRelationRow(row.tournament);
     const opponent = isHome ? away : home;
 
@@ -125,6 +137,10 @@ function normalizeMatch(row: MatchRow, clubId: string): ClubDashboardMatch {
         venue: row.venue ?? null,
         score: normalizeMatchScore(row.score),
         isHome,
+        homeDivisionId: row.home_division_id ?? null,
+        awayDivisionId: row.away_division_id ?? null,
+        homeDivisionName: homeDivision?.name ?? null,
+        awayDivisionName: awayDivision?.name ?? null,
         opponentName: opponent.name,
         opponentShortName: opponent.shortName,
         opponentLogoUrl: opponent.logoUrl,
@@ -200,9 +216,11 @@ export async function getClubDashboardOverview(
 
     const nowIso = new Date().toISOString();
     const matchSelect = `
-        id, date_time, status, venue, score, home_club_id, away_club_id,
+        id, date_time, status, venue, score, tournament_id, home_club_id, away_club_id, home_division_id, away_division_id,
         home:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, slug),
         away:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, slug),
+        home_division:club_divisions!matches_home_division_id_fkey(id, name),
+        away_division:club_divisions!matches_away_division_id_fkey(id, name),
         tournament:tournaments(id, name, slug)
     `;
     const matchFilter = `home_club_id.eq.${clubId},away_club_id.eq.${clubId}`;
@@ -212,6 +230,7 @@ export async function getClubDashboardOverview(
         recentMatchesResult,
         upcomingMatchesCountResult,
         playedMatchesCountResult,
+        tournamentMatchesResult,
         standingsResult,
     ] = await Promise.all([
         supabase
@@ -239,6 +258,13 @@ export async function getClubDashboardOverview(
             .or(matchFilter)
             .in('status', [...FINAL_MATCH_STATUSES]),
         supabase
+            .from('matches')
+            .select('tournament_id')
+            .or(matchFilter)
+            .not('tournament_id', 'is', null)
+            .order('updated_at', { ascending: false })
+            .limit(100),
+        supabase
             .from('tournament_standings')
             .select(`
                 tournament_id, position, played, won, drawn, lost, points, scored, conceded,
@@ -254,11 +280,22 @@ export async function getClubDashboardOverview(
     if (recentMatchesResult.error) throw recentMatchesResult.error;
     if (upcomingMatchesCountResult.error) throw upcomingMatchesCountResult.error;
     if (playedMatchesCountResult.error) throw playedMatchesCountResult.error;
+    if (tournamentMatchesResult.error) throw tournamentMatchesResult.error;
     if (standingsResult.error) throw standingsResult.error;
 
     const upcomingMatches = ((upcomingMatchesResult.data ?? []) as unknown as MatchRow[]).map((row) => normalizeMatch(row, clubId));
     const recentMatches = ((recentMatchesResult.data ?? []) as unknown as MatchRow[]).map((row) => normalizeMatch(row, clubId));
-    const standings = dedupeStandings((standingsResult.data ?? []) as unknown as StandingRow[]);
+    const linkedTournamentIds = new Set(
+        ((tournamentMatchesResult.data ?? []) as Array<{ tournament_id?: string | null }>)
+            .map((row) => row.tournament_id)
+            .filter((value): value is string => typeof value === 'string' && value.length > 0)
+    );
+    const standingsRows = (standingsResult.data ?? []) as unknown as StandingRow[];
+    const standings = dedupeStandings(
+        linkedTournamentIds.size > 0
+            ? standingsRows.filter((row) => linkedTournamentIds.has(row.tournament_id))
+            : standingsRows
+    );
     const bestPosition = standings.reduce<number | null>((best, standing) => {
         if (standing.position == null) return best;
         if (best == null) return standing.position;

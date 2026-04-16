@@ -24,6 +24,7 @@ export function useManagedClubData(clubId?: string | null) {
 
         setLoading(true);
         setError(null);
+        setClub(null);
 
         try {
             const response = await fetch(`/api/clubs/${clubId}/manage`, {

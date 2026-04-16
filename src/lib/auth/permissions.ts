@@ -62,27 +62,19 @@ export async function getUserAccessContext(
         return null;
     }
 
-    const [profileResult, membershipsResult] = await Promise.all([
-        supabase
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .maybeSingle(),
-        supabase
-            .from('memberships')
-            .select('scope_type, scope_id, role')
-            .eq('user_id', user.id),
-    ]);
+    const { data: profileData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
 
-    const rawRole = profileResult.data?.role || user.user_metadata?.role || null;
+    const rawRole = profileData?.role || user.user_metadata?.role || null;
 
     return {
         userId: user.id,
         rawRole,
         role: normalizeRole(rawRole),
-        memberships: normalizeMembershipRows(
-            (membershipsResult.data || []) as Array<{ scope_type: string; scope_id: string; role: string }>
-        ),
+        memberships: [],
     };
 }
 

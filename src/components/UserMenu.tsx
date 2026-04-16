@@ -5,6 +5,7 @@ import { User, Settings, Star, LogOut, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
+import { getRoleLabel, isGlobalAdminRole } from '@/lib/auth/roles'
 import { FAVORITES_ENABLED } from '@/lib/favorites/config'
 import styles from './UserMenu.module.css'
 
@@ -13,7 +14,7 @@ export default function UserMenu() {
     const [isOpen, setIsOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const isSuperAdmin = user?.role === 'super_admin' || user?.role === 'admin_general'
+    const isSuperAdmin = isGlobalAdminRole(user?.role)
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -83,7 +84,7 @@ export default function UserMenu() {
                         </div>
                         {isSuperAdmin && (
                             <span className={styles.superAdminTag}>
-                                Super Admin
+                                {getRoleLabel(user.role)}
                             </span>
                         )}
                     </div>
@@ -107,7 +108,7 @@ export default function UserMenu() {
                             <div className={styles.dropdownDivider} />
                             <Link href="/admin/super" className={styles.menuItemAdmin} onClick={() => setIsOpen(false)}>
                                 <Shield size={16} />
-                                Super Admin
+                                {getRoleLabel(user.role)}
                             </Link>
                         </>
                     )}

@@ -65,7 +65,7 @@ function LoginContent() {
             </div>
 
             <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--basalt-600)', marginTop: '24px' }}>
-                Al continuar, aceptas nuestros <Link href="/terms" className={styles.link}>Terminos</Link> y <Link href="/privacy" className={styles.link}>Privacidad</Link>.
+                Al continuar, aceptas nuestros <Link href="/terminos" className={styles.link}>Terminos</Link> y <Link href="/privacidad" className={styles.link}>Privacidad</Link>.
             </div>
         </div>
     )

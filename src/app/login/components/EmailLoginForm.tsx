@@ -5,29 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import styles from '../login.module.css'
-
-function sanitizeReturnTo(raw: string | null, roleIntent?: string | null): string {
-    if (!raw) {
-        if (roleIntent === 'admin_general' || roleIntent === 'super_admin') return '/admin/super'
-        if (roleIntent === 'redactor') return '/admin/editorial'
-        if (roleIntent === 'admin_club') return '/club-admin'
-        if (
-            roleIntent === 'admin_union' ||
-            roleIntent === 'admin_torneo' ||
-            roleIntent === 'gestor_deportes' ||
-            roleIntent === 'gestor_torneos' ||
-            roleIntent === 'gestor_partidos' ||
-            roleIntent === 'gestor_clubes'
-        ) return '/admin'
-        return '/'
-    }
-
-    if (raw.startsWith('/') && !raw.startsWith('//')) {
-        return raw
-    }
-
-    return '/'
-}
+import { sanitizeReturnTo } from '../redirects'
 
 function normalizeEmail(value: string): string {
     return value.trim().toLowerCase()

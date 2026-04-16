@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { requireGlobalAdminContext } from '@/lib/auth/permissions';
 import {
     APP_ROLES,
@@ -11,6 +12,7 @@ import {
 } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { getReservedAdminRole } from '@/lib/types/user';
 
 const accessPayloadSchema = z.object({
     role: z.string().min(1),
@@ -25,6 +27,15 @@ function badRequest(message: string, details?: unknown) {
 
 function forbidden(message = 'Forbidden') {
     return NextResponse.json({ error: message }, { status: 403 });
+}
+
+function serializePostgrestError(error: PostgrestError) {
+    return {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+    };
 }
 
 async function ensureGlobalAdmin() {
@@ -122,12 +133,17 @@ export async function PUT(
 
         const { data: targetUser } = await admin
             .from('users')
-            .select('id')
+            .select('id, email')
             .eq('id', targetUserId)
             .maybeSingle();
 
         if (!targetUser) {
             return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+        }
+
+        const reservedRole = getReservedAdminRole(targetUser.email);
+        if (reservedRole && role !== reservedRole) {
+            return badRequest('Esta cuenta tiene un rol reservado y no puede recibir un rol operativo.');
         }
 
         const { error: roleError } = await admin
@@ -136,7 +152,7 @@ export async function PUT(
             .eq('id', targetUserId);
 
         if (roleError) {
-            return NextResponse.json({ error: 'No se pudo actualizar el rol del usuario', details: roleError.message }, { status: 500 });
+            return NextResponse.json({ error: 'No se pudo actualizar el rol del usuario', details: serializePostgrestError(roleError) }, { status: 500 });
         }
 
         let deleteQuery = admin
@@ -153,7 +169,7 @@ export async function PUT(
         const { error: deleteError } = await deleteQuery;
 
         if (deleteError) {
-            return NextResponse.json({ error: 'No se pudieron limpiar los accesos existentes', details: deleteError.message }, { status: 500 });
+            return NextResponse.json({ error: 'No se pudieron limpiar los accesos existentes', details: serializePostgrestError(deleteError) }, { status: 500 });
         }
 
         if (uniqueScopeIds.length > 0) {
@@ -174,7 +190,7 @@ export async function PUT(
                 .insert(inserts);
 
             if (insertError) {
-                return NextResponse.json({ error: 'No se pudieron guardar los nuevos accesos', details: insertError.message }, { status: 500 });
+                return NextResponse.json({ error: 'No se pudieron guardar los nuevos accesos', details: serializePostgrestError(insertError) }, { status: 500 });
             }
         }
 

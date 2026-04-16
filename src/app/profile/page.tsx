@@ -23,6 +23,7 @@ import {
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { getActiveSports } from '@/lib/data/sports';
+import { getRoleLabel } from '@/lib/auth/roles';
 import { useAuth } from '@/context/AuthContext';
 import ProdeLobby from '@/components/prode/ProdeLobby';
 import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
@@ -222,7 +223,7 @@ function ProfileHeader({
                 <h1 className={styles.userName}>{user?.name || 'Usuario'}</h1>
                 <div className={styles.userHandle}>@{user?.email?.split('@')[0] || 'usuario'}</div>
                 <div className={styles.userStatusPill}>
-                    {user?.role === 'super_admin' || user?.role === 'admin_general' ? 'Administrador' : 'Usuario'}
+                    {user?.role ? getRoleLabel(user.role) : 'Usuario'}
                 </div>
                 <div className={styles.statsRow}>
                     <span className={styles.stat}><strong>{stats.sports}</strong> Deportes favoritos</span>

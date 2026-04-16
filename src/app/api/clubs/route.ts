@@ -4,7 +4,7 @@ import {
     hasScopedMembershipAccess,
     requireUserAccessContext,
 } from '@/lib/auth/permissions';
-import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { EDIT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
             .select('role')
             .eq('id', authUser.id)
             .single();
-        isSuperAdmin = profile?.role === 'super_admin';
+        isSuperAdmin = isGlobalAdminRole(profile?.role);
     }
 
     const readClient = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;

@@ -19,6 +19,7 @@ import {
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 import type { Sport } from '@/lib/types';
 import ExportImage from '@/components/ExportImage';
 import MobileSectionTabs from '@/components/MobileSectionTabs';
@@ -399,7 +400,7 @@ function RankingsPageContent() {
     );
     const rankingExportSubtitle = selectedRanking?.description?.trim()
         || `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`;
-    const canExportPublicRanking = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const canExportPublicRanking = isGlobalAdminRole(user?.role);
 
     const rankingStatusLabel = loadingList || loadingDetail
         ? 'Cargando'

@@ -156,6 +156,22 @@ export const superNavGroups: SuperNavGroup[] = [
                     'M8 21h8M12 17v4M7 4h10v3a5 5 0 01-10 0V4zM5 4H3a1 1 0 00-1 1v1a5 5 0 005 5M19 4h2a1 1 0 011 1v1a5 5 0 01-5 5',
                 description: 'Carga por Excel y base inicial del ranking de clubes.',
             },
+            {
+                id: 'exports',
+                label: 'Exports',
+                href: '/admin/super/exports',
+                iconPath:
+                    'M12 3v10m0 0l4-4m-4 4L8 9m-4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z',
+                description: 'Plantillas visuales, formatos y variantes personalizadas para exportacion.',
+            },
+            {
+                id: 'configuration',
+                label: 'Configuracion',
+                href: '/admin/super/configuracion',
+                iconPath:
+                    'M10.325 4.317a1 1 0 011.35-.936l.19.062a1 1 0 00.632 0l.19-.062a1 1 0 011.35.936l.03.198a1 1 0 00.39.64l.158.122a1 1 0 01.163 1.49l-.122.158a1 1 0 000 1.223l.122.158a1 1 0 01-.163 1.49l-.158.122a1 1 0 00-.39.64l-.03.198a1 1 0 01-1.35.936l-.19-.062a1 1 0 00-.632 0l-.19.062a1 1 0 01-1.35-.936l-.03-.198a1 1 0 00-.39-.64l-.158-.122a1 1 0 01-.163-1.49l.122-.158a1 1 0 000-1.223l-.122-.158a1 1 0 01.163-1.49l.158-.122a1 1 0 00.39-.64l.03-.198zM12 13a2 2 0 100-4 2 2 0 000 4zM4 12a8 8 0 1116 0 8 8 0 01-16 0z',
+                description: 'Ajustes globales del panel, permisos operativos y preferencias de sistema.',
+            },
         ],
     },
 ];

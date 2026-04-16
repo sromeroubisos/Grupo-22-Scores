@@ -47,6 +47,7 @@ interface Props {
     initialMode: 'player' | 'staff';
     lockDivisionId?: string;
     person?: PersonWithRole | null;
+    submitMode?: 'service' | 'club-admin-api';
 }
 
 function getAgeLabel(birthDate: string) {
@@ -77,7 +78,7 @@ function CompletionRow({ complete, label }: { complete: boolean; label: string }
     );
 }
 
-export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSuccess, initialMode, lockDivisionId, person }: Props) {
+export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSuccess, initialMode, lockDivisionId, person, submitMode = 'service' }: Props) {
     const [loading, setLoading] = useState(false);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -154,9 +155,27 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                 division_id: divisionId || undefined,
                 status: 'active',
             };
-            const res = isEditing && person?.id
-                ? await updatePersonInClub(clubId, person.id, payload)
-                : await addPersonToClub(clubId, payload);
+            const res = submitMode === 'club-admin-api'
+                ? await (async () => {
+                    const response = await fetch('/api/club-admin/roster', {
+                        method: isEditing && person?.id ? 'PATCH' : 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({
+                            clubId,
+                            personId: person?.id,
+                            ...payload,
+                        }),
+                    });
+                    const result = await response.json() as { ok?: boolean; data?: unknown; error?: string };
+
+                    return response.ok && result.ok
+                        ? { success: true as const, data: result.data }
+                        : { success: false as const, error: result.error || 'No se pudo guardar el jugador.' };
+                })()
+                : isEditing && person?.id
+                    ? await updatePersonInClub(clubId, person.id, payload)
+                    : await addPersonToClub(clubId, payload);
 
             if (res.success) {
                 setFirstName('');
@@ -184,12 +203,12 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         : initialMode === 'player' ? 'Nuevo jugador' : 'Nuevo staff';
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/75 px-3 py-4 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-5xl overflow-hidden border border-white/10 bg-[#0b0f13] shadow-[0_28px_90px_rgba(0,0,0,0.76)] scale-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-[#0b0f13] shadow-[0_28px_90px_rgba(0,0,0,0.76)] scale-in">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
                 <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 bg-emerald-400/10 blur-3xl" />
 
-                <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-7 py-5 md:px-8">
+                <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-7 py-6 md:px-8">
                     <div className="flex min-w-0 items-center gap-3">
                         <div className="grid h-11 w-11 shrink-0 place-items-center border border-emerald-300/25 bg-emerald-400/10 text-emerald-200">
                             <UserPlus className="h-5 w-5" />
@@ -209,14 +228,14 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                     <button
                         type="button"
                         onClick={onClose}
-                        className="grid h-10 w-10 shrink-0 place-items-center border border-white/10 bg-white/[0.04] text-neutral-400 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-neutral-400 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
                         aria-label="Cerrar formulario"
                     >
                         <X className="h-4 w-4" />
                     </button>
                 </div>
 
-                <form noValidate onSubmit={handleSubmit} className="relative max-h-[calc(90vh-80px)] overflow-y-auto px-7 py-6 md:px-8">
+                <form noValidate onSubmit={handleSubmit} className="relative max-h-[calc(90vh-88px)] overflow-y-auto px-7 py-6 md:px-8">
                     <input
                         id="photo-upload"
                         type="file"
@@ -227,7 +246,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
 
                     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_270px]">
                         <div className="space-y-5">
-                            <section className="border border-white/10 bg-white/[0.035] px-5 py-5">
+                            <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                                 <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                     Identidad
                                 </div>
@@ -256,7 +275,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 </div>
                             </section>
 
-                            <section className="border border-white/10 bg-white/[0.035] px-5 py-5">
+                            <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                                 <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                     Datos deportivos
                                 </div>
@@ -293,7 +312,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                                                     key={item}
                                                                     type="button"
                                                                     onClick={() => setPosition(item)}
-                                                                    className={`min-h-12 border px-4 py-3 text-left text-xs font-black transition ${selected
+                                                                    className={`min-h-12 rounded-2xl border px-4 py-3 text-left text-xs font-black transition ${selected
                                                                         ? 'border-emerald-300/70 bg-emerald-400 text-neutral-950 shadow-lg shadow-emerald-500/20'
                                                                         : 'border-white/10 bg-black/20 text-neutral-300 hover:border-white/25 hover:bg-white/[0.06] hover:text-white'
                                                                         }`}
@@ -324,7 +343,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                             </section>
 
                             {initialMode === 'player' && (
-                                <section className="border border-white/10 bg-white/[0.035] px-5 py-5">
+                                <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                                     <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                         Datos fisicos
                                     </div>
@@ -361,7 +380,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 </section>
                             )}
 
-                            <section className="border border-white/10 bg-white/[0.035] px-5 py-5">
+                            <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                                 <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                     Asignacion
                                 </div>
@@ -410,13 +429,13 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                             </section>
                         </div>
 
-                        <aside className="h-fit border border-white/10 bg-white/[0.04] px-5 py-5 lg:sticky lg:top-0">
+                        <aside className="h-fit rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] lg:sticky lg:top-2">
                             <div className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500">
                                 Preview
                             </div>
                             <div className="mt-4 flex flex-col items-center text-center">
                                 <div className="relative">
-                                    <div className="grid h-24 w-24 place-items-center overflow-hidden border border-white/10 bg-neutral-900">
+                                    <div className="grid h-24 w-24 place-items-center overflow-hidden rounded-[22px] border border-white/10 bg-neutral-900">
                                         {photoUrl ? (
                                             <img src={photoUrl} alt="Preview" className="h-full w-full object-cover" />
                                         ) : (
@@ -425,7 +444,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                     </div>
                                     <label
                                         htmlFor="photo-upload"
-                                        className="absolute -bottom-2 -right-2 grid h-9 w-9 cursor-pointer place-items-center border border-emerald-200/50 bg-emerald-400 text-neutral-950 shadow-lg transition hover:-translate-y-0.5"
+                                        className="absolute -bottom-2 -right-2 grid h-10 w-10 cursor-pointer place-items-center rounded-2xl border border-emerald-200/50 bg-emerald-400 text-neutral-950 shadow-lg transition hover:-translate-y-0.5"
                                         title="Subir foto"
                                     >
                                         <Upload className="h-4 w-4" />
@@ -437,11 +456,11 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                         ? position || 'Sin posicion'
                                         : STAFF_ROLES.find(([value]) => value === role)?.[1] || 'Staff'}
                                 </div>
-                                <div className="mt-2 border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold text-neutral-400">
+                                <div className="mt-2 rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-semibold text-neutral-400">
                                     {selectedDivision ? selectedDivision.name : 'Club global'}
                                 </div>
                                 {linkedDivisionClubs.length > 0 && (
-                                    <div className="mt-3 w-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-emerald-200">
+                                    <div className="mt-3 w-full rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-emerald-200">
                                         Comparte con: {linkedDivisionClubs.map((club) => club.name).join(', ')}
                                     </div>
                                 )}
@@ -469,14 +488,14 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                         <button
                             type="button"
                             onClick={onClose}
-                            className="h-12 border border-white/15 px-7 text-sm font-black uppercase tracking-wide text-white transition hover:bg-white/10"
+                            className="h-12 rounded-2xl border border-white/15 px-7 text-sm font-black uppercase tracking-wide text-white transition hover:bg-white/10"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="inline-flex h-12 items-center justify-center gap-3 border border-emerald-300/30 bg-emerald-400 px-8 text-sm font-black uppercase tracking-wide text-neutral-950 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:bg-emerald-300 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex h-12 items-center justify-center gap-3 rounded-2xl border border-emerald-300/30 bg-emerald-400 px-8 text-sm font-black uppercase tracking-wide text-neutral-950 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:bg-emerald-300 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                             {isEditing ? 'Actualizar' : 'Guardar'} {initialMode === 'player' ? 'jugador' : 'miembro'}

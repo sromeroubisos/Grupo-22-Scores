@@ -1,19 +1,34 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ChangeEvent } from 'react';
 import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { useAuth } from '@/context/AuthContext';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
+import {
+    EXPORT_DESIGN_CUSTOMIZATION_EVENT,
+    hydrateSavedExportDesignCustomization,
+    readSavedExportDesignCustomization,
+    type ExportDesignCustomizationState,
+    type ExportDesignElementDimensionContext,
+    type ExportDesignElementDimensionContextId,
+    type ExportDesignElementDimensionItemId,
+    type ExportDesignTypographyContextId,
+    type ExportDesignTypographySlot,
+} from '@/lib/exports/designCustomizations';
 import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
 export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups';
 type ExportDateValue = string | number | Date;
-type MatchExportMode = 'schedule' | 'result';
-type MatchExportLayout = 'classic' | 'editorial4x5';
-type StandingsExportMode = 'table' | 'groups';
-type LineupExportMode = 'both' | 'home' | 'away';
+export type MatchExportMode = 'schedule' | 'result';
+export type MatchExportLayout = 'classic' | 'editorial4x5';
+export type StandingsExportMode = 'table' | 'groups';
+export type LineupExportMode = 'both' | 'home' | 'away';
+type DensityMode = 'comfortable' | 'compact' | 'ultra-compact';
 
 interface StandingsRowData {
     pos: number;
@@ -53,12 +68,16 @@ type StandingsLegendEntry = {
     color: string;
 };
 
-interface StandingsData {
+export interface StandingsData {
     title: string;
     subtitle: string;
     tournamentLogo?: string;
     rows: StandingsRowData[];
     groups?: StandingsGroupData[];
+    highlightTeam?: string;
+    highlightPosition?: number;
+    highlightColor?: string;
+    highlightTextColor?: string;
     columnLabels?: Partial<{
         played: string;
         won: string;
@@ -70,7 +89,7 @@ interface StandingsData {
     showPositionDelta?: boolean;
 }
 
-interface DailyMatchesData {
+export interface DailyMatchesData {
     date: string;
     tournament: string;
     tournamentLogo?: string;
@@ -88,7 +107,7 @@ interface DailyMatchesData {
     }>;
 }
 
-interface MatchStatsData {
+export interface MatchStatsData {
     mainTitle?: string;
     status?: 'scheduled' | 'live' | 'final';
     homeTeam: string;
@@ -113,7 +132,7 @@ interface MatchStatsData {
     stats: Array<{ label: string; home: number | string; away: number | string }>;
 }
 
-interface PlayerStatsData {
+export interface PlayerStatsData {
     name: string;
     team: string;
     position: string;
@@ -121,7 +140,7 @@ interface PlayerStatsData {
     stats: Array<{ label: string; value: number | string; highlight?: boolean }>;
 }
 
-interface LineupExportPlayerData {
+export interface LineupExportPlayerData {
     id?: string | null;
     number?: number | string | null;
     name: string;
@@ -131,14 +150,14 @@ interface LineupExportPlayerData {
     isCaptain?: boolean | null;
 }
 
-interface LineupExportTeamData {
+export interface LineupExportTeamData {
     name: string;
     logo?: string;
     lineupLabel?: string;
     starters: LineupExportPlayerData[];
 }
 
-interface LineupsData {
+export interface LineupsData {
     title?: string;
     subtitle?: string;
     tournament: string;
@@ -151,7 +170,7 @@ interface LineupsData {
     awayTeam: LineupExportTeamData;
 }
 
-interface PlayoffBracketMatchData {
+export interface PlayoffBracketMatchData {
     match_id?: string | number;
     home_team?: {
         id?: string | number;
@@ -181,20 +200,20 @@ interface PlayoffBracketMatchData {
     result?: string;
 }
 
-interface PlayoffBracketRoundData {
+export interface PlayoffBracketRoundData {
     round_id?: string | number;
     name: string;
     matches: PlayoffBracketMatchData[];
 }
 
-interface PlayoffBracketData {
+export interface PlayoffBracketData {
     title: string;
     subtitle?: string;
     tournamentLogo?: string;
     rounds: PlayoffBracketRoundData[];
 }
 
-type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData;
+export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData;
 type CanvasFormat = { width: number; height: number };
 type SafeArea = { top: number; bottom: number; centerX: number; width: number; height: number };
 type MatchBackgroundUpload = { name: string; src: string };
@@ -203,6 +222,13 @@ type MatchSponsorData = {
     name?: string;
     logo?: string;
     placement?: string;
+};
+type ExportColorDefaults = {
+    selectedPaletteId: string;
+    bgColor: string;
+    accentColor: string;
+    editorialGradientLeftColor: string;
+    editorialGradientRightColor: string;
 };
 type MatchEditorialPresetId = 'balanced' | 'broadcast' | 'hero';
 type MatchEditorialLayoutPreset = {
@@ -261,6 +287,19 @@ interface ExportImageProps {
     className?: string;
 }
 
+type ExportImagePreviewProps = {
+    template: ExportTemplate;
+    data: ExportData;
+    format?: ExportFormat;
+    visualFamily: ExportVisualFamily;
+    customizationState?: ExportDesignCustomizationState | null;
+    matchExportMode?: MatchExportMode;
+    matchExportLayout?: MatchExportLayout;
+    lineupExportMode?: LineupExportMode;
+    standingsExportMode?: StandingsExportMode;
+    className?: string;
+};
+
 type LogoBadgeOptions = {
     x: number;
     y: number;
@@ -280,6 +319,7 @@ type OverflowCrestOptions = {
     label: string;
     rawLogo?: string;
     isDark: boolean;
+    showFrame?: boolean;
 };
 
 type ExportPalette = {
@@ -296,12 +336,44 @@ type ExportTimeZonePreset = {
     country: string;
     utcOffsetMinutes: number;
 };
+type ExportTypographyRole = 'display' | 'body' | 'mono' | 'editorial' | 'score';
+type ExportFontFamilyOptionId = 'outfit' | 'inter' | 'bebas' | 'dharma' | 'jetbrains' | 'tangerine' | 'inconsolata' | 'cantarell' | 'roboto-mono' | 'rancho';
+type ExportTypographyPresetId = 'g22-core' | 'momentum-v2' | 'poster-v3' | 'inter-tight' | 'mono-sport';
 type LocalExportFont = {
     family: string;
     weight: string;
     style?: string;
     sources: string[];
 };
+type ExportFontFamilyOption = {
+    id: ExportFontFamilyOptionId;
+    label: string;
+    family: string;
+    note: string;
+    sample: string;
+};
+type ExportTypographyPreset = {
+    id: ExportTypographyPresetId;
+    label: string;
+    description: string;
+    recommendedFor?: ExportVisualFamily[];
+    roles: Record<ExportTypographyRole, ExportFontFamilyOptionId>;
+};
+type ExportTypographyRoleOverride = {
+    family?: string;
+    weight?: string;
+};
+type ResolvedTypographyConfig = {
+    preset: ExportTypographyPreset;
+    roles: Record<ExportTypographyRole, ExportFontFamilyOptionId>;
+    families: Record<ExportTypographyRole, string>;
+    weights: Record<ExportTypographyRole, string>;
+};
+type ActiveExportElementDimensions = Partial<Record<ExportDesignElementDimensionItemId, { width: number; offsetY: number }>>;
+
+const DHARMA_GOTHIC_C_FAMILY = '"dharma-gothic-c", sans-serif';
+const DHARMA_GOTHIC_E_FAMILY = '"dharma-gothic-e", sans-serif';
+const DHARMA_GOTHIC_M_FAMILY = '"dharma-gothic-m", sans-serif';
 
 const FORMATS: Array<{ value: ExportFormat; label: string; width: number; height: number }> = [
     { value: '1080x1350', label: 'Post (1080x1350)', width: 1080, height: 1350 },
@@ -319,13 +391,29 @@ const exportJetBrainsMonoFont = JetBrains_Mono({
     display: 'swap',
 });
 
-const FONT_DISPLAY = exportOutfitFont.style.fontFamily;
-const FONT_BODY = exportOutfitFont.style.fontFamily;
-const FONT_MONO = exportJetBrainsMonoFont.style.fontFamily;
-const FONT_OUTFIT_BLACK = exportOutfitFont.style.fontFamily;
-const FONT_EDITORIAL = '"Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
-const FONT_CLASSIC_MATCH_SCORE = '"dharma-gothic-m", "dharma-gothic-c", "dharma-gothic-e", "G22 Dharma Gothic", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
-const FONT_EDITORIAL_SCORE = '"dharma-gothic-e", "dharma-gothic-c", "G22 Dharma Gothic", "Dharma Gothic Expanded Heavy", "Dharma Gothic E Heavy", "Dharma Gothic Expanded", "Dharma Gothic E", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
+const BASE_FONT_OUTFIT = exportOutfitFont.style.fontFamily;
+const BASE_FONT_INTER = '"Inter", "Outfit", system-ui, sans-serif';
+const BASE_FONT_MONO = exportJetBrainsMonoFont.style.fontFamily;
+const BASE_FONT_BEBAS = '"Bebas Neue", "Outfit", "Inter", system-ui, sans-serif';
+const BASE_FONT_DHARMA = `${DHARMA_GOTHIC_E_FAMILY}, ${DHARMA_GOTHIC_C_FAMILY}, ${DHARMA_GOTHIC_M_FAMILY}, "G22 Dharma Gothic", "Dharma Gothic Expanded Heavy", "Dharma Gothic E Heavy", "Dharma Gothic Expanded", "Dharma Gothic E", "Bebas Neue", "Outfit", "Inter", system-ui, sans-serif`;
+const BASE_FONT_TANGERINE = '"Tangerine", "Times New Roman", serif';
+const BASE_FONT_INCONSOLATA = '"Inconsolata", "JetBrains Mono", monospace';
+const BASE_FONT_CANTARELL = '"Cantarell", "Inter", "Outfit", sans-serif';
+const BASE_FONT_ROBOTO_MONO = '"Roboto Mono", "JetBrains Mono", monospace';
+const BASE_FONT_RANCHO = '"Rancho", "Bebas Neue", cursive';
+let FONT_DISPLAY = BASE_FONT_OUTFIT;
+let FONT_BODY = BASE_FONT_OUTFIT;
+let FONT_MONO = BASE_FONT_MONO;
+let FONT_OUTFIT_BLACK = BASE_FONT_OUTFIT;
+let FONT_EDITORIAL = BASE_FONT_BEBAS;
+let FONT_CLASSIC_MATCH_SCORE = BASE_FONT_DHARMA;
+let FONT_EDITORIAL_SCORE = BASE_FONT_DHARMA;
+let FONT_WEIGHT_DISPLAY = '900';
+let FONT_WEIGHT_BODY = '700';
+let FONT_WEIGHT_MONO = '700';
+let FONT_WEIGHT_EDITORIAL = '800';
+let FONT_WEIGHT_SCORE = '900';
+let ACTIVE_EXPORT_ELEMENT_DIMENSIONS: ActiveExportElementDimensions = {};
 const BRAND_ACCENT = '#00a365';
 const EDITORIAL_PRESET_STORAGE_KEY = 'g22-export-editorial-presets-v1';
 const EDITORIAL_GRADIENT_PRESET_STORAGE_KEY = 'g22-export-editorial-gradient-presets-v1';
@@ -363,6 +451,65 @@ const DEFAULT_PALETTE = EXPORT_PALETTES[0];
 const DEFAULT_TIMEZONE_PRESET_ID = 'buenos-aires-ar';
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = -180;
 const MAX_STANDINGS_ROWS_PER_SLIDE = 20;
+const EXPORT_VISUAL_FAMILY_OPTIONS: Array<{ value: ExportVisualFamily; label: string; description: string }> = [
+    { value: 'g22Base', label: 'G22 Base', description: 'Sistema actual con superficies limpias y estructura modular' },
+    { value: 'momentumV2', label: 'Momentum V2', description: 'Nueva familia inspirada en los templates editoriales del rar' },
+    { value: 'posterV3', label: 'Poster V3', description: 'Tercera familia con lenguaje de afiche, outlines gigantes y acentos neon' },
+];
+const EXPORT_FONT_FAMILY_OPTIONS: ExportFontFamilyOption[] = [
+    { id: 'outfit', label: 'Outfit', family: BASE_FONT_OUTFIT, note: 'Sans limpia y modular', sample: 'MATCHDAY' },
+    { id: 'inter', label: 'Inter', family: BASE_FONT_INTER, note: 'Texto mas neutro y editorial', sample: 'FULL TIME' },
+    { id: 'bebas', label: 'Bebas Neue', family: BASE_FONT_BEBAS, note: 'Condensada para titulares', sample: 'FIXTURES' },
+    { id: 'dharma', label: 'Dharma Gothic', family: BASE_FONT_DHARMA, note: 'Impacto para scores y poster con las variantes reales cargadas por Typekit.', sample: '3 2' },
+    { id: 'jetbrains', label: 'JetBrains Mono', family: BASE_FONT_MONO, note: 'Tecnica para metadata', sample: '20:30' },
+    { id: 'tangerine', label: 'Tangerine', family: BASE_FONT_TANGERINE, note: 'Script ornamental para piezas especiales', sample: 'Final night' },
+    { id: 'inconsolata', label: 'Inconsolata', family: BASE_FONT_INCONSOLATA, note: 'Mono editorial con mas personalidad', sample: 'MD 05' },
+    { id: 'cantarell', label: 'Cantarell', family: BASE_FONT_CANTARELL, note: 'Sans humanista para labels y cuerpo', sample: 'Match center' },
+    { id: 'roboto-mono', label: 'Roboto Mono', family: BASE_FONT_ROBOTO_MONO, note: 'Mono precisa para horarios y stats', sample: '21:45' },
+    { id: 'rancho', label: 'Rancho', family: BASE_FONT_RANCHO, note: 'Display expresiva para posters o titulares especiales', sample: 'Grande finale' },
+];
+const EXPORT_TYPOGRAPHY_ROLE_OPTIONS: Record<ExportTypographyRole, ExportFontFamilyOptionId[]> = {
+    display: ['outfit', 'inter', 'bebas', 'dharma', 'cantarell', 'rancho', 'tangerine'],
+    body: ['outfit', 'inter', 'cantarell', 'jetbrains', 'bebas', 'inconsolata'],
+    mono: ['jetbrains', 'roboto-mono', 'inconsolata', 'inter', 'outfit'],
+    editorial: ['bebas', 'dharma', 'rancho', 'cantarell', 'outfit', 'inter', 'tangerine'],
+    score: ['dharma', 'bebas', 'roboto-mono', 'inconsolata', 'outfit', 'jetbrains'],
+};
+const EXPORT_TYPOGRAPHY_PRESETS: ExportTypographyPreset[] = [
+    {
+        id: 'g22-core',
+        label: 'G22 Core',
+        description: 'Preset actual del sistema base, equilibrado para datos, labels y scores.',
+        recommendedFor: ['g22Base'],
+        roles: { display: 'outfit', body: 'outfit', mono: 'jetbrains', editorial: 'bebas', score: 'dharma' },
+    },
+    {
+        id: 'momentum-v2',
+        label: 'Momentum Editorial',
+        description: 'Titulares condensados con cuerpo mas sobrio para la familia Momentum V2.',
+        recommendedFor: ['momentumV2'],
+        roles: { display: 'outfit', body: 'inter', mono: 'jetbrains', editorial: 'bebas', score: 'dharma' },
+    },
+    {
+        id: 'poster-v3',
+        label: 'Poster V3',
+        description: 'Preset recomendado para la nueva familia poster: titulares agresivos y cuerpo editorial.',
+        recommendedFor: ['posterV3'],
+        roles: { display: 'bebas', body: 'inter', mono: 'jetbrains', editorial: 'bebas', score: 'dharma' },
+    },
+    {
+        id: 'inter-tight',
+        label: 'Inter Tight',
+        description: 'Version mas limpia y moderna cuando quieres bajar dramatismo sin perder legibilidad.',
+        roles: { display: 'inter', body: 'inter', mono: 'jetbrains', editorial: 'bebas', score: 'dharma' },
+    },
+    {
+        id: 'mono-sport',
+        label: 'Mono Sport',
+        description: 'Look mas tecnico para overlays y layouts orientados a data.',
+        roles: { display: 'outfit', body: 'outfit', mono: 'jetbrains', editorial: 'jetbrains', score: 'dharma' },
+    },
+];
 const MATCH_EXPORT_MODE_OPTIONS: Array<{ value: MatchExportMode; label: string; description: string }> = [
     { value: 'schedule', label: 'Horario', description: 'Muestra la programacion del partido' },
     { value: 'result', label: 'Resultado', description: 'Muestra el marcador cargado' },
@@ -497,8 +644,16 @@ const EXPORT_TIMEZONE_PRESETS: ExportTimeZonePreset[] = [
     { id: 'kiritimati-ki', city: 'Kiritimati', country: 'Kiribati', utcOffsetMinutes: 840 },
 ];
 let localExportFontsPromise: Promise<void> | null = null;
+const DEFAULT_EXPORT_COLOR_DEFAULTS: ExportColorDefaults = {
+    selectedPaletteId: DEFAULT_PALETTE.id,
+    bgColor: DEFAULT_PALETTE.bg,
+    accentColor: DEFAULT_PALETTE.accent,
+    editorialGradientLeftColor: '#df255c',
+    editorialGradientRightColor: DEFAULT_PALETTE.accent,
+};
 
 export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
+    const { user, isLoading } = useAuth();
     const supabase = useMemo(() => createClient(), []);
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -515,6 +670,11 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const [isMatchModeDropdownOpen, setIsMatchModeDropdownOpen] = useState(false);
     const [matchExportLayout, setMatchExportLayout] = useState<MatchExportLayout>('classic');
     const [isMatchLayoutDropdownOpen, setIsMatchLayoutDropdownOpen] = useState(false);
+    const [activeDesignSlug, setActiveDesignSlug] = useState<ExportDesignSlug>(() => readActiveExportDesign());
+    const [visualFamily, setVisualFamily] = useState<ExportVisualFamily>('g22Base');
+    const [selectedTypographyPresetId, setSelectedTypographyPresetId] = useState<ExportTypographyPresetId>('g22-core');
+    const [typographyOverrides, setTypographyOverrides] = useState<Partial<Record<ExportTypographyRole, ExportFontFamilyOptionId>>>({});
+    const [designCustomizationState, setDesignCustomizationState] = useState<ExportDesignCustomizationState | null>(null);
     const [lineupExportMode, setLineupExportMode] = useState<LineupExportMode>('both');
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
@@ -526,6 +686,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const [selectedPaletteId, setSelectedPaletteId] = useState(DEFAULT_PALETTE.id);
     const [accentColor, setAccentColor] = useState(DEFAULT_PALETTE.accent);
     const [bgColor, setBgColor] = useState(DEFAULT_PALETTE.bg);
+    const [defaultExportColors, setDefaultExportColors] = useState<ExportColorDefaults>(DEFAULT_EXPORT_COLOR_DEFAULTS);
+    const [hasSessionColorOverrides, setHasSessionColorOverrides] = useState(false);
+    const showModalRef = useRef(showModal);
+    const defaultExportColorsRef = useRef(defaultExportColors);
     const [editorialGradientLeftColor, setEditorialGradientLeftColor] = useState('#df255c');
     const [editorialGradientRightColor, setEditorialGradientRightColor] = useState(DEFAULT_PALETTE.accent);
     const [editorialLayoutPresetId, setEditorialLayoutPresetId] = useState<MatchEditorialPresetId>(() => (
@@ -597,12 +761,125 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     }, [preferredStandingsExportMode]);
 
     useEffect(() => {
+        const syncActiveVisualFamily = () => {
+            const nextSlug = readActiveExportDesign();
+            setActiveDesignSlug(nextSlug);
+            setVisualFamily(mapDesignSlugToVisualFamily(nextSlug));
+        };
+
+        syncActiveVisualFamily();
+        window.addEventListener('storage', syncActiveVisualFamily);
+        window.addEventListener('g22:active-export-design-change', syncActiveVisualFamily as EventListener);
+
+        return () => {
+            window.removeEventListener('storage', syncActiveVisualFamily);
+            window.removeEventListener('g22:active-export-design-change', syncActiveVisualFamily as EventListener);
+        };
+    }, []);
+
+    useEffect(() => {
+        setSelectedTypographyPresetId(getDefaultTypographyPresetId(visualFamily));
+        setTypographyOverrides({});
+    }, [visualFamily]);
+
+    useEffect(() => {
+        showModalRef.current = showModal;
+    }, [showModal]);
+
+    useEffect(() => {
+        defaultExportColorsRef.current = defaultExportColors;
+    }, [defaultExportColors]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const applyCustomization = (customization: ExportDesignCustomizationState | null) => {
+            if (!isMounted) return;
+            setDesignCustomizationState(customization);
+
+            if (!customization) {
+                setDefaultExportColors(DEFAULT_EXPORT_COLOR_DEFAULTS);
+                if (!showModalRef.current) {
+                    setSelectedPaletteId(DEFAULT_EXPORT_COLOR_DEFAULTS.selectedPaletteId);
+                    setBgColor(DEFAULT_EXPORT_COLOR_DEFAULTS.bgColor);
+                    setAccentColor(DEFAULT_EXPORT_COLOR_DEFAULTS.accentColor);
+                    setEditorialGradientLeftColor(DEFAULT_EXPORT_COLOR_DEFAULTS.editorialGradientLeftColor);
+                    setEditorialGradientRightColor(DEFAULT_EXPORT_COLOR_DEFAULTS.editorialGradientRightColor);
+                }
+                return;
+            }
+
+            const paletteId = findPaletteIdByColors(customization.previewSurface, customization.previewAccent);
+            const nextDefaults: ExportColorDefaults = {
+                selectedPaletteId: paletteId,
+                bgColor: customization.previewSurface || DEFAULT_PALETTE.bg,
+                accentColor: customization.previewAccent || DEFAULT_PALETTE.accent,
+                editorialGradientLeftColor: customization.previewGradientFrom || '#df255c',
+                editorialGradientRightColor: customization.previewGradientTo || customization.previewAccent || DEFAULT_PALETTE.accent,
+            };
+            setDefaultExportColors(nextDefaults);
+            if (!showModalRef.current) {
+                setSelectedPaletteId(nextDefaults.selectedPaletteId);
+                setBgColor(nextDefaults.bgColor);
+                setAccentColor(nextDefaults.accentColor);
+                setEditorialGradientLeftColor(nextDefaults.editorialGradientLeftColor);
+                setEditorialGradientRightColor(nextDefaults.editorialGradientRightColor);
+            }
+        };
+
+        const hydrateCustomization = async () => {
+            const fallbackLocalState = readSavedExportDesignCustomization(activeDesignSlug);
+            applyCustomization(fallbackLocalState);
+
+            const { state } = await hydrateSavedExportDesignCustomization(activeDesignSlug, supabase);
+            applyCustomization(state);
+        };
+
+        void hydrateCustomization();
+
+        const handleCustomizationChange = () => {
+            void hydrateCustomization();
+        };
+
+        window.addEventListener(EXPORT_DESIGN_CUSTOMIZATION_EVENT, handleCustomizationChange as EventListener);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+            void hydrateCustomization();
+        });
+
+        return () => {
+            isMounted = false;
+            window.removeEventListener(EXPORT_DESIGN_CUSTOMIZATION_EVENT, handleCustomizationChange as EventListener);
+            subscription.unsubscribe();
+        };
+    }, [activeDesignSlug, supabase]);
+
+    useEffect(() => {
         if (!showModal) {
             setIsTimeZoneDropdownOpen(false);
             setIsMatchModeDropdownOpen(false);
             setIsMatchLayoutDropdownOpen(false);
+            setHasSessionColorOverrides(false);
+            return;
         }
+
+        const defaults = defaultExportColorsRef.current;
+        setHasSessionColorOverrides(false);
+        setSelectedPaletteId(defaults.selectedPaletteId);
+        setBgColor(defaults.bgColor);
+        setAccentColor(defaults.accentColor);
+        setEditorialGradientLeftColor(defaults.editorialGradientLeftColor);
+        setEditorialGradientRightColor(defaults.editorialGradientRightColor);
     }, [showModal]);
+
+    useEffect(() => {
+        if (!showModal || hasSessionColorOverrides) return;
+
+        setSelectedPaletteId(defaultExportColors.selectedPaletteId);
+        setBgColor(defaultExportColors.bgColor);
+        setAccentColor(defaultExportColors.accentColor);
+        setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
+        setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
+    }, [defaultExportColors, hasSessionColorOverrides, showModal]);
 
     useEffect(() => {
         setIsPortalReady(true);
@@ -665,14 +942,19 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     }, [data, template]);
 
     useEffect(() => {
-        if (template !== 'matchStats' || matchExportLayout !== 'editorial4x5') return;
+        if (!shouldLockMatchExportFormatToPost(template, visualFamily, matchExportLayout, matchExportMode)) return;
         if (format !== '1080x1350') {
             setFormat('1080x1350');
         }
-        if (matchExportMode !== 'result') {
+    }, [format, matchExportLayout, matchExportMode, template, visualFamily]);
+
+    useEffect(() => {
+        if (template !== 'matchStats') return;
+        const mustForceResult = matchExportLayout === 'editorial4x5' && visualFamily === 'momentumV2';
+        if (mustForceResult && matchExportMode !== 'result') {
             setMatchExportMode('result');
         }
-    }, [format, matchExportLayout, matchExportMode, template]);
+    }, [matchExportLayout, matchExportMode, template, visualFamily]);
 
     useEffect(() => {
         const browserOffsetMinutes = getBrowserOffsetMinutes();
@@ -683,6 +965,22 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const selectedTimeZonePreset = useMemo(
         () => EXPORT_TIMEZONE_PRESETS.find((preset) => preset.id === selectedTimeZoneId) || findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES),
         [selectedTimeZoneId]
+    );
+    const selectedTypographyPreset = useMemo(
+        () => getExportTypographyPreset(selectedTypographyPresetId),
+        [selectedTypographyPresetId]
+    );
+    const activeTypographyContextId = useMemo(
+        () => resolveActiveTypographyContextId(template, matchExportLayout, matchExportMode),
+        [matchExportLayout, matchExportMode, template]
+    );
+    const designTypographyFamilies = useMemo(
+        () => resolveDesignTypographyFamilies(designCustomizationState, activeTypographyContextId),
+        [activeTypographyContextId, designCustomizationState]
+    );
+    const resolvedTypographyConfig = useMemo(
+        () => resolveTypographyConfig(selectedTypographyPresetId, typographyOverrides, designTypographyFamilies),
+        [designTypographyFamilies, selectedTypographyPresetId, typographyOverrides]
     );
     const timeZoneOptions = useMemo(
         () => EXPORT_TIMEZONE_PRESETS.map((preset) => ({
@@ -712,8 +1010,23 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     const editorialAutoContextLabel = useMemo(() => {
         if (template !== 'matchStats') return '';
         const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as MatchStatsData;
-        return buildAutoEditorialContextLabel(applyMatchExportMode(exportData, 'result'));
-    }, [customTournamentName, data, selectedTimeZonePreset, template]);
+        return buildAutoEditorialContextLabel(applyMatchExportMode(exportData, matchExportMode));
+    }, [customTournamentName, data, matchExportMode, selectedTimeZonePreset, template]);
+    const supportsEditorialSchedule = template === 'matchStats' && matchExportLayout === 'editorial4x5' && (visualFamily === 'g22Base' || visualFamily === 'posterV3');
+    const supportsClassicSchedule = template === 'matchStats' && matchExportLayout === 'classic';
+    const showMatchModeSelector = template === 'matchStats' && (supportsClassicSchedule || supportsEditorialSchedule);
+    const showMatchTimeZoneSelector = template === 'dailyMatches'
+        || (
+            template === 'matchStats'
+            && (supportsClassicSchedule || (supportsEditorialSchedule && matchExportMode === 'schedule'))
+        );
+    const supportsPhotoFreeEditorialSchedule = template === 'matchStats'
+        && matchExportLayout === 'editorial4x5'
+        && matchExportMode === 'schedule'
+        && (visualFamily === 'g22Base' || visualFamily === 'posterV3');
+    const hasMatchEditorialBackground = template === 'matchStats'
+        ? supportsPhotoFreeEditorialSchedule || Boolean(matchBackgroundUpload?.src || (data as MatchStatsData).backgroundImage?.trim())
+        : false;
     const isEditorialGradientMode = template === 'matchStats' && matchExportLayout === 'editorial4x5';
     const savedColorGradientPresets = useMemo(
         () => savedGradientPresets.filter((preset) => !preset.gradientImage),
@@ -727,13 +1040,14 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             away: formatExportScoreInput(matchData.awayScore),
         };
     }, [data, template]);
-    const isResultExport = template === 'matchStats' && (matchExportLayout === 'editorial4x5' || matchExportMode === 'result');
+    const isResultExport = template === 'matchStats' && matchExportMode === 'result';
+    const locksMatchFormatToPost = shouldLockMatchExportFormatToPost(template, visualFamily, matchExportLayout, matchExportMode);
     const exportActionLabel = template === 'standings' && standingsSlides.length > 1
         ? `Exportar ${standingsSlides.length} imagenes`
         : 'Exportar imagen';
     const selectedFormatConfig = useMemo(
-        () => FORMATS.find((item) => item.value === format) || FORMATS[0],
-        [format]
+        () => FORMATS.find((item) => item.value === getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode)) || FORMATS[0],
+        [format, matchExportLayout, matchExportMode, template, visualFamily]
     );
     const selectedPaletteName = useMemo(
         () => EXPORT_PALETTES.find((palette) => palette.id === selectedPaletteId)?.name || 'Custom',
@@ -751,6 +1065,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     }, [lineupExportMode, matchExportLayout, matchExportMode, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
+        chips.push(getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
@@ -777,7 +1092,35 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         selectedPaletteName,
         standingsExportMode,
         template,
+        visualFamily,
     ]);
+    const paletteUsageHint = useMemo(() => {
+        if (template === 'lineups' && visualFamily === 'posterV3') {
+            return 'En Poster V3, Fondo construye el clima oscuro del afiche; Acento domina barras, chips numerados y remates neon. En modo de dos equipos, el segundo bloque deriva a una variante fria para separar ambas columnas.';
+        }
+
+        if (template === 'standings' && visualFamily === 'posterV3') {
+            return 'En Poster V3 para standings, Fondo define la base navy/carbon y Acento pinta el header, los bullets de posicion, las capsulas de puntos y el contorno de la tabla para acercarse al look poster del material de referencia.';
+        }
+
+        if (visualFamily === 'posterV3') {
+            return 'En Poster V3, Fondo mueve la atmosfera del afiche y Acento recolorea titulos, marcadores, barras y capsulas neon sin tocar los datos.';
+        }
+
+        if (template === 'lineups' && visualFamily === 'momentumV2') {
+            return 'En Momentum V2, Fondo redefine el matte y la atmosfera del lienzo; Acento recolorea bordes, capsulas numeradas y brillos. En vista de dos equipos, la segunda columna usa una variacion fria del mismo acento para separar ambos lados sin romper la paleta.';
+        }
+
+        if (template === 'standings' && visualFamily === 'momentumV2') {
+            return 'En Momentum V2 para standings, Fondo cambia la base oscura y la atmosfera general del afiche; Acento recolorea el contenedor del titulo, los bordes de cada fila, la capsula de puntos, las lineas de referencia y los brillos de apoyo para redisenar la tabla sin tocar los datos.';
+        }
+
+        if (visualFamily === 'momentumV2') {
+            return 'En Momentum V2, Fondo controla la base matte del afiche y Acento mueve titulares, lineas y brillos para rehacer la pieza sin tocar los datos.';
+        }
+
+        return 'La marca de agua G22 se mantiene en todas las exportaciones.';
+    }, [template, visualFamily]);
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -789,6 +1132,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const applyPalette = (palette: ExportPalette) => {
+        setHasSessionColorOverrides(true);
         setSelectedPaletteId(palette.id);
         setBgColor(palette.bg);
         setAccentColor(palette.accent);
@@ -798,21 +1142,41 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const handleBgColorChange = (value: string) => {
+        setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
         setBgColor(value);
     };
 
     const handleAccentColorChange = (value: string) => {
+        setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
         setAccentColor(value);
     };
 
+    const handleTypographyPresetChange = (presetId: ExportTypographyPresetId) => {
+        setSelectedTypographyPresetId(presetId);
+        setTypographyOverrides({});
+    };
+
+    const handleTypographyRoleChange = (role: ExportTypographyRole, fontId: ExportFontFamilyOptionId) => {
+        setTypographyOverrides((current) => ({
+            ...current,
+            [role]: fontId,
+        }));
+    };
+
+    const resetTypographyOverrides = () => {
+        setTypographyOverrides({});
+    };
+
     const handleEditorialGradientLeftColorChange = (value: string) => {
+        setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
         setEditorialGradientLeftColor(value);
     };
 
     const handleEditorialGradientRightColorChange = (value: string) => {
+        setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
         setEditorialGradientRightColor(value);
     };
@@ -884,6 +1248,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const applySavedEditorialPreset = (preset: SavedMatchEditorialPreset) => {
+        setHasSessionColorOverrides(true);
         setEditorialLayoutPresetId(getEditorialLayoutPreset(preset.layoutPresetId).id);
         setEditorialGradientLeftColor(preset.gradientLeftColor);
         setEditorialGradientRightColor(preset.gradientRightColor);
@@ -962,6 +1327,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const applySavedGradientPreset = (preset: SavedMatchGradientPreset) => {
+        setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
         setBgColor(preset.gradientLeftColor);
         setAccentColor(preset.gradientRightColor);
@@ -1063,9 +1429,14 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setShowModal(false);
 
         try {
-            const resolvedFormat: ExportFormat = template === 'matchStats' && matchExportLayout === 'editorial4x5'
-                ? '1080x1350'
-                : format;
+            applyTypographyConfig(resolvedTypographyConfig);
+            setActiveElementDimensions(
+                resolveActiveElementDimensions(
+                    designCustomizationState,
+                    resolveActiveElementDimensionContextId(template, matchExportLayout, matchExportMode)
+                )
+            );
+            const resolvedFormat = getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode);
             const config = FORMATS.find((item) => item.value === resolvedFormat)!;
             const [, brandLogo] = await Promise.all([ensureExportFonts(), loadImage('/icon.png')]);
             const canvas = document.createElement('canvas');
@@ -1083,7 +1454,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 );
                 if (matchExportLayout === 'editorial4x5') {
                     const backgroundImage = matchBackgroundUpload?.src || matchData.backgroundImage || '';
-                    if (!backgroundImage) {
+                    const scheduledEditorialWithoutPhoto = (visualFamily === 'posterV3' || visualFamily === 'g22Base')
+                        && (matchData.status === 'scheduled' || (matchData.mainTitle || '').trim().toLowerCase() === 'horario');
+                    if (!backgroundImage && !scheduledEditorialWithoutPhoto) {
                         throw new Error('Subi una foto de fondo para usar el layout editorial 4:5');
                     }
                     const editorialMatchData: MatchStatsData = {
@@ -1097,20 +1470,69 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                         editorialGradientImage: editorialGradientUpload?.src || matchData.editorialGradientImage,
                         sponsors: activeEditorialSponsors,
                     };
-                    await drawMatchEditorialResult(
-                        ctx,
-                        canvas,
-                        editorialMatchData,
-                        config,
-                        accentColor,
-                        bgColor,
-                        brandLogo,
-                        backgroundImage,
-                        editorialGradientLeftColor,
-                        editorialGradientRightColor
-                    );
+                    if (visualFamily === 'posterV3') {
+                        await drawPosterV3MatchEditorial(
+                            ctx,
+                            canvas,
+                            editorialMatchData,
+                            config,
+                            accentColor,
+                            bgColor,
+                            brandLogo,
+                            backgroundImage
+                        );
+                    } else if (visualFamily === 'momentumV2') {
+                        await drawMomentumMatchEditorial(
+                            ctx,
+                            canvas,
+                            editorialMatchData,
+                            config,
+                            accentColor,
+                            bgColor,
+                            brandLogo,
+                            backgroundImage,
+                            editorialGradientLeftColor,
+                            editorialGradientRightColor
+                        );
+                    } else if (matchData.status === 'scheduled') {
+                        await drawMatchEditorialScheduleSplitHero(
+                            ctx,
+                            canvas,
+                            editorialMatchData,
+                            config,
+                            accentColor,
+                            bgColor,
+                            brandLogo,
+                            backgroundImage,
+                            editorialGradientLeftColor,
+                            editorialGradientRightColor
+                        );
+                    } else {
+                        await drawMatchEditorialResult(
+                            ctx,
+                            canvas,
+                            editorialMatchData,
+                            config,
+                            accentColor,
+                            bgColor,
+                            brandLogo,
+                            backgroundImage,
+                            editorialGradientLeftColor,
+                            editorialGradientRightColor
+                        );
+                    }
                 } else {
-                    await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                    if (visualFamily === 'posterV3') {
+                        await drawPosterV3MatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                    } else if (visualFamily === 'momentumV2') {
+                        if (matchData.status === 'scheduled') {
+                            await drawMomentumMatchDayClassicSchedule(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                        } else {
+                            await drawMomentumMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                        }
+                    } else {
+                        await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                    }
                 }
             } else if (template === 'standings') {
                 const standingsData = exportData as StandingsData;
@@ -1119,7 +1541,13 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 
                 for (const [index, slide] of slides.entries()) {
                     setStatus(slides.length > 1 ? `Generando ${index + 1}/${slides.length}...` : 'Generando...');
-                    await drawStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                    if (visualFamily === 'posterV3') {
+                        await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                    } else if (visualFamily === 'momentumV2') {
+                        await drawMomentumStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                    } else {
+                        await drawStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                    }
                     await downloadCanvas(canvas, buildExportFilename(filename, template, resolvedFormat, index + 1, slides.length));
                     if (index < slides.length - 1) {
                         await wait(140);
@@ -1132,13 +1560,37 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             } else if (template === 'dailyMatches') {
                 const matchesData = exportData as DailyMatchesData;
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
-                await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+                if (visualFamily === 'posterV3') {
+                    await drawPosterV3DailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+                } else if (visualFamily === 'momentumV2') {
+                    await drawMomentumDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+                } else {
+                    await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+                }
             } else if (template === 'lineups') {
-                await drawLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
+                if (visualFamily === 'posterV3') {
+                    await drawPosterV3Lineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
+                } else if (visualFamily === 'momentumV2') {
+                    await drawMomentumLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
+                } else {
+                    await drawG22BaseLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
+                }
             } else if (template === 'playoffBracket') {
-                await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
+                if (visualFamily === 'posterV3') {
+                    await drawPosterV3PlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
+                } else if (visualFamily === 'momentumV2') {
+                    await drawMomentumPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
+                } else {
+                    await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
+                }
             } else {
-                await drawPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
+                if (visualFamily === 'posterV3') {
+                    await drawPosterV3PlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
+                } else if (visualFamily === 'momentumV2') {
+                    await drawMomentumPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
+                } else {
+                    await drawPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
+                }
             }
 
             await downloadCanvas(canvas, buildExportFilename(filename, template, resolvedFormat));
@@ -1148,11 +1600,17 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             console.error('Export error:', error);
             setStatus(error instanceof Error ? error.message : 'Error al exportar');
         } finally {
+            resetActiveElementDimensions();
             setIsExporting(false);
         }
     };
 
     const dailyMatches = template === 'dailyMatches' ? (data as DailyMatchesData).matches : [];
+    const canExport = isGlobalAdminRole(user?.role);
+
+    if (isLoading || !canExport) {
+        return null;
+    }
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -1198,6 +1656,104 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 
                         <div className={styles.modalBody}>
                             <div className={styles.modalSection}>
+                                <label className={styles.modalLabel}>Diseno activo</label>
+                                <div className={styles.formatOptions}>
+                                    <button className={`${styles.formatBtn} ${styles.active}`} type="button" disabled>
+                                        {getExportVisualFamilyLabel(visualFamily)}
+                                    </button>
+                                </div>
+                                <p className={styles.modalHint}>
+                                    {EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}
+                                    {' '}La tipografia y el estilo visual se administran desde el panel de gestion.
+                                </p>
+                            </div>
+
+                            {false && (
+                            <div className={styles.modalSection}>
+                                <label className={styles.modalLabel}>Tipografia</label>
+                                <div className={styles.formatOptions}>
+                                    {EXPORT_TYPOGRAPHY_PRESETS.map((preset) => (
+                                        <button
+                                            key={preset.id}
+                                            className={`${styles.formatBtn} ${selectedTypographyPresetId === preset.id ? styles.active : ''}`}
+                                            onClick={() => handleTypographyPresetChange(preset.id)}
+                                            type="button"
+                                        >
+                                            {preset.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className={styles.modalHint}>
+                                    {selectedTypographyPreset.description}
+                                    {selectedTypographyPreset.recommendedFor?.includes(visualFamily)
+                                        ? ` Recomendado para ${getExportVisualFamilyLabel(visualFamily)}.`
+                                        : ''}
+                                </p>
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gap: 6,
+                                        padding: '14px 16px',
+                                        borderRadius: 16,
+                                        border: '1px solid rgba(255,255,255,0.12)',
+                                        background: 'rgba(255,255,255,0.03)',
+                                        marginTop: 12,
+                                    }}
+                                >
+                                    <div style={{ fontFamily: resolvedTypographyConfig.families.display, fontSize: '1.2rem', fontWeight: 900, letterSpacing: '0.04em' }}>
+                                        MATCHDAY EXPORT
+                                    </div>
+                                    <div style={{ fontFamily: resolvedTypographyConfig.families.body, fontSize: '0.95rem', fontWeight: 700 }}>
+                                        Club A vs Club B · Resultado · Tabla · Fixture
+                                    </div>
+                                    <div style={{ fontFamily: resolvedTypographyConfig.families.mono, fontSize: '0.85rem', opacity: 0.8 }}>
+                                        20:30 · FINAL · 1080x1350
+                                    </div>
+                                </div>
+                                <div style={{ marginTop: 14, display: 'grid', gap: 14 }}>
+                                    {([
+                                        ['display', 'Titulos / display'],
+                                        ['body', 'Cuerpo / labels'],
+                                        ['mono', 'Metadata / chips'],
+                                        ['editorial', 'Editorial / hero'],
+                                        ['score', 'Score / impacto'],
+                                    ] as Array<[ExportTypographyRole, string]>).map(([role, label]) => (
+                                        <div key={role}>
+                                            <label className={styles.modalLabel}>{label}</label>
+                                            <div className={styles.formatOptions}>
+                                                {EXPORT_TYPOGRAPHY_ROLE_OPTIONS[role].map((fontId) => {
+                                                    const option = getExportFontFamilyOption(fontId);
+                                                    const isActive = resolvedTypographyConfig.roles[role] === fontId;
+                                                    return (
+                                                        <button
+                                                            key={`${role}-${fontId}`}
+                                                            className={`${styles.formatBtn} ${isActive ? styles.active : ''}`}
+                                                            onClick={() => handleTypographyRoleChange(role, fontId)}
+                                                            type="button"
+                                                            title={option.note}
+                                                        >
+                                                            {option.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            <p className={styles.modalHint}>
+                                                {getExportFontFamilyOption(resolvedTypographyConfig.roles[role]).note}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                                {Object.keys(typographyOverrides).length > 0 && (
+                                    <div className={styles.formatOptions} style={{ marginTop: 12 }}>
+                                        <button className={styles.formatBtn} onClick={resetTypographyOverrides} type="button">
+                                            Restablecer preset
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            )}
+
+                            <div className={styles.modalSection}>
                                 <label className={styles.modalLabel}>Formato</label>
                                 <div className={styles.formatOptions}>
                                     {FORMATS.map((item) => (
@@ -1205,15 +1761,23 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             key={item.value}
                                             className={`${styles.formatBtn} ${format === item.value ? styles.active : ''}`}
                                             onClick={() => setFormat(item.value)}
-                                            disabled={template === 'matchStats' && matchExportLayout === 'editorial4x5' && item.value !== '1080x1350'}
+                                            disabled={locksMatchFormatToPost && item.value !== '1080x1350'}
                                             type="button"
                                         >
                                             {item.label}
                                         </button>
                                     ))}
                                 </div>
-                                {template === 'matchStats' && matchExportLayout === 'editorial4x5' && (
-                                    <p className={styles.modalHint}>El layout editorial usa siempre canvas 1080x1350 para respetar la composicion 4:5.</p>
+                                {locksMatchFormatToPost && (
+                                    <p className={styles.modalHint}>
+                                        {template === 'dailyMatches'
+                                            ? 'Poster V3 para daily matches usa siempre canvas 1080x1350 para sostener la composicion vertical del poster.'
+                                            : matchExportMode === 'schedule'
+                                            ? 'El nuevo horario de G22 Base usa siempre canvas 1080x1350 para respetar la composicion del afiche.'
+                                            : matchExportLayout === 'editorial4x5'
+                                            ? 'El layout editorial usa siempre canvas 1080x1350 para respetar la composicion 4:5.'
+                                            : 'El nuevo resultado clasico de G22 Base usa siempre canvas 1080x1350 para sostener la composicion vertical.'}
+                                    </p>
                                 )}
                             </div>
 
@@ -1299,7 +1863,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                 </div>
                             )}
 
-                            {template === 'matchStats' && matchExportLayout === 'classic' && (
+                            {showMatchModeSelector && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Modo del encabezado</label>
                                     <div className={styles.dropdown}>
@@ -1315,9 +1879,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             <span className={styles.dropdownTriggerText}>
                                                 <strong>{getMatchExportModeLabel(matchExportMode)}</strong>
                                                 <span className={styles.dropdownTriggerMeta}>
-                                                    {matchExportMode === 'schedule'
-                                                        ? 'Muestra fecha y hora del partido'
-                                                        : 'Muestra el marcador cargado'}
+                                                    {MATCH_EXPORT_MODE_OPTIONS.find((option) => option.value === matchExportMode)?.description}
                                                 </span>
                                             </span>
                                             <span className={`${styles.dropdownChevron} ${isMatchModeDropdownOpen ? styles.dropdownChevronOpen : ''}`} aria-hidden="true">
@@ -1350,7 +1912,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                 </div>
                             )}
 
-                            {(template === 'dailyMatches' || (template === 'matchStats' && matchExportLayout === 'classic')) && (
+                            {showMatchTimeZoneSelector && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Uso horario</label>
                                     <div className={styles.timeZoneSummary}>
@@ -1464,9 +2026,15 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                     <label className={styles.modalLabel}>Foto de fondo</label>
                                     <div className={styles.uploadCard}>
                                         <div className={styles.uploadMeta}>
-                                            <span className={styles.uploadTitle}>Subi la imagen principal del jugador</span>
+                                            <span className={styles.uploadTitle}>
+                                                {matchExportMode === 'schedule'
+                                                    ? 'Foto o textura opcional'
+                                                    : 'Subi la imagen principal del partido'}
+                                            </span>
                                             <span className={styles.uploadSubtitle}>
-                                                Idealmente en 1080x1350 para mantener el encuadre y el aire del layout editorial.
+                                                {matchExportMode === 'schedule'
+                                                    ? 'El nuevo horario editorial funciona sin foto. Si subis una imagen, solo suma textura visual sin romper la composicion limpia 1080x1350.'
+                                                    : 'Idealmente en 1080x1350 para mantener el encuadre y el aire del layout editorial.'}
                                             </span>
                                         </div>
                                         <div className={styles.uploadActions}>
@@ -1490,7 +2058,9 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         </div>
                                     </div>
                                     <p className={styles.modalHint}>
-                                        Esta variante exporta resultado, overlay inferior y logos mas separados. La foto se usa full-bleed como fondo.
+                                        {matchExportMode === 'schedule'
+                                            ? 'Esta variante arma un poster 4:5 limpio y sin foto obligatoria: bloque superior editorial, escudos en recuadros blancos, fecha/hora protagonistas y colores derivados del fondo y el acento.'
+                                            : 'Esta variante exporta resultado, overlay inferior y logos mas separados. La foto se usa full-bleed como fondo.'}
                                     </p>
                                     {matchBackgroundUpload && (
                                         <div className={styles.uploadPreview}>
@@ -1505,12 +2075,18 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         </div>
                                     )}
                                     <div style={{ marginTop: 16 }}>
-                                        <label className={styles.modalLabel}>Logo central de competencia</label>
+                                        <label className={styles.modalLabel}>
+                                            {matchExportMode === 'schedule' ? 'Logo de competencia' : 'Logo central de competencia'}
+                                        </label>
                                         <div className={styles.uploadCard}>
                                             <div className={styles.uploadMeta}>
-                                                <span className={styles.uploadTitle}>Logo entre los dos scores</span>
+                                                <span className={styles.uploadTitle}>
+                                                    {matchExportMode === 'schedule' ? 'Logo superior del torneo' : 'Logo entre los dos scores'}
+                                                </span>
                                                 <span className={styles.uploadSubtitle}>
-                                                    Si no subis nada, se usa el logo del torneo cargado en el partido. Solo hace override cuando queres cambiarlo.
+                                                    {matchExportMode === 'schedule'
+                                                        ? 'Si no subis nada, se usa el logo del torneo cargado en el partido. Solo hace override cuando quieras otra marca de competencia.'
+                                                        : 'Si no subis nada, se usa el logo del torneo cargado en el partido. Solo hace override cuando queres cambiarlo.'}
                                                 </span>
                                             </div>
                                             <div className={styles.uploadActions}>
@@ -1546,64 +2122,72 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                             </div>
                                         )}
                                     </div>
-                                    <div style={{ marginTop: 16 }}>
-                                        <label className={styles.modalLabel}>Preset de layout</label>
-                                        <div className={styles.compactPresetPanel}>
-                                            {EDITORIAL_LAYOUT_PRESETS.map((preset) => (
-                                                <button
-                                                    key={preset.id}
-                                                    className={`${styles.compactPresetBtn} ${editorialLayoutPresetId === preset.id ? styles.compactPresetBtnActive : ''}`}
-                                                    onClick={() => setEditorialLayoutPresetId(preset.id)}
-                                                    title={preset.description}
-                                                    type="button"
-                                                >
-                                                    {preset.label}
-                                                </button>
-                                            ))}
+                                    {matchExportMode === 'result' && (
+                                        <div style={{ marginTop: 16 }}>
+                                            <label className={styles.modalLabel}>Preset de layout</label>
+                                            <div className={styles.compactPresetPanel}>
+                                                {EDITORIAL_LAYOUT_PRESETS.map((preset) => (
+                                                    <button
+                                                        key={preset.id}
+                                                        className={`${styles.compactPresetBtn} ${editorialLayoutPresetId === preset.id ? styles.compactPresetBtnActive : ''}`}
+                                                        onClick={() => setEditorialLayoutPresetId(preset.id)}
+                                                        title={preset.description}
+                                                        type="button"
+                                                    >
+                                                        {preset.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <p className={styles.modalHint}>
+                                                Cada preset agrupa posiciones, tamanos y respiracion del bloque editorial para reutilizarlo por torneo o liga.
+                                            </p>
                                         </div>
-                                        <p className={styles.modalHint}>
-                                            Cada preset agrupa posiciones, tamanos y respiracion del bloque editorial para reutilizarlo por torneo o liga.
-                                        </p>
-                                    </div>
+                                    )}
                                     <div style={{ marginTop: 16 }}>
-                                        <label className={styles.modalLabel}>Texto central</label>
+                                        <label className={styles.modalLabel}>
+                                            {matchExportMode === 'schedule' ? 'Tagline / campaña' : 'Texto central'}
+                                        </label>
                                         <input
                                             className={styles.modalInput}
                                             value={editorialContextLabel}
                                             onChange={(event) => setEditorialContextLabel(event.target.value)}
-                                            placeholder={editorialAutoContextLabel || 'Ej: Final - Fecha 3'}
+                                            placeholder={editorialAutoContextLabel || (matchExportMode === 'schedule' ? 'Ej: Proximo partido' : 'Ej: Final - Fecha 3')}
                                         />
                                         <p className={styles.modalHint}>
-                                            Si lo dejas vacio, se usa el texto automatico del partido. Aca puedes reemplazar la fecha/hora por cualquier copy editorial.
+                                            {matchExportMode === 'schedule'
+                                                ? 'Si lo dejas vacio, se usa PROXIMO PARTIDO. Puedes usarlo para una bajada de campana o copy editorial.'
+                                                : 'Si lo dejas vacio, se usa el texto automatico del partido. Aca puedes reemplazar la fecha/hora por cualquier copy editorial.'}
                                         </p>
                                     </div>
-                                    <div style={{ marginTop: 16 }}>
-                                        <label className={styles.modalLabel}>Elementos superiores</label>
-                                        <div className={styles.toggleGrid}>
-                                            <label className={styles.toggleCard}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={editorialShowTopBadge}
-                                                    onChange={(event) => setEditorialShowTopBadge(event.target.checked)}
-                                                />
-                                                <span className={styles.toggleCopy}>
-                                                    <span className={styles.toggleLabel}>Panel &quot;Resultado&quot;</span>
-                                                    <span className={styles.toggleHint}>Activa o esconde el badge superior izquierdo.</span>
-                                                </span>
-                                            </label>
-                                            <label className={styles.toggleCard}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={editorialShowHeaderArrows}
-                                                    onChange={(event) => setEditorialShowHeaderArrows(event.target.checked)}
-                                                />
-                                                <span className={styles.toggleCopy}>
-                                                    <span className={styles.toggleLabel}>Tres flechas</span>
-                                                    <span className={styles.toggleHint}>Muestra u oculta las flechas de la esquina superior derecha.</span>
-                                                </span>
-                                            </label>
+                                    {matchExportMode === 'result' && (
+                                        <div style={{ marginTop: 16 }}>
+                                            <label className={styles.modalLabel}>Elementos superiores</label>
+                                            <div className={styles.toggleGrid}>
+                                                <label className={styles.toggleCard}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={editorialShowTopBadge}
+                                                        onChange={(event) => setEditorialShowTopBadge(event.target.checked)}
+                                                    />
+                                                    <span className={styles.toggleCopy}>
+                                                        <span className={styles.toggleLabel}>Panel &quot;Resultado&quot;</span>
+                                                        <span className={styles.toggleHint}>Activa o esconde el badge superior izquierdo.</span>
+                                                    </span>
+                                                </label>
+                                                <label className={styles.toggleCard}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={editorialShowHeaderArrows}
+                                                        onChange={(event) => setEditorialShowHeaderArrows(event.target.checked)}
+                                                    />
+                                                    <span className={styles.toggleCopy}>
+                                                        <span className={styles.toggleLabel}>Tres flechas</span>
+                                                        <span className={styles.toggleHint}>Muestra u oculta las flechas de la esquina superior derecha.</span>
+                                                    </span>
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                     <div style={{ marginTop: 16 }}>
                                         <label className={styles.modalLabel}>Gradiente editorial</label>
                                         <div className={styles.presetLibraryCard}>
@@ -1943,7 +2527,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                         </button>
                                     ))}
                                 </div>
-                                <p className={styles.modalHint}>La marca de agua G22 se mantiene en todas las exportaciones.</p>
+                                <p className={styles.modalHint}>{paletteUsageHint}</p>
+                                <p className={styles.modalHint}>
+                                    Los cambios hechos aca aplican solo a esta exportacion abierta. Al volver a abrir el modal se recuperan los colores predeterminados del diseno.
+                                </p>
                                 <div className={styles.customColors}>
                                     <div className={styles.colorInp}>
                                         <span>Fondo</span>
@@ -2037,7 +2624,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                     onClick={handleExport}
                                     disabled={
                                         (template === 'dailyMatches' && selectedMatchIndices.size === 0)
-                                        || (template === 'matchStats' && matchExportLayout === 'editorial4x5' && !matchBackgroundUpload)
+                                        || (template === 'matchStats' && matchExportLayout === 'editorial4x5' && !hasMatchEditorialBackground)
                                     }
                                     type="button"
                                 >
@@ -2050,6 +2637,73 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             , document.body) : null}
         </div>
     );
+}
+
+export function ExportImagePreview({
+    template,
+    data,
+    format = '1080x1350',
+    visualFamily,
+    customizationState = null,
+    matchExportMode = 'result',
+    matchExportLayout = 'classic',
+    lineupExportMode = 'both',
+    standingsExportMode = 'table',
+    className = '',
+}: ExportImagePreviewProps) {
+    const [previewUrl, setPreviewUrl] = useState('');
+    const [previewError, setPreviewError] = useState('');
+    const [isRenderingPreview, setIsRenderingPreview] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const renderPreview = async () => {
+            if (isMounted) {
+                setIsRenderingPreview(true);
+            }
+            try {
+                const dataUrl = await renderMatchExportPreviewDataUrl({
+                    template,
+                    data,
+                    format,
+                    visualFamily,
+                    customizationState,
+                    matchExportMode,
+                    matchExportLayout,
+                    lineupExportMode,
+                    standingsExportMode,
+                });
+
+                if (!isMounted) return;
+                setPreviewUrl(dataUrl);
+                setPreviewError('');
+            } catch (error) {
+                if (!isMounted) return;
+                setPreviewError(error instanceof Error ? error.message : 'No se pudo generar el preview');
+            } finally {
+                if (isMounted) {
+                    setIsRenderingPreview(false);
+                }
+            }
+        };
+
+        void renderPreview();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [customizationState, data, format, lineupExportMode, matchExportLayout, matchExportMode, standingsExportMode, template, visualFamily]);
+
+    if (previewError && !previewUrl) {
+        return <div className={className}>{previewError}</div>;
+    }
+
+    if (!previewUrl) {
+        return <div className={className}>Generando preview...</div>;
+    }
+
+    return <img className={className} src={previewUrl} alt={isRenderingPreview ? 'Preview del export actualizandose' : 'Preview del export'} />;
 }
 
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
@@ -2071,6 +2725,322 @@ function getDefaultMatchExportMode(template: ExportTemplate, data: ExportData): 
 
 function getMatchExportModeLabel(mode: MatchExportMode): string {
     return mode === 'schedule' ? 'Horario' : 'Resultado';
+}
+
+function shouldLockMatchExportFormatToPost(
+    template: ExportTemplate,
+    visualFamily: ExportVisualFamily,
+    layout: MatchExportLayout,
+    mode: MatchExportMode,
+) {
+    if (template === 'dailyMatches' && visualFamily === 'posterV3') return true;
+    if (template === 'matchStats' && visualFamily === 'g22Base' && mode === 'schedule') return true;
+    if (template !== 'matchStats') return false;
+    return layout === 'editorial4x5'
+        || (layout === 'classic' && mode === 'result');
+}
+
+function getResolvedMatchExportFormat(
+    template: ExportTemplate,
+    format: ExportFormat,
+    visualFamily: ExportVisualFamily,
+    layout: MatchExportLayout,
+    mode: MatchExportMode,
+): ExportFormat {
+    return shouldLockMatchExportFormatToPost(template, visualFamily, layout, mode) ? '1080x1350' : format;
+}
+
+function getExportFontFamilyOption(id: ExportFontFamilyOptionId): ExportFontFamilyOption {
+    return EXPORT_FONT_FAMILY_OPTIONS.find((option) => option.id === id) || EXPORT_FONT_FAMILY_OPTIONS[0];
+}
+
+function normalizeHexColor(value: string | null | undefined): string {
+    return (value || '').trim().toLowerCase();
+}
+
+function normalizeExportFontFamilyValue(value: string | null | undefined): string {
+    const normalized = (value || '').trim();
+    if (!normalized) return normalized;
+
+    const compact = normalized.toLowerCase();
+    if (
+        compact === 'g22 dharma gothic'
+        || compact === 'dharma gothic'
+        || compact === 'dharma gothic expanded'
+        || compact === 'dharma gothic e'
+        || compact === 'dharma gothic expanded heavy'
+        || compact === 'dharma gothic e heavy'
+    ) {
+        return BASE_FONT_DHARMA;
+    }
+    if (compact === 'dharma gothic c') {
+        return DHARMA_GOTHIC_C_FAMILY;
+    }
+    if (compact === 'dharma gothic e') {
+        return DHARMA_GOTHIC_E_FAMILY;
+    }
+    if (compact === 'dharma gothic m') {
+        return DHARMA_GOTHIC_M_FAMILY;
+    }
+
+    return normalized;
+}
+
+function findPaletteIdByColors(bg: string | null | undefined, accent: string | null | undefined): string {
+    const normalizedBg = normalizeHexColor(bg);
+    const normalizedAccent = normalizeHexColor(accent);
+    const matchedPalette = EXPORT_PALETTES.find((palette) => (
+        normalizeHexColor(palette.bg) === normalizedBg
+        && normalizeHexColor(palette.accent) === normalizedAccent
+    ));
+    return matchedPalette?.id || 'custom';
+}
+
+function resolveActiveTypographyContextId(
+    template: ExportTemplate,
+    layout: MatchExportLayout,
+    mode: MatchExportMode
+): ExportDesignTypographyContextId {
+    if (template === 'matchStats') {
+        if (layout === 'editorial4x5') {
+            return mode === 'schedule' ? 'matchEditorialSchedule' : 'matchEditorialResult';
+        }
+        return mode === 'schedule' ? 'matchClassicSchedule' : 'matchClassicResult';
+    }
+    if (template === 'dailyMatches') return 'dailyMatches';
+    if (template === 'standings') return 'standings';
+    if (template === 'playerStats') return 'playerStats';
+    if (template === 'playoffBracket') return 'playoffBracket';
+    if (template === 'lineups') return 'lineups';
+    return 'global';
+}
+
+function resolveActiveElementDimensionContextId(
+    template: ExportTemplate,
+    layout: MatchExportLayout,
+    mode: MatchExportMode
+): ExportDesignElementDimensionContextId {
+    const contextId = resolveActiveTypographyContextId(template, layout, mode);
+    return contextId === 'global' ? 'matchClassicSchedule' : contextId;
+}
+
+function resolveActiveElementDimensions(
+    customization: ExportDesignCustomizationState | null,
+    activeContextId: ExportDesignElementDimensionContextId
+): ActiveExportElementDimensions {
+    const context = (customization?.elementDimensionContexts ?? []).find((item) => item.id === activeContextId) as ExportDesignElementDimensionContext | undefined;
+    if (!context) return {};
+
+    return context.items.reduce<ActiveExportElementDimensions>((acc, item) => {
+        acc[item.id] = { width: item.width, offsetY: item.offsetY };
+        return acc;
+    }, {});
+}
+
+function setActiveElementDimensions(dimensions: ActiveExportElementDimensions) {
+    ACTIVE_EXPORT_ELEMENT_DIMENSIONS = dimensions;
+}
+
+function resetActiveElementDimensions() {
+    ACTIVE_EXPORT_ELEMENT_DIMENSIONS = {};
+}
+
+function getActiveElementDimensionWidth(id: ExportDesignElementDimensionItemId, fallback: number) {
+    const value = ACTIVE_EXPORT_ELEMENT_DIMENSIONS[id]?.width;
+    return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function getActiveElementDimensionOffsetY(id: ExportDesignElementDimensionItemId, fallback = 0) {
+    const value = ACTIVE_EXPORT_ELEMENT_DIMENSIONS[id]?.offsetY;
+    return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function scaleElementSize(id: ExportDesignElementDimensionItemId, baseValue: number, defaultValue: number) {
+    if (!defaultValue) return baseValue;
+    return baseValue * (getActiveElementDimensionWidth(id, defaultValue) / defaultValue);
+}
+
+function offsetElementY(id: ExportDesignElementDimensionItemId, baseValue: number) {
+    return baseValue + getActiveElementDimensionOffsetY(id, 0);
+}
+
+function resolveDesignTypographyFamilies(
+    customization: ExportDesignCustomizationState | null,
+    activeContextId: ExportDesignTypographyContextId
+): Partial<Record<ExportTypographyRole, ExportTypographyRoleOverride>> {
+    if (!customization) return {};
+
+    const resolvedOverrides: Partial<Record<ExportTypographyRole, ExportTypographyRoleOverride>> = {};
+    const contextLookup = new Map(
+        (customization.typographyContexts ?? []).map((context) => [context.id, context] as const)
+    );
+    const activeItems = contextLookup.get(activeContextId)?.items ?? [];
+    const globalItems = contextLookup.get('global')?.items ?? [];
+    const combinedItems = [...activeItems, ...globalItems, ...customization.typography];
+
+    const assignOverrideForSlot = (role: ExportTypographyRole, ...slots: ExportDesignTypographySlot[]) => {
+        for (const slot of slots) {
+            const matchedItem = combinedItems.find((item) => item.slot === slot && (item.family.trim() || item.weight.trim()));
+            if (matchedItem) {
+                resolvedOverrides[role] = {
+                    family: normalizeExportFontFamilyValue(matchedItem.family),
+                    weight: normalizeTypographyWeightValue(matchedItem.weight, getDefaultTypographyWeight(role)),
+                };
+                return;
+            }
+        }
+    };
+
+    assignOverrideForSlot('display', 'display', 'body', 'editorial');
+    assignOverrideForSlot('body', 'body', 'display');
+    assignOverrideForSlot('mono', 'mono', 'body');
+    assignOverrideForSlot('editorial', 'editorial', 'score', 'display');
+    assignOverrideForSlot('score', 'score', 'editorial', 'mono');
+
+    for (const item of combinedItems) {
+        const family = normalizeExportFontFamilyValue(item.family);
+        const weight = normalizeTypographyWeightValue(item.weight, '700');
+        if (!family) continue;
+
+        const normalizedRole = item.role.trim().toLowerCase();
+        if (!resolvedOverrides.score?.family && normalizedRole.includes('score')) {
+            resolvedOverrides.score = { family, weight };
+        }
+        if (!resolvedOverrides.display?.family && (normalizedRole.includes('titulo') || normalizedRole.includes('display'))) {
+            resolvedOverrides.display = { family, weight };
+        }
+        if (!resolvedOverrides.editorial?.family && (normalizedRole.includes('titular') || normalizedRole.includes('editorial') || normalizedRole.includes('firma'))) {
+            resolvedOverrides.editorial = { family, weight };
+        }
+        if (!resolvedOverrides.body?.family && (normalizedRole.includes('interfaz') || normalizedRole.includes('texto') || normalizedRole.includes('sans'))) {
+            resolvedOverrides.body = { family, weight };
+        }
+        if (!resolvedOverrides.mono?.family && (normalizedRole.includes('mono') || normalizedRole.includes('metadata') || normalizedRole.includes('chip'))) {
+            resolvedOverrides.mono = { family, weight };
+        }
+    }
+
+    return resolvedOverrides;
+}
+
+function getExportTypographyPreset(id?: string): ExportTypographyPreset {
+    return EXPORT_TYPOGRAPHY_PRESETS.find((preset) => preset.id === id) || EXPORT_TYPOGRAPHY_PRESETS[0];
+}
+
+function getDefaultTypographyPresetId(visualFamily: ExportVisualFamily): ExportTypographyPresetId {
+    if (visualFamily === 'posterV3') return 'poster-v3';
+    if (visualFamily === 'momentumV2') return 'momentum-v2';
+    return 'g22-core';
+}
+
+function getDefaultTypographyWeight(role: ExportTypographyRole): string {
+    if (role === 'display') return '900';
+    if (role === 'body') return '700';
+    if (role === 'mono') return '700';
+    if (role === 'editorial') return '800';
+    return '900';
+}
+
+function normalizeTypographyWeightValue(value: string | null | undefined, fallback: string): string {
+    const trimmed = (value || '').trim();
+    if (!trimmed) return fallback;
+
+    const exactMatch = trimmed.match(/^\d{3}$/);
+    if (exactMatch) return exactMatch[0];
+
+    const rangeMatches = trimmed.match(/\d{3}/g);
+    if (rangeMatches && rangeMatches.length > 0) {
+        return rangeMatches[rangeMatches.length - 1];
+    }
+
+    const normalized = trimmed.toLowerCase();
+    if (normalized.includes('thin')) return '100';
+    if (normalized.includes('light')) return '300';
+    if (normalized.includes('regular') || normalized.includes('normal')) return '400';
+    if (normalized.includes('medium')) return '500';
+    if (normalized.includes('semibold')) return '600';
+    if (normalized.includes('bold')) return '700';
+    if (normalized.includes('heavy') || normalized.includes('black')) return '900';
+
+    return fallback;
+}
+
+function getActiveTypographyWeight(role: ExportTypographyRole, fallback: string): string {
+    if (role === 'display') return normalizeTypographyWeightValue(FONT_WEIGHT_DISPLAY, fallback);
+    if (role === 'body') return normalizeTypographyWeightValue(FONT_WEIGHT_BODY, fallback);
+    if (role === 'mono') return normalizeTypographyWeightValue(FONT_WEIGHT_MONO, fallback);
+    if (role === 'editorial') return normalizeTypographyWeightValue(FONT_WEIGHT_EDITORIAL, fallback);
+    return normalizeTypographyWeightValue(FONT_WEIGHT_SCORE, fallback);
+}
+
+function resolveCanvasFontWeight(family: string, fallback: string): string {
+    if (family === FONT_CLASSIC_MATCH_SCORE || family === FONT_EDITORIAL_SCORE) {
+        return getActiveTypographyWeight('score', fallback);
+    }
+    if (family === FONT_EDITORIAL) {
+        return getActiveTypographyWeight('editorial', fallback);
+    }
+    if (family === FONT_MONO) {
+        return getActiveTypographyWeight('mono', fallback);
+    }
+    if (family === FONT_DISPLAY || family === FONT_OUTFIT_BLACK) {
+        return getActiveTypographyWeight('display', fallback);
+    }
+    if (family === FONT_BODY) {
+        return getActiveTypographyWeight('body', fallback);
+    }
+
+    return normalizeTypographyWeightValue(fallback, fallback);
+}
+
+function resolveTypographyConfig(
+    presetId: ExportTypographyPresetId,
+    overrides: Partial<Record<ExportTypographyRole, ExportFontFamilyOptionId>>,
+    roleOverrides: Partial<Record<ExportTypographyRole, ExportTypographyRoleOverride>> = {}
+): ResolvedTypographyConfig {
+    const preset = getExportTypographyPreset(presetId);
+    const roles: Record<ExportTypographyRole, ExportFontFamilyOptionId> = {
+        ...preset.roles,
+        ...overrides,
+    };
+
+    return {
+        preset,
+        roles,
+        families: {
+            display: roleOverrides.display?.family?.trim() || getExportFontFamilyOption(roles.display).family,
+            body: roleOverrides.body?.family?.trim() || getExportFontFamilyOption(roles.body).family,
+            mono: roleOverrides.mono?.family?.trim() || getExportFontFamilyOption(roles.mono).family,
+            editorial: roleOverrides.editorial?.family?.trim() || getExportFontFamilyOption(roles.editorial).family,
+            score: roleOverrides.score?.family?.trim() || getExportFontFamilyOption(roles.score).family,
+        },
+        weights: {
+            display: normalizeTypographyWeightValue(roleOverrides.display?.weight, getDefaultTypographyWeight('display')),
+            body: normalizeTypographyWeightValue(roleOverrides.body?.weight, getDefaultTypographyWeight('body')),
+            mono: normalizeTypographyWeightValue(roleOverrides.mono?.weight, getDefaultTypographyWeight('mono')),
+            editorial: normalizeTypographyWeightValue(roleOverrides.editorial?.weight, getDefaultTypographyWeight('editorial')),
+            score: normalizeTypographyWeightValue(roleOverrides.score?.weight, getDefaultTypographyWeight('score')),
+        },
+    };
+}
+
+function applyTypographyConfig(config: ResolvedTypographyConfig) {
+    FONT_DISPLAY = config.families.display;
+    FONT_BODY = config.families.body;
+    FONT_MONO = config.families.mono;
+    FONT_OUTFIT_BLACK = config.families.display;
+    FONT_EDITORIAL = config.families.editorial;
+    FONT_CLASSIC_MATCH_SCORE = config.families.score;
+    FONT_EDITORIAL_SCORE = config.families.score;
+    FONT_WEIGHT_DISPLAY = config.weights.display;
+    FONT_WEIGHT_BODY = config.weights.body;
+    FONT_WEIGHT_MONO = config.weights.mono;
+    FONT_WEIGHT_EDITORIAL = config.weights.editorial;
+    FONT_WEIGHT_SCORE = config.weights.score;
+}
+
+function getExportVisualFamilyLabel(family: ExportVisualFamily): string {
+    return EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === family)?.label || 'G22 Base';
 }
 
 function getMatchExportLayoutLabel(layout: MatchExportLayout): string {
@@ -2656,6 +3626,200 @@ function applyManualMatchScore(data: MatchStatsData, homeScoreInput: string, awa
     };
 }
 
+async function renderMatchExportPreviewDataUrl(options: {
+    template: ExportTemplate;
+    data: ExportData;
+    format: ExportFormat;
+    visualFamily: ExportVisualFamily;
+    customizationState: ExportDesignCustomizationState | null;
+    matchExportMode: MatchExportMode;
+    matchExportLayout: MatchExportLayout;
+    lineupExportMode: LineupExportMode;
+    standingsExportMode: StandingsExportMode;
+}): Promise<string> {
+    const {
+        template,
+        data,
+        format,
+        visualFamily,
+        customizationState,
+        matchExportMode,
+        matchExportLayout,
+        lineupExportMode,
+        standingsExportMode,
+    } = options;
+
+    applyTypographyConfig(
+        resolveTypographyConfig(
+            getDefaultTypographyPresetId(visualFamily),
+            {},
+            resolveDesignTypographyFamilies(
+                customizationState,
+                resolveActiveTypographyContextId(template, matchExportLayout, matchExportMode)
+            )
+        )
+    );
+    setActiveElementDimensions(
+        resolveActiveElementDimensions(
+            customizationState,
+            resolveActiveElementDimensionContextId(template, matchExportLayout, matchExportMode)
+        )
+    );
+
+    try {
+        const resolvedFormat = getResolvedMatchExportFormat(template, format, visualFamily, matchExportLayout, matchExportMode);
+        const config = FORMATS.find((item) => item.value === resolvedFormat);
+        if (!config) {
+            throw new Error('Formato de preview no soportado');
+        }
+
+        await ensureExportFonts();
+        const [, brandLogo] = await Promise.all([
+            ensureExportFonts(),
+            loadImage('/icon.png'),
+        ]);
+
+    const previewDefaults = customizationState
+        ? {
+            accentColor: customizationState.previewAccent || DEFAULT_PALETTE.accent,
+            bgColor: customizationState.previewSurface || DEFAULT_PALETTE.bg,
+            editorialGradientLeftColor: customizationState.previewGradientFrom || '#df255c',
+            editorialGradientRightColor: customizationState.previewGradientTo || customizationState.previewAccent || DEFAULT_PALETTE.accent,
+        }
+        : DEFAULT_EXPORT_COLOR_DEFAULTS;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = config.width;
+    canvas.height = config.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        throw new Error('No se pudo inicializar el canvas del preview');
+    }
+
+    const exportData = buildExportData(template, data, getDefaultTournamentName(template, data), findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES));
+
+    if (template === 'matchStats') {
+        const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);
+
+        if (matchExportLayout === 'editorial4x5') {
+        const editorialMatchData: MatchStatsData = {
+            ...matchData,
+            editorialContextLabel: matchData.editorialContextLabel || '',
+        };
+
+            if (visualFamily === 'posterV3') {
+                await drawPosterV3MatchEditorial(
+                    ctx,
+                    canvas,
+                    editorialMatchData,
+                    config,
+                    previewDefaults.accentColor,
+                    previewDefaults.bgColor,
+                    brandLogo,
+                    editorialMatchData.backgroundImage || ''
+                );
+            } else if (visualFamily === 'momentumV2') {
+                await drawMomentumMatchEditorial(
+                    ctx,
+                    canvas,
+                    editorialMatchData,
+                    config,
+                    previewDefaults.accentColor,
+                    previewDefaults.bgColor,
+                    brandLogo,
+                    editorialMatchData.backgroundImage || '',
+                    previewDefaults.editorialGradientLeftColor,
+                    previewDefaults.editorialGradientRightColor
+                );
+            } else if (matchData.status === 'scheduled') {
+                await drawMatchEditorialScheduleSplitHero(
+                    ctx,
+                    canvas,
+                    editorialMatchData,
+                    config,
+                    previewDefaults.accentColor,
+                    previewDefaults.bgColor,
+                    brandLogo,
+                    editorialMatchData.backgroundImage || '',
+                    previewDefaults.editorialGradientLeftColor,
+                    previewDefaults.editorialGradientRightColor
+                );
+            } else {
+                await drawMatchEditorialResult(
+                    ctx,
+                    canvas,
+                    editorialMatchData,
+                    config,
+                    previewDefaults.accentColor,
+                    previewDefaults.bgColor,
+                    brandLogo,
+                    editorialMatchData.backgroundImage || '',
+                    previewDefaults.editorialGradientLeftColor,
+                    previewDefaults.editorialGradientRightColor
+                );
+            }
+        } else if (visualFamily === 'posterV3') {
+            await drawPosterV3MatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'momentumV2') {
+            if (matchData.status === 'scheduled') {
+                await drawMomentumMatchDayClassicSchedule(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            } else {
+                await drawMomentumMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            }
+        } else {
+            await drawMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        }
+    } else if (template === 'dailyMatches') {
+        if (visualFamily === 'posterV3') {
+            await drawPosterV3DailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'momentumV2') {
+            await drawMomentumDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else {
+            await drawDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        }
+    } else if (template === 'standings') {
+        const standingsData = exportData as StandingsData;
+        const slide = buildStandingsSlides(standingsData, standingsExportMode)[0];
+        if (!slide) throw new Error('No hay datos para preview de tabla');
+        if (visualFamily === 'posterV3') {
+            await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'momentumV2') {
+            await drawMomentumStandings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else {
+            await drawStandings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        }
+    } else if (template === 'lineups') {
+        if (visualFamily === 'posterV3') {
+            await drawPosterV3Lineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
+        } else if (visualFamily === 'momentumV2') {
+            await drawMomentumLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
+        } else {
+            await drawG22BaseLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
+        }
+    } else if (template === 'playoffBracket') {
+        if (visualFamily === 'posterV3') {
+            await drawPosterV3PlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'momentumV2') {
+            await drawMomentumPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else {
+            await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        }
+    } else {
+        if (visualFamily === 'posterV3') {
+            await drawPosterV3PlayerStats(ctx, canvas, exportData as PlayerStatsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'momentumV2') {
+            await drawMomentumPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else {
+            await drawPlayerStats(ctx, canvas, exportData as PlayerStatsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        }
+    }
+
+        return canvas.toDataURL('image/png');
+    } finally {
+        resetActiveElementDimensions();
+    }
+}
+
 function parseManualMatchScore(value: string): number | null {
     const trimmed = value.trim();
     if (!trimmed) return null;
@@ -3051,7 +4215,16 @@ async function ensureExportFonts(): Promise<void> {
             document.fonts.load(`900 24px ${FONT_OUTFIT_BLACK}`),
             document.fonts.load('700 24px Inter'),
             document.fonts.load('700 24px "Bebas Neue"'),
-            document.fonts.load(`700 24px ${FONT_MONO}`),
+            document.fonts.load('700 24px Tangerine'),
+            document.fonts.load('700 24px Inconsolata'),
+            document.fonts.load('700 24px Cantarell'),
+            document.fonts.load('700 24px "Roboto Mono"'),
+            document.fonts.load('700 24px Rancho'),
+            document.fonts.load(`${getActiveTypographyWeight('body', '700')} 24px ${FONT_BODY}`),
+            document.fonts.load(`${getActiveTypographyWeight('display', '900')} 24px ${FONT_OUTFIT_BLACK}`),
+            document.fonts.load(`${getActiveTypographyWeight('mono', '700')} 24px ${FONT_MONO}`),
+            document.fonts.load(`${getActiveTypographyWeight('editorial', '800')} 24px ${FONT_EDITORIAL}`),
+            document.fonts.load(`${getActiveTypographyWeight('score', '900')} 24px ${FONT_EDITORIAL_SCORE}`),
             document.fonts.ready,
         ]);
     } catch {
@@ -3188,25 +4361,14 @@ function getFallbackLogoText(rawLogo: string | undefined, label: string) {
 }
 
 function setFittedFont(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, weight: string, size: number, family: string, minSize: number) {
+    const resolvedWeight = resolveCanvasFontWeight(family, weight);
     let currentSize = size;
     while (currentSize > minSize) {
-        ctx.font = `${weight} ${currentSize}px ${family}`;
+        ctx.font = `${resolvedWeight} ${currentSize}px ${family}`;
         if (ctx.measureText(text).width <= maxWidth) break;
         currentSize -= 2;
     }
     return currentSize;
-}
-
-function getCenteredTextBaseline(
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    centerY: number,
-    fallbackFontSize: number
-) {
-    const metrics = ctx.measureText(text);
-    const ascent = metrics.actualBoundingBoxAscent || fallbackFontSize * 0.72;
-    const descent = metrics.actualBoundingBoxDescent || fallbackFontSize * 0.18;
-    return centerY + (ascent - descent) / 2;
 }
 
 function truncateTextToWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
@@ -3220,6 +4382,48 @@ function truncateTextToWidth(ctx: CanvasRenderingContext2D, text: string, maxWid
     return current.length > 1 ? `${current}...` : text;
 }
 
+function fitTextLinesToWidth(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number,
+    weight: string,
+    size: number,
+    family: string,
+    minSize: number,
+    maxLines = 2,
+) {
+    const resolvedWeight = resolveCanvasFontWeight(family, weight);
+    let currentSize = size;
+    let lines = [text];
+
+    while (currentSize >= minSize) {
+        ctx.font = `${resolvedWeight} ${currentSize}px ${family}`;
+        const words = text.split(/\s+/).filter(Boolean);
+        lines = [];
+        let currentLine = '';
+
+        words.forEach((word) => {
+            const candidate = currentLine ? `${currentLine} ${word}` : word;
+            if (!currentLine || ctx.measureText(candidate).width <= maxWidth) {
+                currentLine = candidate;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        });
+
+        if (currentLine) lines.push(currentLine);
+        if (lines.length <= maxLines && lines.every((line) => ctx.measureText(line).width <= maxWidth)) {
+            return { lines, size: currentSize };
+        }
+
+        currentSize -= 2;
+    }
+
+    ctx.font = `${resolvedWeight} ${minSize}px ${family}`;
+    return { lines: [truncateTextToWidth(ctx, text, maxWidth)], size: minSize };
+}
+
 function getSharedFittedFontSize(
     ctx: CanvasRenderingContext2D,
     items: Array<{ text: string; maxWidth: number }>,
@@ -3228,16 +4432,21 @@ function getSharedFittedFontSize(
     family: string,
     minSize: number
 ) {
+    const resolvedWeight = resolveCanvasFontWeight(family, weight);
     let currentSize = size;
 
     while (currentSize > minSize) {
-        ctx.font = `${weight} ${currentSize}px ${family}`;
+        ctx.font = `${resolvedWeight} ${currentSize}px ${family}`;
         const fitsAll = items.every((item) => ctx.measureText(item.text).width <= item.maxWidth);
         if (fitsAll) break;
         currentSize -= 1;
     }
 
     return currentSize;
+}
+
+function clampNumber(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
 }
 
 function drawStandingsTeamName(
@@ -3327,7 +4536,7 @@ function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions)
 }
 
 function drawOverflowCrest(ctx: CanvasRenderingContext2D, options: OverflowCrestOptions) {
-    const { x, y, width, height, img, label, rawLogo, isDark } = options;
+    const { x, y, width, height, img, label, rawLogo, isDark, showFrame = true } = options;
     ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
@@ -3335,7 +4544,7 @@ function drawOverflowCrest(ctx: CanvasRenderingContext2D, options: OverflowCrest
     if (img) {
         const sourceWidth = img.naturalWidth || img.width || width;
         const sourceHeight = img.naturalHeight || img.height || height;
-        const scale = Math.min(width / sourceWidth, height / sourceHeight) * 0.88;
+        const scale = Math.min(width / sourceWidth, height / sourceHeight) * (showFrame ? 0.88 : 0.98);
         const drawWidth = sourceWidth * scale;
         const drawHeight = sourceHeight * scale;
 
@@ -3348,13 +4557,15 @@ function drawOverflowCrest(ctx: CanvasRenderingContext2D, options: OverflowCrest
     }
 
     const fallbackRadius = Math.min(width, height) * 0.34;
-    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)';
-    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(x - width / 2, y - height / 2, width, height, fallbackRadius);
-    ctx.fill();
-    ctx.stroke();
+    if (showFrame) {
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)';
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(x - width / 2, y - height / 2, width, height, fallbackRadius);
+        ctx.fill();
+        ctx.stroke();
+    }
 
     const isGlyph = rawLogo?.trim() && !isImageSource(rawLogo) && rawLogo.trim().length <= 4;
     ctx.textAlign = 'center';
@@ -3430,14 +4641,17 @@ function drawCenteredPill(
     ctx.save();
     ctx.font = font;
     const width = ctx.measureText(text).width + horizontalPadding * 2;
+    const resolvedWidth = scaleElementSize('title', width, width);
+    const resolvedHeight = scaleElementSize('title', height, height);
+    const resolvedY = offsetElementY('title', y);
     ctx.fillStyle = fill;
     ctx.beginPath();
-    ctx.roundRect(centerX - width / 2, y, width, height, height / 2);
+    ctx.roundRect(centerX - resolvedWidth / 2, resolvedY, resolvedWidth, resolvedHeight, resolvedHeight / 2);
     ctx.fill();
     ctx.fillStyle = textColor;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, centerX, y + height / 2 + 1);
+    ctx.fillText(text, centerX, resolvedY + resolvedHeight / 2 + 1);
     ctx.restore();
 }
 
@@ -3618,33 +4832,43 @@ function drawTournamentRibbon(
     fontSize: number
 ) {
     if (!label && !logoImg) return;
-    const logoSize = logoImg ? fontSize + 12 : 0;
+    const baseLogoSize = logoImg ? fontSize + 12 : 0;
+    const logoSize = logoImg ? scaleElementSize('tournamentLogo', baseLogoSize, baseLogoSize) : 0;
+    const resolvedLogoY = offsetElementY('tournamentLogo', y);
+    const resolvedLabelY = y;
     const gap = logoImg ? 12 : 0;
     ctx.save();
-    ctx.font = `700 ${fontSize}px ${FONT_BODY}`;
+    const resolvedFontSize = scaleElementSize('title', fontSize, fontSize);
+    ctx.font = `700 ${resolvedFontSize}px ${FONT_BODY}`;
     const labelText = label ? label.toUpperCase() : '';
     const labelWidth = labelText ? ctx.measureText(labelText).width : 0;
     const totalWidth = logoSize + gap + labelWidth;
     let currentX = canvas.width / 2 - totalWidth / 2;
     if (logoImg) {
-        drawLogoBadge(ctx, { x: currentX + logoSize / 2, y: y - 4, size: logoSize, img: logoImg, label: label || 'Torneo', rawLogo, isDark });
+        drawLogoBadge(ctx, { x: currentX + logoSize / 2, y: resolvedLogoY - 4, size: logoSize, img: logoImg, label: label || 'Torneo', rawLogo, isDark });
         currentX += logoSize + gap;
     }
     if (labelText) {
         ctx.fillStyle = accentColor;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
-        ctx.fillText(labelText, currentX, y);
+        ctx.fillText(labelText, currentX, resolvedLabelY);
     }
     ctx.restore();
 }
 
-function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, brandLogo: HTMLImageElement | null, isDark: boolean) {
+function getBrandFooterMetrics(canvas: HTMLCanvasElement) {
     const isStory = canvas.height > 1500;
     const labelY = canvas.height - (isStory ? 126 : 108);
     const wordmarkY = labelY + (isStory ? 48 : 42);
     const iconSize = isStory ? 40 : 34;
     const gap = 12;
+    const topLine = labelY - (isStory ? 18 : 16);
+    return { isStory, labelY, wordmarkY, iconSize, gap, topLine };
+}
+
+function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, brandLogo: HTMLImageElement | null, isDark: boolean) {
+    const { isStory, labelY, wordmarkY, iconSize, gap } = getBrandFooterMetrics(canvas);
     ctx.save();
     ctx.textAlign = 'center';
     ctx.fillStyle = getMutedColor(isDark, 0.66);
@@ -3666,6 +4890,60 @@ function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
     ctx.font = `800 ${isStory ? 28 : 24}px ${FONT_BODY}`;
     ctx.fillStyle = getTextColor(isDark);
     ctx.fillText('Scores', textX + g22Width + 8, wordmarkY);
+    ctx.restore();
+}
+
+function drawPoweredByFooter(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    brandLogo: HTMLImageElement | null,
+    isDark: boolean,
+    accentColor = BRAND_ACCENT
+) {
+    const isStory = canvas.height > 1500;
+    const footerY = canvas.height - (isStory ? 54 : 42);
+    const iconSize = isStory ? 28 : 24;
+    const gap = 10;
+    const prefix = 'powered by';
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
+    const prefixWidth = ctx.measureText(prefix).width;
+    ctx.font = `900 ${isStory ? 22 : 20}px ${FONT_DISPLAY}`;
+    const g22Width = ctx.measureText('G22').width;
+    ctx.font = `800 ${isStory ? 22 : 20}px ${FONT_BODY}`;
+    const scoresWidth = ctx.measureText('Scores').width;
+
+    const totalWidth = iconSize + gap + prefixWidth + 12 + g22Width + 6 + scoresWidth;
+    const startX = canvas.width / 2 - totalWidth / 2;
+
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: startX + iconSize / 2,
+            y: footerY - (isStory ? 8 : 7),
+            size: iconSize,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark,
+        });
+    }
+
+    const textX = startX + iconSize + gap;
+    ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
+    ctx.fillStyle = getMutedColor(isDark, 0.72);
+    ctx.fillText(prefix, textX, footerY);
+
+    const brandTextX = textX + prefixWidth + 12;
+    ctx.font = `900 ${isStory ? 22 : 20}px ${FONT_DISPLAY}`;
+    ctx.fillStyle = accentColor;
+    ctx.fillText('G22', brandTextX, footerY + 1);
+
+    ctx.font = `800 ${isStory ? 22 : 20}px ${FONT_BODY}`;
+    ctx.fillStyle = getTextColor(isDark);
+    ctx.fillText('Scores', brandTextX + g22Width + 6, footerY + 1);
     ctx.restore();
 }
 
@@ -3695,6 +4973,12 @@ function buildEditorialContextLabel(data: MatchStatsData) {
     const customLabel = data.editorialContextLabel?.trim();
     if (customLabel) return customLabel;
     return buildAutoEditorialContextLabel(data);
+}
+
+function buildEditorialScheduleCampaignLabel(data: MatchStatsData) {
+    const customLabel = data.editorialContextLabel?.trim();
+    if (customLabel) return customLabel.toUpperCase();
+    return 'PROXIMO PARTIDO';
 }
 
 function drawCoverImage(
@@ -3981,6 +5265,511 @@ function getStatusColor(status: string | undefined, accentColor: string, isDark:
     return isDark ? '#cbd5e1' : '#475569';
 }
 
+async function drawMatchEditorialScheduleSplitHero(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    _format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    backgroundImageSrc: string,
+    editorialGradientLeftColor?: string,
+    editorialGradientRightColor?: string
+) {
+    const [backgroundImage, homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+        loadImage(backgroundImageSrc || ''),
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+    ]);
+    const kickoffDate = toExportDate(data.kickoffAt);
+    const scaleX = canvas.width / 1080;
+    const scaleY = canvas.height / 1350;
+    const sx = (value: number) => Math.round(value * scaleX);
+    const sy = (value: number) => Math.round(value * scaleY);
+    const bgIsDark = getContrastColor(bgColor) === '#ffffff';
+    const requestedGradientLeft = editorialGradientLeftColor || mixHexColors(accentColor, bgColor, bgIsDark ? 0.24 : 0.16);
+    const requestedGradientRight = editorialGradientRightColor || accentColor;
+    // Keep the G22 Base schedule anchored to the brand accent so saved presets do not
+    // push the split hero into the colder "hardened" blues.
+    const gradientLeft = requestedGradientLeft;
+    const gradientRight = mixHexColors(accentColor, requestedGradientRight, bgIsDark ? 0.12 : 0.1);
+    const posterBase = bgIsDark
+        ? mixHexColors(bgColor, '#030712', 0.3)
+        : mixHexColors(bgColor, '#101828', 0.78);
+    const posterTint = mixHexColors(posterBase, gradientLeft, 0.16);
+    const posterShade = mixHexColors(posterBase, '#000000', 0.28);
+    const accentPrimary = getContrastColor(gradientRight) === '#ffffff'
+        ? mixHexColors(gradientRight, '#ffffff', 0.08)
+        : mixHexColors(gradientRight, '#0f172a', 0.08);
+    const accentSecondary = getContrastColor(gradientLeft) === '#ffffff'
+        ? mixHexColors(gradientLeft, '#ffffff', 0.08)
+        : mixHexColors(gradientLeft, '#0f172a', 0.14);
+    const accentSoft = mixHexColors(accentPrimary, '#ffffff', bgIsDark ? 0.18 : 0.28);
+    const accentDeep = mixHexColors(accentSecondary, '#020617', 0.36);
+    const frameColor = mixHexColors(posterBase, '#ffffff', bgIsDark ? 0.06 : 0.12);
+    const headlineColor = getContrastColor(posterBase);
+    const mutedHeadline = hexToRGBA(headlineColor, 0.72);
+    const accentStroke = hexToRGBA(mixHexColors(headlineColor === '#ffffff' ? '#ffffff' : '#0f172a', accentPrimary, 0.18), 0.24);
+    const leftInfoFill = accentPrimary;
+    const leftInfoText = getContrastColor(leftInfoFill);
+    const neutralLogoPlate = mixHexColors(posterBase, '#000000', 0.18);
+    const neutralLogoText = getContrastColor(neutralLogoPlate);
+    const accentLogoPlate = mixHexColors(accentPrimary, accentDeep, 0.22);
+    const accentLogoText = getContrastColor(accentLogoPlate);
+    const fallbackLogo = tournamentLogo || brandLogo;
+    const kickerText = (
+        data.editorialContextLabel?.trim()
+        || ((data.mainTitle || '').trim().toLowerCase() !== 'horario' ? (data.mainTitle || '').trim() : '')
+        || buildEditorialScheduleCampaignLabel(data)
+    ).toUpperCase();
+    const competitionText = (data.tournament || 'TOURNAMENT').trim().toUpperCase();
+    const dateText = kickoffDate
+        ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(kickoffDate).replace(',', '').toUpperCase()
+        : (data.date || 'DATE TBC').trim().toUpperCase();
+    const timeText = kickoffDate
+        ? new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(kickoffDate).toUpperCase()
+        : (data.time || '--:--').trim().toUpperCase();
+    const venueText = (data.venue || '').trim().toUpperCase();
+    const matchupText = `${(data.homeTeam || 'HOME').trim().toUpperCase()} V ${(data.awayTeam || 'AWAY').trim().toUpperCase()}`;
+    const photoX = sx(566);
+    const photoY = sy(110);
+    const photoWidth = sx(392);
+    const photoHeight = scaleElementSize('rowHeight', sy(980), 304);
+    const heroLeftX = sx(90);
+    const heroMaxWidth = sx(466);
+    const heroTopY = offsetElementY('title', sy(382));
+    const heroBottomY = offsetElementY('title', sy(590));
+    const infoBlockX = sx(92);
+    const infoBlockY = sy(912);
+    const infoBlockWidth = sx(452);
+    const infoBlockHeight = sy(128);
+    const metaLeftX = sx(92);
+    const metaDateY = sy(1106);
+    const metaVenueY = sy(1184);
+    const logoPlateY = sy(1098);
+    const logoPlateWidth = sx(148);
+    const logoPlateHeight = sy(124);
+    const homeLogoPlateX = sx(646);
+    const awayLogoPlateX = homeLogoPlateX + logoPlateWidth;
+
+    const drawCoverInRect = (image: HTMLImageElement | null, x: number, y: number, width: number, height: number, focusX = 0.56, focusY = 0.34) => {
+        if (!image) return false;
+        const sourceWidth = image.naturalWidth || image.width || width;
+        const sourceHeight = image.naturalHeight || image.height || height;
+        const scale = Math.max(width / sourceWidth, height / sourceHeight);
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        const offsetX = x + Math.min(0, Math.max(width - drawWidth, width / 2 - drawWidth * focusX));
+        const offsetY = y + Math.min(0, Math.max(height - drawHeight, height / 2 - drawHeight * focusY));
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+        return true;
+    };
+
+    const drawCondensedHeroWord = (word: string, x: number, baselineY: number, maxWidth: number, size: number) => {
+        const scaleWordX = 0.66;
+        const scaleWordY = 1.08;
+        const adjustedWidth = maxWidth / scaleWordX;
+
+        ctx.save();
+        ctx.translate(x, baselineY);
+        ctx.scale(scaleWordX, scaleWordY);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = headlineColor;
+        ctx.shadowColor = 'rgba(0,0,0,0.28)';
+        ctx.shadowBlur = sy(14);
+        ctx.shadowOffsetY = sy(6);
+        setFittedFont(ctx, word, adjustedWidth, '900', size, FONT_EDITORIAL_SCORE, 86);
+        ctx.fillText(truncateTextToWidth(ctx, word, adjustedWidth), 0, 0);
+        ctx.restore();
+    };
+
+    const drawLogoPlate = (
+        x: number,
+        fill: string,
+        textColor: string,
+        logo: HTMLImageElement | null,
+        label: string,
+        rawLogo: string | undefined,
+        innerLabel: string
+    ) => {
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.18)';
+        ctx.shadowBlur = sy(20);
+        ctx.shadowOffsetY = sy(12);
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, logoPlateY, logoPlateWidth, logoPlateHeight);
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = hexToRGBA(textColor === '#ffffff' ? '#ffffff' : '#0f172a', 0.12);
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 0.75, logoPlateY + 0.75, logoPlateWidth - 1.5, logoPlateHeight - 1.5);
+        ctx.restore();
+
+        drawOverflowCrest(ctx, {
+            x: x + logoPlateWidth / 2,
+            y: logoPlateY + sy(50),
+            width: scaleElementSize('teamLogo', sx(72), 188),
+            height: scaleElementSize('teamLogo', sy(72), 188),
+            img: logo,
+            label,
+            rawLogo,
+            isDark: textColor === '#ffffff',
+            showFrame: false,
+        });
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = hexToRGBA(textColor, 0.8);
+        ctx.font = `800 ${sy(14)}px ${FONT_MONO}`;
+        ctx.fillText(truncateTextToWidth(ctx, innerLabel, logoPlateWidth - sx(20)), x + logoPlateWidth / 2, logoPlateY + logoPlateHeight - sy(18));
+        ctx.restore();
+    };
+
+    const textureSeed = (seed: number) => {
+        const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+        return value - Math.floor(value);
+    };
+
+    const drawAdaptedBackgroundTexture = () => {
+        const diagonalAngle = -Math.PI * (56 / 180);
+        const dx = Math.cos(diagonalAngle);
+        const dy = Math.sin(diagonalAngle);
+        const px = -dy;
+        const py = dx;
+        const wideStroke = hexToRGBA(mixHexColors(accentSecondary, '#60a5fa', 0.26), bgIsDark ? 0.17 : 0.12);
+        const thinStroke = hexToRGBA(mixHexColors(accentPrimary, '#93c5fd', 0.22), bgIsDark ? 0.12 : 0.08);
+        const dustColor = hexToRGBA(mixHexColors(accentSoft, '#dbeafe', 0.2), bgIsDark ? 0.11 : 0.07);
+
+        ctx.save();
+        ctx.lineCap = 'butt';
+
+        for (let lane = -4; lane < 22; lane += 1) {
+            const laneSeed = lane + 1;
+            const originX = -canvas.height * 0.64 + lane * sx(82);
+            const originY = canvas.height + sy(180) - lane * sy(10);
+            let travel = sx(10 + textureSeed(laneSeed * 4.1) * 40);
+            const segments = 5 + Math.floor(textureSeed(laneSeed * 2.7) * 4);
+
+            for (let segment = 0; segment < segments; segment += 1) {
+                const segmentSeed = laneSeed * 19 + segment * 7;
+                const length = sx(84 + textureSeed(segmentSeed) * 228);
+                const gap = sx(28 + textureSeed(segmentSeed + 1.3) * 74);
+                const thickness = sx(6 + textureSeed(segmentSeed + 2.1) * 22);
+                const crossOffset = (textureSeed(segmentSeed + 3.7) - 0.5) * sx(20);
+                const x1 = originX + dx * travel + px * crossOffset;
+                const y1 = originY + dy * travel + py * crossOffset;
+                const x2 = originX + dx * (travel + length) + px * crossOffset;
+                const y2 = originY + dy * (travel + length) + py * crossOffset;
+
+                ctx.strokeStyle = segment % 3 === 0 ? wideStroke : thinStroke;
+                ctx.lineWidth = thickness;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                if (textureSeed(segmentSeed + 5.2) > 0.46) {
+                    const scratchTravel = travel + sx(18 + textureSeed(segmentSeed + 6.4) * 36);
+                    const scratchLength = length * (0.18 + textureSeed(segmentSeed + 7.1) * 0.22);
+                    const scratchOffset = crossOffset + (textureSeed(segmentSeed + 8.6) - 0.5) * sx(34);
+                    ctx.strokeStyle = dustColor;
+                    ctx.lineWidth = Math.max(1, thickness * 0.22);
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        originX + dx * scratchTravel + px * scratchOffset,
+                        originY + dy * scratchTravel + py * scratchOffset,
+                    );
+                    ctx.lineTo(
+                        originX + dx * (scratchTravel + scratchLength) + px * scratchOffset,
+                        originY + dy * (scratchTravel + scratchLength) + py * scratchOffset,
+                    );
+                    ctx.stroke();
+                }
+
+                travel += length + gap;
+            }
+        }
+
+        ctx.fillStyle = dustColor;
+        for (let index = 0; index < 340; index += 1) {
+            const x = textureSeed(index * 3.17) * canvas.width;
+            const y = textureSeed(index * 7.91 + 4.2) * canvas.height;
+            const width = sx(1 + textureSeed(index * 11.4 + 2.8) * 3.2);
+            const height = sy(1 + textureSeed(index * 5.6 + 1.4) * 2.2);
+            ctx.fillRect(x, y, width, height);
+        }
+        ctx.restore();
+    };
+
+    ctx.fillStyle = posterBase;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const backgroundGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    backgroundGradient.addColorStop(0, posterTint);
+    backgroundGradient.addColorStop(0.46, posterBase);
+    backgroundGradient.addColorStop(1, posterShade);
+    ctx.fillStyle = backgroundGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawAdaptedBackgroundTexture();
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(posterBase, 0.72);
+    ctx.fillRect(sx(18), sy(14), sx(332), sy(56));
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = hexToRGBA(headlineColor, 0.54);
+    ctx.font = `800 ${sy(14)}px ${FONT_MONO}`;
+    ctx.fillText('POWERED BY G22 SCORES', sx(28), sy(50));
+    ctx.restore();
+
+    ctx.save();
+    const topGlow = ctx.createRadialGradient(sx(226), sy(182), sx(18), sx(226), sy(182), sx(540));
+    topGlow.addColorStop(0, hexToRGBA(accentSoft, 0.3));
+    topGlow.addColorStop(0.44, hexToRGBA(accentPrimary, 0.12));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(accentPrimary, 0.18);
+    ctx.beginPath();
+    ctx.moveTo(photoX - sx(56), sy(40));
+    ctx.lineTo(photoX + sx(196), sy(40));
+    ctx.lineTo(photoX + sx(262), sy(100));
+    ctx.lineTo(photoX + sx(178), sy(150));
+    ctx.lineTo(photoX - sx(56), sy(150));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(accentSecondary, 0.16);
+    ctx.beginPath();
+    ctx.moveTo(photoX + photoWidth - sx(12), canvas.height - sy(210));
+    ctx.lineTo(canvas.width - sx(52), canvas.height - sy(146));
+    ctx.lineTo(canvas.width - sx(52), canvas.height);
+    ctx.lineTo(photoX + sx(108), canvas.height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    if (backgroundImage) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.26)';
+        ctx.shadowBlur = sy(28);
+        ctx.shadowOffsetY = sy(18);
+        ctx.fillStyle = frameColor;
+        ctx.fillRect(photoX, photoY, photoWidth, photoHeight);
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(photoX, photoY, photoWidth, photoHeight);
+        ctx.clip();
+        drawCoverInRect(backgroundImage, photoX, photoY, photoWidth, photoHeight, 0.58, 0.24);
+        const photoOverlay = ctx.createLinearGradient(photoX, photoY, photoX, photoY + photoHeight);
+        photoOverlay.addColorStop(0, hexToRGBA(posterBase, 0.14));
+        photoOverlay.addColorStop(0.68, 'rgba(0,0,0,0)');
+        photoOverlay.addColorStop(1, hexToRGBA(accentDeep, 0.22));
+        ctx.fillStyle = photoOverlay;
+        ctx.fillRect(photoX, photoY, photoWidth, photoHeight);
+        ctx.restore();
+    } else {
+        const fallbackPhotoGradient = ctx.createLinearGradient(photoX, photoY, photoX + photoWidth, photoY + photoHeight);
+        fallbackPhotoGradient.addColorStop(0, accentSecondary);
+        fallbackPhotoGradient.addColorStop(0.48, mixHexColors(accentPrimary, posterBase, 0.34));
+        fallbackPhotoGradient.addColorStop(1, accentDeep);
+        ctx.fillStyle = fallbackPhotoGradient;
+        ctx.fillRect(photoX, photoY, photoWidth, photoHeight);
+
+        ctx.save();
+        ctx.strokeStyle = hexToRGBA(headlineColor, 0.12);
+        ctx.lineWidth = 2;
+        for (let x = photoX - photoHeight; x < photoX + photoWidth + photoHeight; x += sx(62)) {
+            ctx.beginPath();
+            ctx.moveTo(x, photoY);
+            ctx.lineTo(x + photoHeight * 0.56, photoY + photoHeight);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        if (fallbackLogo) {
+            drawNeutralizedBackdropMark(
+                ctx,
+                fallbackLogo,
+                photoX + photoWidth / 2,
+                offsetElementY('tournamentLogo', photoY + photoHeight / 2),
+                sx(244),
+                sy(244),
+                headlineColor === '#ffffff' ? '#ffffff' : '#0f172a',
+                0.12
+            );
+        }
+    }
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(headlineColor === '#ffffff' ? '#ffffff' : '#0f172a', 0.14);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(photoX + 1, photoY + 1, photoWidth - 2, photoHeight - 2);
+    ctx.restore();
+
+    if (tournamentLogo) {
+        drawOverflowCrest(ctx, {
+            x: photoX + sx(44),
+            y: offsetElementY('tournamentLogo', photoY + sy(58)),
+            width: sx(54),
+            height: sy(54),
+            img: tournamentLogo,
+            label: data.tournament || 'Tournament',
+            rawLogo: data.tournamentLogo,
+            isDark: getContrastColor(frameColor) === '#ffffff',
+            showFrame: false,
+        });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = mutedHeadline;
+    ctx.font = `800 ${sy(18)}px ${FONT_MONO}`;
+    ctx.fillText(truncateTextToWidth(ctx, kickerText || competitionText, heroMaxWidth), heroLeftX, offsetElementY('title', sy(112)));
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(headlineColor, 0.12);
+    ctx.fillRect(heroLeftX, sy(128), sx(84), sy(4));
+    ctx.restore();
+
+    drawCondensedHeroWord('PROXIMO', heroLeftX, heroTopY, heroMaxWidth, scaleElementSize('title', sy(246), 118));
+    drawCondensedHeroWord('PARTIDO', heroLeftX, heroBottomY, heroMaxWidth, scaleElementSize('title', sy(246), 118));
+
+    if (competitionText) {
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = hexToRGBA(headlineColor, 0.64);
+        ctx.font = `800 ${sy(18)}px ${FONT_MONO}`;
+        ctx.fillText(truncateTextToWidth(ctx, competitionText, heroMaxWidth), heroLeftX, sy(846));
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.18)';
+    ctx.shadowBlur = sy(20);
+    ctx.shadowOffsetY = sy(12);
+    ctx.fillStyle = leftInfoFill;
+    ctx.fillRect(infoBlockX, infoBlockY, infoBlockWidth, infoBlockHeight);
+    ctx.restore();
+
+    const matchupLayout = fitTextLinesToWidth(
+        ctx,
+        matchupText,
+        infoBlockWidth - sx(34),
+        '900',
+        scaleElementSize('teamName', sy(44), 34),
+        FONT_EDITORIAL_SCORE,
+        sy(26),
+        2
+    );
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = leftInfoText;
+    ctx.font = `900 ${matchupLayout.size}px ${FONT_EDITORIAL_SCORE}`;
+    matchupLayout.lines.forEach((line, index) => {
+        ctx.fillText(line, infoBlockX + sx(18), offsetElementY('teamName', infoBlockY + sy(56) + index * (matchupLayout.size + sy(6))));
+    });
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = mutedHeadline;
+    ctx.font = `800 ${sy(16)}px ${FONT_MONO}`;
+    ctx.fillText(truncateTextToWidth(ctx, dateText, sx(250)), metaLeftX, metaDateY);
+    ctx.restore();
+
+    const koPillX = metaLeftX;
+    const koPillY = sy(1128);
+    const koPillWidth = sx(68);
+    const koPillHeight = sy(38);
+
+    ctx.save();
+    ctx.fillStyle = accentPrimary;
+    ctx.fillRect(koPillX, koPillY, koPillWidth, koPillHeight);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = getContrastColor(accentPrimary);
+    ctx.font = `900 ${sy(18)}px ${FONT_MONO}`;
+    ctx.fillText('KO', koPillX + koPillWidth / 2, koPillY + koPillHeight / 2 + 1);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = headlineColor;
+    ctx.font = `900 ${scaleElementSize('score', sy(42), 212)}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(truncateTextToWidth(ctx, timeText, sx(250)), koPillX + koPillWidth + sx(20), sy(1158));
+    ctx.restore();
+
+    if (venueText) {
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = mutedHeadline;
+        ctx.font = `800 ${sy(18)}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, venueText, sx(430)), metaLeftX, metaVenueY);
+        ctx.restore();
+    }
+
+    drawLogoPlate(homeLogoPlateX, neutralLogoPlate, neutralLogoText, homeLogo, data.homeTeam, data.homeLogo, 'HOME');
+    drawLogoPlate(awayLogoPlateX, accentLogoPlate, accentLogoText, awayLogo, data.awayTeam, data.awayLogo, 'AWAY');
+
+    const footerLineY = sy(1264);
+    const footerLogoSize = scaleElementSize('tournamentLogo', sx(86), 323);
+    const footerLineGap = Math.max(sx(122), Math.round(footerLogoSize * 0.9));
+
+    ctx.save();
+    ctx.strokeStyle = accentStroke;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(sx(26), footerLineY);
+    ctx.lineTo(canvas.width / 2 - footerLineGap, footerLineY);
+    ctx.moveTo(canvas.width / 2 + footerLineGap, footerLineY);
+    ctx.lineTo(canvas.width - sx(26), footerLineY);
+    ctx.stroke();
+    ctx.restore();
+
+    if (fallbackLogo) {
+        drawOverflowCrest(ctx, {
+            x: canvas.width / 2,
+            y: offsetElementY('tournamentLogo', footerLineY),
+            width: footerLogoSize,
+            height: footerLogoSize,
+            img: fallbackLogo,
+            label: data.tournament || 'G22 Scores',
+            rawLogo: tournamentLogo ? data.tournamentLogo : '/icon.png',
+            isDark: headlineColor === '#ffffff',
+            showFrame: false,
+        });
+    }
+}
+
 async function drawMatchEditorialResult(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -4039,6 +5828,8 @@ async function drawMatchEditorialResult(
     const titleY = topRuleY;
     const tournamentLogoY = scoreCenterY + editorialPreset.tournamentLogoOffsetY;
     const teamLogoY = topRuleY - editorialPreset.logoOffsetY;
+    const teamLogoWidth = Math.round(editorialPreset.logoWidth * 1.25);
+    const teamLogoHeight = Math.round(editorialPreset.logoHeight * 1.25);
     const gradientStartY = Math.max(Math.round(titleY - editorialPreset.titleFontSize * 0.95), Math.round(overlayTop - 16));
     const usesUploadedGradientImage = Boolean(gradientImage);
 
@@ -4150,27 +5941,29 @@ async function drawMatchEditorialResult(
         drawEditorialHeaderArrows(ctx, canvas);
     }
 
-    drawEditorialCrestStroke(ctx, leftColumnX, teamLogoY, editorialPreset.logoWidth, editorialPreset.logoHeight, homeLogo, 5);
+    drawEditorialCrestStroke(ctx, leftColumnX, teamLogoY, teamLogoWidth, teamLogoHeight, homeLogo, 5);
     drawOverflowCrest(ctx, {
         x: leftColumnX,
         y: teamLogoY,
-        width: editorialPreset.logoWidth,
-        height: editorialPreset.logoHeight,
+        width: teamLogoWidth,
+        height: teamLogoHeight,
         img: homeLogo,
         label: data.homeTeam,
         rawLogo: data.homeLogo,
         isDark: true,
+        showFrame: false,
     });
-    drawEditorialCrestStroke(ctx, rightColumnX, teamLogoY, editorialPreset.logoWidth, editorialPreset.logoHeight, awayLogo, 5);
+    drawEditorialCrestStroke(ctx, rightColumnX, teamLogoY, teamLogoWidth, teamLogoHeight, awayLogo, 5);
     drawOverflowCrest(ctx, {
         x: rightColumnX,
         y: teamLogoY,
-        width: editorialPreset.logoWidth,
-        height: editorialPreset.logoHeight,
+        width: teamLogoWidth,
+        height: teamLogoHeight,
         img: awayLogo,
         label: data.awayTeam,
         rawLogo: data.awayLogo,
         isDark: true,
+        showFrame: false,
     });
 
     const contextLabel = buildEditorialContextLabel(data);
@@ -4251,7 +6044,8 @@ async function drawMatchEditorialResult(
     );
 }
 
-async function drawMatchResult(
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function drawLegacyClassicMatchPanel(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: MatchStatsData,
@@ -4267,181 +6061,1116 @@ async function drawMatchResult(
     const softColor = getMutedColor(isDark, 0.12);
     const safe = getSafeArea(canvas);
     const isStory = format.height > format.width;
-    const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+    const scaleX = canvas.width / 1080;
+    const scaleY = canvas.height / 1350;
+    const uiScale = isStory ? 1.08 : 1;
+    const sx = (value: number) => Math.round(value * scaleX);
+    const sy = (value: number) => Math.round(value * scaleY);
+    const ss = (value: number) => Math.round(value * uiScale);
+    const [homeLogo, awayLogo, tournamentLogo, mediaImage] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
         loadImage(data.tournamentLogo || ''),
+        loadImage(data.backgroundImage || ''),
     ]);
 
     drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
-    drawCenteredPill(
-        ctx,
-        safe.centerX,
-        isStory ? 72 : 54,
-        (data.mainTitle || getStatusLabel(data.status)).toUpperCase(),
-        accentColor,
-        getContrastColor(accentColor),
-        `800 ${isStory ? 24 : 20}px ${FONT_BODY}`,
-        26,
-        isStory ? 48 : 42
+    const headerX = sx(54);
+    const headerY = sy(40);
+    const headerHeight = sy(70);
+    const headerLogoSize = ss(42);
+    const headerTextX = headerX + headerLogoSize + sx(14);
+    const headerStatus = (data.mainTitle || getStatusLabel(data.status)).toUpperCase();
+
+    drawLogoBadge(ctx, {
+        x: headerX + headerLogoSize / 2,
+        y: headerY + headerHeight / 2,
+        size: headerLogoSize,
+        img: tournamentLogo,
+        label: data.tournament || 'Torneo',
+        rawLogo: data.tournamentLogo,
+        isDark,
+    });
+
+    ctx.save();
+    ctx.globalAlpha = 0.95;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = textColor;
+    ctx.font = `800 ${ss(18)}px ${FONT_BODY}`;
+    ctx.fillText(
+        truncateTextToWidth(ctx, (data.tournament || 'TORNEO').toUpperCase(), sx(430)),
+        headerTextX,
+        headerY + headerHeight / 2 + 1
     );
-    drawTournamentRibbon(ctx, canvas, data.tournament, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 164 : 136, isStory ? 26 : 22);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = mutedColor;
+    ctx.font = `700 ${ss(15)}px ${FONT_BODY}`;
+    ctx.fillText(headerStatus, canvas.width - sx(54), headerY + headerHeight / 2 + 1);
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(accentColor, isDark ? 0.42 : 0.26);
+    ctx.lineWidth = Math.max(2, sx(2));
+    ctx.beginPath();
+    ctx.moveTo(sx(54), sy(108));
+    ctx.lineTo(canvas.width - sx(54), sy(108));
+    ctx.stroke();
+    ctx.restore();
+
+    const mediaPanelX = sx(64);
+    const mediaPanelY = sy(135);
+    const mediaPanelWidth = sx(952);
+    const mediaPanelHeight = sy(430);
+    const mediaPanelRadius = ss(36);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(mediaPanelX, mediaPanelY, mediaPanelWidth, mediaPanelHeight, mediaPanelRadius);
+    ctx.clip();
+
+    if (mediaImage) {
+        const sourceWidth = mediaImage.naturalWidth || mediaImage.width || mediaPanelWidth;
+        const sourceHeight = mediaImage.naturalHeight || mediaImage.height || mediaPanelHeight;
+        const scale = Math.max(mediaPanelWidth / sourceWidth, mediaPanelHeight / sourceHeight);
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        const drawX = mediaPanelX + (mediaPanelWidth - drawWidth) / 2;
+        const drawY = mediaPanelY + (mediaPanelHeight - drawHeight) / 2;
+        ctx.drawImage(mediaImage, drawX, drawY, drawWidth, drawHeight);
+
+        const mediaOverlay = ctx.createLinearGradient(mediaPanelX, mediaPanelY, mediaPanelX, mediaPanelY + mediaPanelHeight);
+        mediaOverlay.addColorStop(0, hexToRGBA(bgColor, isDark ? 0.22 : 0.08));
+        mediaOverlay.addColorStop(1, hexToRGBA(bgColor, isDark ? 0.42 : 0.14));
+        ctx.fillStyle = mediaOverlay;
+        ctx.fillRect(mediaPanelX, mediaPanelY, mediaPanelWidth, mediaPanelHeight);
+    } else {
+        const mediaFill = ctx.createLinearGradient(mediaPanelX, mediaPanelY, mediaPanelX + mediaPanelWidth, mediaPanelY + mediaPanelHeight);
+        mediaFill.addColorStop(0, hexToRGBA(accentColor, isDark ? 0.18 : 0.12));
+        mediaFill.addColorStop(1, hexToRGBA(isDark ? '#ffffff' : '#0f172a', isDark ? 0.06 : 0.03));
+        ctx.fillStyle = mediaFill;
+        ctx.fillRect(mediaPanelX, mediaPanelY, mediaPanelWidth, mediaPanelHeight);
+
+        const sheen = ctx.createLinearGradient(mediaPanelX, mediaPanelY, mediaPanelX + mediaPanelWidth, mediaPanelY + mediaPanelHeight);
+        sheen.addColorStop(0, 'rgba(255,255,255,0.12)');
+        sheen.addColorStop(0.35, 'rgba(255,255,255,0.02)');
+        sheen.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(mediaPanelX, mediaPanelY, mediaPanelWidth, mediaPanelHeight);
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.56)';
+    ctx.beginPath();
+    ctx.roundRect(mediaPanelX, mediaPanelY, mediaPanelWidth, mediaPanelHeight, mediaPanelRadius);
+    ctx.fill();
+    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.07)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    const scoreLabelText = isScheduled ? 'HORARIO' : 'RESULTADO';
+    const scoreValueText = isScheduled
+        ? (data.time || '--:--')
+        : `${data.homeScore ?? '-'} - ${data.awayScore ?? '-'}`;
+    const scoreLabelY = sy(610);
+    const scoreValueY = sy(690);
+    const teamLogoSize = ss(74);
+    const leftTeamX = sx(180);
+    const rightTeamX = canvas.width - sx(180);
+    const teamLogoCenterY = sy(796);
+    const teamNameY = offsetElementY('teamName', sy(848));
+    const teamNameMaxWidth = sx(250);
+
+    const matchResultNameFontSize = getSharedFittedFontSize(
+        ctx,
+        [
+            { text: data.homeTeam.trim().toUpperCase(), maxWidth: teamNameMaxWidth },
+            { text: data.awayTeam.trim().toUpperCase(), maxWidth: teamNameMaxWidth },
+        ],
+        '800',
+        scaleElementSize('teamName', ss(28), ss(28)),
+        FONT_DISPLAY,
+        ss(22),
+    );
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = accentColor;
+    ctx.font = `900 ${ss(72)}px ${FONT_DISPLAY}`;
+    ctx.fillText(scoreLabelText, safe.centerX, scoreLabelY);
+
+    ctx.shadowColor = isDark ? 'rgba(0,0,0,0.34)' : 'rgba(15,23,42,0.16)';
+    ctx.shadowBlur = ss(22);
+    ctx.shadowOffsetY = ss(8);
+    ctx.fillStyle = textColor;
+    ctx.font = `900 ${ss(isScheduled ? 110 : 138)}px ${isScheduled ? FONT_MONO : FONT_CLASSIC_MATCH_SCORE}`;
+    ctx.fillText(scoreValueText, safe.centerX, scoreValueY);
+    ctx.restore();
+
+    drawOverflowCrest(ctx, {
+        x: leftTeamX,
+        y: teamLogoCenterY,
+        width: teamLogoSize,
+        height: teamLogoSize,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark,
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: rightTeamX,
+        y: teamLogoCenterY,
+        width: teamLogoSize,
+        height: teamLogoSize,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark,
+        showFrame: false,
+    });
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = textColor;
+    ctx.font = `800 ${matchResultNameFontSize}px ${FONT_DISPLAY}`;
+    ctx.fillText(truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), teamNameMaxWidth), leftTeamX, teamNameY);
+    ctx.fillText(truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), teamNameMaxWidth), rightTeamX, teamNameY);
+    ctx.restore();
+
+    const stats = data.stats.slice(0, 6);
+
+    if (stats.length === 0) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = mutedColor;
+        ctx.font = `600 ${ss(20)}px ${FONT_BODY}`;
+        ctx.fillText('No hay estadisticas disponibles para este partido.', safe.centerX, sy(932));
+        ctx.restore();
+    } else {
+        let columns = 3;
+        let rows = 1;
+        let cardWidth = sx(286);
+        let cardHeight = sy(92);
+        let gapX = sx(18);
+        let gapY = sy(14);
+        let startX = sx(93);
+        let startY = sy(930);
+
+        if (stats.length === 4) {
+            columns = 2;
+            rows = 2;
+            cardWidth = sx(396);
+            cardHeight = sy(86);
+            gapX = sx(18);
+            gapY = sy(16);
+            startX = sx(135);
+            startY = sy(910);
+        } else if (stats.length >= 5) {
+            columns = 3;
+            rows = 2;
+            cardWidth = sx(286);
+            cardHeight = sy(78);
+            gapX = sx(18);
+            gapY = sy(14);
+            startX = sx(93);
+            startY = sy(900);
+        } else if (stats.length < 3) {
+            columns = stats.length;
+            rows = 1;
+            cardWidth = stats.length === 1 ? sx(520) : sx(438);
+            cardHeight = sy(92);
+            gapX = sx(18);
+            gapY = sy(14);
+            const totalWidth = cardWidth * columns + gapX * Math.max(columns - 1, 0);
+            startX = Math.round((canvas.width - totalWidth) / 2);
+            startY = sy(930);
+        }
+
+        stats.forEach((stat, index) => {
+            const column = index % columns;
+            const row = Math.floor(index / columns);
+            if (row >= rows) return;
+
+            const x = startX + column * (cardWidth + gapX);
+            const y = startY + row * (cardHeight + gapY);
+
+            ctx.save();
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.74)';
+            ctx.beginPath();
+            ctx.roundRect(x, y, cardWidth, cardHeight, ss(22));
+            ctx.fill();
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.07)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = mutedColor;
+            setFittedFont(ctx, stat.label.toUpperCase(), cardWidth - sx(36), '800', ss(16), FONT_BODY, ss(12));
+            ctx.fillText(truncateTextToWidth(ctx, stat.label.toUpperCase(), cardWidth - sx(36)), x + cardWidth / 2, y + sy(12));
+
+            ctx.fillStyle = textColor;
+            ctx.font = `900 ${ss(22)}px ${FONT_MONO}`;
+            ctx.fillText(`${stat.home} - ${stat.away}`, x + cardWidth / 2, y + Math.round(cardHeight / 2));
+            ctx.restore();
+        });
+    }
 
     const metaLine = [data.date, data.time, data.venue].filter(Boolean).join('  /  ');
     if (metaLine) {
         ctx.save();
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
         ctx.fillStyle = mutedColor;
-        ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
-        ctx.fillText(metaLine, safe.centerX, isStory ? 210 : 178);
+        setFittedFont(ctx, metaLine.toUpperCase(), canvas.width - sx(140), '700', ss(15), FONT_BODY, ss(11));
+        ctx.fillText(metaLine.toUpperCase(), safe.centerX, sy(1166));
         ctx.restore();
     }
-
-    const panelX = isStory ? 64 : 72;
-    const panelY = isStory ? 250 : 222;
-    const panelWidth = canvas.width - panelX * 2;
-    const panelHeight = safe.bottom - panelY - (isStory ? 24 : 12);
-    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
-
-    const statusColor = getStatusColor(data.status, accentColor, isDark);
-    drawCenteredPill(
-        ctx,
-        safe.centerX,
-        panelY + 28,
-        getStatusLabel(data.status),
-        hexToRGBA(statusColor, isDark ? 0.2 : 0.14),
-        statusColor,
-        `800 ${isStory ? 18 : 16}px ${FONT_BODY}`,
-        22,
-        isStory ? 40 : 36
-    );
-
-    const teamLogoSize = isStory ? 154 : 132;
-    const scoreY = panelY + (isStory ? 206 : 188);
-    const leftX = panelX + panelWidth * 0.22;
-    const rightX = panelX + panelWidth * 0.78;
-    const nameY = scoreY + (isStory ? 122 : 106);
-
-    drawLogoBadge(ctx, { x: leftX, y: scoreY, size: teamLogoSize, img: homeLogo, label: data.homeTeam, rawLogo: data.homeLogo, isDark });
-    drawLogoBadge(ctx, { x: rightX, y: scoreY, size: teamLogoSize, img: awayLogo, label: data.awayTeam, rawLogo: data.awayLogo, isDark });
-    const matchResultNameFontSize = getSharedFittedFontSize(
-        ctx,
-        [
-            { text: data.homeTeam.trim().toUpperCase(), maxWidth: panelWidth * 0.28 },
-            { text: data.awayTeam.trim().toUpperCase(), maxWidth: panelWidth * 0.28 },
-        ],
-        '800',
-        isStory ? 38 : 32,
-        FONT_DISPLAY,
-        8,
-    );
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.fillStyle = textColor;
-    ctx.font = `800 ${matchResultNameFontSize}px ${FONT_DISPLAY}`;
-    ctx.fillText(data.homeTeam.toUpperCase(), leftX, nameY);
-    ctx.fillText(data.awayTeam.toUpperCase(), rightX, nameY);
-
-    ctx.fillStyle = mutedColor;
-    ctx.font = `700 ${isStory ? 16 : 14}px ${FONT_BODY}`;
-    ctx.fillText('LOCAL', leftX, nameY + (isStory ? 34 : 28));
-    ctx.fillText('VISITANTE', rightX, nameY + (isStory ? 34 : 28));
-
-    if (isScheduled) {
-        ctx.fillStyle = accentColor;
-        ctx.font = `800 ${isStory ? 42 : 36}px ${FONT_DISPLAY}`;
-        ctx.fillText((data.date || 'Fecha por confirmar').toUpperCase(), safe.centerX, scoreY - (isStory ? 2 : 4));
-        ctx.fillStyle = textColor;
-        ctx.font = `800 ${isStory ? 62 : 52}px ${FONT_MONO}`;
-        ctx.fillText(data.time || '--:--', safe.centerX, scoreY + (isStory ? 56 : 50));
-        ctx.fillStyle = mutedColor;
-        ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
-        ctx.fillText('HORARIO DEL PARTIDO', safe.centerX, scoreY + (isStory ? 92 : 82));
-    } else {
-        const classicScoreFontSize = isStory ? 168 : 148;
-        const classicScoreOffsetX = isStory ? 88 : 78;
-        const classicScoreCenterY = scoreY;
-        ctx.fillStyle = accentColor;
-        ctx.font = `900 ${classicScoreFontSize}px ${FONT_CLASSIC_MATCH_SCORE}`;
-        ctx.textBaseline = 'alphabetic';
-        const homeScoreText = String(data.homeScore ?? '-');
-        const awayScoreText = String(data.awayScore ?? '-');
-        const scoreBaselineY = getCenteredTextBaseline(ctx, '88', classicScoreCenterY, classicScoreFontSize);
-        ctx.fillText(homeScoreText, safe.centerX - classicScoreOffsetX, scoreBaselineY);
-        ctx.fillText(awayScoreText, safe.centerX + classicScoreOffsetX, scoreBaselineY);
-        ctx.fillStyle = mutedColor;
-        ctx.font = `700 ${isStory ? 52 : 44}px ${FONT_DISPLAY}`;
-        ctx.textBaseline = 'middle';
-        ctx.fillText(':', safe.centerX, classicScoreCenterY);
-    }
-    ctx.restore();
-
-    const stats = data.stats.slice(0, isStory ? 6 : 5);
-    const statsTop = panelY + (isStory ? 404 : 354);
-    const statsBottom = panelY + panelHeight - 34;
 
     ctx.save();
     ctx.strokeStyle = softColor;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(panelX + 28, statsTop - 24);
-    ctx.lineTo(panelX + panelWidth - 28, statsTop - 24);
+    ctx.moveTo(sx(54), sy(1260));
+    ctx.lineTo(canvas.width - sx(54), sy(1260));
     ctx.stroke();
     ctx.restore();
 
-    if (stats.length === 0) {
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.fillStyle = mutedColor;
-        ctx.font = `600 ${isStory ? 24 : 20}px ${FONT_BODY}`;
-        ctx.fillText('No hay estadísticas disponibles para este partido.', safe.centerX, statsTop + 32);
-        ctx.restore();
-    } else {
-        const rowHeight = Math.min(isStory ? 96 : 86, (statsBottom - statsTop) / stats.length);
+    const footerLabelY = sy(1210);
+    const footerWordmarkY = sy(1238);
+    const footerIconSize = ss(30);
+    const footerGap = sx(10);
 
-        stats.forEach((stat, index) => {
-            const y = statsTop + index * rowHeight;
-            const barY = y + rowHeight - (isStory ? 26 : 24);
-            const barWidth = panelWidth - 240;
-            const barX = safe.centerX - barWidth / 2;
-            const homeNumeric = Number(String(stat.home).replace(/[^\d.-]/g, ''));
-            const awayNumeric = Number(String(stat.away).replace(/[^\d.-]/g, ''));
-            const total = Number.isFinite(homeNumeric) && Number.isFinite(awayNumeric) ? Math.abs(homeNumeric) + Math.abs(awayNumeric) : 0;
-            const homeRatio = total > 0 ? Math.abs(homeNumeric) / total : 0.5;
-            const awayRatio = total > 0 ? Math.abs(awayNumeric) / total : 0.5;
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = getMutedColor(isDark, 0.62);
+    ctx.font = `600 ${ss(15)}px ${FONT_BODY}`;
+    ctx.fillText('Info aportada por', safe.centerX, footerLabelY);
+    ctx.restore();
 
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.fillStyle = mutedColor;
-            ctx.font = `700 ${isStory ? 18 : 16}px ${FONT_BODY}`;
-            ctx.fillText(stat.label.toUpperCase(), safe.centerX, y + 18);
+    ctx.save();
+    ctx.font = `800 ${ss(24)}px ${FONT_DISPLAY}`;
+    const g22Width = ctx.measureText('G22').width;
+    ctx.font = `800 ${ss(24)}px ${FONT_BODY}`;
+    const scoresWidth = ctx.measureText('Scores').width;
+    const totalWidth = footerIconSize + footerGap + g22Width + sx(8) + scoresWidth;
+    const startX = safe.centerX - totalWidth / 2;
+    ctx.restore();
 
-            ctx.fillStyle = textColor;
-            ctx.font = `800 ${isStory ? 36 : 30}px ${FONT_MONO}`;
-            ctx.fillText(String(stat.home), panelX + 122, y + 30);
-            ctx.fillText(String(stat.away), panelX + panelWidth - 122, y + 30);
-
-            ctx.fillStyle = softColor;
-            ctx.beginPath();
-            ctx.roundRect(barX, barY, barWidth, isStory ? 12 : 10, 999);
-            ctx.fill();
-
-            ctx.fillStyle = accentColor;
-            ctx.beginPath();
-            ctx.roundRect(barX, barY, Math.max(28, barWidth * homeRatio), isStory ? 12 : 10, 999);
-            ctx.fill();
-
-            ctx.fillStyle = hexToRGBA(isDark ? '#ffffff' : '#0f172a', isDark ? 0.35 : 0.2);
-            ctx.beginPath();
-            ctx.roundRect(barX + barWidth * (1 - awayRatio), barY, Math.max(28, barWidth * awayRatio), isStory ? 12 : 10, 999);
-            ctx.fill();
-            ctx.restore();
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: startX + footerIconSize / 2,
+            y: footerWordmarkY + footerIconSize / 2 - sy(2),
+            size: footerIconSize,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark,
         });
     }
 
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.font = `800 ${ss(24)}px ${FONT_DISPLAY}`;
+    ctx.fillStyle = BRAND_ACCENT;
+    ctx.fillText('G22', startX + footerIconSize + footerGap, footerWordmarkY);
+    ctx.font = `800 ${ss(24)}px ${FONT_BODY}`;
+    ctx.fillStyle = textColor;
+    ctx.fillText('Scores', startX + footerIconSize + footerGap + g22Width + sx(8), footerWordmarkY);
+    ctx.restore();
+}
+
+async function drawMatchScheduleConfrontation(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const scaleX = canvas.width / 1080;
+    const scaleY = canvas.height / 1350;
+    const sx = (value: number) => Math.round(value * scaleX);
+    const sy = (value: number) => Math.round(value * scaleY);
+    const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        loadImage(EDITORIAL_TEXTURE_SOURCE),
+    ]);
+    const baseBg = normalizeHexColor(bgColor) || DEFAULT_PALETTE.bg;
+    const accent = normalizeHexColor(accentColor) || BRAND_ACCENT;
+    const isDark = getContrastColor(baseBg) === '#ffffff';
+    const posterBase = isDark ? mixHexColors(baseBg, '#02060a', 0.24) : mixHexColors(baseBg, '#eff4fa', 0.18);
+    const posterTop = isDark ? mixHexColors(posterBase, accent, 0.08) : mixHexColors(posterBase, '#ffffff', 0.12);
+    const posterBottom = isDark ? mixHexColors(posterBase, '#010203', 0.34) : mixHexColors(posterBase, '#dbe3ee', 0.24);
+    const panelFill = isDark ? mixHexColors(baseBg, '#02060a', 0.48) : mixHexColors(baseBg, '#ffffff', 0.22);
+    const panelStroke = hexToRGBA(mixHexColors(accent, '#ffffff', isDark ? 0.18 : 0.34), isDark ? 0.22 : 0.16);
+    const panelText = getContrastColor(panelFill) === '#ffffff' ? '#ffffff' : '#0f172a';
+    const subtitleColor = hexToRGBA(panelText, 0.82);
+    const infoColor = hexToRGBA(panelText, 0.94);
+    const accentMist = mixHexColors(accent, '#ffffff', isDark ? 0.18 : 0.34);
+    const accentSoft = mixHexColors(accent, '#ffffff', isDark ? 0.3 : 0.18);
+    const neutralTile = isDark ? '#ffffff' : mixHexColors('#ffffff', baseBg, 0.06);
+    const neutralTileText = getContrastColor(neutralTile);
+    const competitionLabel = buildEditorialContextLabel(data).toUpperCase();
+    const titleLabel = 'PROXIMO PARTIDO';
+    const kickoffDate = toExportDate(data.kickoffAt);
+    const dateLabel = kickoffDate
+        ? new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: '2-digit', month: 'short' }).format(kickoffDate).replace('.', '').toUpperCase()
+        : (data.date || 'FECHA A CONFIRMAR').toUpperCase();
+    const timeLabel = kickoffDate
+        ? new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(kickoffDate)
+        : (data.time || '--:--');
+    const sanitizedDateLabel = dateLabel.replace(/,\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    const mainPanelLeft = sx(72);
+    const mainPanelTop = sy(82);
+    const mainPanelRight = canvas.width - sx(72);
+    const mainPanelBottom = canvas.height - sy(96);
+    const tileY = sy(472);
+    const sideTileSize = sx(286);
+    const middleTileWidth = sx(176);
+    const middleTileHeight = sy(204);
+    const tileGap = sx(24);
+    const groupWidth = sideTileSize * 2 + middleTileWidth + tileGap * 2;
+    const startX = Math.round((canvas.width - groupWidth) / 2);
+    const homeTileX = startX;
+    const middleTileX = homeTileX + sideTileSize + tileGap;
+    const awayTileX = middleTileX + middleTileWidth + tileGap;
+    const bottomInfoY = sy(944);
+
+    const getColorDistance = (left: string, right: string) => {
+        if (!/^#[0-9a-f]{6}$/i.test(left) || !/^#[0-9a-f]{6}$/i.test(right)) return 999;
+        const lr = parseInt(left.slice(1, 3), 16);
+        const lg = parseInt(left.slice(3, 5), 16);
+        const lb = parseInt(left.slice(5, 7), 16);
+        const rr = parseInt(right.slice(1, 3), 16);
+        const rg = parseInt(right.slice(3, 5), 16);
+        const rb = parseInt(right.slice(5, 7), 16);
+        return Math.abs(lr - rr) + Math.abs(lg - rg) + Math.abs(lb - rb);
+    };
+
+    const deriveTileColor = (image: HTMLImageElement | null, fallback: string) => {
+        const fallbackHex = normalizeHexColor(fallback) || accent;
+        if (!image || typeof document === 'undefined') {
+            return mixHexColors(fallbackHex, accent, 0.12);
+        }
+
+        try {
+            const sampleCanvas = document.createElement('canvas');
+            const sampleSize = 28;
+            sampleCanvas.width = sampleSize;
+            sampleCanvas.height = sampleSize;
+            const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+            if (!sampleCtx) return fallbackHex;
+
+            sampleCtx.drawImage(image, 0, 0, sampleSize, sampleSize);
+            const imageData = sampleCtx.getImageData(0, 0, sampleSize, sampleSize).data;
+            let redTotal = 0;
+            let greenTotal = 0;
+            let blueTotal = 0;
+            let weightTotal = 0;
+
+            for (let index = 0; index < imageData.length; index += 4) {
+                const alpha = imageData[index + 3] / 255;
+                if (alpha <= 0.08) continue;
+
+                const red = imageData[index];
+                const green = imageData[index + 1];
+                const blue = imageData[index + 2];
+                const max = Math.max(red, green, blue) / 255;
+                const min = Math.min(red, green, blue) / 255;
+                const saturation = max <= 0 ? 0 : (max - min) / max;
+                const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+                const weight = alpha * (0.3 + saturation * 1.35 + (luminance > 0.1 && luminance < 0.92 ? 0.25 : 0));
+
+                redTotal += red * weight;
+                greenTotal += green * weight;
+                blueTotal += blue * weight;
+                weightTotal += weight;
+            }
+
+            if (weightTotal <= 0) return fallbackHex;
+
+            const toHex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
+            const sampled = `#${toHex(redTotal / weightTotal)}${toHex(greenTotal / weightTotal)}${toHex(blueTotal / weightTotal)}`;
+            const refined = mixHexColors(sampled, accent, 0.14);
+            return getColorDistance(refined, baseBg) < 52
+                ? mixHexColors(refined, accentMist, 0.4)
+                : refined;
+        } catch {
+            return fallbackHex;
+        }
+    };
+
+    const homeTileColor = deriveTileColor(homeLogo, mixHexColors(accent, '#7dd3fc', 0.44));
+    const awayTileColor = deriveTileColor(awayLogo, mixHexColors(accent, '#1d4ed8', 0.42));
+
+    const drawTexture = (x: number, y: number, width: number, height: number, opacity: number) => {
+        if (!textureImage) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        ctx.clip();
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(textureImage, x, y, width, height);
+        ctx.restore();
+    };
+
+    const drawPosterShape = (
+        points: Array<[number, number]>,
+        fillStyle: string,
+        strokeStyle?: string
+    ) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(points[0][0], points[0][1]);
+        points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+        ctx.closePath();
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+        if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        ctx.restore();
+    };
+
+    const drawTile = (
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        fillStyle: string,
+        logo: HTMLImageElement | null,
+        label: string,
+        rawLogo: string | undefined,
+        logoSize: number
+    ) => {
+        ctx.save();
+        ctx.shadowColor = isDark ? 'rgba(0,0,0,0.3)' : 'rgba(15,23,42,0.16)';
+        ctx.shadowBlur = sy(30);
+        ctx.shadowOffsetY = sy(12);
+        ctx.fillStyle = fillStyle;
+        ctx.fillRect(x, y, width, height);
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = hexToRGBA(mixHexColors(fillStyle, panelText === '#ffffff' ? '#ffffff' : '#0f172a', 0.28), 0.24);
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, width, height);
+        ctx.restore();
+
+        drawTexture(x, y, width, height, isDark ? 0.08 : 0.06);
+
+        drawOverflowCrest(ctx, {
+            x: x + width / 2,
+            y: y + height / 2,
+            width: logoSize,
+            height: logoSize,
+            img: logo,
+            label,
+            rawLogo,
+            isDark: getContrastColor(fillStyle) === '#ffffff',
+            showFrame: false,
+        });
+    };
+
+    ctx.fillStyle = posterBase;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const backgroundGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    backgroundGradient.addColorStop(0, posterTop);
+    backgroundGradient.addColorStop(0.48, posterBase);
+    backgroundGradient.addColorStop(1, posterBottom);
+    ctx.fillStyle = backgroundGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const topGlow = ctx.createRadialGradient(canvas.width * 0.24, sy(124), 0, canvas.width * 0.24, sy(124), sx(360));
+    topGlow.addColorStop(0, hexToRGBA(accentSoft, isDark ? 0.26 : 0.18));
+    topGlow.addColorStop(0.42, hexToRGBA(accentSoft, isDark ? 0.1 : 0.08));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const bottomGlow = ctx.createRadialGradient(canvas.width * 0.82, canvas.height, 0, canvas.width * 0.82, canvas.height, sx(440));
+    bottomGlow.addColorStop(0, hexToRGBA(accentMist, isDark ? 0.18 : 0.12));
+    bottomGlow.addColorStop(0.44, hexToRGBA(accentMist, isDark ? 0.08 : 0.06));
+    bottomGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = bottomGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawTexture(0, 0, canvas.width, canvas.height, isDark ? 0.15 : 0.08);
+
+    drawPosterShape(
+        [
+            [0, sy(0)],
+            [sx(220), sy(0)],
+            [sx(148), sy(84)],
+            [sx(206), sy(106)],
+            [0, sy(274)],
+        ],
+        hexToRGBA(accentSoft, isDark ? 0.5 : 0.22)
+    );
+    drawPosterShape(
+        [
+            [canvas.width, sy(0)],
+            [canvas.width - sx(156), sy(0)],
+            [canvas.width - sx(228), sy(94)],
+            [canvas.width - sx(162), sy(174)],
+            [canvas.width, sy(272)],
+        ],
+        hexToRGBA(accent, isDark ? 0.28 : 0.14)
+    );
+    drawPosterShape(
+        [
+            [0, canvas.height - sy(0)],
+            [sx(188), canvas.height - sy(0)],
+            [sx(124), canvas.height - sy(88)],
+            [sx(160), canvas.height - sy(210)],
+            [0, canvas.height - sy(298)],
+        ],
+        hexToRGBA(accent, isDark ? 0.24 : 0.14)
+    );
+    drawPosterShape(
+        [
+            [canvas.width, canvas.height - sy(0)],
+            [canvas.width - sx(190), canvas.height - sy(0)],
+            [canvas.width - sx(248), canvas.height - sy(88)],
+            [canvas.width - sx(140), canvas.height - sy(132)],
+            [canvas.width - sx(194), canvas.height - sy(210)],
+            [canvas.width, canvas.height - sy(278)],
+        ],
+        hexToRGBA(accentSoft, isDark ? 0.48 : 0.24)
+    );
+
+    drawPosterShape(
+        [
+            [mainPanelLeft + sx(44), mainPanelTop],
+            [mainPanelRight, mainPanelTop + sy(8)],
+            [mainPanelRight - sx(84), mainPanelTop + sy(142)],
+            [mainPanelRight - sx(104), mainPanelTop + sy(192)],
+            [mainPanelRight - sx(36), mainPanelBottom - sy(124)],
+            [mainPanelRight - sx(86), mainPanelBottom],
+            [mainPanelLeft + sx(28), mainPanelBottom],
+            [mainPanelLeft + sx(74), mainPanelBottom - sy(126)],
+            [mainPanelLeft - sx(12), mainPanelTop + sy(520)],
+            [mainPanelLeft + sx(22), mainPanelTop + sy(140)],
+        ],
+        panelFill,
+        panelStroke
+    );
+    drawTexture(mainPanelLeft - sx(24), mainPanelTop - sy(12), mainPanelRight - mainPanelLeft + sx(48), mainPanelBottom - mainPanelTop + sy(24), isDark ? 0.1 : 0.05);
+
+    if (tournamentLogo || brandLogo) {
+        drawOverflowCrest(ctx, {
+            x: canvas.width - sx(88),
+            y: sy(72),
+            width: sx(68),
+            height: sy(68),
+            img: tournamentLogo || brandLogo,
+            label: data.tournament || 'Tournament',
+            rawLogo: tournamentLogo ? data.tournamentLogo : '/icon.png',
+            isDark: true,
+            showFrame: false,
+        });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = panelText;
+    setFittedFont(ctx, titleLabel, canvas.width - sx(180), '900', sy(94), FONT_EDITORIAL_SCORE, sy(48));
+    ctx.fillText(truncateTextToWidth(ctx, titleLabel, canvas.width - sx(180)), canvas.width / 2, sy(248));
+    ctx.fillStyle = subtitleColor;
+    ctx.font = `italic 700 ${sy(30)}px ${FONT_BODY}`;
+    ctx.fillText(truncateTextToWidth(ctx, competitionLabel, canvas.width - sx(260)), canvas.width / 2, sy(302));
+    ctx.restore();
+
+    drawTile(
+        homeTileX,
+        tileY,
+        sideTileSize,
+        sideTileSize,
+        homeTileColor,
+        homeLogo,
+        data.homeTeam,
+        data.homeLogo,
+        sx(176)
+    );
+    drawTile(
+        awayTileX,
+        tileY,
+        sideTileSize,
+        sideTileSize,
+        awayTileColor,
+        awayLogo,
+        data.awayTeam,
+        data.awayLogo,
+        sx(176)
+    );
+    drawTile(
+        middleTileX,
+        tileY + sy(42),
+        middleTileWidth,
+        middleTileHeight,
+        neutralTile,
+        tournamentLogo || brandLogo,
+        data.tournament || 'Tournament',
+        tournamentLogo ? data.tournamentLogo : '/icon.png',
+        sx(96)
+    );
+
+    const sideTeamLabelY = tileY + sideTileSize + sy(52);
+    const sideTeamLabelWidth = sideTileSize + sx(28);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = panelText;
+    setFittedFont(ctx, data.homeTeam.toUpperCase(), sideTeamLabelWidth, '900', sy(30), FONT_BODY, sy(16));
+    ctx.fillText(
+        truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), sideTeamLabelWidth),
+        homeTileX + sideTileSize / 2,
+        sideTeamLabelY
+    );
+    setFittedFont(ctx, data.awayTeam.toUpperCase(), sideTeamLabelWidth, '900', sy(30), FONT_BODY, sy(16));
+    ctx.fillText(
+        truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), sideTeamLabelWidth),
+        awayTileX + sideTileSize / 2,
+        sideTeamLabelY
+    );
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = neutralTileText;
+    ctx.font = `900 ${sy(18)}px ${FONT_BODY}`;
+    ctx.fillText(
+        truncateTextToWidth(ctx, (data.tournament || 'LEAGUE').toUpperCase(), middleTileWidth - sx(24)),
+        middleTileX + middleTileWidth / 2,
+        tileY + sy(268)
+    );
+    ctx.restore();
+
+    if (tournamentLogo) {
+        drawNeutralizedBackdropMark(
+            ctx,
+            tournamentLogo,
+            canvas.width / 2,
+            tileY + sideTileSize / 2 + sy(12),
+            sx(360),
+            sy(360),
+            panelText,
+            isDark ? 0.045 : 0.035
+        );
+    }
+
+    const infoBlockWidth = canvas.width - sx(180);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = infoColor;
+    setFittedFont(ctx, sanitizedDateLabel, infoBlockWidth, '900', sy(72), FONT_BODY, sy(36));
+    ctx.fillText(truncateTextToWidth(ctx, sanitizedDateLabel, infoBlockWidth), canvas.width / 2, bottomInfoY);
+    setFittedFont(ctx, timeLabel.toUpperCase(), infoBlockWidth, '900', sy(105), FONT_EDITORIAL_SCORE, sy(51));
+    ctx.fillText(truncateTextToWidth(ctx, timeLabel.toUpperCase(), infoBlockWidth), canvas.width / 2, bottomInfoY + sy(108));
+    ctx.restore();
+
+    const footerBlockWidth = sx(332);
+    const footerBlockHeight = sy(42);
+    const footerBlockX = Math.round((canvas.width - footerBlockWidth) / 2);
+    const footerBlockY = canvas.height - sy(86);
+    const footerMaskWidth = footerBlockWidth + sx(84);
+    const footerMaskHeight = footerBlockHeight + sy(16);
+    const footerMaskX = Math.round((canvas.width - footerMaskWidth) / 2);
+    const footerMaskY = footerBlockY - sy(8);
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(mixHexColors(baseBg, '#000000', 0.18), isDark ? 0.98 : 0.94);
+    ctx.beginPath();
+    ctx.roundRect(footerMaskX, footerMaskY, footerMaskWidth, footerMaskHeight, sy(10));
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(mixHexColors(baseBg, accent, 0.16), isDark ? 0.92 : 0.88);
+    ctx.beginPath();
+    ctx.roundRect(footerBlockX, footerBlockY, footerBlockWidth, footerBlockHeight, sy(8));
+    ctx.fill();
+    ctx.strokeStyle = hexToRGBA(mixHexColors(accent, '#ffffff', isDark ? 0.16 : 0.28), isDark ? 0.18 : 0.14);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = panelText;
+    ctx.font = `800 ${sy(15)}px ${FONT_BODY}`;
+    ctx.fillText('POWERED BY G22 SCORES', footerBlockX + footerBlockWidth / 2, footerBlockY + footerBlockHeight / 2 + 1);
+    ctx.restore();
+}
+
+function drawClassicResultAccentShape(
+    ctx: CanvasRenderingContext2D,
+    points: Array<[number, number]>,
+    fillStyle: string,
+) {
+    if (points.length < 3) return;
+    ctx.save();
+    ctx.fillStyle = fillStyle;
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+    points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+async function drawMatchResult(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    if (data.status === 'scheduled') {
+        await drawMatchScheduleConfrontation(ctx, canvas, data, format, accentColor, bgColor, brandLogo);
+        return;
+    }
+
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const textColor = getTextColor(isDark);
+    const mutedColor = getMutedColor(isDark, 0.72);
+    const textureOpacity = isDark ? 0.08 : 0.16;
+    const scorePanelColor = isDark ? 'rgba(248,250,252,0.94)' : '#050505';
+    const scorePanelTextColor = getContrastColor(scorePanelColor);
+    const plateInnerColor = isDark ? 'rgba(10,12,16,0.9)' : 'rgba(255,255,255,0.94)';
+    const badgeTextColor = getContrastColor(accentColor);
+    const scaleX = canvas.width / 1080;
+    const scaleY = canvas.height / 1350;
+    const sx = (value: number) => Math.round(value * scaleX);
+    const sy = (value: number) => Math.round(value * scaleY);
+    const primaryColor = accentColor;
+    const statusText = getStatusLabel(data.status).toUpperCase();
+    const modeBadgeText = (data.mainTitle || 'RESULTADO').toUpperCase();
+    const footerMeta = [data.time, data.venue].filter(Boolean).join('  //  ').toUpperCase();
+    const bottomBadgeText = (data.date || data.time || modeBadgeText).toUpperCase();
+    const topMetaText = [data.date, data.time].filter(Boolean).join('  //  ').toUpperCase();
+    const homeTeamName = data.homeTeam.trim().toUpperCase() || 'LOCAL';
+    const awayTeamName = data.awayTeam.trim().toUpperCase() || 'VISITANTE';
+    const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        loadImage(EDITORIAL_TEXTURE_SOURCE),
+    ]);
+
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const glow = ctx.createRadialGradient(canvas.width / 2, sy(300), sx(90), canvas.width / 2, sy(300), sx(760));
+    glow.addColorStop(0, hexToRGBA(primaryColor, isDark ? 0.12 : 0.1));
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (textureImage) {
+        ctx.save();
+        ctx.globalAlpha = textureOpacity;
+        ctx.globalCompositeOperation = isDark ? 'soft-light' : 'multiply';
+        ctx.drawImage(textureImage, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    }
+
+    drawClassicResultAccentShape(ctx, [
+        [-sx(70), sy(220)],
+        [sx(208), sy(118)],
+        [sx(154), sy(226)],
+        [sx(378), sy(112)],
+        [sx(222), sy(324)],
+        [sx(266), sy(326)],
+        [sx(86), sy(646)],
+        [-sx(38), sy(552)],
+        [sx(70), sy(410)],
+        [sx(18), sy(398)],
+    ], hexToRGBA(primaryColor, isDark ? 0.92 : 0.98));
+    drawClassicResultAccentShape(ctx, [
+        [canvas.width + sx(38), sy(820)],
+        [canvas.width - sx(238), sy(958)],
+        [canvas.width - sx(162), sy(1036)],
+        [canvas.width + sx(84), sy(896)],
+        [canvas.width + sx(84), sy(1048)],
+        [canvas.width - sx(102), sy(1128)],
+        [canvas.width + sx(38), sy(1242)],
+        [canvas.width + sx(38), sy(1350)],
+        [canvas.width - sx(158), sy(1212)],
+        [canvas.width - sx(92), sy(1146)],
+    ], hexToRGBA(primaryColor, isDark ? 0.92 : 0.98));
+
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, {
+            x: sx(80),
+            y: offsetElementY('tournamentLogo', sy(82)),
+            size: scaleElementSize('tournamentLogo', sx(56), sx(56)),
+            img: tournamentLogo,
+            label: data.tournament || 'Torneo',
+            rawLogo: data.tournamentLogo,
+            isDark,
+        });
+    }
+
+    const headerTextLayout = fitTextLinesToWidth(
+        ctx,
+        (data.tournament || 'TORNEO').trim().toUpperCase(),
+        sx(300),
+        '900',
+        scaleElementSize('title', sy(34), sy(34)),
+        FONT_EDITORIAL_SCORE,
+        sy(20),
+        2
+    );
+    const headerTextX = tournamentLogo ? sx(122) : sx(54);
+    const headerTextY = offsetElementY('title', sy(46));
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = primaryColor;
+    ctx.font = `900 ${headerTextLayout.size}px ${FONT_EDITORIAL_SCORE}`;
+    headerTextLayout.lines.forEach((line, index) => {
+        ctx.fillText(line, headerTextX, headerTextY + index * (headerTextLayout.size + sy(4)));
+    });
+    if (topMetaText) {
+        ctx.fillStyle = mutedColor;
+        ctx.font = `700 ${sy(14)}px ${FONT_BODY}`;
+        ctx.fillText(
+            truncateTextToWidth(ctx, topMetaText, sx(320)),
+            headerTextX,
+            headerTextY + headerTextLayout.lines.length * (headerTextLayout.size + sy(4)) + sy(8)
+        );
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.font = `900 ${sy(24)}px ${FONT_EDITORIAL_SCORE}`;
+    const topBadgeWidth = Math.max(sx(170), Math.ceil(ctx.measureText(modeBadgeText).width + sx(44)));
+    const topBadgeX = canvas.width - sx(54) - topBadgeWidth;
+    const topBadgeY = sy(48);
+    ctx.fillStyle = primaryColor;
+    ctx.beginPath();
+    ctx.roundRect(topBadgeX, topBadgeY, topBadgeWidth, sy(54), 0);
+    ctx.fill();
+    ctx.fillStyle = badgeTextColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(modeBadgeText, topBadgeX + topBadgeWidth / 2, topBadgeY + sy(28) + 1);
+    ctx.restore();
+
+    const statusFontSize = getSharedFittedFontSize(
+        ctx,
+        [{ text: statusText, maxWidth: sx(520) }],
+        '900',
+        sy(116),
+        FONT_EDITORIAL_SCORE,
+        sy(72),
+    );
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = primaryColor;
+    ctx.font = `900 ${statusFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(statusText, canvas.width / 2, sy(292));
+    ctx.restore();
+
+    const scoreBoxSize = scaleElementSize('score', sx(372), sx(372));
+    const scoreBoxX = Math.round((canvas.width - scoreBoxSize) / 2);
+    const scoreBoxY = offsetElementY('score', sy(454));
+    const logoPlateSize = scaleElementSize('teamLogo', sx(186), sx(186));
+    const logoPlateGap = sx(8);
+    const leftPlateX = scoreBoxX - logoPlateSize - logoPlateGap;
+    const rightPlateX = scoreBoxX + scoreBoxSize + logoPlateGap;
+    const plateY = Math.round(scoreBoxY + (scoreBoxSize - logoPlateSize) / 2);
+    const plateInnerInset = sx(12);
+    const crestSize = scaleElementSize('teamLogo', sx(154), sx(154));
+
+    const drawLogoPlate = (x: number, label: string, rawLogo: string | undefined, img: HTMLImageElement | null) => {
+        ctx.save();
+        ctx.fillStyle = primaryColor;
+        ctx.fillRect(x, plateY, logoPlateSize, logoPlateSize);
+        ctx.fillStyle = plateInnerColor;
+        ctx.fillRect(x + plateInnerInset, plateY + plateInnerInset, logoPlateSize - plateInnerInset * 2, logoPlateSize - plateInnerInset * 2);
+        ctx.restore();
+
+        drawOverflowCrest(ctx, {
+            x: x + logoPlateSize / 2,
+            y: plateY + logoPlateSize / 2,
+            width: crestSize,
+            height: crestSize,
+            img,
+            label,
+            rawLogo,
+            isDark,
+            showFrame: false,
+        });
+    };
+
+    drawLogoPlate(leftPlateX, data.homeTeam, data.homeLogo, homeLogo);
+    drawLogoPlate(rightPlateX, data.awayTeam, data.awayLogo, awayLogo);
+
+    ctx.save();
+    ctx.shadowColor = isDark ? 'rgba(0,0,0,0.32)' : 'rgba(15,23,42,0.14)';
+    ctx.shadowBlur = sx(42);
+    ctx.shadowOffsetY = sy(16);
+    ctx.fillStyle = scorePanelColor;
+    ctx.fillRect(scoreBoxX, scoreBoxY, scoreBoxSize, scoreBoxSize);
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(primaryColor, isDark ? 0.18 : 0.24);
+    ctx.lineWidth = Math.max(2, sx(2));
+    ctx.strokeRect(scoreBoxX, scoreBoxY, scoreBoxSize, scoreBoxSize);
+    ctx.restore();
+
+    const scoreText = `${data.homeScore ?? '-'}-${data.awayScore ?? '-'}`;
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    setFittedFont(ctx, scoreText, scoreBoxSize - sx(64), '900', scaleElementSize('score', sy(232), sy(232)), FONT_CLASSIC_MATCH_SCORE, sy(164));
+    ctx.fillStyle = scorePanelTextColor;
+    ctx.fillText(scoreText, scoreBoxX + scoreBoxSize / 2, scoreBoxY + scoreBoxSize / 2 + sy(12));
+    ctx.restore();
+
+    const verticalNameMaxWidth = sy(388);
+    const verticalNameFontSize = getSharedFittedFontSize(
+        ctx,
+        [
+            { text: homeTeamName, maxWidth: verticalNameMaxWidth },
+            { text: awayTeamName, maxWidth: verticalNameMaxWidth },
+        ],
+        '900',
+        sy(62),
+        FONT_EDITORIAL_SCORE,
+        sy(30),
+    );
+    const verticalCenterY = scoreBoxY + scoreBoxSize / 2;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = isDark ? textColor : '#090909';
+    ctx.font = `900 ${verticalNameFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.translate(leftPlateX - sx(36), verticalCenterY);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(truncateTextToWidth(ctx, homeTeamName, verticalNameMaxWidth), 0, 0);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = isDark ? textColor : '#090909';
+    ctx.font = `900 ${verticalNameFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.translate(rightPlateX + logoPlateSize + sx(36), verticalCenterY);
+    ctx.rotate(Math.PI / 2);
+    ctx.fillText(truncateTextToWidth(ctx, awayTeamName, verticalNameMaxWidth), 0, 0);
+    ctx.restore();
+
+    const sideFacts = data.stats.slice(0, 2);
+    if (sideFacts.length > 0) {
+        const formatFact = (value: string | number, label: string) => `${String(value ?? '-')}${label ? ` ${label}` : ''}`.trim().toUpperCase();
+        ctx.save();
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = primaryColor;
+        sideFacts.forEach((stat, index) => {
+            const factY = plateY + logoPlateSize + sy(16) + index * sy(36);
+
+            ctx.textAlign = 'left';
+            setFittedFont(ctx, formatFact(stat.home, stat.label), logoPlateSize, '900', sy(30), FONT_EDITORIAL_SCORE, sy(18));
+            ctx.fillText(truncateTextToWidth(ctx, formatFact(stat.home, stat.label), logoPlateSize), leftPlateX, factY);
+
+            ctx.textAlign = 'right';
+            setFittedFont(ctx, formatFact(stat.away, stat.label), logoPlateSize, '900', sy(30), FONT_EDITORIAL_SCORE, sy(18));
+            ctx.fillText(truncateTextToWidth(ctx, formatFact(stat.away, stat.label), logoPlateSize), rightPlateX + logoPlateSize, factY);
+        });
+        ctx.restore();
+    }
+
+    const bottomBadgeY = sy(900);
+    ctx.save();
+    ctx.font = `900 ${sy(34)}px ${FONT_EDITORIAL_SCORE}`;
+    const bottomBadgeWidth = Math.min(sx(480), Math.max(sx(220), Math.ceil(ctx.measureText(bottomBadgeText).width + sx(56))));
+    ctx.fillStyle = primaryColor;
+    ctx.beginPath();
+    ctx.roundRect(canvas.width / 2 - bottomBadgeWidth / 2, bottomBadgeY, bottomBadgeWidth, sy(80), 0);
+    ctx.fill();
+    ctx.fillStyle = badgeTextColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(truncateTextToWidth(ctx, bottomBadgeText, bottomBadgeWidth - sx(40)), canvas.width / 2, bottomBadgeY + sy(42));
+    ctx.restore();
+
+    const tournamentLayout = fitTextLinesToWidth(
+        ctx,
+        (data.tournament || 'TORNEO').trim().toUpperCase(),
+        sx(640),
+        '900',
+        sy(66),
+        FONT_EDITORIAL_SCORE,
+        sy(30),
+        2
+    );
+    const tournamentTop = bottomBadgeY + sy(96);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = isDark ? textColor : '#090909';
+    ctx.font = `900 ${tournamentLayout.size}px ${FONT_EDITORIAL_SCORE}`;
+    tournamentLayout.lines.forEach((line, index) => {
+        ctx.fillText(line, canvas.width / 2, tournamentTop + index * (tournamentLayout.size + sy(2)));
+    });
+    ctx.restore();
+
+    if (footerMeta) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = mutedColor;
+        setFittedFont(ctx, footerMeta, sx(760), '700', sy(22), FONT_BODY, sy(14));
+        ctx.fillText(
+            truncateTextToWidth(ctx, footerMeta, sx(760)),
+            canvas.width / 2,
+            tournamentTop + tournamentLayout.lines.length * (tournamentLayout.size + sy(2)) + sy(18)
+        );
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(isDark ? '#ffffff' : '#0f172a', isDark ? 0.14 : 0.12);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(sx(96), sy(1218));
+    ctx.lineTo(canvas.width - sx(96), sy(1218));
+    ctx.stroke();
+    ctx.restore();
+
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
+
 async function drawStandings(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -4481,11 +7210,11 @@ async function drawStandings(
         'TABLA DE POSICIONES',
         accentColor,
         getContrastColor(accentColor),
-        `800 ${isStory ? 24 : 20}px ${FONT_BODY}`,
+        `800 ${scaleElementSize('title', isStory ? 24 : 20, isStory ? 24 : 20)}px ${FONT_BODY}`,
         24,
-        isStory ? 48 : 42
+        scaleElementSize('title', isStory ? 48 : 42, isStory ? 48 : 42)
     );
-    drawTournamentRibbon(ctx, canvas, data.title, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 26 : 22);
+    drawTournamentRibbon(ctx, canvas, data.title, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, scaleElementSize('title', isStory ? 26 : 22, isStory ? 26 : 22));
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -4495,7 +7224,7 @@ async function drawStandings(
     ctx.restore();
 
     const panelX = isStory ? 46 : 54;
-    const panelY = isStory ? 252 : (isDenseStandingsSlide ? 216 : 224);
+    const panelY = offsetElementY('rowHeight', isStory ? 252 : (isDenseStandingsSlide ? 216 : 224));
     const panelWidth = canvas.width - panelX * 2;
     const panelHeight = safe.bottom - panelY - (isStory ? 22 : (isDenseStandingsSlide ? 6 : 10));
     const tableRight = panelX + panelWidth - 24;
@@ -4554,9 +7283,9 @@ async function drawStandings(
         return total + groupTitleHeight + groupTitleGap + (index > 0 ? interGroupGap : 0);
     }, 0);
     const rawRowHeight = (bodyBottom - bodyTop - reservedGroupSpace) / Math.max(slide.totalRows, 1);
-    const rowHeight = Math.max(isStory ? (isDenseStandingsSlide ? 30 : 32) : (isDenseStandingsSlide ? 26 : 30), Math.min(isStory ? 70 : 62, rawRowHeight));
-    const crestHeight = Math.min(isStory ? 50 : 44, Math.max(isStory ? (isDenseStandingsSlide ? 34 : 38) : (isDenseStandingsSlide ? 28 : 34), rowHeight - 4));
-    const crestWidth = Math.min(isStory ? 46 : 40, crestHeight * 0.9);
+    const rowHeight = scaleElementSize('rowHeight', Math.max(isStory ? (isDenseStandingsSlide ? 30 : 32) : (isDenseStandingsSlide ? 26 : 30), Math.min(isStory ? 70 : 62, rawRowHeight)), isStory ? 32 : 30);
+    const crestHeight = scaleElementSize('teamLogo', Math.min(isStory ? 50 : 44, Math.max(isStory ? (isDenseStandingsSlide ? 34 : 38) : (isDenseStandingsSlide ? 28 : 34), rowHeight - 4)), isStory ? 44 : 40);
+    const crestWidth = scaleElementSize('teamLogo', Math.min(isStory ? 46 : 40, crestHeight * 0.9), isStory ? 46 : 40);
     const posFontSize = Math.max(isStory ? 20 : (isDenseStandingsSlide ? 18 : 20), Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.44)));
     const statFontSize = Math.max(isStory ? 16 : (isDenseStandingsSlide ? 14 : 16), Math.min(isStory ? 26 : 22, Math.round(rowHeight * 0.36)));
     const pointsFontSize = Math.max(isStory ? 20 : (isDenseStandingsSlide ? 18 : 20), Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.42)));
@@ -4771,11 +7500,11 @@ async function drawDailyMatches(
         statusLabel,
         accentColor,
         getContrastColor(accentColor),
-        `800 ${isStory ? 24 : 20}px ${FONT_BODY}`,
+        `800 ${scaleElementSize('title', isStory ? 24 : 20, isStory ? 24 : 20)}px ${FONT_BODY}`,
         26,
-        isStory ? 48 : 42
+        scaleElementSize('title', isStory ? 48 : 42, isStory ? 48 : 42)
     );
-    drawTournamentRibbon(ctx, canvas, data.tournament, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 26 : 22);
+    drawTournamentRibbon(ctx, canvas, data.tournament, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, scaleElementSize('title', isStory ? 26 : 22, isStory ? 26 : 22));
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -4785,24 +7514,33 @@ async function drawDailyMatches(
     ctx.restore();
 
     const panelX = isStory ? 46 : 54;
-    const panelY = isStory ? 248 : 220;
+    const panelY = offsetElementY('rowHeight', isStory ? 248 : 220);
     const panelWidth = canvas.width - panelX * 2;
     const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
     drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
 
+    const densityMode = resolveDensityMode(matches.length, 7, 9);
     const listTop = panelY + 28;
     const listBottom = panelY + panelHeight - 20;
-    const rowGap = isStory ? 16 : 14;
-    const rowHeight = Math.min(
-        isStory ? 132 : 118,
+    const rowGap = getDensitySpacing(densityMode, {
+        comfortable: isStory ? 12 : 10,
+        compact: isStory ? 10 : 8,
+        ultraCompact: isStory ? 8 : 6,
+    });
+    const rowHeight = scaleElementSize('rowHeight', Math.min(
+        getDensitySpacing(densityMode, {
+            comfortable: isStory ? 124 : 112,
+            compact: isStory ? 118 : 106,
+            ultraCompact: isStory ? 112 : 100,
+        }),
         (listBottom - listTop - rowGap * Math.max(matches.length - 1, 0)) / Math.max(matches.length, 1)
-    );
-    const crestHeight = Math.min(isStory ? 88 : 74, rowHeight - 8);
-    const crestWidth = Math.min(isStory ? 78 : 64, crestHeight * 0.86);
-    const crestInset = isStory ? 18 : 14;
-    const cardWidth = panelWidth - 36;
-    const homeTextWidth = Math.max(110, safe.centerX - 118 - (panelX + 18 + crestInset + crestWidth + 18));
-    const awayTextWidth = Math.max(110, (panelX + 18 + cardWidth - crestInset - crestWidth - 18) - (safe.centerX + 118));
+    ), isStory ? 124 : 112);
+    const crestHeight = scaleElementSize('teamLogo', Math.min(isStory ? 82 : 68, rowHeight - 10), isStory ? 68 : 58);
+    const crestWidth = scaleElementSize('teamLogo', Math.min(isStory ? 72 : 58, crestHeight * 0.86), isStory ? 72 : 58);
+    const crestInset = isStory ? 16 : 12;
+    const cardWidth = panelWidth - 48;
+    const homeTextWidth = Math.max(110, safe.centerX - 108 - (panelX + 24 + crestInset + crestWidth + 18));
+    const awayTextWidth = Math.max(110, (panelX + 24 + cardWidth - crestInset - crestWidth - 18) - (safe.centerX + 108));
     const sharedMatchNameFontSize = getSharedFittedFontSize(
         ctx,
         matches.flatMap((match) => ([
@@ -4817,7 +7555,7 @@ async function drawDailyMatches(
 
     matches.forEach((match, index) => {
         const y = listTop + index * (rowHeight + rowGap);
-        const cardX = panelX + 18;
+        const cardX = panelX + 24;
         const cardRight = cardX + cardWidth;
         const logoOffset = 1 + index * 2;
         const homeLogo = logoLoads[logoOffset] || null;
@@ -4883,7 +7621,7 @@ async function drawDailyMatches(
 
         ctx.textAlign = 'center';
         ctx.fillStyle = accentColor;
-        ctx.font = `800 ${isStory ? 44 : 38}px ${match.status === 'scheduled' ? FONT_DISPLAY : FONT_MONO}`;
+        ctx.font = `800 ${scaleElementSize('score', isStory ? 44 : 38, isStory ? 44 : 38)}px ${match.status === 'scheduled' ? FONT_DISPLAY : FONT_MONO}`;
         ctx.fillText(centerText, safe.centerX, y + rowHeight / 2 + 4);
 
         ctx.fillStyle = mutedColor;
@@ -4954,6 +7692,23 @@ function getLineupExportRatingValue(value: unknown) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
+function resolveDensityMode(itemCount: number, compactThreshold: number, ultraCompactThreshold: number): DensityMode {
+    if (itemCount >= ultraCompactThreshold) return 'ultra-compact';
+    if (itemCount >= compactThreshold) return 'compact';
+    return 'comfortable';
+}
+
+function getDensitySpacing(
+    densityMode: DensityMode,
+    values: { comfortable: number; compact: number; ultraCompact: number }
+) {
+    if (densityMode === 'ultra-compact') return values.ultraCompact;
+    if (densityMode === 'compact') return values.compact;
+    return values.comfortable;
+}
+
+// Legacy g22Base lineup renderer kept temporarily while the new template settles.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function drawLineups(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -5053,7 +7808,6 @@ async function drawLineups(
     const contentX = panelX + 18;
     const contentY = panelY + 18;
     const contentWidth = panelWidth - 36;
-    const contentHeight = panelHeight - 36;
     const columnGap = isSingleTeam ? 0 : (isStory ? 22 : 18);
     const columnWidth = isSingleTeam ? contentWidth : (contentWidth - columnGap) / 2;
     const headerHeight = isSingleTeam ? (isStory ? 126 : 118) : (isStory ? 112 : 102);
@@ -5075,36 +7829,51 @@ async function drawLineups(
             : contentX + index * (columnWidth + columnGap);
         const logoImage = teamLogoMap[team.side];
         const players = [...team.starters].sort((left, right) => Number(left.number ?? 0) - Number(right.number ?? 0));
-        const starters = players.filter((player, playerIndex) => isLineupStarter(player, playerIndex));
-        const finishers = players.filter((player, playerIndex) => !isLineupStarter(player, playerIndex));
+        const densityMode = resolveDensityMode(players.length, isSingleTeam ? 20 : 18, isSingleTeam ? 23 : 21);
+        const starterLimit = getDensitySpacing(densityMode, {
+            comfortable: 15,
+            compact: 15,
+            ultraCompact: isSingleTeam ? 15 : 14,
+        });
+        const benchLimit = getDensitySpacing(densityMode, {
+            comfortable: isSingleTeam ? 8 : 8,
+            compact: isSingleTeam ? 7 : 7,
+            ultraCompact: isSingleTeam ? 6 : 6,
+        });
+        const starters = players
+            .filter((player, playerIndex) => isLineupStarter(player, playerIndex))
+            .slice(0, starterLimit);
+        const finishers = players
+            .filter((player, playerIndex) => !isLineupStarter(player, playerIndex))
+            .slice(0, benchLimit);
         const startersCount = starters.length;
         const finishersCount = finishers.length;
         const listTop = contentY + headerHeight + 16;
         const finishersLabelHeight = finishersCount > 0 ? (isSingleTeam ? 28 : 24) : 0;
-        const starterGap = isSingleTeam ? 7 : 6;
-        const finisherGap = isSingleTeam ? 6 : 5;
+        const starterGap = getDensitySpacing(densityMode, {
+            comfortable: isSingleTeam ? 8 : 7,
+            compact: isSingleTeam ? 7 : 6,
+            ultraCompact: isSingleTeam ? 6 : 5,
+        });
+        const finisherGap = getDensitySpacing(densityMode, {
+            comfortable: isSingleTeam ? 6 : 5,
+            compact: isSingleTeam ? 5 : 4,
+            ultraCompact: isSingleTeam ? 4 : 3,
+        });
         const finishersTopPadding = finishersCount > 0 ? 18 : 0;
-        const availableHeight = contentHeight - headerHeight - 16 - finishersLabelHeight - finishersTopPadding;
-        const starterWeight = startersCount > 0 ? startersCount : 0;
-        const finisherWeight = finishersCount > 0 ? finishersCount * 0.68 : 0;
-        const weightTotal = Math.max(1, starterWeight + finisherWeight);
         const starterRowHeight = startersCount > 0
-            ? Math.max(
-                isSingleTeam ? 26 : 24,
-                Math.min(
-                    isSingleTeam ? 36 : 34,
-                    (availableHeight * (starterWeight / weightTotal) - starterGap * Math.max(startersCount - 1, 0)) / startersCount,
-                ),
-            )
+            ? getDensitySpacing(densityMode, {
+                comfortable: isSingleTeam ? 36 : 34,
+                compact: isSingleTeam ? 34 : 32,
+                ultraCompact: isSingleTeam ? 32 : 30,
+            })
             : 0;
         const finisherRowHeight = finishersCount > 0
-            ? Math.max(
-                isSingleTeam ? 18 : 17,
-                Math.min(
-                    isSingleTeam ? 25 : 23,
-                    (availableHeight * (finisherWeight / weightTotal) - finisherGap * Math.max(finishersCount - 1, 0)) / finishersCount,
-                ),
-            )
+            ? getDensitySpacing(densityMode, {
+                comfortable: isSingleTeam ? 28 : 26,
+                compact: isSingleTeam ? 26 : 24,
+                ultraCompact: isSingleTeam ? 24 : 22,
+            })
             : 0;
         const starterRowRadius = Math.max(12, Math.round(starterRowHeight * 0.42));
         const finisherRowRadius = Math.max(10, Math.round(finisherRowHeight * 0.42));
@@ -5207,16 +7976,25 @@ async function drawLineups(
             const finishersLabelY = listTop + startersCount * (starterRowHeight + starterGap) + 10;
 
             ctx.save();
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.12)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(columnX, finishersLabelY + finishersLabelHeight / 2);
+            ctx.lineTo(columnX + columnWidth * 0.32, finishersLabelY + finishersLabelHeight / 2);
+            ctx.moveTo(columnX + columnWidth * 0.68, finishersLabelY + finishersLabelHeight / 2);
+            ctx.lineTo(columnX + columnWidth, finishersLabelY + finishersLabelHeight / 2);
+            ctx.stroke();
+
             ctx.fillStyle = mutedColor;
             ctx.font = `800 ${isSingleTeam ? 13 : 11}px ${FONT_BODY}`;
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'alphabetic';
-            ctx.fillText('FINISHERS', columnX, finishersLabelY + finishersLabelHeight - 6);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('SUPLENTES', columnX + columnWidth / 2, finishersLabelY + finishersLabelHeight / 2 + 1);
 
             ctx.textAlign = 'right';
             ctx.fillStyle = accentColor;
             ctx.font = `800 ${isSingleTeam ? 13 : 11}px ${FONT_MONO}`;
-            ctx.fillText(String(finishersCount).padStart(2, '0'), columnX + columnWidth, finishersLabelY + finishersLabelHeight - 6);
+            ctx.fillText(String(finishersCount).padStart(2, '0'), columnX + columnWidth, finishersLabelY - 2);
             ctx.restore();
 
             finishers.forEach((player, finisherIndex) => {
@@ -5263,6 +8041,661 @@ async function drawLineups(
                 ctx.restore();
             });
         }
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, isDark);
+}
+
+async function drawG22BaseLineups(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    lineupExportMode: LineupExportMode,
+) {
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const primaryText = isDark ? '#f8fafc' : '#0f172a';
+    const secondaryText = hexToRGBA(primaryText, isDark ? 0.74 : 0.66);
+    const tertiaryText = hexToRGBA(primaryText, isDark ? 0.58 : 0.5);
+    const highlightColor = normalizeHexColor(accentColor) || BRAND_ACCENT;
+    const titleText = 'FORMACION';
+    const roundText = data.subtitle?.trim().toUpperCase() || '';
+    const metaLabel = getLineupMetaLabel(data);
+    const [tournamentLogo, homeLogo, awayLogo] = await Promise.all([
+        loadImage(data.tournamentLogo || ''),
+        loadImage(data.homeTeam.logo || ''),
+        loadImage(data.awayTeam.logo || ''),
+    ]);
+    const logoMap = {
+        home: homeLogo,
+        away: awayLogo,
+    } as const;
+
+    const colorDistance = (left: string, right: string) => {
+        if (!/^#[0-9a-f]{6}$/i.test(left) || !/^#[0-9a-f]{6}$/i.test(right)) return 999;
+
+        const leftRed = parseInt(left.slice(1, 3), 16);
+        const leftGreen = parseInt(left.slice(3, 5), 16);
+        const leftBlue = parseInt(left.slice(5, 7), 16);
+        const rightRed = parseInt(right.slice(1, 3), 16);
+        const rightGreen = parseInt(right.slice(3, 5), 16);
+        const rightBlue = parseInt(right.slice(5, 7), 16);
+
+        return Math.abs(leftRed - rightRed) + Math.abs(leftGreen - rightGreen) + Math.abs(leftBlue - rightBlue);
+    };
+
+    const deriveTeamAccent = (image: HTMLImageElement | null, fallback: string) => {
+        const fallbackHex = normalizeHexColor(fallback) || highlightColor;
+        const contrastTarget = isDark ? '#ffffff' : '#0f172a';
+
+        if (!image || typeof document === 'undefined') {
+            return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
+        }
+
+        try {
+            const sampleCanvas = document.createElement('canvas');
+            const sampleSize = 28;
+            sampleCanvas.width = sampleSize;
+            sampleCanvas.height = sampleSize;
+            const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+            if (!sampleCtx) {
+                return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
+            }
+
+            sampleCtx.drawImage(image, 0, 0, sampleSize, sampleSize);
+            const imageData = sampleCtx.getImageData(0, 0, sampleSize, sampleSize).data;
+            let redTotal = 0;
+            let greenTotal = 0;
+            let blueTotal = 0;
+            let weightTotal = 0;
+
+            for (let index = 0; index < imageData.length; index += 4) {
+                const alpha = imageData[index + 3] / 255;
+                if (alpha <= 0.04) continue;
+
+                const red = imageData[index];
+                const green = imageData[index + 1];
+                const blue = imageData[index + 2];
+                const max = Math.max(red, green, blue) / 255;
+                const min = Math.min(red, green, blue) / 255;
+                const saturation = max <= 0 ? 0 : (max - min) / max;
+                const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+                const weight = alpha * (0.45 + saturation * 1.35 + (luminance > 0.12 && luminance < 0.9 ? 0.18 : 0));
+
+                redTotal += red * weight;
+                greenTotal += green * weight;
+                blueTotal += blue * weight;
+                weightTotal += weight;
+            }
+
+            if (weightTotal <= 0) {
+                return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
+            }
+
+            const toHex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
+            const sampledColor = `#${toHex(redTotal / weightTotal)}${toHex(greenTotal / weightTotal)}${toHex(blueTotal / weightTotal)}`;
+            return mixHexColors(sampledColor, contrastTarget, isDark ? 0.16 : 0.22);
+        } catch {
+            return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
+        }
+    };
+
+    const splitTeamPlayers = (players: LineupExportPlayerData[]) => {
+        const starters = players.filter((player, index) => isLineupStarter(player, index));
+        if (starters.length > 0) {
+            return {
+                starters,
+                bench: players.filter((player, index) => !isLineupStarter(player, index)),
+            };
+        }
+
+        return {
+            starters: players.slice(0, Math.min(players.length, 15)),
+            bench: players.slice(Math.min(players.length, 15)),
+        };
+    };
+
+    const cleanExtraInfo = (value: string | undefined) => {
+        const normalized = String(value || '').trim();
+        if (!normalized) return '';
+        const lowered = normalized.toLowerCase();
+        if (lowered === 'titulares' || lowered === 'titulares y suplentes' || lowered === 'starters' || lowered === 'starting lineup') {
+            return '';
+        }
+        return normalized.toUpperCase();
+    };
+
+    const selectedTeams = getSelectedLineupTeams(data, lineupExportMode).map((team, index) => {
+        const players = Array.isArray(team.starters)
+            ? team.starters
+                .filter((player) => player && String(player.name || '').trim())
+                .slice(0, 23)
+                .sort((left, right) => {
+                    const leftNumber = Number(left.number);
+                    const rightNumber = Number(right.number);
+                    if (Number.isFinite(leftNumber) && Number.isFinite(rightNumber)) return leftNumber - rightNumber;
+                    if (Number.isFinite(leftNumber)) return -1;
+                    if (Number.isFinite(rightNumber)) return 1;
+                    return String(left.name || '').localeCompare(String(right.name || ''));
+                })
+            : [];
+        const split = splitTeamPlayers(players);
+        const fallbackAccent = index === 0 ? highlightColor : mixHexColors(highlightColor, '#38bdf8', 0.3);
+
+        return {
+            ...team,
+            logoImage: logoMap[team.side],
+            accentTone: deriveTeamAccent(logoMap[team.side], fallbackAccent),
+            starters: split.starters,
+            bench: split.bench,
+            extraInfo: cleanExtraInfo(team.lineupLabel),
+        };
+    });
+    const isSingleTeam = selectedTeams.length === 1;
+
+    if (!isSingleTeam && selectedTeams.length > 1 && colorDistance(selectedTeams[0].accentTone, selectedTeams[1].accentTone) < 96) {
+        selectedTeams[1].accentTone = mixHexColors(selectedTeams[1].accentTone, '#38bdf8', 0.34);
+    }
+
+    const totalPlayers = selectedTeams.reduce((sum, team) => sum + team.starters.length + team.bench.length, 0);
+    const scaleX = canvas.width / 1080;
+    const scaleY = canvas.height / 1350;
+    const scaleFont = Math.min(scaleX, scaleY);
+    const snapToGrid = (value: number) => Math.round(value / 2) * 2;
+    const sx = (value: number) => snapToGrid(value * scaleX);
+    const sy = (value: number) => snapToGrid(value * scaleY);
+    const sf = (value: number) => Math.max(1, Math.round(value * scaleFont));
+    const surfaceTop = isDark ? mixHexColors(bgColor, '#0b1220', 0.28) : mixHexColors('#ffffff', bgColor, 0.08);
+    const surfaceBottom = isDark ? mixHexColors(bgColor, '#030712', 0.52) : mixHexColors('#eef2f7', bgColor, 0.18);
+    const panelFill = isDark ? hexToRGBA(mixHexColors(bgColor, '#020617', 0.2), 0.16) : hexToRGBA(mixHexColors('#ffffff', bgColor, 0.03), 0.58);
+    const headerHeight = sy(225);
+    const teamBannerY = headerHeight;
+    const teamBannerHeight = sy(175);
+    const brandFooterMetrics = getBrandFooterMetrics(canvas);
+    const brandingTopLine = brandFooterMetrics.topLine;
+    const contentBottomLimit = brandingTopLine - sy(12);
+    const contentPanelX = sx(60);
+    const contentPanelY = teamBannerY + teamBannerHeight;
+    const contentPanelWidth = canvas.width - contentPanelX * 2;
+    const contentPanelHeight = Math.max(sy(320), contentBottomLimit - contentPanelY);
+    const contentInsetTop = sy(40);
+    const columnGap = isSingleTeam ? 0 : sx(50);
+    const columnWidth = isSingleTeam
+        ? Math.min(contentPanelWidth, sx(760))
+        : (contentPanelWidth - columnGap) / 2;
+    const columnStartX = isSingleTeam
+        ? canvas.width / 2 - columnWidth / 2
+        : contentPanelX;
+    const columnTop = contentPanelY + contentInsetTop;
+    const bannerInnerHeight = teamBannerHeight - sy(28);
+    const teamNameMaxWidth = columnWidth - sx(48);
+    const playerTextMaxWidth = columnWidth - sx(68);
+    const teamNameBaseSize = isSingleTeam ? sf(36) : sf(32);
+    const teamNameMinSize = sf(20);
+    const playerLabels = selectedTeams.flatMap((team) => [...team.starters, ...team.bench].map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()));
+
+    const teamNameLayouts = selectedTeams.map((team) =>
+        fitTextLinesToWidth(ctx, team.name.toUpperCase(), teamNameMaxWidth, '900', teamNameBaseSize, FONT_DISPLAY, teamNameMinSize, 2),
+    );
+    const maxTeamNameLines = Math.max(...teamNameLayouts.map((layout) => layout.lines.length), 1);
+    const maxTeamNameSize = Math.max(...teamNameLayouts.map((layout) => layout.size), teamNameMinSize);
+    const teamNameLineHeight = maxTeamNameSize * 0.94;
+    const hasExtraInfo = selectedTeams.some((team) => team.extraInfo);
+    const teamExtraInfoHeight = hasExtraInfo ? sy(20) : 0;
+    let teamLogoSize = isSingleTeam ? sy(98) : sy(88);
+    const teamLogoSpacingBottom = sy(10);
+    const teamIdentityHeight = teamLogoSize + teamLogoSpacingBottom + maxTeamNameLines * teamNameLineHeight + teamExtraInfoHeight;
+    if (teamIdentityHeight > bannerInnerHeight) {
+        teamLogoSize = Math.max(sy(68), teamLogoSize - (teamIdentityHeight - bannerInnerHeight));
+    }
+
+    const teamBlockHeight = teamLogoSize + teamLogoSpacingBottom + maxTeamNameLines * teamNameLineHeight + teamExtraInfoHeight;
+    const teamBlockTop = teamBannerY + Math.max(0, (teamBannerHeight - teamBlockHeight) / 2);
+    const listTop = columnTop;
+    const listHeight = Math.max(sy(220), contentBottomLimit - listTop);
+    const textStartOffset = sx(36);
+    const numberAreaWidth = sx(28);
+    const minStarterFontSizeBase = sf(20);
+    const minNumberFontSize = sf(18);
+    const sharedPlayerFontSize = playerLabels.length > 0
+        ? getSharedFittedFontSize(
+            ctx,
+            playerLabels.map((text) => ({ text, maxWidth: playerTextMaxWidth })),
+            '700',
+            sf(26),
+            FONT_BODY,
+            minStarterFontSizeBase,
+        )
+        : sf(24);
+    const fitColumnMetrics = (team: typeof selectedTeams[number]) => {
+        let starterFontSize = sharedPlayerFontSize;
+        let benchFontSize = sharedPlayerFontSize;
+        let starterRowGap = sy(8);
+        let benchRowGap = sy(8);
+        let starterToBenchGap = sy(18);
+        let benchLabelToListGap = sy(12);
+        let starterRowHeight = Math.max(sy(34), starterFontSize + sy(10));
+        let benchRowHeight = Math.max(sy(32), benchFontSize + sy(10));
+        let benchLabelFontSize = sf(18);
+        const minStarterFontSize = Math.max(minStarterFontSizeBase, Math.round(sharedPlayerFontSize * 0.92));
+        const minBenchFontSize = Math.max(sf(18), Math.round(sharedPlayerFontSize * 0.88));
+
+        const getRequiredHeight = () =>
+            team.starters.length * starterRowHeight
+            + Math.max(0, team.starters.length - 1) * starterRowGap
+            + (team.bench.length > 0
+                ? starterToBenchGap
+                    + benchLabelFontSize
+                    + benchLabelToListGap
+                    + team.bench.length * benchRowHeight
+                    + Math.max(0, team.bench.length - 1) * benchRowGap
+                : 0);
+
+        let requiredHeight = getRequiredHeight();
+        while (
+            requiredHeight > listHeight
+            && (
+                starterRowGap > sy(2)
+                || benchRowGap > sy(2)
+                || starterToBenchGap > sy(10)
+                || benchLabelToListGap > sy(6)
+                || starterRowHeight > starterFontSize + sy(6)
+                || benchRowHeight > benchFontSize + sy(6)
+                || benchFontSize > minBenchFontSize
+                || starterFontSize > minStarterFontSize
+            )
+        ) {
+            if (starterRowGap > sy(2)) {
+                starterRowGap -= 1;
+            } else if (benchRowGap > sy(2)) {
+                benchRowGap -= 1;
+            } else if (starterToBenchGap > sy(10)) {
+                starterToBenchGap -= 1;
+            } else if (benchLabelToListGap > sy(6)) {
+                benchLabelToListGap -= 1;
+            } else if (starterRowHeight > starterFontSize + sy(6)) {
+                starterRowHeight -= 1;
+            } else if (benchRowHeight > benchFontSize + sy(6)) {
+                benchRowHeight -= 1;
+            } else if (benchFontSize > minBenchFontSize) {
+                benchFontSize -= 1;
+                benchLabelFontSize = Math.max(sf(15), benchLabelFontSize - 1);
+                benchRowHeight = Math.max(benchFontSize + sy(6), benchRowHeight - 1);
+            } else {
+                starterFontSize -= 1;
+                starterRowHeight = Math.max(starterFontSize + sy(6), starterRowHeight - 1);
+            }
+
+            requiredHeight = getRequiredHeight();
+        }
+
+        return {
+            starterFontSize,
+            benchFontSize,
+            starterNumberFontSize: Math.max(minNumberFontSize, Math.round(starterFontSize * 0.9)),
+            benchNumberFontSize: Math.max(sf(16), Math.round(benchFontSize * 0.9)),
+            starterRowHeight,
+            benchRowHeight,
+            starterRowGap,
+            benchRowGap,
+            starterToBenchGap,
+            benchLabelToListGap,
+            benchLabelFontSize,
+            listStartY: listTop,
+            listBottomY: contentBottomLimit,
+        };
+    };
+
+    const preparedColumns = selectedTeams.map((team, index) => {
+        const columnX = isSingleTeam ? columnStartX : columnStartX + index * (columnWidth + columnGap);
+        return {
+            ...team,
+            nameLayout: teamNameLayouts[index],
+            columnX,
+            bannerCenterX: columnX + columnWidth / 2,
+            metrics: fitColumnMetrics(team),
+        };
+    });
+
+    const leftGlow = selectedTeams[0]?.accentTone || highlightColor;
+    const rightGlow = selectedTeams[1]?.accentTone || mixHexColors(highlightColor, '#38bdf8', 0.24);
+    const backgroundGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    backgroundGradient.addColorStop(0, surfaceTop);
+    backgroundGradient.addColorStop(1, surfaceBottom);
+    ctx.fillStyle = backgroundGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const headerWash = ctx.createLinearGradient(0, 0, canvas.width, headerHeight);
+    headerWash.addColorStop(0, hexToRGBA(leftGlow, isDark ? 0.2 : 0.1));
+    headerWash.addColorStop(0.5, hexToRGBA(highlightColor, isDark ? 0.08 : 0.05));
+    headerWash.addColorStop(1, hexToRGBA(rightGlow, isDark ? 0.2 : 0.1));
+    ctx.fillStyle = headerWash;
+    ctx.fillRect(0, 0, canvas.width, headerHeight);
+
+    ctx.save();
+    const ambientLeft = ctx.createRadialGradient(canvas.width * 0.18, headerHeight * 0.18, 0, canvas.width * 0.18, headerHeight * 0.18, canvas.width * 0.38);
+    ambientLeft.addColorStop(0, hexToRGBA(leftGlow, isDark ? 0.24 : 0.12));
+    ambientLeft.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ambientLeft;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const ambientRight = ctx.createRadialGradient(canvas.width * 0.82, headerHeight * 0.18, 0, canvas.width * 0.82, headerHeight * 0.18, canvas.width * 0.38);
+    ambientRight.addColorStop(0, hexToRGBA(rightGlow, isDark ? 0.24 : 0.12));
+    ambientRight.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ambientRight;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = isDark ? 0.12 : 0.08;
+    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.12)';
+    ctx.lineWidth = 1;
+    for (let y = 0; y < canvas.height; y += sy(24)) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    const fitHeaderSingleLineSize = (
+        text: string,
+        weight: string,
+        family: string,
+        preferredSize: number,
+        minSize: number,
+        maxSize: number,
+        maxWidth: number,
+    ) => {
+        let resolvedSize = preferredSize;
+        ctx.font = `${weight} ${resolvedSize}px ${family}`;
+        while (resolvedSize > minSize && ctx.measureText(text).width > maxWidth) {
+            resolvedSize -= 1;
+            ctx.font = `${weight} ${resolvedSize}px ${family}`;
+        }
+        while (resolvedSize < maxSize) {
+            ctx.font = `${weight} ${resolvedSize + 1}px ${family}`;
+            if (ctx.measureText(text).width > maxWidth) break;
+            resolvedSize += 1;
+        }
+        return resolvedSize;
+    };
+
+    const headerPaddingX = sx(32);
+    const headerTopPadding = sy(30);
+    const headerBottomPadding = sy(26);
+    const headerInnerHeight = headerHeight - headerTopPadding - headerBottomPadding;
+    const headerLeftX = headerPaddingX;
+    const headerLeftRightLimit = canvas.width / 2;
+    const headerRightLineGap = sy(8);
+    const roundLineY = headerTopPadding + sy(34);
+    const dateTimeLine = [data.date?.trim(), data.time?.trim()].filter(Boolean).join(' / ').toUpperCase();
+    const metaLabelText = (!roundText ? metaLabel.toUpperCase() : metaLabel).toUpperCase();
+    const headerMetaLines = [
+        { text: roundText, font: `800 ${sf(28)}px ${FONT_BODY}` },
+        { text: metaLabelText, font: `700 ${sf(20)}px ${FONT_MONO}` },
+        { text: dateTimeLine, font: `700 ${sf(20)}px ${FONT_MONO}` },
+        { text: data.venue?.trim().toUpperCase() || '', font: `700 ${sf(20)}px ${FONT_MONO}` },
+    ].filter((entry) => entry.text);
+    const headerRightMaxWidth = headerMetaLines.reduce((maxWidth, line) => {
+        ctx.font = line.font;
+        return Math.max(maxWidth, ctx.measureText(line.text).width);
+    }, 0);
+    const headerRightLimitLeft = canvas.width - headerPaddingX - headerRightMaxWidth;
+    const headerTextGap = sx(14);
+    const headerLeftUsableRight = Math.min(headerLeftRightLimit, headerRightLimitLeft - sx(24));
+    let headerLogoSize = sx(52);
+    let headerTextX = headerLeftX + headerLogoSize + headerTextGap;
+    let headerTitleWidth = Math.max(sx(180), headerLeftUsableRight - headerTextX);
+    let tournamentFontSize = fitHeaderSingleLineSize(
+        (data.tournament || 'TORNEO').toUpperCase(),
+        '800',
+        FONT_MONO,
+        sf(22),
+        sf(14),
+        sf(30),
+        headerTitleWidth,
+    );
+    let titleFontSize = fitHeaderSingleLineSize(
+        titleText,
+        '900',
+        FONT_EDITORIAL_SCORE,
+        sf(52),
+        sf(32),
+        sf(74),
+        headerTitleWidth,
+    );
+    headerLogoSize = Math.min(sy(64), Math.max(sx(44), Math.round(titleFontSize * 1.4)));
+    headerTextX = headerLeftX + headerLogoSize + headerTextGap;
+    headerTitleWidth = Math.max(sx(160), headerLeftUsableRight - headerTextX);
+    tournamentFontSize = fitHeaderSingleLineSize(
+        (data.tournament || 'TORNEO').toUpperCase(),
+        '800',
+        FONT_MONO,
+        tournamentFontSize,
+        sf(14),
+        sf(30),
+        headerTitleWidth,
+    );
+    titleFontSize = fitHeaderSingleLineSize(
+        titleText,
+        '900',
+        FONT_EDITORIAL_SCORE,
+        titleFontSize,
+        sf(32),
+        sf(74),
+        headerTitleWidth,
+    );
+    const tournamentLabelY = headerTopPadding + tournamentFontSize;
+    const titleBaselineY = tournamentLabelY + sy(10) + titleFontSize;
+    const headerBlockHeight = titleBaselineY - tournamentLabelY + titleFontSize;
+    const logoCenterY = headerTopPadding + Math.max(headerLogoSize / 2, Math.min(headerInnerHeight - headerLogoSize / 2, headerBlockHeight / 2 + sy(14)));
+    const infoLineWidth = Math.max(sx(180), canvas.width - headerPaddingX - Math.max(headerLeftUsableRight + sx(24), headerRightLimitLeft));
+
+    if (tournamentLogo) {
+        drawOverflowCrest(ctx, {
+            x: headerLeftX + headerLogoSize / 2,
+            y: logoCenterY,
+            width: headerLogoSize,
+            height: headerLogoSize,
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark,
+            showFrame: false,
+        });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = secondaryText;
+    ctx.font = `800 ${tournamentFontSize}px ${FONT_MONO}`;
+    ctx.fillText(truncateTextToWidth(ctx, (data.tournament || 'TORNEO').toUpperCase(), headerTitleWidth), headerTextX, tournamentLabelY);
+    ctx.fillStyle = primaryText;
+    ctx.font = `900 ${titleFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(truncateTextToWidth(ctx, titleText, headerTitleWidth), headerTextX, titleBaselineY);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'alphabetic';
+    if (roundText) {
+        ctx.fillStyle = hexToRGBA(highlightColor, 0.96);
+        ctx.font = `800 ${sf(28)}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, roundText, infoLineWidth), canvas.width - headerPaddingX, roundLineY);
+    }
+    ctx.fillStyle = tertiaryText;
+    ctx.font = `700 ${sf(20)}px ${FONT_MONO}`;
+    ctx.fillText(truncateTextToWidth(ctx, metaLabelText, infoLineWidth), canvas.width - headerPaddingX, roundLineY + sf(28) + headerRightLineGap);
+    if (dateTimeLine) {
+        ctx.fillText(truncateTextToWidth(ctx, dateTimeLine, infoLineWidth), canvas.width - headerPaddingX, roundLineY + sf(56) + headerRightLineGap * 2);
+    }
+    if (data.venue?.trim()) {
+        ctx.fillText(
+            truncateTextToWidth(ctx, data.venue.trim().toUpperCase(), infoLineWidth),
+            canvas.width - headerPaddingX,
+            roundLineY + sf(84) + headerRightLineGap * 3,
+        );
+    }
+    ctx.restore();
+
+    ctx.save();
+    const headerDivider = ctx.createLinearGradient(canvas.width * 0.18, headerHeight - sy(20), canvas.width * 0.82, headerHeight - sy(20));
+    headerDivider.addColorStop(0, 'rgba(255,255,255,0)');
+    headerDivider.addColorStop(0.18, hexToRGBA(leftGlow, 0.64));
+    headerDivider.addColorStop(0.5, hexToRGBA(highlightColor, 0.92));
+    headerDivider.addColorStop(0.82, hexToRGBA(rightGlow, 0.64));
+    headerDivider.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = headerDivider;
+    ctx.fillRect(canvas.width * 0.16, headerHeight - sy(12), canvas.width * 0.68, sy(4));
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = panelFill;
+    ctx.beginPath();
+    ctx.roundRect(contentPanelX, contentPanelY, contentPanelWidth, contentPanelHeight, sx(28));
+    ctx.fill();
+    ctx.restore();
+
+    if (totalPlayers === 0) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = secondaryText;
+        ctx.font = `700 ${sf(24)}px ${FONT_BODY}`;
+        ctx.fillText('No hay alineaciones confirmadas para exportar.', canvas.width / 2, contentPanelY + contentPanelHeight / 2);
+        ctx.restore();
+        drawBrandFooter(ctx, canvas, brandLogo, isDark);
+        return;
+    }
+
+    preparedColumns.forEach((team) => {
+        const centerX = team.bannerCenterX;
+        const localTeamNameLineHeight = team.nameLayout.size * 0.94;
+        const logoCenterY = teamBlockTop + teamLogoSize / 2;
+        const logoBottomY = logoCenterY + teamLogoSize / 2;
+        const teamNameTop = logoBottomY + teamLogoSpacingBottom + team.nameLayout.size * 0.82;
+        const extraInfoY = teamNameTop + team.nameLayout.lines.length * localTeamNameLineHeight + sy(16);
+        const {
+            starterFontSize,
+            benchFontSize,
+            starterNumberFontSize,
+            benchNumberFontSize,
+            starterRowHeight,
+            benchRowHeight,
+            starterRowGap,
+            benchRowGap,
+            starterToBenchGap,
+            benchLabelToListGap,
+            benchLabelFontSize,
+            listStartY,
+        } = team.metrics;
+
+        drawOverflowCrest(ctx, {
+            x: centerX,
+            y: logoCenterY,
+            width: teamLogoSize,
+            height: teamLogoSize,
+            img: team.logoImage,
+            label: team.name,
+            rawLogo: team.logo,
+            isDark,
+            showFrame: false,
+        });
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = primaryText;
+        team.nameLayout.lines.forEach((line, index) => {
+            ctx.font = `900 ${team.nameLayout.size}px ${FONT_DISPLAY}`;
+            ctx.fillText(line, centerX, teamNameTop + index * localTeamNameLineHeight);
+        });
+        if (team.extraInfo) {
+            ctx.fillStyle = secondaryText;
+            ctx.font = `700 ${sf(16)}px ${FONT_MONO}`;
+            ctx.fillText(truncateTextToWidth(ctx, team.extraInfo, columnWidth - sx(54)), centerX, extraInfoY);
+        }
+        ctx.restore();
+
+        if (team.starters.length === 0 && team.bench.length === 0) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = secondaryText;
+            ctx.font = `700 ${sf(18)}px ${FONT_BODY}`;
+            ctx.fillText('Sin alineacion confirmada', centerX, listTop + listHeight / 2);
+            ctx.restore();
+            return;
+        }
+
+        ctx.save();
+        ctx.textBaseline = 'middle';
+        const numberColor = hexToRGBA(mixHexColors(team.accentTone, highlightColor, 0.32), 0.98);
+
+        team.starters.forEach((player, index) => {
+            const rowY = listStartY + index * (starterRowHeight + starterRowGap);
+            const centerY = rowY + starterRowHeight / 2;
+            const numberLabel = String(player.number ?? index + 1).padStart(2, '0');
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = numberColor;
+            ctx.font = `900 ${starterNumberFontSize}px ${FONT_MONO}`;
+            ctx.fillText(numberLabel, team.columnX + numberAreaWidth, centerY);
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = primaryText;
+            ctx.font = `700 ${starterFontSize}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
+        });
+
+        if (team.bench.length > 0) {
+            const benchLabelCenterY = listStartY
+                + team.starters.length * starterRowHeight
+                + Math.max(0, team.starters.length - 1) * starterRowGap
+                + starterToBenchGap
+                + benchLabelFontSize / 2;
+
+            ctx.font = `800 ${benchLabelFontSize}px ${FONT_MONO}`;
+            const benchLabelText = 'SUPLENTES';
+            const benchLabelWidth = ctx.measureText(benchLabelText).width;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = numberColor;
+            ctx.fillText(benchLabelText, centerX, benchLabelCenterY);
+
+            ctx.strokeStyle = hexToRGBA(team.accentTone, isDark ? 0.5 : 0.36);
+            ctx.lineWidth = Math.max(2, sx(2));
+            ctx.beginPath();
+            ctx.moveTo(team.columnX, benchLabelCenterY);
+            ctx.lineTo(centerX - benchLabelWidth / 2 - sx(14), benchLabelCenterY);
+            ctx.moveTo(centerX + benchLabelWidth / 2 + sx(14), benchLabelCenterY);
+            ctx.lineTo(team.columnX + columnWidth, benchLabelCenterY);
+            ctx.stroke();
+
+            team.bench.forEach((player, index) => {
+                const rowY = benchLabelCenterY + benchLabelFontSize / 2 + benchLabelToListGap + index * (benchRowHeight + benchRowGap);
+                const centerY = rowY + benchRowHeight / 2;
+                const numberLabel = String(player.number ?? team.starters.length + index + 1).padStart(2, '0');
+                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+
+                ctx.textAlign = 'right';
+                ctx.fillStyle = numberColor;
+                ctx.font = `900 ${benchNumberFontSize}px ${FONT_MONO}`;
+                ctx.fillText(numberLabel, team.columnX + numberAreaWidth, centerY);
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = primaryText;
+                ctx.font = `700 ${benchFontSize}px ${FONT_BODY}`;
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
+            });
+        }
+
+        ctx.restore();
     });
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
@@ -5577,3 +9010,5735 @@ async function drawPlayerStats(
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
+
+function drawMomentumBackdrop(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    accentColor: string,
+    bgColor: string
+) {
+    const supportColor = mixHexColors(accentColor, '#ff8a00', 0.28);
+    const coolColor = mixHexColors(accentColor, '#38bdf8', 0.18);
+    const baseColor = mixHexColors('#030303', bgColor, 0.18);
+
+    ctx.fillStyle = baseColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    const topGlow = ctx.createRadialGradient(canvas.width * 0.14, canvas.height * 0.08, 0, canvas.width * 0.14, canvas.height * 0.08, canvas.width * 0.78);
+    topGlow.addColorStop(0, hexToRGBA(accentColor, 0.16));
+    topGlow.addColorStop(0.4, hexToRGBA(accentColor, 0.04));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const bottomGlow = ctx.createRadialGradient(canvas.width * 0.88, canvas.height * 0.9, 0, canvas.width * 0.88, canvas.height * 0.9, canvas.width * 0.7);
+    bottomGlow.addColorStop(0, hexToRGBA(coolColor, 0.14));
+    bottomGlow.addColorStop(0.32, hexToRGBA(supportColor, 0.06));
+    bottomGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = bottomGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    for (let offset = -canvas.height; offset <= canvas.width; offset += 74) {
+        ctx.beginPath();
+        ctx.moveTo(offset, 0);
+        ctx.lineTo(offset + canvas.height, canvas.height);
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = hexToRGBA(accentColor, 0.96);
+    ctx.fillRect(0, 54, canvas.width * 0.22, 8);
+    ctx.fillStyle = hexToRGBA(supportColor, 0.96);
+    ctx.fillRect(canvas.width * 0.74, canvas.height - 64, canvas.width * 0.2, 8);
+}
+
+function drawMomentumKicker(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    text: string,
+    color: string,
+    align: CanvasTextAlign = 'left'
+) {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.textAlign = align;
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `800 14px ${FONT_MONO}`;
+    ctx.fillText(text.toUpperCase(), x, y);
+    ctx.restore();
+}
+
+function drawMomentumHeroTitle(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    size: number,
+    color: string,
+    align: CanvasTextAlign = 'left'
+) {
+    ctx.save();
+    ctx.textAlign = align;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = color;
+    setFittedFont(ctx, text.toUpperCase(), maxWidth, '900', size, FONT_EDITORIAL_SCORE, 32);
+    ctx.fillText(truncateTextToWidth(ctx, text.toUpperCase(), maxWidth), x, y);
+    ctx.restore();
+}
+
+function drawMomentumImageCover(
+    ctx: CanvasRenderingContext2D,
+    image: HTMLImageElement | null,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    overlay?: string
+) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.clip();
+
+    if (image) {
+        const sourceWidth = image.naturalWidth || image.width || width;
+        const sourceHeight = image.naturalHeight || image.height || height;
+        const scale = Math.max(width / sourceWidth, height / sourceHeight);
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        ctx.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
+    } else {
+        const fallback = ctx.createLinearGradient(x, y, x + width, y + height);
+        fallback.addColorStop(0, 'rgba(255,255,255,0.08)');
+        fallback.addColorStop(1, 'rgba(255,255,255,0.02)');
+        ctx.fillStyle = fallback;
+        ctx.fillRect(x, y, width, height);
+    }
+
+    if (overlay) {
+        ctx.fillStyle = overlay;
+        ctx.fillRect(x, y, width, height);
+    }
+
+    ctx.restore();
+}
+
+function drawNeutralizedBackdropMark(
+    ctx: CanvasRenderingContext2D,
+    image: HTMLImageElement | null,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    tint: string,
+    opacity: number
+) {
+    if (!image) return;
+
+    const sourceWidth = image.naturalWidth || image.width || width;
+    const sourceHeight = image.naturalHeight || image.height || height;
+    const scale = Math.min(width / sourceWidth, height / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    const drawX = x - drawWidth / 2;
+    const drawY = y - drawHeight / 2;
+
+    if (typeof document === 'undefined') {
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+        ctx.restore();
+        return;
+    }
+
+    const offscreen = document.createElement('canvas');
+    offscreen.width = Math.max(1, Math.ceil(drawWidth));
+    offscreen.height = Math.max(1, Math.ceil(drawHeight));
+    const offscreenCtx = offscreen.getContext('2d');
+    if (!offscreenCtx) return;
+
+    offscreenCtx.imageSmoothingEnabled = true;
+    offscreenCtx.imageSmoothingQuality = 'high';
+    offscreenCtx.drawImage(image, 0, 0, offscreen.width, offscreen.height);
+    offscreenCtx.globalCompositeOperation = 'source-atop';
+    offscreenCtx.fillStyle = tint;
+    offscreenCtx.fillRect(0, 0, offscreen.width, offscreen.height);
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(offscreen, drawX, drawY, drawWidth, drawHeight);
+    ctx.restore();
+}
+
+function drawMomentumRepeatLabel(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    top: number,
+    bottom: number,
+    color: string
+) {
+    ctx.save();
+    ctx.translate(x, top);
+    ctx.rotate(Math.PI / 2);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = color;
+    ctx.font = `800 20px ${FONT_BODY}`;
+    const step = 196;
+    const length = Math.max(1, Math.floor((bottom - top) / step));
+    for (let index = 0; index < length; index += 1) {
+        ctx.fillText(text.toUpperCase(), index * step, 0);
+    }
+    ctx.restore();
+}
+
+function getMomentumDailyMatchesHeroTitle(matches: DailyMatchesData['matches']) {
+    if (matches.length > 0 && matches.every((match) => match.status === 'finished')) return 'Resultados';
+    if (matches.length > 0 && matches.every((match) => match.status === 'scheduled')) return 'Calendario';
+    return 'Partidos';
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function drawMomentumClassicTallWord(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    centerX: number,
+    topY: number,
+    maxWidth: number,
+    fontSize: number,
+    color: string,
+    scaleX: number,
+    scaleY: number
+) {
+    const safeText = text.trim().toUpperCase();
+    if (!safeText) return;
+
+    ctx.save();
+    ctx.translate(centerX, topY);
+    ctx.scale(scaleX, scaleY);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = color;
+    setFittedFont(ctx, safeText, maxWidth / Math.max(scaleX, 0.01), '900', Math.round(fontSize / Math.max(scaleY, 0.01)), FONT_CLASSIC_MATCH_SCORE, 24);
+    ctx.fillText(truncateTextToWidth(ctx, safeText, maxWidth / Math.max(scaleX, 0.01)), 0, 0);
+    ctx.restore();
+}
+
+async function drawMomentumMatchDayClassicSchedule(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    return drawMomentumMatchDayClassicScheduleRevised(ctx, canvas, data, format, accentColor, bgColor, brandLogo);
+    /*
+    const blockTint = '#ffffff';
+    const paperShade = mixHexColors(bgColor, '#d7d0c4', 0.18);
+    const ambientAccent = mixHexColors(accentColor, '#ffffff', 0.08);
+    const infoAccent = mixHexColors(accentColor, '#7a0000', 0.18);
+    const topWord = getMomentumClassicDecorativeWord(data.homeTeam, 'MATCH');
+    const bottomWord = getMomentumClassicDecorativeWord(data.awayTeam, 'DAY');
+    const curvedLabel = (data.editorialContextLabel?.trim() || "IT'S SHOW TIME").toUpperCase();
+    const heroLabel = data.mainTitle?.trim() && data.mainTitle.trim().toUpperCase() !== 'HORARIO'
+        ? data.mainTitle.trim().toUpperCase()
+        : 'MATCH DAY';
+    const heroWords = heroLabel.split(/\s+/).filter(Boolean);
+    const heroTopWord = heroWords[0] || 'MATCH';
+    const heroBottomWord = heroWords.slice(1).join(' ') || 'DAY';
+    const metaLabel = [data.date, data.time].filter(Boolean).join(' • ').toUpperCase();
+    const sponsors = getActiveEditorialSponsors(buildEditorialSponsorSlots(data.sponsors)).slice(0, 4);
+    const paperShade = mixHexColors(bgColor, '#e5dfd5', 0.14);
+    const accentSoft = mixHexColors(accentColor, '#ffffff', 0.2);
+    const metaAccent = mixHexColors(accentColor, '#0f172a', 0.08);
+    const tournamentLabel = (data.tournament || 'TORNEO').toUpperCase();
+    const venueLabel = (data.venue || 'SEDE A CONFIRMAR').toUpperCase();
+    const infoLabel = [data.tournament, data.date, data.time].filter(Boolean).join(' • ').toUpperCase() || tournamentLabel;
+    const metaLabel = [data.date, data.time].filter(Boolean).join(' • ').toUpperCase();
+    const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        loadImage(EDITORIAL_TEXTURE_SOURCE),
+    ]);
+
+    const drawTintedCrest = (
+        centerX: number,
+        centerY: number,
+        width: number,
+        height: number,
+        image: HTMLImageElement | null,
+        label: string,
+        rawLogo: string | undefined
+    ) => {
+        if (image) {
+            drawNeutralizedBackdropMark(ctx, image, centerX, centerY, width, height, blockTint, 1);
+            return;
+        }
+
+        drawOverflowCrest(ctx, {
+            x: centerX,
+            y: centerY,
+            width,
+            height,
+            img: null,
+            label,
+            rawLogo,
+            isDark: true,
+            showFrame: false,
+        });
+    };
+
+    const fillPaper = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    fillPaper.addColorStop(0, '#ffffff');
+    fillPaper.addColorStop(0.36, bgColor);
+    fillPaper.addColorStop(1, paperShade);
+    ctx.fillStyle = fillPaper;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const topGlow = ctx.createRadialGradient(canvas.width * 0.24, canvas.height * 0.18, sx(28), canvas.width * 0.24, canvas.height * 0.18, sx(420));
+    topGlow.addColorStop(0, hexToRGBA(ambientAccent, 0.16));
+    topGlow.addColorStop(0.55, hexToRGBA(ambientAccent, 0.04));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (textureImage) {
+        ctx.save();
+        ctx.globalAlpha = isStory ? 0.18 : 0.16;
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.drawImage(textureImage, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    }
+
+    drawMomentumClassicTallWord(
+        ctx,
+        topWord,
+        canvas.width / 2,
+        -sy(isStory ? 34 : 54),
+        canvas.width + sx(180),
+        sy(isStory ? 218 : 232),
+        accentColor,
+        1.02,
+        1.14
+    );
+
+    drawMomentumClassicArcText(
+        ctx,
+        curvedLabel,
+        canvas.width / 2,
+        sy(isStory ? 434 : 330),
+        sx(isStory ? 198 : 164),
+        -Math.PI * 0.82,
+        -Math.PI * 0.18,
+        accentColor,
+        sy(isStory ? 28 : 24)
+    );
+
+    drawMomentumClassicTallWord(
+        ctx,
+        heroTopWord,
+        canvas.width / 2,
+        sy(isStory ? 292 : 206),
+        sx(420),
+        sy(isStory ? 178 : 154),
+        accentColor,
+        0.72,
+        1.18
+    );
+    drawMomentumClassicTallWord(
+        ctx,
+        heroBottomWord,
+        canvas.width / 2,
+        sy(isStory ? 514 : 390),
+        sx(468),
+        sy(isStory ? 244 : 214),
+        accentColor,
+        0.82,
+        1.24
+    );
+
+    const plateX = 0;
+    const plateY = sy(isStory ? 880 : 764);
+    const plateWidth = sx(678);
+    const plateHeight = sy(isStory ? 268 : 236);
+    const plateCenterY = plateY + plateHeight / 2;
+
+    ctx.save();
+    ctx.fillStyle = accentColor;
+    ctx.fillRect(plateX, plateY, plateWidth, plateHeight);
+    ctx.restore();
+
+    if (textureImage) {
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.drawImage(textureImage, plateX, plateY, plateWidth, plateHeight);
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(blockTint, 0.9);
+    ctx.lineWidth = sx(3);
+    ctx.beginPath();
+    ctx.moveTo(plateX + plateWidth / 2, plateY + sy(58));
+    ctx.lineTo(plateX + plateWidth / 2, plateY + plateHeight - sy(58));
+    ctx.stroke();
+    ctx.restore();
+
+    drawTintedCrest(
+        plateX + plateWidth * 0.24,
+        plateCenterY,
+        sx(isStory ? 180 : 166),
+        sy(isStory ? 180 : 166),
+        homeLogo,
+        data.homeTeam,
+        data.homeLogo
+    );
+    drawTintedCrest(
+        plateX + plateWidth * 0.74,
+        plateCenterY,
+        sx(isStory ? 180 : 166),
+        sy(isStory ? 180 : 166),
+        awayLogo,
+        data.awayTeam,
+        data.awayLogo
+    );
+
+    const infoX = plateX + plateWidth + sx(44);
+    const infoWidth = canvas.width - infoX - sx(44);
+    const homeLayout = fitTextLinesToWidth(ctx, data.homeTeam.toUpperCase(), infoWidth, '900', sy(isStory ? 54 : 48), FONT_CLASSIC_MATCH_SCORE, sy(28), 2);
+    const awayLayout = fitTextLinesToWidth(ctx, data.awayTeam.toUpperCase(), infoWidth, '900', sy(isStory ? 54 : 48), FONT_CLASSIC_MATCH_SCORE, sy(28), 2);
+    const versusLayout = fitTextLinesToWidth(ctx, 'VERSUS.', infoWidth, '900', sy(isStory ? 58 : 52), FONT_CLASSIC_MATCH_SCORE, sy(32), 1);
+    const homeLineGap = Math.max(sy(38), Math.round(homeLayout.size * 0.82));
+    const awayLineGap = Math.max(sy(38), Math.round(awayLayout.size * 0.82));
+    const versusGap = Math.max(sy(46), Math.round(versusLayout.size * 0.9));
+    let cursorY = plateY + sy(isStory ? 84 : 76);
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = infoAccent;
+    ctx.font = `900 ${homeLayout.size}px ${FONT_CLASSIC_MATCH_SCORE}`;
+    homeLayout.lines.forEach((line, index) => {
+        ctx.fillText(line, infoX, cursorY + index * homeLineGap);
+    });
+    cursorY += homeLayout.lines.length * homeLineGap + sy(6);
+    ctx.font = `900 ${versusLayout.size}px ${FONT_CLASSIC_MATCH_SCORE}`;
+    ctx.fillText(versusLayout.lines[0], infoX, cursorY);
+    cursorY += versusGap;
+    ctx.font = `900 ${awayLayout.size}px ${FONT_CLASSIC_MATCH_SCORE}`;
+    awayLayout.lines.forEach((line, index) => {
+        ctx.fillText(line, infoX, cursorY + index * awayLineGap);
+    });
+    cursorY += awayLayout.lines.length * awayLineGap + sy(6);
+    ctx.font = `800 ${sy(isStory ? 26 : 24)}px ${FONT_CLASSIC_MATCH_SCORE}`;
+    ctx.fillText(truncateTextToWidth(ctx, venueLabel, infoWidth), infoX, cursorY);
+
+    if (metaLabel) {
+        ctx.fillStyle = hexToRGBA(infoAccent, 0.74);
+        ctx.font = `700 ${sy(isStory ? 18 : 16)}px ${FONT_MONO}`;
+        ctx.fillText(truncateTextToWidth(ctx, metaLabel, infoWidth), infoX, cursorY + sy(isStory ? 34 : 30));
+    }
+    ctx.restore();
+
+    const sponsorsDrawn = drawMomentumClassicSponsorRow(
+        ctx,
+        canvas,
+        sponsors,
+        sponsorImages,
+        canvas.height - sy(isStory ? 218 : 150),
+        accentColor,
+        isStory
+    );
+
+    if (!sponsorsDrawn && brandLogo) {
+        drawNeutralizedBackdropMark(
+            ctx,
+            brandLogo,
+            canvas.width / 2,
+            canvas.height - sy(isStory ? 220 : 152),
+            sx(116),
+            sy(52),
+            accentColor,
+            0.92
+        );
+    }
+
+    drawMomentumClassicTallWord(
+        ctx,
+        bottomWord,
+        canvas.width / 2,
+        canvas.height - sy(isStory ? 88 : 72),
+        canvas.width + sx(120),
+        sy(isStory ? 206 : 214),
+        accentColor,
+        1.04,
+        1.08
+    );
+    */
+}
+
+async function drawMomentumMatchDayClassicScheduleRevised(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    void format;
+    void brandLogo;
+    const scaleX = canvas.width / 1080;
+    const scaleY = canvas.height / 1350;
+    const sx = (value: number) => Math.round(value * scaleX);
+    const sy = (value: number) => Math.round(value * scaleY);
+    const surfaceIsDark = getContrastColor(bgColor) === '#ffffff';
+    const posterBase = surfaceIsDark
+        ? mixHexColors(bgColor, '#071018', 0.3)
+        : mixHexColors(bgColor, '#dce6ee', 0.1);
+    const matteColor = surfaceIsDark
+        ? mixHexColors(bgColor, '#04070b', 0.46)
+        : mixHexColors(bgColor, '#081119', 0.8);
+    const matteSecondary = mixHexColors(matteColor, '#000000', 0.24);
+    const accentSoft = mixHexColors(accentColor, '#ffffff', surfaceIsDark ? 0.2 : 0.34);
+    const accentLight = mixHexColors(accentColor, '#ffffff', surfaceIsDark ? 0.36 : 0.52);
+    const accentDeep = mixHexColors(accentColor, '#0b1220', 0.3);
+    const accentMuted = mixHexColors(accentColor, bgColor, surfaceIsDark ? 0.24 : 0.4);
+    const neutralCard = mixHexColors('#ffffff', bgColor, surfaceIsDark ? 0.14 : 0.08);
+    const textPrimary = '#ffffff';
+    const textSecondary = hexToRGBA('#ffffff', 0.84);
+    const textMuted = hexToRGBA('#ffffff', 0.66);
+    const title = `${data.homeTeam} X ${data.awayTeam}`.trim().toUpperCase();
+    const subtitleParts = [
+        data.editorialContextLabel?.trim(),
+        data.tournament?.trim(),
+        data.mainTitle?.trim() && data.mainTitle.trim().toLowerCase() !== 'horario' ? data.mainTitle.trim() : '',
+    ].filter(Boolean);
+    const subtitle = subtitleParts.join(' / ').toUpperCase();
+    const tournamentLabel = (data.tournament || 'TORNEO').trim().toUpperCase();
+    const dateLabel = (data.date || '').trim().toUpperCase();
+    const timeLabel = (data.time || '--:--').trim().toUpperCase();
+    const venueLabel = (data.venue || 'SEDE A CONFIRMAR').trim().toUpperCase();
+    const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        loadImage(EDITORIAL_TEXTURE_SOURCE),
+    ]);
+
+    const drawTexturedRect = (
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        fillColor: string | CanvasGradient | CanvasPattern,
+        strokeColor: string,
+        radius: number,
+        textureOpacity: number,
+    ) => {
+        ctx.save();
+        ctx.fillStyle = fillColor;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, radius);
+        ctx.fill();
+        ctx.stroke();
+
+        if (textureImage) {
+            ctx.save();
+            ctx.globalAlpha = textureOpacity;
+            ctx.globalCompositeOperation = 'soft-light';
+            ctx.beginPath();
+            ctx.roundRect(x, y, width, height, radius);
+            ctx.clip();
+            ctx.drawImage(textureImage, x, y, width, height);
+            ctx.restore();
+        }
+        ctx.restore();
+    };
+
+    ctx.fillStyle = posterBase;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const backgroundWash = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    backgroundWash.addColorStop(0, mixHexColors(bgColor, accentSoft, 0.18));
+    backgroundWash.addColorStop(0.46, posterBase);
+    backgroundWash.addColorStop(1, mixHexColors(bgColor, accentMuted, 0.22));
+    ctx.fillStyle = backgroundWash;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const topGlow = ctx.createRadialGradient(sx(210), sy(140), sx(24), sx(210), sy(140), sx(520));
+    topGlow.addColorStop(0, hexToRGBA(accentLight, 0.3));
+    topGlow.addColorStop(0.38, hexToRGBA(accentSoft, 0.14));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const bottomGlow = ctx.createRadialGradient(canvas.width - sx(160), canvas.height - sy(210), sx(32), canvas.width - sx(160), canvas.height - sy(210), sx(440));
+    bottomGlow.addColorStop(0, hexToRGBA(accentColor, 0.22));
+    bottomGlow.addColorStop(0.42, hexToRGBA(accentMuted, 0.1));
+    bottomGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = bottomGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(accentSoft, 0.26);
+    ctx.beginPath();
+    ctx.moveTo(sx(-36), sy(-12));
+    ctx.lineTo(sx(420), sy(-12));
+    ctx.lineTo(sx(354), sy(104));
+    ctx.lineTo(sx(188), sy(168));
+    ctx.lineTo(sx(88), sy(86));
+    ctx.lineTo(sx(-36), sy(202));
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = hexToRGBA(accentDeep, 0.32);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width, sy(104));
+    ctx.lineTo(canvas.width, sy(468));
+    ctx.bezierCurveTo(canvas.width - sx(34), sy(448), canvas.width - sx(82), sy(382), canvas.width - sx(98), sy(302));
+    ctx.bezierCurveTo(canvas.width - sx(112), sy(228), canvas.width - sx(64), sy(152), canvas.width, sy(104));
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = hexToRGBA(accentMuted, 0.28);
+    ctx.beginPath();
+    ctx.moveTo(sx(-28), canvas.height - sy(520));
+    ctx.bezierCurveTo(sx(118), canvas.height - sy(470), sx(164), canvas.height - sy(352), sx(122), canvas.height - sy(236));
+    ctx.bezierCurveTo(sx(104), canvas.height - sy(184), sx(52), canvas.height - sy(124), sx(-24), canvas.height - sy(102));
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = hexToRGBA(accentLight, 0.24);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width - sx(184), canvas.height - sy(176));
+    ctx.lineTo(canvas.width, canvas.height - sy(104));
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.lineTo(canvas.width - sx(266), canvas.height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    if (textureImage) {
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.drawImage(textureImage, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.shadowColor = hexToRGBA('#000000', 0.34);
+    ctx.shadowBlur = sy(38);
+    ctx.shadowOffsetY = sy(20);
+    ctx.fillStyle = matteColor;
+    ctx.beginPath();
+    ctx.moveTo(sx(106), sy(84));
+    ctx.lineTo(canvas.width - sx(94), sy(84));
+    ctx.lineTo(canvas.width - sx(164), sy(198));
+    ctx.lineTo(canvas.width - sx(128), sy(324));
+    ctx.lineTo(canvas.width - sx(94), canvas.height - sy(178));
+    ctx.lineTo(canvas.width - sx(154), canvas.height - sy(96));
+    ctx.lineTo(sx(172), canvas.height - sy(96));
+    ctx.lineTo(sx(112), canvas.height - sy(226));
+    ctx.lineTo(sx(138), canvas.height - sy(378));
+    ctx.lineTo(sx(86), sy(822));
+    ctx.lineTo(sx(150), sy(728));
+    ctx.lineTo(sx(72), sy(480));
+    ctx.lineTo(sx(184), sy(204));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    const matteGradient = ctx.createLinearGradient(0, sy(84), 0, canvas.height - sy(96));
+    matteGradient.addColorStop(0, mixHexColors(matteColor, accentDeep, 0.1));
+    matteGradient.addColorStop(0.48, matteColor);
+    matteGradient.addColorStop(1, matteSecondary);
+    ctx.fillStyle = matteGradient;
+    ctx.beginPath();
+    ctx.moveTo(sx(106), sy(84));
+    ctx.lineTo(canvas.width - sx(94), sy(84));
+    ctx.lineTo(canvas.width - sx(164), sy(198));
+    ctx.lineTo(canvas.width - sx(128), sy(324));
+    ctx.lineTo(canvas.width - sx(94), canvas.height - sy(178));
+    ctx.lineTo(canvas.width - sx(154), canvas.height - sy(96));
+    ctx.lineTo(sx(172), canvas.height - sy(96));
+    ctx.lineTo(sx(112), canvas.height - sy(226));
+    ctx.lineTo(sx(138), canvas.height - sy(378));
+    ctx.lineTo(sx(86), sy(822));
+    ctx.lineTo(sx(150), sy(728));
+    ctx.lineTo(sx(72), sy(480));
+    ctx.lineTo(sx(184), sy(204));
+    ctx.closePath();
+    ctx.fill();
+
+    if (textureImage) {
+        ctx.globalAlpha = 0.14;
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.clip();
+        ctx.drawImage(textureImage, sx(64), sy(84), canvas.width - sx(128), canvas.height - sy(180));
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(accentLight, 0.16);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(sx(106), sy(84));
+    ctx.lineTo(canvas.width - sx(94), sy(84));
+    ctx.lineTo(canvas.width - sx(164), sy(198));
+    ctx.lineTo(canvas.width - sx(128), sy(324));
+    ctx.lineTo(canvas.width - sx(94), canvas.height - sy(178));
+    ctx.lineTo(canvas.width - sx(154), canvas.height - sy(96));
+    ctx.lineTo(sx(172), canvas.height - sy(96));
+    ctx.lineTo(sx(112), canvas.height - sy(226));
+    ctx.lineTo(sx(138), canvas.height - sy(378));
+    ctx.lineTo(sx(86), sy(822));
+    ctx.lineTo(sx(150), sy(728));
+    ctx.lineTo(sx(72), sy(480));
+    ctx.lineTo(sx(184), sy(204));
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    const titleLayout = fitTextLinesToWidth(ctx, title, canvas.width - sx(220), '900', sy(92), FONT_EDITORIAL_SCORE, sy(52), 2);
+    const titleLineGap = Math.max(sy(72), Math.round(titleLayout.size * 0.86));
+    const titleTop = sy(170);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = textPrimary;
+    ctx.shadowColor = 'rgba(0,0,0,0.34)';
+    ctx.shadowBlur = sy(18);
+    ctx.shadowOffsetY = sy(8);
+    ctx.font = `italic 900 ${titleLayout.size}px ${FONT_EDITORIAL_SCORE}`;
+    titleLayout.lines.forEach((line, index) => {
+        ctx.fillText(line, canvas.width / 2, titleTop + index * titleLineGap);
+    });
+    ctx.restore();
+
+    if (subtitle) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = textSecondary;
+        ctx.font = `italic 700 ${sy(30)}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, subtitle, canvas.width - sx(260)), canvas.width / 2, titleTop + titleLayout.lines.length * titleLineGap + sy(24));
+        ctx.restore();
+    }
+
+    const teamTileY = sy(498);
+    const teamTileSize = sx(330);
+    const centerTileSize = sx(168);
+    const gap = sx(28);
+    const totalWidth = teamTileSize * 2 + centerTileSize + gap * 2;
+    const startX = (canvas.width - totalWidth) / 2;
+    const leftTileX = startX;
+    const centerTileX = leftTileX + teamTileSize + gap;
+    const rightTileX = centerTileX + centerTileSize + gap;
+    const leftTileFill = ctx.createLinearGradient(leftTileX, teamTileY, leftTileX + teamTileSize, teamTileY + teamTileSize);
+    leftTileFill.addColorStop(0, accentLight);
+    leftTileFill.addColorStop(1, accentSoft);
+    const rightTileFill = ctx.createLinearGradient(rightTileX, teamTileY, rightTileX + teamTileSize, teamTileY + teamTileSize);
+    rightTileFill.addColorStop(0, accentDeep);
+    rightTileFill.addColorStop(1, mixHexColors(accentColor, '#0a1020', 0.48));
+    const centerTileFill = ctx.createLinearGradient(centerTileX, teamTileY + sy(82), centerTileX + centerTileSize, teamTileY + sy(250));
+    centerTileFill.addColorStop(0, neutralCard);
+    centerTileFill.addColorStop(1, mixHexColors(neutralCard, '#d8e1ea', 0.18));
+
+    drawTexturedRect(leftTileX, teamTileY, teamTileSize, teamTileSize, leftTileFill, hexToRGBA(accentLight, 0.42), sx(4), 0.12);
+    drawTexturedRect(rightTileX, teamTileY, teamTileSize, teamTileSize, rightTileFill, hexToRGBA(accentLight, 0.2), sx(4), 0.12);
+    drawTexturedRect(centerTileX, teamTileY + sy(80), centerTileSize, centerTileSize, centerTileFill, hexToRGBA('#ffffff', 0.22), sx(4), 0.08);
+
+    drawOverflowCrest(ctx, {
+        x: leftTileX + teamTileSize / 2,
+        y: teamTileY + teamTileSize / 2,
+        width: sx(218),
+        height: sy(218),
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: false,
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: rightTileX + teamTileSize / 2,
+        y: teamTileY + teamTileSize / 2,
+        width: sx(218),
+        height: sy(218),
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: true,
+        showFrame: false,
+    });
+
+    if (tournamentLogo) {
+        drawOverflowCrest(ctx, {
+            x: centerTileX + centerTileSize / 2,
+            y: teamTileY + sy(80) + centerTileSize / 2,
+            width: sx(114),
+            height: sy(114),
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark: false,
+            showFrame: false,
+        });
+    } else {
+        const competitionLayout = fitTextLinesToWidth(ctx, tournamentLabel, centerTileSize - sx(28), '900', sy(28), FONT_BODY, sy(15), 2);
+        const lineGap = Math.max(sy(24), Math.round(competitionLayout.size * 1.12));
+        const totalHeight = competitionLayout.lines.length * lineGap;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = mixHexColors(matteColor, '#0b1320', 0.1);
+        ctx.font = `900 ${competitionLayout.size}px ${FONT_BODY}`;
+        competitionLayout.lines.forEach((line, index) => {
+            const y = teamTileY + sy(80) + centerTileSize / 2 - totalHeight / 2 + lineGap * index + lineGap / 2;
+            ctx.fillText(line, centerTileX + centerTileSize / 2, y);
+        });
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(accentLight, 0.18);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(sx(238), sy(968));
+    ctx.lineTo(canvas.width - sx(238), sy(968));
+    ctx.stroke();
+    ctx.restore();
+
+    const venueLayout = fitTextLinesToWidth(ctx, venueLabel, canvas.width - sx(280), '800', sy(28), FONT_BODY, sy(18), 2);
+    const venueGap = Math.max(sy(24), Math.round(venueLayout.size * 1.16));
+    const venueBlockHeight = venueLayout.lines.length * venueGap;
+    const infoCenterX = canvas.width / 2;
+    const dateBaseline = sy(1078);
+    const timeBaseline = sy(1138);
+    const venueStartBaseline = sy(1198);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = textPrimary;
+    ctx.shadowColor = 'rgba(0,0,0,0.24)';
+    ctx.shadowBlur = sy(10);
+    ctx.shadowOffsetY = sy(4);
+    ctx.font = `italic 900 ${sy(48)}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(truncateTextToWidth(ctx, dateLabel, canvas.width - sx(320)), infoCenterX, dateBaseline);
+    ctx.font = `italic 900 ${sy(54)}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(truncateTextToWidth(ctx, timeLabel, canvas.width - sx(320)), infoCenterX, timeBaseline);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = textSecondary;
+    ctx.font = `800 ${venueLayout.size}px ${FONT_BODY}`;
+    venueLayout.lines.forEach((line, index) => {
+        const y = venueStartBaseline + index * venueGap;
+        ctx.fillText(line, infoCenterX, y);
+    });
+    ctx.restore();
+
+    if (tournamentLabel) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = textMuted;
+        ctx.font = `800 ${sy(16)}px ${FONT_MONO}`;
+        ctx.fillText(truncateTextToWidth(ctx, tournamentLabel, canvas.width - sx(360)), infoCenterX, venueStartBaseline + venueBlockHeight + sy(34));
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(accentLight, 0.26);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(sx(162), sy(1188));
+    ctx.lineTo(sx(262), sy(1188));
+    ctx.moveTo(canvas.width - sx(162), sy(1188));
+    ctx.lineTo(canvas.width - sx(262), sy(1188));
+    ctx.stroke();
+    ctx.restore();
+}
+
+async function drawMomentumMatchEditorial(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    backgroundImage: string,
+    gradientLeftColor: string,
+    gradientRightColor: string
+) {
+    const isStory = format.height > format.width;
+    const matteColor = mixHexColors(bgColor, '#020202', 0.76);
+    const homeLogo = await loadImage(data.homeLogo || '');
+    const awayLogo = await loadImage(data.awayLogo || '');
+    const photo = await loadImage(backgroundImage);
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const headlineColor = mixHexColors(accentColor, '#e8c07a', 0.6);
+    const sidePanelWidth = isStory ? 446 : 424;
+    const photoX = sidePanelWidth + 96;
+    const photoY = 144;
+    const photoWidth = canvas.width - photoX - 46;
+    const photoHeight = canvas.height - 296;
+
+    drawMomentumBackdrop(ctx, canvas, gradientRightColor || accentColor, bgColor);
+
+    ctx.fillStyle = matteColor;
+    ctx.fillRect(0, 0, sidePanelWidth, canvas.height);
+    ctx.fillStyle = 'rgba(0,0,0,0.24)';
+    ctx.fillRect(sidePanelWidth - 18, 0, 18, canvas.height);
+
+    drawMomentumImageCover(ctx, photo, photoX, photoY, photoWidth, photoHeight, 52, 'rgba(0,0,0,0.16)');
+
+    ctx.save();
+    const overlay = ctx.createLinearGradient(photoX, photoY, photoX + photoWidth, photoY + photoHeight);
+    overlay.addColorStop(0, hexToRGBA(gradientLeftColor || accentColor, 0.08));
+    overlay.addColorStop(0.6, 'rgba(0,0,0,0)');
+    overlay.addColorStop(1, 'rgba(0,0,0,0.24)');
+    ctx.fillStyle = overlay;
+    ctx.beginPath();
+    ctx.roundRect(photoX, photoY, photoWidth, photoHeight, 52);
+    ctx.fill();
+    ctx.restore();
+
+    drawMomentumKicker(ctx, 34, 38, data.mainTitle || getStatusLabel(data.status), getMutedColor(true, 0.72));
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, { x: 70, y: 92, size: 56, img: tournamentLogo, label: data.tournament || 'Torneo', rawLogo: data.tournamentLogo, isDark: true });
+    }
+
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 18px ${FONT_BODY}`;
+    ctx.textAlign = 'left';
+    ctx.fillText((data.tournament || 'TORNEO').toUpperCase(), tournamentLogo ? 106 : 34, 100);
+    ctx.restore();
+
+    const centerX = sidePanelWidth / 2;
+    drawOverflowCrest(ctx, {
+        x: centerX,
+        y: 246,
+        width: 104,
+        height: 104,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: true,
+        showFrame: false,
+    });
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = headlineColor;
+    ctx.font = `800 30px ${FONT_BODY}`;
+    ctx.fillText(data.homeTeam.toUpperCase(), centerX, 316);
+    ctx.font = `900 182px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(String(data.homeScore ?? '-'), centerX, 468);
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(headlineColor, 0.9);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(112, 506);
+    ctx.lineTo(sidePanelWidth - 112, 506);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = headlineColor;
+    ctx.font = `900 182px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(String(data.awayScore ?? '-'), centerX, 690);
+    ctx.font = `800 30px ${FONT_BODY}`;
+    ctx.fillText(data.awayTeam.toUpperCase(), centerX, 762);
+    ctx.restore();
+
+    drawOverflowCrest(ctx, {
+        x: centerX,
+        y: 842,
+        width: 104,
+        height: 104,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: true,
+        showFrame: false,
+    });
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 34px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText((data.mainTitle || getStatusLabel(data.status)).toUpperCase(), 38, canvas.height - 212);
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.font = `700 16px ${FONT_BODY}`;
+    const meta = [data.date, data.time, data.venue].filter(Boolean).join('  •  ');
+    ctx.fillText(meta.toUpperCase(), 38, canvas.height - 176);
+    ctx.restore();
+
+    drawMomentumRepeatLabel(ctx, data.mainTitle || getStatusLabel(data.status), canvas.width - 18, photoY + 56, photoY + photoHeight - 56, headlineColor);
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawMomentumMatchResult(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const homeLogo = await loadImage(data.homeLogo || '');
+    const awayLogo = await loadImage(data.awayLogo || '');
+    const background = await loadImage(data.backgroundImage || '');
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const supportColor = mixHexColors(accentColor, '#ef4444', 0.48);
+    const isTallStory = format.height >= 1600;
+    const photoY = isTallStory ? 164 : 144;
+    const photoHeight = isTallStory ? 590 : 380;
+
+    drawMomentumBackdrop(ctx, canvas, accentColor, bgColor);
+    drawMomentumImageCover(ctx, background, 62, photoY, canvas.width - 124, photoHeight, 44, 'rgba(0,0,0,0.28)');
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+    ctx.beginPath();
+    ctx.roundRect(62, photoY, canvas.width - 124, photoHeight, 44);
+    ctx.fill();
+    ctx.restore();
+
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, { x: 88, y: 88, size: 54, img: tournamentLogo, label: data.tournament || 'Torneo', rawLogo: data.tournamentLogo, isDark: true });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 18px ${FONT_BODY}`;
+    ctx.fillText((data.tournament || 'TORNEO').toUpperCase(), tournamentLogo ? 124 : 48, 96);
+    ctx.restore();
+
+    const heroTitle = (data.mainTitle || getStatusLabel(data.status)).toUpperCase();
+    const heroTitleFontSize = getSharedFittedFontSize(
+        ctx,
+        [{ text: heroTitle, maxWidth: canvas.width - 180 }],
+        '900',
+        isTallStory ? 120 : 92,
+        FONT_EDITORIAL_SCORE,
+        isTallStory ? 74 : 58
+    );
+    const heroTitleTop = photoY + photoHeight + (isTallStory ? 8 : 6);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 ${heroTitleFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(truncateTextToWidth(ctx, heroTitle, canvas.width - 180), canvas.width / 2, heroTitleTop);
+    ctx.restore();
+
+    const isScheduled = data.status === 'scheduled';
+    const scoreValue = isScheduled
+        ? (data.time || '--:--')
+        : `${data.homeScore ?? '-'} - ${data.awayScore ?? '-'}`;
+    const scoreFontSize = isScheduled
+        ? (isTallStory ? 156 : 124)
+        : (isTallStory ? 188 : 154);
+    const scoreFontFamily = isScheduled ? FONT_MONO : FONT_EDITORIAL_SCORE;
+    const scoreTop = heroTitleTop + heroTitleFontSize - (isTallStory ? 4 : 6);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 ${scoreFontSize}px ${scoreFontFamily}`;
+    ctx.fillText(scoreValue, canvas.width / 2, scoreTop);
+    ctx.restore();
+
+    const teamXInset = isTallStory ? 208 : 188;
+    const crestSize = isTallStory ? 118 : 98;
+    const crestCenterY = scoreTop + scoreFontSize * 0.49;
+    const teamNameTop = offsetElementY('teamName', scoreTop + (isTallStory ? 10 : 8));
+    const teamNameMaxWidth = isTallStory ? 248 : 224;
+    const teamNameFontSize = getSharedFittedFontSize(
+        ctx,
+        [
+            { text: data.homeTeam.trim().toUpperCase(), maxWidth: teamNameMaxWidth },
+            { text: data.awayTeam.trim().toUpperCase(), maxWidth: teamNameMaxWidth },
+        ],
+        '800',
+        scaleElementSize('teamName', isTallStory ? 30 : 24, isTallStory ? 30 : 24),
+        FONT_BODY,
+        18
+    );
+
+    drawOverflowCrest(ctx, {
+        x: teamXInset,
+        y: crestCenterY,
+        width: crestSize,
+        height: crestSize,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: true,
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: canvas.width - teamXInset,
+        y: crestCenterY,
+        width: crestSize,
+        height: crestSize,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: true,
+        showFrame: false,
+    });
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = getMutedColor(true, 0.82);
+    ctx.font = `800 ${teamNameFontSize}px ${FONT_BODY}`;
+    ctx.fillText(truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), teamNameMaxWidth), teamXInset, teamNameTop);
+    ctx.fillText(truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), teamNameMaxWidth), canvas.width - teamXInset, teamNameTop);
+    ctx.restore();
+
+    const stats = data.stats.slice(0, 6);
+    let columns = 3;
+    if (stats.length <= 1) {
+        columns = 1;
+    } else if (stats.length === 2 || stats.length === 4) {
+        columns = 2;
+    }
+    const rows = Math.ceil(Math.max(stats.length, 1) / columns);
+    const gapX = isTallStory ? 18 : 14;
+    const gapY = isTallStory ? 18 : 14;
+    const gridSidePadding = isTallStory ? 84 : 108;
+    const gridWidth = canvas.width - gridSidePadding * 2;
+    const cardWidth = (gridWidth - gapX * Math.max(columns - 1, 0)) / columns;
+    const metaY = canvas.height - (isTallStory ? 290 : 252);
+    const legacyMetaY = metaY;
+    const gridBottom = metaY - (isTallStory ? 58 : 48);
+    const minGridTop = scoreTop + scoreFontSize + (isTallStory ? 18 : 12);
+    const availableGridHeight = Math.max(
+        (isTallStory ? 98 : 78) * rows + gapY * Math.max(rows - 1, 0),
+        gridBottom - minGridTop
+    );
+    const cardHeight = Math.max(
+        isTallStory ? 98 : 78,
+        Math.min(isTallStory ? 120 : 94, Math.floor((availableGridHeight - gapY * Math.max(rows - 1, 0)) / rows))
+    );
+    const gridHeight = rows * cardHeight + gapY * Math.max(rows - 1, 0);
+    const gridX = (canvas.width - gridWidth) / 2;
+    const gridTop = gridBottom - gridHeight;
+    if (stats.length === 0) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = getMutedColor(true, 0.74);
+        ctx.font = `700 ${isTallStory ? 24 : 20}px ${FONT_BODY}`;
+        ctx.fillText('NO HAY ESTADISTICAS DISPONIBLES.', canvas.width / 2, (gridTop + gridBottom) / 2);
+        ctx.restore();
+    } else {
+        stats.forEach((stat, index) => {
+            const column = index % columns;
+            const row = Math.floor(index / columns);
+            const x = gridX + column * (cardWidth + gapX);
+            const y = gridTop + row * (cardHeight + gapY);
+            const labelTop = y + (isTallStory ? 20 : 16);
+            const valueTop = y + Math.max(42, cardHeight * 0.42);
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(255,255,255,0.06)';
+            ctx.beginPath();
+            ctx.roundRect(x, y, cardWidth, cardHeight, 22);
+            ctx.fill();
+            ctx.strokeStyle = index === 0 ? hexToRGBA(accentColor, 0.6) : hexToRGBA(supportColor, 0.4);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `800 ${isTallStory ? 18 : 16}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, stat.label.toUpperCase(), cardWidth - 36), x + cardWidth / 2, labelTop);
+            ctx.font = `900 ${isTallStory ? 38 : 32}px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillText(`${stat.home} - ${stat.away}`, x + cardWidth / 2, valueTop);
+            ctx.restore();
+        });
+    }
+
+    ctx.save();
+    ctx.globalAlpha = 0;
+    ctx.fillStyle = getMutedColor(true, 0.74);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = `700 16px ${FONT_BODY}`;
+    ctx.fillText([data.date, data.time, data.venue].filter(Boolean).join('  •  ').toUpperCase(), canvas.width / 2, canvas.height - 126);
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.beginPath();
+    ctx.roundRect(72, legacyMetaY - 10, canvas.width - 144, 38, 16);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = getMutedColor(true, 0.74);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = `700 16px ${FONT_BODY}`;
+    ctx.fillText([data.date, data.time, data.venue].filter(Boolean).join(' - ').toUpperCase(), canvas.width / 2, metaY);
+    ctx.restore();
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawMomentumStandings(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const isStory = format.height > format.width;
+    const rows = slide.groups.flatMap((group) => group.rows);
+    const [tournamentLogo, ...logos] = await Promise.all([loadImage(data.tournamentLogo || ''), ...rows.map((row) => loadImage(row.teamLogo || ''))]);
+    const legendItems = collectStandingsLegendEntries(rows, accentColor);
+    const title = data.title?.trim() || 'Tabla de posiciones';
+    const subtitle = buildStandingsSlideSubtitle(data.subtitle, slide);
+    const sx = (value: number) => (value * canvas.width) / 1080;
+    const sy = (value: number) => (value * canvas.height) / 1350;
+    const sf = (value: number) => Math.round(Math.min(sx(value), sy(value)));
+    const dense = slide.totalRows >= (isStory ? 16 : 14);
+    const hasGroupLabels = slide.groups.some((group) => Boolean(formatStandingsGroupLabel(group)));
+    const sidebarWidth = sx(isStory ? 224 : 194);
+    const cardX = sx(isStory ? 168 : 190);
+    const cardY = sy(isStory ? 54 : 40);
+    const cardWidth = canvas.width - cardX - sx(38);
+    const cardHeight = canvas.height - cardY - sy(128);
+    const cardRight = cardX + cardWidth;
+    const cardBottom = cardY + cardHeight;
+    const innerLeft = cardX + sx(38);
+    const innerRight = cardRight - sx(38);
+    const playedX = innerRight - sx(202);
+    const diffX = innerRight - sx(108);
+    const pointsW = sx(dense ? 88 : 98);
+    const pointsX = innerRight - pointsW;
+    const legendLayout = buildStandingsLegendLayout(ctx, legendItems, cardWidth - sx(96), isStory);
+    const groupLabelHeight = hasGroupLabels ? sy(dense ? 24 : 28) : 0;
+    const groupLabelGap = hasGroupLabels ? sy(dense ? 10 : 12) : 0;
+    const interGroupGap = hasGroupLabels ? sy(dense ? 8 : 10) : 0;
+    const reservedGroupSpace = slide.groups.reduce((total, group, index) => !formatStandingsGroupLabel(group) ? total : total + groupLabelHeight + groupLabelGap + (index > 0 ? interGroupGap : 0), 0);
+    const legendReserve = legendLayout.totalHeight > 0 ? legendLayout.totalHeight + sy(26) : 0;
+    const rowsTop = cardY + sy(isStory ? 166 : 156);
+    const availableRowsHeight = Math.max(sy(420), cardBottom - sy(34) - legendReserve - rowsTop - reservedGroupSpace);
+    const baseRowHeight = availableRowsHeight / Math.max(rows.length, 1);
+    const rowHeight = clampNumber(baseRowHeight, sy(24), sy(dense ? 50 : 56));
+    const compactScale = clampNumber(rowHeight / sy(dense ? 42 : 46), 0.72, 1);
+    const crestSize = sx((dense ? 34 : 38) * compactScale);
+    const crestCenterX = innerLeft + sx(76);
+    const teamTextX = crestCenterX + crestSize / 2 + sx(18);
+    const teamTextMaxWidth = Math.max(sx(150), playedX - sx(42) - teamTextX);
+    const teamFontSize = getSharedFittedFontSize(
+        ctx,
+        rows.map((row) => ({ text: row.team.trim().toUpperCase(), maxWidth: teamTextMaxWidth })),
+        '900',
+        sf((dense ? 26 : 30) * compactScale),
+        FONT_BODY,
+        sf(12),
+    );
+    const headerLabelFontSize = sf((dense ? 16 : 17) * compactScale);
+    const rowPosFontSize = sf((dense ? 28 : 32) * compactScale);
+    const rowStatFontSize = sf((dense ? 22 : 24) * compactScale);
+    const pointsH = Math.max(sy(24), Math.min(rowHeight - sy(8), sy((dense ? 34 : 38) * compactScale)));
+    const bgIsDark = getContrastColor(bgColor) === '#ffffff';
+    const pageBase = mixHexColors(bgColor, '#ffffff', bgIsDark ? 0.08 : 0.16);
+    const pageTopColor = mixHexColors(bgColor, accentColor, 0.12);
+    const pageBottomColor = mixHexColors(bgColor, bgIsDark ? '#000000' : '#0f172a', bgIsDark ? 0.08 : 0.1);
+    const tableSurfaceTop = mixHexColors(bgColor, '#ffffff', bgIsDark ? 0.9 : 0.72);
+    const tableSurfaceBottom = mixHexColors(bgColor, '#ffffff', bgIsDark ? 0.96 : 0.82);
+    const tableSurfaceLine = mixHexColors(bgColor, accentColor, 0.12);
+    const ink = mixHexColors(bgColor, bgIsDark ? '#ffffff' : '#0f172a', bgIsDark ? 0.16 : 0.86);
+    const mutedInk = hexToRGBA(ink, 0.62);
+    const titleBlockFill = accentColor;
+    const titleBlockText = mixHexColors(bgColor, getContrastColor(accentColor), 0.12);
+    const titleBlockStroke = hexToRGBA(mixHexColors(accentColor, bgColor, 0.24), 0.82);
+    const metaBlockText = accentColor;
+    const cardStrokeColor = hexToRGBA(mixHexColors(bgColor, accentColor, 0.24), 0.74);
+    const dividerColor = hexToRGBA(mixHexColors(bgColor, accentColor, 0.18), 0.42);
+    const sidebarTop = mixHexColors(accentColor, '#ffffff', 0.1);
+    const sidebarBottom = mixHexColors(accentColor, bgColor, 0.2);
+    const sidebarText = getContrastColor(sidebarBottom);
+    const sidebarMatch = title.match(/^(.+?)\s+(matchweek|jornada|fecha|round)\b/i);
+    const sidebarLabel = (sidebarMatch?.[1] || title).trim();
+    const sidebarMeta = sidebarMatch ? title.slice(sidebarLabel.length).trim() : subtitle;
+    const metaRight = [slide.totalPages > 1 ? `${slide.pageNumber}/${slide.totalPages}` : '', subtitle.toUpperCase()].filter(Boolean).join('  •  ');
+    const highlightColor = data.highlightColor?.trim() || mixHexColors('#ffffff', accentColor, 0.22);
+    const normalizedHighlightTeam = data.highlightTeam?.trim().toLowerCase() || '';
+
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bgGradient.addColorStop(0, pageTopColor);
+    bgGradient.addColorStop(0.52, pageBase);
+    bgGradient.addColorStop(1, pageBottomColor);
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = hexToRGBA(accentColor, 0.06);
+    ctx.beginPath(); ctx.moveTo(sx(110), 0); ctx.lineTo(canvas.width, 0); ctx.lineTo(canvas.width, sy(362)); ctx.lineTo(sx(454), sy(212)); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(sx(-40), canvas.height); ctx.lineTo(sx(322), canvas.height); ctx.lineTo(0, canvas.height - sy(276)); ctx.closePath(); ctx.fill();
+
+    const sidebarGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    sidebarGradient.addColorStop(0, sidebarTop);
+    sidebarGradient.addColorStop(0.62, accentColor);
+    sidebarGradient.addColorStop(1, sidebarBottom);
+    ctx.fillStyle = sidebarGradient;
+    ctx.fillRect(0, 0, sidebarWidth, canvas.height);
+    ctx.fillStyle = hexToRGBA('#ffffff', 0.12);
+    ctx.beginPath(); ctx.moveTo(0, canvas.height - sy(368)); ctx.lineTo(sidebarWidth, canvas.height - sy(244)); ctx.lineTo(sidebarWidth, canvas.height); ctx.lineTo(0, canvas.height); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0, sy(512)); ctx.lineTo(sidebarWidth, sy(660)); ctx.lineTo(sidebarWidth, sy(812)); ctx.lineTo(0, sy(684)); ctx.closePath(); ctx.fill();
+    if (tournamentLogo) drawLogoBadge(ctx, { x: sidebarWidth / 2, y: sy(128), size: sx(84), img: tournamentLogo, label: title, rawLogo: data.tournamentLogo, isDark: sidebarText === '#ffffff' });
+    ctx.save();
+    ctx.translate(sidebarWidth / 2, canvas.height / 2 + sy(90));
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = sidebarText;
+    setFittedFont(ctx, sidebarLabel.toUpperCase(), canvas.height - sy(360), '900', sf(80), FONT_BODY, sf(34));
+    ctx.fillText(truncateTextToWidth(ctx, sidebarLabel.toUpperCase(), canvas.height - sy(360)), 0, 0);
+    ctx.restore();
+    if (sidebarMeta) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `800 ${sf(13)}px ${FONT_MONO}`;
+        const safeMeta = truncateTextToWidth(ctx, sidebarMeta.toUpperCase(), sidebarWidth - sx(52));
+        const width = Math.min(sidebarWidth - sx(36), ctx.measureText(safeMeta).width + sx(28));
+        ctx.fillStyle = hexToRGBA(sidebarText === '#ffffff' ? '#ffffff' : ink, 0.16);
+        ctx.strokeStyle = hexToRGBA(sidebarText === '#ffffff' ? '#ffffff' : ink, 0.28);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(sidebarWidth / 2 - width / 2, canvas.height - sy(170), width, sy(34), 999);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = sidebarText;
+        ctx.fillText(safeMeta, sidebarWidth / 2, canvas.height - sy(153));
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.shadowColor = bgIsDark ? 'rgba(0,0,0,0.22)' : 'rgba(15,23,42,0.12)';
+    ctx.shadowBlur = 34;
+    ctx.shadowOffsetY = 18;
+    ctx.fillStyle = tableSurfaceBottom;
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardWidth, cardHeight, sf(36));
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.beginPath(); ctx.roundRect(cardX, cardY, cardWidth, cardHeight, sf(36)); ctx.clip();
+    const cardGradient = ctx.createLinearGradient(cardX, cardY, cardX, cardBottom);
+    cardGradient.addColorStop(0, tableSurfaceTop);
+    cardGradient.addColorStop(0.5, tableSurfaceBottom);
+    cardGradient.addColorStop(1, tableSurfaceTop);
+    ctx.fillStyle = cardGradient;
+    ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
+    ctx.fillStyle = hexToRGBA(tableSurfaceLine, 0.18);
+    ctx.beginPath(); ctx.moveTo(cardX + sx(380), cardY); ctx.lineTo(cardRight, cardY); ctx.lineTo(cardRight, cardY + sy(314)); ctx.lineTo(cardX + sx(520), cardY + sy(162)); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = cardStrokeColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(cardX, cardY, cardWidth, cardHeight, sf(36)); ctx.stroke();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = `800 ${headerLabelFontSize}px ${FONT_BODY}`;
+    const metaMeasureWidth = metaRight
+        ? (() => {
+            ctx.font = `700 ${sf(14)}px ${FONT_MONO}`;
+            return Math.min(cardWidth * 0.42, ctx.measureText(metaRight).width + sx(16));
+        })()
+        : 0;
+    ctx.font = `800 ${headerLabelFontSize}px ${FONT_BODY}`;
+    const titleMaxWidth = Math.max(sx(180), cardWidth - sx(84) - metaMeasureWidth);
+    const safeTitle = truncateTextToWidth(ctx, title.toUpperCase(), titleMaxWidth - sx(32));
+    const titleWidth = Math.min(titleMaxWidth, ctx.measureText(safeTitle).width + sx(32));
+    ctx.fillStyle = titleBlockFill;
+    ctx.strokeStyle = titleBlockStroke;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(innerLeft, cardY + sy(33), titleWidth, sy(34), 999); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = titleBlockText;
+    ctx.fillText(safeTitle, innerLeft + sx(16), cardY + sy(50));
+    ctx.restore();
+    if (metaRight) {
+        ctx.save();
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = metaBlockText;
+        ctx.font = `700 ${sf(14 * compactScale)}px ${FONT_MONO}`;
+        ctx.fillText(truncateTextToWidth(ctx, metaRight, Math.max(sx(120), cardWidth - titleWidth - sx(110))), innerRight, cardY + sy(50));
+        ctx.restore();
+    }
+    ctx.strokeStyle = dividerColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(innerLeft, cardY + sy(144)); ctx.lineTo(innerRight, cardY + sy(144)); ctx.stroke();
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = mutedInk;
+    ctx.font = `800 ${headerLabelFontSize}px ${FONT_BODY}`;
+    ctx.fillText('POS', innerLeft + sx(12), cardY + sy(126));
+    ctx.fillText('CLUB', teamTextX, cardY + sy(126));
+    ctx.textAlign = 'right';
+    ctx.fillText((data.columnLabels?.played?.trim() || 'P').toUpperCase(), playedX, cardY + sy(126));
+    ctx.fillText((data.columnLabels?.diff?.trim() || 'GD').toUpperCase(), diffX, cardY + sy(126));
+    ctx.fillText((data.columnLabels?.points?.trim() || 'POINTS').toUpperCase(), innerRight, cardY + sy(126));
+    ctx.restore();
+
+    let cursorY = rowsTop;
+    let flatIndex = 0;
+    let logoIndex = 0;
+    slide.groups.forEach((group, groupIndex) => {
+        const label = formatStandingsGroupLabel(group);
+        if (label) {
+            if (groupIndex > 0) cursorY += interGroupGap;
+            ctx.save();
+            ctx.fillStyle = hexToRGBA(accentColor, 0.12);
+            ctx.strokeStyle = hexToRGBA(accentColor, 0.28);
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(innerLeft, cursorY, Math.min(sx(260), cardWidth * 0.36), groupLabelHeight, 999); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = mixHexColors(ink, accentColor, 0.42);
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.font = `800 ${sf((dense ? 12 : 13) * compactScale)}px ${FONT_MONO}`;
+            ctx.fillText(label.toUpperCase(), innerLeft + sx(14), cursorY + groupLabelHeight / 2 + 1);
+            ctx.restore();
+            cursorY += groupLabelHeight + groupLabelGap;
+        }
+        group.rows.forEach((row, rowIndex) => {
+            const y = cursorY;
+            const centerY = y + rowHeight / 2;
+            const logo = logos[logoIndex] || null;
+            logoIndex += 1;
+            const rowLabel = row.labelName?.trim();
+            const rowAccent = row.zoneColor || accentColor;
+            const isHighlighted = (normalizedHighlightTeam && row.team.trim().toLowerCase() === normalizedHighlightTeam) || (typeof data.highlightPosition === 'number' && row.pos === data.highlightPosition);
+            const rowFill = isHighlighted ? hexToRGBA(highlightColor, 0.18) : flatIndex % 2 === 0 ? 'rgba(255,255,255,0)' : hexToRGBA(mixHexColors(bgColor, '#ffffff', bgIsDark ? 0.84 : 0.62), 0.56);
+            const diffText = data.plainDiff ? String(row.diff).trim() || '-' : formatDiff(row.diff);
+            if (rowFill !== 'rgba(255,255,255,0)') {
+                ctx.fillStyle = rowFill;
+                ctx.strokeStyle = isHighlighted ? hexToRGBA(highlightColor, 0.5) : 'rgba(0,0,0,0)';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.roundRect(innerLeft - sx(8), y + sy(3), innerRight - innerLeft + sx(16), rowHeight - sy(6), sf(18 * compactScale)); ctx.fill();
+                if (isHighlighted) ctx.stroke();
+            }
+            if (rowLabel) {
+                ctx.fillStyle = hexToRGBA(rowAccent, 0.92);
+                ctx.beginPath(); ctx.roundRect(innerLeft - sx(16), y + Math.max(sy(5), rowHeight * 0.16), sx(6), Math.max(sy(10), rowHeight - Math.max(sy(10), rowHeight * 0.32)), 999); ctx.fill();
+            }
+            if (!(groupIndex === slide.groups.length - 1 && rowIndex === group.rows.length - 1)) {
+                ctx.strokeStyle = dividerColor;
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(innerLeft, y + rowHeight + 0.5); ctx.lineTo(innerRight, y + rowHeight + 0.5); ctx.stroke();
+            }
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = ink;
+            ctx.font = `900 ${rowPosFontSize}px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillText(String(row.pos), innerLeft + sx(12), centerY + sf(2));
+            ctx.restore();
+            drawOverflowCrest(ctx, { x: crestCenterX, y: centerY, width: crestSize, height: crestSize, img: logo, label: row.team, rawLogo: row.teamLogo, isDark: false, showFrame: false });
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = ink;
+            ctx.font = `900 ${teamFontSize}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, row.team.toUpperCase(), teamTextMaxWidth), teamTextX, rowLabel ? y + rowHeight * 0.38 : centerY + 1);
+            if (rowLabel) drawStandingsLabelPill(ctx, teamTextX, y + rowHeight * 0.72, rowLabel, rowAccent, false, rowHeight, Math.min(teamTextMaxWidth, sx(188)));
+            ctx.restore();
+            ctx.save();
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.font = `800 ${rowStatFontSize}px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillStyle = ink;
+            ctx.fillText(String(row.played ?? '-'), playedX, centerY + 1);
+            ctx.fillStyle = diffText.startsWith('+') ? mixHexColors(ink, accentColor, 0.54) : ink;
+            ctx.fillText(diffText, diffX, centerY + 1);
+            ctx.restore();
+            ctx.fillStyle = isHighlighted ? highlightColor : accentColor;
+            ctx.beginPath(); ctx.roundRect(pointsX, centerY - pointsH / 2, pointsW, pointsH, 999); ctx.fill();
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = getContrastColor(isHighlighted ? highlightColor : accentColor);
+            ctx.font = `900 ${rowStatFontSize}px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillText(String(row.points ?? '-'), pointsX + pointsW / 2, centerY + 1);
+            ctx.restore();
+            cursorY += rowHeight;
+            flatIndex += 1;
+        });
+    });
+
+    if (legendLayout.totalHeight > 0) drawStandingsLegend(ctx, innerLeft, cardBottom - legendLayout.totalHeight - sy(28), innerRight - innerLeft, legendItems, false, isStory);
+    drawPoweredByFooter(ctx, canvas, brandLogo, false, accentColor);
+}
+
+async function drawMomentumDailyMatches(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: DailyMatchesData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    void format;
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const matches = data.matches.slice(0, 10);
+    const logos = await Promise.all(
+        matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')]),
+    );
+    const panelX = 72;
+    const panelY = 160;
+    const panelWidth = canvas.width - 536;
+    const listWidth = panelWidth - 24;
+    const heroTitle = getMomentumDailyMatchesHeroTitle(matches).toUpperCase();
+    const heroTitleColor = mixHexColors('#f3dfbb', accentColor, 0.22);
+    const heroTitleFontSize = getSharedFittedFontSize(
+        ctx,
+        [{ text: heroTitle, maxWidth: 402 }],
+        '900',
+        122,
+        FONT_EDITORIAL_SCORE,
+        84
+    );
+    const heroTitleTop = canvas.height - 262;
+    const scoreLabels = matches.map((match) => (
+        match.status === 'scheduled'
+            ? (match.time || '--:--')
+            : `${match.homeScore ?? '-'} - ${match.awayScore ?? '-'}`
+    ));
+    const scoreFontSize = 46;
+
+    ctx.save();
+    ctx.font = `900 ${scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    const scoreBlockWidth = Math.max(118, ...scoreLabels.map((label) => ctx.measureText(label).width));
+    ctx.restore();
+
+    const scoreRightX = panelX + listWidth - 22;
+    const scoreLeftX = scoreRightX - scoreBlockWidth;
+    const teamTextX = panelX + 198;
+    const teamTextMaxWidth = Math.max(136, scoreLeftX - teamTextX - 26);
+    const teamNameFontSize = getSharedFittedFontSize(
+        ctx,
+        matches.flatMap((match) => ([
+            { text: match.homeTeam.toUpperCase(), maxWidth: teamTextMaxWidth },
+            { text: match.awayTeam.toUpperCase(), maxWidth: teamTextMaxWidth },
+        ])),
+        '800',
+        26,
+        FONT_BODY,
+        14
+    );
+
+    drawMomentumBackdrop(ctx, canvas, accentColor, bgColor);
+
+    if (tournamentLogo) {
+        drawNeutralizedBackdropMark(ctx, tournamentLogo, canvas.width - 96, canvas.height - 78, 112, 112, '#7c8590', 0.06);
+    }
+
+    const brandStage = ctx.createRadialGradient(canvas.width - 188, canvas.height - 276, 0, canvas.width - 188, canvas.height - 276, 278);
+    brandStage.addColorStop(0, 'rgba(0,0,0,0.34)');
+    brandStage.addColorStop(0.52, 'rgba(0,0,0,0.14)');
+    brandStage.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle = brandStage;
+    ctx.fillRect(canvas.width - 496, canvas.height - 570, 496, 570);
+    ctx.restore();
+
+    if (tournamentLogo) {
+        drawEditorialCrestStroke(
+            ctx,
+            canvas.width - 176,
+            canvas.height / 2 + 36,
+            244,
+            244,
+            tournamentLogo,
+            6,
+            'rgba(255,255,255,0.16)'
+        );
+
+        ctx.save();
+        ctx.globalAlpha = 0.88;
+        drawOverflowCrest(ctx, {
+            x: canvas.width - 176,
+            y: canvas.height / 2 + 36,
+            width: 232,
+            height: 232,
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark: true,
+            showFrame: false,
+        });
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.textBaseline = 'bottom';
+    ctx.shadowColor = 'rgba(0,0,0,0.38)';
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 6;
+    ctx.fillStyle = getMutedColor(true, 0.78);
+    ctx.textAlign = 'right';
+    ctx.font = `700 18px ${FONT_BODY}`;
+    ctx.fillText((data.tournament || 'TORNEO').toUpperCase(), canvas.width - 72, heroTitleTop - 16);
+    ctx.restore();
+
+    drawMomentumKicker(ctx, 56, 74, data.date || 'Fecha', getMutedColor(true, 0.76));
+
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.shadowColor = 'rgba(0,0,0,0.46)';
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 8;
+    ctx.fillStyle = heroTitleColor;
+    ctx.font = `900 ${heroTitleFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(truncateTextToWidth(ctx, heroTitle, 402), canvas.width - 72, heroTitleTop);
+    ctx.restore();
+
+    const densityMode = resolveDensityMode(matches.length, 7, 9);
+    const rowGap = getDensitySpacing(densityMode, {
+        comfortable: 10,
+        compact: 8,
+        ultraCompact: 6,
+    });
+    const rowHeight = Math.min(
+        getDensitySpacing(densityMode, {
+            comfortable: 96,
+            compact: 90,
+            ultraCompact: 84,
+        }),
+        (canvas.height - panelY - 244 - rowGap * Math.max(matches.length - 1, 0)) / Math.max(matches.length, 1),
+    );
+    let logoIndex = 0;
+
+    matches.forEach((match, index) => {
+        const y = panelY + index * (rowHeight + rowGap);
+        const homeLogo = logos[logoIndex] || null;
+        const awayLogo = logos[logoIndex + 1] || null;
+        logoIndex += 2;
+        const statusColor = match.status === 'live'
+            ? mixHexColors(accentColor, '#fb7185', 0.46)
+            : match.status === 'finished'
+                ? mixHexColors(accentColor, '#f59e0b', 0.24)
+                : accentColor;
+        const homeLineY = y + rowHeight * 0.32;
+        const awayLineY = y + rowHeight * 0.74;
+        const scoreLabel = match.status === 'scheduled'
+            ? (match.time || '--:--')
+            : `${match.homeScore ?? '-'} - ${match.awayScore ?? '-'}`;
+        const crestSize = 30;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(8,8,10,0.72)';
+        ctx.strokeStyle = hexToRGBA(statusColor, 0.72);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(panelX, y, listWidth, rowHeight, 26);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = hexToRGBA(statusColor, 0.16);
+        ctx.beginPath();
+        ctx.roundRect(panelX + 12, y + 14, 112, rowHeight - 28, 18);
+        ctx.fill();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `800 15px ${FONT_MONO}`;
+        ctx.fillText((match.dateLabel || match.time || '--:--').toUpperCase(), panelX + 68, y + rowHeight / 2 + 6);
+        ctx.restore();
+
+        drawOverflowCrest(ctx, {
+            x: panelX + 168,
+            y: homeLineY - 2,
+            width: crestSize,
+            height: crestSize,
+            img: homeLogo,
+            label: match.homeTeam,
+            rawLogo: match.homeLogo,
+            isDark: true,
+            showFrame: false,
+        });
+        drawOverflowCrest(ctx, {
+            x: panelX + 168,
+            y: awayLineY - 2,
+            width: crestSize,
+            height: crestSize,
+            img: awayLogo,
+            label: match.awayTeam,
+            rawLogo: match.awayLogo,
+            isDark: true,
+            showFrame: false,
+        });
+
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.font = `800 ${teamNameFontSize}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, match.homeTeam.toUpperCase(), teamTextMaxWidth), teamTextX, homeLineY);
+        ctx.fillText(truncateTextToWidth(ctx, match.awayTeam.toUpperCase(), teamTextMaxWidth), teamTextX, awayLineY);
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `900 ${scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText(scoreLabel, scoreRightX, y + rowHeight / 2 + 6);
+        ctx.restore();
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawMomentumLineups(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    mode: LineupExportMode
+) {
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const homeLogo = await loadImage(data.homeTeam.logo || '');
+    const awayLogo = await loadImage(data.awayTeam.logo || '');
+    const isStory = format.height > format.width;
+    const teams = mode === 'both'
+        ? [
+            { team: data.homeTeam, logo: homeLogo },
+            { team: data.awayTeam, logo: awayLogo },
+        ]
+        : mode === 'home'
+            ? [{ team: data.homeTeam, logo: homeLogo }]
+            : [{ team: data.awayTeam, logo: awayLogo }];
+
+    drawMomentumBackdrop(ctx, canvas, accentColor, bgColor);
+
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width / 2,
+            y: 92,
+            size: 72,
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark: true,
+        });
+    }
+
+    drawMomentumKicker(ctx, canvas.width / 2, 156, data.tournament || 'Torneo', getMutedColor(true, 0.76), 'center');
+    drawMomentumHeroTitle(ctx, data.title || 'Alineaciones', canvas.width / 2, 234, canvas.width - 180, 88, '#ffffff', 'center');
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = getMutedColor(true, 0.74);
+    ctx.font = `700 18px ${FONT_BODY}`;
+    ctx.fillText([data.subtitle, data.date, data.time, data.venue].filter(Boolean).join('  •  ').toUpperCase(), canvas.width / 2, 270);
+    ctx.restore();
+
+    const columnGap = teams.length === 2 ? 26 : 0;
+    const columnWidth = teams.length === 2 ? (canvas.width - 132 - columnGap) / 2 : canvas.width - 132;
+    const columnXStart = teams.length === 2 ? 54 : 66;
+    const columnY = 324;
+    const columnHeight = canvas.height - columnY - (isStory ? 236 : 178);
+
+    teams.forEach(({ team, logo }, index) => {
+        const x = columnXStart + index * (columnWidth + columnGap);
+        const teamPlayers = [...(team.starters ?? [])].sort((left, right) => Number(left.number ?? 0) - Number(right.number ?? 0));
+        const densityMode = resolveDensityMode(teamPlayers.length, teams.length === 2 ? 19 : 21, teams.length === 2 ? 22 : 23);
+        const starters = teamPlayers
+            .filter((player, playerIndex) => isLineupStarter(player, playerIndex))
+            .slice(0, 15);
+        const bench = teamPlayers
+            .filter((player, playerIndex) => !isLineupStarter(player, playerIndex))
+            .slice(0, getDensitySpacing(densityMode, {
+                comfortable: teams.length === 2 ? 8 : 8,
+                compact: teams.length === 2 ? 7 : 7,
+                ultraCompact: teams.length === 2 ? 6 : 6,
+            }));
+        const starterGap = getDensitySpacing(densityMode, {
+            comfortable: teams.length === 2 ? 8 : 7,
+            compact: teams.length === 2 ? 7 : 6,
+            ultraCompact: teams.length === 2 ? 6 : 5,
+        });
+        const benchGap = getDensitySpacing(densityMode, {
+            comfortable: 5,
+            compact: 4,
+            ultraCompact: 3,
+        });
+        const starterRowHeight = getDensitySpacing(densityMode, {
+            comfortable: teams.length === 2 ? 36 : 34,
+            compact: teams.length === 2 ? 34 : 32,
+            ultraCompact: teams.length === 2 ? 32 : 30,
+        });
+        const benchRowHeight = getDensitySpacing(densityMode, {
+            comfortable: teams.length === 2 ? 28 : 26,
+            compact: teams.length === 2 ? 26 : 24,
+            ultraCompact: teams.length === 2 ? 24 : 22,
+        });
+        const baseHeaderHeight = isStory ? 124 : 116;
+        const baseBottomPadding = isStory ? 34 : 20;
+        const starterRowsHeight = starters.length > 0
+            ? starters.length * starterRowHeight + Math.max(0, starters.length - 1) * starterGap
+            : 0;
+        const benchRowsHeight = bench.length > 0
+            ? bench.length * benchRowHeight + Math.max(0, bench.length - 1) * benchGap
+            : 0;
+        const baseBenchSectionHeight = bench.length > 0 ? 40 : 0;
+        const totalContentHeight = baseHeaderHeight + starterRowsHeight + baseBenchSectionHeight + benchRowsHeight + baseBottomPadding;
+        const layoutScale = clampNumber(columnHeight / Math.max(totalContentHeight, 1), 0.72, 1);
+        const headerHeight = Math.max(96, Math.round(baseHeaderHeight * layoutScale));
+        const scaledStarterGap = Math.max(3, Math.round(starterGap * layoutScale));
+        const scaledBenchGap = Math.max(2, Math.round(benchGap * layoutScale));
+        const scaledStarterRowHeight = Math.max(24, Math.round(starterRowHeight * layoutScale));
+        const scaledBenchRowHeight = Math.max(18, Math.round(benchRowHeight * layoutScale));
+        const starterRowsBlockHeight = starters.length > 0
+            ? starters.length * scaledStarterRowHeight + Math.max(0, starters.length - 1) * scaledStarterGap
+            : 0;
+        const benchSectionHeight = bench.length > 0 ? Math.max(28, Math.round(40 * layoutScale)) : 0;
+        const contentTopPadding = Math.max(98, Math.round(headerHeight));
+        const listStartY = columnY + contentTopPadding;
+        const benchHeaderY = listStartY + starterRowsBlockHeight + Math.max(6, Math.round(8 * layoutScale));
+        const accent = index === 0 ? accentColor : mixHexColors(accentColor, '#38bdf8', 0.5);
+        const logoSize = Math.max(46, Math.round(54 * Math.max(layoutScale, 0.84)));
+        const logoY = columnY + Math.round(contentTopPadding * 0.5);
+        const titleY = columnY + Math.round(contentTopPadding * 0.57);
+        const subtitleY = columnY + Math.round(contentTopPadding * 0.79);
+        const teamTitleMaxWidth = columnWidth - 136;
+        const titleFontSize = Math.max(20, Math.round(30 * Math.max(layoutScale, 0.82)));
+        const subtitleFontSize = Math.max(11, Math.round(14 * Math.max(layoutScale, 0.82)));
+        const starterNumberFontSize = Math.max(11, Math.round((teams.length === 2 ? 14 : 13) * Math.max(layoutScale, 0.82)));
+        const starterNameFontSize = Math.max(11, Math.round((teams.length === 2 ? 16 : 15) * Math.max(layoutScale, 0.82)));
+        const benchNumberFontSize = Math.max(10, Math.round(12 * Math.max(layoutScale, 0.82)));
+        const benchNameFontSize = Math.max(10, Math.round(14 * Math.max(layoutScale, 0.82)));
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(8,8,10,0.74)';
+        ctx.strokeStyle = hexToRGBA(accent, 0.82);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x, columnY, columnWidth, columnHeight, 34);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        drawLogoBadge(ctx, { x: x + 58, y: logoY, size: logoSize, img: logo, label: team.name, rawLogo: team.logo, isDark: true });
+
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffffff';
+        setFittedFont(ctx, team.name.toUpperCase(), teamTitleMaxWidth, '900', titleFontSize, FONT_BODY, 18);
+        ctx.fillText(truncateTextToWidth(ctx, team.name.toUpperCase(), teamTitleMaxWidth), x + 96, titleY);
+        ctx.fillStyle = getMutedColor(true, 0.72);
+        ctx.font = `700 ${subtitleFontSize}px ${FONT_MONO}`;
+        ctx.fillText(
+            truncateTextToWidth(ctx, (team.lineupLabel || 'Titulares y suplentes').toUpperCase(), teamTitleMaxWidth),
+            x + 96,
+            subtitleY
+        );
+        ctx.restore();
+
+        starters.forEach((player, playerIndex) => {
+            const y = listStartY + playerIndex * (scaledStarterRowHeight + scaledStarterGap);
+            const numberLabel = String(player.number ?? playerIndex + 1).padStart(2, '0');
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+            const numberChipHeight = Math.max(16, scaledStarterRowHeight - Math.max(10, Math.round(16 * layoutScale)));
+            const numberChipY = y + Math.round((scaledStarterRowHeight - numberChipHeight) / 2);
+            ctx.save();
+            ctx.fillStyle = playerIndex % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.025)';
+            ctx.beginPath();
+            ctx.roundRect(x + 14, y, columnWidth - 28, scaledStarterRowHeight, Math.max(14, Math.round(18 * layoutScale)));
+            ctx.fill();
+            ctx.fillStyle = hexToRGBA(accent, 0.14);
+            ctx.beginPath();
+            ctx.roundRect(x + 24, numberChipY, 54, numberChipHeight, Math.max(10, Math.round(14 * layoutScale)));
+            ctx.fill();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `800 ${starterNumberFontSize}px ${FONT_MONO}`;
+            ctx.fillText(numberLabel, x + 51, y + scaledStarterRowHeight / 2 + 4);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#ffffff';
+            setFittedFont(ctx, playerLabel, columnWidth - 156, '800', starterNameFontSize, FONT_BODY, 10);
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 156), x + 94, y + scaledStarterRowHeight / 2 + 5);
+            ctx.restore();
+        });
+
+        if (bench.length > 0) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            const dividerY = benchHeaderY + Math.round(benchSectionHeight * 0.38);
+            ctx.moveTo(x + 18, dividerY);
+            ctx.lineTo(x + columnWidth * 0.34, dividerY);
+            ctx.moveTo(x + columnWidth * 0.66, dividerY);
+            ctx.lineTo(x + columnWidth - 18, dividerY);
+            ctx.stroke();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = getMutedColor(true, 0.76);
+            ctx.font = `800 ${Math.max(10, Math.round(12 * Math.max(layoutScale, 0.82)))}px ${FONT_BODY}`;
+            ctx.fillText('SUPLENTES', x + columnWidth / 2, benchHeaderY + Math.round(benchSectionHeight * 0.58));
+            ctx.restore();
+
+            bench.forEach((player, benchIndex) => {
+                const y = benchHeaderY + benchSectionHeight + benchIndex * (scaledBenchRowHeight + scaledBenchGap);
+                const numberLabel = String(player.number ?? starters.length + benchIndex + 1).padStart(2, '0');
+                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+                const numberChipHeight = Math.max(14, scaledBenchRowHeight - Math.max(8, Math.round(12 * layoutScale)));
+                const numberChipY = y + Math.round((scaledBenchRowHeight - numberChipHeight) / 2);
+                ctx.save();
+                ctx.globalAlpha = 0.86;
+                ctx.fillStyle = benchIndex % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)';
+                ctx.beginPath();
+                ctx.roundRect(x + 14, y, columnWidth - 28, scaledBenchRowHeight, Math.max(12, Math.round(16 * layoutScale)));
+                ctx.fill();
+                ctx.fillStyle = hexToRGBA(accent, 0.12);
+                ctx.beginPath();
+                ctx.roundRect(x + 24, numberChipY, 50, numberChipHeight, Math.max(9, Math.round(12 * layoutScale)));
+                ctx.fill();
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `800 ${benchNumberFontSize}px ${FONT_MONO}`;
+                ctx.fillText(numberLabel, x + 49, y + scaledBenchRowHeight / 2 + 4);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#ffffff';
+                setFittedFont(ctx, playerLabel, columnWidth - 152, '800', benchNameFontSize, FONT_BODY, 10);
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 152), x + 88, y + scaledBenchRowHeight / 2 + 4);
+                ctx.restore();
+            });
+        }
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawMomentumPlayoffBracket(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: PlayoffBracketData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => round.matches?.length) : [];
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const logos = await Promise.all(
+        rounds.flatMap((round) =>
+            round.matches.flatMap((match) => [
+                loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
+                loadImage(getBracketParticipantLogo(match.away_team || null, match.away_participant || null)),
+            ]),
+        ),
+    );
+
+    drawMomentumBackdrop(ctx, canvas, accentColor, bgColor);
+    drawMomentumHeroTitle(ctx, data.title || 'Playoff', canvas.width / 2, 128, canvas.width - 160, 84, '#ffffff', 'center');
+    if (data.subtitle) {
+        drawMomentumKicker(ctx, canvas.width / 2, 164, data.subtitle, getMutedColor(true, 0.72), 'center');
+    }
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, { x: 90, y: 92, size: 56, img: tournamentLogo, label: data.title, rawLogo: data.tournamentLogo, isDark: true });
+    }
+
+    if (!rounds.length) {
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.font = `700 24px ${FONT_BODY}`;
+        ctx.fillText('No hay cruces cargados para exportar.', canvas.width / 2, canvas.height / 2);
+        ctx.restore();
+        drawBrandFooter(ctx, canvas, brandLogo, true);
+        return;
+    }
+
+    const columnGap = 18;
+    const columnWidth = (canvas.width - 112 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
+    const top = 220;
+    const usableHeight = canvas.height - top - 176;
+    let logoIndex = 0;
+
+    rounds.forEach((round, roundIndex) => {
+        const x = 56 + roundIndex * (columnWidth + columnGap);
+        const titleHeight = 42;
+        const gap = 16;
+        const matchHeight = Math.min(126, (usableHeight - titleHeight - 18 - gap * Math.max(round.matches.length - 1, 0)) / Math.max(round.matches.length, 1));
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.beginPath();
+        ctx.roundRect(x, top, columnWidth, titleHeight, 999);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.font = `800 16px ${FONT_BODY}`;
+        ctx.fillText(round.name.toUpperCase(), x + columnWidth / 2, top + 27);
+        ctx.restore();
+
+        round.matches.forEach((match, matchIndex) => {
+            const y = top + titleHeight + 18 + matchIndex * (matchHeight + gap);
+            const homeName = getBracketParticipantName(match.home_team || null, match.home_participant || null);
+            const awayName = getBracketParticipantName(match.away_team || null, match.away_participant || null);
+            const homeLogo = logos[logoIndex] || null;
+            const awayLogo = logos[logoIndex + 1] || null;
+            logoIndex += 2;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(9,9,12,0.74)';
+            ctx.strokeStyle = hexToRGBA(accentColor, 0.56);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(x, y, columnWidth, matchHeight, 24);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            drawLogoBadge(ctx, { x: x + 28, y: y + 40, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true });
+            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 40, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true });
+
+            ctx.save();
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            setFittedFont(ctx, homeName.toUpperCase(), columnWidth - 110, '800', 14, FONT_BODY, 10);
+            ctx.fillText(homeName.toUpperCase(), x + 52, y + 46);
+            setFittedFont(ctx, awayName.toUpperCase(), columnWidth - 110, '800', 14, FONT_BODY, 10);
+            ctx.fillText(awayName.toUpperCase(), x + 52, y + matchHeight - 34);
+            ctx.textAlign = 'right';
+            ctx.font = `900 26px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillText(String(match.score_home ?? '-'), x + columnWidth - 20, y + 47);
+            ctx.fillText(String(match.score_away ?? '-'), x + columnWidth - 20, y + matchHeight - 33);
+            ctx.restore();
+        });
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawMomentumPlayerStats(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: PlayerStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const isStory = format.height > format.width;
+    const photo = await loadImage(data.photo || '');
+    const supportColor = mixHexColors(accentColor, '#eab308', 0.54);
+
+    drawMomentumBackdrop(ctx, canvas, accentColor, bgColor);
+    drawMomentumKicker(ctx, 60, 74, `${data.team} • ${data.position}`, getMutedColor(true, 0.72));
+    drawMomentumHeroTitle(ctx, 'Jugador destacado', 60, 168, canvas.width - 120, isStory ? 102 : 94, '#f3dfbb');
+
+    drawMomentumImageCover(ctx, photo, 58, 214, canvas.width - 116, canvas.height - 454, 44, 'rgba(0,0,0,0.18)');
+
+    ctx.save();
+    const photoShade = ctx.createLinearGradient(58, 214, 58, canvas.height - 240);
+    photoShade.addColorStop(0, 'rgba(0,0,0,0.02)');
+    photoShade.addColorStop(0.62, 'rgba(0,0,0,0.12)');
+    photoShade.addColorStop(1, 'rgba(0,0,0,0.82)');
+    ctx.fillStyle = photoShade;
+    ctx.beginPath();
+    ctx.roundRect(58, 214, canvas.width - 116, canvas.height - 454, 44);
+    ctx.fill();
+    ctx.restore();
+
+    drawMomentumHeroTitle(ctx, data.name, 76, canvas.height - 302, canvas.width - 152, isStory ? 112 : 96, '#ffffff');
+
+    const stats = data.stats.slice(0, isStory ? 4 : 3);
+    const cardWidth = (canvas.width - 144 - stats.length * 16) / Math.max(stats.length, 1);
+    stats.forEach((stat, index) => {
+        const x = 72 + index * (cardWidth + 16);
+        const y = canvas.height - 258;
+        const tone = stat.highlight ? supportColor : accentColor;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(8,8,10,0.82)';
+        ctx.strokeStyle = hexToRGBA(tone, 0.7);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x, y, cardWidth, 112, 22);
+        ctx.fill();
+        ctx.stroke();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = getMutedColor(true, 0.76);
+        ctx.font = `700 14px ${FONT_BODY}`;
+        ctx.fillText(stat.label.toUpperCase(), x + 18, y + 30);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `900 52px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText(String(stat.value), x + 18, y + 86);
+        ctx.restore();
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+function drawPosterV3Backdrop(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    accentColor: string,
+    bgColor: string
+) {
+    const palette = resolvePosterV3GradientPalette(bgColor, accentColor);
+    const frameColor = getContrastColor(palette.base) === '#ffffff'
+        ? hexToRGBA('#ffffff', 0.12)
+        : hexToRGBA('#111827', 0.12);
+
+    ctx.fillStyle = palette.base;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const baseGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    baseGradient.addColorStop(0, palette.start);
+    baseGradient.addColorStop(0.5, palette.mid);
+    baseGradient.addColorStop(1, palette.end);
+    ctx.fillStyle = baseGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let index = 0; index < 6; index += 1) {
+        const beamX = canvas.width * (0.08 + index * 0.16);
+        const beamWidth = Math.max(48, canvas.width * 0.038);
+        const beam = ctx.createLinearGradient(beamX, 0, beamX + beamWidth, 0);
+        beam.addColorStop(0, 'rgba(255,255,255,0)');
+        beam.addColorStop(0.4, hexToRGBA(index % 2 === 0 ? palette.accentPrimary : palette.accentSecondary, 0.14));
+        beam.addColorStop(0.6, hexToRGBA(index % 2 === 0 ? palette.accentPrimary : palette.accentSecondary, 0.08));
+        beam.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = beam;
+        ctx.fillRect(beamX, 0, beamWidth, canvas.height);
+    }
+
+    const topGlow = ctx.createRadialGradient(canvas.width * 0.28, canvas.height * 0.08, 0, canvas.width * 0.28, canvas.height * 0.08, canvas.width * 0.6);
+    topGlow.addColorStop(0, hexToRGBA(palette.accentPrimary, 0.22));
+    topGlow.addColorStop(0.42, hexToRGBA(palette.accentPrimary, 0.05));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = frameColor;
+    ctx.lineWidth = 1;
+    for (let y = 0; y <= canvas.height; y += 8) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(canvas.width, y + 0.5);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.fillStyle = palette.accentPrimary;
+    ctx.fillRect(0, 0, canvas.width, 4);
+    ctx.fillRect(0, canvas.height - 4, canvas.width, 4);
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(palette.accentPrimary, 0.28);
+    ctx.lineWidth = 2;
+    [
+        [[92, 52], [166, 34], [188, 112]],
+        [[canvas.width - 250, 62], [canvas.width - 170, 28], [canvas.width - 126, 104]],
+        [[canvas.width * 0.32, 70], [canvas.width * 0.4, 48], [canvas.width * 0.44, 122]],
+    ].forEach((triangle) => {
+        ctx.beginPath();
+        ctx.moveTo(triangle[0][0], triangle[0][1]);
+        ctx.lineTo(triangle[1][0], triangle[1][1]);
+        ctx.lineTo(triangle[2][0], triangle[2][1]);
+        ctx.closePath();
+        ctx.stroke();
+    });
+    ctx.restore();
+}
+
+function resolvePosterV3GradientPalette(bgColor: string, accentColor: string) {
+    const isDarkSurface = getContrastColor(bgColor) === '#ffffff';
+    const base = bgColor;
+    const start = isDarkSurface
+        ? mixHexColors(bgColor, accentColor, 0.18)
+        : mixHexColors(bgColor, accentColor, 0.08);
+    const mid = isDarkSurface
+        ? mixHexColors(bgColor, '#080808', 0.16)
+        : mixHexColors(bgColor, '#ffffff', 0.04);
+    const end = isDarkSurface
+        ? mixHexColors(bgColor, '#000000', 0.3)
+        : mixHexColors(bgColor, '#dfe3e8', 0.12);
+    const accentPrimary = mixHexColors(accentColor, '#ffffff', isDarkSurface ? 0.12 : 0.22);
+    const accentSecondary = mixHexColors(accentColor, bgColor, isDarkSurface ? 0.2 : 0.14);
+
+    return {
+        isDarkSurface,
+        base,
+        start,
+        mid,
+        end,
+        accentPrimary,
+        accentSecondary,
+    };
+}
+
+function drawPosterV3Kicker(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    text: string,
+    color: string,
+    align: CanvasTextAlign = 'left'
+) {
+    ctx.save();
+    ctx.textAlign = align;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = color;
+    ctx.font = `800 16px ${FONT_MONO}`;
+    ctx.fillText(text.toUpperCase(), x, y);
+    ctx.restore();
+}
+
+function drawPosterV3OutlineTitle(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    size: number,
+    color: string,
+    align: CanvasTextAlign = 'left'
+) {
+    ctx.save();
+    ctx.textAlign = align;
+    ctx.textBaseline = 'alphabetic';
+    setFittedFont(ctx, text.toUpperCase(), maxWidth, '900', size, FONT_EDITORIAL_SCORE, 26);
+    ctx.lineJoin = 'round';
+    ctx.miterLimit = 2;
+    ctx.lineWidth = Math.max(2, Math.round(size * 0.042));
+    ctx.strokeStyle = color;
+    ctx.strokeText(truncateTextToWidth(ctx, text.toUpperCase(), maxWidth), x, y);
+    ctx.restore();
+}
+
+function drawPosterV3SolidTitle(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    size: number,
+    color: string,
+    align: CanvasTextAlign = 'left'
+) {
+    ctx.save();
+    ctx.textAlign = align;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = color;
+    setFittedFont(ctx, text.toUpperCase(), maxWidth, '900', size, FONT_EDITORIAL_SCORE, 24);
+    ctx.fillText(truncateTextToWidth(ctx, text.toUpperCase(), maxWidth), x, y);
+    ctx.restore();
+}
+
+function drawPosterV3Panel(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    fill: string,
+    stroke: string,
+    radius = 22,
+    lineWidth = 2
+) {
+    ctx.save();
+    ctx.fillStyle = fill;
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawPosterV3VerticalSideLabel(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    centerX: number,
+    centerY: number,
+    maxWidth: number,
+    size: number,
+    color: string
+) {
+    const normalized = text.trim().toUpperCase();
+    if (!normalized) return;
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    ctx.strokeStyle = hexToRGBA(getContrastColor(color) === '#ffffff' ? '#000000' : '#ffffff', 0.16);
+    ctx.lineWidth = Math.max(2, Math.round(size * 0.03));
+    setFittedFont(ctx, normalized, maxWidth, '900', size, FONT_EDITORIAL_SCORE, 58);
+    const finalText = truncateTextToWidth(ctx, normalized, maxWidth);
+    ctx.strokeText(finalText, 0, 0);
+    ctx.fillText(finalText, 0, 0);
+    ctx.restore();
+}
+
+function drawPosterV3TrophyMark(
+    ctx: CanvasRenderingContext2D,
+    centerX: number,
+    centerY: number,
+    size: number,
+    color: string
+) {
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.2, -size * 0.22);
+    ctx.bezierCurveTo(-size * 0.32, -size * 0.22, -size * 0.32, size * 0.02, -size * 0.18, size * 0.1);
+    ctx.bezierCurveTo(-size * 0.08, size * 0.16, size * 0.08, size * 0.16, size * 0.18, size * 0.1);
+    ctx.bezierCurveTo(size * 0.32, size * 0.02, size * 0.32, -size * 0.22, size * 0.2, -size * 0.22);
+    ctx.quadraticCurveTo(size * 0.12, -size * 0.02, 0, size * 0.08);
+    ctx.quadraticCurveTo(-size * 0.12, -size * 0.02, -size * 0.2, -size * 0.22);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.lineWidth = Math.max(3, size * 0.055);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.22, -size * 0.14);
+    ctx.quadraticCurveTo(-size * 0.42, -size * 0.02, -size * 0.28, size * 0.14);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(size * 0.22, -size * 0.14);
+    ctx.quadraticCurveTo(size * 0.42, -size * 0.02, size * 0.28, size * 0.14);
+    ctx.stroke();
+
+    ctx.fillRect(-size * 0.045, size * 0.08, size * 0.09, size * 0.22);
+    ctx.beginPath();
+    ctx.roundRect(-size * 0.16, size * 0.26, size * 0.32, size * 0.08, size * 0.03);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(-size * 0.24, size * 0.37, size * 0.48, size * 0.09, size * 0.03);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawPosterV3BroadcastChip(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    label: string,
+    fillColor: string,
+    textColor: string,
+    logo: HTMLImageElement | null,
+    rawLogo?: string
+) {
+    ctx.save();
+    ctx.fillStyle = fillColor;
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, 10);
+    ctx.fill();
+    ctx.restore();
+
+    const iconSize = height - 16;
+    const iconX = x + 10 + iconSize / 2;
+    const iconY = y + height / 2;
+    drawOverflowCrest(ctx, {
+        x: iconX,
+        y: iconY,
+        width: iconSize,
+        height: iconSize,
+        img: logo,
+        label,
+        rawLogo,
+        isDark: getContrastColor(fillColor) === '#ffffff',
+        showFrame: false,
+    });
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = textColor;
+    setFittedFont(ctx, label.toUpperCase(), width - iconSize - 56, '800', 27, FONT_BODY, 14);
+    ctx.fillText(truncateTextToWidth(ctx, label.toUpperCase(), width - iconSize - 56), x + iconSize + 38, y + height / 2 + 1);
+    ctx.restore();
+}
+
+async function drawPosterV3SchedulePoster(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const sponsors = getActiveEditorialSponsors(buildEditorialSponsorSlots(data.sponsors)).slice(0, 2);
+    const [homeLogo, awayLogo, tournamentLogo, textureImage, ...broadcastLogos] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        loadImage(EDITORIAL_TEXTURE_SOURCE),
+        ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
+    ]);
+    const palette = resolvePosterV3GradientPalette(bgColor, accentColor);
+    const paperColor = palette.isDarkSurface
+        ? mixHexColors('#f5f0e7', bgColor, 0.1)
+        : mixHexColors('#fffdf8', bgColor, 0.14);
+    const pageBase = palette.isDarkSurface
+        ? mixHexColors(bgColor, '#020617', 0.34)
+        : mixHexColors(bgColor, '#f1f5f9', 0.16);
+    const pageShade = palette.isDarkSurface
+        ? mixHexColors(bgColor, '#000000', 0.56)
+        : mixHexColors(bgColor, '#cbd5e1', 0.2);
+    const leftRailColor = getContrastColor(accentColor) === '#ffffff'
+        ? mixHexColors(accentColor, '#ffffff', 0.06)
+        : mixHexColors(accentColor, '#0f172a', 0.08);
+    const rightRailColor = getContrastColor(bgColor) === '#ffffff'
+        ? mixHexColors(bgColor, '#020617', 0.26)
+        : mixHexColors(bgColor, '#111827', 0.74);
+    const paperTextColor = getContrastColor(paperColor);
+    const leftRailText = getContrastColor(leftRailColor);
+    const rightRailText = getContrastColor(rightRailColor);
+    const outlineColor = hexToRGBA(paperTextColor === '#ffffff' ? '#ffffff' : '#0f172a', 0.12);
+    const frameX = 86;
+    const frameY = 68;
+    const frameWidth = canvas.width - frameX * 2;
+    const frameHeight = canvas.height - frameY * 2;
+    const sideWidth = 286;
+    const centerWidth = frameWidth - sideWidth * 2;
+    const leftX = frameX;
+    const centerX = leftX + sideWidth;
+    const rightX = centerX + centerWidth;
+    const contentCenterX = centerX + centerWidth / 2;
+    const headlineTop = frameY + 130;
+    const dateTop = frameY + 420;
+    const versusCenterY = frameY + 670;
+    const broadcastTop = frameY + 920;
+    const competitionText = (data.tournament || 'CAMPEONATO').toUpperCase();
+    const competitionLayout = fitTextLinesToWidth(ctx, competitionText, centerWidth - 92, '900', 38, FONT_BODY, 20, 2);
+    const dateLabel = (data.date || buildEditorialContextLabel(data) || 'PROXIMO PARTIDO').toUpperCase();
+    const timeLabel = (data.time || '--:--').toUpperCase();
+    const venueLabel = (data.venue || '').trim().toUpperCase();
+    const broadcastItems = sponsors.map((sponsor, index) => ({
+        label: sponsor.name?.trim() || `CANAL ${index + 1}`,
+        logo: broadcastLogos[index] || null,
+        rawLogo: sponsor.logo,
+        fill: index === 0
+            ? mixHexColors(accentColor, paperColor, 0.08)
+            : rightRailColor,
+    }));
+
+    if (broadcastItems.length === 0) {
+        broadcastItems.push({
+            label: 'G22 SCORES',
+            logo: brandLogo,
+            rawLogo: '/icon.png',
+            fill: mixHexColors(accentColor, paperColor, 0.08),
+        });
+    }
+    if (broadcastItems.length === 1) {
+        broadcastItems.push({
+            label: tournamentLogo ? (data.tournament || 'TORNEO') : 'AO VIVO',
+            logo: tournamentLogo || null,
+            rawLogo: data.tournamentLogo,
+            fill: rightRailColor,
+        });
+    }
+
+    ctx.fillStyle = pageBase;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const pageGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    pageGradient.addColorStop(0, mixHexColors(pageBase, accentColor, 0.14));
+    pageGradient.addColorStop(0.45, pageBase);
+    pageGradient.addColorStop(1, pageShade);
+    ctx.fillStyle = pageGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(accentColor, 0.18);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width * 0.72, -64);
+    ctx.bezierCurveTo(canvas.width * 0.92, 10, canvas.width * 1.04, 120, canvas.width * 0.94, 306);
+    ctx.lineTo(canvas.width, 306);
+    ctx.lineTo(canvas.width, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(rightRailColor, 0.16);
+    ctx.beginPath();
+    ctx.moveTo(-48, canvas.height - 180);
+    ctx.bezierCurveTo(96, canvas.height - 310, 242, canvas.height - 250, 314, canvas.height - 108);
+    ctx.lineTo(148, canvas.height + 32);
+    ctx.lineTo(-48, canvas.height + 32);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    if (textureImage) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.globalAlpha = 0.12;
+        ctx.drawImage(textureImage, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.18)';
+    ctx.shadowBlur = 26;
+    ctx.shadowOffsetY = 16;
+    ctx.fillStyle = paperColor;
+    ctx.beginPath();
+    ctx.roundRect(frameX, frameY, frameWidth, frameHeight, 0);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = leftRailColor;
+    ctx.fillRect(leftX, frameY, sideWidth, frameHeight);
+    ctx.fillStyle = paperColor;
+    ctx.fillRect(centerX, frameY, centerWidth, frameHeight);
+    ctx.fillStyle = rightRailColor;
+    ctx.fillRect(rightX, frameY, sideWidth, frameHeight);
+
+    ctx.save();
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = 1;
+    for (let y = frameY + 58; y < frameY + frameHeight - 58; y += 48) {
+        ctx.beginPath();
+        ctx.moveTo(centerX, y + 0.5);
+        ctx.lineTo(centerX + centerWidth, y + 0.5);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(rightRailText === '#ffffff' ? '#ffffff' : '#0f172a', 0.08);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(rightX + 52, frameY + 286, sideWidth - 104, sideWidth - 104, 28);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(rightX + sideWidth / 2, frameY + 432, 56, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(rightX + sideWidth / 2, frameY + 286);
+    ctx.lineTo(rightX + sideWidth / 2, frameY + 578);
+    ctx.moveTo(rightX + 52, frameY + 432);
+    ctx.lineTo(rightX + sideWidth - 52, frameY + 432);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(leftRailText === '#ffffff' ? '#ffffff' : '#0f172a', 0.08);
+    ctx.lineWidth = 2;
+    for (let offset = -frameHeight; offset < frameWidth; offset += 92) {
+        ctx.beginPath();
+        ctx.moveTo(leftX + offset, frameY);
+        ctx.lineTo(leftX + offset + 220, frameY + frameHeight);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    drawPosterV3VerticalSideLabel(
+        ctx,
+        data.homeTeam,
+        leftX + sideWidth / 2,
+        frameY + frameHeight / 2,
+        frameHeight - 140,
+        164,
+        leftRailText
+    );
+    drawPosterV3VerticalSideLabel(
+        ctx,
+        data.awayTeam,
+        rightX + sideWidth / 2,
+        frameY + frameHeight / 2,
+        frameHeight - 140,
+        164,
+        rightRailText
+    );
+
+    const leftBadgeSize = 116;
+    const leftBadgeX = leftX + sideWidth / 2 - leftBadgeSize / 2;
+    const leftBadgeY = frameY + frameHeight - 184;
+    const rightBadgeSize = 116;
+    const rightBadgeX = rightX + sideWidth / 2 - rightBadgeSize / 2;
+    const rightBadgeY = frameY + 82;
+
+    drawPosterV3Panel(
+        ctx,
+        leftBadgeX,
+        leftBadgeY,
+        leftBadgeSize,
+        leftBadgeSize,
+        mixHexColors(rightRailColor, '#000000', 0.16),
+        hexToRGBA(leftRailText === '#ffffff' ? '#ffffff' : '#0f172a', 0.16),
+        0,
+        1.5
+    );
+    drawPosterV3Panel(
+        ctx,
+        rightBadgeX,
+        rightBadgeY,
+        rightBadgeSize,
+        rightBadgeSize,
+        mixHexColors(accentColor, rightRailColor, 0.24),
+        hexToRGBA(rightRailText === '#ffffff' ? '#ffffff' : '#0f172a', 0.14),
+        0,
+        1.5
+    );
+
+    drawOverflowCrest(ctx, {
+        x: leftX + sideWidth / 2,
+        y: leftBadgeY + leftBadgeSize / 2,
+        width: 86,
+        height: 86,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: getContrastColor(mixHexColors(rightRailColor, '#000000', 0.16)) === '#ffffff',
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: rightX + sideWidth / 2,
+        y: rightBadgeY + rightBadgeSize / 2,
+        width: 86,
+        height: 86,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: getContrastColor(mixHexColors(accentColor, rightRailColor, 0.24)) === '#ffffff',
+        showFrame: false,
+    });
+
+    if (tournamentLogo) {
+        drawNeutralizedBackdropMark(ctx, tournamentLogo, contentCenterX, frameY + 546, 222, 222, accentColor, 0.05);
+    }
+
+    drawPosterV3TrophyMark(ctx, contentCenterX, headlineTop, 70, accentColor);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = paperTextColor;
+    competitionLayout.lines.forEach((line, index) => {
+        ctx.font = `${index === 0 ? '800' : '900'} ${competitionLayout.size}px ${FONT_BODY}`;
+        ctx.fillText(line, contentCenterX, headlineTop + 96 + index * (competitionLayout.size + 6));
+    });
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = hexToRGBA(paperTextColor, 0.94);
+    setFittedFont(ctx, dateLabel, centerWidth - 84, '900', 74, FONT_EDITORIAL_SCORE, 38);
+    ctx.fillText(truncateTextToWidth(ctx, dateLabel, centerWidth - 84), contentCenterX, dateTop);
+    ctx.font = `900 48px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(`- ${timeLabel}`, contentCenterX, dateTop + 72);
+    if (venueLabel) {
+        ctx.fillStyle = hexToRGBA(paperTextColor, 0.68);
+        ctx.font = `800 18px ${FONT_MONO}`;
+        ctx.fillText(truncateTextToWidth(ctx, venueLabel, centerWidth - 96), contentCenterX, dateTop + 118);
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(contentCenterX, versusCenterY);
+    ctx.scale(0.72, 1.08);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = hexToRGBA(paperTextColor, 0.96);
+    ctx.font = `900 244px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText('VS', 0, 0);
+    ctx.restore();
+
+    const chipWidth = centerWidth - 100;
+    const firstChipY = broadcastTop;
+    const secondChipY = firstChipY + 72;
+    drawPosterV3BroadcastChip(
+        ctx,
+        contentCenterX - chipWidth / 2,
+        firstChipY,
+        chipWidth,
+        52,
+        broadcastItems[0].label,
+        broadcastItems[0].fill,
+        getContrastColor(broadcastItems[0].fill),
+        broadcastItems[0].logo,
+        broadcastItems[0].rawLogo
+    );
+    drawPosterV3BroadcastChip(
+        ctx,
+        contentCenterX - chipWidth / 2,
+        secondChipY,
+        chipWidth,
+        52,
+        broadcastItems[1].label,
+        broadcastItems[1].fill,
+        getContrastColor(broadcastItems[1].fill),
+        broadcastItems[1].logo,
+        broadcastItems[1].rawLogo
+    );
+
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: frameX + frameWidth - 40,
+            y: frameY + frameHeight - 40,
+            size: 28,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark: getContrastColor(rightRailColor) === '#ffffff',
+        });
+    }
+}
+
+function drawPosterV3FullBleedImage(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    image: HTMLImageElement | null,
+    overlayTop: string,
+    overlayBottom: string
+) {
+    if (image) {
+        const sourceWidth = image.naturalWidth || image.width || canvas.width;
+        const sourceHeight = image.naturalHeight || image.height || canvas.height;
+        const scale = Math.max(canvas.width / sourceWidth, canvas.height / sourceHeight);
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        ctx.drawImage(image, (canvas.width - drawWidth) / 2, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
+    }
+
+    const overlay = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    overlay.addColorStop(0, overlayTop);
+    overlay.addColorStop(0.55, 'rgba(0,0,0,0.24)');
+    overlay.addColorStop(1, overlayBottom);
+    ctx.fillStyle = overlay;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawPosterV3MetadataBand(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    label: string,
+    accentColor: string
+) {
+    if (!label.trim()) return;
+
+    ctx.save();
+    ctx.font = `800 18px ${FONT_MONO}`;
+    const textWidth = ctx.measureText(label.toUpperCase()).width;
+    const pillWidth = Math.min(canvas.width - 120, textWidth + 42);
+    drawPosterV3Panel(ctx, (canvas.width - pillWidth) / 2, canvas.height - 158, pillWidth, 44, hexToRGBA(accentColor, 0.16), hexToRGBA(accentColor, 0.76), 999, 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(label.toUpperCase(), canvas.width / 2, canvas.height - 136);
+    ctx.restore();
+}
+
+function getPosterV3ClassicHeroTitle(data: MatchStatsData): string {
+    const label = (data.mainTitle || '').trim().toLowerCase();
+    if (data.status === 'scheduled' || label === 'horario') return 'MATCH TIME';
+    if (data.status === 'live') return 'LIVE SCORE';
+    return 'FULL TIME';
+}
+
+function splitPosterV3HeroTitle(text: string): [string, string] {
+    const parts = text.trim().toUpperCase().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+        return [parts[0], parts.slice(1).join(' ')];
+    }
+    return [parts[0] || '', ''];
+}
+
+function drawPosterV3SlashedHeadline(
+    ctx: CanvasRenderingContext2D,
+    centerX: number,
+    topY: number,
+    text: string,
+    maxWidth: number,
+    size: number,
+    color: string,
+    slashColor: string
+) {
+    const [firstLine, secondLine] = splitPosterV3HeroTitle(text);
+    const firstBaselineY = topY + size * 0.84;
+    const secondSize = Math.round(size * 0.86);
+    const secondBaselineY = firstBaselineY + (secondLine ? size * 0.64 : 0);
+
+    if (firstLine) {
+        drawPosterV3SolidTitle(ctx, firstLine, centerX, firstBaselineY, maxWidth, size, color, 'center');
+    }
+    if (secondLine) {
+        drawPosterV3SolidTitle(ctx, secondLine, centerX, secondBaselineY, maxWidth * 0.96, secondSize, color, 'center');
+    }
+
+    ctx.save();
+    ctx.strokeStyle = slashColor;
+    ctx.lineWidth = Math.max(6, Math.round(size * 0.085));
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(centerX - maxWidth * 0.18, secondLine ? secondBaselineY - secondSize * 0.18 : firstBaselineY + size * 0.06);
+    ctx.lineTo(centerX + maxWidth * 0.06, firstBaselineY - size * 0.74);
+    ctx.stroke();
+    ctx.restore();
+}
+
+function buildPosterV3MatchSideNotes(data: MatchStatsData, isScheduled: boolean): {
+    leftLines: string[];
+    rightLines: string[];
+} {
+    const stats = data.stats
+        .filter((stat) => stat && stat.label)
+        .slice(0, 3);
+
+    if (!isScheduled && stats.length > 0) {
+        return {
+            leftLines: stats.map((stat) => `${String(stat.home)} ${stat.label}`.trim().toUpperCase()),
+            rightLines: stats.map((stat) => `${String(stat.away)} ${stat.label}`.trim().toUpperCase()),
+        };
+    }
+
+    const fallbackLines = [data.date, data.time, data.venue, data.tournament]
+        .filter(Boolean)
+        .map((value) => String(value).trim().toUpperCase())
+        .filter(Boolean)
+        .slice(0, 4);
+
+    if (fallbackLines.length === 0) {
+        return {
+            leftLines: [],
+            rightLines: [],
+        };
+    }
+
+    const splitIndex = Math.max(1, Math.ceil(fallbackLines.length / 2));
+    const leftLines = fallbackLines.slice(0, splitIndex);
+    const rightLines = fallbackLines.slice(splitIndex);
+
+    if (rightLines.length === 0 && leftLines.length > 1) {
+        rightLines.push(leftLines[leftLines.length - 1]);
+        leftLines.pop();
+    }
+
+    return {
+        leftLines: leftLines.slice(0, 3),
+        rightLines: rightLines.slice(0, 3),
+    };
+}
+
+function drawPosterV3PaperMetadataBand(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    label: string,
+    fillColor: string
+) {
+    if (!label.trim()) return;
+
+    const textColor = getContrastColor(fillColor);
+    ctx.save();
+    ctx.font = `800 18px ${FONT_MONO}`;
+    const textWidth = ctx.measureText(label.toUpperCase()).width;
+    const pillWidth = Math.min(canvas.width - 132, textWidth + 54);
+    const x = (canvas.width - pillWidth) / 2;
+    const y = canvas.height - 174;
+
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+    ctx.shadowBlur = 22;
+    ctx.shadowOffsetY = 10;
+    ctx.fillStyle = fillColor;
+    ctx.beginPath();
+    ctx.roundRect(x, y, pillWidth, 48, 999);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(textColor === '#ffffff' ? '#ffffff' : '#0f172a', 0.14);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(x, y, pillWidth, 48, 999);
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = textColor;
+    ctx.font = `800 18px ${FONT_MONO}`;
+    ctx.fillText(label.toUpperCase(), canvas.width / 2, y + 24);
+    ctx.restore();
+}
+
+// Legacy editorial layout kept temporarily while the new poster split-panel version settles.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function drawPosterV3MatchEditorialLegacy(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    _format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    backgroundImageSrc: string
+) {
+    const sponsors = getActiveEditorialSponsors(buildEditorialSponsorSlots(data.sponsors));
+    const [backgroundImage, homeLogo, awayLogo, tournamentLogo, ...sponsorImages] = await Promise.all([
+        loadImage(backgroundImageSrc || data.backgroundImage || ''),
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
+    ]);
+    const neonAccent = mixHexColors(accentColor, '#d7ff00', 0.68);
+    const hotAccent = mixHexColors(accentColor, '#ff5fa2', 0.42);
+    const title = data.mainTitle || getStatusLabel(data.status);
+    const metaLine = [data.date, data.time, data.venue].filter(Boolean).join('  •  ');
+
+    drawPosterV3Backdrop(ctx, canvas, accentColor, bgColor);
+    drawPosterV3FullBleedImage(ctx, canvas, backgroundImage, 'rgba(2,5,10,0.24)', 'rgba(0,0,0,0.82)');
+
+    if (data.editorialShowTopBadge !== false && tournamentLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width / 2,
+            y: 84,
+            size: 72,
+            img: tournamentLogo,
+            label: data.tournament || 'Torneo',
+            rawLogo: data.tournamentLogo,
+            isDark: true,
+        });
+    }
+
+    drawPosterV3Kicker(ctx, canvas.width / 2, 146, (data.editorialContextLabel || data.tournament || 'Torneo').toUpperCase(), hexToRGBA('#ffffff', 0.84), 'center');
+    drawPosterV3OutlineTitle(ctx, title, canvas.width / 2, 254, canvas.width - 128, 118, hexToRGBA('#ffffff', 0.34), 'center');
+
+    drawLogoBadge(ctx, { x: 176, y: 390, size: 102, img: homeLogo, label: data.homeTeam, rawLogo: data.homeLogo, isDark: true });
+    drawLogoBadge(ctx, { x: canvas.width - 176, y: 390, size: 102, img: awayLogo, label: data.awayTeam, rawLogo: data.awayLogo, isDark: true });
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = hotAccent;
+    setFittedFont(ctx, String(data.homeScore ?? '-'), 250, '900', 248, FONT_EDITORIAL_SCORE, 120);
+    ctx.fillText(String(data.homeScore ?? '-'), canvas.width / 2 - 186, 474);
+    setFittedFont(ctx, String(data.awayScore ?? '-'), 250, '900', 248, FONT_EDITORIAL_SCORE, 120);
+    ctx.fillText(String(data.awayScore ?? '-'), canvas.width / 2 + 186, 474);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 128px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(':', canvas.width / 2, 456);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#ffffff';
+    setFittedFont(ctx, data.homeTeam.toUpperCase(), 286, '900', 46, FONT_BODY, 18);
+    ctx.fillText(truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), 286), 176, 546);
+    setFittedFont(ctx, data.awayTeam.toUpperCase(), 286, '900', 46, FONT_BODY, 18);
+    ctx.fillText(truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), 286), canvas.width - 176, 546);
+    ctx.restore();
+
+    drawPosterV3MetadataBand(ctx, canvas, metaLine, neonAccent);
+
+    if (sponsors.length > 0) {
+        drawEditorialSponsorsRow(ctx, canvas, sponsors, sponsorImages, brandLogo, canvas.height - 64, 40, 16);
+    } else {
+        drawBrandFooter(ctx, canvas, brandLogo, true);
+    }
+}
+
+async function drawPosterV3MatchEditorial(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    _format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    backgroundImageSrc: string
+) {
+    const isScheduled = data.status === 'scheduled' || (data.mainTitle || '').trim().toLowerCase() === 'horario';
+
+    if (isScheduled) {
+        await drawPosterV3SchedulePoster(ctx, canvas, data, accentColor, bgColor, brandLogo);
+        return;
+    }
+
+    const sponsors = getActiveEditorialSponsors(buildEditorialSponsorSlots(data.sponsors));
+    const leadSponsor = sponsors[0] || null;
+    const [backgroundImage, homeLogo, awayLogo, tournamentLogo, sponsorLogo] = await Promise.all([
+        loadImage(backgroundImageSrc || data.backgroundImage || ''),
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+        loadImage(leadSponsor?.logo || ''),
+    ]);
+    const photoHeight = 792;
+    const panelTop = photoHeight;
+    const panelHeight = canvas.height - panelTop;
+    const panelBg = mixHexColors(bgColor, '#000000', 0.82);
+    const titleColor = '#ffffff';
+    const secondaryText = 'rgba(255,255,255,0.74)';
+    const scoreStroke = hexToRGBA('#ffffff', 0.88);
+    const accentGlow = mixHexColors(accentColor, '#ffffff', 0.18);
+    const leftBlockX = 40;
+    const leftBlockWidth = 336;
+    const scoreBoxX = 430;
+    const scoreBoxY = panelTop + 56;
+    const scoreBoxWidth = canvas.width - scoreBoxX - 40;
+    const scoreBoxHeight = 206;
+    const scoreBandHeight = 46;
+    const scoreTopHeight = scoreBoxHeight - scoreBandHeight;
+    const heroLabel = (data.editorialContextLabel?.trim() || data.mainTitle || getStatusLabel(data.status)).toUpperCase();
+    const [heroLineOne, heroLineTwo] = splitPosterV3HeroTitle(heroLabel);
+    const sponsorText = leadSponsor?.name?.trim()
+        ? `Presented by ${leadSponsor.name.trim()}`
+        : 'Presented by G22 Scores';
+    const metaLine = [data.date, data.time, data.venue].filter(Boolean).join('  •  ');
+    const infoLine = metaLine || (data.tournament || '').toUpperCase();
+
+    if (backgroundImage) {
+        drawCoverImage(ctx, canvas, backgroundImage);
+    } else {
+        const fallbackGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        fallbackGradient.addColorStop(0, mixHexColors(accentColor, '#0b1220', 0.64));
+        fallbackGradient.addColorStop(1, mixHexColors(bgColor, '#030712', 0.86));
+        ctx.fillStyle = fallbackGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.save();
+    const photoOverlay = ctx.createLinearGradient(0, 0, 0, photoHeight);
+    photoOverlay.addColorStop(0, 'rgba(0,0,0,0.14)');
+    photoOverlay.addColorStop(0.68, 'rgba(0,0,0,0.12)');
+    photoOverlay.addColorStop(1, 'rgba(0,0,0,0.78)');
+    ctx.fillStyle = photoOverlay;
+    ctx.fillRect(0, 0, canvas.width, photoHeight);
+    ctx.restore();
+
+    ctx.save();
+    const leftGlow = ctx.createRadialGradient(180, 180, 0, 180, 180, 320);
+    leftGlow.addColorStop(0, hexToRGBA(accentGlow, 0.2));
+    leftGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = leftGlow;
+    ctx.fillRect(0, 0, canvas.width, photoHeight);
+    ctx.restore();
+
+    if (data.editorialShowTopBadge !== false) {
+        if (tournamentLogo) {
+            drawLogoBadge(ctx, {
+                x: 76,
+                y: 76,
+                size: 64,
+                img: tournamentLogo,
+                label: data.tournament || 'Torneo',
+                rawLogo: data.tournamentLogo,
+                isDark: true,
+            });
+        }
+
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `800 18px ${FONT_BODY}`;
+        ctx.fillText((data.tournament || 'TORNEO').toUpperCase(), tournamentLogo ? 118 : 44, 76);
+        ctx.restore();
+    }
+
+    if (data.editorialShowHeaderArrows !== false) {
+        ctx.save();
+        ctx.strokeStyle = hexToRGBA('#ffffff', 0.82);
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        const arrowBaseX = canvas.width - 126;
+        const arrowY = 64;
+        for (let index = 0; index < 3; index += 1) {
+            const x = arrowBaseX + index * 24;
+            ctx.beginPath();
+            ctx.moveTo(x, arrowY);
+            ctx.lineTo(x + 14, arrowY + 12);
+            ctx.lineTo(x, arrowY + 24);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    ctx.fillStyle = panelBg;
+    ctx.fillRect(0, panelTop, canvas.width, panelHeight);
+
+    ctx.save();
+    const panelAccent = ctx.createLinearGradient(0, panelTop, canvas.width, panelTop);
+    panelAccent.addColorStop(0, hexToRGBA(accentColor, 0.92));
+    panelAccent.addColorStop(0.3, hexToRGBA(accentGlow, 0.82));
+    panelAccent.addColorStop(1, hexToRGBA(accentColor, 0.12));
+    ctx.fillStyle = panelAccent;
+    ctx.fillRect(0, panelTop, canvas.width, 4);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    for (let y = panelTop + 18; y < canvas.height; y += 10) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = titleColor;
+    setFittedFont(ctx, heroLineOne || heroLabel, leftBlockWidth, '900', 86, FONT_EDITORIAL_SCORE, 52);
+    ctx.fillText(truncateTextToWidth(ctx, heroLineOne || heroLabel, leftBlockWidth), leftBlockX, panelTop + 42);
+    if (heroLineTwo) {
+        setFittedFont(ctx, heroLineTwo, leftBlockWidth, '900', 86, FONT_EDITORIAL_SCORE, 52);
+        ctx.fillText(truncateTextToWidth(ctx, heroLineTwo, leftBlockWidth), leftBlockX, panelTop + 130);
+    }
+    ctx.restore();
+
+    const sponsorY = panelTop + 250;
+    if (leadSponsor || brandLogo) {
+        drawOverflowCrest(ctx, {
+            x: leftBlockX + 22,
+            y: sponsorY + 16,
+            width: 40,
+            height: 40,
+            img: sponsorLogo || brandLogo,
+            label: leadSponsor?.name || 'G22 Scores',
+            rawLogo: leadSponsor?.logo || '/icon.png',
+            isDark: true,
+            showFrame: false,
+        });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = secondaryText;
+    ctx.font = `700 18px ${FONT_BODY}`;
+    ctx.fillText(sponsorText.toUpperCase(), leftBlockX + (leadSponsor || brandLogo ? 48 : 0), sponsorY + 16);
+    if (infoLine) {
+        ctx.font = `700 15px ${FONT_MONO}`;
+        ctx.fillStyle = 'rgba(255,255,255,0.58)';
+        ctx.fillText(infoLine.toUpperCase(), leftBlockX, sponsorY + 58);
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = scoreStroke;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(scoreBoxX, scoreBoxY, scoreBoxWidth, scoreBoxHeight);
+    ctx.beginPath();
+    ctx.moveTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY);
+    ctx.lineTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + scoreTopHeight);
+    ctx.moveTo(scoreBoxX, scoreBoxY + scoreTopHeight);
+    ctx.lineTo(scoreBoxX + scoreBoxWidth, scoreBoxY + scoreTopHeight);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = 'rgba(255,255,255,0.54)';
+    ctx.font = `800 12px ${FONT_MONO}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), scoreBoxWidth / 2 - 86), scoreBoxX + 20, scoreBoxY + 22);
+    ctx.textAlign = 'right';
+    ctx.fillText(truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), scoreBoxWidth / 2 - 86), scoreBoxX + scoreBoxWidth - 20, scoreBoxY + 22);
+    ctx.restore();
+
+    drawOverflowCrest(ctx, {
+        x: scoreBoxX + 86,
+        y: scoreBoxY + scoreTopHeight / 2 + 2,
+        width: 80,
+        height: 80,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: true,
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: scoreBoxX + scoreBoxWidth - 86,
+        y: scoreBoxY + scoreTopHeight / 2 + 2,
+        width: 80,
+        height: 80,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: true,
+        showFrame: false,
+    });
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    setFittedFont(ctx, String(data.homeScore ?? '-'), 120, '900', 108, FONT_EDITORIAL_SCORE, 68);
+    ctx.fillText(String(data.homeScore ?? '-'), scoreBoxX + scoreBoxWidth * 0.34, scoreBoxY + scoreTopHeight / 2 + 6);
+    setFittedFont(ctx, String(data.awayScore ?? '-'), 120, '900', 108, FONT_EDITORIAL_SCORE, 68);
+    ctx.fillText(String(data.awayScore ?? '-'), scoreBoxX + scoreBoxWidth * 0.66, scoreBoxY + scoreTopHeight / 2 + 6);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 24px ${FONT_MONO}`;
+    ctx.fillText(
+        truncateTextToWidth(ctx, (metaLine || buildEditorialContextLabel(data) || getStatusLabel(data.status)).toUpperCase(), scoreBoxWidth - 30),
+        scoreBoxX + scoreBoxWidth - 18,
+        scoreBoxY + scoreTopHeight + scoreBandHeight / 2
+    );
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(accentGlow, 0.92);
+    ctx.lineWidth = 14;
+    ctx.lineCap = 'round';
+    const brushY = canvas.height - 44;
+    [
+        [42, brushY, 116, brushY - 24],
+        [118, brushY + 2, 214, brushY - 32],
+        [194, brushY + 2, 316, brushY - 28],
+    ].forEach(([x1, y1, x2, y2]) => {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    });
+    ctx.restore();
+
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width - 44,
+            y: canvas.height - 42,
+            size: 26,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark: true,
+        });
+    }
+}
+
+// Legacy poster-v3 match result kept temporarily while the new classic layout settles.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function drawPosterV3MatchResultLegacy(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    _format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const [backgroundImage, homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+        loadImage(data.backgroundImage || ''),
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+    ]);
+    const neonAccent = mixHexColors(accentColor, '#d7ff00', 0.68);
+    const hotAccent = mixHexColors(accentColor, '#ff5fa2', 0.42);
+    const title = data.mainTitle || getStatusLabel(data.status);
+    const metaLine = [data.tournament, data.date, data.time, data.venue].filter(Boolean).join('  •  ');
+
+    drawPosterV3Backdrop(ctx, canvas, accentColor, bgColor);
+    if (backgroundImage) {
+        drawPosterV3FullBleedImage(ctx, canvas, backgroundImage, 'rgba(3,8,16,0.46)', 'rgba(0,0,0,0.88)');
+    } else if (tournamentLogo) {
+        drawNeutralizedBackdropMark(ctx, tournamentLogo, canvas.width / 2, canvas.height / 2 + 18, canvas.width * 0.56, canvas.width * 0.56, '#ffffff', 0.08);
+    }
+
+    drawPosterV3Kicker(ctx, canvas.width / 2, 120, (data.tournament || 'Torneo').toUpperCase(), hexToRGBA(neonAccent, 0.92), 'center');
+    drawPosterV3OutlineTitle(ctx, title, canvas.width / 2, 234, canvas.width - 120, 126, hexToRGBA('#ffffff', 0.34), 'center');
+
+    drawLogoBadge(ctx, { x: 190, y: 462, size: 108, img: homeLogo, label: data.homeTeam, rawLogo: data.homeLogo, isDark: true });
+    drawLogoBadge(ctx, { x: canvas.width - 190, y: 462, size: 108, img: awayLogo, label: data.awayTeam, rawLogo: data.awayLogo, isDark: true });
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = hotAccent;
+    setFittedFont(ctx, String(data.homeScore ?? '-'), 268, '900', 272, FONT_EDITORIAL_SCORE, 138);
+    ctx.fillText(String(data.homeScore ?? '-'), canvas.width / 2 - 194, 560);
+    setFittedFont(ctx, String(data.awayScore ?? '-'), 268, '900', 272, FONT_EDITORIAL_SCORE, 138);
+    ctx.fillText(String(data.awayScore ?? '-'), canvas.width / 2 + 194, 560);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 138px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(':', canvas.width / 2, 540);
+    ctx.restore();
+
+    drawPosterV3Panel(ctx, 82, canvas.height - 236, canvas.width - 164, 106, 'rgba(3, 9, 18, 0.84)', hexToRGBA(neonAccent, 0.7), 24, 2);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#ffffff';
+    setFittedFont(ctx, data.homeTeam.toUpperCase(), 328, '900', 48, FONT_BODY, 18);
+    ctx.fillText(truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), 328), 256, canvas.height - 174);
+    setFittedFont(ctx, data.awayTeam.toUpperCase(), 328, '900', 48, FONT_BODY, 18);
+    ctx.fillText(truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), 328), canvas.width - 256, canvas.height - 174);
+    ctx.fillStyle = hexToRGBA('#ffffff', 0.72);
+    ctx.font = `800 18px ${FONT_MONO}`;
+    ctx.fillText(metaLine.toUpperCase(), canvas.width / 2, canvas.height - 140);
+    ctx.restore();
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawPosterV3MatchResult(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    _format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const [backgroundImage, homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+        loadImage(data.backgroundImage || ''),
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(data.tournamentLogo || ''),
+    ]);
+    const isStory = canvas.height > canvas.width * 1.45;
+    const isScheduled = data.status === 'scheduled';
+
+    if (isScheduled && !isStory) {
+        await drawPosterV3SchedulePoster(ctx, canvas, data, accentColor, bgColor, brandLogo);
+        return;
+    }
+
+    const panelColor = getContrastColor(accentColor) === '#ffffff'
+        ? mixHexColors(accentColor, '#0f172a', 0.18)
+        : mixHexColors(accentColor, '#ffffff', 0.06);
+    const panelTextColor = getContrastColor(panelColor);
+    const frameColor = mixHexColors(bgColor, '#08111c', 0.82);
+    const cornerColor = mixHexColors(panelColor, bgColor, 0.38);
+    const bgIsDark = getContrastColor(bgColor) === '#ffffff';
+    const paperColor = bgIsDark
+        ? mixHexColors(bgColor, '#0b1220', 0.28)
+        : mixHexColors(bgColor, '#f3f4f6', 0.14);
+    const paperHighlight = bgIsDark
+        ? mixHexColors(bgColor, '#111827', 0.18)
+        : mixHexColors(paperColor, '#ffffff', 0.72);
+    const paperShade = bgIsDark
+        ? mixHexColors(bgColor, '#020617', 0.42)
+        : mixHexColors(paperColor, '#d9d0c3', 0.22);
+    const heroTitle = getPosterV3ClassicHeroTitle(data);
+    const metaLine = [data.tournament, data.date, data.time, data.venue].filter(Boolean).join('  •  ');
+
+    const topLeftSlice: Array<[number, number]> = [
+        [0, 0],
+        [canvas.width * 0.33, 0],
+        [canvas.width * 0.14, canvas.height * 0.34],
+        [0, canvas.height * 0.28],
+    ];
+    const bottomRightSlice: Array<[number, number]> = [
+        [canvas.width, canvas.height],
+        [canvas.width * 0.67, canvas.height],
+        [canvas.width * 0.86, canvas.height * 0.66],
+        [canvas.width, canvas.height * 0.72],
+    ];
+    const tracePolygon = (points: Array<[number, number]>) => {
+        ctx.beginPath();
+        ctx.moveTo(points[0][0], points[0][1]);
+        points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+        ctx.closePath();
+    };
+    const drawCoverImage = () => {
+        if (!backgroundImage) return;
+        const sourceWidth = backgroundImage.naturalWidth || backgroundImage.width || canvas.width;
+        const sourceHeight = backgroundImage.naturalHeight || backgroundImage.height || canvas.height;
+        const scale = Math.max(canvas.width / sourceWidth, canvas.height / sourceHeight);
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        ctx.drawImage(backgroundImage, (canvas.width - drawWidth) / 2, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
+    };
+    const drawCornerSlice = (
+        points: Array<[number, number]>,
+        gradientStart: [number, number],
+        gradientEnd: [number, number],
+        overlayAlpha: number
+    ) => {
+        ctx.save();
+        tracePolygon(points);
+        ctx.clip();
+        if (backgroundImage) {
+            drawCoverImage();
+        } else {
+            const fillGradient = ctx.createLinearGradient(gradientStart[0], gradientStart[1], gradientEnd[0], gradientEnd[1]);
+            fillGradient.addColorStop(0, panelColor);
+            fillGradient.addColorStop(1, cornerColor);
+            ctx.fillStyle = fillGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        const overlayGradient = ctx.createLinearGradient(gradientStart[0], gradientStart[1], gradientEnd[0], gradientEnd[1]);
+        overlayGradient.addColorStop(0, hexToRGBA(panelColor, overlayAlpha));
+        overlayGradient.addColorStop(0.55, hexToRGBA(cornerColor, overlayAlpha * 0.9));
+        overlayGradient.addColorStop(1, hexToRGBA(frameColor, overlayAlpha * 0.92));
+        ctx.fillStyle = overlayGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        ctx.save();
+        tracePolygon(points);
+        ctx.strokeStyle = hexToRGBA(panelTextColor === '#ffffff' ? '#ffffff' : frameColor, 0.12);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+    };
+    const scoreBlockSize = isScheduled ? (isStory ? 390 : 344) : (isStory ? 486 : 420);
+    const scoreBlockX = Math.round((canvas.width - scoreBlockSize) / 2);
+    const scoreBlockY = isStory ? 668 : 498;
+    const sideTabWidth = isStory ? 170 : 148;
+    const sideTabHeight = isStory ? 160 : 136;
+    const sideTabY = Math.round(scoreBlockY + scoreBlockSize / 2 - sideTabHeight / 2);
+    const leftTabX = scoreBlockX - sideTabWidth + 20;
+    const rightTabX = scoreBlockX + scoreBlockSize - 20;
+    const teamLabelY = scoreBlockY + scoreBlockSize + (isStory ? 76 : 62);
+    const notesTop = teamLabelY + (isStory ? 56 : 48);
+    const noteWidth = isStory ? 264 : 228;
+    const leftColumnX = isStory ? 224 : 198;
+    const rightColumnX = canvas.width - leftColumnX;
+    const noteLineGap = isStory ? 42 : 34;
+    const noteFontSize = isStory ? 22 : 19;
+    const noteHeadingSize = isStory ? 34 : 28;
+    const scoreValue = isScheduled
+        ? (data.time || '--:--')
+        : `${data.homeScore ?? '-'}-${data.awayScore ?? '-'}`;
+    const scoreFont = isScheduled ? FONT_MONO : FONT_EDITORIAL_SCORE;
+    const scoreFontSize = isScheduled ? (isStory ? 168 : 138) : (isStory ? 360 : 304);
+    const sideNotes = buildPosterV3MatchSideNotes(data, isScheduled);
+    const logoToneIsDark = panelTextColor === '#ffffff';
+    const sideAccentColor = accentColor;
+    const sideShadowColor = bgIsDark ? hexToRGBA('#000000', 0.52) : hexToRGBA(frameColor, 0.24);
+
+    ctx.fillStyle = paperColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const paperGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    paperGradient.addColorStop(0, paperHighlight);
+    paperGradient.addColorStop(0.42, paperColor);
+    paperGradient.addColorStop(1, paperShade);
+    ctx.fillStyle = paperGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = hexToRGBA(frameColor, 0.18);
+    ctx.lineWidth = 1;
+    for (let index = 0; index < 18; index += 1) {
+        const y = canvas.height * (0.05 + index * 0.052);
+        ctx.beginPath();
+        ctx.moveTo(canvas.width * 0.1, y);
+        ctx.lineTo(canvas.width * 0.9, y + (index % 2 === 0 ? 12 : -10));
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    drawCornerSlice(topLeftSlice, [0, 0], [canvas.width * 0.42, canvas.height * 0.34], backgroundImage ? 0.58 : 0.92);
+    drawCornerSlice(bottomRightSlice, [canvas.width * 0.58, canvas.height * 0.6], [canvas.width, canvas.height], backgroundImage ? 0.62 : 0.94);
+
+    if (tournamentLogo) {
+        drawNeutralizedBackdropMark(ctx, tournamentLogo, canvas.width * 0.11, canvas.height * 0.09, 240, 240, panelColor, 0.12);
+        drawNeutralizedBackdropMark(ctx, tournamentLogo, canvas.width * 0.9, canvas.height * 0.9, 240, 240, panelColor, 0.12);
+    }
+
+    ctx.fillStyle = panelColor;
+    ctx.fillRect(0, 0, canvas.width, 4);
+    ctx.fillRect(0, canvas.height - 4, canvas.width, 4);
+
+    drawPosterV3Kicker(ctx, canvas.width / 2, isStory ? 122 : 102, (data.tournament || 'TORNEO').toUpperCase(), hexToRGBA(frameColor, 0.88), 'center');
+    drawPosterV3SlashedHeadline(
+        ctx,
+        canvas.width / 2,
+        isStory ? 148 : 126,
+        heroTitle,
+        canvas.width - 320,
+        isStory ? 168 : 138,
+        panelColor,
+        hexToRGBA(panelColor, 0.9)
+    );
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = hexToRGBA(frameColor, 0.74);
+    ctx.font = `800 ${isStory ? 20 : 18}px ${FONT_MONO}`;
+    ctx.fillText((data.mainTitle || getStatusLabel(data.status)).toUpperCase(), canvas.width / 2, isStory ? 418 : 360);
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(9, 15, 24, 0.18)';
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 16;
+    ctx.fillStyle = cornerColor;
+    ctx.beginPath();
+    ctx.roundRect(leftTabX, sideTabY, sideTabWidth, sideTabHeight, 10);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(rightTabX, sideTabY, sideTabWidth, sideTabHeight, 10);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(9, 15, 24, 0.22)';
+    ctx.shadowBlur = 36;
+    ctx.shadowOffsetY = 18;
+    ctx.fillStyle = panelColor;
+    ctx.beginPath();
+    ctx.roundRect(scoreBlockX, scoreBlockY, scoreBlockSize, scoreBlockSize, 10);
+    ctx.fill();
+    ctx.restore();
+
+    drawOverflowCrest(ctx, {
+        x: leftTabX + sideTabWidth / 2,
+        y: sideTabY + sideTabHeight / 2,
+        width: isStory ? 96 : 82,
+        height: isStory ? 96 : 82,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: logoToneIsDark,
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: rightTabX + sideTabWidth / 2,
+        y: sideTabY + sideTabHeight / 2,
+        width: isStory ? 96 : 82,
+        height: isStory ? 96 : 82,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: logoToneIsDark,
+        showFrame: false,
+    });
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = panelTextColor;
+    setFittedFont(ctx, scoreValue, scoreBlockSize - (isScheduled ? 68 : 96), '900', scoreFontSize, scoreFont, isScheduled ? 82 : 180);
+    ctx.fillText(scoreValue, canvas.width / 2, scoreBlockY + scoreBlockSize / 2 + (isScheduled ? 12 : 18));
+    ctx.restore();
+
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = sideAccentColor;
+    ctx.shadowColor = sideShadowColor;
+    ctx.shadowBlur = isStory ? 26 : 20;
+    ctx.shadowOffsetY = isStory ? 10 : 8;
+    ctx.textAlign = 'left';
+    setFittedFont(ctx, data.homeTeam.toUpperCase(), noteWidth, '900', noteHeadingSize, FONT_BODY, 18);
+    ctx.fillText(truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), noteWidth), leftColumnX, teamLabelY);
+    ctx.textAlign = 'right';
+    setFittedFont(ctx, data.awayTeam.toUpperCase(), noteWidth, '900', noteHeadingSize, FONT_BODY, 18);
+    ctx.fillText(truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), noteWidth), rightColumnX, teamLabelY);
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = sideAccentColor;
+    ctx.shadowColor = sideShadowColor;
+    ctx.shadowBlur = isStory ? 22 : 16;
+    ctx.shadowOffsetY = isStory ? 8 : 6;
+    ctx.textBaseline = 'top';
+    ctx.font = `800 ${noteFontSize}px ${FONT_BODY}`;
+    ctx.textAlign = 'left';
+    sideNotes.leftLines.forEach((line, index) => {
+        const y = notesTop + index * noteLineGap;
+        ctx.fillText(truncateTextToWidth(ctx, line, noteWidth), leftColumnX, y);
+    });
+    ctx.textAlign = 'right';
+    sideNotes.rightLines.forEach((line, index) => {
+        const y = notesTop + index * noteLineGap;
+        ctx.fillText(truncateTextToWidth(ctx, line, noteWidth), rightColumnX, y);
+    });
+    ctx.restore();
+
+    drawPosterV3PaperMetadataBand(ctx, canvas, metaLine, panelColor);
+
+    const footerCenterY = canvas.height - (isStory ? 70 : 64);
+    const footerPillHeight = isStory ? 54 : 48;
+    const footerIconSize = isStory ? 28 : 24;
+    const footerPaddingX = isStory ? 18 : 16;
+    const footerGap = isStory ? 12 : 10;
+    const footerTextGap = 6;
+
+    ctx.save();
+    ctx.font = `900 ${isStory ? 24 : 21}px ${FONT_EDITORIAL}`;
+    const footerG22Width = ctx.measureText('G22').width;
+    ctx.font = `800 ${isStory ? 24 : 21}px ${FONT_BODY}`;
+    const footerScoresWidth = ctx.measureText('Scores').width;
+    ctx.restore();
+
+    const footerPillWidth = Math.ceil(footerPaddingX * 2 + footerIconSize + footerGap + footerG22Width + footerTextGap + footerScoresWidth);
+    const footerPillX = canvas.width / 2 - footerPillWidth / 2;
+    const footerPillY = footerCenterY - footerPillHeight / 2;
+
+    ctx.save();
+    ctx.shadowColor = hexToRGBA('#000000', bgIsDark ? 0.34 : 0.18);
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetY = 8;
+    ctx.fillStyle = accentColor;
+    ctx.beginPath();
+    ctx.roundRect(footerPillX, footerPillY, footerPillWidth, footerPillHeight, footerPillHeight / 2);
+    ctx.fill();
+    ctx.restore();
+
+    if (brandLogo) {
+        drawOverflowCrest(ctx, {
+            x: footerPillX + footerPaddingX + footerIconSize / 2,
+            y: footerCenterY,
+            width: footerIconSize,
+            height: footerIconSize,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark: false,
+            showFrame: false,
+        });
+    }
+
+    const footerTextX = footerPillX + footerPaddingX + footerIconSize + footerGap;
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = `900 ${isStory ? 24 : 21}px ${FONT_EDITORIAL}`;
+    ctx.fillStyle = getContrastColor(accentColor);
+    ctx.fillText('G22', footerTextX, footerCenterY + 1);
+    ctx.font = `800 ${isStory ? 24 : 21}px ${FONT_BODY}`;
+    ctx.fillText('Scores', footerTextX + footerG22Width + footerTextGap, footerCenterY + 1);
+    ctx.restore();
+
+    if (tournamentLogo) {
+        const competitionLogoSize = isStory ? 86 : 78;
+        const competitionLogoX = canvas.width - (isStory ? 84 : 74);
+        const competitionLogoY = canvas.height - (isStory ? 74 : 68);
+
+        ctx.save();
+        ctx.shadowColor = hexToRGBA('#000000', bgIsDark ? 0.36 : 0.18);
+        ctx.shadowBlur = 22;
+        ctx.shadowOffsetY = 8;
+        ctx.fillStyle = hexToRGBA(accentColor, bgIsDark ? 0.2 : 0.14);
+        ctx.beginPath();
+        ctx.arc(competitionLogoX, competitionLogoY, competitionLogoSize / 2 + 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        drawOverflowCrest(ctx, {
+            x: competitionLogoX,
+            y: competitionLogoY,
+            width: competitionLogoSize,
+            height: competitionLogoSize,
+            img: tournamentLogo,
+            label: data.tournament || 'Torneo',
+            rawLogo: data.tournamentLogo,
+            isDark: true,
+            showFrame: false,
+        });
+    }
+}
+
+async function drawPosterV3Standings(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    return drawPosterV3StandingsRedesign(ctx, canvas, data, slide, format, accentColor, bgColor, brandLogo);
+}
+
+async function drawPosterV3StandingsRedesign(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const isStory = format.height > format.width;
+    const rows = slide.groups.flatMap((group) => group.rows);
+    const [tournamentLogo, ...logos] = await Promise.all([
+        loadImage(data.tournamentLogo || ''),
+        ...rows.map((row) => loadImage(row.teamLogo || '')),
+    ]);
+    const title = (data.title?.trim() || 'Standings').toUpperCase();
+    const subtitle = buildStandingsSlideSubtitle(data.subtitle, slide);
+    const headerLabel = 'CLASIFICACION';
+    const sideTape = 'CLASIFICACION';
+    const darkFrame = mixHexColors(bgColor, '#05070b', getContrastColor(bgColor) === '#ffffff' ? 0.54 : 0.14);
+    const frameGlow = mixHexColors(bgColor, accentColor, 0.34);
+    const accentStrong = mixHexColors(accentColor, '#ffffff', 0.18);
+    const accentSoft = mixHexColors(accentColor, bgColor, 0.12);
+    const panelColor = mixHexColors(bgColor, accentColor, getContrastColor(bgColor) === '#ffffff' ? 0.08 : 0.12);
+    const panelShade = mixHexColors(panelColor, accentColor, 0.2);
+    const panelText = getContrastColor(panelColor);
+    const tableHeaderFill = mixHexColors(bgColor, accentColor, 0.18);
+    const tableBodyFill = mixHexColors(bgColor, accentColor, 0.1);
+    const tableHeaderText = getContrastColor(tableHeaderFill);
+    const tableBodyText = getContrastColor(tableBodyFill);
+    const statText = getContrastColor(tableBodyFill);
+    const dividerLight = hexToRGBA(mixHexColors(panelText === '#ffffff' ? '#ffffff' : '#0f172a', accentColor, 0.2), 0.68);
+    const tableRule = hexToRGBA(panelText === '#ffffff' ? '#ffffff' : '#0f172a', 0.14);
+    const subtleRule = hexToRGBA(panelText === '#ffffff' ? '#ffffff' : '#0f172a', 0.08);
+    const highlightColor = data.highlightColor?.trim() || mixHexColors(accentColor, '#ffffff', 0.24);
+    const highlightTextColor = data.highlightTextColor?.trim() || getContrastColor(highlightColor);
+    const negativeDiffColor = mixHexColors('#ef4444', '#ffffff', 0.1);
+    const positiveDiffColor = mixHexColors('#22c55e', '#ffffff', 0.08);
+    const outerInset = isStory ? 34 : 24;
+    const panelInset = isStory ? 74 : 52;
+    const panelTop = isStory ? 76 : 36;
+    const panelBottom = canvas.height - (isStory ? 84 : 42);
+    const panelWidth = canvas.width - panelInset * 2;
+    const panelHeight = panelBottom - panelTop;
+    const logoBandY = panelTop + (isStory ? 48 : 40);
+    const titleFontBaseSize = isStory ? 196 : 156;
+    const titleTopY = panelTop + (isStory ? 156 : 140);
+    ctx.font = `900 ${titleFontBaseSize}px ${FONT_EDITORIAL_SCORE}`;
+    const titleFontSize = setFittedFont(ctx, 'CLASIFICACION', panelWidth - 120, '900', titleFontBaseSize, FONT_EDITORIAL_SCORE, 80);
+    const bigTitleY = titleTopY + Math.round(titleFontSize * 0.86) - 40;
+    const titleBottomY = bigTitleY + Math.round(titleFontSize * 0.06);
+    const tableTop = titleBottomY + 20;
+    const tableBottom = panelBottom - (isStory ? 110 : 70);
+    const tableLeft = panelInset + (isStory ? 42 : 38);
+    const tableRight = canvas.width - panelInset - (isStory ? 42 : 38);
+    const tableWidth = tableRight - tableLeft;
+    const tableHeaderHeight = isStory ? 56 : 46;
+    const availableRowsHeight = tableBottom - tableTop - tableHeaderHeight;
+    const hasGroupLabels = slide.groups.some((group) => Boolean(formatStandingsGroupLabel(group)));
+    const groupLabelHeight = hasGroupLabels ? (isStory ? 24 : 18) : 0;
+    const groupGap = hasGroupLabels ? (isStory ? 10 : 8) : 0;
+    const rowCount = Math.max(rows.length, 1);
+    const reservedGroupSpace = slide.groups.reduce((total, group, index) => {
+        if (!formatStandingsGroupLabel(group)) return total;
+        return total + groupLabelHeight + (index > 0 ? groupGap : 0);
+    }, 0);
+    const rowHeight = clampNumber((availableRowsHeight - reservedGroupSpace) / rowCount, isStory ? 40 : 40, isStory ? 62 : 42);
+    const crestSize = clampNumber(rowHeight * 0.62, 24, 34);
+    const normalizedHighlightTeam = data.highlightTeam?.trim().toLowerCase() || '';
+    const columns = [
+        { key: 'pos', label: '#', width: 0.08 },
+        { key: 'club', label: 'CLUB', width: 0.46 },
+        { key: 'played', label: (data.columnLabels?.played?.trim() || 'P').toUpperCase(), width: 0.07 },
+        { key: 'won', label: (data.columnLabels?.won?.trim() || 'W').toUpperCase(), width: 0.07 },
+        { key: 'drawn', label: 'D', width: 0.07 },
+        { key: 'lost', label: 'L', width: 0.07 },
+        { key: 'diff', label: (data.columnLabels?.diff?.trim() || 'GD').toUpperCase(), width: 0.08 },
+        { key: 'points', label: (data.columnLabels?.points?.trim() || 'PTS').toUpperCase(), width: 0.1 },
+    ] as const;
+    const columnXs: Record<string, { left: number; width: number; center: number }> = {};
+    let columnCursor = tableLeft;
+    columns.forEach((column, index) => {
+        const width = index === columns.length - 1
+            ? tableRight - columnCursor
+            : Math.round(tableWidth * column.width);
+        columnXs[column.key] = {
+            left: columnCursor,
+            width,
+            center: columnCursor + width / 2,
+        };
+        columnCursor += width;
+    });
+    const clubTextMaxWidth = Math.max(150, columnXs.club.width - crestSize - 42);
+    const teamFontSize = getSharedFittedFontSize(
+        ctx,
+        rows.map((row) => ({ text: row.team.trim().toUpperCase(), maxWidth: clubTextMaxWidth })),
+        '900',
+        isStory ? 26 : 17,
+        FONT_BODY,
+        10,
+    );
+    const statFontSize = clampNumber(rowHeight * 0.36, 12, isStory ? 24 : 18);
+    const posFontSize = clampNumber(rowHeight * 0.44, 16, isStory ? 28 : 22);
+    const borderWord = sideTape.replace(/\s+/g, '   ');
+    const pageLabel = slide.totalPages > 1 ? `${slide.pageNumber}/${slide.totalPages}` : '';
+
+    const drawStar = (centerX: number, centerY: number, radius: number, fill: string, glow = false) => {
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        if (glow) {
+            ctx.shadowColor = hexToRGBA(fill, 0.5);
+            ctx.shadowBlur = radius * 1.8;
+        }
+        ctx.beginPath();
+        for (let index = 0; index < 10; index += 1) {
+            const angle = -Math.PI / 2 + (Math.PI / 5) * index;
+            const currentRadius = index % 2 === 0 ? radius : radius * 0.42;
+            const x = Math.cos(angle) * currentRadius;
+            const y = Math.sin(angle) * currentRadius;
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.restore();
+    };
+
+    const getDrawValue = (row: StandingsRowData) => {
+        const played = Number(row.played);
+        const won = Number(row.won);
+        const lost = Number(row.lost);
+        if (Number.isFinite(played) && Number.isFinite(won) && Number.isFinite(lost)) {
+            return String(Math.max(0, played - won - lost));
+        }
+        return '-';
+    };
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const borderGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    borderGradient.addColorStop(0, darkFrame);
+    borderGradient.addColorStop(0.38, frameGlow);
+    borderGradient.addColorStop(0.68, mixHexColors(darkFrame, '#02040a', 0.42));
+    borderGradient.addColorStop(1, mixHexColors(accentColor, darkFrame, 0.58));
+    ctx.fillStyle = borderGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    const aura = ctx.createRadialGradient(canvas.width * 0.2, canvas.height * 0.08, 0, canvas.width * 0.2, canvas.height * 0.08, canvas.width * 0.5);
+    aura.addColorStop(0, hexToRGBA(accentColor, 0.38));
+    aura.addColorStop(0.45, hexToRGBA(accentColor, 0.12));
+    aura.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = aura;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = hexToRGBA('#ffffff', 0.14);
+    for (let y = 0; y < canvas.height; y += 6) {
+        ctx.fillRect(0, y, canvas.width, 1);
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = panelColor;
+    ctx.shadowColor = 'rgba(0,0,0,0.25)';
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 22;
+    ctx.fillRect(panelInset, panelTop, panelWidth, panelHeight);
+    ctx.restore();
+
+    const panelGradient = ctx.createLinearGradient(panelInset, panelTop, panelInset, panelBottom);
+    panelGradient.addColorStop(0, hexToRGBA(mixHexColors(panelColor, accentColor, 0.08), 0.96));
+    panelGradient.addColorStop(1, hexToRGBA(panelShade, 0.92));
+    ctx.fillStyle = panelGradient;
+    ctx.fillRect(panelInset, panelTop, panelWidth, panelHeight);
+
+    ctx.save();
+    ctx.globalAlpha = 0.14;
+    ctx.fillStyle = subtleRule;
+    for (let x = panelInset; x < panelInset + panelWidth; x += 18) {
+        for (let y = panelTop; y < panelBottom; y += 18) {
+            if (((x + y) / 18) % 2 === 0) ctx.fillRect(x, y, 2, 2);
+        }
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = dividerLight;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(panelInset, panelTop, panelWidth, panelHeight);
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = getContrastColor(darkFrame) === '#ffffff' ? 'rgba(255,255,255,0.9)' : 'rgba(15,23,42,0.85)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `700 ${isStory ? 12 : 10}px ${FONT_MONO}`;
+    const topTapeY = isStory ? 12 : 10;
+    const bottomTapeY = canvas.height - (isStory ? 12 : 10);
+    for (let x = 92; x < canvas.width - 92; x += 156) {
+        ctx.fillText(borderWord, x, topTapeY);
+        ctx.fillText(borderWord, x, bottomTapeY);
+    }
+    ctx.restore();
+
+    drawPosterV3VerticalSideLabel(ctx, borderWord, outerInset - 2, canvas.height / 2, canvas.height - 180, isStory ? 24 : 18, hexToRGBA('#ffffff', 0.9));
+    drawPosterV3VerticalSideLabel(ctx, borderWord, canvas.width - outerInset + 2, canvas.height / 2, canvas.height - 180, isStory ? 24 : 18, hexToRGBA('#ffffff', 0.9));
+
+    drawStar(outerInset + 18, panelTop + 170, isStory ? 26 : 20, accentStrong, true);
+    drawStar(outerInset + 16, panelTop + 228, isStory ? 20 : 16, accentStrong);
+    drawStar(outerInset + 18, panelTop + 284, isStory ? 26 : 20, accentStrong, true);
+    drawStar(canvas.width - outerInset - 18, panelBottom - 174, isStory ? 26 : 20, accentStrong, true);
+    drawStar(canvas.width - outerInset - 16, panelBottom - 118, isStory ? 20 : 16, accentStrong);
+    drawStar(canvas.width - outerInset - 18, panelBottom - 62, isStory ? 26 : 20, accentStrong, true);
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = panelText;
+    ctx.font = `900 ${isStory ? 34 : 22}px ${FONT_BODY}`;
+    let logoAnchorX = panelInset + (isStory ? 56 : 44);
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, {
+            x: logoAnchorX + (isStory ? 30 : 26),
+            y: logoBandY,
+            size: isStory ? 60 : 52,
+            img: tournamentLogo,
+            label: title,
+            rawLogo: data.tournamentLogo,
+            isDark: false,
+        });
+        logoAnchorX += isStory ? 82 : 72;
+    }
+    const leagueBlockWidth = panelWidth * 0.44;
+    setFittedFont(ctx, title, leagueBlockWidth, '900', isStory ? 34 : 22, FONT_BODY, 12);
+    ctx.fillText(truncateTextToWidth(ctx, title, leagueBlockWidth), logoAnchorX, logoBandY);
+    ctx.restore();
+
+    const dividerX = canvas.width / 2 + (isStory ? 24 : 18);
+    ctx.save();
+    ctx.strokeStyle = accentStrong;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(dividerX, logoBandY - 26);
+    ctx.lineTo(dividerX, logoBandY + 26);
+    ctx.stroke();
+    ctx.restore();
+
+    const rightChipX = dividerX + (isStory ? 28 : 20);
+    const rightChipWidth = panelInset + panelWidth - rightChipX - (isStory ? 56 : 44);
+    drawPosterV3BroadcastChip(
+        ctx,
+        rightChipX,
+        logoBandY - (isStory ? 26 : 22),
+        rightChipWidth,
+        isStory ? 56 : 46,
+        headerLabel,
+        hexToRGBA(accentSoft, 0.18),
+        accentStrong,
+        brandLogo,
+        '/icon.png',
+    );
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = accentColor;
+    ctx.font = `900 ${titleFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText('CLASIFICACION', canvas.width / 2, bigTitleY);
+    ctx.restore();
+
+    if (pageLabel) {
+        ctx.save();
+        ctx.fillStyle = hexToRGBA(panelText, 0.6);
+        ctx.textAlign = 'right';
+        ctx.font = `700 ${isStory ? 16 : 12}px ${FONT_MONO}`;
+        ctx.fillText(pageLabel, panelInset + panelWidth - 24, panelTop + 26);
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.fillStyle = tableHeaderFill;
+    ctx.fillRect(tableLeft, tableTop, tableWidth, tableHeaderHeight);
+    ctx.restore();
+
+    const tableBodyHeight = slide.groups.reduce((total, group, index) => {
+        const label = formatStandingsGroupLabel(group);
+        return total + group.rows.length * rowHeight + (label ? groupLabelHeight + (index > 0 ? groupGap : 0) : 0);
+    }, tableHeaderHeight);
+    const bodyBottomY = tableTop + tableBodyHeight;
+
+    ctx.save();
+    ctx.fillStyle = tableBodyFill;
+    ctx.fillRect(tableLeft, tableTop + tableHeaderHeight, tableWidth, bodyBottomY - tableTop - tableHeaderHeight);
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = dividerLight;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(tableLeft, tableTop, tableWidth, bodyBottomY - tableTop);
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tableHeaderText;
+    ctx.font = `900 ${isStory ? 16 : 13}px ${FONT_BODY}`;
+    columns.forEach((column) => {
+        if (column.key === 'club') {
+            ctx.textAlign = 'left';
+            ctx.fillText(column.label, columnXs.club.left + 18, tableTop + tableHeaderHeight / 2 + 1);
+            ctx.textAlign = 'center';
+        } else {
+            ctx.fillText(column.label, columnXs[column.key].center, tableTop + tableHeaderHeight / 2 + 1);
+        }
+    });
+    ctx.restore();
+
+    const zoneBands: Array<{ label: string; color: string; startY: number; endY: number }> = [];
+    let activeZoneBand: { label: string; color: string; startY: number; endY: number } | null = null;
+    let cursorY = tableTop + tableHeaderHeight;
+    let logoIndex = 0;
+
+    slide.groups.forEach((group, groupIndex) => {
+        const label = formatStandingsGroupLabel(group);
+        if (label) {
+            if (groupIndex > 0) cursorY += groupGap;
+            activeZoneBand = null;
+
+            ctx.save();
+            ctx.fillStyle = hexToRGBA(accentColor, 0.14);
+            ctx.fillRect(tableLeft, cursorY, tableWidth, groupLabelHeight);
+            ctx.fillStyle = accentStrong;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.font = `800 ${isStory ? 14 : 11}px ${FONT_MONO}`;
+            ctx.fillText(label, tableLeft + 16, cursorY + groupLabelHeight / 2 + 1);
+            ctx.restore();
+            cursorY += groupLabelHeight;
+        }
+
+        group.rows.forEach((row, index) => {
+            const y = cursorY;
+            const centerY = y + rowHeight / 2;
+            const logo = logos[logoIndex] || null;
+            const zoneLabel = row.labelName?.trim() || '';
+            const zoneColor = row.zoneColor || accentColor;
+            const isHighlightedRow =
+                (normalizedHighlightTeam && row.team.trim().toLowerCase() === normalizedHighlightTeam) ||
+                (typeof data.highlightPosition === 'number' && row.pos === data.highlightPosition);
+            const diffText = data.plainDiff ? String(row.diff).trim() || '-' : formatDiff(row.diff);
+            const drawValue = getDrawValue(row);
+            const shouldDrawDivider = !(groupIndex === slide.groups.length - 1 && index === group.rows.length - 1);
+            logoIndex += 1;
+
+            if (zoneLabel) {
+                if (
+                    activeZoneBand &&
+                    activeZoneBand.label === zoneLabel &&
+                    activeZoneBand.color === zoneColor &&
+                    Math.abs(activeZoneBand.endY - y) < 1
+                ) {
+                    activeZoneBand.endY = y + rowHeight;
+                } else {
+                    activeZoneBand = { label: zoneLabel, color: zoneColor, startY: y, endY: y + rowHeight };
+                    zoneBands.push(activeZoneBand);
+                }
+            } else {
+                activeZoneBand = null;
+            }
+
+            ctx.save();
+            ctx.fillStyle = isHighlightedRow
+                ? highlightColor
+                : index % 2 === 0
+                    ? hexToRGBA('#ffffff', 0.04)
+                    : hexToRGBA('#ffffff', 0.12);
+            ctx.fillRect(tableLeft, y, tableWidth, rowHeight);
+            ctx.restore();
+
+            if (shouldDrawDivider) {
+                ctx.save();
+                ctx.strokeStyle = tableRule;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(tableLeft, y + rowHeight + 0.5);
+                ctx.lineTo(tableRight, y + rowHeight + 0.5);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = isHighlightedRow ? highlightTextColor : accentStrong;
+            ctx.font = `900 ${posFontSize}px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillText(String(row.pos), columnXs.pos.center, centerY + 1);
+            ctx.restore();
+
+            drawOverflowCrest(ctx, {
+                x: columnXs.club.left + 18 + crestSize / 2,
+                y: centerY,
+                width: crestSize,
+                height: crestSize,
+                img: logo,
+                label: row.team,
+                rawLogo: row.teamLogo,
+                isDark: true,
+                showFrame: false,
+            });
+
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = isHighlightedRow ? highlightTextColor : tableBodyText;
+            ctx.font = `900 ${teamFontSize}px ${FONT_BODY}`;
+            const clubTextX = columnXs.club.left + crestSize + 34;
+            ctx.fillText(truncateTextToWidth(ctx, row.team.toUpperCase(), clubTextMaxWidth), clubTextX, centerY + 1);
+            ctx.restore();
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = isHighlightedRow ? highlightTextColor : statText;
+            ctx.font = `800 ${statFontSize}px ${FONT_BODY}`;
+            ctx.fillText(String(row.played ?? '-'), columnXs.played.center, centerY + 1);
+            ctx.fillText(String(row.won ?? '-'), columnXs.won.center, centerY + 1);
+            ctx.fillText(drawValue, columnXs.drawn.center, centerY + 1);
+            ctx.fillText(String(row.lost ?? '-'), columnXs.lost.center, centerY + 1);
+            ctx.fillStyle = isHighlightedRow
+                ? highlightTextColor
+                : diffText.startsWith('-')
+                    ? negativeDiffColor
+                    : diffText.startsWith('+')
+                        ? positiveDiffColor
+                        : statText;
+            ctx.fillText(diffText, columnXs.diff.center, centerY + 1);
+
+            const pointsBoxWidth = Math.min(56, columnXs.points.width - 10);
+            const pointsBoxHeight = Math.max(24, rowHeight - 12);
+            const pointsBoxX = columnXs.points.center - pointsBoxWidth / 2;
+            const pointsBoxY = centerY - pointsBoxHeight / 2;
+            ctx.fillStyle = isHighlightedRow ? hexToRGBA(highlightTextColor, 0.16) : hexToRGBA(accentColor, 0.22);
+            ctx.beginPath();
+            ctx.roundRect(pointsBoxX, pointsBoxY, pointsBoxWidth, pointsBoxHeight, 999);
+            ctx.fill();
+            ctx.fillStyle = isHighlightedRow ? highlightTextColor : tableBodyText;
+            ctx.font = `900 ${Math.max(12, statFontSize)}px ${FONT_BODY}`;
+            ctx.fillText(String(row.points ?? '-'), columnXs.points.center, centerY + 1);
+            ctx.restore();
+
+            cursorY += rowHeight;
+        });
+    });
+
+    zoneBands.forEach((band) => {
+        const bandX = tableLeft - (isStory ? 24 : 20);
+        const bandWidth = isStory ? 10 : 8;
+        const bandHeight = Math.max(10, band.endY - band.startY);
+        ctx.save();
+        ctx.fillStyle = band.color;
+        ctx.beginPath();
+        ctx.roundRect(bandX, band.startY, bandWidth, bandHeight, 999);
+        ctx.fill();
+        ctx.restore();
+    });
+
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width / 2 + 40,
+            y: panelBottom - 26,
+            size: isStory ? 32 : 26,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark: false,
+        });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = hexToRGBA(panelText, 0.62);
+    ctx.font = `700 ${isStory ? 13 : 10}px ${FONT_MONO}`;
+    ctx.fillText(borderWord, canvas.width / 2 - 30, panelBottom - 26);
+    ctx.restore();
+}
+
+// Legacy poster-v3 daily matches layout kept temporarily while the new one settles.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function drawPosterV3DailyMatchesLegacyUnused(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: DailyMatchesData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const isStory = format.height > format.width;
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const matches = data.matches.slice(0, 10);
+    const logos = await Promise.all(matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')]));
+    const allFinished = matches.length > 0 && matches.every((match) => match.status === 'finished');
+    const primaryBg = mixHexColors('#081227', bgColor, 0.82);
+    const secondaryBg = mixHexColors('#1d4ed8', bgColor, 0.5);
+    const panelColor = hexToRGBA(mixHexColors('#0b1435', bgColor, 0.72), 0.9);
+    const panelStroke = hexToRGBA(mixHexColors('#ffffff', accentColor, 0.44), 0.12);
+    const accent = accentColor;
+    const accentSoft = mixHexColors('#00D1B2', accentColor, 0.46);
+    const cardColor = mixHexColors('#ffffff', accentColor, 0.08);
+    const cardTextColor = getContrastColor(cardColor);
+    const teamTextColor = getContrastColor(primaryBg) === '#ffffff' ? '#ffffff' : '#f8fafc';
+    const rowDivider = hexToRGBA(mixHexColors('#ffffff', accentColor, 0.28), 0.12);
+    const matchdayNumber = (() => {
+        const source = `${data.date || ''} ${data.tournament || ''}`;
+        const found = source.match(/\b(\d{1,2})\b/);
+        if (found) return found[1];
+        return String(matches.length || 0).padStart(2, '0');
+    })();
+    const headerWord = allFinished ? 'RESULTS' : 'MATCHDAY';
+    const panelX = 118;
+    const panelWidth = canvas.width - panelX * 2;
+    const panelY = 84;
+    const panelHeight = canvas.height - 146;
+    const headerX = panelX + 46;
+    const headerY = panelY + 88;
+    const listTop = panelY + 164;
+    const listBottom = panelY + panelHeight - 42;
+    const rowGap = 10;
+    const rowHeight = Math.min(96, (listBottom - listTop - rowGap * Math.max(matches.length - 1, 0)) / Math.max(matches.length, 1));
+    const centerCardWidth = 168;
+    const centerCardHeight = Math.max(72, rowHeight - 12);
+    const logoSize = Math.max(28, Math.min(40, rowHeight * 0.42));
+    const teamBlockInset = 24;
+    const sideBlockWidth = (panelWidth - centerCardWidth - 64) / 2;
+    const teamNameWidth = sideBlockWidth - logoSize - 24;
+    const leftNameRightX = panelX + teamBlockInset + teamNameWidth;
+    const leftLogoCenterX = panelX + teamBlockInset + teamNameWidth + 16 + logoSize / 2;
+    const centerCardX = canvas.width / 2 - centerCardWidth / 2;
+    const rightLogoCenterX = panelX + panelWidth - teamBlockInset - sideBlockWidth + logoSize / 2;
+    const rightNameLeftX = rightLogoCenterX + logoSize / 2 + 16;
+
+    const getCenterCardMeta = (match: DailyMatchesData['matches'][number]) => {
+        const daySource = (match.dateLabel || '').trim();
+        const weekdayMatch = daySource.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}/);
+        const dateMatch = daySource.match(/(\d{1,2})[\/.-](\d{1,2})|(\d{1,2})/);
+        const timeMatch = String(match.time || '').match(/\d{1,2}:\d{2}/);
+        const weekday = weekdayMatch ? weekdayMatch[0].slice(0, 3).toUpperCase() : allFinished ? 'FT' : 'DAY';
+        const day = dateMatch ? (dateMatch[1] || dateMatch[3] || '--').padStart(2, '0') : '--';
+
+        if (match.status === 'scheduled') {
+            return {
+                top: `${weekday} ${day}`.trim(),
+                bottom: timeMatch ? timeMatch[0] : String(match.time || '--:--'),
+                tone: cardTextColor,
+                topColor: cardTextColor === '#ffffff' ? 'rgba(255,255,255,0.72)' : '#6B7280',
+            };
+        }
+
+        if (match.status === 'live') {
+            return {
+                top: 'LIVE',
+                bottom: `${match.homeScore ?? '-'}:${match.awayScore ?? '-'}`,
+                tone: mixHexColors('#ef4444', accentColor, 0.18),
+                topColor: cardTextColor === '#ffffff' ? 'rgba(255,255,255,0.72)' : '#6B7280',
+            };
+        }
+
+        return {
+            top: `${weekday} ${day}`.trim() || 'FINAL',
+            bottom: `${match.homeScore ?? '-'}:${match.awayScore ?? '-'}`,
+            tone: cardTextColor,
+            topColor: cardTextColor === '#ffffff' ? 'rgba(255,255,255,0.72)' : '#6B7280',
+        };
+    };
+
+    let logoIndex = 0;
+
+    ctx.fillStyle = primaryBg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const backgroundGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    backgroundGradient.addColorStop(0, secondaryBg);
+    backgroundGradient.addColorStop(0.55, primaryBg);
+    backgroundGradient.addColorStop(1, mixHexColors('#020617', bgColor, 0.74));
+    ctx.fillStyle = backgroundGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    ctx.strokeStyle = hexToRGBA(accentSoft, 0.3);
+    ctx.lineWidth = 1;
+    for (let y = 0; y <= canvas.height; y += 18) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(canvas.width, y + 0.5);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    const topGlow = ctx.createRadialGradient(canvas.width * 0.26, canvas.height * 0.08, 0, canvas.width * 0.26, canvas.height * 0.08, canvas.width * 0.7);
+    topGlow.addColorStop(0, hexToRGBA(accent, 0.24));
+    topGlow.addColorStop(0.36, hexToRGBA(accent, 0.08));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const drawTriangle = (x: number, y: number, size: number, color: string, rotate = 0) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotate);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(0, -size / 2);
+        ctx.lineTo(size / 2, size / 2);
+        ctx.lineTo(-size / 2, size / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    };
+
+    const drawShard = (x: number, y: number, width: number, height: number, color: string) => {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + width * 0.82, y);
+        ctx.lineTo(x + width, y + height);
+        ctx.lineTo(x + width * 0.12, y + height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    };
+
+    drawShard(58, 74, 142, 38, hexToRGBA(mixHexColors('#000000', bgColor, 0.4), 0.38));
+    drawShard(328, 88, 370, 44, hexToRGBA(mixHexColors('#000000', accentColor, 0.28), 0.36));
+    drawShard(32, canvas.height - 264, 28, 232, hexToRGBA(mixHexColors('#111827', accentColor, 0.26), 0.6));
+
+    drawTriangle(82, 126, 26, accentSoft, 0.12);
+    drawTriangle(158, 106, 22, hexToRGBA('#ffffff', 0.72), 0);
+    drawTriangle(406, 104, 30, hexToRGBA(accentSoft, 0.8), -0.06);
+    drawTriangle(452, 98, 22, hexToRGBA('#ffffff', 0.24), -0.12);
+    drawTriangle(canvas.width - 112, 38, 24, hexToRGBA('#ffffff', 0.9), 0);
+    drawTriangle(canvas.width - 82, 124, 20, hexToRGBA('#ffffff', 0.82), 0.22);
+    drawTriangle(canvas.width - 74, canvas.height - 168, 34, hexToRGBA('#ffffff', 0.88), -0.16);
+    drawTriangle(canvas.width - 116, canvas.height - 110, 18, accentSoft, 0.18);
+    drawTriangle(38, canvas.height - 82, 24, accentSoft, -0.18);
+
+    if (tournamentLogo || brandLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width - 84,
+            y: 64,
+            size: 78,
+            img: tournamentLogo || brandLogo,
+            label: data.tournament || 'G22 Scores',
+            rawLogo: tournamentLogo ? data.tournamentLogo : '/icon.png',
+            isDark: true,
+        });
+    }
+
+    ctx.save();
+    ctx.fillStyle = panelColor;
+    ctx.beginPath();
+    ctx.roundRect(panelX, panelY, panelWidth, panelHeight, 0);
+    ctx.fill();
+    ctx.strokeStyle = panelStroke;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    setFittedFont(ctx, headerWord, panelWidth - 210, '900', 74, FONT_EDITORIAL_SCORE, 36);
+    ctx.fillStyle = accentSoft;
+    ctx.fillText(headerWord, headerX, headerY);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `900 ${isStory ? 74 : 68}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.fillText(matchdayNumber, panelX + panelWidth - 48, headerY);
+    ctx.restore();
+
+    matches.forEach((match, index) => {
+        const y = listTop + index * (rowHeight + rowGap);
+        const homeLogo = logos[logoIndex] || null;
+        const awayLogo = logos[logoIndex + 1] || null;
+        logoIndex += 2;
+        const centerMeta = getCenterCardMeta(match);
+
+        if (index > 0) {
+            ctx.save();
+            ctx.strokeStyle = rowDivider;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(panelX + 28, y - rowGap / 2);
+            ctx.lineTo(panelX + panelWidth - 28, y - rowGap / 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        drawOverflowCrest(ctx, {
+            x: leftLogoCenterX,
+            y: y + rowHeight / 2,
+            width: logoSize,
+            height: logoSize,
+            img: homeLogo,
+            label: match.homeTeam,
+            rawLogo: match.homeLogo,
+            isDark: true,
+            showFrame: false,
+        });
+        drawOverflowCrest(ctx, {
+            x: rightLogoCenterX,
+            y: y + rowHeight / 2,
+            width: logoSize,
+            height: logoSize,
+            img: awayLogo,
+            label: match.awayTeam,
+            rawLogo: match.awayLogo,
+            isDark: true,
+            showFrame: false,
+        });
+
+        ctx.save();
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = teamTextColor;
+        ctx.textAlign = 'right';
+        setFittedFont(ctx, match.homeTeam.toUpperCase(), teamNameWidth, '800', 24, FONT_BODY, 12);
+        ctx.fillText(truncateTextToWidth(ctx, match.homeTeam.toUpperCase(), teamNameWidth), leftNameRightX, y + rowHeight / 2 + 1);
+        ctx.textAlign = 'left';
+        setFittedFont(ctx, match.awayTeam.toUpperCase(), teamNameWidth, '800', 24, FONT_BODY, 12);
+        ctx.fillText(truncateTextToWidth(ctx, match.awayTeam.toUpperCase(), teamNameWidth), rightNameLeftX, y + rowHeight / 2 + 1);
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = cardColor;
+        ctx.beginPath();
+        ctx.roundRect(centerCardX, y + (rowHeight - centerCardHeight) / 2, centerCardWidth, centerCardHeight, 4);
+        ctx.fill();
+        ctx.strokeStyle = hexToRGBA(mixHexColors('#111827', accentColor, 0.12), 0.08);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = centerMeta.topColor;
+        ctx.font = `800 13px ${FONT_BODY}`;
+        ctx.fillText(centerMeta.top, canvas.width / 2, y + rowHeight / 2 - 10);
+        ctx.fillStyle = centerMeta.tone;
+        ctx.font = `900 34px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText(centerMeta.bottom, canvas.width / 2, y + rowHeight / 2 + 22);
+        ctx.restore();
+    });
+}
+
+async function drawPosterV3DailyMatches(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: DailyMatchesData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const isPost = format.height >= format.width;
+    const assets = await Promise.all(data.matches.slice(0, 10).map(async (match, rowIndex) => {
+        const [homeLogo, awayLogo] = await Promise.all([
+            loadImage(match.homeLogo || ''),
+            loadImage(match.awayLogo || ''),
+        ]);
+
+        return { match, rowIndex, homeLogo, awayLogo };
+    }));
+    const allScheduled = assets.length > 0 && assets.every(({ match }) => match.status === 'scheduled');
+    const anyLive = assets.some(({ match }) => match.status === 'live');
+    const heroLabel = allScheduled ? 'PARTIDOS' : anyLive ? 'PARTIDOS' : 'RESULTADOS';
+    const sx = (value: number) => (canvas.width / 1080) * value;
+    const sy = (value: number) => (canvas.height / 1350) * value;
+    const base = mixHexColors(bgColor, '#05080d', 0.78);
+    const topTone = mixHexColors(base, accentColor, 0.08);
+    const bottomTone = mixHexColors(base, '#010203', 0.18);
+    const accentStrong = mixHexColors(accentColor, '#ffffff', 0.1);
+    const accentSoft = mixHexColors(accentColor, '#ffffff', 0.24);
+    const headerText = getContrastColor(base) === '#ffffff' ? '#ffffff' : '#0f172a';
+    const headerMuted = hexToRGBA(headerText, 0.68);
+    const frameFill = hexToRGBA(mixHexColors(base, accentColor, 0.06), 0.86);
+    const frameStroke = hexToRGBA(mixHexColors('#ffffff', accentColor, 0.22), 0.16);
+    const lightRowFill = mixHexColors('#ffffff', accentColor, 0.04);
+    const darkRowFill = mixHexColors(base, '#071018', 0.58);
+    const lightRowText = getContrastColor(lightRowFill) === '#ffffff' ? '#ffffff' : '#0f172a';
+    const darkRowText = getContrastColor(darkRowFill) === '#ffffff' ? '#ffffff' : '#0f172a';
+    const centerFill = mixHexColors(accentColor, '#ffffff', 0.16);
+    const centerText = getContrastColor(centerFill) === '#ffffff' ? '#ffffff' : '#0f172a';
+    const rowDivider = hexToRGBA(mixHexColors('#ffffff', accentColor, 0.28), 0.12);
+    const railLabel = (data.tournament || 'TOURNAMENT').trim().toUpperCase();
+    const watermarkText = (() => {
+        const words = railLabel
+            .split(/[^A-Z0-9]+/)
+            .map((word) => word.trim())
+            .filter(Boolean)
+            .filter((word) => word.length > 1);
+        const initials = words.slice(0, 4).map((word) => word[0]).join('');
+        if (initials.length >= 2) return initials;
+        const compact = railLabel.replace(/[^A-Z0-9]/g, '');
+        return compact.slice(0, 4) || 'FIX';
+    })();
+    const weekdayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+    const getOrdinalSuffix = (day: number) => {
+        if (day % 100 >= 11 && day % 100 <= 13) return 'TH';
+        if (day % 10 === 1) return 'ST';
+        if (day % 10 === 2) return 'ND';
+        if (day % 10 === 3) return 'RD';
+        return 'TH';
+    };
+    const formatGroupLabel = (match: DailyMatchesData['matches'][number]) => {
+        const kickoff = toExportDate(match.kickoffAt);
+        if (kickoff) {
+            const weekday = weekdayNames[kickoff.getUTCDay()] || weekdayNames[kickoff.getDay()];
+            const month = monthNames[kickoff.getUTCMonth()] || monthNames[kickoff.getMonth()];
+            const day = kickoff.getUTCDate() || kickoff.getDate();
+            const year = kickoff.getUTCFullYear() || kickoff.getFullYear();
+            return `${weekday} ${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
+        }
+
+        const source = (match.dateLabel || data.date || '').replace(/\s+/g, ' ').trim();
+        return source ? source.toUpperCase() : 'UPCOMING MATCHES';
+    };
+    const formatKickoffTime = (match: DailyMatchesData['matches'][number]) => {
+        const kickoff = toExportDate(match.kickoffAt);
+        if (kickoff) {
+            const hours = kickoff.getUTCHours() || kickoff.getHours();
+            const minutes = kickoff.getUTCMinutes() || kickoff.getMinutes();
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const twelveHour = hours % 12 || 12;
+            return `${twelveHour}:${String(minutes).padStart(2, '0')}${period}`;
+        }
+
+        const raw = String(match.time || '').trim();
+        const detectedTime = raw.match(/\d{1,2}:\d{2}\s?(?:AM|PM)?/i)?.[0];
+        return (detectedTime || raw || '--:--').replace(/\s+/g, '').toUpperCase();
+    };
+    const groups = assets.reduce<Array<{ label: string; items: typeof assets }>>((acc, asset) => {
+        const label = formatGroupLabel(asset.match);
+        const lastGroup = acc[acc.length - 1];
+        if (lastGroup && lastGroup.label === label) {
+            lastGroup.items.push(asset);
+            return acc;
+        }
+
+        acc.push({ label, items: [asset] });
+        return acc;
+    }, []);
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bgGradient.addColorStop(0, topTone);
+    bgGradient.addColorStop(0.5, base);
+    bgGradient.addColorStop(1, bottomTone);
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const topGlow = ctx.createRadialGradient(canvas.width * 0.28, sy(140), 0, canvas.width * 0.28, sy(140), sx(340));
+    topGlow.addColorStop(0, hexToRGBA(accentStrong, 0.22));
+    topGlow.addColorStop(0.4, hexToRGBA(accentStrong, 0.08));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const bottomGlow = ctx.createRadialGradient(canvas.width * 0.86, canvas.height, 0, canvas.width * 0.86, canvas.height, sx(420));
+    bottomGlow.addColorStop(0, hexToRGBA(accentSoft, 0.14));
+    bottomGlow.addColorStop(0.46, hexToRGBA(accentSoft, 0.05));
+    bottomGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = bottomGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = hexToRGBA('#ffffff', 0.09);
+    ctx.lineWidth = 1;
+    for (let y = 0; y <= canvas.height; y += sy(18)) {
+        ctx.beginPath();
+        ctx.moveTo(sx(76), y + 0.5);
+        ctx.lineTo(canvas.width - sx(76), y + 0.5);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(sx(134), canvas.height * 0.54);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeStyle = hexToRGBA('#ffffff', 0.08);
+    ctx.lineWidth = sx(2.4);
+    setFittedFont(ctx, watermarkText, canvas.height * 0.38, '900', sy(120), FONT_EDITORIAL_SCORE, sy(68));
+    const safeWatermark = truncateTextToWidth(ctx, watermarkText, canvas.height * 0.38);
+    ctx.strokeText(safeWatermark, 0, 0);
+    ctx.restore();
+
+    const leftHeaderLogo = brandLogo || tournamentLogo;
+    const rightHeaderLogo = tournamentLogo && tournamentLogo !== leftHeaderLogo ? tournamentLogo : (brandLogo && brandLogo !== leftHeaderLogo ? brandLogo : null);
+    const titleY = sy(134);
+    const titleMaxWidth = canvas.width - sx(180);
+
+    if (leftHeaderLogo) {
+        drawOverflowCrest(ctx, {
+            x: sx(58),
+            y: sy(50),
+            width: sx(63),
+            height: sx(63),
+            img: leftHeaderLogo,
+            label: 'Brand',
+            rawLogo: '/icon.png',
+            isDark: true,
+            showFrame: false,
+        });
+    }
+
+    if (rightHeaderLogo) {
+        drawOverflowCrest(ctx, {
+            x: canvas.width - sx(58),
+            y: sy(50),
+            width: sx(63),
+            height: sx(63),
+            img: rightHeaderLogo,
+            label: data.tournament || 'Tournament',
+            rawLogo: data.tournamentLogo || '/icon.png',
+            isDark: true,
+            showFrame: false,
+        });
+    }
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = headerText;
+    setFittedFont(ctx, heroLabel, titleMaxWidth, '900', sy(isPost ? 76 : 70), FONT_EDITORIAL_SCORE, sy(44));
+    ctx.fillText(truncateTextToWidth(ctx, heroLabel, titleMaxWidth), canvas.width / 2, titleY);
+    ctx.fillStyle = headerMuted;
+    setFittedFont(ctx, railLabel, canvas.width - sx(220), '800', sy(20), FONT_BODY, sy(12));
+    ctx.fillText(truncateTextToWidth(ctx, railLabel, canvas.width - sx(220)), canvas.width / 2, titleY + sy(28));
+    ctx.font = `700 ${sy(14)}px ${FONT_MONO}`;
+    ctx.fillText(truncateTextToWidth(ctx, (data.date || '').toUpperCase(), canvas.width - sx(260)), canvas.width / 2, titleY + sy(54));
+    ctx.restore();
+
+    const listPanelX = sx(92);
+    const listPanelY = sy(206);
+    const listPanelWidth = canvas.width - sx(184);
+    const listInnerX = listPanelX + sx(18);
+    const listInnerWidth = listPanelWidth - sx(36);
+    const rowGap = sy(8);
+    const groupGap = sy(14);
+    const sectionHeaderHeight = sy(30);
+    const rowRadius = sy(12);
+    const listTopInset = sy(22);
+    const listBottomInset = sy(20);
+    const rowWidth = listInnerWidth;
+    const rowX = listInnerX;
+    const centerBlockWidth = clampNumber(rowWidth * 0.14, sx(112), sx(138));
+    const sideWidth = (rowWidth - centerBlockWidth) / 2;
+    const crestGap = sx(14);
+    const rowPaddingX = sx(18);
+    const fixedVerticalSpace = groups.length * sectionHeaderHeight
+        + groups.length * sy(10)
+        + Math.max(0, groups.length - 1) * groupGap
+        + assets.length * rowGap;
+    const targetBottomInset = sy(64);
+    const maxUsableHeight = canvas.height - listPanelY - targetBottomInset;
+    const rowHeight = clampNumber(
+        (maxUsableHeight - listTopInset - listBottomInset - fixedVerticalSpace) / Math.max(assets.length, 1),
+        sy(58),
+        sy(84)
+    );
+    const crestSize = clampNumber(rowHeight * 0.56, sx(36), sx(48));
+    const listPanelHeight = listTopInset + listBottomInset + fixedVerticalSpace + rowHeight * Math.max(assets.length, 1);
+    const listTop = listPanelY + listTopInset;
+    const nameFontSize = getSharedFittedFontSize(
+        ctx,
+        assets.flatMap(({ match }) => ([
+            { text: match.homeTeam.toUpperCase(), maxWidth: Math.max(sx(92), sideWidth - rowPaddingX * 2 - crestSize - crestGap) },
+            { text: match.awayTeam.toUpperCase(), maxWidth: Math.max(sx(92), sideWidth - rowPaddingX * 2 - crestSize - crestGap) },
+        ])),
+        '900',
+        sy(24),
+        FONT_BODY,
+        sy(12)
+    );
+
+    ctx.save();
+    ctx.fillStyle = frameFill;
+    ctx.strokeStyle = frameStroke;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(listPanelX, listPanelY, listPanelWidth, listPanelHeight, sy(28));
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    let cursorY = listTop;
+    groups.forEach((group, groupIndex) => {
+        ctx.save();
+        ctx.fillStyle = hexToRGBA('#ffffff', 0.04);
+        ctx.beginPath();
+        ctx.roundRect(rowX, cursorY, rowWidth, sectionHeaderHeight, sectionHeaderHeight / 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = hexToRGBA(accentSoft, 0.96);
+        ctx.beginPath();
+        ctx.roundRect(rowX + sx(8), cursorY + sy(6), sx(8), sectionHeaderHeight - sy(12), sy(4));
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = headerText;
+        setFittedFont(ctx, group.label, rowWidth - sx(46), '800', sy(16), FONT_BODY, sy(10));
+        ctx.fillText(truncateTextToWidth(ctx, group.label, rowWidth - sx(46)), rowX + sx(28), cursorY + sectionHeaderHeight / 2 + 1);
+        ctx.restore();
+
+        cursorY += sectionHeaderHeight + sy(10);
+
+        group.items.forEach((asset, itemIndex) => {
+            const { match, homeLogo, awayLogo, rowIndex } = asset;
+            const isLightRow = rowIndex % 2 === 0;
+            const rowFill = isLightRow ? lightRowFill : darkRowFill;
+            const rowText = isLightRow ? lightRowText : darkRowText;
+            const centerY = cursorY + rowHeight / 2;
+            const homeBlockLeft = rowX + rowPaddingX;
+            const homeBlockRight = rowX + sideWidth - rowPaddingX;
+            const awayBlockLeft = rowX + sideWidth + centerBlockWidth + rowPaddingX;
+            const awayBlockRight = rowX + rowWidth - rowPaddingX;
+            const homeLogoX = homeBlockLeft + crestSize / 2;
+            const awayLogoX = awayBlockRight - crestSize / 2;
+            const homeTextLeft = homeLogoX + crestSize / 2 + crestGap;
+            const awayTextRight = awayLogoX - crestSize / 2 - crestGap;
+            const centerBlockX = rowX + sideWidth;
+            const scoreLabel = `${match.homeScore ?? '-'} - ${match.awayScore ?? '-'}`;
+            const centerPrimary = match.status === 'scheduled' ? formatKickoffTime(match) : match.status === 'live' ? 'LIVE' : scoreLabel;
+            const centerSecondary = match.status === 'scheduled' ? '' : match.status === 'live' ? scoreLabel : 'FINAL';
+            const homeTextWidth = Math.max(sx(92), homeBlockRight - homeTextLeft);
+            const awayTextWidth = Math.max(sx(92), awayTextRight - awayBlockLeft);
+
+            ctx.save();
+            ctx.fillStyle = rowFill;
+            ctx.beginPath();
+            ctx.roundRect(rowX, cursorY, rowWidth, rowHeight, rowRadius);
+            ctx.fill();
+            ctx.strokeStyle = hexToRGBA(isLightRow ? '#0f172a' : '#ffffff', isLightRow ? 0.08 : 0.1);
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.save();
+            ctx.fillStyle = hexToRGBA(centerFill, isLightRow ? 0.96 : 0.9);
+            ctx.beginPath();
+            ctx.roundRect(centerBlockX, cursorY, centerBlockWidth, rowHeight, sy(8));
+            ctx.fill();
+            ctx.restore();
+
+            drawOverflowCrest(ctx, { x: homeLogoX, y: centerY, width: crestSize, height: crestSize, img: homeLogo, label: match.homeTeam, rawLogo: match.homeLogo || match.homeTeam, isDark: getContrastColor(rowFill) === '#ffffff', showFrame: false });
+            drawOverflowCrest(ctx, { x: awayLogoX, y: centerY, width: crestSize, height: crestSize, img: awayLogo, label: match.awayTeam, rawLogo: match.awayLogo || match.awayTeam, isDark: getContrastColor(rowFill) === '#ffffff', showFrame: false });
+
+            ctx.save();
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = rowText;
+            ctx.font = `900 ${nameFontSize}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, match.homeTeam.toUpperCase(), homeTextWidth), homeTextLeft, centerY + sy(3));
+            ctx.restore();
+
+            ctx.save();
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = rowText;
+            ctx.font = `900 ${nameFontSize}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, match.awayTeam.toUpperCase(), awayTextWidth), awayTextRight, centerY + sy(3));
+            ctx.restore();
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = centerText;
+            setFittedFont(ctx, centerPrimary, centerBlockWidth - sx(20), '900', sy(match.status === 'scheduled' ? 30 : 25), FONT_EDITORIAL_SCORE, sy(18));
+            ctx.fillText(
+                truncateTextToWidth(ctx, centerPrimary, centerBlockWidth - sx(24)),
+                centerBlockX + centerBlockWidth / 2,
+                match.status === 'scheduled' ? centerY + sy(8) : centerY - sy(1)
+            );
+            if (centerSecondary) {
+                ctx.fillStyle = hexToRGBA(centerText, 0.72);
+                ctx.font = `800 ${sy(10)}px ${FONT_MONO}`;
+                ctx.fillText(truncateTextToWidth(ctx, centerSecondary.toUpperCase(), centerBlockWidth - sx(20)), centerBlockX + centerBlockWidth / 2, cursorY + rowHeight - sy(10));
+            }
+            ctx.restore();
+
+            if (!(groupIndex === groups.length - 1 && itemIndex === group.items.length - 1)) {
+                ctx.save();
+                ctx.strokeStyle = rowDivider;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(rowX + sx(10), cursorY + rowHeight + rowGap / 2);
+                ctx.lineTo(rowX + rowWidth - sx(10), cursorY + rowHeight + rowGap / 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            cursorY += rowHeight + rowGap;
+        });
+
+        if (groupIndex < groups.length - 1) cursorY += groupGap;
+    });
+
+    if (assets.length === 0) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = headerMuted;
+        ctx.font = `800 ${sy(24)}px ${FONT_BODY}`;
+        ctx.fillText('NO MATCHES SELECTED', canvas.width / 2, listPanelY + listPanelHeight / 2);
+        ctx.restore();
+    }
+
+}
+// Legacy poster-v3 lineup layout kept temporarily while the new one settles.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function drawPosterV3LineupsLegacy(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    mode: LineupExportMode
+) {
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const homeLogo = await loadImage(data.homeTeam.logo || '');
+    const awayLogo = await loadImage(data.awayTeam.logo || '');
+    const isStory = format.height > format.width;
+    const neonAccent = mixHexColors(accentColor, '#d7ff00', 0.68);
+    const teams = mode === 'both'
+        ? [
+            { team: data.homeTeam, logo: homeLogo },
+            { team: data.awayTeam, logo: awayLogo },
+        ]
+        : mode === 'home'
+            ? [{ team: data.homeTeam, logo: homeLogo }]
+            : [{ team: data.awayTeam, logo: awayLogo }];
+
+    drawPosterV3Backdrop(ctx, canvas, accentColor, bgColor);
+
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width / 2,
+            y: 86,
+            size: 70,
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark: true,
+        });
+    }
+
+    drawPosterV3Kicker(ctx, canvas.width / 2, 148, (data.tournament || 'Torneo').toUpperCase(), hexToRGBA(neonAccent, 0.96), 'center');
+    drawPosterV3OutlineTitle(ctx, data.title || 'Alineaciones', canvas.width / 2, 228, canvas.width - 160, 116, hexToRGBA('#ffffff', 0.26), 'center');
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = hexToRGBA('#ffffff', 0.76);
+    ctx.font = `800 15px ${FONT_MONO}`;
+    ctx.fillText([data.subtitle, data.date, data.time, data.venue].filter(Boolean).join('  •  ').toUpperCase(), canvas.width / 2, 266);
+    ctx.restore();
+
+    const columnGap = teams.length === 2 ? 24 : 0;
+    const columnWidth = teams.length === 2 ? (canvas.width - 136 - columnGap) / 2 : canvas.width - 136;
+    const columnXStart = teams.length === 2 ? 56 : 68;
+    const columnY = 316;
+    const columnHeight = canvas.height - columnY - (isStory ? 222 : 172);
+
+    teams.forEach(({ team, logo }, index) => {
+        const x = columnXStart + index * (columnWidth + columnGap);
+        const accent = index === 0 ? neonAccent : mixHexColors(neonAccent, '#8be9ff', 0.54);
+        const teamPlayers = [...(team.starters ?? [])].sort((left, right) => Number(left.number ?? 0) - Number(right.number ?? 0));
+        const densityMode = resolveDensityMode(teamPlayers.length, teams.length === 2 ? 19 : 21, teams.length === 2 ? 22 : 23);
+        const starters = teamPlayers.filter((player, playerIndex) => isLineupStarter(player, playerIndex)).slice(0, 15);
+        const bench = teamPlayers
+            .filter((player, playerIndex) => !isLineupStarter(player, playerIndex))
+            .slice(0, getDensitySpacing(densityMode, { comfortable: 8, compact: 7, ultraCompact: 6 }));
+        const starterGap = getDensitySpacing(densityMode, { comfortable: teams.length === 2 ? 8 : 7, compact: 6, ultraCompact: 5 });
+        const benchGap = getDensitySpacing(densityMode, { comfortable: 4, compact: 3, ultraCompact: 2 });
+        const starterRowHeight = getDensitySpacing(densityMode, { comfortable: teams.length === 2 ? 36 : 34, compact: 32, ultraCompact: 28 });
+        const benchRowHeight = getDensitySpacing(densityMode, { comfortable: 26, compact: 24, ultraCompact: 22 });
+        const baseHeaderHeight = isStory ? 128 : 116;
+        const starterRowsHeight = starters.length > 0
+            ? starters.length * starterRowHeight + Math.max(0, starters.length - 1) * starterGap
+            : 0;
+        const benchRowsHeight = bench.length > 0
+            ? bench.length * benchRowHeight + Math.max(0, bench.length - 1) * benchGap
+            : 0;
+        const baseBenchSectionHeight = bench.length > 0 ? 38 : 0;
+        const totalContentHeight = baseHeaderHeight + starterRowsHeight + baseBenchSectionHeight + benchRowsHeight + 26;
+        const layoutScale = clampNumber(columnHeight / Math.max(totalContentHeight, 1), 0.72, 1);
+        const headerHeight = Math.max(98, Math.round(baseHeaderHeight * layoutScale));
+        const scaledStarterGap = Math.max(3, Math.round(starterGap * layoutScale));
+        const scaledBenchGap = Math.max(2, Math.round(benchGap * layoutScale));
+        const scaledStarterRowHeight = Math.max(23, Math.round(starterRowHeight * layoutScale));
+        const scaledBenchRowHeight = Math.max(18, Math.round(benchRowHeight * layoutScale));
+        const starterRowsBlockHeight = starters.length > 0
+            ? starters.length * scaledStarterRowHeight + Math.max(0, starters.length - 1) * scaledStarterGap
+            : 0;
+        const benchSectionHeight = bench.length > 0 ? Math.max(28, Math.round(38 * layoutScale)) : 0;
+        const listStartY = columnY + Math.max(112, headerHeight);
+        const benchHeaderY = listStartY + starterRowsBlockHeight + Math.max(8, Math.round(10 * layoutScale));
+
+        drawPosterV3Panel(ctx, x, columnY, columnWidth, columnHeight, 'rgba(4, 10, 20, 0.92)', hexToRGBA(accent, 0.7), 22, 2);
+        ctx.save();
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.roundRect(x + 12, columnY + 12, columnWidth - 24, 18, 12);
+        ctx.fill();
+        ctx.restore();
+
+        drawLogoBadge(ctx, { x: x + 56, y: columnY + 72, size: 52, img: logo, label: team.name, rawLogo: team.logo, isDark: true });
+
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffffff';
+        setFittedFont(ctx, team.name.toUpperCase(), columnWidth - 140, '900', Math.max(20, Math.round(30 * layoutScale)), FONT_BODY, 18);
+        ctx.fillText(truncateTextToWidth(ctx, team.name.toUpperCase(), columnWidth - 140), x + 92, columnY + 78);
+        ctx.fillStyle = hexToRGBA('#ffffff', 0.74);
+        ctx.font = `800 ${Math.max(11, Math.round(14 * layoutScale))}px ${FONT_MONO}`;
+        ctx.fillText((team.lineupLabel || 'Titulares y suplentes').toUpperCase(), x + 92, columnY + 106);
+        ctx.restore();
+
+        starters.forEach((player, playerIndex) => {
+            const y = listStartY + playerIndex * (scaledStarterRowHeight + scaledStarterGap);
+            const numberLabel = String(player.number ?? playerIndex + 1).padStart(2, '0');
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+
+            ctx.save();
+            ctx.fillStyle = playerIndex % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.03)';
+            ctx.beginPath();
+            ctx.roundRect(x + 14, y, columnWidth - 28, scaledStarterRowHeight, 12);
+            ctx.fill();
+            ctx.fillStyle = accent;
+            ctx.beginPath();
+            ctx.roundRect(x + 24, y + 5, 56, scaledStarterRowHeight - 10, 10);
+            ctx.fill();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#05101d';
+            ctx.font = `900 ${Math.max(11, Math.round(14 * layoutScale))}px ${FONT_MONO}`;
+            ctx.fillText(numberLabel, x + 52, y + scaledStarterRowHeight / 2 + 4);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#ffffff';
+            setFittedFont(ctx, playerLabel, columnWidth - 156, '800', Math.max(11, Math.round(16 * layoutScale)), FONT_BODY, 10);
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 156), x + 96, y + scaledStarterRowHeight / 2 + 5);
+            ctx.restore();
+        });
+
+        if (bench.length > 0) {
+            ctx.save();
+            ctx.fillStyle = hexToRGBA(accent, 0.16);
+            ctx.beginPath();
+            ctx.roundRect(x + 18, benchHeaderY, columnWidth - 36, benchSectionHeight, 999);
+            ctx.fill();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `800 ${Math.max(10, Math.round(12 * layoutScale))}px ${FONT_MONO}`;
+            ctx.fillText('SUPLENTES', x + columnWidth / 2, benchHeaderY + benchSectionHeight / 2 + 4);
+            ctx.restore();
+
+            bench.forEach((player, benchIndex) => {
+                const y = benchHeaderY + benchSectionHeight + benchIndex * (scaledBenchRowHeight + scaledBenchGap);
+                const numberLabel = String(player.number ?? starters.length + benchIndex + 1).padStart(2, '0');
+                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+
+                ctx.save();
+                ctx.globalAlpha = 0.88;
+                ctx.fillStyle = benchIndex % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)';
+                ctx.beginPath();
+                ctx.roundRect(x + 14, y, columnWidth - 28, scaledBenchRowHeight, 10);
+                ctx.fill();
+                ctx.fillStyle = hexToRGBA(accent, 0.84);
+                ctx.beginPath();
+                ctx.roundRect(x + 24, y + 4, 52, scaledBenchRowHeight - 8, 8);
+                ctx.fill();
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#05101d';
+                ctx.font = `900 ${Math.max(10, Math.round(12 * layoutScale))}px ${FONT_MONO}`;
+                ctx.fillText(numberLabel, x + 50, y + scaledBenchRowHeight / 2 + 4);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#ffffff';
+                setFittedFont(ctx, playerLabel, columnWidth - 150, '800', Math.max(10, Math.round(14 * layoutScale)), FONT_BODY, 10);
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 150), x + 88, y + scaledBenchRowHeight / 2 + 4);
+                ctx.restore();
+            });
+        }
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawPosterV3Lineups(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    mode: LineupExportMode
+) {
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const homeLogo = await loadImage(data.homeTeam.logo || '');
+    const awayLogo = await loadImage(data.awayTeam.logo || '');
+    const teams = getSelectedLineupTeams(data, mode).map((team) => ({
+        ...team,
+        starters: Array.isArray(team.starters)
+            ? team.starters.filter((player) => player && String(player.name || '').trim())
+            : [],
+    }));
+    const isSingleTeam = teams.length === 1;
+    const metaLabel = getLineupMetaLabel(data);
+    const accent = accentColor;
+    const accentSoft = mixHexColors(accentColor, '#ffffff', 0.24);
+    const primaryText = getContrastColor(mixHexColors(bgColor, '#050505', 0.7)) === '#ffffff' ? '#ffffff' : '#f8fafc';
+    const secondaryText = hexToRGBA(primaryText, 0.72);
+    const mutedDivider = hexToRGBA(accentSoft, 0.24);
+    const palette = resolvePosterV3GradientPalette(bgColor, accentColor);
+
+    if (isSingleTeam) {
+        const selectedTeam = teams[0];
+        const teamLogo = selectedTeam.side === 'home' ? homeLogo : awayLogo;
+        const startersRaw = selectedTeam.starters.filter((player, index) => isLineupStarter(player, index));
+        const starters = startersRaw.length > 0 ? startersRaw : selectedTeam.starters.slice(0, 11);
+        const bench = selectedTeam.starters.filter((player, index) => !isLineupStarter(player, index));
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, palette.start);
+        bgGradient.addColorStop(0.5, palette.mid);
+        bgGradient.addColorStop(1, palette.end);
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        for (let side = 0; side < 2; side += 1) {
+            const startX = side === 0 ? 24 : canvas.width - 184;
+            for (let index = 0; index < 8; index += 1) {
+                const x = startX + index * 18;
+                const streak = ctx.createLinearGradient(x, 0, x + 10, 0);
+                streak.addColorStop(0, 'rgba(255,255,255,0)');
+                streak.addColorStop(0.5, side === 0 ? mutedDivider : hexToRGBA(accent, 0.34));
+                streak.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = streak;
+                ctx.fillRect(x, 0, 12, canvas.height);
+            }
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.08;
+        ctx.strokeStyle = mutedDivider;
+        ctx.lineWidth = 1;
+        for (let y = 0; y < canvas.height; y += 12) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        drawLogoBadge(ctx, { x: canvas.width / 2 - 32, y: 82, size: 54, img: homeLogo, label: data.homeTeam.name, rawLogo: data.homeTeam.logo, isDark: true });
+        drawLogoBadge(ctx, { x: canvas.width / 2 + 32, y: 82, size: 54, img: awayLogo, label: data.awayTeam.name, rawLogo: data.awayTeam.logo, isDark: true });
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = primaryText;
+        setFittedFont(ctx, 'FORMACION', canvas.width - 180, '900', 92, FONT_EDITORIAL_SCORE, 56);
+        ctx.fillText('FORMACION', canvas.width / 2, 236);
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = hexToRGBA(primaryText, 0.88);
+        setFittedFont(ctx, selectedTeam.name.toUpperCase(), canvas.width - 220, '700', 26, FONT_BODY, 16);
+        ctx.fillText(selectedTeam.name.toUpperCase(), canvas.width / 2, 282);
+        ctx.restore();
+
+        ctx.save();
+        const divider = ctx.createLinearGradient(canvas.width / 2 - 180, 330, canvas.width / 2 + 180, 330);
+        divider.addColorStop(0, 'rgba(255,255,255,0)');
+        divider.addColorStop(0.22, hexToRGBA(accent, 0.72));
+        divider.addColorStop(0.78, hexToRGBA(accentSoft, 0.94));
+        divider.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = divider;
+        ctx.fillRect(canvas.width / 2 - 200, 328, 400, 3);
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = secondaryText;
+        ctx.font = `800 15px ${FONT_MONO}`;
+        const infoText = [data.tournament?.trim(), metaLabel?.trim()].filter(Boolean).join('  //  ').toUpperCase();
+        ctx.fillText(truncateTextToWidth(ctx, infoText, canvas.width - 140), canvas.width / 2, 364);
+        ctx.restore();
+
+        const contentTop = 408;
+        const contentBottom = canvas.height - 112;
+        const contentWidth = 560;
+        const numberAreaWidth = 84;
+        const nameAreaWidth = contentWidth - numberAreaWidth - 12;
+        const numberCenterX = canvas.width / 2 - contentWidth / 2 + numberAreaWidth / 2;
+        const nameX = canvas.width / 2 - contentWidth / 2 + numberAreaWidth + 12;
+        const buildBenchLayout = (labelFontSize: number, itemFontSize: number) => {
+            const entries = bench.map((player, index) => ({
+                number: String(player.number ?? starters.length + index + 1),
+                label: `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(),
+            }));
+            if (entries.length === 0) return { lines: [] as typeof entries[], lineHeight: 0, height: 0 };
+
+            ctx.save();
+            ctx.font = `900 ${labelFontSize}px ${FONT_BODY}`;
+            const labelWidth = ctx.measureText('SUPLENTES:').width;
+            ctx.font = `800 ${itemFontSize}px ${FONT_BODY}`;
+            const maxWidth = canvas.width - 120;
+            const lines: typeof entries[] = [];
+            let currentLine: typeof entries = [];
+            let currentWidth = labelWidth + 12;
+
+            entries.forEach((entry) => {
+                const segmentWidth = ctx.measureText(`${entry.number} ${entry.label}`).width + 22;
+                if (currentLine.length > 0 && currentWidth + segmentWidth > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = [];
+                    currentWidth = 0;
+                }
+                currentLine.push(entry);
+                currentWidth += segmentWidth;
+            });
+            if (currentLine.length > 0) lines.push(currentLine);
+            ctx.restore();
+
+            const lineHeight = itemFontSize + 10;
+            return { lines, lineHeight, height: labelFontSize + 12 + lines.length * lineHeight };
+        };
+
+        let starterNameFont = getSharedFittedFontSize(
+            ctx,
+            starters.map((player) => ({ text: `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(), maxWidth: nameAreaWidth })),
+            '800',
+            46,
+            FONT_BODY,
+            22
+        );
+        let starterNumberFont = Math.max(22, Math.round(starterNameFont * 0.9));
+        let starterRowHeight = Math.max(36, Math.round(starterNameFont * 1.14));
+        let benchLabelFont = Math.max(14, Math.round(starterNameFont * 0.46));
+        let benchItemFont = Math.max(14, Math.round(starterNameFont * 0.5));
+        let benchLayout = buildBenchLayout(benchLabelFont, benchItemFont);
+        let starterHeight = starters.length * starterRowHeight;
+        let totalHeight = starterHeight + (bench.length > 0 ? 48 + benchLayout.height : 0);
+        const availableHeight = contentBottom - contentTop;
+
+        while (starterNameFont > 18 && totalHeight > availableHeight) {
+            starterNameFont -= 1;
+            starterNumberFont = Math.max(20, Math.round(starterNameFont * 0.88));
+            starterRowHeight = Math.max(32, Math.round(starterNameFont * 1.12));
+            benchLabelFont = Math.max(13, Math.round(starterNameFont * 0.44));
+            benchItemFont = Math.max(13, Math.round(starterNameFont * 0.48));
+            benchLayout = buildBenchLayout(benchLabelFont, benchItemFont);
+            starterHeight = starters.length * starterRowHeight;
+            totalHeight = starterHeight + (bench.length > 0 ? 44 + benchLayout.height : 0);
+        }
+
+        const startY = contentTop + Math.max(0, Math.round((availableHeight - totalHeight) / 2));
+        starters.forEach((player, index) => {
+            const centerY = startY + index * starterRowHeight + starterRowHeight / 2;
+            const numberLabel = String(player.number ?? index + 1);
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+
+            ctx.save();
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = accent;
+            ctx.font = `900 ${starterNumberFont}px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillText(numberLabel, numberCenterX, centerY);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = primaryText;
+            ctx.font = `800 ${starterNameFont}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, nameAreaWidth), nameX, centerY + 1);
+            ctx.restore();
+        });
+
+        if (bench.length > 0) {
+            const benchY = startY + starterHeight + 44;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = primaryText;
+            ctx.font = `900 ${benchLabelFont}px ${FONT_BODY}`;
+            ctx.fillText('SUPLENTES:', canvas.width / 2, benchY);
+            ctx.restore();
+
+            benchLayout.lines.forEach((line, lineIndex) => {
+                ctx.save();
+                ctx.textBaseline = 'alphabetic';
+                ctx.font = `800 ${benchItemFont}px ${FONT_BODY}`;
+                let totalWidth = 0;
+                line.forEach((entry, entryIndex) => {
+                    totalWidth += ctx.measureText(`${entry.number} ${entry.label}`).width;
+                    if (entryIndex < line.length - 1) totalWidth += 22;
+                });
+                let cursorX = canvas.width / 2 - totalWidth / 2;
+                const y = benchY + 18 + (lineIndex + 1) * benchLayout.lineHeight;
+                line.forEach((entry, entryIndex) => {
+                    ctx.fillStyle = accent;
+                    ctx.fillText(entry.number, cursorX, y);
+                    cursorX += ctx.measureText(entry.number).width + 8;
+                    ctx.fillStyle = primaryText;
+                    ctx.fillText(entry.label, cursorX, y);
+                    cursorX += ctx.measureText(entry.label).width;
+                    if (entryIndex < line.length - 1) cursorX += 22;
+                });
+                ctx.restore();
+            });
+        }
+
+        if (teamLogo) {
+            drawOverflowCrest(ctx, {
+                x: 66,
+                y: canvas.height - 52,
+                width: 34,
+                height: 34,
+                img: teamLogo,
+                label: selectedTeam.name,
+                rawLogo: selectedTeam.logo,
+                isDark: true,
+                showFrame: false,
+            });
+        }
+
+        if (brandLogo) {
+            drawLogoBadge(ctx, {
+                x: canvas.width - 42,
+                y: canvas.height - 42,
+                size: 24,
+                img: brandLogo,
+                label: 'G22 Scores',
+                rawLogo: '/icon.png',
+                isDark: true,
+            });
+        }
+        return;
+    }
+
+    const navyBase = mixHexColors(bgColor, '#050505', 0.78);
+    const navyMid = mixHexColors(bgColor, '#121212', 0.54);
+    const shardAccent = accent;
+    const gridColor = mixHexColors(accent, primaryText, 0.18);
+    const surfaceColor = mixHexColors(bgColor, '#020202', 0.68);
+    const leftTeam = teams[0];
+    const rightTeam = teams[1];
+    const splitTeamPlayers = (players: LineupExportPlayerData[]) => {
+        const detectedStarters = players.filter((player, index) => isLineupStarter(player, index));
+        if (detectedStarters.length > 0) {
+            return {
+                starters: detectedStarters,
+                bench: players.filter((player, index) => !isLineupStarter(player, index)),
+            };
+        }
+
+        return {
+            starters: players.slice(0, Math.min(players.length, 15)),
+            bench: players.slice(Math.min(players.length, 15)),
+        };
+    };
+    const leftSplit = splitTeamPlayers(leftTeam.starters);
+    const rightSplit = splitTeamPlayers(rightTeam.starters);
+    const titleText = 'FORMACIONES';
+    const headerText = (data.tournament?.trim() || data.subtitle?.trim() || 'TORNEO').toUpperCase();
+    const metaText = [data.date?.trim(), data.time?.trim(), metaLabel?.trim()].filter(Boolean).join('  //  ').toUpperCase();
+    const topBandHeight = 156;
+    const titleY = 248;
+    const metaY = 324;
+    const crestY = 382;
+    const teamNameY = 440;
+    const listTop = 484;
+    const listBottom = canvas.height - 132;
+    const columnWidth = 386;
+    const columnGap = 58;
+    const leftCenterX = canvas.width / 2 - columnGap / 2 - columnWidth / 2;
+    const rightCenterX = canvas.width / 2 + columnGap / 2 + columnWidth / 2;
+
+    const fitTextLines = (text: string, maxWidth: number, baseSize: number, minSize: number, maxLines = 2) => {
+        let size = baseSize;
+        let lines = [text];
+        while (size >= minSize) {
+            ctx.font = `900 ${size}px ${FONT_EDITORIAL_SCORE}`;
+            const words = text.split(/\s+/).filter(Boolean);
+            lines = [];
+            let currentLine = '';
+            words.forEach((word) => {
+                const candidate = currentLine ? `${currentLine} ${word}` : word;
+                if (!currentLine || ctx.measureText(candidate).width <= maxWidth) {
+                    currentLine = candidate;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+            if (lines.length <= maxLines && lines.every((line) => ctx.measureText(line).width <= maxWidth)) {
+                return { lines, size };
+            }
+            size -= 2;
+        }
+        ctx.font = `900 ${minSize}px ${FONT_EDITORIAL_SCORE}`;
+        return { lines: [truncateTextToWidth(ctx, text, maxWidth)], size: minSize };
+    };
+
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bgGradient.addColorStop(0, navyMid);
+    bgGradient.addColorStop(1, navyBase);
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.24;
+    for (let x = 0; x <= canvas.width; x += 60) {
+        ctx.beginPath();
+        ctx.strokeStyle = hexToRGBA(gridColor, x % 120 === 0 ? 0.44 : 0.24);
+        ctx.lineWidth = 1;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += 60) {
+        ctx.beginPath();
+        ctx.strokeStyle = hexToRGBA(gridColor, y % 120 === 0 ? 0.44 : 0.24);
+        ctx.lineWidth = 1;
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = hexToRGBA(accentSoft, 0.18);
+    for (let x = 0; x < canvas.width; x += 18) {
+        for (let y = 0; y < canvas.height; y += 18) {
+            if ((x / 18 + y / 18) % 2 === 0) {
+                ctx.fillRect(x, y, 2, 2);
+            }
+        }
+    }
+    ctx.restore();
+
+    ctx.fillStyle = hexToRGBA(surfaceColor, 0.82);
+    ctx.fillRect(0, 0, canvas.width, topBandHeight);
+
+    const drawShard = (points: Array<[number, number]>) => {
+        ctx.save();
+        ctx.fillStyle = shardAccent;
+        ctx.beginPath();
+        ctx.moveTo(points[0][0], points[0][1]);
+        points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    };
+
+    drawShard([[0, 0], [128, 0], [88, 48], [0, 36]]);
+    drawShard([[148, 0], [212, 0], [248, 34], [184, 34]]);
+    drawShard([[canvas.width - 120, canvas.height], [canvas.width, canvas.height - 38], [canvas.width, canvas.height], [canvas.width - 46, canvas.height]]);
+    drawShard([[0, canvas.height], [76, canvas.height - 52], [124, canvas.height - 24], [52, canvas.height]]);
+
+    const headerLayout = fitTextLines(headerText, canvas.width - 360, 44, 18, 2);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = primaryText;
+    ctx.font = `900 ${headerLayout.size}px ${FONT_EDITORIAL_SCORE}`;
+    const headerLineHeight = headerLayout.size * 0.95;
+    const headerStartY = 74 - ((headerLayout.lines.length - 1) * headerLineHeight) / 2;
+    headerLayout.lines.forEach((line, index) => {
+        ctx.fillText(line, canvas.width / 2, headerStartY + index * headerLineHeight);
+    });
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(canvas.width / 2, titleY);
+    ctx.rotate(-0.08);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = hexToRGBA(primaryText, 0.22);
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = primaryText;
+    setFittedFont(ctx, titleText, canvas.width - 220, '900', 112, FONT_EDITORIAL_SCORE, 58);
+    ctx.fillText(titleText, 0, 0);
+    ctx.restore();
+
+    if (metaText) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = secondaryText;
+        ctx.font = `800 15px ${FONT_MONO}`;
+        ctx.fillText(truncateTextToWidth(ctx, metaText, canvas.width - 220), canvas.width / 2, metaY);
+        ctx.restore();
+    }
+
+    ctx.save();
+    const divider = ctx.createLinearGradient(canvas.width / 2 - 220, metaY + 26, canvas.width / 2 + 220, metaY + 26);
+    divider.addColorStop(0, 'rgba(255,255,255,0)');
+    divider.addColorStop(0.18, hexToRGBA(accent, 0.54));
+    divider.addColorStop(0.5, hexToRGBA(accentSoft, 0.92));
+    divider.addColorStop(0.82, hexToRGBA(accent, 0.54));
+    divider.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = divider;
+    ctx.fillRect(canvas.width / 2 - 220, metaY + 24, 440, 3);
+    ctx.restore();
+
+    const leftStarterLabels = leftSplit.starters.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const rightStarterLabels = rightSplit.starters.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const leftBenchLabels = leftSplit.bench.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const rightBenchLabels = rightSplit.bench.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    let starterFont = getSharedFittedFontSize(
+        ctx,
+        [...leftStarterLabels, ...rightStarterLabels].map((text) => ({ text, maxWidth: columnWidth - 24 })),
+        '900',
+        38,
+        FONT_BODY,
+        12
+    );
+    let starterRowGap = Math.max(24, Math.round(starterFont * 1.16));
+    let benchFont = Math.max(12, Math.round(starterFont * 0.68));
+    let benchRowGap = Math.max(18, Math.round(benchFont * 1.16));
+    let benchLabelFont = Math.max(12, Math.round(benchFont * 0.96));
+    const availableListHeight = listBottom - listTop;
+    const maxStarterRows = Math.max(leftStarterLabels.length, rightStarterLabels.length, 1);
+    const maxBenchRows = Math.max(leftBenchLabels.length, rightBenchLabels.length, 0);
+    let totalColumnHeight =
+        maxStarterRows * starterRowGap +
+        (maxBenchRows > 0 ? 34 + benchLabelFont + 14 + maxBenchRows * benchRowGap : 0);
+
+    while (starterFont > 11 && totalColumnHeight > availableListHeight) {
+        starterFont -= 1;
+        starterRowGap = Math.max(20, Math.round(starterFont * 1.12));
+        benchFont = Math.max(11, Math.round(starterFont * 0.66));
+        benchRowGap = Math.max(16, Math.round(benchFont * 1.12));
+        benchLabelFont = Math.max(11, Math.round(benchFont * 0.94));
+        totalColumnHeight =
+            maxStarterRows * starterRowGap +
+            (maxBenchRows > 0 ? 30 + benchLabelFont + 12 + maxBenchRows * benchRowGap : 0);
+    }
+
+    const getColumnMetrics = (starters: string[], bench: string[]) => {
+        const startersHeight = starters.length * starterRowGap;
+        const benchBlockHeight = bench.length > 0 ? 34 + benchLabelFont + 14 + bench.length * benchRowGap : 0;
+        const totalHeight = startersHeight + benchBlockHeight;
+        const startY = listTop + Math.max(0, Math.round((availableListHeight - totalHeight) / 2));
+        return {
+            startersStartY: startY,
+            benchLabelY: startY + startersHeight + 34,
+            benchStartY: startY + startersHeight + 34 + benchLabelFont + 14,
+        };
+    };
+
+    const leftMetrics = getColumnMetrics(leftStarterLabels, leftBenchLabels);
+    const rightMetrics = getColumnMetrics(rightStarterLabels, rightBenchLabels);
+
+    const drawSquadColumn = (
+        centerX: number,
+        teamName: string,
+        starters: LineupExportPlayerData[],
+        bench: LineupExportPlayerData[],
+        metrics: { startersStartY: number; benchLabelY: number; benchStartY: number },
+        label: string,
+        logo: HTMLImageElement | null,
+        rawLogo: string | undefined
+    ) => {
+        if (logo) {
+            drawOverflowCrest(ctx, {
+                x: centerX,
+                y: crestY,
+                width: 52,
+                height: 52,
+                img: logo,
+                label,
+                rawLogo,
+                isDark: true,
+                showFrame: false,
+            });
+        }
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = secondaryText;
+        setFittedFont(ctx, teamName.toUpperCase(), columnWidth - 20, '800', 18, FONT_BODY, 12);
+        ctx.fillText(teamName.toUpperCase(), centerX, teamNameY);
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = primaryText;
+        ctx.textBaseline = 'alphabetic';
+        ctx.font = `900 ${starterFont}px ${FONT_BODY}`;
+        const maxWidth = columnWidth - 20;
+        starters.forEach((player, index) => {
+            const y = metrics.startersStartY + index * starterRowGap;
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, maxWidth), centerX, y);
+        });
+        ctx.restore();
+
+        if (bench.length > 0) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = hexToRGBA(accentSoft, 0.96);
+            ctx.font = `800 ${benchLabelFont}px ${FONT_MONO}`;
+            ctx.fillText('SUPLENTES', centerX, metrics.benchLabelY);
+            ctx.restore();
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = secondaryText;
+            ctx.font = `700 ${benchFont}px ${FONT_BODY}`;
+            bench.forEach((player, index) => {
+                const y = metrics.benchStartY + index * benchRowGap;
+                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, maxWidth), centerX, y);
+            });
+            ctx.restore();
+        }
+    };
+
+    drawSquadColumn(leftCenterX, leftTeam.name, leftSplit.starters, leftSplit.bench, leftMetrics, leftTeam.name, homeLogo, data.homeTeam.logo);
+    drawSquadColumn(rightCenterX, rightTeam.name, rightSplit.starters, rightSplit.bench, rightMetrics, rightTeam.name, awayLogo, data.awayTeam.logo);
+
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width / 2,
+            y: canvas.height - 44,
+            size: 28,
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark: true,
+        });
+    } else if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: canvas.width / 2,
+            y: canvas.height - 44,
+            size: 28,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark: true,
+        });
+    }
+}
+
+async function drawPosterV3PlayoffBracket(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: PlayoffBracketData,
+    _format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => round.matches?.length) : [];
+    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const logos = await Promise.all(
+        rounds.flatMap((round) =>
+            round.matches.flatMap((match) => [
+                loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
+                loadImage(getBracketParticipantLogo(match.away_team || null, match.away_participant || null)),
+            ]),
+        ),
+    );
+    const accentPrimary = mixHexColors(accentColor, '#ffffff', 0.12);
+    const accentSoft = mixHexColors(accentColor, bgColor, 0.18);
+    const primaryText = getContrastColor(mixHexColors(bgColor, '#050505', 0.74)) === '#ffffff' ? '#ffffff' : '#f8fafc';
+
+    drawPosterV3Backdrop(ctx, canvas, accentColor, bgColor);
+    drawPosterV3Kicker(ctx, 58, 94, (data.subtitle || 'Eliminacion directa').toUpperCase(), hexToRGBA(accentPrimary, 0.96));
+    drawPosterV3OutlineTitle(ctx, data.title || 'Playoff', 56, 168, canvas.width - 120, 102, hexToRGBA(primaryText, 0.26));
+
+    if (tournamentLogo) {
+        drawLogoBadge(ctx, { x: canvas.width - 88, y: 90, size: 58, img: tournamentLogo, label: data.title, rawLogo: data.tournamentLogo, isDark: true });
+    }
+
+    if (!rounds.length) {
+        ctx.save();
+        ctx.fillStyle = primaryText;
+        ctx.textAlign = 'center';
+        ctx.font = `700 24px ${FONT_BODY}`;
+        ctx.fillText('No hay cruces cargados para exportar.', canvas.width / 2, canvas.height / 2);
+        ctx.restore();
+        drawBrandFooter(ctx, canvas, brandLogo, true);
+        return;
+    }
+
+    const columnGap = 18;
+    const columnWidth = (canvas.width - 112 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
+    const top = 224;
+    const usableHeight = canvas.height - top - 166;
+    let logoIndex = 0;
+
+    rounds.forEach((round, roundIndex) => {
+        const x = 56 + roundIndex * (columnWidth + columnGap);
+        const titleHeight = 42;
+        const gap = 14;
+        const matchHeight = Math.min(124, (usableHeight - titleHeight - 18 - gap * Math.max(round.matches.length - 1, 0)) / Math.max(round.matches.length, 1));
+
+        ctx.save();
+        ctx.fillStyle = accentPrimary;
+        ctx.beginPath();
+        ctx.roundRect(x, top, columnWidth, titleHeight, 12);
+        ctx.fill();
+        ctx.fillStyle = getContrastColor(accentPrimary) === '#ffffff' ? '#05101d' : '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.font = `900 14px ${FONT_MONO}`;
+        ctx.fillText(round.name.toUpperCase(), x + columnWidth / 2, top + 27);
+        ctx.restore();
+
+        round.matches.forEach((match, matchIndex) => {
+            const y = top + titleHeight + 18 + matchIndex * (matchHeight + gap);
+            const homeName = getBracketParticipantName(match.home_team || null, match.home_participant || null);
+            const awayName = getBracketParticipantName(match.away_team || null, match.away_participant || null);
+            const homeLogo = logos[logoIndex] || null;
+            const awayLogo = logos[logoIndex + 1] || null;
+            logoIndex += 2;
+
+            drawPosterV3Panel(ctx, x, y, columnWidth, matchHeight, hexToRGBA(mixHexColors(bgColor, '#04080f', 0.78), 0.9), hexToRGBA(accentSoft, 0.28), 16, 1.5);
+
+            drawLogoBadge(ctx, { x: x + 28, y: y + 34, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true });
+            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 34, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true });
+
+            ctx.save();
+            ctx.fillStyle = primaryText;
+            ctx.textAlign = 'left';
+            setFittedFont(ctx, homeName.toUpperCase(), columnWidth - 112, '800', 14, FONT_BODY, 10);
+            ctx.fillText(homeName.toUpperCase(), x + 52, y + 40);
+            setFittedFont(ctx, awayName.toUpperCase(), columnWidth - 112, '800', 14, FONT_BODY, 10);
+            ctx.fillText(awayName.toUpperCase(), x + 52, y + matchHeight - 28);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = accentPrimary;
+            ctx.font = `900 26px ${FONT_EDITORIAL_SCORE}`;
+            ctx.fillText(String(match.score_home ?? '-'), x + columnWidth - 18, y + 42);
+            ctx.fillText(String(match.score_away ?? '-'), x + columnWidth - 18, y + matchHeight - 26);
+            ctx.restore();
+        });
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+
+async function drawPosterV3PlayerStats(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: PlayerStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const isStory = format.height > format.width;
+    const photo = await loadImage(data.photo || '');
+    const accentPrimary = mixHexColors(accentColor, '#ffffff', 0.12);
+    const accentHighlight = mixHexColors(accentColor, '#ffffff', 0.24);
+    const panelFill = hexToRGBA(mixHexColors(bgColor, '#030912', 0.74), 0.86);
+    const stats = data.stats.slice(0, isStory ? 4 : 3);
+
+    drawPosterV3Backdrop(ctx, canvas, accentColor, bgColor);
+    drawPosterV3FullBleedImage(ctx, canvas, photo, 'rgba(2, 6, 12, 0.14)', 'rgba(0, 0, 0, 0.82)');
+    drawPosterV3Kicker(ctx, 56, 94, `${data.team} • ${data.position}`.toUpperCase(), hexToRGBA(accentPrimary, 0.94));
+    drawPosterV3OutlineTitle(ctx, 'Jugador destacado', 54, 172, canvas.width - 120, 104, hexToRGBA('#ffffff', 0.26));
+
+    ctx.save();
+    const shade = ctx.createLinearGradient(0, canvas.height * 0.48, 0, canvas.height);
+    shade.addColorStop(0, 'rgba(0,0,0,0)');
+    shade.addColorStop(1, 'rgba(0,0,0,0.84)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    drawPosterV3SolidTitle(ctx, data.name, 70, canvas.height - 274, canvas.width - 140, isStory ? 92 : 86, '#ffffff');
+
+    const cardGap = 14;
+    const cardWidth = (canvas.width - 140 - cardGap * Math.max(stats.length - 1, 0)) / Math.max(stats.length, 1);
+    stats.forEach((stat, index) => {
+        const x = 70 + index * (cardWidth + cardGap);
+        const y = canvas.height - 226;
+        const tone = stat.highlight ? accentHighlight : accentPrimary;
+
+        drawPosterV3Panel(ctx, x, y, cardWidth, 96, panelFill, hexToRGBA(tone, 0.64), 16, 2);
+
+        ctx.save();
+        ctx.fillStyle = hexToRGBA('#ffffff', 0.72);
+        ctx.font = `800 13px ${FONT_MONO}`;
+        ctx.fillText(stat.label.toUpperCase(), x + 16, y + 28);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `900 48px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText(String(stat.value), x + 16, y + 76);
+        ctx.restore();
+    });
+
+    drawBrandFooter(ctx, canvas, brandLogo, true);
+}
+

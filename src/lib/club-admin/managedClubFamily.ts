@@ -36,7 +36,7 @@ export interface ManagedClubSummary {
     familyRootName: string | null;
     accessRole: string;
     managementType: 'club' | 'club_family';
-    accessSource: 'direct' | 'family';
+    accessSource: 'direct' | 'family' | 'shared_roster';
     isDirect: boolean;
 }
 
@@ -145,6 +145,61 @@ async function findDerivedClubIds(supabase: SupabaseServerClient, clubId: string
         .filter((value): value is string => typeof value === 'string' && value.length > 0);
 }
 
+async function findSharedRosterLinkedClubIds(
+    supabase: SupabaseServerClient,
+    clubId: string
+): Promise<string[]> {
+    const { data: seedLinks, error } = await supabase
+        .from('club_family_divisions')
+        .select('roster_owner_club_id, division_club_id, group_name')
+        .or(`roster_owner_club_id.eq.${clubId},division_club_id.eq.${clubId}`);
+
+    if (error) {
+        if (isMissingTableError(error)) return [];
+        throw error;
+    }
+
+    const groupKeys = new Set(
+        (Array.isArray(seedLinks) ? seedLinks : []).map((link) => (
+            `${link?.roster_owner_club_id || ''}::${link?.group_name || ''}`
+        ))
+    );
+
+    if (groupKeys.size === 0) {
+        return [];
+    }
+
+    const rosterOwnerClubIds = Array.from(new Set(
+        (Array.isArray(seedLinks) ? seedLinks : [])
+            .map((link) => link?.roster_owner_club_id)
+            .filter((value): value is string => typeof value === 'string' && value.length > 0)
+    ));
+
+    let relatedLinks = Array.isArray(seedLinks) ? seedLinks : [];
+    if (rosterOwnerClubIds.length > 0) {
+        const { data: ownerLinks, error: ownerLinksError } = await supabase
+            .from('club_family_divisions')
+            .select('roster_owner_club_id, division_club_id, group_name')
+            .in('roster_owner_club_id', rosterOwnerClubIds);
+
+        if (ownerLinksError) {
+            if (!isMissingTableError(ownerLinksError)) {
+                throw ownerLinksError;
+            }
+        } else {
+            relatedLinks = (Array.isArray(ownerLinks) ? ownerLinks : []).filter((link) => (
+                groupKeys.has(`${link?.roster_owner_club_id || ''}::${link?.group_name || ''}`)
+            ));
+        }
+    }
+
+    return Array.from(new Set(
+        relatedLinks
+            .flatMap((link) => [link?.roster_owner_club_id, link?.division_club_id])
+            .filter((value): value is string => typeof value === 'string' && value.length > 0)
+    ));
+}
+
 export async function resolveClubFamilyIds(supabase: SupabaseServerClient, clubId: string): Promise<{
     rootClubId: string;
     clubIds: string[];
@@ -213,6 +268,7 @@ export async function getManagedClubSummaries(
         familyRootId: string;
         accessRole: string;
         managementType: 'club' | 'club_family';
+        accessSource: 'direct' | 'family' | 'shared_roster';
         isDirect: boolean;
     }>();
     const defaultClubId = directMemberships[0]?.scopeId ?? null;
@@ -220,23 +276,37 @@ export async function getManagedClubSummaries(
     for (const membership of directMemberships) {
         const scopeId = membership.scopeId!;
         const managementType = membership.scopeType === 'club_family' ? 'club_family' : 'club';
-        const family = managementType === 'club_family'
-            ? await resolveClubFamilyIds(supabase, scopeId)
-            : { rootClubId: scopeId, clubIds: [scopeId] };
+        const resolvedFamily = await resolveClubFamilyIds(supabase, scopeId).catch(() => ({
+            rootClubId: scopeId,
+            clubIds: [scopeId],
+        }));
+        const familyClubIds = managementType === 'club_family'
+            ? resolvedFamily.clubIds
+            : Array.from(new Set([
+                scopeId,
+                ...await findSharedRosterLinkedClubIds(supabase, scopeId),
+            ]));
 
-        for (const familyClubId of family.clubIds) {
+        for (const familyClubId of familyClubIds) {
             const current = familyAccess.get(familyClubId);
             const nextPriority = rolePriority(membership.role);
             const currentPriority = current ? rolePriority(current.accessRole) : -1;
 
             const prefersBroaderManagement =
                 current?.managementType === 'club' && managementType === 'club_family';
+            const accessSource =
+                familyClubId === scopeId
+                    ? 'direct'
+                    : managementType === 'club_family'
+                        ? 'family'
+                        : 'shared_roster';
 
             if (!current || nextPriority > currentPriority || (nextPriority === currentPriority && prefersBroaderManagement)) {
                 familyAccess.set(familyClubId, {
-                    familyRootId: family.rootClubId,
+                    familyRootId: resolvedFamily.rootClubId,
                     accessRole: membership.role,
                     managementType,
+                    accessSource,
                     isDirect: familyClubId === scopeId,
                 });
                 continue;
@@ -245,6 +315,7 @@ export async function getManagedClubSummaries(
             if (familyClubId === scopeId && !current.isDirect) {
                 familyAccess.set(familyClubId, {
                     ...current,
+                    accessSource: 'direct',
                     isDirect: true,
                 });
             }
@@ -277,7 +348,7 @@ export async function getManagedClubSummaries(
                 familyRootName: rootClub?.name || null,
                 accessRole: access.accessRole,
                 managementType: access.managementType,
-                accessSource: access.isDirect ? 'direct' : 'family',
+                accessSource: access.accessSource,
                 isDirect: access.isDirect,
             } satisfies ManagedClubSummary;
         })

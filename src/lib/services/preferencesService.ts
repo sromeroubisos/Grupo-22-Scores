@@ -27,8 +27,30 @@ export interface LeagueItem {
     logoUrl: string | null
 }
 
-function isUuidLike(value: string) {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.trim())
+interface FavoriteSportRow {
+    sport_id: string
+}
+
+interface FavoriteLeagueRow {
+    league_id: string
+    sport_id: string | null
+    sort_order: number | null
+}
+
+interface UnionBranding {
+    logo_url?: string | null
+    organization?: {
+        identity?: {
+            sport?: string | null
+        }
+    }
+}
+
+interface UnionRow {
+    id: string
+    name: string
+    country: string | null
+    branding?: UnionBranding | null
 }
 
 // ─── Onboarding Status ────────────────────────────────────────────────────────
@@ -48,6 +70,23 @@ export async function getOnboardingStatus(
     }
 
     return data ?? null
+}
+
+export async function ensureOnboardingStatus(
+    supabase: SupabaseClient,
+    userId: string
+): Promise<void> {
+    const { error } = await supabase
+        .from('user_onboarding_status')
+        .upsert({
+            user_id: userId,
+            updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' })
+
+    if (error) {
+        console.error('[preferencesService] ensureOnboardingStatus error:', error.message)
+        throw error
+    }
 }
 
 export async function completeOnboarding(
@@ -90,7 +129,7 @@ export async function getFavoriteSports(
         return []
     }
 
-    return (data ?? []).map((r: any) => r.sport_id)
+    return ((data ?? []) as FavoriteSportRow[]).map((row) => row.sport_id)
 }
 
 export async function saveFavoriteSports(
@@ -134,8 +173,7 @@ export async function getFavoriteLeagues(
     supabase: SupabaseClient,
     userId: string
 ): Promise<FavoriteLeagueEntry[]> {
-    const supabaseAny = supabase as any
-    const { data, error } = await supabaseAny
+    const { data, error } = await supabase
         .from('user_favorite_leagues')
         .select('league_id, sport_id, sort_order')
         .eq('user_id', userId)
@@ -147,7 +185,7 @@ export async function getFavoriteLeagues(
         return []
     }
 
-    return (data ?? []).map((row: any) => ({
+    return ((data ?? []) as FavoriteLeagueRow[]).map((row) => ({
         leagueId: String(row.league_id),
         sportId: String(row.sport_id || ''),
         sortOrder: typeof row.sort_order === 'number' ? row.sort_order : 0,
@@ -159,8 +197,7 @@ export async function saveFavoriteLeagues(
     userId: string,
     leagues: { leagueId: string; sportId: string }[]
 ): Promise<void> {
-    const supabaseAny = supabase as any
-    const { error: deleteError } = await supabaseAny
+    const { error: deleteError } = await supabase
         .from('user_favorite_leagues')
         .delete()
         .eq('user_id', userId)
@@ -180,7 +217,7 @@ export async function saveFavoriteLeagues(
         sort_order: index,
     }))
 
-    const { error: insertError } = await supabaseAny
+    const { error: insertError } = await supabase
         .from('user_favorite_leagues')
         .insert(rows)
 
@@ -214,8 +251,7 @@ export async function getLeaguesBySports(
 
     // Query 2: unions table (federations/leagues/associations)
     // sport column may not exist — fetch all and filter client-side via branding JSONB
-    const supabaseAny = supabase as any
-    const { data: unionData, error: unionError } = await supabaseAny
+    const { data: unionData, error: unionError } = await supabase
         .from('unions')
         .select('id, name, country, branding')
         .order('name', { ascending: true })
@@ -239,7 +275,7 @@ export async function getLeaguesBySports(
     }
 
     // Map unions — extract sport from branding JSONB, filter client-side
-    for (const u of (unionData ?? [])) {
+    for (const u of ((unionData ?? []) as UnionRow[])) {
         const effectiveSport = u.branding?.organization?.identity?.sport
         if (!effectiveSport || !sportIds.includes(effectiveSport)) continue
         results.push({

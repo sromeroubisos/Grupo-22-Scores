@@ -3,17 +3,10 @@
 import { Database } from "../database.types";
 
 export type UserRole =
+    | 'admin_general'
     | 'fan'
     | 'user'
-    | 'redactor'
-    | 'super_admin'
-    | 'operator'
-    | 'club_admin'
-    | 'admin_general'
-    | 'gestor_deportes'
-    | 'gestor_torneos'
-    | 'gestor_partidos'
-    | 'gestor_clubes';
+    | 'super_admin';
 
 export type EntityType = 'league' | 'club' | 'tournament' | 'team' | 'player';
 
@@ -40,7 +33,8 @@ export interface UserProfile {
 
 // Super Admin constant
 export const SUPER_ADMIN_EMAIL = 'superadmin@g22scores.com';
-export const AUTHORIZED_SUPER_ADMIN_EMAILS = [SUPER_ADMIN_EMAIL, 'deportesgrupo@gmail.com', 'sromeroubisos@gmail.com'] as const;
+export const AUTHORIZED_SUPER_ADMIN_EMAILS = [SUPER_ADMIN_EMAIL] as const;
+export const AUTHORIZED_ADMIN_GENERAL_EMAILS = ['sromeroubisos@gmail.com'] as const;
 
 // Helper to check if email is super admin
 export function isSuperAdminEmail(email?: string | null): boolean {
@@ -49,21 +43,28 @@ export function isSuperAdminEmail(email?: string | null): boolean {
     return AUTHORIZED_SUPER_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === lowerEmail);
 }
 
+export function isAdminGeneralEmail(email?: string | null): boolean {
+    if (!email) return false;
+    const lowerEmail = email.toLowerCase();
+    return AUTHORIZED_ADMIN_GENERAL_EMAILS.some(adminEmail => adminEmail.toLowerCase() === lowerEmail);
+}
+
+export function getReservedAdminRole(email?: string | null): 'super_admin' | 'admin_general' | null {
+    if (isSuperAdminEmail(email)) return 'super_admin';
+    if (isAdminGeneralEmail(email)) return 'admin_general';
+    return null;
+}
+
 // Helper to check if user is super admin
 export function isSuperAdmin(user: User | null): boolean {
+    return user?.role === 'super_admin';
+}
+
+export function isGlobalAdmin(user: User | null): boolean {
     return user?.role === 'super_admin' || user?.role === 'admin_general';
 }
 
 // Helper to check if user can access admin panel
 export function canAccessAdminPanel(user: User | null): boolean {
-    return Boolean(
-        isSuperAdmin(user) ||
-        user?.role === 'redactor' ||
-        user?.role === 'operator' ||
-        user?.role === 'club_admin' ||
-        user?.role === 'gestor_deportes' ||
-        user?.role === 'gestor_torneos' ||
-        user?.role === 'gestor_partidos' ||
-        user?.role === 'gestor_clubes'
-    );
+    return Boolean(isGlobalAdmin(user));
 }

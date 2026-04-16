@@ -1,0 +1,189 @@
+diff --git a/src/app/admin/super/torneos/externos/[id]/page.tsx b/src/app/admin/super/torneos/externos/[id]/page.tsx
+index e48d4c8..3a3c108 100644
+--- a/src/app/admin/super/torneos/externos/[id]/page.tsx
++++ b/src/app/admin/super/torneos/externos/[id]/page.tsx
+@@ -98,6 +99,7 @@ type StandingsPreviewRow = {
+ 
+ const BUILTIN_STANDINGS_TABLES = [
+     { key: 'standings', name: 'Tabla general' },
++    { key: 'luckyLoser', name: 'Lucky Loser' },
+     { key: 'standingsForm', name: 'Forma' },
+     { key: 'standingsOverUnder', name: 'Over/Under' },
+     { key: 'standingsHtFt', name: 'HT/FT' },
+@@ -396,7 +398,7 @@ function buildRowIdentity(row: unknown, index: number) {
+     return `name:${slugify(teamName || `row-${index + 1}`) || `row-${index + 1}`}`;
+ }
+ 
+-function extractPreviewRows(standings: unknown[]): StandingsPreviewRow[] {
++function buildPreviewRows(standings: unknown[]): StandingsPreviewRow[] {
+     if (!Array.isArray(standings)) return [];
+ 
+     if (!isGroupedStandings(standings)) {
+@@ -442,20 +444,83 @@ function extractPreviewRows(standings: unknown[]): StandingsPreviewRow[] {
+     });
+ }
+ 
+-function deriveGroupsFromStandings(standings: unknown[]): ExternalStandingsGroup[] {
+-    if (!isGroupedStandings(standings)) return [];
++function ensureUniquePreviewRowIds(rows: StandingsPreviewRow[]) {
++    const duplicates = new Map<string, number>();
++
++    rows.forEach((row) => {
++        duplicates.set(row.id, (duplicates.get(row.id) || 0) + 1);
++    });
++
++    return rows.map((row, index) => {
++        if ((duplicates.get(row.id) || 0) <= 1) {
++            return row;
++        }
++
++        const groupScope = slugify(row.groupId || row.groupName || '') || 'global';
++        const positionScope = typeof row.position === 'number' ? `pos-${row.position}` : `row-${index + 1}`;
+ 
+-    return standings.map((group, index: number) => {
+-        const record = asRecord(group);
+-        const name = normalizeString(record?.group_name) || `Grupo ${index + 1}`;
+         return {
+-            id: normalizeString(record?.group_id) || `ext-group-${slugify(name) || index + 1}`,
+-            name,
+-            order_index: index,
++            ...row,
++            id: `${row.id}:group:${groupScope}:${positionScope}:${index + 1}`,
+         };
+     });
+ }
+ 
++function splitPreviewRowsByDuplicateKey(rows: StandingsPreviewRow[]) {
++    const seen = new Map<string, number>();
++    const primaryRows: StandingsPreviewRow[] = [];
++    const luckyLoserRows: StandingsPreviewRow[] = [];
++
++    rows.forEach((row) => {
++        const currentCount = seen.get(row.id) || 0;
++        seen.set(row.id, currentCount + 1);
++
++        if (currentCount === 0) {
++            primaryRows.push(row);
++            return;
++        }
++
++        luckyLoserRows.push({
++            ...row,
++            id: `${row.id}:lucky-loser:${currentCount}`,
++        });
++    });
++
++    return {
++        primaryRows: ensureUniquePreviewRowIds(primaryRows),
++        luckyLoserRows: ensureUniquePreviewRowIds(luckyLoserRows),
++    };
++}
++
++function extractPreviewRows(standings: unknown[]): StandingsPreviewRow[] {
++    return ensureUniquePreviewRowIds(buildPreviewRows(standings));
++}
++
++function extractStandingsRows(standings: unknown[]) {
++    return splitPreviewRowsByDuplicateKey(buildPreviewRows(standings));
++}
++
++function deriveGroupsFromRows(rows: StandingsPreviewRow[]): ExternalStandingsGroup[] {
++    const groups = new Map<string, ExternalStandingsGroup>();
++
++    rows.forEach((row) => {
++        const normalizedGroupId = normalizeString(row.groupId);
++        const normalizedGroupName = normalizeString(row.groupName);
++        if (!normalizedGroupId && !normalizedGroupName) return;
++
++        const id = normalizedGroupId || `ext-group-${slugify(normalizedGroupName || '') || groups.size + 1}`;
++        if (groups.has(id)) return;
++
++        groups.set(id, {
++            id,
++            name: normalizedGroupName || `Grupo ${groups.size + 1}`,
++            order_index: groups.size,
++        });
++    });
++
++    return [...groups.values()];
++}
++
+ function deriveAssignments(rows: StandingsPreviewRow[]): ExternalStandingsAssignment[] {
+     return rows
+         .filter((row) => row.groupId)
+@@ -496,11 +561,17 @@ function deriveLabels(teamLabels: unknown[]): ExternalStandingsLabel[] {
+ }
+ 
+ function buildApiTablesFromPayload(payload: ExternalApiRecord | null | undefined): ApiStandingsTable[] {
++    const standingsRows = extractStandingsRows(Array.isArray(payload?.standings) ? payload.standings as unknown[] : []);
+     const candidates: ApiStandingsTable[] = BUILTIN_STANDINGS_TABLES.map((table) => ({
+         key: table.key,
+         name: table.name,
+         sourceKey: table.key,
+-        rows: extractPreviewRows(Array.isArray(payload?.[table.key]) ? payload?.[table.key] as unknown[] : []),
++        rows:
++            table.key === 'standings'
++                ? standingsRows.primaryRows
++                : table.key === 'luckyLoser'
++                    ? standingsRows.luckyLoserRows
++                    : extractPreviewRows(Array.isArray(payload?.[table.key]) ? payload?.[table.key] as unknown[] : []),
+         builtIn: true,
+     }));
+@@ -716,8 +787,6 @@ export default function ExternalTournamentOverridePage() {
+                     tables: [],
+                 };
+ 
+-                let publicStandings: unknown[] = [];
+-                let publicRows: StandingsPreviewRow[] = [];
+                 let publicTeamLabels: unknown[] = [];
+                 let publicApiTables: ApiStandingsTable[] = [];
+@@ -745,8 +814,6 @@ export default function ExternalTournamentOverridePage() {
+ 
+                 if (publicResponse.status === 'fulfilled' && publicResponse.value.ok && publicResponse.value.payload?.ok) {
+                     const payload = asRecord(publicResponse.value.payload);
+-                    publicStandings = Array.isArray(payload?.standings) ? payload.standings : [];
+-                    publicRows = extractPreviewRows(publicStandings);
+                     publicTeamLabels = Array.isArray(payload?.teamLabels) ? payload.teamLabels : [];
+                     publicApiTables = buildApiTablesFromPayload(payload);
+ 
+@@ -776,22 +843,35 @@ export default function ExternalTournamentOverridePage() {
+                     nextForm.country_id = nextForm.country_id || detailsCountry.country_id;
+                 }
+ 
++                const apiTablesByKey = new Map(publicApiTables.map((table) => [table.key, table]));
++
+                 nextEditor.tables = ensureEditorTables(nextEditor.tables, publicApiTables, tournamentId)
+                     .map((table, index) => {
+-                        if (table.key !== 'standings') return table;
+                         if (
+                             table.groups.length > 0 ||
+                             table.assignments.length > 0 ||
+                             table.labels.length > 0
+                         ) {
+-                            return table;
++                            return {
++                                ...table,
++                                order_index: index,
++                            };
++                        }
++
++                        const sourceTable = apiTablesByKey.get(table.source_key || table.key);
++                        const sourceRows = sourceTable?.rows || [];
++                        if (sourceRows.length === 0) {
++                            return {
++                                ...table,
++                                order_index: index,
++                            };
+                         }
+ 
+                         return {
+                             ...table,
+-                            groups: deriveGroupsFromStandings(publicStandings),
+-                            assignments: deriveAssignments(publicRows),
+-                            labels: deriveLabels(publicTeamLabels),
++                            groups: deriveGroupsFromRows(sourceRows),
++                            assignments: deriveAssignments(sourceRows),
++                            labels: table.key === 'standings' ? deriveLabels(publicTeamLabels) : [],
+                             order_index: index,
+                         };
+                     });

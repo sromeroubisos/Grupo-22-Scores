@@ -1,0 +1,20 @@
+diff --git a/src/app/admin/super/torneos/externos/[id]/page.tsx b/src/app/admin/super/torneos/externos/[id]/page.tsx
+index e48d4c8..3a3c108 100644
+--- a/src/app/admin/super/torneos/externos/[id]/page.tsx
++++ b/src/app/admin/super/torneos/externos/[id]/page.tsx
+@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
+ import { ArrowLeft, CheckCircle2, Plus, Save, ShieldAlert, Trash2 } from 'lucide-react';
+ import LogoUploader from '@/components/LogoUploader';
+ import { useAuth } from '@/context/AuthContext';
++import { isGlobalAdminRole } from '@/lib/auth/roles';
+ import { getTournamentCountryOptions, resolveTournamentCountryId, resolveTournamentCountryLabel } from '@/lib/data/countries';
+ import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
+@@ -549,7 +620,7 @@ export default function ExternalTournamentOverridePage() {
+     const { user, isLoading: authLoading } = useAuth();
+     const tournamentId = String(params?.id || '').trim();
+     const publicTournamentId = tournamentId.toLowerCase().startsWith('fs-') ? tournamentId : `fs-${tournamentId}`;
+-    const isExactSuperAdmin = isGlobalAdminRole(user?.role);
++    const isExactSuperAdmin = user?.role === 'super_admin';
+ 
+     const [loading, setLoading] = useState(true);
+     const [saving, setSaving] = useState(false);

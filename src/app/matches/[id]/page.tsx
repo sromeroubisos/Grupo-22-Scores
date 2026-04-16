@@ -18,6 +18,7 @@ import {
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { SPORTS } from '@/lib/data/sports';
 import { findCountryRecord } from '@/lib/data/countries';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
@@ -982,7 +983,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
     const isEspnExternal = isEspnAmericanFootballMatchId(id);
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
     const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnMotorsportExternal;
-    const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const isSuperAdminUser = isGlobalAdminRole(user?.role);
     const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';
     const isEspnSource = state.matchData?.externalProvider === 'espn';
     const isMotorsportSource =
@@ -2196,7 +2197,7 @@ export default function PartidoDetailPage({ params }: { params: Promise<{ id: st
                     </div>
                     <div className={styles.matchActions}>
                         {isSuperAdminUser && !isExternalMatch && (
-                            <Link href={`/admin/matches/${id}/manage`} className={`${styles.btn} ${styles.btnPrimary}`}>
+                            <Link href={`/admin/super/partidos/${id}`} className={`${styles.btn} ${styles.btnPrimary}`}>
                                 Editar partido
                             </Link>
                         )}

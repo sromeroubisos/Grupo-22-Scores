@@ -11,6 +11,7 @@ import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import ExportImage from '@/components/ExportImage';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
@@ -302,7 +303,7 @@ function TeamDetailInner({ params }: { params: Promise<{ id: string }> }) {
     // Filtered matches by sport
     const filteredResults = selectedSport === 'all' ? results : results.filter(m => String(m.sport_id) === selectedSport);
     const filteredFixtures = selectedSport === 'all' ? fixtures : fixtures.filter(m => String(m.sport_id) === selectedSport);
-    const isSuperAdminUser = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const isSuperAdminUser = isGlobalAdminRole(user?.role);
     const externalTeamId = getExternalTeamId(rawId, hintTeamUrl);
     const adminClubId = useMemo(() => {
         if (resolvedClubId) return resolvedClubId;

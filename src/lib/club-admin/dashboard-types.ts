@@ -24,6 +24,10 @@ export interface ClubDashboardMatch {
     venue: string | null;
     score: ClubDashboardScore | null;
     isHome: boolean;
+    homeDivisionId: string | null;
+    awayDivisionId: string | null;
+    homeDivisionName: string | null;
+    awayDivisionName: string | null;
     opponentName: string;
     opponentShortName: string | null;
     opponentLogoUrl: string | null;

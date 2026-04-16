@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { isSuperAdminEmail } from '@/lib/types/user'
+import { getReservedAdminRole } from '@/lib/types/user'
 import { NextResponse } from 'next/server'
 
 export async function POST() {
@@ -18,7 +18,7 @@ export async function POST() {
         }
 
         const user = session.user
-        const shouldBeSuperAdmin = isSuperAdminEmail(user.email)
+        const reservedRole = getReservedAdminRole(user.email)
         const admin = createAdminClient()
         const now = new Date().toISOString()
 
@@ -35,7 +35,7 @@ export async function POST() {
         }
 
         if (!existingUser) {
-            const role = shouldBeSuperAdmin ? 'super_admin' : 'fan'
+            const role = reservedRole ?? 'fan'
 
             const { error: insertError } = await admin
                 .from('users')
@@ -53,12 +53,12 @@ export async function POST() {
                 return NextResponse.json({ error: 'Error creating user' }, { status: 500 })
             }
         } else {
-            const updates: { last_login_at: string; role?: 'super_admin' } = {
+            const updates: { last_login_at: string; role?: 'super_admin' | 'admin_general' } = {
                 last_login_at: now,
             }
 
-            if (shouldBeSuperAdmin && existingUser.role !== 'super_admin') {
-                updates.role = 'super_admin'
+            if (reservedRole && existingUser.role !== reservedRole) {
+                updates.role = reservedRole
             }
 
             const { error: updateError } = await admin

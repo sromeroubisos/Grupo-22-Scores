@@ -1940,7 +1940,7 @@ function MatchCard({
   const totalHomePoints = quickResultForm ? parseQuickPointNumber(quickResultForm.homeBasePoints) + parseQuickPointNumber(quickResultForm.homeBonusPoints) : 0;
   const totalAwayPoints = quickResultForm ? parseQuickPointNumber(quickResultForm.awayBasePoints) + parseQuickPointNumber(quickResultForm.awayBonusPoints) : 0;
   const getGroupLabel = (groupId: string | null | undefined) => groupLabel ?? formatGroupLabel(groupId);
-  const manageHref = `/admin/matches/${match.id}/manage`;
+  const manageHref = `/admin/super/partidos/${match.id}`;
   const matchLabel = `${match.homeClub?.name || 'Local'} vs ${match.awayClub?.name || 'Visitante'}`;
 
   return (

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { getRoleLabel, isGlobalAdminRole } from '@/lib/auth/roles';
 
 type SidebarSection =
     | 'dashboard'
@@ -22,21 +23,21 @@ interface SidebarItem {
     label: string;
     badge?: number;
     href: string;
-    roles: ('admin_general' | 'super_admin' | 'admin_union' | 'admin_torneo' | 'operador')[];
+    roles: ('super_admin')[];
 }
 
-const ALL_ADMINS = ['admin_general', 'super_admin'] as const;
+const ALL_ADMINS = ['super_admin'] as const;
 
 const sidebarItems: SidebarItem[] = [
-    { id: 'dashboard', icon: 'dashboard', label: 'Dashboard', href: '/admin/super', roles: ['admin_general', 'super_admin'] },
-    { id: 'tournaments', icon: 'emoji_events', label: 'Torneos', href: '/admin/super/torneos', roles: ['admin_general', 'super_admin'] },
-    { id: 'matches', icon: 'sports_score', label: 'Partidos', href: '/admin/super/partidos', roles: ['admin_general', 'super_admin'] },
-    { id: 'clubs', icon: 'shield', label: 'Clubes', href: '/admin/super/clubes', roles: ['admin_general', 'super_admin'] },
-    { id: 'players', icon: 'group', label: 'Jugadores', href: '/admin/super/jugadores', roles: ['admin_general', 'super_admin'] },
-    { id: 'roles', icon: 'badge', label: 'Personas y Roles', href: '/admin/super/personas-roles', roles: ['admin_general', 'super_admin'] },
-    { id: 'news', icon: 'newspaper', label: 'Noticias', href: '/admin/super/noticias', roles: ['admin_general', 'super_admin'] },
-    { id: 'moderation', icon: 'policy', label: 'Moderación', href: '/admin/super/moderacion', roles: ['admin_general', 'super_admin'] },
-    { id: 'sync', icon: 'sync', label: 'Sincronización', href: '/admin/super/sync', roles: ['admin_general', 'super_admin'] }
+    { id: 'dashboard', icon: 'dashboard', label: 'Dashboard', href: '/admin/super', roles: ['super_admin'] },
+    { id: 'tournaments', icon: 'emoji_events', label: 'Torneos', href: '/admin/super/torneos', roles: ['super_admin'] },
+    { id: 'matches', icon: 'sports_score', label: 'Partidos', href: '/admin/super/partidos', roles: ['super_admin'] },
+    { id: 'clubs', icon: 'shield', label: 'Clubes', href: '/admin/super/clubes', roles: ['super_admin'] },
+    { id: 'players', icon: 'group', label: 'Jugadores', href: '/admin/super/jugadores', roles: ['super_admin'] },
+    { id: 'roles', icon: 'badge', label: 'Personas y Roles', href: '/admin/super/personas-roles', roles: ['super_admin'] },
+    { id: 'news', icon: 'newspaper', label: 'Noticias', href: '/admin/super/noticias', roles: ['super_admin'] },
+    { id: 'moderation', icon: 'policy', label: 'Moderación', href: '/admin/super/moderacion', roles: ['super_admin'] },
+    { id: 'sync', icon: 'sync', label: 'Sincronización', href: '/admin/super/sync', roles: ['super_admin'] }
 ];
 
 export default function Sidebar() {
@@ -48,7 +49,7 @@ export default function Sidebar() {
     const toggleSidebar = () => setIsOpen(!isOpen);
     const closeSidebar = () => setIsOpen(false);
 
-    if (!user) return null;
+    if (!user || !isGlobalAdminRole(user.role)) return null;
 
     return (
         <>
@@ -98,8 +99,6 @@ export default function Sidebar() {
                 <nav className="flex-1 overflow-y-auto px-4 pb-10 space-y-1.5 custom-scrollbar">
                     <p className="px-5 mb-4 text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Management</p>
                     {sidebarItems.map((item) => {
-                        if (!item.roles.includes(user.role as any)) return null;
-
                         const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
 
                         return (
@@ -151,12 +150,12 @@ export default function Sidebar() {
                             <div className="flex flex-col min-w-0">
                                 <span className="text-sm font-black text-white truncate tracking-tight">{user.name}</span>
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse" />
-                                    <span className="text-[9px] text-[#00ff88]/80 font-black uppercase tracking-widest truncate">
-                                        {(user.role === 'admin_general' || user.role === 'super_admin') ? 'Super Admin' : 'Staff'}
-                                    </span>
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse" />
+                                        <span className="text-[9px] text-[#00ff88]/80 font-black uppercase tracking-widest truncate">
+                                        {isGlobalAdminRole(user.role) ? getRoleLabel(user.role) : 'Staff'}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
                         </div>
                         <button
                             onClick={logout}

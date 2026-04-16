@@ -15,71 +15,6 @@
     "labels": [],
     "updated_at": "2026-03-30T01:07:21.724Z"
   },
-  "fs-qn09jaqf": {
-    "id": "fs-qn09jaqf",
-    "source": "external-api",
-    "groups": [],
-    "assignments": [],
-    "labels": [
-      {
-        "id": "label-1775033535509-1",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 1,
-        "group_id": null
-      },
-      {
-        "id": "label-1775033615197-2",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 2,
-        "group_id": null
-      },
-      {
-        "id": "label-1775033615837-3",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 3,
-        "group_id": null
-      },
-      {
-        "id": "label-1775033616278-4",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 4,
-        "group_id": null
-      },
-      {
-        "id": "label-1775033616653-5",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 5,
-        "group_id": null
-      },
-      {
-        "id": "label-1775033617053-6",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 6,
-        "group_id": null
-      },
-      {
-        "id": "label-1775033617662-7",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 7,
-        "group_id": null
-      },
-      {
-        "id": "label-1775033618053-8",
-        "name": "Nueva etiqueta",
-        "color": "#00a365",
-        "position": 8,
-        "group_id": null
-      }
-    ],
-    "updated_at": "2026-04-01T08:53:48.390Z"
-  },
   "fs-00h828zi": {
     "id": "fs-00h828zi",
     "source": "external-api",
@@ -203,5 +138,805 @@
       }
     ],
     "updated_at": "2026-04-13T17:31:48.063Z"
+  },
+  "fs-wsddphce": {
+    "id": "fs-wsddphce",
+    "source": "external-api",
+    "groups": [
+      {
+        "id": "ext-group-1776344514448-1",
+        "name": "Grupo A",
+        "order_index": 0
+      },
+      {
+        "id": "ext-group-1776344514859-2",
+        "name": "Grupo B",
+        "order_index": 1
+      },
+      {
+        "id": "ext-group-1776344515144-3",
+        "name": "Grupo C",
+        "order_index": 2
+      }
+    ],
+    "assignments": [
+      {
+        "id": "team:tqlza3nc",
+        "team_id": "tQLza3nC",
+        "team_name": "Argentina 7s",
+        "team_url": "/team/argentina-7s/tQLza3nC/",
+        "group_id": "ext-group-1776344514448-1",
+        "points": null
+      },
+      {
+        "id": "team:manxsxnq",
+        "team_id": "MaNxsXNq",
+        "team_name": "South Africa 7s",
+        "team_url": "/team/south-africa-7s/MaNxsXNq/",
+        "group_id": "ext-group-1776344514448-1",
+        "points": null
+      },
+      {
+        "id": "team:h6phfib6",
+        "team_id": "h6pHfIB6",
+        "team_name": "Spain 7s",
+        "team_url": "/team/spain-7s/h6pHfIB6/",
+        "group_id": "ext-group-1776344514448-1",
+        "points": null
+      },
+      {
+        "id": "team:hdhx2ugd",
+        "team_id": "hdHx2UgD",
+        "team_name": "Uruguay 7s",
+        "team_url": "/team/uruguay-7s/hdHx2UgD/",
+        "group_id": "ext-group-1776344514448-1",
+        "points": null
+      },
+      {
+        "id": "team:v5bwd4e5",
+        "team_id": "v5BWd4E5",
+        "team_name": "Fiji 7s",
+        "team_url": "/team/fiji-7s/v5BWd4E5/",
+        "group_id": "ext-group-1776344514859-2",
+        "points": null
+      },
+      {
+        "id": "team:2zmwaqx5",
+        "team_id": "2ZMWaqX5",
+        "team_name": "France 7s",
+        "team_url": "/team/france-7s/2ZMWaqX5/",
+        "group_id": "ext-group-1776344514859-2",
+        "points": null
+      },
+      {
+        "id": "team:ducxxlqb",
+        "team_id": "dUcxXLqb",
+        "team_name": "Germany 7s",
+        "team_url": "/team/germany-7s/dUcxXLqb/",
+        "group_id": "ext-group-1776344514859-2",
+        "points": null
+      },
+      {
+        "id": "team:mictlurt",
+        "team_id": "MicTLURt",
+        "team_name": "Great Britain 7s",
+        "team_url": "/team/great-britain-7s/MicTLURt/",
+        "group_id": "ext-group-1776344514859-2",
+        "points": null
+      },
+      {
+        "id": "team:sctrhlbe",
+        "team_id": "SCtRHLBE",
+        "team_name": "New Zealand 7s",
+        "team_url": "/team/new-zealand-7s/SCtRHLBE/",
+        "group_id": "ext-group-1776344515144-3",
+        "points": null
+      },
+      {
+        "id": "team:t0rnuiem",
+        "team_id": "t0rnuIEM",
+        "team_name": "Australia 7s",
+        "team_url": "/team/australia-7s/t0rnuIEM/",
+        "group_id": "ext-group-1776344515144-3",
+        "points": null
+      },
+      {
+        "id": "team:rfboubhd",
+        "team_id": "rFBouBhd",
+        "team_name": "Kenya 7s",
+        "team_url": "/team/kenya-7s/rFBouBhd/",
+        "group_id": "ext-group-1776344515144-3",
+        "points": 0
+      },
+      {
+        "id": "team:sczrixjl",
+        "team_id": "SCzrIxjl",
+        "team_name": "USA 7s",
+        "team_url": "/team/usa-7s/SCzrIxjl/",
+        "group_id": "ext-group-1776344515144-3",
+        "points": null
+      }
+    ],
+    "labels": [
+      {
+        "id": "label-1776344548007-1__p1",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 1,
+        "group_id": null
+      },
+      {
+        "id": "label-1776344548007-1__p2",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 2,
+        "group_id": null
+      },
+      {
+        "id": "label-1776344557608-2",
+        "name": "Lucky Loser",
+        "color": "#ffc800",
+        "position": 3,
+        "group_id": null
+      }
+    ],
+    "tables": [
+      {
+        "id": "fs-wsddphce:standings",
+        "key": "standings",
+        "name": "Tabla general",
+        "source_key": "standings",
+        "order_index": 0,
+        "groups": [
+          {
+            "id": "ext-group-1776344514448-1",
+            "name": "Grupo A",
+            "order_index": 0
+          },
+          {
+            "id": "ext-group-1776344514859-2",
+            "name": "Grupo B",
+            "order_index": 1
+          },
+          {
+            "id": "ext-group-1776344515144-3",
+            "name": "Grupo C",
+            "order_index": 2
+          }
+        ],
+        "assignments": [
+          {
+            "id": "team:tqlza3nc",
+            "team_id": "tQLza3nC",
+            "team_name": "Argentina 7s",
+            "team_url": "/team/argentina-7s/tQLza3nC/",
+            "group_id": "ext-group-1776344514448-1",
+            "points": null
+          },
+          {
+            "id": "team:manxsxnq",
+            "team_id": "MaNxsXNq",
+            "team_name": "South Africa 7s",
+            "team_url": "/team/south-africa-7s/MaNxsXNq/",
+            "group_id": "ext-group-1776344514448-1",
+            "points": null
+          },
+          {
+            "id": "team:h6phfib6",
+            "team_id": "h6pHfIB6",
+            "team_name": "Spain 7s",
+            "team_url": "/team/spain-7s/h6pHfIB6/",
+            "group_id": "ext-group-1776344514448-1",
+            "points": null
+          },
+          {
+            "id": "team:hdhx2ugd",
+            "team_id": "hdHx2UgD",
+            "team_name": "Uruguay 7s",
+            "team_url": "/team/uruguay-7s/hdHx2UgD/",
+            "group_id": "ext-group-1776344514448-1",
+            "points": null
+          },
+          {
+            "id": "team:v5bwd4e5",
+            "team_id": "v5BWd4E5",
+            "team_name": "Fiji 7s",
+            "team_url": "/team/fiji-7s/v5BWd4E5/",
+            "group_id": "ext-group-1776344514859-2",
+            "points": null
+          },
+          {
+            "id": "team:2zmwaqx5",
+            "team_id": "2ZMWaqX5",
+            "team_name": "France 7s",
+            "team_url": "/team/france-7s/2ZMWaqX5/",
+            "group_id": "ext-group-1776344514859-2",
+            "points": null
+          },
+          {
+            "id": "team:ducxxlqb",
+            "team_id": "dUcxXLqb",
+            "team_name": "Germany 7s",
+            "team_url": "/team/germany-7s/dUcxXLqb/",
+            "group_id": "ext-group-1776344514859-2",
+            "points": null
+          },
+          {
+            "id": "team:mictlurt",
+            "team_id": "MicTLURt",
+            "team_name": "Great Britain 7s",
+            "team_url": "/team/great-britain-7s/MicTLURt/",
+            "group_id": "ext-group-1776344514859-2",
+            "points": null
+          },
+          {
+            "id": "team:sctrhlbe",
+            "team_id": "SCtRHLBE",
+            "team_name": "New Zealand 7s",
+            "team_url": "/team/new-zealand-7s/SCtRHLBE/",
+            "group_id": "ext-group-1776344515144-3",
+            "points": null
+          },
+          {
+            "id": "team:t0rnuiem",
+            "team_id": "t0rnuIEM",
+            "team_name": "Australia 7s",
+            "team_url": "/team/australia-7s/t0rnuIEM/",
+            "group_id": "ext-group-1776344515144-3",
+            "points": null
+          },
+          {
+            "id": "team:rfboubhd",
+            "team_id": "rFBouBhd",
+            "team_name": "Kenya 7s",
+            "team_url": "/team/kenya-7s/rFBouBhd/",
+            "group_id": "ext-group-1776344515144-3",
+            "points": 0
+          },
+          {
+            "id": "team:sczrixjl",
+            "team_id": "SCzrIxjl",
+            "team_name": "USA 7s",
+            "team_url": "/team/usa-7s/SCzrIxjl/",
+            "group_id": "ext-group-1776344515144-3",
+            "points": null
+          }
+        ],
+        "labels": [
+          {
+            "id": "label-1776344548007-1__p1",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 1,
+            "group_id": null
+          },
+          {
+            "id": "label-1776344548007-1__p2",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 2,
+            "group_id": null
+          },
+          {
+            "id": "label-1776344557608-2",
+            "name": "Lucky Loser",
+            "color": "#ffc800",
+            "position": 3,
+            "group_id": null
+          }
+        ]
+      },
+      {
+        "id": "fs-wsddphce:luckyLoser",
+        "key": "luckyLoser",
+        "name": "Lucky Loser",
+        "source_key": "luckyLoser",
+        "order_index": 1,
+        "groups": [],
+        "assignments": [],
+        "labels": []
+      }
+    ],
+    "updated_at": "2026-04-16T13:02:52.705Z"
+  },
+  "fs-ar8hes3d": {
+    "id": "fs-ar8hes3d",
+    "source": "external-api",
+    "groups": [
+      {
+        "id": "ext-group-1776343386216-1",
+        "name": "Grupo A",
+        "order_index": 0
+      },
+      {
+        "id": "ext-group-1776343387048-2",
+        "name": "Grupo B",
+        "order_index": 1
+      },
+      {
+        "id": "ext-group-1776343387424-3",
+        "name": "Grupo C",
+        "order_index": 2
+      }
+    ],
+    "assignments": [
+      {
+        "id": "team:fkdhinr5",
+        "team_id": "fkDhInR5",
+        "team_name": "Fiji 7s W",
+        "team_url": "/team/fiji-7s/fkDhInR5/",
+        "group_id": "ext-group-1776343386216-1",
+        "points": null
+      },
+      {
+        "id": "team:kcmevump",
+        "team_id": "KCMevUmP",
+        "team_name": "New Zealand 7s W",
+        "team_url": "/team/new-zealand-7s/KCMevUmP/",
+        "group_id": "ext-group-1776343386216-1",
+        "points": null
+      },
+      {
+        "id": "team:4pbsy7bn",
+        "team_id": "4pbSY7Bn",
+        "team_name": "Brazil 7s W",
+        "team_url": "/team/brazil-7s/4pbSY7Bn/",
+        "group_id": "ext-group-1776343386216-1",
+        "points": 0
+      },
+      {
+        "id": "team:im2wxrqh",
+        "team_id": "Im2WXRQh",
+        "team_name": "Japan 7s W",
+        "team_url": "/team/japan-7s/Im2WXRQh/",
+        "group_id": "ext-group-1776343386216-1",
+        "points": null
+      },
+      {
+        "id": "team:0sdljsba",
+        "team_id": "0SDlJSBa",
+        "team_name": "Australia 7s W",
+        "team_url": "/team/australia-7s/0SDlJSBa/",
+        "group_id": "ext-group-1776343387048-2",
+        "points": null
+      },
+      {
+        "id": "team:ml8nzmdt",
+        "team_id": "ML8NZmdt",
+        "team_name": "Great Britain 7s W",
+        "team_url": "/team/great-britain-7s/ML8NZmdt/",
+        "group_id": "ext-group-1776343387048-2",
+        "points": null
+      },
+      {
+        "id": "team:ca1zxota",
+        "team_id": "CA1zXota",
+        "team_name": "Canada 7s W",
+        "team_url": "/team/canada-7s/CA1zXota/",
+        "group_id": "ext-group-1776343387048-2",
+        "points": null
+      },
+      {
+        "id": "team:0prcgoht",
+        "team_id": "0pRcGoHT",
+        "team_name": "South Africa 7s W",
+        "team_url": "/team/south-africa-7s/0pRcGoHT/",
+        "group_id": "ext-group-1776343387048-2",
+        "points": 0
+      },
+      {
+        "id": "team:j31vnymp",
+        "team_id": "j31vnYmp",
+        "team_name": "Argentina 7s W",
+        "team_url": "/team/argentina-7s/j31vnYmp/",
+        "group_id": "ext-group-1776343387424-3",
+        "points": null
+      },
+      {
+        "id": "team:ho7vbblu",
+        "team_id": "hO7VbBlU",
+        "team_name": "Spain 7s W",
+        "team_url": "/team/spain-7s/hO7VbBlU/",
+        "group_id": "ext-group-1776343387424-3",
+        "points": null
+      },
+      {
+        "id": "team:ijjxk8dg",
+        "team_id": "IJjxK8dg",
+        "team_name": "USA 7s W",
+        "team_url": "/team/usa-7s/IJjxK8dg/",
+        "group_id": "ext-group-1776343387424-3",
+        "points": 0
+      },
+      {
+        "id": "team:sv55fpbo",
+        "team_id": "Sv55FpBO",
+        "team_name": "France 7s W",
+        "team_url": "/team/france-7s/Sv55FpBO/",
+        "group_id": "ext-group-1776343387424-3",
+        "points": null
+      },
+      {
+        "id": "team:ijjxk8dg:group:ext-group-1776343387424-3:pos-3:13",
+        "team_id": "IJjxK8dg",
+        "team_name": "USA 7s W",
+        "team_url": "/team/usa-7s/IJjxK8dg/",
+        "group_id": "ext-group-1776343387424-3",
+        "points": null
+      },
+      {
+        "id": "team:ca1zxota:group:ext-group-1776343387048-2:pos-3:8",
+        "team_id": "CA1zXota",
+        "team_name": "Canada 7s W",
+        "team_url": "/team/canada-7s/CA1zXota/",
+        "group_id": "ext-group-1776343387048-2",
+        "points": null
+      },
+      {
+        "id": "team:4pbsy7bn:group:ext-group-1776343386216-1:pos-3:3",
+        "team_id": "4pbSY7Bn",
+        "team_name": "Brazil 7s W",
+        "team_url": "/team/brazil-7s/4pbSY7Bn/",
+        "group_id": "ext-group-1776343386216-1",
+        "points": null
+      }
+    ],
+    "labels": [
+      {
+        "id": "label-1776343423656-1__p1",
+        "name": "Playoff",
+        "color": "#00a365",
+        "position": 1,
+        "group_id": null
+      },
+      {
+        "id": "label-1776343423656-1__p2",
+        "name": "Playoff",
+        "color": "#00a365",
+        "position": 2,
+        "group_id": null
+      },
+      {
+        "id": "label-1776343431104-2",
+        "name": "Lucky Loser",
+        "color": "#ffa200",
+        "position": 3,
+        "group_id": null
+      }
+    ],
+    "tables": [
+      {
+        "id": "fs-ar8hes3d:standings",
+        "key": "standings",
+        "name": "Tabla general",
+        "source_key": "standings",
+        "order_index": 0,
+        "groups": [
+          {
+            "id": "ext-group-1776343386216-1",
+            "name": "Grupo A",
+            "order_index": 0
+          },
+          {
+            "id": "ext-group-1776343387048-2",
+            "name": "Grupo B",
+            "order_index": 1
+          },
+          {
+            "id": "ext-group-1776343387424-3",
+            "name": "Grupo C",
+            "order_index": 2
+          }
+        ],
+        "assignments": [
+          {
+            "id": "team:fkdhinr5",
+            "team_id": "fkDhInR5",
+            "team_name": "Fiji 7s W",
+            "team_url": "/team/fiji-7s/fkDhInR5/",
+            "group_id": "ext-group-1776343386216-1",
+            "points": null
+          },
+          {
+            "id": "team:kcmevump",
+            "team_id": "KCMevUmP",
+            "team_name": "New Zealand 7s W",
+            "team_url": "/team/new-zealand-7s/KCMevUmP/",
+            "group_id": "ext-group-1776343386216-1",
+            "points": null
+          },
+          {
+            "id": "team:4pbsy7bn",
+            "team_id": "4pbSY7Bn",
+            "team_name": "Brazil 7s W",
+            "team_url": "/team/brazil-7s/4pbSY7Bn/",
+            "group_id": "ext-group-1776343386216-1",
+            "points": 0
+          },
+          {
+            "id": "team:im2wxrqh",
+            "team_id": "Im2WXRQh",
+            "team_name": "Japan 7s W",
+            "team_url": "/team/japan-7s/Im2WXRQh/",
+            "group_id": "ext-group-1776343386216-1",
+            "points": null
+          },
+          {
+            "id": "team:0sdljsba",
+            "team_id": "0SDlJSBa",
+            "team_name": "Australia 7s W",
+            "team_url": "/team/australia-7s/0SDlJSBa/",
+            "group_id": "ext-group-1776343387048-2",
+            "points": null
+          },
+          {
+            "id": "team:ml8nzmdt",
+            "team_id": "ML8NZmdt",
+            "team_name": "Great Britain 7s W",
+            "team_url": "/team/great-britain-7s/ML8NZmdt/",
+            "group_id": "ext-group-1776343387048-2",
+            "points": null
+          },
+          {
+            "id": "team:ca1zxota",
+            "team_id": "CA1zXota",
+            "team_name": "Canada 7s W",
+            "team_url": "/team/canada-7s/CA1zXota/",
+            "group_id": "ext-group-1776343387048-2",
+            "points": null
+          },
+          {
+            "id": "team:0prcgoht",
+            "team_id": "0pRcGoHT",
+            "team_name": "South Africa 7s W",
+            "team_url": "/team/south-africa-7s/0pRcGoHT/",
+            "group_id": "ext-group-1776343387048-2",
+            "points": 0
+          },
+          {
+            "id": "team:j31vnymp",
+            "team_id": "j31vnYmp",
+            "team_name": "Argentina 7s W",
+            "team_url": "/team/argentina-7s/j31vnYmp/",
+            "group_id": "ext-group-1776343387424-3",
+            "points": null
+          },
+          {
+            "id": "team:ho7vbblu",
+            "team_id": "hO7VbBlU",
+            "team_name": "Spain 7s W",
+            "team_url": "/team/spain-7s/hO7VbBlU/",
+            "group_id": "ext-group-1776343387424-3",
+            "points": null
+          },
+          {
+            "id": "team:ijjxk8dg",
+            "team_id": "IJjxK8dg",
+            "team_name": "USA 7s W",
+            "team_url": "/team/usa-7s/IJjxK8dg/",
+            "group_id": "ext-group-1776343387424-3",
+            "points": 0
+          },
+          {
+            "id": "team:sv55fpbo",
+            "team_id": "Sv55FpBO",
+            "team_name": "France 7s W",
+            "team_url": "/team/france-7s/Sv55FpBO/",
+            "group_id": "ext-group-1776343387424-3",
+            "points": null
+          },
+          {
+            "id": "team:ijjxk8dg:group:ext-group-1776343387424-3:pos-3:13",
+            "team_id": "IJjxK8dg",
+            "team_name": "USA 7s W",
+            "team_url": "/team/usa-7s/IJjxK8dg/",
+            "group_id": "ext-group-1776343387424-3",
+            "points": null
+          },
+          {
+            "id": "team:ca1zxota:group:ext-group-1776343387048-2:pos-3:8",
+            "team_id": "CA1zXota",
+            "team_name": "Canada 7s W",
+            "team_url": "/team/canada-7s/CA1zXota/",
+            "group_id": "ext-group-1776343387048-2",
+            "points": null
+          },
+          {
+            "id": "team:4pbsy7bn:group:ext-group-1776343386216-1:pos-3:3",
+            "team_id": "4pbSY7Bn",
+            "team_name": "Brazil 7s W",
+            "team_url": "/team/brazil-7s/4pbSY7Bn/",
+            "group_id": "ext-group-1776343386216-1",
+            "points": null
+          }
+        ],
+        "labels": [
+          {
+            "id": "label-1776343423656-1__p1",
+            "name": "Playoff",
+            "color": "#00a365",
+            "position": 1,
+            "group_id": null
+          },
+          {
+            "id": "label-1776343423656-1__p2",
+            "name": "Playoff",
+            "color": "#00a365",
+            "position": 2,
+            "group_id": null
+          },
+          {
+            "id": "label-1776343431104-2",
+            "name": "Lucky Loser",
+            "color": "#ffa200",
+            "position": 3,
+            "group_id": null
+          }
+        ]
+      },
+      {
+        "id": "fs-ar8hes3d:luckyLoser",
+        "key": "luckyLoser",
+        "name": "Lucky Loser",
+        "source_key": "luckyLoser",
+        "order_index": 1,
+        "groups": [],
+        "assignments": [],
+        "labels": [
+          {
+            "id": "label-1776347653645-1",
+            "name": "Playoff",
+            "color": "#00a365",
+            "position": 1,
+            "group_id": null
+          }
+        ]
+      }
+    ],
+    "updated_at": "2026-04-16T13:54:19.901Z"
+  },
+  "fs-qn09jaqf": {
+    "id": "fs-qn09jaqf",
+    "source": "external-api",
+    "groups": [],
+    "assignments": [],
+    "labels": [
+      {
+        "id": "label-1776348970396-1__p1",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 1,
+        "group_id": null
+      },
+      {
+        "id": "label-1776348970396-1__p2",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 2,
+        "group_id": null
+      },
+      {
+        "id": "label-1776348970396-1__p3",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 3,
+        "group_id": null
+      },
+      {
+        "id": "label-1776348970396-1__p4",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 4,
+        "group_id": null
+      },
+      {
+        "id": "label-1776348970396-1__p5",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 5,
+        "group_id": null
+      },
+      {
+        "id": "label-1776348970396-1__p6",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 6,
+        "group_id": null
+      },
+      {
+        "id": "label-1776348970396-1__p7",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 7,
+        "group_id": null
+      },
+      {
+        "id": "label-1776348970396-1__p8",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 8,
+        "group_id": null
+      }
+    ],
+    "tables": [
+      {
+        "id": "fs-qn09jaqf:standings",
+        "key": "standings",
+        "name": "Tabla general",
+        "source_key": "standings",
+        "order_index": 0,
+        "groups": [],
+        "assignments": [],
+        "labels": [
+          {
+            "id": "label-1776348970396-1__p1",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 1,
+            "group_id": null
+          },
+          {
+            "id": "label-1776348970396-1__p2",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 2,
+            "group_id": null
+          },
+          {
+            "id": "label-1776348970396-1__p3",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 3,
+            "group_id": null
+          },
+          {
+            "id": "label-1776348970396-1__p4",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 4,
+            "group_id": null
+          },
+          {
+            "id": "label-1776348970396-1__p5",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 5,
+            "group_id": null
+          },
+          {
+            "id": "label-1776348970396-1__p6",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 6,
+            "group_id": null
+          },
+          {
+            "id": "label-1776348970396-1__p7",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 7,
+            "group_id": null
+          },
+          {
+            "id": "label-1776348970396-1__p8",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 8,
+            "group_id": null
+          }
+        ]
+      },
+      {
+        "id": "fs-qn09jaqf:standingsForm",
+        "key": "standingsForm",
+        "name": "Forma",
+        "source_key": "standingsForm",
+        "order_index": 1,
+        "groups": [],
+        "assignments": [],
+        "labels": []
+      }
+    ],
+    "updated_at": "2026-04-16T14:16:31.547Z"
   }
 }

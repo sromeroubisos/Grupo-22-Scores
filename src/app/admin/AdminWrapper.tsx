@@ -19,7 +19,7 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
     const currentReturnTo = buildReturnTo(pathname ?? '', searchParams);
 
     const isMatchConsole = pathname?.startsWith('/admin/matches/');
-    const isEditorialRoute = pathname === '/admin' || pathname?.startsWith('/admin/editorial');
+    const isEditorialRoute = pathname === '/admin';
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
     const isFederationAdmin = hasFederationAdminAccess(user?.role, user?.memberships);

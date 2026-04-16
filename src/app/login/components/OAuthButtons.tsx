@@ -3,16 +3,23 @@
 import { createClient } from '@/lib/supabase/client'
 import styles from '../login.module.css'
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { sanitizeReturnTo } from '../redirects'
 
 export default function OAuthButtons() {
     const [loading, setLoading] = useState<string | null>(null)
+    const searchParams = useSearchParams()
+    const roleIntent = searchParams.get('roleIntent')
+    const returnTo = sanitizeReturnTo(searchParams.get('returnTo'), roleIntent)
     const supabase = createClient()
 
     const getCallbackUrl = (provider: 'google' | 'apple' | 'facebook') => {
-        if (provider === 'google') {
-            return `${window.location.origin}/api/auth/callback/google`
-        }
-        return `${window.location.origin}/auth/callback`
+        const callbackUrl = new URL(
+            provider === 'google' ? '/api/auth/callback/google' : '/auth/callback',
+            window.location.origin
+        )
+        callbackUrl.searchParams.set('next', returnTo)
+        return callbackUrl.toString()
     }
 
     const handleLogin = async (provider: 'google' | 'apple' | 'facebook') => {

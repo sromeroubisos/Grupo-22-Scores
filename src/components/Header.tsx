@@ -8,7 +8,7 @@ import { useSport } from '@/context/SportContext';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
-import { resolveAdminPanel } from '@/lib/auth/roles';
+import { getRoleLabel, resolveAdminPanel } from '@/lib/auth/roles';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 
 export default function Header() {
@@ -253,7 +253,7 @@ export default function Header() {
                                         </div>
                                         <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>{user.email}</div>
                                         <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', background: 'var(--color-bg-tertiary)', fontSize: '11px', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
-                                            {adminPanel ? 'Administrador' : 'Usuario'}
+                                            {user?.role ? getRoleLabel(user.role) : 'Usuario'}
                                         </div>
                                         <Link href="/profile" onClick={() => setIsUserMenuOpen(false)} style={{ display: 'block', marginTop: '12px', textAlign: 'center', background: 'var(--color-button-primary, #00C853)', color: 'white', padding: '8px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
                                             Editar perfil

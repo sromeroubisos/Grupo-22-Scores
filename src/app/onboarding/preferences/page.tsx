@@ -21,6 +21,11 @@ interface PreferencesResponse {
     favoriteSports: string[]
 }
 
+function sanitizeReturnTo(raw: string | null): string {
+    if (!raw) return '/'
+    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
+}
+
 async function readJson<T>(response: Response): Promise<T> {
     const payload = await response.json().catch(() => null)
 
@@ -51,6 +56,7 @@ function OnboardingPreferencesContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const isEditMode = searchParams.get('edit') === 'true'
+    const returnTo = sanitizeReturnTo(searchParams.get('returnTo'))
     const { user, refreshOnboardingStatus } = useAuth()
 
     const [sports, setSports] = useState<SportOption[]>([])
@@ -111,7 +117,7 @@ function OnboardingPreferencesContent() {
 
     const handleSkip = async () => {
         if (!user) {
-            router.push('/')
+            router.push(returnTo)
             return
         }
 
@@ -130,7 +136,7 @@ function OnboardingPreferencesContent() {
             await readJson<{ ok: boolean }>(response)
             setOnboardingStorageStatus(user.id, { skipped: true })
             await refreshOnboardingStatus()
-            router.push('/')
+            router.push(returnTo)
         } catch (err) {
             console.error('[Onboarding] handleSkip error:', err)
             setError('Ocurrio un error. Intenta de nuevo.')
@@ -141,7 +147,7 @@ function OnboardingPreferencesContent() {
 
     const handleFinish = async () => {
         if (!user) {
-            router.push('/')
+            router.push(returnTo)
             return
         }
 
@@ -168,7 +174,7 @@ function OnboardingPreferencesContent() {
             if (isEditMode) {
                 router.push('/profile?tab=perfil')
             } else {
-                router.push('/')
+                router.push(returnTo)
             }
         } catch (err) {
             console.error('[Onboarding] handleFinish error:', err)

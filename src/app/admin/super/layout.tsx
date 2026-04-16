@@ -8,6 +8,7 @@ import SuperSidebar from './SuperSidebar';
 import styles from './layout.module.css';
 import { SuperConsoleProvider, useSuperConsole } from './SuperConsoleContext';
 import { findActiveSuperNavItem, superNavItems } from './navigation';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 
 function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
     const { filters, setFilters } = useSuperConsole();
@@ -151,7 +152,7 @@ export default function GlobalAdminLayout({ children }: { children: React.ReactN
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const isUnionManageRoute = /^\/admin\/super\/uniones\/[^/]+$/.test(pathname || '');
-    const isAuthorized = user?.role === 'super_admin' || user?.role === 'admin_general';
+    const isAuthorized = isGlobalAdminRole(user?.role);
 
     useEffect(() => {
         if (isLoading) return; // Wait until auth state is resolved
