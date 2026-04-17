@@ -63,6 +63,96 @@ function normalizeHumanText(value: unknown): string | null {
     return normalized ? repairMojibake(normalized) : null;
 }
 
+function normalizeTournamentPath(value: unknown): string | null {
+    const normalized = normalizeString(value);
+    if (!normalized) return null;
+
+    let pathname = normalized;
+    if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+        try {
+            pathname = new URL(normalized).pathname;
+        } catch {
+            pathname = normalized;
+        }
+    }
+
+    const collapsed = pathname.replace(/\/+/g, '/');
+    const withLeadingSlash = collapsed.startsWith('/') ? collapsed : `/${collapsed}`;
+    const trimmed = withLeadingSlash === '/' ? '/' : withLeadingSlash.replace(/\/+$/, '');
+
+    if (!trimmed || trimmed === '/') {
+        return null;
+    }
+
+    return `${trimmed}/`;
+}
+
+function buildUrlDerivedTournamentId(value: unknown): string | null {
+    const pathname = normalizeTournamentPath(value);
+    if (!pathname) return null;
+
+    const slug = pathname
+        .split('/')
+        .filter(Boolean)
+        .join('-')
+        .toLowerCase();
+
+    return slug ? `fs-${slug}` : null;
+}
+
+function buildTournamentPathFromSlugId(value: unknown): string | null {
+    const normalized = normalizeString(value);
+    if (!normalized) return null;
+
+    const withoutFsPrefix = normalized.toLowerCase().startsWith('fs-') ? normalized.slice(3) : normalized;
+    const lowered = withoutFsPrefix.toLowerCase();
+
+    let sport: string | null = null;
+    let remainder = '';
+
+    if (lowered.startsWith('rugby-league-')) {
+        sport = 'rugby-league';
+        remainder = withoutFsPrefix.slice('rugby-league-'.length);
+    } else if (lowered.startsWith('rugby-union-')) {
+        sport = 'rugby-union';
+        remainder = withoutFsPrefix.slice('rugby-union-'.length);
+    } else {
+        return null;
+    }
+
+    const segments = remainder
+        .split('-')
+        .map((segment) => segment.trim())
+        .filter(Boolean);
+
+    if (segments.length < 2) return null;
+
+    const [country, ...tournamentParts] = segments;
+    const tournamentSlug = tournamentParts.join('-');
+    if (!country || !tournamentSlug) return null;
+
+    return normalizeTournamentPath(`/${sport}/${country}/${tournamentSlug}/`);
+}
+
+function buildExternalTournamentUrlCandidates(value: unknown): string[] {
+    const normalized = normalizeString(value);
+    if (!normalized) return [];
+
+    const directPath = normalizeTournamentPath(normalized);
+    const slugPath = buildTournamentPathFromSlugId(normalized);
+    const directId = buildUrlDerivedTournamentId(normalized);
+    const slugId = slugPath ? buildUrlDerivedTournamentId(slugPath) : null;
+
+    return uniqueValues([
+        directPath,
+        directPath ? directPath.replace(/\/$/, '') : null,
+        slugPath,
+        slugPath ? slugPath.replace(/\/$/, '') : null,
+        directId,
+        slugId,
+    ]);
+}
+
 function normalizeInteger(value: unknown): number | null {
     if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
     if (typeof value === 'string' && value.trim()) {
@@ -192,6 +282,7 @@ export function buildExternalTournamentOverrideCandidates(id: string | null | un
         `fs-${withoutFsPrefixLower}`,
         numericLeagueId,
         numericLeagueId ? `ras-league-${numericLeagueId}` : null,
+        ...buildExternalTournamentUrlCandidates(raw),
     ]);
 }
 
@@ -268,26 +359,46 @@ function findStoredOverrideByCandidates(
     store: ExternalTournamentOverrideStore,
     candidates: string[],
 ): ExternalTournamentOverrideRecord | null {
-    for (const candidate of candidates) {
-        const direct = store[candidate];
-        if (direct) return direct;
-    }
+    const lookup = buildStoreCandidateMap(store);
+    return findRecordByCandidates(lookup, candidates);
+}
 
-    const normalizedStoreEntries = Object.entries(store);
-    for (const candidate of candidates) {
-        const lowered = candidate.toLowerCase();
-        const found = normalizedStoreEntries.find(([key]) => key.toLowerCase() === lowered);
-        if (found) return found[1];
-    }
+function buildExternalTournamentRecordCandidates(
+    record: ExternalTournamentOverrideRecord,
+    storeKey?: string,
+): string[] {
+    return uniqueValues([
+        storeKey,
+        ...buildExternalTournamentOverrideCandidates(record.id),
+        ...buildExternalTournamentUrlCandidates(record.url),
+    ]);
+}
 
-    return null;
+function buildStoreCandidateMap(store: ExternalTournamentOverrideStore): Map<string, ExternalTournamentOverrideRecord> {
+    const lookup = new Map<string, ExternalTournamentOverrideRecord>();
+
+    Object.entries(store).forEach(([key, record]) => {
+        try {
+            const normalizedRecord = coerceExternalTournamentOverrideRecord(record);
+            buildExternalTournamentRecordCandidates(normalizedRecord, key).forEach((candidate) => {
+                const lowered = candidate.toLowerCase();
+                if (!lookup.has(lowered)) {
+                    lookup.set(lowered, normalizedRecord);
+                }
+            });
+        } catch {
+            // Skip malformed local records.
+        }
+    });
+
+    return lookup;
 }
 
 function buildRecordCandidateMap(records: ExternalTournamentOverrideRecord[]): Map<string, ExternalTournamentOverrideRecord> {
     const lookup = new Map<string, ExternalTournamentOverrideRecord>();
 
     records.forEach((record) => {
-        buildExternalTournamentOverrideCandidates(record.id).forEach((candidate) => {
+        buildExternalTournamentRecordCandidates(record).forEach((candidate) => {
             const key = candidate.toLowerCase();
             if (!lookup.has(key)) {
                 lookup.set(key, record);
@@ -340,6 +451,36 @@ async function getExternalTournamentOverridesFromTable(candidateIds: string[]): 
     }
 }
 
+async function getExternalTournamentOverridesFromTableByUrl(candidateUrls: string[]): Promise<ExternalTournamentOverrideRecord[]> {
+    if (candidateUrls.length === 0) return [];
+
+    try {
+        const readClient = await getReadClient();
+        const client = readClient as unknown as MinimalReadClient;
+        let { data, error } = await client
+            .from('external_tournaments')
+            .select(EXTERNAL_TOURNAMENT_SELECT)
+            .in('url', candidateUrls);
+
+        if (error && isMissingColumnError(error, 'priority')) {
+            const fallback = await client
+                .from('external_tournaments')
+                .select(EXTERNAL_TOURNAMENT_SELECT_WITHOUT_PRIORITY)
+                .in('url', candidateUrls);
+            data = fallback.data;
+            error = fallback.error;
+        }
+
+        if (error || !Array.isArray(data)) return [];
+
+        return data
+            .map((row: Record<string, unknown>) => mapExternalTournamentOverrideRow(row))
+            .filter((record: ExternalTournamentOverrideRecord | null): record is ExternalTournamentOverrideRecord => record !== null);
+    } catch {
+        return [];
+    }
+}
+
 async function getLegacyTournamentOverridesFromTable(candidateIds: string[]): Promise<ExternalTournamentOverrideRecord[]> {
     if (candidateIds.length === 0) return [];
 
@@ -356,6 +497,36 @@ async function getLegacyTournamentOverridesFromTable(candidateIds: string[]): Pr
                 .from('tournaments')
                 .select(LEGACY_TOURNAMENT_SELECT_WITHOUT_PRIORITY)
                 .in('external_id', candidateIds);
+            data = fallback.data;
+            error = fallback.error;
+        }
+
+        if (error || !Array.isArray(data)) return [];
+
+        return data
+            .map((row: Record<string, unknown>) => mapLegacyTournamentOverrideRow(row))
+            .filter((record: ExternalTournamentOverrideRecord | null): record is ExternalTournamentOverrideRecord => record !== null);
+    } catch {
+        return [];
+    }
+}
+
+async function getLegacyTournamentOverridesFromTableByUrl(candidateUrls: string[]): Promise<ExternalTournamentOverrideRecord[]> {
+    if (candidateUrls.length === 0) return [];
+
+    try {
+        const readClient = await getReadClient();
+        const client = readClient as unknown as MinimalReadClient;
+        let { data, error } = await client
+            .from('tournaments')
+            .select(LEGACY_TOURNAMENT_SELECT)
+            .in('url', candidateUrls);
+
+        if (error && isMissingColumnError(error, 'priority')) {
+            const fallback = await client
+                .from('tournaments')
+                .select(LEGACY_TOURNAMENT_SELECT_WITHOUT_PRIORITY)
+                .in('url', candidateUrls);
             data = fallback.data;
             error = fallback.error;
         }
@@ -390,23 +561,55 @@ export async function getStoredExternalTournamentOverrides(ids: string[]): Promi
     const allCandidates = uniqueValues(
         normalizedIds.flatMap((id) => buildExternalTournamentOverrideCandidates(id)),
     );
+    const allUrlCandidates = uniqueValues(
+        normalizedIds.flatMap((id) => buildExternalTournamentUrlCandidates(id)),
+    );
 
-    const [store, externalRows, legacyRows] = await Promise.all([
+    const [store, externalRowsById, externalRowsByUrl, legacyRowsById, legacyRowsByUrl] = await Promise.all([
         readStore(),
         getExternalTournamentOverridesFromTable(allCandidates),
+        getExternalTournamentOverridesFromTableByUrl(allUrlCandidates),
         getLegacyTournamentOverridesFromTable(allCandidates),
+        getLegacyTournamentOverridesFromTableByUrl(allUrlCandidates),
     ]);
 
-    const externalLookup = buildRecordCandidateMap(externalRows);
-    const legacyLookup = buildRecordCandidateMap(legacyRows);
-    const result = new Map<string, ExternalTournamentOverrideRecord>();
+    const externalLookup = buildRecordCandidateMap([...externalRowsById, ...externalRowsByUrl]);
+    const legacyLookup = buildRecordCandidateMap([...legacyRowsById, ...legacyRowsByUrl]);
+    const preliminaryOverrides = new Map<string, ExternalTournamentOverrideRecord>();
 
     for (const rawId of normalizedIds) {
         const candidates = buildExternalTournamentOverrideCandidates(rawId);
-        const override = mergeExternalTournamentOverrideRecords(
+        const preliminaryOverride = mergeExternalTournamentOverrideRecords(
             findRecordByCandidates(externalLookup, candidates),
             findStoredOverrideByCandidates(store, candidates),
             findRecordByCandidates(legacyLookup, candidates),
+        );
+
+        if (preliminaryOverride) {
+            preliminaryOverrides.set(rawId, preliminaryOverride);
+        }
+    }
+
+    const canonicalIds = uniqueValues(
+        [...preliminaryOverrides.values()].map((override) => override.id),
+    );
+    const [canonicalExternalRows, canonicalLegacyRows] = await Promise.all([
+        getExternalTournamentOverridesFromTable(canonicalIds),
+        getLegacyTournamentOverridesFromTable(canonicalIds),
+    ]);
+    const canonicalExternalLookup = buildRecordCandidateMap(canonicalExternalRows);
+    const canonicalLegacyLookup = buildRecordCandidateMap(canonicalLegacyRows);
+    const result = new Map<string, ExternalTournamentOverrideRecord>();
+
+    for (const rawId of normalizedIds) {
+        const preliminaryOverride = preliminaryOverrides.get(rawId);
+        if (!preliminaryOverride) continue;
+
+        const canonicalCandidates = buildExternalTournamentOverrideCandidates(preliminaryOverride.id);
+        const override = mergeExternalTournamentOverrideRecords(
+            findRecordByCandidates(canonicalExternalLookup, canonicalCandidates),
+            preliminaryOverride,
+            findRecordByCandidates(canonicalLegacyLookup, canonicalCandidates),
         );
 
         if (override) {
@@ -421,14 +624,17 @@ export async function getStoredExternalTournamentOverrides(ids: string[]): Promi
 export async function getDatabaseExternalTournamentOverride(id: string): Promise<ExternalTournamentOverrideRecord | null> {
     const candidates = buildExternalTournamentOverrideCandidates(id);
     if (candidates.length === 0) return null;
+    const urlCandidates = buildExternalTournamentUrlCandidates(id);
 
-    const [externalRows, legacyRows] = await Promise.all([
+    const [externalRowsById, externalRowsByUrl, legacyRowsById, legacyRowsByUrl] = await Promise.all([
         getExternalTournamentOverridesFromTable(candidates),
+        getExternalTournamentOverridesFromTableByUrl(urlCandidates),
         getLegacyTournamentOverridesFromTable(candidates),
+        getLegacyTournamentOverridesFromTableByUrl(urlCandidates),
     ]);
 
-    const externalLookup = buildRecordCandidateMap(externalRows);
-    const legacyLookup = buildRecordCandidateMap(legacyRows);
+    const externalLookup = buildRecordCandidateMap([...externalRowsById, ...externalRowsByUrl]);
+    const legacyLookup = buildRecordCandidateMap([...legacyRowsById, ...legacyRowsByUrl]);
 
     return mergeExternalTournamentOverrideRecords(
         findRecordByCandidates(externalLookup, candidates),
@@ -439,20 +645,41 @@ export async function getDatabaseExternalTournamentOverride(id: string): Promise
 export async function getExternalTournamentOverride(id: string): Promise<ExternalTournamentOverrideRecord | null> {
     const candidates = buildExternalTournamentOverrideCandidates(id);
     if (candidates.length === 0) return null;
+    const urlCandidates = buildExternalTournamentUrlCandidates(id);
 
-    const [store, externalRows, legacyRows] = await Promise.all([
+    const [store, externalRowsById, externalRowsByUrl, legacyRowsById, legacyRowsByUrl] = await Promise.all([
         readStore(),
         getExternalTournamentOverridesFromTable(candidates),
+        getExternalTournamentOverridesFromTableByUrl(urlCandidates),
         getLegacyTournamentOverridesFromTable(candidates),
+        getLegacyTournamentOverridesFromTableByUrl(urlCandidates),
     ]);
 
-    const externalLookup = buildRecordCandidateMap(externalRows);
-    const legacyLookup = buildRecordCandidateMap(legacyRows);
+    const externalLookup = buildRecordCandidateMap([...externalRowsById, ...externalRowsByUrl]);
+    const legacyLookup = buildRecordCandidateMap([...legacyRowsById, ...legacyRowsByUrl]);
 
-    return mergeExternalTournamentOverrideRecords(
+    const preliminaryOverride = mergeExternalTournamentOverrideRecords(
         findRecordByCandidates(externalLookup, candidates),
         findStoredOverrideByCandidates(store, candidates),
         findRecordByCandidates(legacyLookup, candidates),
+    );
+
+    if (!preliminaryOverride) {
+        return null;
+    }
+
+    const canonicalCandidates = buildExternalTournamentOverrideCandidates(preliminaryOverride.id);
+    const [canonicalExternalRows, canonicalLegacyRows] = await Promise.all([
+        getExternalTournamentOverridesFromTable(canonicalCandidates),
+        getLegacyTournamentOverridesFromTable(canonicalCandidates),
+    ]);
+    const canonicalExternalLookup = buildRecordCandidateMap(canonicalExternalRows);
+    const canonicalLegacyLookup = buildRecordCandidateMap(canonicalLegacyRows);
+
+    return mergeExternalTournamentOverrideRecords(
+        findRecordByCandidates(canonicalExternalLookup, canonicalCandidates),
+        preliminaryOverride,
+        findRecordByCandidates(canonicalLegacyLookup, canonicalCandidates),
     );
 }
 
