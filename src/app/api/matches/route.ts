@@ -221,9 +221,9 @@ async function selectMatchesRowsWithFallback(
         }
 
         lastError = result.error;
-        const isSchemaFallbackCandidate =
-            isMissingColumnError(result.error, 'sport_id') ||
-            isMissingColumnError(result.error, 'sport');
+        const isSchemaFallbackCandidate = MATCHES_DB_SCHEMA_FALLBACK_COLUMNS.some((column) =>
+            isMissingColumnError(result.error, column),
+        );
 
         if (!isSchemaFallbackCandidate) {
             return result;
@@ -501,6 +501,11 @@ async function fetchPublicSupabaseMatches(options: {
         );
 
         if (dbError) {
+            console.error('[matches] Supabase query returned error:', {
+                code: dbError.code ?? null,
+                message: dbError.message ?? null,
+                details: dbError.details ?? null,
+            });
             return {
                 matches: [],
                 ok: false,
@@ -649,7 +654,25 @@ const MATCHES_DB_SELECT_COLUMNS = [
 ].join(', ');
 const MATCHES_DB_SELECT_VARIANTS = [
     MATCHES_DB_SELECT_COLUMNS,
-    MATCHES_DB_SELECT_COLUMNS,
+    'id, tournament_id, date_time, status, score, round_label, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, score, round_id, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, score, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, round_label, round_id, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, round_label, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, round_id, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, home_club_id, away_club_id',
+];
+const MATCHES_DB_SCHEMA_FALLBACK_COLUMNS = [
+    'id',
+    'tournament_id',
+    'date_time',
+    'status',
+    'score',
+    'round_label',
+    'round_id',
+    'venue',
+    'home_club_id',
+    'away_club_id',
 ];
 const matchesRefreshLocks = new Map<string, Promise<void>>();
 const matchesInFlightResponses = new Map<string, Promise<MatchesPayload>>();
