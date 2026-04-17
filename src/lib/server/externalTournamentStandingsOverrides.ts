@@ -89,6 +89,26 @@ function normalizeString(value: unknown): string | null {
     return trimmed || null;
 }
 
+function repairMojibake(value: string): string {
+    if (!/[ÃÂ]/.test(value)) return value;
+
+    try {
+        const repaired = Buffer.from(value, 'latin1').toString('utf8').trim();
+        if (repaired && !repaired.includes('\uFFFD')) {
+            return repaired;
+        }
+    } catch {
+        // Fall back to the original value.
+    }
+
+    return value;
+}
+
+function normalizeHumanText(value: unknown): string | null {
+    const normalized = normalizeString(value);
+    return normalized ? repairMojibake(normalized) : null;
+}
+
 function normalizeInteger(value: unknown): number | null {
     if (typeof value === 'number' && Number.isFinite(value)) {
         return Math.trunc(value);
@@ -134,6 +154,14 @@ function normalizeStandingsSourceKey(value: unknown) {
 
 function getBuiltInStandingsTableName(key: string) {
     return BUILTIN_STANDINGS_TABLES.find((table) => table.key === key)?.name || null;
+}
+
+function parseUpdatedAt(value: unknown): number {
+    const normalized = normalizeString(value);
+    if (!normalized) return 0;
+
+    const parsed = Date.parse(normalized);
+    return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function buildPrimaryStandingsTable(
@@ -255,7 +283,7 @@ function flattenPreparedStandings(rows: any[]): any[] {
 
     return rows.flatMap((group: any, groupIndex: number) => {
         const groupId = getGroupIdFromContainer(group, groupIndex);
-        const groupName = normalizeString(group?.group_name) || `Grupo ${groupIndex + 1}`;
+        const groupName = normalizeHumanText(group?.group_name) || `Grupo ${groupIndex + 1}`;
 
         return Array.isArray(group?.rows)
             ? group.rows.map((row: any, rowIndex: number) => ({
@@ -281,7 +309,7 @@ function ensureStandingsGroupMetadata(rows: any[]): any[] {
 
     return rows.map((group: any, index: number) => {
         const groupId = getGroupIdFromContainer(group, index);
-        const groupName = normalizeString(group?.group_name) || `Grupo ${index + 1}`;
+        const groupName = normalizeHumanText(group?.group_name) || `Grupo ${index + 1}`;
 
         return {
             ...group,
@@ -416,7 +444,7 @@ function normalizeGroups(rawGroups: unknown): ExternalTournamentStandingsGroup[]
     rawGroups.forEach((rawGroup, index) => {
         if (!rawGroup || typeof rawGroup !== 'object') return;
 
-        const name = normalizeString((rawGroup as any).name) || `Grupo ${index + 1}`;
+        const name = normalizeHumanText((rawGroup as any).name) || `Grupo ${index + 1}`;
         const id = normalizeString((rawGroup as any).id) || deriveId(name, 'ext-group');
         if (seen.has(id)) return;
 
@@ -447,7 +475,7 @@ function normalizeAssignments(
         const points = normalizeInteger((rawAssignment as any).points);
 
         const teamId = normalizeString((rawAssignment as any).team_id);
-        const teamName = normalizeString((rawAssignment as any).team_name);
+        const teamName = normalizeHumanText((rawAssignment as any).team_name);
         const teamUrl = normalizeTeamUrl((rawAssignment as any).team_url);
         if (!teamId && !teamName && !teamUrl) return;
         if (!groupId && points === null) return;
@@ -476,7 +504,7 @@ function normalizeLabels(
     rawLabels.forEach((rawLabel, index) => {
         if (!rawLabel || typeof rawLabel !== 'object') return;
 
-        const name = normalizeString((rawLabel as any).name);
+        const name = normalizeHumanText((rawLabel as any).name);
         const color = normalizeString((rawLabel as any).color);
         const position = normalizeInteger((rawLabel as any).position);
         const groupId = normalizeString((rawLabel as any).group_id);
@@ -525,7 +553,7 @@ function normalizeTables(
             normalized.push({
                 id: normalizeString(tableRecord.id) || `${tournamentId}:${key}`,
                 key,
-                name: normalizeString(tableRecord.name) || getBuiltInStandingsTableName(key) || `Tabla ${index + 1}`,
+                name: normalizeHumanText(tableRecord.name) || getBuiltInStandingsTableName(key) || `Tabla ${index + 1}`,
                 source_key: normalizeStandingsSourceKey(tableRecord.source_key ?? key),
                 order_index: normalizeInteger(tableRecord.order_index ?? index) ?? index,
                 groups,
@@ -613,6 +641,33 @@ function mapDatabaseStandingsOverride(
         tables,
         updated_at: normalizeString(row.updated_at),
     };
+}
+
+function mergeExternalTournamentStandingsOverrideRecords(
+    ...records: Array<ExternalTournamentStandingsOverrideRecord | null | undefined>
+): ExternalTournamentStandingsOverrideRecord | null {
+    const normalizedRecords = records
+        .filter((record): record is ExternalTournamentStandingsOverrideRecord => Boolean(record))
+        .map((record) => normalizeExternalTournamentStandingsOverrideRecord(record));
+
+    if (normalizedRecords.length === 0) return null;
+
+    const [primary, ...fallbacks] = [...normalizedRecords].sort((left, right) => (
+        parseUpdatedAt(right.updated_at) - parseUpdatedAt(left.updated_at)
+    ));
+
+    return normalizeExternalTournamentStandingsOverrideRecord(
+        fallbacks.reduce((accumulator, record) => ({
+            ...record,
+            ...accumulator,
+            source: accumulator.source || record.source,
+            groups: Array.isArray(accumulator.groups) ? accumulator.groups : record.groups,
+            assignments: Array.isArray(accumulator.assignments) ? accumulator.assignments : record.assignments,
+            labels: Array.isArray(accumulator.labels) ? accumulator.labels : record.labels,
+            tables: Array.isArray(accumulator.tables) ? accumulator.tables : record.tables,
+            updated_at: accumulator.updated_at || record.updated_at,
+        }), primary),
+    );
 }
 
 function buildDatabaseOverrideLookup(
@@ -711,22 +766,7 @@ export async function getExternalTournamentStandingsOverride(
     const databaseRecord = findDatabaseOverrideByCandidates(databaseLookup, candidates);
     const storedRecord = findStoredOverrideByCandidates(store, candidates);
 
-    if (!databaseRecord && !storedRecord) return null;
-    if (!databaseRecord) return storedRecord;
-    if (!storedRecord) return databaseRecord;
-
-    return normalizeExternalTournamentStandingsOverrideRecord({
-        ...databaseRecord,
-        ...storedRecord,
-        source: storedRecord.source || databaseRecord.source,
-        groups: Array.isArray(storedRecord.groups) ? storedRecord.groups : databaseRecord.groups,
-        assignments: Array.isArray(storedRecord.assignments) ? storedRecord.assignments : databaseRecord.assignments,
-        labels: Array.isArray(storedRecord.labels) ? storedRecord.labels : databaseRecord.labels,
-        tables: Array.isArray(storedRecord.tables) && storedRecord.tables.length > 0
-            ? storedRecord.tables
-            : databaseRecord.tables,
-        updated_at: storedRecord.updated_at || databaseRecord.updated_at,
-    });
+    return mergeExternalTournamentStandingsOverrideRecords(databaseRecord, storedRecord);
 }
 
 export async function upsertExternalTournamentStandingsOverride(

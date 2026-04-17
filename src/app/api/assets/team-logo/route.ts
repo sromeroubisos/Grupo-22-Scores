@@ -2,7 +2,10 @@ import { access } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
-import { findExternalTeamLogoOverride } from '@/lib/server/externalTeamLogoOverrides';
+import {
+    findExternalTeamLogoOverride,
+    mergeExternalTeamLogoOverrideRecords,
+} from '@/lib/server/externalTeamLogoOverrides';
 import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
@@ -164,6 +167,7 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
     if (teamUrl) addCandidate(candidateSet, teamUrl);
     if (teamName) addCandidate(candidateSet, teamName);
     const candidates = Array.from(candidateSet);
+    let databaseRecord: Record<string, unknown> | null = null;
 
     try {
         const readClient = await getReadClient();
@@ -171,53 +175,58 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
         if (idCandidates.length > 0) {
             const { data } = await (readClient as any)
                 .from('external_teams')
-                .select('id, logo_url')
+                .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
                 .in('id', idCandidates);
 
-            const byId = new Map<string, string>();
+            const byId = new Map<string, Record<string, unknown>>();
             for (const row of data || []) {
-                if (row?.id && row?.logo_url) {
-                    byId.set(String(row.id), String(row.logo_url));
+                if (row?.id) {
+                    byId.set(String(row.id), row);
                 }
             }
 
             for (const candidate of candidates) {
-                const logo = byId.get(candidate);
-                if (logo) return logo;
+                const record = byId.get(candidate);
+                if (record) {
+                    databaseRecord = record;
+                    break;
+                }
             }
         }
 
-        if (teamUrl) {
+        if (!databaseRecord && teamUrl) {
             const { data } = await (readClient as any)
                 .from('external_teams')
-                .select('logo_url')
+                .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
                 .eq('team_url', teamUrl)
                 .maybeSingle();
 
-            if (data?.logo_url) {
-                return String(data.logo_url);
+            if (data) {
+                databaseRecord = data;
             }
         }
 
-        if (teamName) {
+        if (!databaseRecord && teamName) {
             const { data: byName } = await (readClient as any)
                 .from('external_teams')
-                .select('logo_url')
+                .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
                 .eq('name', teamName)
                 .maybeSingle();
 
-            if (byName?.logo_url) {
-                return String(byName.logo_url);
+            if (byName) {
+                databaseRecord = byName;
             }
 
-            const { data: byShortName } = await (readClient as any)
-                .from('external_teams')
-                .select('logo_url')
-                .eq('short_name', teamName)
-                .maybeSingle();
+            if (!databaseRecord) {
+                const { data: byShortName } = await (readClient as any)
+                    .from('external_teams')
+                    .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
+                    .eq('short_name', teamName)
+                    .maybeSingle();
 
-            if (byShortName?.logo_url) {
-                return String(byShortName.logo_url);
+                if (byShortName) {
+                    databaseRecord = byShortName;
+                }
             }
         }
     } catch {
@@ -225,8 +234,9 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
     }
 
     const storedOverride = await findExternalTeamLogoOverride(key, teamUrl, teamName, ...candidates);
-    if (storedOverride?.logo_url) {
-        return storedOverride.logo_url;
+    const mergedOverride = mergeExternalTeamLogoOverrideRecords(databaseRecord as any, storedOverride);
+    if (mergedOverride?.logo_url) {
+        return mergedOverride.logo_url;
     }
 
     if (teamUrl) {

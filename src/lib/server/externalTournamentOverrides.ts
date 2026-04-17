@@ -43,6 +43,26 @@ function normalizeString(value: unknown): string | null {
     return trimmed || null;
 }
 
+function repairMojibake(value: string): string {
+    if (!/[ÃÂ]/.test(value)) return value;
+
+    try {
+        const repaired = Buffer.from(value, 'latin1').toString('utf8').trim();
+        if (repaired && !repaired.includes('\uFFFD')) {
+            return repaired;
+        }
+    } catch {
+        // Fall back to the original value.
+    }
+
+    return value;
+}
+
+function normalizeHumanText(value: unknown): string | null {
+    const normalized = normalizeString(value);
+    return normalized ? repairMojibake(normalized) : null;
+}
+
 function normalizeInteger(value: unknown): number | null {
     if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
     if (typeof value === 'string' && value.trim()) {
@@ -68,7 +88,7 @@ function uniqueValues(values: Array<string | null | undefined>): string[] {
 }
 
 function normalizeExternalTournamentCountryFields(country: unknown, countryId: unknown) {
-    const rawCountry = normalizeString(country);
+    const rawCountry = normalizeHumanText(country);
     const rawCountryId = normalizeString(countryId);
 
     const countryBasedId = resolveTournamentCountryId(rawCountry);
@@ -102,8 +122,8 @@ function coerceExternalTournamentOverrideRecord(
     return {
         ...record,
         id: normalizedId,
-        name: normalizeString(record.display_name) || normalizeString(record.name),
-        display_name: normalizeString(record.display_name) || normalizeString(record.name),
+        name: normalizeHumanText(record.display_name) || normalizeHumanText(record.name),
+        display_name: normalizeHumanText(record.display_name) || normalizeHumanText(record.name),
         logo_url: normalizeString(record.logo_url),
         source: normalizeString(record.source) || 'flashscore',
         sport: normalizeString(record.sport) || 'rugby',
@@ -113,6 +133,44 @@ function coerceExternalTournamentOverrideRecord(
         priority: normalizeInteger(record.priority),
         updated_at: normalizeString(record.updated_at),
     };
+}
+
+function parseUpdatedAt(value: unknown): number {
+    const normalized = normalizeString(value);
+    if (!normalized) return 0;
+
+    const parsed = Date.parse(normalized);
+    return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function mergeExternalTournamentOverrideRecords(
+    ...records: Array<ExternalTournamentOverrideRecord | null | undefined>
+): ExternalTournamentOverrideRecord | null {
+    const normalizedRecords = records
+        .filter((record): record is ExternalTournamentOverrideRecord => Boolean(record))
+        .map((record) => coerceExternalTournamentOverrideRecord(record));
+
+    if (normalizedRecords.length === 0) return null;
+
+    const [primary, ...fallbacks] = [...normalizedRecords].sort((left, right) => (
+        parseUpdatedAt(right.updated_at) - parseUpdatedAt(left.updated_at)
+    ));
+
+    const merged = fallbacks.reduce((accumulator, record) => ({
+        id: accumulator.id || record.id,
+        source: accumulator.source || record.source,
+        name: accumulator.name || record.name,
+        display_name: accumulator.display_name || record.display_name,
+        logo_url: accumulator.logo_url || record.logo_url,
+        sport: accumulator.sport || record.sport,
+        country: accumulator.country || record.country,
+        country_id: accumulator.country_id || record.country_id,
+        url: accumulator.url || record.url,
+        priority: accumulator.priority ?? record.priority ?? null,
+        updated_at: accumulator.updated_at || record.updated_at,
+    }), primary);
+
+    return coerceExternalTournamentOverrideRecord(merged);
 }
 
 export function buildExternalTournamentOverrideCandidates(id: string | null | undefined): string[] {
@@ -174,11 +232,11 @@ function mapExternalTournamentOverrideRow(row: Record<string, unknown> | null | 
     return {
         id,
         source: normalizeString(row.source) || 'database',
-        name: normalizeString(row.display_name) || normalizeString(row.name),
-        display_name: normalizeString(row.display_name) || normalizeString(row.name),
+        name: normalizeHumanText(row.display_name) || normalizeHumanText(row.name),
+        display_name: normalizeHumanText(row.display_name) || normalizeHumanText(row.name),
         logo_url: normalizeString(row.logo_url),
         sport: normalizeString(row.sport),
-        country: normalizeString(row.country),
+        country: normalizeHumanText(row.country),
         country_id: normalizeString(row.country_id),
         url: normalizeString(row.url),
         priority: normalizeInteger(row.priority),
@@ -195,11 +253,11 @@ function mapLegacyTournamentOverrideRow(row: Record<string, unknown> | null | un
     return {
         id: externalId,
         source: 'database',
-        name: normalizeString(row.display_name) || normalizeString(row.name),
-        display_name: normalizeString(row.display_name) || normalizeString(row.name),
+        name: normalizeHumanText(row.display_name) || normalizeHumanText(row.name),
+        display_name: normalizeHumanText(row.display_name) || normalizeHumanText(row.name),
         logo_url: normalizeString(row.logo_url),
         sport: normalizeString(row.sport_id) || normalizeString(row.sport),
-        country: normalizeString(row.country),
+        country: normalizeHumanText(row.country),
         country_id: normalizeString(row.country_id),
         url: normalizeString(row.url),
         priority: normalizeInteger(row.priority),
@@ -345,15 +403,15 @@ export async function getStoredExternalTournamentOverrides(ids: string[]): Promi
 
     for (const rawId of normalizedIds) {
         const candidates = buildExternalTournamentOverrideCandidates(rawId);
-        const override =
-            findRecordByCandidates(externalLookup, candidates) ||
-            findStoredOverrideByCandidates(store, candidates) ||
-            findRecordByCandidates(legacyLookup, candidates);
+        const override = mergeExternalTournamentOverrideRecords(
+            findRecordByCandidates(externalLookup, candidates),
+            findStoredOverrideByCandidates(store, candidates),
+            findRecordByCandidates(legacyLookup, candidates),
+        );
 
         if (override) {
-            const normalizedOverride = coerceExternalTournamentOverrideRecord(override);
-            result.set(rawId, normalizedOverride);
-            result.set(rawId.toLowerCase(), normalizedOverride);
+            result.set(rawId, override);
+            result.set(rawId.toLowerCase(), override);
         }
     }
 
@@ -372,11 +430,10 @@ export async function getDatabaseExternalTournamentOverride(id: string): Promise
     const externalLookup = buildRecordCandidateMap(externalRows);
     const legacyLookup = buildRecordCandidateMap(legacyRows);
 
-    const override =
-        findRecordByCandidates(externalLookup, candidates) ||
-        findRecordByCandidates(legacyLookup, candidates);
-
-    return override ? coerceExternalTournamentOverrideRecord(override) : null;
+    return mergeExternalTournamentOverrideRecords(
+        findRecordByCandidates(externalLookup, candidates),
+        findRecordByCandidates(legacyLookup, candidates),
+    );
 }
 
 export async function getExternalTournamentOverride(id: string): Promise<ExternalTournamentOverrideRecord | null> {
@@ -392,12 +449,11 @@ export async function getExternalTournamentOverride(id: string): Promise<Externa
     const externalLookup = buildRecordCandidateMap(externalRows);
     const legacyLookup = buildRecordCandidateMap(legacyRows);
 
-    const override =
-        findRecordByCandidates(externalLookup, candidates) ||
-        findStoredOverrideByCandidates(store, candidates) ||
-        findRecordByCandidates(legacyLookup, candidates);
-
-    return override ? coerceExternalTournamentOverrideRecord(override) : null;
+    return mergeExternalTournamentOverrideRecords(
+        findRecordByCandidates(externalLookup, candidates),
+        findStoredOverrideByCandidates(store, candidates),
+        findRecordByCandidates(legacyLookup, candidates),
+    );
 }
 
 export async function upsertExternalTournamentOverride(

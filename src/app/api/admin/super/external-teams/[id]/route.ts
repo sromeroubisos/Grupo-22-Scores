@@ -3,6 +3,8 @@ import { requireSuperAdmin } from '@/lib/auth/server';
 import { createClient } from '@/lib/supabase/server';
 import {
     getExternalTeamLogoOverride,
+    mergeExternalTeamLogoOverrideRecords,
+    normalizeExternalTeamLogoOverrideRecord,
     upsertExternalTeamLogoOverride,
 } from '@/lib/server/externalTeamLogoOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
@@ -22,6 +24,7 @@ type ExternalTeamRow = {
     sport?: string | null;
     country?: string | null;
     team_url?: string | null;
+    updated_at?: string | null;
 };
 
 type ExternalTeamsQueryResult = {
@@ -34,8 +37,8 @@ type ExternalTeamsQueryResult = {
     } | null;
 };
 
-const SELECT_COLUMNS = 'id, source, name, short_name, logo_url, sport, country, team_url';
-const SELECT_COLUMNS_WITHOUT_TEAM_URL = 'id, source, name, short_name, logo_url, sport, country';
+const SELECT_COLUMNS = 'id, source, name, short_name, logo_url, sport, country, team_url, updated_at';
+const SELECT_COLUMNS_WITHOUT_TEAM_URL = 'id, source, name, short_name, logo_url, sport, country, updated_at';
 
 async function selectExternalTeam(
     supabase: Awaited<ReturnType<typeof createClient>>,
@@ -94,12 +97,12 @@ export async function GET(
             return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
         }
 
-        if (data) {
-            return NextResponse.json({ ok: true, data });
-        }
-
         const storedOverride = await getExternalTeamLogoOverride(id);
-        return NextResponse.json({ ok: true, data: storedOverride || null });
+        const merged = mergeExternalTeamLogoOverrideRecords(
+            normalizeExternalTeamLogoOverrideRecord(data),
+            storedOverride,
+        );
+        return NextResponse.json({ ok: true, data: merged });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Unauthorized';
         return NextResponse.json({ ok: false, error: message }, { status: message.includes('Forbidden') ? 403 : 401 });
@@ -148,7 +151,21 @@ export async function PATCH(
             return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ ok: true, data, storage: 'database' });
+        let persistedFileRecord = null;
+        try {
+            persistedFileRecord = await upsertExternalTeamLogoOverride(payload);
+        } catch (fileError) {
+            console.warn('[external-teams][PATCH] file cache persistence skipped', {
+                id,
+                error: fileError instanceof Error ? fileError.message : 'Unknown storage error',
+            });
+        }
+        const merged = mergeExternalTeamLogoOverrideRecords(
+            normalizeExternalTeamLogoOverrideRecord(data),
+            persistedFileRecord,
+        );
+
+        return NextResponse.json({ ok: true, data: merged, storage: 'database' });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Unauthorized';
         return NextResponse.json({ ok: false, error: message }, { status: message.includes('Forbidden') ? 403 : 401 });
