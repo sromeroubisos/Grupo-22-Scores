@@ -643,6 +643,12 @@ export class FixtureService {
       supportsCategory,
       supportsBroadcastUrl,
       supportsReplayUrl,
+      supportsHomeBasePoints,
+      supportsAwayBasePoints,
+      supportsHomeBonusPoints,
+      supportsAwayBonusPoints,
+      supportsPointsAutocalculated,
+      supportsPointsOverrideReason,
     ] = await Promise.all([
       this.checkRoundLabelSupport(),
       data.homeSquadId ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
@@ -650,6 +656,12 @@ export class FixtureService {
       data.category ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
       data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url') : Promise.resolve(false),
       data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url') : Promise.resolve(false),
+      data.homeBasePoints !== undefined ? this.checkMatchColumnSupport('home_base_points') : Promise.resolve(false),
+      data.awayBasePoints !== undefined ? this.checkMatchColumnSupport('away_base_points') : Promise.resolve(false),
+      data.homeBonusPoints !== undefined ? this.checkMatchColumnSupport('home_bonus_points') : Promise.resolve(false),
+      data.awayBonusPoints !== undefined ? this.checkMatchColumnSupport('away_bonus_points') : Promise.resolve(false),
+      data.pointsAutocalculated !== undefined ? this.checkMatchColumnSupport('points_autocalculated') : Promise.resolve(false),
+      data.pointsOverrideReason !== undefined ? this.checkMatchColumnSupport('points_override_reason') : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] createMatch - round_label: ${supportsRoundLabel}`);
 
@@ -683,12 +695,12 @@ export class FixtureService {
       score: data.score || { home: 0, away: 0 },
     };
 
-    if (data.homeBasePoints !== undefined) insertData.home_base_points = data.homeBasePoints;
-    if (data.awayBasePoints !== undefined) insertData.away_base_points = data.awayBasePoints;
-    if (data.homeBonusPoints !== undefined) insertData.home_bonus_points = data.homeBonusPoints;
-    if (data.awayBonusPoints !== undefined) insertData.away_bonus_points = data.awayBonusPoints;
-    if (data.pointsAutocalculated !== undefined) insertData.points_autocalculated = data.pointsAutocalculated;
-    if (data.pointsOverrideReason !== undefined) insertData.points_override_reason = data.pointsOverrideReason;
+    if (supportsHomeBasePoints && data.homeBasePoints !== undefined) insertData.home_base_points = data.homeBasePoints;
+    if (supportsAwayBasePoints && data.awayBasePoints !== undefined) insertData.away_base_points = data.awayBasePoints;
+    if (supportsHomeBonusPoints && data.homeBonusPoints !== undefined) insertData.home_bonus_points = data.homeBonusPoints;
+    if (supportsAwayBonusPoints && data.awayBonusPoints !== undefined) insertData.away_bonus_points = data.awayBonusPoints;
+    if (supportsPointsAutocalculated && data.pointsAutocalculated !== undefined) insertData.points_autocalculated = data.pointsAutocalculated;
+    if (supportsPointsOverrideReason && data.pointsOverrideReason !== undefined) insertData.points_override_reason = data.pointsOverrideReason;
 
     if (supportsRoundLabel) {
       insertData.round_label = data.roundLabel || null;
@@ -752,6 +764,12 @@ export class FixtureService {
       supportsBroadcastUrl,
       supportsReplayUrl,
       supportsClock,
+      supportsHomeBasePoints,
+      supportsAwayBasePoints,
+      supportsHomeBonusPoints,
+      supportsAwayBonusPoints,
+      supportsPointsAutocalculated,
+      supportsPointsOverrideReason,
     ] = await Promise.all([
       this.checkRoundLabelSupport(),
       data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id', supabase) : Promise.resolve(false),
@@ -760,6 +778,12 @@ export class FixtureService {
       data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url', supabase) : Promise.resolve(false),
       data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url', supabase) : Promise.resolve(false),
       data.clock !== undefined ? this.checkMatchColumnSupport('clock', supabase) : Promise.resolve(false),
+      data.homeBasePoints !== undefined ? this.checkMatchColumnSupport('home_base_points', supabase) : Promise.resolve(false),
+      data.awayBasePoints !== undefined ? this.checkMatchColumnSupport('away_base_points', supabase) : Promise.resolve(false),
+      data.homeBonusPoints !== undefined ? this.checkMatchColumnSupport('home_bonus_points', supabase) : Promise.resolve(false),
+      data.awayBonusPoints !== undefined ? this.checkMatchColumnSupport('away_bonus_points', supabase) : Promise.resolve(false),
+      data.pointsAutocalculated !== undefined ? this.checkMatchColumnSupport('points_autocalculated', supabase) : Promise.resolve(false),
+      data.pointsOverrideReason !== undefined ? this.checkMatchColumnSupport('points_override_reason', supabase) : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] updateMatch - round_label: ${supportsRoundLabel}`);
 
@@ -845,12 +869,12 @@ export class FixtureService {
     if (supportsReplayUrl && data.replayUrl !== undefined) updateData.replay_url = data.replayUrl || null;
     if (data.score !== undefined) updateData.score = data.score;
     if (supportsClock && data.clock !== undefined) updateData.clock = data.clock;
-    if (data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
-    if (data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;
-    if (data.homeBonusPoints !== undefined) updateData.home_bonus_points = data.homeBonusPoints;
-    if (data.awayBonusPoints !== undefined) updateData.away_bonus_points = data.awayBonusPoints;
-    if (data.pointsAutocalculated !== undefined) updateData.points_autocalculated = data.pointsAutocalculated;
-    if (data.pointsOverrideReason !== undefined) updateData.points_override_reason = data.pointsOverrideReason;
+    if (supportsHomeBasePoints && data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
+    if (supportsAwayBasePoints && data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;
+    if (supportsHomeBonusPoints && data.homeBonusPoints !== undefined) updateData.home_bonus_points = data.homeBonusPoints;
+    if (supportsAwayBonusPoints && data.awayBonusPoints !== undefined) updateData.away_bonus_points = data.awayBonusPoints;
+    if (supportsPointsAutocalculated && data.pointsAutocalculated !== undefined) updateData.points_autocalculated = data.pointsAutocalculated;
+    if (supportsPointsOverrideReason && data.pointsOverrideReason !== undefined) updateData.points_override_reason = data.pointsOverrideReason;
 
     // Guard: if nothing to update (e.g. only events/lineups were sent but those columns
     // were removed in schema simplification), skip the UPDATE to avoid PostgREST returning
