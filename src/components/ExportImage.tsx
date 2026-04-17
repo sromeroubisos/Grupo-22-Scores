@@ -6647,7 +6647,6 @@ async function drawMatchScheduleConfrontation(
         panelFill,
         panelStroke
     );
-    drawTexture(mainPanelLeft - sx(24), mainPanelTop - sy(12), mainPanelRight - mainPanelLeft + sx(48), mainPanelBottom - mainPanelTop + sy(24), isDark ? 0.1 : 0.05);
 
     if (tournamentLogo || brandLogo) {
         drawOverflowCrest(ctx, {
