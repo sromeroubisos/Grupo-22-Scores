@@ -87,6 +87,8 @@ type QuickResultFormState = {
   status: MatchStatus;
   homeScore: string;
   awayScore: string;
+  homePenalties: string;
+  awayPenalties: string;
   homeBasePoints: string;
   awayBasePoints: string;
   homeBonusPoints: string;
@@ -217,6 +219,13 @@ function parseQuickNumber(value: string, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function parseOptionalQuickNumber(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number.parseInt(trimmed, 10);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : null;
+}
+
 function parseQuickPointNumber(value: string, fallback = 0) {
   const parsed = Number.parseFloat(value.replace(',', '.'));
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -225,6 +234,18 @@ function parseQuickPointNumber(value: string, fallback = 0) {
 function formatQuickNumber(value: number | null | undefined, fallback = 0) {
   const normalized = Number(value);
   return Number.isFinite(normalized) ? String(normalized) : String(fallback);
+}
+
+function formatOptionalQuickNumber(value: number | null | undefined) {
+  const normalized = Number(value);
+  return Number.isFinite(normalized) ? String(normalized) : '';
+}
+
+function shouldShowPenaltyFields(form: Pick<QuickResultFormState, 'status' | 'homeScore' | 'awayScore'>) {
+  if (form.status !== 'final') return false;
+  const homeScore = Number.parseInt(form.homeScore, 10);
+  const awayScore = Number.parseInt(form.awayScore, 10);
+  return Number.isFinite(homeScore) && Number.isFinite(awayScore) && homeScore === awayScore;
 }
 
 function calculateBasePoints(score: { home: number; away: number }, rules: PointsRules) {
@@ -268,6 +289,8 @@ function buildQuickResultForm(match: MatchWithClubs, rules: PointsRules): QuickR
     status: match.status,
     homeScore: formatQuickNumber(match.score?.home, 0),
     awayScore: formatQuickNumber(match.score?.away, 0),
+    homePenalties: formatOptionalQuickNumber(match.score?.penalties?.home),
+    awayPenalties: formatOptionalQuickNumber(match.score?.penalties?.away),
     homeBasePoints: formatQuickNumber(match.homeBasePoints, 0),
     awayBasePoints: formatQuickNumber(match.awayBasePoints, 0),
     homeBonusPoints: formatQuickNumber(match.homeBonusPoints, 0),
@@ -773,6 +796,10 @@ export function TournamentOperationFixtureWorkspace({
     setQuickResultForm((current) => {
       if (!current) return current;
       const next = { ...current, [field]: value };
+      if ((field === 'status' || field === 'homeScore' || field === 'awayScore') && !shouldShowPenaltyFields(next)) {
+        next.homePenalties = '';
+        next.awayPenalties = '';
+      }
       if ((field === 'status' || field === 'homeScore' || field === 'awayScore') && next.pointsAutocalculated) {
         return applyQuickPointsAutofill(next, pointsRules);
       }
@@ -830,6 +857,15 @@ export function TournamentOperationFixtureWorkspace({
     if (!Number.isFinite(homeScore) || homeScore < 0) nextErrors.homeScore = 'Ingresa un marcador local valido.';
     if (!Number.isFinite(awayScore) || awayScore < 0) nextErrors.awayScore = 'Ingresa un marcador visitante valido.';
 
+    if (shouldShowPenaltyFields(quickResultForm)) {
+      const homePenalties = parseOptionalQuickNumber(quickResultForm.homePenalties);
+      const awayPenalties = parseOptionalQuickNumber(quickResultForm.awayPenalties);
+      const hasOnePenalty = homePenalties !== null || awayPenalties !== null;
+
+      if (hasOnePenalty && homePenalties === null) nextErrors.homePenalties = 'Completa los penales del local o deja ambos vacios.';
+      if (hasOnePenalty && awayPenalties === null) nextErrors.awayPenalties = 'Completa los penales del visitante o deja ambos vacios.';
+    }
+
     if (quickResultForm.status === 'final') {
       const homeBasePoints = parseQuickPointNumber(quickResultForm.homeBasePoints, Number.NaN);
       const awayBasePoints = parseQuickPointNumber(quickResultForm.awayBasePoints, Number.NaN);
@@ -872,6 +908,9 @@ export function TournamentOperationFixtureWorkspace({
       const homeScore = Math.max(0, parseQuickNumber(quickResultForm.homeScore));
       const awayScore = Math.max(0, parseQuickNumber(quickResultForm.awayScore));
       const isFinal = quickResultForm.status === 'final';
+      const penaltiesVisible = shouldShowPenaltyFields(quickResultForm);
+      const homePenalties = penaltiesVisible ? parseOptionalQuickNumber(quickResultForm.homePenalties) : null;
+      const awayPenalties = penaltiesVisible ? parseOptionalQuickNumber(quickResultForm.awayPenalties) : null;
 
       const newDateTime = quickResultForm.scheduledDate && quickResultForm.scheduledTime
         ? combineLocalDateTimeToUtcIso(quickResultForm.scheduledDate, quickResultForm.scheduledTime, APP_TIMEZONE)
@@ -880,7 +919,13 @@ export function TournamentOperationFixtureWorkspace({
       await saveMatch({
         id: match.id,
         status: quickResultForm.status,
-        score: { home: homeScore, away: awayScore },
+        score: {
+          home: homeScore,
+          away: awayScore,
+          ...(homePenalties !== null && awayPenalties !== null
+            ? { penalties: { home: homePenalties, away: awayPenalties } }
+            : {}),
+        },
         homeBasePoints: isFinal ? Math.max(0, parseQuickPointNumber(quickResultForm.homeBasePoints)) : 0,
         awayBasePoints: isFinal ? Math.max(0, parseQuickPointNumber(quickResultForm.awayBasePoints)) : 0,
         homeBonusPoints: isFinal ? parseQuickPointNumber(quickResultForm.homeBonusPoints) : 0,
@@ -2033,6 +2078,29 @@ function MatchCard({
               {quickResultErrors.awayScore ? <small className="operation-field-error">{quickResultErrors.awayScore}</small> : null}
             </label>
           </div>
+
+          {shouldShowPenaltyFields(quickResultForm) ? (
+            <>
+              <div className="fixture-quick-points-head">
+                <div>
+                  <span className="fixture-quick-kicker">Desempate</span>
+                  <strong>Penales opcionales</strong>
+                </div>
+              </div>
+              <div className="fixture-quick-grid fixture-quick-grid-score">
+                <label className="fixture-quick-field">
+                  <span>Penales local</span>
+                  <input type="number" min={0} value={quickResultForm.homePenalties} onChange={(event) => onQuickResultFieldChange('homePenalties', event.target.value)} placeholder="Opcional" />
+                  {quickResultErrors.homePenalties ? <small className="operation-field-error">{quickResultErrors.homePenalties}</small> : null}
+                </label>
+                <label className="fixture-quick-field">
+                  <span>Penales visitante</span>
+                  <input type="number" min={0} value={quickResultForm.awayPenalties} onChange={(event) => onQuickResultFieldChange('awayPenalties', event.target.value)} placeholder="Opcional" />
+                  {quickResultErrors.awayPenalties ? <small className="operation-field-error">{quickResultErrors.awayPenalties}</small> : null}
+                </label>
+              </div>
+            </>
+          ) : null}
 
           <div className="fixture-quick-points-head">
             <div>

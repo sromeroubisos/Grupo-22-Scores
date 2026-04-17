@@ -192,8 +192,21 @@
     color: var(--color-text-tertiary);
 }
 
+.teamScoreWrap {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-left: auto;
+}
+
 .teamScore.winner {
     color: var(--color-accent);
+}
+
+.teamPenaltyScore {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
 }
 
 .resultDivider {

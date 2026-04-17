@@ -13,6 +13,10 @@ export type MatchCreatedFrom = 'generator' | 'manual';
 export interface MatchScore {
     home: number | null;
     away: number | null;
+    penalties?: {
+        home: number | null;
+        away: number | null;
+    } | null;
     homeTries?: number | null;
     awayTries?: number | null;
     homeBonus?: number;

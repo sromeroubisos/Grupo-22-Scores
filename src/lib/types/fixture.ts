@@ -11,6 +11,10 @@ export type MatchStatus = 'scheduled' | 'live' | 'final' | 'postponed' | 'suspen
 export interface MatchScore {
   home: number;
   away: number;
+  penalties?: {
+    home: number | null;
+    away: number | null;
+  } | null;
 }
 
 export interface MatchClock {

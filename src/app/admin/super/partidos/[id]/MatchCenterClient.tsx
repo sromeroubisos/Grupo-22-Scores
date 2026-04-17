@@ -94,6 +94,10 @@ type QuickLineupEntry = {
 interface MatchScore {
     home: number;
     away: number;
+    penalties?: {
+        home: number | null;
+        away: number | null;
+    } | null;
     homeTries?: number;
     awayTries?: number;
     notes?: string;
@@ -179,6 +183,14 @@ function normalizeMatchLineups(lineups: MatchRow['lineups']): MatchLineups {
 function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
     const normalizedHomeTries = Number(score?.homeTries);
     const normalizedAwayTries = Number(score?.awayTries);
+    const normalizedPenaltyHome =
+        score?.penalties?.home === null || score?.penalties?.home === undefined
+            ? Number.NaN
+            : Number(score.penalties.home);
+    const normalizedPenaltyAway =
+        score?.penalties?.away === null || score?.penalties?.away === undefined
+            ? Number.NaN
+            : Number(score.penalties.away);
     const manualOverride = score?.manualOverride;
     const normalizedManualHome = Number(manualOverride?.home);
     const normalizedManualAway = Number(manualOverride?.away);
@@ -187,9 +199,20 @@ function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
             ? null
             : Number(manualOverride.cutoffMinute);
 
+    const home = Math.max(0, Number(score?.home) || 0);
+    const away = Math.max(0, Number(score?.away) || 0);
+    const penalties =
+        home === away && Number.isFinite(normalizedPenaltyHome) && Number.isFinite(normalizedPenaltyAway)
+            ? {
+                home: Math.max(0, normalizedPenaltyHome),
+                away: Math.max(0, normalizedPenaltyAway),
+            }
+            : null;
+
     return {
-        home: Math.max(0, Number(score?.home) || 0),
-        away: Math.max(0, Number(score?.away) || 0),
+        home,
+        away,
+        penalties,
         homeTries: Number.isFinite(normalizedHomeTries) ? normalizedHomeTries : undefined,
         awayTries: Number.isFinite(normalizedAwayTries) ? normalizedAwayTries : undefined,
         notes: typeof score?.notes === 'string' ? score.notes : undefined,
@@ -315,6 +338,8 @@ function areMatchScoresEqual(left: MatchScore | null | undefined, right: MatchSc
     return (
         normalizedLeft.home === normalizedRight.home
         && normalizedLeft.away === normalizedRight.away
+        && (normalizedLeft.penalties?.home ?? null) === (normalizedRight.penalties?.home ?? null)
+        && (normalizedLeft.penalties?.away ?? null) === (normalizedRight.penalties?.away ?? null)
         && (normalizedLeft.homeTries ?? null) === (normalizedRight.homeTries ?? null)
         && (normalizedLeft.awayTries ?? null) === (normalizedRight.awayTries ?? null)
         && (normalizedLeft.notes ?? '') === (normalizedRight.notes ?? '')
@@ -1662,10 +1687,38 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             ...currentOfficialScore,
             home: nextHome,
             away: nextAway,
+            penalties: nextHome === nextAway ? currentOfficialScore.penalties ?? null : null,
             manualOverride: {
                 home: nextHome,
                 away: nextAway,
                 cutoffMinute,
+            },
+        });
+    }, [resolveOfficialScore]);
+
+    const handlePenaltyInputChange = useCallback((team: 'home' | 'away', value: string) => {
+        const currentOfficialScore = resolveOfficialScore();
+
+        if (currentOfficialScore.home !== currentOfficialScore.away) {
+            return;
+        }
+
+        const trimmedValue = value.trim();
+        if (!trimmedValue) {
+            setScoreDraft({
+                ...currentOfficialScore,
+                penalties: null,
+            });
+            return;
+        }
+
+        const parsedValue = Math.max(0, Number.parseInt(trimmedValue, 10) || 0);
+
+        setScoreDraft({
+            ...currentOfficialScore,
+            penalties: {
+                home: team === 'home' ? parsedValue : (currentOfficialScore.penalties?.home ?? 0),
+                away: team === 'away' ? parsedValue : (currentOfficialScore.penalties?.away ?? 0),
             },
         });
     }, [resolveOfficialScore]);
@@ -3011,6 +3064,32 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                     onChange={(e) => handleScoreInputChange('away', e.target.value)}
                                 />
                             </div>
+                            {match.status === 'final' && score.home === score.away ? (
+                                <>
+                                    <div className="form-group">
+                                        <label>Penales Local</label>
+                                        <input
+                                            type="number"
+                                            value={score.penalties?.home ?? ''}
+                                            min={0}
+                                            placeholder="Opcional"
+                                            style={{ borderRadius: 4 }}
+                                            onChange={(e) => handlePenaltyInputChange('home', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Penales Visitante</label>
+                                        <input
+                                            type="number"
+                                            value={score.penalties?.away ?? ''}
+                                            min={0}
+                                            placeholder="Opcional"
+                                            style={{ borderRadius: 4 }}
+                                            onChange={(e) => handlePenaltyInputChange('away', e.target.value)}
+                                        />
+                                    </div>
+                                </>
+                            ) : null}
                             <div className="form-group">
                                 <label>Estadio / Venue</label>
                                 <input

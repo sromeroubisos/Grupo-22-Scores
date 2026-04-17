@@ -7,6 +7,7 @@ import ExportImage from '@/components/ExportImage';
 import DateStrip from '@/components/DateStrip';
 import { useSport } from '@/context/SportContext';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
+import { getMatchPenaltyScore, getMatchWinnerByScore, hasMatchPenaltyShootout } from '@/lib/matchUtils';
 import { generateLocalDateKeys } from '@/lib/timezone';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import styles from './page.module.css';
@@ -16,7 +17,14 @@ type PublicMatch = {
     dateTime: string;
     status?: string | null;
     roundId?: string | null;
-    score?: { home?: number | null; away?: number | null } | null;
+    score?: {
+        home?: number | null;
+        away?: number | null;
+        penalties?: {
+            home?: number | null;
+            away?: number | null;
+        } | null;
+    } | null;
     homeTeam?: { name?: string | null; logo?: string | null } | null;
     awayTeam?: { name?: string | null; logo?: string | null } | null;
     tournament?: {
@@ -34,10 +42,13 @@ type ResultRow = {
     home: string;
     homeLogo: string;
     homeScore: number | null;
+    homePenaltyScore: number | null;
     away: string;
     awayLogo: string;
     awayScore: number | null;
+    awayPenaltyScore: number | null;
     dateTime: string;
+    winner: 'home' | 'away' | null;
 };
 
 type ResultGroup = {
@@ -84,6 +95,7 @@ export default function ResultadosPage() {
                 const country = String(match.tournament?.country || 'Internacional');
                 const tournamentName = String(match.tournament?.name || 'Competencia');
                 const key = String(match.tournament?.id || `${country}::${tournamentName}`);
+                const penalties = hasMatchPenaltyShootout(match) ? getMatchPenaltyScore(match) : null;
                 const row: ResultRow = {
                     id: String(match.id),
                     tournamentName,
@@ -92,10 +104,13 @@ export default function ResultadosPage() {
                     home: String(match.homeTeam?.name || 'Local'),
                     homeLogo: resolveTeamLogo(match.homeTeam),
                     homeScore: typeof match.score?.home === 'number' ? match.score.home : 0,
+                    homePenaltyScore: penalties?.home ?? null,
                     away: String(match.awayTeam?.name || 'Visitante'),
                     awayLogo: resolveTeamLogo(match.awayTeam),
                     awayScore: typeof match.score?.away === 'number' ? match.score.away : 0,
+                    awayPenaltyScore: penalties?.away ?? null,
                     dateTime: match.dateTime,
+                    winner: getMatchWinnerByScore(match),
                 };
 
                 const existing = groups.get(key);
@@ -290,8 +305,13 @@ export default function ResultadosPage() {
                                                         )}
                                                     </span>
                                                     <span className={styles.teamName}>{match.home}</span>
-                                                    <span className={`${styles.teamScore} ${(match.homeScore ?? -1) > (match.awayScore ?? -1) ? styles.winner : ''}`}>
-                                                        {match.homeScore ?? '-'}
+                                                    <span className={styles.teamScoreWrap}>
+                                                        <span className={`${styles.teamScore} ${match.winner === 'home' ? styles.winner : ''}`}>
+                                                            {match.homeScore ?? '-'}
+                                                        </span>
+                                                        {match.homePenaltyScore !== null ? (
+                                                            <span className={styles.teamPenaltyScore}>({match.homePenaltyScore})</span>
+                                                        ) : null}
                                                     </span>
                                                 </div>
 
@@ -314,8 +334,13 @@ export default function ResultadosPage() {
                                                         )}
                                                     </span>
                                                     <span className={styles.teamName}>{match.away}</span>
-                                                    <span className={`${styles.teamScore} ${(match.awayScore ?? -1) > (match.homeScore ?? -1) ? styles.winner : ''}`}>
-                                                        {match.awayScore ?? '-'}
+                                                    <span className={styles.teamScoreWrap}>
+                                                        <span className={`${styles.teamScore} ${match.winner === 'away' ? styles.winner : ''}`}>
+                                                            {match.awayScore ?? '-'}
+                                                        </span>
+                                                        {match.awayPenaltyScore !== null ? (
+                                                            <span className={styles.teamPenaltyScore}>({match.awayPenaltyScore})</span>
+                                                        ) : null}
                                                     </span>
                                                 </div>
                                             </div>

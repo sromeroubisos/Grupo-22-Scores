@@ -328,7 +328,19 @@
     font-weight: 700;
     font-size: 1.125rem;
     color: var(--color-text-primary);
+}
+
+.matchScoreWrap {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
     margin-left: auto;
+}
+
+.matchPenaltyScore {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
 }
 
 .matchMeta {

@@ -7,6 +7,7 @@ import ExportImage from '@/components/ExportImage';
 import DateStrip from '@/components/DateStrip';
 import { useSport } from '@/context/SportContext';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
+import { getMatchPenaltyScore, hasMatchPenaltyShootout } from '@/lib/matchUtils';
 import { generateLocalDateKeys, toLocalMatch } from '@/lib/timezone';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import styles from './page.module.css';
@@ -17,7 +18,14 @@ type PublicMatch = {
     status?: string | null;
     venue?: string | null;
     roundId?: string | null;
-    score?: { home?: number | null; away?: number | null } | null;
+    score?: {
+        home?: number | null;
+        away?: number | null;
+        penalties?: {
+            home?: number | null;
+            away?: number | null;
+        } | null;
+    } | null;
     clock?: { period?: string | null } | null;
     homeTeam?: { name?: string | null; logo?: string | null } | null;
     awayTeam?: { name?: string | null; logo?: string | null } | null;
@@ -40,9 +48,11 @@ type FixtureRow = {
     home: string;
     homeLogo: string;
     homeScore: number | null;
+    homePenaltyScore: number | null;
     away: string;
     awayLogo: string;
     awayScore: number | null;
+    awayPenaltyScore: number | null;
     status: DisplayStatus;
     venue: string;
     roundLabel: string;
@@ -74,6 +84,7 @@ function formatRoundLabel(roundId: unknown): string {
 function createFixtureRow(match: PublicMatch, timeZone: string): FixtureRow {
     const { localTime } = toLocalMatch(match.dateTime, timeZone);
     const status = normalizeStatus(match.status);
+    const penalties = hasMatchPenaltyShootout(match) ? getMatchPenaltyScore(match) : null;
 
     return {
         id: String(match.id),
@@ -85,9 +96,11 @@ function createFixtureRow(match: PublicMatch, timeZone: string): FixtureRow {
         home: String(match.homeTeam?.name || 'Local'),
         homeLogo: resolveTeamLogo(match.homeTeam),
         homeScore: typeof match.score?.home === 'number' ? match.score.home : (status === 'scheduled' ? null : 0),
+        homePenaltyScore: penalties?.home ?? null,
         away: String(match.awayTeam?.name || 'Visitante'),
         awayLogo: resolveTeamLogo(match.awayTeam),
         awayScore: typeof match.score?.away === 'number' ? match.score.away : (status === 'scheduled' ? null : 0),
+        awayPenaltyScore: penalties?.away ?? null,
         status,
         venue: String(match.venue || 'Sede a confirmar'),
         roundLabel: formatRoundLabel(match.roundId),
@@ -358,8 +371,13 @@ export default function FixturesPage() {
                                                             )}
                                                         </span>
                                                         <span className={styles.teamName}>{match.home}</span>
-                                                        <span className={styles.matchScore}>
-                                                            {match.homeScore ?? (match.status === 'scheduled' ? '-' : match.homeScore)}
+                                                        <span className={styles.matchScoreWrap}>
+                                                            <span className={styles.matchScore}>
+                                                                {match.homeScore ?? (match.status === 'scheduled' ? '-' : match.homeScore)}
+                                                            </span>
+                                                            {match.homePenaltyScore !== null ? (
+                                                                <span className={styles.matchPenaltyScore}>({match.homePenaltyScore})</span>
+                                                            ) : null}
                                                         </span>
                                                     </div>
                                                     <div className={styles.matchTeam}>
@@ -377,8 +395,13 @@ export default function FixturesPage() {
                                                             )}
                                                         </span>
                                                         <span className={styles.teamName}>{match.away}</span>
-                                                        <span className={styles.matchScore}>
-                                                            {match.awayScore ?? (match.status === 'scheduled' ? '-' : match.awayScore)}
+                                                        <span className={styles.matchScoreWrap}>
+                                                            <span className={styles.matchScore}>
+                                                                {match.awayScore ?? (match.status === 'scheduled' ? '-' : match.awayScore)}
+                                                            </span>
+                                                            {match.awayPenaltyScore !== null ? (
+                                                                <span className={styles.matchPenaltyScore}>({match.awayPenaltyScore})</span>
+                                                            ) : null}
                                                         </span>
                                                     </div>
                                                 </div>
