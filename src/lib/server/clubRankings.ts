@@ -249,6 +249,25 @@ function createClubRankingQueryError(error: unknown, fallbackMessage: string) {
     return new Error(message || fallbackMessage);
 }
 
+function isUniqueConstraintViolation(error: unknown, constraintName?: string) {
+    if (!error || typeof error !== 'object') return false;
+
+    const code = 'code' in error ? String((error as { code?: unknown }).code || '') : '';
+    const message = 'message' in error ? String((error as { message?: unknown }).message || '') : '';
+    const details = 'details' in error ? String((error as { details?: unknown }).details || '') : '';
+    const haystack = `${message} ${details}`.toLowerCase();
+
+    if (code !== '23505') {
+        return false;
+    }
+
+    if (!constraintName) {
+        return true;
+    }
+
+    return haystack.includes(constraintName.toLowerCase());
+}
+
 function toNumber(value: unknown, fallback = 0) {
     if (value === null || value === undefined || value === '') return fallback;
     const numeric = Number(String(value).replace(',', '.'));
@@ -1344,36 +1363,7 @@ async function applyMatchToRanking(
     const homeRatingAfter = roundRating(homeRatingBefore + exchange.homeDelta);
     const awayRatingAfter = roundRating(awayRatingBefore + exchange.awayDelta);
 
-    homeEntry.previous_rating = homeRatingBefore;
-    awayEntry.previous_rating = awayRatingBefore;
-    homeEntry.source_payload = withPreviousRating(homeEntry.source_payload, homeRatingBefore);
-    awayEntry.source_payload = withPreviousRating(awayEntry.source_payload, awayRatingBefore);
-    homeEntry.current_rating = homeRatingAfter;
-    awayEntry.current_rating = awayRatingAfter;
-    homeEntry.last_applied_match_id = match.id;
-    awayEntry.last_applied_match_id = match.id;
-
-    await supabase
-        .from('club_ranking_entries')
-        .update({
-            current_rating: homeRatingAfter,
-            source_payload: homeEntry.source_payload,
-            last_applied_match_id: match.id,
-        })
-        .eq('ranking_id', ranking.id)
-        .eq('club_id', homeEntry.club_id);
-
-    await supabase
-        .from('club_ranking_entries')
-        .update({
-            current_rating: awayRatingAfter,
-            source_payload: awayEntry.source_payload,
-            last_applied_match_id: match.id,
-        })
-        .eq('ranking_id', ranking.id)
-        .eq('club_id', awayEntry.club_id);
-
-    await supabase.from('club_ranking_match_applications').insert({
+    const applicationPayload = {
         ranking_id: ranking.id,
         match_id: match.id,
         match_date_time: match.date_time,
@@ -1396,17 +1386,84 @@ async function applyMatchToRanking(
             phaseId: match.phase_id,
             roundId: match.round_uuid,
         },
-    });
+    };
 
-    await supabase
-        .from('club_rankings')
-        .update({
-            last_incremental_match_id: match.id,
-            stale_from_match_id: null,
-            stale_from_match_date: null,
-            stale_reason: null,
-        })
-        .eq('id', ranking.id);
+    const { error: applicationError } = await supabase
+        .from('club_ranking_match_applications')
+        .insert(applicationPayload);
+
+    if (applicationError) {
+        if (
+            isUniqueConstraintViolation(
+                applicationError,
+                'club_ranking_match_applications_unique',
+            )
+        ) {
+            return false;
+        }
+
+        throw createClubRankingQueryError(
+            applicationError,
+            `No se pudo registrar la aplicacion del partido ${match.id} en el ranking ${ranking.id}.`,
+        );
+    }
+
+    homeEntry.previous_rating = homeRatingBefore;
+    awayEntry.previous_rating = awayRatingBefore;
+    homeEntry.source_payload = withPreviousRating(homeEntry.source_payload, homeRatingBefore);
+    awayEntry.source_payload = withPreviousRating(awayEntry.source_payload, awayRatingBefore);
+    homeEntry.current_rating = homeRatingAfter;
+    awayEntry.current_rating = awayRatingAfter;
+    homeEntry.last_applied_match_id = match.id;
+    awayEntry.last_applied_match_id = match.id;
+
+    const [homeUpdateRes, awayUpdateRes, rankingUpdateRes] = await Promise.all([
+        supabase
+            .from('club_ranking_entries')
+            .update({
+                current_rating: homeRatingAfter,
+                source_payload: homeEntry.source_payload,
+                last_applied_match_id: match.id,
+            })
+            .eq('ranking_id', ranking.id)
+            .eq('club_id', homeEntry.club_id),
+        supabase
+            .from('club_ranking_entries')
+            .update({
+                current_rating: awayRatingAfter,
+                source_payload: awayEntry.source_payload,
+                last_applied_match_id: match.id,
+            })
+            .eq('ranking_id', ranking.id)
+            .eq('club_id', awayEntry.club_id),
+        supabase
+            .from('club_rankings')
+            .update({
+                last_incremental_match_id: match.id,
+                stale_from_match_id: null,
+                stale_from_match_date: null,
+                stale_reason: null,
+            })
+            .eq('id', ranking.id),
+    ]);
+
+    const writeError =
+        homeUpdateRes.error ||
+        awayUpdateRes.error ||
+        rankingUpdateRes.error;
+
+    if (writeError) {
+        await supabase
+            .from('club_ranking_match_applications')
+            .delete()
+            .eq('ranking_id', ranking.id)
+            .eq('match_id', match.id);
+
+        throw createClubRankingQueryError(
+            writeError,
+            `No se pudo consolidar la aplicacion del partido ${match.id} en el ranking ${ranking.id}.`,
+        );
+    }
 
     return true;
 }

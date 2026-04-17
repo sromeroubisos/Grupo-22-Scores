@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 const MATCHES_FEED_CACHE_TABLE = 'matches_feed_cache';
+const MAX_PERSISTED_MATCHES_FEED_PAYLOAD_BYTES = 750_000;
 const MATCHES_FEED_CACHE_META_COLUMNS = [
     'cache_key',
     'feed_type',
@@ -256,6 +257,15 @@ export async function upsertMatchesFeedSnapshot<T>(
     const freshUntil = new Date(generatedAt.getTime() + input.freshTtlSeconds * 1000);
     const staleUntil = new Date(generatedAt.getTime() + input.staleTtlSeconds * 1000);
     const payloadSizeBytes = new TextEncoder().encode(JSON.stringify(input.payload)).length;
+
+    if (payloadSizeBytes > MAX_PERSISTED_MATCHES_FEED_PAYLOAD_BYTES) {
+        console.warn('[matchesFeedCache] skipping oversized snapshot write:', {
+            cacheKey: input.cacheKey,
+            payloadSizeBytes,
+            maxBytes: MAX_PERSISTED_MATCHES_FEED_PAYLOAD_BYTES,
+        });
+        return false;
+    }
 
     const payload = {
         cache_key: input.cacheKey,

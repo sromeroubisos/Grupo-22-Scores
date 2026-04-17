@@ -356,13 +356,13 @@ async function getAllTournamentCatalogRows() {
     }
 
     const selectVariants = [
-        'id,name,display_name,logo_url,sport_id,sport_name,country,country_name,status,is_visible,priority,is_api_managed,data_source,external_id',
         'id,name,display_name,logo_url,sport_id,country,status,is_visible,priority,is_api_managed,data_source,external_id',
         'id,name,display_name,logo_url,sport_id,country,status,is_visible,priority,is_api_managed,data_source',
         'id,name,display_name,logo_url,sport_id,country,status,is_visible,priority',
         'id,name,display_name,logo_url,sport_id,country,status,is_visible',
         'id,name,display_name,logo_url,sport_id,country,status',
         'id,name,display_name,logo_url,sport_id,country',
+        'id,name,display_name,logo_url,sport_id,sport_name,country,country_name,status,is_visible,priority,is_api_managed,data_source,external_id',
         'id,name,display_name',
         'id,name',
     ];
