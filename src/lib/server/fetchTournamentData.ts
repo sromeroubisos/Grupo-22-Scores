@@ -10,6 +10,8 @@ const MATCHES_TIMEOUT_MS = 12000;
 const STANDINGS_TIMEOUT_MS = 12000;
 const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id';
 const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id';
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id';
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id';
 
 export type TournamentQueryErrors = {
     tournament: string | null;
@@ -277,6 +279,22 @@ async function getTournamentByIdWithSportFallback(
             .maybeSingle();
     }
 
+    if (isMissingColumnError(result.error, 'url')) {
+        result = await supabase
+            .from('tournaments')
+            .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL)
+            .eq('id', tournamentId)
+            .maybeSingle();
+
+        if (isMissingColumnError(result.error, 'sport')) {
+            result = await supabase
+                .from('tournaments')
+                .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL)
+                .eq('id', tournamentId)
+                .maybeSingle();
+        }
+    }
+
     return result;
 }
 
@@ -324,6 +342,22 @@ async function getTournamentByIdBareFallback(
             .select('id, name, display_name, logo_url, sport_id, country_id, slug, url')
             .eq('id', tournamentId)
             .maybeSingle();
+    }
+
+    if (isMissingColumnError(result.error, 'url')) {
+        result = await supabase
+            .from('tournaments')
+            .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug')
+            .eq('id', tournamentId)
+            .maybeSingle();
+
+        if (isMissingColumnError(result.error, 'banner_url')) {
+            result = await supabase
+                .from('tournaments')
+                .select('id, name, display_name, logo_url, sport_id, country_id, slug')
+                .eq('id', tournamentId)
+                .maybeSingle();
+        }
     }
 
     return result;

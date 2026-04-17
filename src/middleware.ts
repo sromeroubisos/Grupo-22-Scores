@@ -7,35 +7,37 @@ import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
 
-// Routes that do NOT need a proxy-level session refresh.
-// Some are public, while others enforce auth inside the route handler itself.
-// Skipping the proxy check here avoids an extra Supabase auth round-trip that
-// can add 30-40s latency to data-heavy admin requests.
-const SESSION_REFRESH_BYPASS_PREFIXES = [
-    '/api/matches',
-    '/api/news',
-    '/api/home/',
-    '/api/tournaments',
-    '/api/search',
-    '/api/clubs',
-    '/api/admin/clubs',
-    '/api/players',
-    '/api/admin/super/console-data',
-    '/api/admin/super/dashboard-stats',
-    '/api/admin/super/matches',
-    '/manifest.json',
-    '/sw.js',
+// Only refresh the Supabase session on routes that genuinely depend on auth.
+// This avoids hitting `auth/v1/user` on public traffic, which is what was
+// triggering long middleware stalls in production.
+const SESSION_REFRESH_REQUIRED_PREFIXES = [
+    '/admin',
+    '/club-admin',
+    '/profile',
+    '/favorites',
+    '/onboarding',
+    '/prode/ligas',
+    '/api/auth',
+    '/api/profile',
+    '/api/club-admin',
+    '/api/admin',
+    '/api/prode/private-leagues',
+    '/api/prode/predictions',
 ]
 
-function shouldBypassSessionRefresh(pathname: string): boolean {
-    return SESSION_REFRESH_BYPASS_PREFIXES.some(prefix => pathname.startsWith(prefix))
+function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): boolean {
+    if (pathname === '/' && searchParams.has('code')) {
+        return true
+    }
+
+    return SESSION_REFRESH_REQUIRED_PREFIXES.some(prefix => pathname.startsWith(prefix))
 }
 
 export async function middleware(request: NextRequest) {
     const { pathname, searchParams } = request.nextUrl;
 
-    // 1. Skip proxy-level auth refresh for routes that do not need it.
-    if (shouldBypassSessionRefresh(pathname)) {
+    // 1. Skip proxy-level auth refresh for public routes.
+    if (!shouldRefreshSession(pathname, searchParams)) {
         return measureAsync(
             'proxy_bypass',
             async () => NextResponse.next(),

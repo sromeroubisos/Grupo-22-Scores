@@ -3,6 +3,22 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
 
+const AUTH_REFRESH_TIMEOUT_MS = 2500;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const timeoutPromise = new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => {
+            reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+    });
+
+    return Promise.race([promise, timeoutPromise]).finally(() => {
+        if (timeoutId) clearTimeout(timeoutId);
+    });
+}
+
 export async function updateSession(request: NextRequest) {
     let response = NextResponse.next({
         request: {
@@ -66,22 +82,40 @@ export async function updateSession(request: NextRequest) {
 
     // Refresh session if expired - required for Server Components and OAuth PKCE flow.
     // DO NOT skip this call: it is needed to exchange OAuth codes and refresh tokens.
-    const { data: { user }, error } = await measureAsync(
-        'proxy_get_user',
-        async () => supabase.auth.getUser(),
-        {
-            runtime: 'server',
-            tags: ['PROXY'],
-            metadata: {
-                path: request.nextUrl.pathname,
-                authChecked: true,
+    let authResult: Awaited<ReturnType<typeof supabase.auth.getUser>> | null = null;
+
+    try {
+        authResult = await measureAsync(
+            'proxy_get_user',
+            async () => withTimeout(supabase.auth.getUser(), AUTH_REFRESH_TIMEOUT_MS, 'proxy_get_user'),
+            {
+                runtime: 'server',
+                tags: ['PROXY'],
+                metadata: {
+                    path: request.nextUrl.pathname,
+                    authChecked: true,
+                },
+                describeResult: (result) => ({
+                    success: !result.error,
+                    hasUser: Boolean(result.data?.user),
+                }),
             },
-            describeResult: (result) => ({
-                success: !result.error,
-                hasUser: Boolean(result.data?.user),
-            }),
-        },
-    )
+        )
+    } catch (error) {
+        console.warn('[Middleware] Session refresh skipped:', error);
+        logPerf(
+            ['PROXY', 'WARN'],
+            {
+                path: request.nextUrl.pathname,
+                authChecked: false,
+                skipped: 'timeout_or_error',
+            },
+            'server',
+        )
+        return response
+    }
+
+    const { data: { user }, error } = authResult
     if (error) {
         // Only log if it's not a common "no session" state
         if (!error.message.includes('Auth session missing')) {

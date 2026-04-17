@@ -42,6 +42,7 @@ import {
 } from '@/lib/utils/blockedTournaments';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import {
     applyExternalTournamentOverride,
     getExternalTournamentOverride,
@@ -55,6 +56,10 @@ import { formatDurationMs, logPerf, measureAsync, nowMs } from '@/lib/perf/measu
 
 const TAB_TIMEOUT_MS = 5000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DB_TOURNAMENT_META_SELECT = 'id, name, display_name, sport_id, country_id, logo_url, banner_url, url, ruleset, external_id, slug';
+const DB_TOURNAMENT_META_SELECT_NO_URL = 'id, name, display_name, sport_id, country_id, logo_url, banner_url, ruleset, external_id, slug';
+const DB_TOURNAMENT_META_SELECT_NO_BANNER_URL = 'id, name, display_name, sport_id, country_id, logo_url, url, ruleset, external_id, slug';
+const DB_TOURNAMENT_META_SELECT_NO_BANNER_OR_URL = 'id, name, display_name, sport_id, country_id, logo_url, ruleset, external_id, slug';
 
 function normalizeId(val: any): string | undefined {
     if (val === null || val === undefined) return undefined;
@@ -557,13 +562,30 @@ async function findDbTournamentMeta(id: string) {
 
     try {
         const readClient = await getReadClient();
-        const baseQuery = readClient
-            .from('tournaments')
-            .select('id, name, display_name, sport_id, country_id, logo_url, banner_url, url, ruleset, external_id, slug');
+        const queryByIdentifier = async (selectClause: string) => {
+            const baseQuery = readClient
+                .from('tournaments')
+                .select(selectClause);
 
-        const response = UUID_RE.test(id)
-            ? await baseQuery.eq('id', id).maybeSingle()
-            : await baseQuery.eq('slug', id).maybeSingle();
+            return UUID_RE.test(id)
+                ? baseQuery.eq('id', id).maybeSingle()
+                : baseQuery.eq('slug', id).maybeSingle();
+        };
+
+        let response = await queryByIdentifier(DB_TOURNAMENT_META_SELECT);
+        const missingUrl = isMissingColumnError(response.error, 'url');
+
+        if (missingUrl) {
+            response = await queryByIdentifier(DB_TOURNAMENT_META_SELECT_NO_URL);
+        }
+
+        if (isMissingColumnError(response.error, 'banner_url')) {
+            response = await queryByIdentifier(
+                missingUrl
+                    ? DB_TOURNAMENT_META_SELECT_NO_BANNER_OR_URL
+                    : DB_TOURNAMENT_META_SELECT_NO_BANNER_URL,
+            );
+        }
 
         return response.data || null;
     } catch (error) {
