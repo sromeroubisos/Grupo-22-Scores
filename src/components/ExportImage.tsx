@@ -1770,13 +1770,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                 </div>
                                 {locksMatchFormatToPost && (
                                     <p className={styles.modalHint}>
-                                        {template === 'dailyMatches'
-                                            ? 'Poster V3 para daily matches usa siempre canvas 1080x1350 para sostener la composicion vertical del poster.'
-                                            : matchExportMode === 'schedule'
-                                            ? 'El nuevo horario de G22 Base usa siempre canvas 1080x1350 para respetar la composicion del afiche.'
-                                            : matchExportLayout === 'editorial4x5'
-                                            ? 'El layout editorial usa siempre canvas 1080x1350 para respetar la composicion 4:5.'
-                                            : 'El nuevo resultado clasico de G22 Base usa siempre canvas 1080x1350 para sostener la composicion vertical.'}
+                                        El layout editorial usa siempre canvas 1080x1350 para respetar la composicion 4:5.
                                     </p>
                                 )}
                             </div>
@@ -2729,15 +2723,14 @@ function getMatchExportModeLabel(mode: MatchExportMode): string {
 
 function shouldLockMatchExportFormatToPost(
     template: ExportTemplate,
-    visualFamily: ExportVisualFamily,
+    _visualFamily: ExportVisualFamily,
     layout: MatchExportLayout,
-    mode: MatchExportMode,
+    _mode: MatchExportMode,
 ) {
-    if (template === 'dailyMatches' && visualFamily === 'posterV3') return true;
-    if (template === 'matchStats' && visualFamily === 'g22Base' && mode === 'schedule') return true;
+    void _visualFamily;
+    void _mode;
     if (template !== 'matchStats') return false;
-    return layout === 'editorial4x5'
-        || (layout === 'classic' && mode === 'result');
+    return layout === 'editorial4x5';
 }
 
 function getResolvedMatchExportFormat(
