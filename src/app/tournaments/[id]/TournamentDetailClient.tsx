@@ -3161,7 +3161,7 @@ export default function TournamentDetailPage({
                                     </Link>
                                 )}
                                 {isSuperAdminUser && adminTournamentId && (
-                                    <Link href={`/admin/super/torneos/${adminTournamentId}`} className={styles.ctaBtnSecondary}>
+                                    <Link href={`/admin/entities/${adminTournamentId}/manage?type=tournament`} className={styles.ctaBtnSecondary}>
                                         Editar torneo
                                     </Link>
                                 )}
