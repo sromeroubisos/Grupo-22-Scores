@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type {
   TournamentFixture,
+  Match,
   MatchWithClubs,
   FixtureViewMode,
   MatchStatus,
@@ -23,6 +24,54 @@ function isAbortLikeError(error: unknown): error is Error {
     error instanceof Error &&
     (error.name === 'AbortError' || error.message.toLowerCase().includes('abort'))
   );
+}
+
+function applySavedMatchToFixture(
+  currentFixture: TournamentFixture | null,
+  savedMatch: Match,
+): TournamentFixture | null {
+  if (!currentFixture) return currentFixture;
+
+  let didUpdate = false;
+
+  const nextPhases = currentFixture.phases.map((phase) => ({
+    ...phase,
+    rounds: phase.rounds.map((round) => {
+      const nextMatches = round.matches.map((match) => {
+        if (match.id !== savedMatch.id) {
+          return match;
+        }
+
+        didUpdate = true;
+
+        const homeClubChanged = match.homeClubId !== savedMatch.homeClubId;
+        const awayClubChanged = match.awayClubId !== savedMatch.awayClubId;
+
+        return {
+          ...match,
+          ...savedMatch,
+          tournament: match.tournament ?? null,
+          homeClub: homeClubChanged ? null : match.homeClub ?? null,
+          awayClub: awayClubChanged ? null : match.awayClub ?? null,
+        };
+      });
+
+      return didUpdate
+        ? {
+            ...round,
+            matches: nextMatches,
+            matchCount: nextMatches.length,
+          }
+        : round;
+    }),
+  }));
+
+  return didUpdate
+    ? {
+        ...currentFixture,
+        phases: nextPhases,
+      }
+    : currentFixture;
 }
 
 interface FixtureContextValue {
@@ -420,6 +469,14 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.error || 'Failed to save match');
+      }
+
+      const savedMatch = await response.json();
+
+      if (isUpdate) {
+        setFixture((current) => applySavedMatchToFixture(current, savedMatch as Match));
+        void refreshFixture();
+        return;
       }
 
       await refreshFixture();

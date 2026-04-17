@@ -936,10 +936,15 @@ export function TournamentOperationFixtureWorkspace({
           : null,
         ...(newDateTime ? { dateTime: newDateTime } : {}),
       });
-      await afterMutation('Resultado y puntos guardados.');
       setQuickResultMatchId(null);
       setQuickResultForm(null);
       setQuickResultErrors({});
+      setFeedback({ tone: 'ok', message: 'Resultado y puntos guardados.' });
+      void validateFixture()
+        .then((result) => setValidationData(result as ValidationResult))
+        .catch((error) => {
+          console.error('Error validating fixture after quick save:', error);
+        });
     } catch (error) {
       setFeedback({ tone: 'error', message: error instanceof Error ? error.message : 'No se pudo guardar el resultado rapido.' });
     } finally {
@@ -2178,7 +2183,7 @@ function MatchCard({
               {quickResultForm.pointsAutocalculated ? 'Puntos autocompletados' : 'Puntos editados manualmente'}
             </span>
             <div className="fixture-quick-action-btns">
-              <button type="button" className="basalt-btn basalt-btn-ghost" onClick={onEdit}>
+              <button type="button" className="basalt-btn basalt-btn-ghost" onClick={() => setShowScheduleEdit((v) => !v)}>
                 <Clock3 size={14} />
                 Editar horario
               </button>
