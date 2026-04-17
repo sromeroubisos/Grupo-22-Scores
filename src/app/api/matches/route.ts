@@ -24,7 +24,7 @@ import {
     applyExternalTournamentOverride,
     getStoredExternalTournamentOverrides,
 } from '@/lib/server/externalTournamentOverrides';
-import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import {
@@ -317,6 +317,18 @@ function isTournamentPubliclyVisible(tournament?: DbTournamentLite | null) {
     return status !== 'archived' && status !== 'deleted';
 }
 
+function isLookupPermissionError(error: { code?: string | null; message?: string | null; details?: string | null } | null | undefined) {
+    if (!error) return false;
+
+    const haystack = `${error.message || ''} ${error.details || ''}`.toLowerCase();
+    return (
+        error.code === '42501' ||
+        haystack.includes('permission denied') ||
+        haystack.includes('not authorized') ||
+        haystack.includes('row-level security')
+    );
+}
+
 async function fetchDbLookupMaps(
     supabase: unknown,
     tournamentIds: string[],
@@ -363,12 +375,42 @@ async function fetchDbLookupMaps(
         ),
     ]);
 
-    if (tournamentsRes.error) throw tournamentsRes.error;
-    if (clubsRes.error) throw clubsRes.error;
+    const ignoreTournamentLookupError = Boolean(
+        tournamentsRes.error && (
+            isMissingTableError(tournamentsRes.error, 'tournaments') ||
+            isLookupPermissionError(tournamentsRes.error)
+        ),
+    );
+    const ignoreClubLookupError = Boolean(
+        clubsRes.error && (
+            isMissingTableError(clubsRes.error, 'clubs') ||
+            isLookupPermissionError(clubsRes.error)
+        ),
+    );
+
+    if (tournamentsRes.error && !ignoreTournamentLookupError) throw tournamentsRes.error;
+    if (clubsRes.error && !ignoreClubLookupError) throw clubsRes.error;
+
+    if (ignoreTournamentLookupError) {
+        console.warn('[matches] Tournament lookup unavailable, continuing with raw match data.', {
+            code: tournamentsRes.error?.code ?? null,
+            message: tournamentsRes.error?.message ?? null,
+        });
+    }
+
+    if (ignoreClubLookupError) {
+        console.warn('[matches] Club lookup unavailable, continuing with raw match data.', {
+            code: clubsRes.error?.code ?? null,
+            message: clubsRes.error?.message ?? null,
+        });
+    }
+
+    const tournamentRows = (ignoreTournamentLookupError ? [] : tournamentsRes.data) || [];
+    const clubRows = (ignoreClubLookupError ? [] : clubsRes.data) || [];
 
     return {
-        tournamentMap: new Map((tournamentsRes.data || []).map((t: any) => [t.id, t as DbTournamentLite])),
-        clubMap: new Map((clubsRes.data || []).map((c: any) => [c.id, c as DbClubLite])),
+        tournamentMap: new Map(tournamentRows.map((t: any) => [t.id, t as DbTournamentLite])),
+        clubMap: new Map(clubRows.map((c: any) => [c.id, c as DbClubLite])),
     };
 }
 
@@ -661,15 +703,23 @@ const MATCHES_DB_SELECT_COLUMNS = [
     'venue',
     'home_club_id',
     'away_club_id',
+    'sport_id',
+    'sport',
 ].join(', ');
 const MATCHES_DB_SELECT_VARIANTS = [
     MATCHES_DB_SELECT_COLUMNS,
+    'id, tournament_id, date_time, status, score, round_label, round_id, venue, home_club_id, away_club_id, sport_id',
+    'id, tournament_id, date_time, status, score, round_label, round_id, venue, home_club_id, away_club_id, sport',
     'id, tournament_id, date_time, status, score, round_label, venue, home_club_id, away_club_id',
     'id, tournament_id, date_time, status, score, round_id, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, score, venue, home_club_id, away_club_id, sport_id',
+    'id, tournament_id, date_time, status, score, venue, home_club_id, away_club_id, sport',
     'id, tournament_id, date_time, status, score, venue, home_club_id, away_club_id',
     'id, tournament_id, date_time, status, round_label, round_id, venue, home_club_id, away_club_id',
     'id, tournament_id, date_time, status, round_label, venue, home_club_id, away_club_id',
     'id, tournament_id, date_time, status, round_id, venue, home_club_id, away_club_id',
+    'id, tournament_id, date_time, status, home_club_id, away_club_id, sport_id',
+    'id, tournament_id, date_time, status, home_club_id, away_club_id, sport',
     'id, tournament_id, date_time, status, home_club_id, away_club_id',
 ];
 const MATCHES_DB_SCHEMA_FALLBACK_COLUMNS = [
@@ -683,6 +733,8 @@ const MATCHES_DB_SCHEMA_FALLBACK_COLUMNS = [
     'venue',
     'home_club_id',
     'away_club_id',
+    'sport_id',
+    'sport',
 ];
 const matchesRefreshLocks = new Map<string, Promise<void>>();
 const matchesInFlightResponses = new Map<string, Promise<MatchesPayload>>();
