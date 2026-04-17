@@ -6394,11 +6394,10 @@ async function drawMatchScheduleConfrontation(
     const scaleY = canvas.height / 1350;
     const sx = (value: number) => Math.round(value * scaleX);
     const sy = (value: number) => Math.round(value * scaleY);
-    const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
+    const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
         loadImage(data.tournamentLogo || ''),
-        loadImage(EDITORIAL_TEXTURE_SOURCE),
     ]);
     const baseBg = normalizeHexColor(bgColor) || DEFAULT_PALETTE.bg;
     const accent = normalizeHexColor(accentColor) || BRAND_ACCENT;
@@ -6508,17 +6507,6 @@ async function drawMatchScheduleConfrontation(
     const homeTileColor = deriveTileColor(homeLogo, mixHexColors(accent, '#7dd3fc', 0.44));
     const awayTileColor = deriveTileColor(awayLogo, mixHexColors(accent, '#1d4ed8', 0.42));
 
-    const drawTexture = (x: number, y: number, width: number, height: number, opacity: number) => {
-        if (!textureImage) return;
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x, y, width, height);
-        ctx.clip();
-        ctx.globalAlpha = opacity;
-        ctx.drawImage(textureImage, x, y, width, height);
-        ctx.restore();
-    };
-
     const drawPosterShape = (
         points: Array<[number, number]>,
         fillStyle: string,
@@ -6564,8 +6552,6 @@ async function drawMatchScheduleConfrontation(
         ctx.strokeRect(x, y, width, height);
         ctx.restore();
 
-        drawTexture(x, y, width, height, isDark ? 0.08 : 0.06);
-
         drawOverflowCrest(ctx, {
             x: x + width / 2,
             y: y + height / 2,
@@ -6602,8 +6588,6 @@ async function drawMatchScheduleConfrontation(
     bottomGlow.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = bottomGlow;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    drawTexture(0, 0, canvas.width, canvas.height, isDark ? 0.15 : 0.08);
 
     drawPosterShape(
         [
