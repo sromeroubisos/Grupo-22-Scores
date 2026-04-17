@@ -322,3 +322,23 @@ export async function upsertTournamentsFeedSnapshot<T>(
 
     return true;
 }
+
+export async function clearTournamentsFeedSnapshots(
+    supabase: SupabaseClient,
+): Promise<boolean> {
+    const { error } = await supabase
+        .from(TOURNAMENTS_FEED_CACHE_TABLE)
+        .delete()
+        .not('cache_key', 'is', null);
+
+    if (error) {
+        if (isMissingTableError(error, TOURNAMENTS_FEED_CACHE_TABLE)) {
+            return false;
+        }
+
+        console.error('[tournamentsFeedCache] clear error:', error);
+        return false;
+    }
+
+    return true;
+}

@@ -6,7 +6,7 @@ interface CacheEntry<T> {
 }
 
 class MemoryCache {
-    private cache: Map<string, CacheEntry<any>>;
+    private cache: Map<string, CacheEntry<unknown>>;
 
     constructor() {
         this.cache = new Map();
@@ -46,6 +46,18 @@ class MemoryCache {
 
     delete(key: string): void {
         this.cache.delete(key);
+    }
+
+    deleteByPrefix(prefix: string): number {
+        let deleted = 0;
+
+        for (const key of this.cache.keys()) {
+            if (!key.startsWith(prefix)) continue;
+            this.cache.delete(key);
+            deleted += 1;
+        }
+
+        return deleted;
     }
 
     clear(): void {

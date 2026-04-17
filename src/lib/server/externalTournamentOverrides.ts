@@ -434,6 +434,11 @@ export function applyExternalTournamentOverride<T extends Record<string, unknown
             name: resolvedName,
             display_name: resolvedName,
         } : {}),
+        ...(normalizedOverride.sport ? {
+            sport: normalizedOverride.sport,
+            sport_id: normalizedOverride.sport,
+            sportId: normalizedOverride.sport,
+        } : {}),
         ...(resolvedLogo ? {
             logo_url: resolvedLogo,
             image: resolvedLogo,

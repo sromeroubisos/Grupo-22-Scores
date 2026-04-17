@@ -322,3 +322,23 @@ export async function upsertMatchesFeedSnapshot<T>(
 
     return true;
 }
+
+export async function clearMatchesFeedSnapshots(
+    supabase: SupabaseClient,
+): Promise<boolean> {
+    const { error } = await supabase
+        .from(MATCHES_FEED_CACHE_TABLE)
+        .delete()
+        .not('cache_key', 'is', null);
+
+    if (error) {
+        if (isMissingTableError(error, MATCHES_FEED_CACHE_TABLE)) {
+            return false;
+        }
+
+        console.error('[matchesFeedCache] clear error:', error);
+        return false;
+    }
+
+    return true;
+}

@@ -3,12 +3,13 @@ import { getCurrentUser } from '@/lib/auth/server';
 import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { invalidateExternalTournamentApiCaches } from '@/lib/server/externalTournamentCacheInvalidation';
 import {
     getExternalTournamentStandingsOverride,
     normalizeExternalTournamentStandingsOverrideRecord,
     upsertExternalTournamentStandingsOverride,
 } from '@/lib/server/externalTournamentStandingsOverrides';
-import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 type MinimalUpsertClient = {
     from: (table: string) => {
@@ -141,9 +142,17 @@ export async function PATCH(
         }
 
         if (error) {
-            if (error.message?.includes('Could not find the table')) {
+            if (isMissingTableError(error, 'external_tournament_standings_overrides')) {
                 try {
                     const fileData = await upsertExternalTournamentStandingsOverride(payload);
+                    try {
+                        await invalidateExternalTournamentApiCaches(supabase);
+                    } catch (cacheError) {
+                        console.warn('[external-tournaments-standings][PATCH] cache invalidation skipped after file fallback', {
+                            id,
+                            error: cacheError instanceof Error ? cacheError.message : 'Unknown cache invalidation error',
+                        });
+                    }
                     return NextResponse.json({ ok: true, data: fileData, storage: 'file' });
                 } catch (fallbackError) {
                     const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown storage error';
@@ -174,6 +183,15 @@ export async function PATCH(
             console.warn('[external-tournaments-standings][PATCH] file cache persistence skipped', {
                 id,
                 error: fileError instanceof Error ? fileError.message : 'Unknown storage error',
+            });
+        }
+
+        try {
+            await invalidateExternalTournamentApiCaches(supabase);
+        } catch (cacheError) {
+            console.warn('[external-tournaments-standings][PATCH] cache invalidation skipped', {
+                id,
+                error: cacheError instanceof Error ? cacheError.message : 'Unknown cache invalidation error',
             });
         }
 
