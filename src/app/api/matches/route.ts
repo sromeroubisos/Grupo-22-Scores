@@ -178,15 +178,21 @@ async function selectManyWithFallback<T>(
         return { data: [] as T[], error: null };
     }
 
+    const variantCacheKey = `${table}:${idColumn}`;
+    const preferredVariant = lookupSelectVariantCache.get(variantCacheKey);
+    const orderedVariants = preferredVariant
+        ? [preferredVariant, ...variants.filter((columns) => columns !== preferredVariant)]
+        : variants;
     let lastError: { code?: string | null; message?: string | null; details?: string | null } | null = null;
 
-    for (const columns of variants) {
+    for (const columns of orderedVariants) {
         const result = await client
             .from(table)
             .select(columns)
             .in(idColumn, ids);
 
         if (!result.error) {
+            lookupSelectVariantCache.set(variantCacheKey, columns);
             return { data: (result.data as T[] | null) || [], error: null };
         }
 
@@ -212,11 +218,15 @@ async function selectMatchesRowsWithFallback(
     supabase: Awaited<ReturnType<typeof getReadClient>>,
     buildQuery: (columns: string) => Promise<{ data: any[] | null; error: any }>,
 ) {
+    const orderedVariants = preferredMatchesSelectVariant
+        ? [preferredMatchesSelectVariant, ...MATCHES_DB_SELECT_VARIANTS.filter((columns) => columns !== preferredMatchesSelectVariant)]
+        : MATCHES_DB_SELECT_VARIANTS;
     let lastError: any = null;
 
-    for (const columns of MATCHES_DB_SELECT_VARIANTS) {
+    for (const columns of orderedVariants) {
         const result = await buildQuery(columns);
         if (!result.error) {
+            preferredMatchesSelectVariant = columns;
             return result;
         }
 
@@ -678,6 +688,8 @@ const matchesRefreshLocks = new Map<string, Promise<void>>();
 const matchesInFlightResponses = new Map<string, Promise<MatchesPayload>>();
 const matchesSnapshotPersistLocks = new Map<string, Promise<boolean>>();
 const externalMatchesPersistedAt = new Map<string, number>();
+const lookupSelectVariantCache = new Map<string, string>();
+let preferredMatchesSelectVariant: string | null = null;
 
 function createTraceId(prefix: 'req' | 'refresh') {
     const randomPart = typeof crypto !== 'undefined' && 'randomUUID' in crypto
