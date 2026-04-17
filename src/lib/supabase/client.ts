@@ -4,7 +4,6 @@ import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure'
 
 let client: ReturnType<typeof createBrowserClient<Database>> | undefined
-let clearedAuthSessionAt = 0
 const SUPABASE_AUTH_TIMEOUT_MS = 15000
 
 function getSupabaseBrowserStorageKey() {
@@ -40,15 +39,6 @@ function resolveRequestUrl(input: string | URL | Request): string {
 function isSupabaseAuthRequest(input: string | URL | Request, supabaseUrl: string) {
     const requestUrl = resolveRequestUrl(input)
     return requestUrl.startsWith(`${supabaseUrl}/auth/v1`)
-}
-
-function clearBrokenSupabaseSessionOnce() {
-    if (typeof window === 'undefined') return
-
-    const now = Date.now()
-    if (now - clearedAuthSessionAt < 3000) return
-    clearedAuthSessionAt = now
-    clearSupabaseBrowserSession()
 }
 
 function buildAuthFailureResponse() {
@@ -113,7 +103,7 @@ export function createClient() {
             return await withAuthTimeout(input, init)
         } catch (error) {
             if (url && isSupabaseAuthRequest(input, url)) {
-                clearBrokenSupabaseSessionOnce()
+                console.warn('[SupabaseClient] Auth request failed, preserving local session state:', error)
                 return buildAuthFailureResponse()
             }
             throw error

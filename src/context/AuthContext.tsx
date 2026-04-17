@@ -102,21 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ensureOnboardingStatus(supabase, userId).catch(() => { });
     }, [supabase]);
 
-    const resetBrokenSession = useCallback((reason: string) => {
-        console.warn('[AuthContext] Clearing local Supabase session after auth failure:', reason);
-        clearSupabaseBrowserSession();
-        if (typeof window !== 'undefined') {
-            window.localStorage.removeItem('g22_user');
-        }
-        clearFavoritesLocalCache();
-        void supabase.auth.signOut({ scope: 'local' }).catch(() => { });
-
-        if (isMounted.current) {
-            setUser(null);
-            setIsLoading(false);
-        }
-    }, [supabase]);
-
     const fetchAndSetUser = useCallback(async (sbUser: SupabaseUser) => {
         trackAuthDuplicate('restoreUser', { userId: sbUser.id });
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
@@ -288,7 +273,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (isAbortError(err)) return;
                 console.error('[AuthContext] initAuth error:', err);
                 if (isSupabaseNetworkError(err)) {
-                    resetBrokenSession('initAuth network failure');
+                    console.warn('[AuthContext] initAuth network failure, keeping existing local session state');
+                    if (isMounted.current) {
+                        setIsLoading(false);
+                    }
                     return;
                 }
                 if (isMounted.current) setIsLoading(false);
@@ -365,7 +353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isMounted.current = false;
             subscription.unsubscribe();
         };
-    }, [fetchAndSetUser, resetBrokenSession, supabase, trackAuthDuplicate]);
+    }, [fetchAndSetUser, supabase, trackAuthDuplicate]);
 
     const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
         void _role;
