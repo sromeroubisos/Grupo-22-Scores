@@ -4,12 +4,14 @@ import { listPublicProdeCompetitions, listPublicProdeUserTotals, listUserPrivate
 import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 
 export default async function ProdePage() {
-    await refreshStoredProdeScoreboards();
-
     const supabase = await createClient();
+    const [, sessionResult] = await Promise.all([
+        refreshStoredProdeScoreboards(),
+        supabase.auth.getSession(),
+    ]);
     const {
         data: { session },
-    } = await supabase.auth.getSession();
+    } = sessionResult;
     const [
         { schemaReady: competitionsReady, data: competitions },
         { schemaReady: totalsReady, data: totals },

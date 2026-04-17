@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { listUserPrivateLeagues } from '@/lib/server/prodeCompetitions';
+import { invalidateProdeRefresh } from '@/lib/server/prodeScoring';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
 import type { ProdeSourceBinding } from '@/lib/prode/types';
@@ -426,6 +427,7 @@ export async function POST(request: Request) {
             }
 
             const leagueSlug = ensureString(leagueResult.data.slug);
+            invalidateProdeRefresh(competitionId);
 
             return NextResponse.json({
                 ok: true,
@@ -532,6 +534,7 @@ export async function POST(request: Request) {
         const createdSlug = ensureString(createdLeague.slug);
         const shareUrl = `${normalizedBaseUrl}/prode/ligas/unirse?codigo=${encodeURIComponent(inviteCode)}`;
         const leagueUrl = `${normalizedBaseUrl}/prode/ligas/${encodeURIComponent(createdSlug)}`;
+        invalidateProdeRefresh(competitionId);
 
         return NextResponse.json({
             leagueId: createdLeague.id,
@@ -652,6 +655,8 @@ export async function PATCH(request: Request) {
                 return NextResponse.json({ error: updateLeagueError.message || 'No se pudieron actualizar las reglas.' }, { status: 500 });
             }
 
+            invalidateProdeRefresh(ensureString(league.competition_id));
+
             return NextResponse.json({
                 ok: true,
                 rules: nextRules,
@@ -684,6 +689,8 @@ export async function PATCH(request: Request) {
                     { status: 500 },
                 );
             }
+
+            invalidateProdeRefresh(ensureString(league.competition_id));
 
             return NextResponse.json({
                 ok: true,
@@ -730,6 +737,8 @@ export async function PATCH(request: Request) {
             if (updateRoleError) {
                 return NextResponse.json({ error: updateRoleError.message || 'No se pudo actualizar el rol del miembro.' }, { status: 500 });
             }
+
+            invalidateProdeRefresh(ensureString(league.competition_id));
 
             return NextResponse.json({
                 ok: true,

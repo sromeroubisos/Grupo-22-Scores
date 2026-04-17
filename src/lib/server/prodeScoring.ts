@@ -38,6 +38,17 @@ export type ProdeScoringRules = {
     doubleFinals: boolean;
 };
 
+const COMPETITION_REFRESH_TTL_MS = 15_000;
+const GLOBAL_REFRESH_TTL_MS = 15_000;
+
+const competitionRefreshInFlight = new Map<string, { promise: Promise<boolean>; version: number }>();
+const competitionRefreshCompletedAt = new Map<string, number>();
+const competitionRefreshVersion = new Map<string, number>();
+
+let globalRefreshInFlight: { promise: Promise<boolean>; version: number } | null = null;
+let globalRefreshCompletedAt = 0;
+let globalRefreshVersion = 0;
+
 function toSafeString(value: unknown) {
     return typeof value === 'string' ? value : '';
 }
@@ -80,6 +91,23 @@ function getRuleNumber(record: Record<string, unknown>, ...keys: string[]) {
 function isMissingRelationError(error: QueryError) {
     const message = error?.message || '';
     return message.includes('does not exist') || message.includes('schema cache') || message.includes('Could not find');
+}
+
+function isFreshEnough(lastCompletedAt: number | undefined, ttlMs: number) {
+    return typeof lastCompletedAt === 'number' && (Date.now() - lastCompletedAt) < ttlMs;
+}
+
+export function invalidateProdeRefresh(competitionId?: string | null) {
+    if (competitionId) {
+        competitionRefreshCompletedAt.delete(competitionId);
+        competitionRefreshVersion.set(competitionId, (competitionRefreshVersion.get(competitionId) || 0) + 1);
+    } else {
+        competitionRefreshCompletedAt.clear();
+        competitionRefreshVersion.clear();
+    }
+
+    globalRefreshCompletedAt = 0;
+    globalRefreshVersion += 1;
 }
 
 function parseOfficialResult(rawValue: unknown) {
@@ -564,213 +592,260 @@ async function refreshUserTotals(admin: LooseMutationClient, userIds: string[]) 
 }
 
 export async function refreshCompetitionScoreboards(competitionId: string) {
-    const admin = createAdminClient() as unknown as LooseMutationClient;
-    const competitionResult = await admin
-        .from('prode_competitions')
-        .select('id, active_ruleset_id, metadata')
-        .eq('id', competitionId)
-        .maybeSingle();
-
-    if (competitionResult.error) {
-        if (isMissingRelationError(competitionResult.error)) {
-            return false;
-        }
-
-        throw new Error(competitionResult.error.message || 'No se pudo cargar la competencia del prode.');
-    }
-
-    if (!competitionResult.data) {
+    if (!competitionId) {
         return false;
     }
 
-    const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
-    const [rulesetResult, eventResult, predictionResult, competitionMembersResult, privateLeagueResult] = await Promise.all([
-        activeRulesetId
-            ? admin
-                .from('prode_rulesets')
-                .select('id, scoring_model')
-                .eq('id', activeRulesetId)
-                .maybeSingle()
-            : Promise.resolve({ data: null, error: null }),
-        admin
-            .from('prode_events')
-            .select('id, competition_id, status, scoring_status, official_result, match_snapshot, locks_at, scored_at')
-            .eq('competition_id', competitionId)
-            .order('starts_at', { ascending: true }),
-        admin
-            .from('prode_predictions')
-            .select('id, competition_id, event_id, user_id, predicted_outcome, predicted_home_score, predicted_away_score, points_awarded, status, scoring_breakdown, submitted_at, locked_at, scored_at')
-            .eq('competition_id', competitionId),
-        admin
-            .from('prode_competition_members')
-            .select('competition_id, user_id, status')
-            .eq('competition_id', competitionId)
-            .eq('status', 'active'),
-        admin
-            .from('prode_private_leagues')
-            .select('id, competition_id, metadata')
-            .eq('competition_id', competitionId),
-    ]);
-
-    const blockingError = [
-        rulesetResult.error,
-        eventResult.error,
-        predictionResult.error,
-        competitionMembersResult.error,
-        privateLeagueResult.error,
-    ].find((error) => error && !isMissingRelationError(error));
-
-    if (blockingError) {
-        throw new Error(blockingError.message || 'No se pudo refrescar el scoring del prode.');
+    if (isFreshEnough(competitionRefreshCompletedAt.get(competitionId), COMPETITION_REFRESH_TTL_MS)) {
+        return true;
     }
 
-    const competitionRow = competitionResult.data;
-    const eventRows = eventResult.data || [];
-    const predictionRows = predictionResult.data || [];
-    const memberUserIds = Array.from(new Set([
-        ...(competitionMembersResult.data || []).map((row) => toSafeString(row.user_id)).filter(Boolean),
-        ...predictionRows.map((row) => toSafeString(row.user_id)).filter(Boolean),
-    ]));
-    const activeLeagueRows = (privateLeagueResult.data || []).filter((row) => {
-        const lifecycle = toSafeString(toRecord(row.metadata).lifecycle);
-        return !lifecycle || lifecycle === 'active';
-    });
-
-    const globalRules = resolveProdeScoringRules(competitionRow, rulesetResult.data);
-    const scoredPredictions = applyScoringRulesToPredictionRows(eventRows, predictionRows, globalRules);
-
-    const predictionUpdates = scoredPredictions
-        .filter((row, index) => isPredictionChanged(predictionRows[index] || {}, row))
-        .map((row) => (
-            admin
-                .from('prode_predictions')
-                .update({
-                    points_awarded: row.points_awarded,
-                    status: row.status,
-                    scoring_breakdown: row.scoring_breakdown,
-                    locked_at: row.locked_at,
-                    scored_at: row.scored_at,
-                })
-                .eq('id', toSafeString(row.id))
-        ));
-
-    const eventUpdates = eventRows.map((row) => {
-        const officialResult = parseOfficialResult(row.official_result);
-        const status = toSafeString(row.status);
-
-        if (status === 'cancelled') {
-            return admin
-                .from('prode_events')
-                .update({
-                    scoring_status: 'void',
-                    scored_at: new Date().toISOString(),
-                })
-                .eq('id', toSafeString(row.id));
-        }
-
-        if (!officialResult || (status !== 'final' && status !== 'scored')) {
-            return null;
-        }
-
-        return admin
-            .from('prode_events')
-            .update({
-                status: 'scored',
-                scoring_status: 'scored',
-                scored_at: new Date().toISOString(),
-            })
-            .eq('id', toSafeString(row.id));
-    }).filter(Boolean) as Array<PromiseLike<MutationResult>>;
-
-    const writeResults = await Promise.all([...predictionUpdates, ...eventUpdates]);
-    const failedWrite = writeResults.find((result) => result.error);
-
-    if (failedWrite?.error) {
-        throw new Error(failedWrite.error.message || 'No se pudieron persistir los puntos del prode.');
+    const refreshVersion = competitionRefreshVersion.get(competitionId) || 0;
+    const existingRefresh = competitionRefreshInFlight.get(competitionId);
+    if (existingRefresh && existingRefresh.version === refreshVersion) {
+        return existingRefresh.promise;
     }
 
-    const globalRankings = buildRankingPayload(competitionId, memberUserIds, scoredPredictions, { scopeType: 'global' });
-    await upsertCompetitionRankingScope(admin, competitionId, globalRankings, { scopeType: 'global' });
+    const refreshPromise = (async () => {
+        const admin = createAdminClient() as unknown as LooseMutationClient;
+        const competitionResult = await admin
+            .from('prode_competitions')
+            .select('id, active_ruleset_id, metadata')
+            .eq('id', competitionId)
+            .maybeSingle();
 
-    const activeLeagueIds = activeLeagueRows.map((row) => toSafeString(row.id)).filter(Boolean);
-    if (activeLeagueIds.length) {
-        const leagueMembersResult = await admin
-            .from('prode_private_league_members')
-            .select('private_league_id, user_id, role')
-            .in('private_league_id', activeLeagueIds);
+        if (competitionResult.error) {
+            if (isMissingRelationError(competitionResult.error)) {
+                return false;
+            }
 
-        if (leagueMembersResult.error) {
-            throw new Error(leagueMembersResult.error.message || 'No se pudieron cargar los miembros de las ligas privadas.');
+            throw new Error(competitionResult.error.message || 'No se pudo cargar la competencia del prode.');
         }
 
-        const leagueMembershipMap = new Map<string, Set<string>>();
-        (leagueMembersResult.data || []).forEach((row) => {
-            const leagueId = toSafeString(row.private_league_id);
-            const userId = toSafeString(row.user_id);
-            if (!leagueId || !userId) return;
-
-            const current = leagueMembershipMap.get(leagueId) || new Set<string>();
-            current.add(userId);
-            leagueMembershipMap.set(leagueId, current);
-        });
-
-        const privateLeagueRankings = activeLeagueRows.flatMap((leagueRow) => {
-            const leagueId = toSafeString(leagueRow.id);
-            const scopedRules = resolveProdeScoringRules(competitionRow, rulesetResult.data, leagueRow);
-            const scopedPredictions = applyScoringRulesToPredictionRows(eventRows, predictionRows, scopedRules);
-            const leagueUserIds = Array.from(leagueMembershipMap.get(leagueId) || []);
-
-            return buildRankingPayload(
-                competitionId,
-                leagueUserIds,
-                scopedPredictions.filter((row) => leagueUserIds.includes(toSafeString(row.user_id))),
-                { scopeType: 'private_league', privateLeagueId: leagueId },
-            );
-        });
-
-        const privateLeagueIds = Array.from(new Set(
-            privateLeagueRankings.map((row) => toSafeString(row.private_league_id)).filter(Boolean),
-        ));
-
-        for (const privateLeagueId of privateLeagueIds) {
-            await upsertCompetitionRankingScope(
-                admin,
-                competitionId,
-                privateLeagueRankings.filter((row) => toSafeString(row.private_league_id) === privateLeagueId),
-                { scopeType: 'private_league', privateLeagueId },
-            );
-        }
-    }
-
-    await refreshUserTotals(admin, memberUserIds);
-    return true;
-}
-
-export async function refreshStoredProdeScoreboards() {
-    const admin = createAdminClient() as unknown as LooseMutationClient;
-    const competitionResult = await admin
-        .from('prode_competitions')
-        .select('id')
-        .in('status', ['active', 'published', 'finished']);
-
-    if (competitionResult.error) {
-        if (isMissingRelationError(competitionResult.error)) {
+        if (!competitionResult.data) {
             return false;
         }
 
-        throw new Error(competitionResult.error.message || 'No se pudieron cargar las competencias del prode.');
-    }
+        const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
+        const [rulesetResult, eventResult, predictionResult, competitionMembersResult, privateLeagueResult] = await Promise.all([
+            activeRulesetId
+                ? admin
+                    .from('prode_rulesets')
+                    .select('id, scoring_model')
+                    .eq('id', activeRulesetId)
+                    .maybeSingle()
+                : Promise.resolve({ data: null, error: null }),
+            admin
+                .from('prode_events')
+                .select('id, competition_id, status, scoring_status, official_result, match_snapshot, locks_at, scored_at')
+                .eq('competition_id', competitionId)
+                .order('starts_at', { ascending: true }),
+            admin
+                .from('prode_predictions')
+                .select('id, competition_id, event_id, user_id, predicted_outcome, predicted_home_score, predicted_away_score, points_awarded, status, scoring_breakdown, submitted_at, locked_at, scored_at')
+                .eq('competition_id', competitionId),
+            admin
+                .from('prode_competition_members')
+                .select('competition_id, user_id, status')
+                .eq('competition_id', competitionId)
+                .eq('status', 'active'),
+            admin
+                .from('prode_private_leagues')
+                .select('id, competition_id, metadata')
+                .eq('competition_id', competitionId),
+        ]);
 
-    for (const row of competitionResult.data || []) {
-        const competitionId = toSafeString(row.id);
-        if (!competitionId) continue;
+        const blockingError = [
+            rulesetResult.error,
+            eventResult.error,
+            predictionResult.error,
+            competitionMembersResult.error,
+            privateLeagueResult.error,
+        ].find((error) => error && !isMissingRelationError(error));
 
-        try {
-            await refreshCompetitionScoreboards(competitionId);
-        } catch (error) {
-            console.error('[prode/scoring] refresh failed for competition', competitionId, error);
+        if (blockingError) {
+            throw new Error(blockingError.message || 'No se pudo refrescar el scoring del prode.');
         }
+
+        const competitionRow = competitionResult.data;
+        const eventRows = eventResult.data || [];
+        const predictionRows = predictionResult.data || [];
+        const memberUserIds = Array.from(new Set([
+            ...(competitionMembersResult.data || []).map((row) => toSafeString(row.user_id)).filter(Boolean),
+            ...predictionRows.map((row) => toSafeString(row.user_id)).filter(Boolean),
+        ]));
+        const activeLeagueRows = (privateLeagueResult.data || []).filter((row) => {
+            const lifecycle = toSafeString(toRecord(row.metadata).lifecycle);
+            return !lifecycle || lifecycle === 'active';
+        });
+
+        const globalRules = resolveProdeScoringRules(competitionRow, rulesetResult.data);
+        const scoredPredictions = applyScoringRulesToPredictionRows(eventRows, predictionRows, globalRules);
+
+        const predictionUpdates = scoredPredictions
+            .filter((row, index) => isPredictionChanged(predictionRows[index] || {}, row))
+            .map((row) => (
+                admin
+                    .from('prode_predictions')
+                    .update({
+                        points_awarded: row.points_awarded,
+                        status: row.status,
+                        scoring_breakdown: row.scoring_breakdown,
+                        locked_at: row.locked_at,
+                        scored_at: row.scored_at,
+                    })
+                    .eq('id', toSafeString(row.id))
+            ));
+
+        const eventUpdates = eventRows.map((row) => {
+            const officialResult = parseOfficialResult(row.official_result);
+            const status = toSafeString(row.status);
+
+            if (status === 'cancelled') {
+                return admin
+                    .from('prode_events')
+                    .update({
+                        scoring_status: 'void',
+                        scored_at: new Date().toISOString(),
+                    })
+                    .eq('id', toSafeString(row.id));
+            }
+
+            if (!officialResult || (status !== 'final' && status !== 'scored')) {
+                return null;
+            }
+
+            return admin
+                .from('prode_events')
+                .update({
+                    status: 'scored',
+                    scoring_status: 'scored',
+                    scored_at: new Date().toISOString(),
+                })
+                .eq('id', toSafeString(row.id));
+        }).filter(Boolean) as Array<PromiseLike<MutationResult>>;
+
+        const writeResults = await Promise.all([...predictionUpdates, ...eventUpdates]);
+        const failedWrite = writeResults.find((result) => result.error);
+
+        if (failedWrite?.error) {
+            throw new Error(failedWrite.error.message || 'No se pudieron persistir los puntos del prode.');
+        }
+
+        const globalRankings = buildRankingPayload(competitionId, memberUserIds, scoredPredictions, { scopeType: 'global' });
+        await upsertCompetitionRankingScope(admin, competitionId, globalRankings, { scopeType: 'global' });
+
+        const activeLeagueIds = activeLeagueRows.map((row) => toSafeString(row.id)).filter(Boolean);
+        if (activeLeagueIds.length) {
+            const leagueMembersResult = await admin
+                .from('prode_private_league_members')
+                .select('private_league_id, user_id, role')
+                .in('private_league_id', activeLeagueIds);
+
+            if (leagueMembersResult.error) {
+                throw new Error(leagueMembersResult.error.message || 'No se pudieron cargar los miembros de las ligas privadas.');
+            }
+
+            const leagueMembershipMap = new Map<string, Set<string>>();
+            (leagueMembersResult.data || []).forEach((row) => {
+                const leagueId = toSafeString(row.private_league_id);
+                const userId = toSafeString(row.user_id);
+                if (!leagueId || !userId) return;
+
+                const current = leagueMembershipMap.get(leagueId) || new Set<string>();
+                current.add(userId);
+                leagueMembershipMap.set(leagueId, current);
+            });
+
+            const privateLeagueRankings = activeLeagueRows.flatMap((leagueRow) => {
+                const leagueId = toSafeString(leagueRow.id);
+                const scopedRules = resolveProdeScoringRules(competitionRow, rulesetResult.data, leagueRow);
+                const scopedPredictions = applyScoringRulesToPredictionRows(eventRows, predictionRows, scopedRules);
+                const leagueUserIds = Array.from(leagueMembershipMap.get(leagueId) || []);
+
+                return buildRankingPayload(
+                    competitionId,
+                    leagueUserIds,
+                    scopedPredictions.filter((row) => leagueUserIds.includes(toSafeString(row.user_id))),
+                    { scopeType: 'private_league', privateLeagueId: leagueId },
+                );
+            });
+
+            const privateLeagueIds = Array.from(new Set(
+                privateLeagueRankings.map((row) => toSafeString(row.private_league_id)).filter(Boolean),
+            ));
+
+            await Promise.all(
+                privateLeagueIds.map((privateLeagueId) => (
+                    upsertCompetitionRankingScope(
+                        admin,
+                        competitionId,
+                        privateLeagueRankings.filter((row) => toSafeString(row.private_league_id) === privateLeagueId),
+                        { scopeType: 'private_league', privateLeagueId },
+                    )
+                )),
+            );
+        }
+
+        await refreshUserTotals(admin, memberUserIds);
+        if ((competitionRefreshVersion.get(competitionId) || 0) === refreshVersion) {
+            competitionRefreshCompletedAt.set(competitionId, Date.now());
+        }
+        return true;
+    })().finally(() => {
+        competitionRefreshInFlight.delete(competitionId);
+    });
+
+    competitionRefreshInFlight.set(competitionId, { promise: refreshPromise, version: refreshVersion });
+    return refreshPromise;
+}
+
+export async function refreshStoredProdeScoreboards() {
+    if (isFreshEnough(globalRefreshCompletedAt, GLOBAL_REFRESH_TTL_MS)) {
+        return true;
     }
 
-    return true;
+    const refreshVersion = globalRefreshVersion;
+    if (globalRefreshInFlight && globalRefreshInFlight.version === refreshVersion) {
+        return globalRefreshInFlight.promise;
+    }
+
+    const refreshPromise = (async () => {
+        const admin = createAdminClient() as unknown as LooseMutationClient;
+        const competitionResult = await admin
+            .from('prode_competitions')
+            .select('id')
+            .in('status', ['active', 'published', 'finished']);
+
+        if (competitionResult.error) {
+            if (isMissingRelationError(competitionResult.error)) {
+                return false;
+            }
+
+            throw new Error(competitionResult.error.message || 'No se pudieron cargar las competencias del prode.');
+        }
+
+        await Promise.allSettled(
+            (competitionResult.data || [])
+                .map((row) => toSafeString(row.id))
+                .filter(Boolean)
+                .map(async (competitionId) => {
+                    try {
+                        await refreshCompetitionScoreboards(competitionId);
+                    } catch (error) {
+                        console.error('[prode/scoring] refresh failed for competition', competitionId, error);
+                    }
+                }),
+        );
+
+        if (globalRefreshVersion === refreshVersion) {
+            globalRefreshCompletedAt = Date.now();
+        }
+        return true;
+    })().finally(() => {
+        globalRefreshInFlight = null;
+    });
+
+    globalRefreshInFlight = { promise: refreshPromise, version: refreshVersion };
+    return refreshPromise;
 }

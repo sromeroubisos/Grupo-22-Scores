@@ -68,6 +68,11 @@ type BaseMatchRow = {
     matchSnapshot: Record<string, unknown>;
 };
 
+const EVENT_SYNC_TTL_MS = 30_000;
+
+const eventSyncInFlight = new Map<string, Promise<void>>();
+const eventSyncCompletedAt = new Map<string, number>();
+
 function toSafeString(value: unknown) {
     return typeof value === 'string' ? value : '';
 }
@@ -438,6 +443,19 @@ function computeLockTimestamp(startsAt: string, leadMinutes: number) {
 function isMissingRelationError(error: QueryError) {
     const message = error?.message || '';
     return message.includes('does not exist') || message.includes('schema cache') || message.includes('Could not find');
+}
+
+function isFreshEnough(lastCompletedAt: number | undefined, ttlMs: number) {
+    return typeof lastCompletedAt === 'number' && (Date.now() - lastCompletedAt) < ttlMs;
+}
+
+function hasEmbeddedUserIdentity(row: AnyRow) {
+    const userRow = toRelatedRecord(row.users);
+    return Boolean(
+        toNullableString(userRow.name)
+        || toNullableString(userRow.email)
+        || toNullableString(userRow.avatar_url),
+    );
 }
 
 function resolveUserIdentity(source: unknown, fallback?: UserIdentity | null): UserIdentity {
@@ -919,143 +937,167 @@ async function getFlashscoreExternalBaseMatches(
 
 async function syncCompetitionBaseEvents(admin: LooseMutationClient, competitionRow: AnyRow) {
     const competitionId = toSafeString(competitionRow.id);
-    const predictionLeadMinutes = toFiniteNumber(competitionRow.prediction_lead_minutes, 0);
-    const sourceBinding = normalizeProdeSourceBinding({
-        source_type: competitionRow.source_type,
-        local_tournament_id: competitionRow.local_tournament_id,
-        external_provider: competitionRow.external_provider,
-        external_tournament_id: competitionRow.external_tournament_id,
+    if (!competitionId) {
+        return;
+    }
+
+    if (isFreshEnough(eventSyncCompletedAt.get(competitionId), EVENT_SYNC_TTL_MS)) {
+        return;
+    }
+
+    const existingSync = eventSyncInFlight.get(competitionId);
+    if (existingSync) {
+        await existingSync;
+        return;
+    }
+
+    const syncPromise = (async () => {
+        const predictionLeadMinutes = toFiniteNumber(competitionRow.prediction_lead_minutes, 0);
+        const sourceBinding = normalizeProdeSourceBinding({
+            source_type: competitionRow.source_type,
+            local_tournament_id: competitionRow.local_tournament_id,
+            external_provider: competitionRow.external_provider,
+            external_tournament_id: competitionRow.external_tournament_id,
+        });
+
+        let baseMatches: BaseMatchRow[] = [];
+
+        if (sourceBinding.sourceType === 'local' && sourceBinding.localTournamentId) {
+            baseMatches = await getLocalBaseMatches(admin, sourceBinding.localTournamentId);
+        } else if (sourceBinding.sourceType === 'external' && sourceBinding.externalProvider && sourceBinding.externalTournamentId) {
+            baseMatches = await getExternalBaseMatches(admin, sourceBinding.externalProvider, sourceBinding.externalTournamentId);
+        } else {
+            return;
+        }
+
+        if (!baseMatches.length) {
+            eventSyncCompletedAt.set(competitionId, Date.now());
+            return;
+        }
+
+        const existingEventsResult = await admin
+            .from('prode_events')
+            .select('id, local_match_id, external_provider, external_match_id')
+            .eq('competition_id', competitionId);
+
+        if (existingEventsResult.error) {
+            throw new Error(existingEventsResult.error.message || 'No se pudieron cargar los eventos existentes del prode.');
+        }
+
+        const existingLocalEventIds = new Map<string, string>();
+        const existingExternalEventIds = new Map<string, string>();
+
+        for (const row of existingEventsResult.data || []) {
+            const existingId = toSafeString(row.id);
+            const localMatchId = toNullableString(row.local_match_id);
+            const externalProvider = toNullableString(row.external_provider);
+            const externalMatchId = toNullableString(row.external_match_id);
+
+            if (existingId && localMatchId) {
+                existingLocalEventIds.set(localMatchId, existingId);
+            }
+
+            if (existingId && externalProvider && externalMatchId) {
+                existingExternalEventIds.set(`${externalProvider}:${externalMatchId}`, existingId);
+            }
+        }
+
+        const localPayloads = baseMatches
+            .filter((row) => row.sourceType === 'local' && row.localMatchId)
+            .map((row) => ({
+                competition_id: competitionId,
+                source_type: 'local',
+                local_match_id: row.localMatchId,
+                tournament_id: row.tournamentId,
+                home_label: row.homeLabel,
+                away_label: row.awayLabel,
+                starts_at: row.startsAt,
+                locks_at: computeLockTimestamp(row.startsAt, predictionLeadMinutes),
+                status: row.status,
+                scoring_status: row.status === 'final' ? 'ready' : 'pending',
+                official_result: row.officialResult,
+                match_snapshot: row.matchSnapshot,
+            }));
+
+        const externalPayloads = baseMatches
+            .filter((row) => row.sourceType === 'external' && row.externalMatchId && row.externalProvider)
+            .map((row) => ({
+                competition_id: competitionId,
+                source_type: 'external',
+                external_provider: row.externalProvider,
+                external_match_id: row.externalMatchId,
+                tournament_id: null,
+                home_label: row.homeLabel,
+                away_label: row.awayLabel,
+                starts_at: row.startsAt,
+                locks_at: computeLockTimestamp(row.startsAt, predictionLeadMinutes),
+                status: row.status,
+                scoring_status: row.status === 'final' ? 'ready' : 'pending',
+                official_result: row.officialResult,
+                match_snapshot: row.matchSnapshot,
+            }));
+
+        const inserts: AnyRow[] = [];
+        const updates: Array<{ id: string; payload: AnyRow }> = [];
+
+        for (const payload of localPayloads) {
+            const localMatchId = toNullableString(payload.local_match_id);
+            if (!localMatchId) continue;
+
+            const existingEventId = existingLocalEventIds.get(localMatchId);
+            if (existingEventId) {
+                updates.push({ id: existingEventId, payload });
+            } else {
+                inserts.push(payload);
+            }
+        }
+
+        for (const payload of externalPayloads) {
+            const externalProvider = toNullableString(payload.external_provider);
+            const externalMatchId = toNullableString(payload.external_match_id);
+            if (!externalProvider || !externalMatchId) continue;
+
+            const existingEventId = existingExternalEventIds.get(`${externalProvider}:${externalMatchId}`);
+            if (existingEventId) {
+                updates.push({ id: existingEventId, payload });
+            } else {
+                inserts.push(payload);
+            }
+        }
+
+        if (!inserts.length && !updates.length) {
+            eventSyncCompletedAt.set(competitionId, Date.now());
+            return;
+        }
+
+        const operations: Array<PromiseLike<MutationResult>> = [];
+
+        if (inserts.length) {
+            operations.push(admin.from('prode_events').insert(inserts));
+        }
+
+        for (const updateOperation of updates) {
+            operations.push(
+                admin
+                    .from('prode_events')
+                    .update(updateOperation.payload)
+                    .eq('id', updateOperation.id),
+            );
+        }
+
+        const results = await Promise.all(operations);
+        const failedOperation = results.find((result) => result.error);
+
+        if (failedOperation?.error) {
+            throw new Error(failedOperation.error.message || 'No se pudieron sincronizar los partidos del prode.');
+        }
+        eventSyncCompletedAt.set(competitionId, Date.now());
+    })().finally(() => {
+        eventSyncInFlight.delete(competitionId);
     });
 
-    let baseMatches: BaseMatchRow[] = [];
-
-    if (sourceBinding.sourceType === 'local' && sourceBinding.localTournamentId) {
-        baseMatches = await getLocalBaseMatches(admin, sourceBinding.localTournamentId);
-    } else if (sourceBinding.sourceType === 'external' && sourceBinding.externalProvider && sourceBinding.externalTournamentId) {
-        baseMatches = await getExternalBaseMatches(admin, sourceBinding.externalProvider, sourceBinding.externalTournamentId);
-    } else {
-        return;
-    }
-
-    if (!baseMatches.length) {
-        return;
-    }
-
-    const existingEventsResult = await admin
-        .from('prode_events')
-        .select('id, local_match_id, external_provider, external_match_id')
-        .eq('competition_id', competitionId);
-
-    if (existingEventsResult.error) {
-        throw new Error(existingEventsResult.error.message || 'No se pudieron cargar los eventos existentes del prode.');
-    }
-
-    const existingLocalEventIds = new Map<string, string>();
-    const existingExternalEventIds = new Map<string, string>();
-
-    for (const row of existingEventsResult.data || []) {
-        const existingId = toSafeString(row.id);
-        const localMatchId = toNullableString(row.local_match_id);
-        const externalProvider = toNullableString(row.external_provider);
-        const externalMatchId = toNullableString(row.external_match_id);
-
-        if (existingId && localMatchId) {
-            existingLocalEventIds.set(localMatchId, existingId);
-        }
-
-        if (existingId && externalProvider && externalMatchId) {
-            existingExternalEventIds.set(`${externalProvider}:${externalMatchId}`, existingId);
-        }
-    }
-
-    const localPayloads = baseMatches
-        .filter((row) => row.sourceType === 'local' && row.localMatchId)
-        .map((row) => ({
-            competition_id: competitionId,
-            source_type: 'local',
-            local_match_id: row.localMatchId,
-            tournament_id: row.tournamentId,
-            home_label: row.homeLabel,
-            away_label: row.awayLabel,
-            starts_at: row.startsAt,
-            locks_at: computeLockTimestamp(row.startsAt, predictionLeadMinutes),
-            status: row.status,
-            scoring_status: row.status === 'final' ? 'ready' : 'pending',
-            official_result: row.officialResult,
-            match_snapshot: row.matchSnapshot,
-        }));
-
-    const externalPayloads = baseMatches
-        .filter((row) => row.sourceType === 'external' && row.externalMatchId && row.externalProvider)
-        .map((row) => ({
-            competition_id: competitionId,
-            source_type: 'external',
-            external_provider: row.externalProvider,
-            external_match_id: row.externalMatchId,
-            tournament_id: null,
-            home_label: row.homeLabel,
-            away_label: row.awayLabel,
-            starts_at: row.startsAt,
-            locks_at: computeLockTimestamp(row.startsAt, predictionLeadMinutes),
-            status: row.status,
-            scoring_status: row.status === 'final' ? 'ready' : 'pending',
-            official_result: row.officialResult,
-            match_snapshot: row.matchSnapshot,
-        }));
-
-    const inserts: AnyRow[] = [];
-    const updates: Array<{ id: string; payload: AnyRow }> = [];
-
-    for (const payload of localPayloads) {
-        const localMatchId = toNullableString(payload.local_match_id);
-        if (!localMatchId) continue;
-
-        const existingEventId = existingLocalEventIds.get(localMatchId);
-        if (existingEventId) {
-            updates.push({ id: existingEventId, payload });
-        } else {
-            inserts.push(payload);
-        }
-    }
-
-    for (const payload of externalPayloads) {
-        const externalProvider = toNullableString(payload.external_provider);
-        const externalMatchId = toNullableString(payload.external_match_id);
-        if (!externalProvider || !externalMatchId) continue;
-
-        const existingEventId = existingExternalEventIds.get(`${externalProvider}:${externalMatchId}`);
-        if (existingEventId) {
-            updates.push({ id: existingEventId, payload });
-        } else {
-            inserts.push(payload);
-        }
-    }
-
-    if (!inserts.length && !updates.length) {
-        return;
-    }
-
-    const operations: Array<PromiseLike<MutationResult>> = [];
-
-    if (inserts.length) {
-        operations.push(admin.from('prode_events').insert(inserts));
-    }
-
-    for (const updateOperation of updates) {
-        operations.push(
-            admin
-                .from('prode_events')
-                .update(updateOperation.payload)
-                .eq('id', updateOperation.id),
-        );
-    }
-
-    const results = await Promise.all(operations);
-    const failedOperation = results.find((result) => result.error);
-
-    if (failedOperation?.error) {
-        throw new Error(failedOperation.error.message || 'No se pudieron sincronizar los partidos del prode.');
-    }
+    eventSyncInFlight.set(competitionId, syncPromise);
+    await syncPromise;
 }
 
 function buildCompetitionSubtitle(competitionRow: AnyRow) {
@@ -1121,10 +1163,13 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
     const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data);
     const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
     const events = mapEvents(eventRows, scopedPredictionRows);
-    const leaderboardUserIds = (rankingRows.length ? rankingRows : memberRows)
+    const leaderboardSourceRows = rankingRows.length ? rankingRows : memberRows;
+    const leaderboardUserIds = leaderboardSourceRows
         .map((row) => toSafeString(row.user_id))
         .filter(Boolean);
-    const userIdentityMap = await loadUserIdentityMap(admin, leaderboardUserIds);
+    const userIdentityMap = leaderboardSourceRows.some((row) => !hasEmbeddedUserIdentity(row))
+        ? await loadUserIdentityMap(admin, leaderboardUserIds)
+        : undefined;
     const leaderboardRows = rankingRows.length
         ? rankingRows.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap))
         : buildFallbackLeaderboard(memberRows, currentUserId, userIdentityMap);
@@ -1278,8 +1323,11 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
     const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data, leagueRow);
     const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
     const events = mapEvents(eventRows, scopedPredictionRows);
-    const rankingUserIds = (rankingResult.data || []).map((row) => toSafeString(row.user_id)).filter(Boolean);
-    const userIdentityMap = await loadUserIdentityMap(admin, rankingUserIds.length ? rankingUserIds : leagueMembershipRows.map((row) => toSafeString(row.user_id)));
+    const rankingSourceRows = rankingResult.data?.length ? rankingResult.data : leagueMembershipRows;
+    const rankingUserIds = rankingSourceRows.map((row) => toSafeString(row.user_id)).filter(Boolean);
+    const userIdentityMap = rankingSourceRows.some((row) => !hasEmbeddedUserIdentity(row))
+        ? await loadUserIdentityMap(admin, rankingUserIds)
+        : undefined;
     let leaderboardRows = rankingResult.data?.length
         ? rankingResult.data.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap))
         : [];

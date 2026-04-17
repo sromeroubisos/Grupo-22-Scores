@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
+import { invalidateProdeRefresh } from '@/lib/server/prodeScoring';
 import type { ProdePredictionOutcome } from '@/lib/prode/types';
 
 export const dynamic = 'force-dynamic';
@@ -173,6 +174,8 @@ export async function POST(request: Request) {
         if (predictionResult.error || !predictionResult.data) {
             return NextResponse.json({ error: predictionResult.error?.message || 'No se pudo guardar el pronostico.' }, { status: 500 });
         }
+
+        invalidateProdeRefresh(competitionId);
 
         return NextResponse.json({
             prediction: {
