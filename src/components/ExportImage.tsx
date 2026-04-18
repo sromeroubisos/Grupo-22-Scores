@@ -4499,6 +4499,33 @@ function drawSurfacePanel(ctx: CanvasRenderingContext2D, x: number, y: number, w
     ctx.restore();
 }
 
+function getContainedImagePlacement(
+    image: HTMLImageElement,
+    centerX: number,
+    centerY: number,
+    boxWidth: number,
+    boxHeight: number,
+    paddingX: number,
+    paddingY = paddingX
+) {
+    const sourceWidth = image.naturalWidth || image.width || boxWidth;
+    const sourceHeight = image.naturalHeight || image.height || boxHeight;
+    const safeSourceWidth = Math.max(sourceWidth, 1);
+    const safeSourceHeight = Math.max(sourceHeight, 1);
+    const innerWidth = Math.max(1, boxWidth - paddingX * 2);
+    const innerHeight = Math.max(1, boxHeight - paddingY * 2);
+    const scale = Math.min(innerWidth / safeSourceWidth, innerHeight / safeSourceHeight);
+    const drawWidth = safeSourceWidth * scale;
+    const drawHeight = safeSourceHeight * scale;
+
+    return {
+        x: centerX - drawWidth / 2,
+        y: centerY - drawHeight / 2,
+        width: drawWidth,
+        height: drawHeight,
+    };
+}
+
 function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions) {
     const { x, y, size, img, label, rawLogo, isDark } = options;
     ctx.save();
@@ -4511,11 +4538,12 @@ function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions)
     ctx.stroke();
 
     if (img) {
-        const inset = Math.max(4, size * 0.13);
+        const inset = Math.max(6, size * 0.18);
+        const placement = getContainedImagePlacement(img, x, y, size, size, inset);
         ctx.beginPath();
         ctx.arc(x, y, size / 2, 0, Math.PI * 2);
         ctx.clip();
-        ctx.drawImage(img, x - size / 2 + inset, y - size / 2 + inset, size - inset * 2, size - inset * 2);
+        ctx.drawImage(img, placement.x, placement.y, placement.width, placement.height);
     } else {
         const isGlyph = rawLogo?.trim() && !isImageSource(rawLogo) && rawLogo.trim().length <= 4;
         ctx.textAlign = 'center';
@@ -4535,16 +4563,13 @@ function drawOverflowCrest(ctx: CanvasRenderingContext2D, options: OverflowCrest
     ctx.imageSmoothingQuality = 'high';
 
     if (img) {
-        const sourceWidth = img.naturalWidth || img.width || width;
-        const sourceHeight = img.naturalHeight || img.height || height;
-        const scale = Math.min(width / sourceWidth, height / sourceHeight) * (showFrame ? 0.88 : 0.98);
-        const drawWidth = sourceWidth * scale;
-        const drawHeight = sourceHeight * scale;
+        const inset = Math.max(6, Math.min(width, height) * (showFrame ? 0.11 : 0.08));
+        const placement = getContainedImagePlacement(img, x, y, width, height, inset);
 
         ctx.shadowColor = isDark ? 'rgba(0,0,0,0.32)' : 'rgba(15,23,42,0.18)';
         ctx.shadowBlur = Math.max(8, Math.round(Math.max(width, height) * 0.12));
         ctx.shadowOffsetY = Math.max(2, Math.round(height * 0.06));
-        ctx.drawImage(img, x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
+        ctx.drawImage(img, placement.x, placement.y, placement.width, placement.height);
         ctx.restore();
         return;
     }
@@ -4581,11 +4606,10 @@ function drawEditorialCrestStroke(
 ) {
     if (!img || typeof document === 'undefined') return;
 
-    const sourceWidth = img.naturalWidth || img.width || width;
-    const sourceHeight = img.naturalHeight || img.height || height;
-    const scale = Math.min(width / sourceWidth, height / sourceHeight) * 0.88;
-    const drawWidth = sourceWidth * scale;
-    const drawHeight = sourceHeight * scale;
+    const inset = Math.max(strokeWidth + 4, Math.min(width, height) * 0.08);
+    const placement = getContainedImagePlacement(img, x, y, width, height, inset);
+    const drawWidth = placement.width;
+    const drawHeight = placement.height;
     const maskCanvas = document.createElement('canvas');
     maskCanvas.width = Math.max(1, Math.ceil(drawWidth + strokeWidth * 2));
     maskCanvas.height = Math.max(1, Math.ceil(drawHeight + strokeWidth * 2));
@@ -4601,8 +4625,8 @@ function drawEditorialCrestStroke(
     maskCtx.fillStyle = color;
     maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
 
-    const originX = x - drawWidth / 2 - strokeWidth;
-    const originY = y - drawHeight / 2 - strokeWidth;
+    const originX = placement.x - strokeWidth;
+    const originY = placement.y - strokeWidth;
     const steps = 24;
 
     ctx.save();
@@ -5176,11 +5200,15 @@ function drawEditorialSponsorsRow(
             ctx.restore();
 
             if (img) {
-                const sourceWidth = img.naturalWidth || img.width || slotWidth;
-                const sourceHeight = img.naturalHeight || img.height || logoHeight;
-                const scale = Math.min(slotWidth / Math.max(sourceWidth, 1), logoHeight / Math.max(sourceHeight, 1));
-                const drawWidth = sourceWidth * scale;
-                const drawHeight = sourceHeight * scale;
+                const placement = getContainedImagePlacement(
+                    img,
+                    drawX,
+                    centerY,
+                    slotWidth,
+                    logoHeight,
+                    Math.max(10, slotWidth * 0.12),
+                    Math.max(8, logoHeight * 0.16)
+                );
 
                 ctx.save();
                 ctx.imageSmoothingEnabled = true;
@@ -5189,7 +5217,7 @@ function drawEditorialSponsorsRow(
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.38)';
                 ctx.shadowBlur = 16;
                 ctx.shadowOffsetY = 6;
-                ctx.drawImage(img, drawX - drawWidth / 2, centerY - drawHeight / 2, drawWidth, drawHeight);
+                ctx.drawImage(img, placement.x, placement.y, placement.width, placement.height);
                 ctx.restore();
             } else {
                 ctx.save();
