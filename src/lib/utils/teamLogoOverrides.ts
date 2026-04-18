@@ -40,6 +40,16 @@ const LOGO_FIELDS = [
 const EXTERNAL_CONTEXT_FIELDS = ['team_url', 'teamUrl'] as const;
 const EXTERNAL_PROVIDER_FIELDS = ['provider', 'source', 'dataSource', 'data_source'] as const;
 const NAME_FIELDS = ['team_name', 'teamName', 'name', 'short_name', 'shortName'] as const;
+const VERSION_FIELDS = [
+    'logo_updated_at',
+    'logoUpdatedAt',
+    'override_updated_at',
+    'overrideUpdatedAt',
+    'updated_at',
+    'updatedAt',
+    'logo_version',
+    'logoVersion',
+] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -185,6 +195,38 @@ function getFirstExternalTeamName(...sources: TeamLogoSource[]): string {
     return '';
 }
 
+function normalizeVersionToken(value: unknown): string {
+    if (value === null || value === undefined) return '';
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return String(Math.trunc(value));
+    }
+
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+
+    const parsed = Date.parse(trimmed);
+    if (Number.isFinite(parsed)) {
+        return String(parsed);
+    }
+
+    return trimmed;
+}
+
+function getFirstLogoVersion(...sources: TeamLogoSource[]): string {
+    for (const source of sources) {
+        if (!isRecord(source)) continue;
+
+        for (const field of VERSION_FIELDS) {
+            const normalized = normalizeVersionToken(source[field]);
+            if (normalized) return normalized;
+        }
+    }
+
+    return '';
+}
+
 function getSourceLogo(source: TeamLogoSource): string {
     if (!isRecord(source)) return '';
 
@@ -273,12 +315,13 @@ function hasExternalContext(...sources: TeamLogoSource[]): boolean {
     return false;
 }
 
-function buildProxyLogoUrl(key: string, fallbackLogo: string, teamUrl: string, teamName: string): string {
+function buildProxyLogoUrl(key: string, fallbackLogo: string, teamUrl: string, teamName: string, version: string): string {
     const params = new URLSearchParams();
     params.set('key', key);
     if (fallbackLogo) params.set('fallback', fallbackLogo);
     if (teamUrl) params.set('team_url', teamUrl);
     if (teamName) params.set('name', teamName);
+    if (version) params.set('v', version);
     return `${TEAM_LOGO_PROXY_PATH}?${params.toString()}`;
 }
 
@@ -288,6 +331,7 @@ function extendProxyLogoUrl(
     fallbackLogo: string,
     teamUrl: string,
     teamName: string,
+    version: string,
 ): string {
     try {
         const parsed = new URL(proxyLogoUrl, 'http://localhost');
@@ -297,6 +341,7 @@ function extendProxyLogoUrl(
         }
         if (teamUrl && !parsed.searchParams.get('team_url')) parsed.searchParams.set('team_url', teamUrl);
         if (teamName && !parsed.searchParams.get('name')) parsed.searchParams.set('name', teamName);
+        if (version && parsed.searchParams.get('v') !== version) parsed.searchParams.set('v', version);
         return `${TEAM_LOGO_PROXY_PATH}?${parsed.searchParams.toString()}`;
     } catch {
         return proxyLogoUrl;
@@ -333,13 +378,14 @@ export function resolveTeamLogo(...sources: TeamLogoSource[]): string {
     const candidateKey = getFirstCandidateKey(...sources);
     const teamUrl = getFirstExternalTeamUrl(...sources);
     const teamName = getFirstExternalTeamName(...sources);
+    const version = getFirstLogoVersion(...sources);
     const fallbackLogo = sources.map(getSourceLogo).find(Boolean) || '';
     if (fallbackLogo.startsWith(`${TEAM_LOGO_PROXY_PATH}?`)) {
-        return extendProxyLogoUrl(fallbackLogo, candidateKey || '', '', teamUrl, teamName);
+        return extendProxyLogoUrl(fallbackLogo, candidateKey || '', '', teamUrl, teamName, version);
     }
 
     if (candidateKey && (hasExternalContext(...sources) || hasExternalKeyPrefix(candidateKey))) {
-        return buildProxyLogoUrl(candidateKey, fallbackLogo, teamUrl, teamName);
+        return buildProxyLogoUrl(candidateKey, fallbackLogo, teamUrl, teamName, version);
     }
 
     for (const source of sources) {

@@ -134,6 +134,15 @@ export async function PATCH(
 
         if (error) {
             if (isMissingTableError(error, 'external_teams')) {
+                if (process.env.NODE_ENV === 'production') {
+                    return NextResponse.json(
+                        {
+                            ok: false,
+                            error: 'No se pudo guardar el logo externo en produccion porque falta la tabla public.external_teams. Aplica la migracion 20260417200000_restore_external_teams_cache.sql y redeploya.',
+                        },
+                        { status: 500 },
+                    );
+                }
                 try {
                     const storedOverride = await upsertExternalTeamLogoOverride(payload);
                     return NextResponse.json({ ok: true, data: storedOverride, storage: 'file' });

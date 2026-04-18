@@ -10,6 +10,7 @@ import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
+const PROXY_CACHE_CONTROL = 'private, no-store, no-cache, max-age=0, must-revalidate';
 
 function normalizeSourceUrl(source: string): string {
     const trimmed = source.trim();
@@ -274,7 +275,8 @@ async function buildImageResponse(source: string, url: URL) {
         return new NextResponse(payload, {
             headers: {
                 'Content-Type': mimeType,
-                'Cache-Control': 'public, max-age=3600',
+                'Cache-Control': PROXY_CACHE_CONTROL,
+                'Access-Control-Allow-Origin': '*',
             },
         });
     }
@@ -297,7 +299,7 @@ async function buildImageResponse(source: string, url: URL) {
                 return new NextResponse(Buffer.from(buffer), {
                     headers: {
                         'Content-Type': contentType,
-                        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
+                        'Cache-Control': PROXY_CACHE_CONTROL,
                         'Access-Control-Allow-Origin': '*',
                     },
                 });
@@ -311,7 +313,14 @@ async function buildImageResponse(source: string, url: URL) {
         ? new URL(normalizedSource)
         : new URL(normalizedSource, url.origin);
 
-    return NextResponse.redirect(target);
+    return new NextResponse(null, {
+        status: 307,
+        headers: {
+            Location: target.toString(),
+            'Cache-Control': PROXY_CACHE_CONTROL,
+            'Access-Control-Allow-Origin': '*',
+        },
+    });
 }
 
 export async function GET(request: Request) {

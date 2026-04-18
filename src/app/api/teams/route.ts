@@ -146,6 +146,17 @@ type PublicRelatedClub = {
     is_base: boolean;
     is_current: boolean;
 };
+type ExternalTeamCacheRow = {
+    id: string;
+    source?: string | null;
+    name?: string | null;
+    short_name?: string | null;
+    logo_url?: string | null;
+    sport?: string | null;
+    country?: string | null;
+    team_url?: string | null;
+    updated_at?: string | null;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -155,6 +166,140 @@ function stripFsTeamPrefix(val: string): string {
     if (val.toLowerCase().startsWith('fs-team-')) return val.slice(8);
     if (val.toLowerCase().startsWith('fs-')) return val.slice(3);
     return val;
+}
+
+function buildExternalTeamLookupKeys(value: unknown): string[] {
+    const raw = String(value ?? '').trim();
+    if (!raw) return [];
+
+    const normalized = raw.toLowerCase();
+    const keys = new Set<string>([raw, normalized]);
+
+    if (normalized.startsWith('fs-team-')) {
+        const stripped = raw.slice(8);
+        const strippedNormalized = normalized.slice(8);
+        if (stripped) {
+            keys.add(stripped);
+            keys.add(strippedNormalized);
+            keys.add(`fs-${stripped}`);
+            keys.add(`fs-${strippedNormalized}`);
+        }
+        return Array.from(keys);
+    }
+
+    if (normalized.startsWith('fs-')) {
+        const stripped = raw.slice(3);
+        const strippedNormalized = normalized.slice(3);
+        if (stripped) {
+            keys.add(stripped);
+            keys.add(strippedNormalized);
+            keys.add(`fs-team-${stripped}`);
+            keys.add(`fs-team-${strippedNormalized}`);
+        }
+        return Array.from(keys);
+    }
+
+    if (normalized.startsWith('ras-team-')) {
+        const stripped = raw.slice(9);
+        const strippedNormalized = normalized.slice(9);
+        if (stripped) {
+            keys.add(stripped);
+            keys.add(strippedNormalized);
+        }
+        return Array.from(keys);
+    }
+
+    if (normalized.startsWith('espn-team-')) {
+        const stripped = raw.slice(10);
+        const strippedNormalized = normalized.slice(10);
+        if (stripped) {
+            keys.add(stripped);
+            keys.add(strippedNormalized);
+        }
+        return Array.from(keys);
+    }
+
+    if (/^[a-z0-9]+$/i.test(raw)) {
+        keys.add(`fs-team-${raw}`);
+        keys.add(`fs-team-${normalized}`);
+        keys.add(`fs-${raw}`);
+        keys.add(`fs-${normalized}`);
+        keys.add(`ras-team-${raw}`);
+        keys.add(`ras-team-${normalized}`);
+        keys.add(`espn-team-${raw}`);
+        keys.add(`espn-team-${normalized}`);
+    }
+
+    return Array.from(keys);
+}
+
+function buildExternalTeamCacheMap(rows: ExternalTeamCacheRow[]): Map<string, ExternalTeamCacheRow> {
+    const map = new Map<string, ExternalTeamCacheRow>();
+
+    rows.forEach((row) => {
+        [
+            ...buildExternalTeamLookupKeys(row.id),
+            ...buildExternalTeamLookupKeys(row.team_url),
+            ...buildExternalTeamLookupKeys(row.name),
+            ...buildExternalTeamLookupKeys(row.short_name),
+        ].forEach((key) => map.set(key, row));
+    });
+
+    return map;
+}
+
+function findExternalTeamCacheRecord(
+    cacheMap: Map<string, ExternalTeamCacheRow>,
+    ...values: unknown[]
+): ExternalTeamCacheRow | null {
+    for (const value of values) {
+        for (const key of buildExternalTeamLookupKeys(value)) {
+            const match = cacheMap.get(key);
+            if (match) return match;
+        }
+    }
+
+    return null;
+}
+
+function enrichExternalTeamSource<T extends Record<string, unknown>>(source: T, cached: ExternalTeamCacheRow | null): T {
+    if (!cached) return source;
+
+    const nextTeamUrl = typeof source.team_url === 'string' && source.team_url.trim()
+        ? source.team_url
+        : cached.team_url ?? undefined;
+    const nextUpdatedAt = typeof source.updated_at === 'string' && source.updated_at.trim()
+        ? source.updated_at
+        : cached.updated_at ?? undefined;
+    const nextLogoUpdatedAt = typeof source.logo_updated_at === 'string' && source.logo_updated_at.trim()
+        ? source.logo_updated_at
+        : cached.updated_at ?? undefined;
+
+    return {
+        ...source,
+        team_url: nextTeamUrl,
+        updated_at: nextUpdatedAt,
+        logo_updated_at: nextLogoUpdatedAt,
+    } as T;
+}
+
+function enrichMatchesWithExternalTeamCache(
+    matches: NormalizedInternalMatch[],
+    cacheMap: Map<string, ExternalTeamCacheRow>,
+): NormalizedInternalMatch[] {
+    if (matches.length === 0 || cacheMap.size === 0) return matches;
+
+    return matches.map((match) => ({
+        ...match,
+        home_team: enrichExternalTeamSource(
+            match.home_team,
+            findExternalTeamCacheRecord(cacheMap, match.home_team?.team_id, match.home_team?.name),
+        ),
+        away_team: enrichExternalTeamSource(
+            match.away_team,
+            findExternalTeamCacheRecord(cacheMap, match.away_team?.team_id, match.away_team?.name),
+        ),
+    }));
 }
 
 function parseRugbyApiSportsTeamId(val: string): string | null {
@@ -1103,14 +1248,16 @@ export async function GET(request: Request) {
 
     // Look up cached team_url from external_teams table to avoid slug mismatches
     let cachedTeamUrl: string | null = null;
+    let cachedExternalTeam: ExternalTeamCacheRow | null = null;
     if (effectiveExternalId) {
         try {
             const readClient = await getReadClient();
             const { data: extTeam } = await (readClient as any)
                 .from('external_teams')
-                .select('team_url')
+                .select('id, source, name, short_name, logo_url, sport, country, team_url, updated_at')
                 .eq('id', effectiveExternalId)
                 .maybeSingle();
+            if (extTeam) cachedExternalTeam = extTeam as ExternalTeamCacheRow;
             if (extTeam?.team_url) cachedTeamUrl = extTeam.team_url as string;
         } catch {
             // Ignore — external_teams table may not have team_url column yet
@@ -1201,7 +1348,10 @@ export async function GET(request: Request) {
             transfers = Array.isArray(rawTransfers) ? rawTransfers : [];
 
             if (isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
-                details = { ...(details ?? {}), ...remoteDetails };
+                details = {
+                    ...(details ?? {}),
+                    ...remoteDetails,
+                };
             }
 
             if (needFsResults && fsResultsRes.status === 'fulfilled' && fsResultsRes.value) {
@@ -1221,13 +1371,64 @@ export async function GET(request: Request) {
                 squad = remoteSquad;
             }
             if (isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
-                details = { ...(details ?? {}), ...remoteDetails };
+                details = {
+                    ...(details ?? {}),
+                    ...remoteDetails,
+                };
             }
         }
 
-        const finalResults = sortMatchesByDate(internalResults.length > 0 ? internalResults : fsResults, 'desc');
-        const finalFixtures = sortMatchesByDate(internalFixtures.length > 0 ? internalFixtures : fsFixtures, 'asc');
-        const detailsWithOverride = applyExternalTeamLogoOverride(details);
+        const baseResults = sortMatchesByDate(internalResults.length > 0 ? internalResults : fsResults, 'desc');
+        const baseFixtures = sortMatchesByDate(internalFixtures.length > 0 ? internalFixtures : fsFixtures, 'asc');
+        const matchExternalTeamIds = Array.from(new Set(
+            [...baseResults, ...baseFixtures]
+                .flatMap((match) => [match.home_team?.team_id, match.away_team?.team_id])
+                .flatMap((teamId) => buildExternalTeamLookupKeys(teamId))
+                .filter((teamId) => /^[a-z0-9-]+$/i.test(teamId))
+        ));
+        let externalTeamCacheMap = new Map<string, ExternalTeamCacheRow>();
+
+        if (cachedExternalTeam) {
+            externalTeamCacheMap = buildExternalTeamCacheMap([cachedExternalTeam]);
+        }
+
+        if (matchExternalTeamIds.length > 0) {
+            try {
+                const readClient = await getReadClient();
+                const { data: externalTeams } = await (readClient as any)
+                    .from('external_teams')
+                    .select('id, source, name, short_name, logo_url, sport, country, team_url, updated_at')
+                    .in('id', matchExternalTeamIds);
+
+                if (Array.isArray(externalTeams) && externalTeams.length > 0) {
+                    externalTeamCacheMap = buildExternalTeamCacheMap([
+                        ...Array.from(new Set(externalTeamCacheMap.values())),
+                        ...(externalTeams as ExternalTeamCacheRow[]),
+                    ]);
+                }
+            } catch {
+                // Ignore missing table/schema issues and keep rendering with proxy fallback URLs.
+            }
+        }
+
+        const enrichedDetails = isRecord(details)
+            ? enrichExternalTeamSource(
+                details,
+                findExternalTeamCacheRecord(
+                    externalTeamCacheMap,
+                    effectiveExternalId,
+                    resolvedExternalId,
+                    details.id,
+                    details.external_id,
+                    details.team_url,
+                    details.name,
+                    teamName,
+                ),
+            )
+            : details;
+        const finalResults = enrichMatchesWithExternalTeamCache(baseResults, externalTeamCacheMap);
+        const finalFixtures = enrichMatchesWithExternalTeamCache(baseFixtures, externalTeamCacheMap);
+        const detailsWithOverride = applyExternalTeamLogoOverride(enrichedDetails);
         const hasExternalSquadSupport = Boolean(effectiveExternalId || teamUrlParam || cachedTeamUrl);
         const detailsForResponse = isRecord(detailsWithOverride)
             ? {
