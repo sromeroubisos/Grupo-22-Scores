@@ -4526,6 +4526,120 @@ function getContainedImagePlacement(
     };
 }
 
+type OpaqueImageBounds = {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+};
+
+const OPAQUE_IMAGE_BOUNDS_CACHE = typeof WeakMap !== 'undefined'
+    ? new WeakMap<HTMLImageElement, OpaqueImageBounds | null>()
+    : null;
+
+function getOpaqueImageBounds(image: HTMLImageElement): OpaqueImageBounds | null {
+    if (typeof document === 'undefined') return null;
+
+    const cached = OPAQUE_IMAGE_BOUNDS_CACHE?.get(image);
+    if (cached !== undefined) {
+        return cached;
+    }
+
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    if (!sourceWidth || !sourceHeight) {
+        OPAQUE_IMAGE_BOUNDS_CACHE?.set(image, null);
+        return null;
+    }
+
+    try {
+        const maxSampleSide = 512;
+        const sampleScale = Math.min(1, maxSampleSide / Math.max(sourceWidth, sourceHeight));
+        const sampleWidth = Math.max(1, Math.round(sourceWidth * sampleScale));
+        const sampleHeight = Math.max(1, Math.round(sourceHeight * sampleScale));
+        const sampleCanvas = document.createElement('canvas');
+        sampleCanvas.width = sampleWidth;
+        sampleCanvas.height = sampleHeight;
+
+        const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+        if (!sampleCtx) {
+            OPAQUE_IMAGE_BOUNDS_CACHE?.set(image, null);
+            return null;
+        }
+
+        sampleCtx.imageSmoothingEnabled = true;
+        sampleCtx.imageSmoothingQuality = 'high';
+        sampleCtx.drawImage(image, 0, 0, sampleWidth, sampleHeight);
+
+        const imageData = sampleCtx.getImageData(0, 0, sampleWidth, sampleHeight).data;
+        const alphaThreshold = 10;
+        let minX = sampleWidth;
+        let minY = sampleHeight;
+        let maxX = -1;
+        let maxY = -1;
+
+        for (let y = 0; y < sampleHeight; y += 1) {
+            for (let x = 0; x < sampleWidth; x += 1) {
+                const alpha = imageData[(y * sampleWidth + x) * 4 + 3];
+                if (alpha <= alphaThreshold) continue;
+
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+            }
+        }
+
+        if (maxX < 0 || maxY < 0) {
+            OPAQUE_IMAGE_BOUNDS_CACHE?.set(image, null);
+            return null;
+        }
+
+        const bounds = {
+            left: minX / sampleWidth,
+            top: minY / sampleHeight,
+            right: (maxX + 1) / sampleWidth,
+            bottom: (maxY + 1) / sampleHeight,
+        };
+        OPAQUE_IMAGE_BOUNDS_CACHE?.set(image, bounds);
+        return bounds;
+    } catch {
+        OPAQUE_IMAGE_BOUNDS_CACHE?.set(image, null);
+        return null;
+    }
+}
+
+function getContainedOpaquePlacement(
+    image: HTMLImageElement,
+    centerX: number,
+    centerY: number,
+    boxWidth: number,
+    boxHeight: number,
+    paddingX: number,
+    paddingY = paddingX
+) {
+    const placement = getContainedImagePlacement(image, centerX, centerY, boxWidth, boxHeight, paddingX, paddingY);
+    const bounds = getOpaqueImageBounds(image);
+
+    if (!bounds) {
+        return {
+            placement,
+            visibleLeft: placement.x,
+            visibleTop: placement.y,
+            visibleRight: placement.x + placement.width,
+            visibleBottom: placement.y + placement.height,
+        };
+    }
+
+    return {
+        placement,
+        visibleLeft: placement.x + placement.width * bounds.left,
+        visibleTop: placement.y + placement.height * bounds.top,
+        visibleRight: placement.x + placement.width * bounds.right,
+        visibleBottom: placement.y + placement.height * bounds.bottom,
+    };
+}
+
 function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions) {
     const { x, y, size, img, label, rawLogo, isDark } = options;
     ctx.save();
@@ -5848,9 +5962,28 @@ async function drawMatchEditorialResult(
     const scoreCenterY = scoreTopY + scoreHeight / 2;
     const titleY = topRuleY;
     const tournamentLogoY = scoreCenterY + editorialPreset.tournamentLogoOffsetY;
-    const teamLogoY = topRuleY - editorialPreset.logoOffsetY;
     const teamLogoWidth = Math.round(editorialPreset.logoWidth * 1.25);
     const teamLogoHeight = Math.round(editorialPreset.logoHeight * 1.25);
+    const teamLogoBottomGap = 15;
+    const crestStrokeWidth = 5;
+    const crestInset = Math.max(crestStrokeWidth + 4, Math.min(teamLogoWidth, teamLogoHeight) * 0.08);
+    const defaultTeamLogoY = topRuleY - editorialPreset.logoOffsetY;
+    const resolveTeamLogoY = (logo: HTMLImageElement | null) => {
+        if (!logo) return defaultTeamLogoY;
+
+        const placement = getContainedOpaquePlacement(
+            logo,
+            0,
+            0,
+            teamLogoWidth,
+            teamLogoHeight,
+            crestInset
+        );
+        const visibleBottomWithStroke = placement.visibleBottom + crestStrokeWidth;
+        return topRuleY - teamLogoBottomGap - visibleBottomWithStroke;
+    };
+    const homeLogoY = resolveTeamLogoY(homeLogo);
+    const awayLogoY = resolveTeamLogoY(awayLogo);
     const gradientStartY = Math.max(Math.round(titleY - editorialPreset.titleFontSize * 0.95), Math.round(overlayTop - 16));
     const usesUploadedGradientImage = Boolean(gradientImage);
 
@@ -5962,10 +6095,10 @@ async function drawMatchEditorialResult(
         drawEditorialHeaderArrows(ctx, canvas);
     }
 
-    drawEditorialCrestStroke(ctx, leftColumnX, teamLogoY, teamLogoWidth, teamLogoHeight, homeLogo, 5);
+    drawEditorialCrestStroke(ctx, leftColumnX, homeLogoY, teamLogoWidth, teamLogoHeight, homeLogo, crestStrokeWidth);
     drawOverflowCrest(ctx, {
         x: leftColumnX,
-        y: teamLogoY,
+        y: homeLogoY,
         width: teamLogoWidth,
         height: teamLogoHeight,
         img: homeLogo,
@@ -5974,10 +6107,10 @@ async function drawMatchEditorialResult(
         isDark: true,
         showFrame: false,
     });
-    drawEditorialCrestStroke(ctx, rightColumnX, teamLogoY, teamLogoWidth, teamLogoHeight, awayLogo, 5);
+    drawEditorialCrestStroke(ctx, rightColumnX, awayLogoY, teamLogoWidth, teamLogoHeight, awayLogo, crestStrokeWidth);
     drawOverflowCrest(ctx, {
         x: rightColumnX,
-        y: teamLogoY,
+        y: awayLogoY,
         width: teamLogoWidth,
         height: teamLogoHeight,
         img: awayLogo,
