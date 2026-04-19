@@ -7288,8 +7288,15 @@ async function drawStandings(
     }, 0);
     const rawRowHeight = (bodyBottom - bodyTop - reservedGroupSpace) / Math.max(slide.totalRows, 1);
     const rowHeight = scaleElementSize('rowHeight', Math.max(isStory ? (isDenseStandingsSlide ? 30 : 32) : (isDenseStandingsSlide ? 26 : 30), Math.min(isStory ? 70 : 62, rawRowHeight)), isStory ? 32 : 30);
-    const crestHeight = scaleElementSize('teamLogo', Math.min(isStory ? 50 : 44, Math.max(isStory ? (isDenseStandingsSlide ? 34 : 38) : (isDenseStandingsSlide ? 28 : 34), rowHeight - 4)), isStory ? 44 : 40);
-    const crestWidth = scaleElementSize('teamLogo', Math.min(isStory ? 46 : 40, crestHeight * 0.9), isStory ? 46 : 40);
+    const crestHeight = scaleElementSize(
+        'teamLogo',
+        Math.min(
+            isStory ? 58 : 52,
+            Math.max(isStory ? (isDenseStandingsSlide ? 40 : 44) : (isDenseStandingsSlide ? 34 : 38), rowHeight - 2)
+        ),
+        48
+    );
+    const crestWidth = scaleElementSize('teamLogo', Math.min(isStory ? 54 : 48, crestHeight * 0.92), 48);
     const posFontSize = Math.max(isStory ? 20 : (isDenseStandingsSlide ? 18 : 20), Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.44)));
     const statFontSize = Math.max(isStory ? 16 : (isDenseStandingsSlide ? 14 : 16), Math.min(isStory ? 26 : 22, Math.round(rowHeight * 0.36)));
     const pointsFontSize = Math.max(isStory ? 20 : (isDenseStandingsSlide ? 18 : 20), Math.min(isStory ? 30 : 26, Math.round(rowHeight * 0.42)));
@@ -7539,8 +7546,8 @@ async function drawDailyMatches(
         }),
         (listBottom - listTop - rowGap * Math.max(matches.length - 1, 0)) / Math.max(matches.length, 1)
     ), isStory ? 124 : 112);
-    const crestHeight = scaleElementSize('teamLogo', Math.min(isStory ? 82 : 68, rowHeight - 10), isStory ? 68 : 58);
-    const crestWidth = scaleElementSize('teamLogo', Math.min(isStory ? 72 : 58, crestHeight * 0.86), isStory ? 72 : 58);
+    const crestHeight = scaleElementSize('teamLogo', Math.min(isStory ? 90 : 76, rowHeight - 6), 68);
+    const crestWidth = scaleElementSize('teamLogo', Math.min(isStory ? 78 : 66, crestHeight * 0.88), 68);
     const crestInset = isStory ? 16 : 12;
     const cardWidth = panelWidth - 48;
     const homeTextWidth = Math.max(110, safe.centerX - 108 - (panelX + 24 + crestInset + crestWidth + 18));

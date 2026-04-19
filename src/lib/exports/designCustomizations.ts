@@ -80,6 +80,11 @@ export const EXPORT_DESIGN_CUSTOMIZATION_STORAGE_KEY = 'g22-export-design-custom
 export const EXPORT_DESIGN_CUSTOMIZATION_PRESET_TYPE = 'design_customization';
 export const EXPORT_DESIGN_CUSTOMIZATION_EVENT = 'g22:export-design-customization-change';
 
+const G22_BASE_TEAM_LOGO_WIDTH_MIGRATIONS = {
+    dailyMatches: { previous: 58, next: 68 },
+    standings: { previous: 40, next: 48 },
+} as const;
+
 type SupabaseBrowserClient = ReturnType<typeof createClient>;
 type ExportDesignCustomizationStorageMode = 'local' | 'cloud';
 type PersistedExportDesignCustomizationRow = {
@@ -281,7 +286,7 @@ export const EXPORT_DESIGN_ELEMENT_DIMENSION_CONTEXTS: ElementDimensionContextDe
         items: [
             { id: 'title', label: 'Titulo fixture', width: 20, offsetY: 0, note: 'Tamano proporcional de la capsula superior y ajuste vertical.' },
             { id: 'tournamentLogo', label: 'Logo torneo', width: 34, offsetY: 0, note: 'Tamano proporcional y eje Y del logo de torneo.' },
-            { id: 'teamLogo', label: 'Logo equipo', width: 58, offsetY: 0, note: 'Tamano proporcional y eje Y de escudos por fila.' },
+            { id: 'teamLogo', label: 'Logo equipo', width: 68, offsetY: 0, note: 'Tamano proporcional y eje Y de escudos por fila.' },
             { id: 'teamName', label: 'Nombre equipo', width: 24, offsetY: 0, note: 'Tamano proporcional y eje Y del nombre de cada equipo.' },
             { id: 'score', label: 'Hora / score', width: 38, offsetY: 0, note: 'Tamano proporcional y eje Y del bloque central por fila.' },
             { id: 'rowHeight', label: 'Fila de partido', width: 112, offsetY: 0, note: 'Escala de cada fila y desplazamiento vertical del listado.' },
@@ -294,7 +299,7 @@ export const EXPORT_DESIGN_ELEMENT_DIMENSION_CONTEXTS: ElementDimensionContextDe
         items: [
             { id: 'title', label: 'Titulo tabla', width: 20, offsetY: 0, note: 'Tamano proporcional de la capsula superior y ajuste vertical.' },
             { id: 'tournamentLogo', label: 'Logo torneo', width: 34, offsetY: 0, note: 'Tamano proporcional y eje Y del logo de torneo.' },
-            { id: 'teamLogo', label: 'Logo equipo', width: 40, offsetY: 0, note: 'Tamano proporcional y eje Y de escudos de equipos.' },
+            { id: 'teamLogo', label: 'Logo equipo', width: 48, offsetY: 0, note: 'Tamano proporcional y eje Y de escudos de equipos.' },
             { id: 'teamName', label: 'Nombre equipo', width: 26, offsetY: 0, note: 'Tamano proporcional y eje Y del nombre en cada fila.' },
             { id: 'score', label: 'Puntos / metricas', width: 26, offsetY: 0, note: 'Tamano proporcional y eje Y de la numerica principal.' },
             { id: 'rowHeight', label: 'Fila de tabla', width: 30, offsetY: 0, note: 'Escala de cada fila y desplazamiento vertical del bloque.' },
@@ -568,13 +573,61 @@ function migrateG22BaseScheduleContexts(state: ExportDesignCustomizationState): 
     };
 }
 
+function migrateG22BaseElementDimensions(state: ExportDesignCustomizationState): ExportDesignCustomizationState {
+    const defaultContexts = buildDefaultElementDimensionContexts();
+    const currentContextsById = new Map(state.elementDimensionContexts.map((context) => [context.id, context] as const));
+
+    return {
+        ...state,
+        elementDimensionContexts: defaultContexts.map((defaultContext) => {
+            const currentContext = currentContextsById.get(defaultContext.id);
+            if (!currentContext) {
+                return defaultContext;
+            }
+
+            const migration =
+                defaultContext.id === 'dailyMatches'
+                    ? G22_BASE_TEAM_LOGO_WIDTH_MIGRATIONS.dailyMatches
+                    : defaultContext.id === 'standings'
+                        ? G22_BASE_TEAM_LOGO_WIDTH_MIGRATIONS.standings
+                        : null;
+
+            return {
+                ...defaultContext,
+                items: defaultContext.items.map((defaultItem) => {
+                    const currentItem = currentContext.items.find((item) => item.id === defaultItem.id);
+                    if (!currentItem) {
+                        return defaultItem;
+                    }
+
+                    if (
+                        migration &&
+                        defaultItem.id === 'teamLogo' &&
+                        currentItem.width === migration.previous
+                    ) {
+                        return normalizeElementDimensionItem(
+                            {
+                                ...currentItem,
+                                width: migration.next,
+                            },
+                            defaultItem
+                        );
+                    }
+
+                    return normalizeElementDimensionItem(currentItem, defaultItem);
+                }),
+            };
+        }),
+    };
+}
+
 function applyExportDesignCustomizationMigrations(
     designSlug: string,
     state: ExportDesignCustomizationState | null
 ): ExportDesignCustomizationState | null {
     if (!state) return null;
     if (designSlug !== 'g22-base') return state;
-    return migrateG22BaseScheduleContexts(state);
+    return migrateG22BaseElementDimensions(migrateG22BaseScheduleContexts(state));
 }
 
 export function normalizeExportDesignCustomizationState(payload: unknown): ExportDesignCustomizationState | null {
