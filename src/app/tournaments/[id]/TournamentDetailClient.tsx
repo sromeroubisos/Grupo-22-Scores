@@ -18,6 +18,7 @@ import { addDaysToIsoDate, APP_TIMEZONE, formatDateInTimeZone, formatDateKey } f
 import type { TournamentInitialData } from '@/lib/server/fetchTournamentData';
 import { normalizeTournamentFormat } from '@/lib/utils/tournamentFormat';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
+import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
@@ -125,10 +126,10 @@ function getTeamLogo(team: any): string {
 }
 
 function getTournamentLogo(detailsData: any, localData: any): string {
-    return resolveTournamentLogoSource(
+    return resolveLogoPreviewSrc(resolveTournamentLogoSource(
         detailsData,
-        localData?.logoUrl || localData?.logo_url || null
-    ) || '';
+        localData?.logoUrl || localData?.logo_url || localData?.bannerUrl || localData?.banner_url || null
+    )) || '';
 }
 
 function buildClubHref(
@@ -1483,6 +1484,7 @@ export default function TournamentDetailPage({
     const [activeStandingsScope, setActiveStandingsScope] = useState<string>(
         preloaded?.defaultStandingsScope ?? preloaded?.standingsScopeViews?.[0]?.id ?? CIRCUIT_GLOBAL_SCOPE,
     );
+    const [tournamentLogoFailed, setTournamentLogoFailed] = useState(false);
 
     // ── Data fetch ────────────────────────────────────────────────────────
 
@@ -1864,6 +1866,10 @@ export default function TournamentDetailPage({
         return () => controller.abort();
     }, [id, initialData, preloaded]);
 
+    useEffect(() => {
+        setTournamentLogoFailed(false);
+    }, [details, tournamentData]);
+
     const hasDbKnockoutPhase = useMemo(
         () => dbPhases.some((phase: any) => isKnockoutPhaseType(phase?.phase_type)),
         [dbPhases],
@@ -2205,6 +2211,7 @@ export default function TournamentDetailPage({
     const countryName = resolveCountryName(details, tournamentData);
     const tournamentLogo = getTournamentLogo(details, tournamentData);
     const tournamentName = details?.name || details?.tournament?.name || tournamentData?.name || 'Torneo';
+    const shouldShowTournamentLogo = Boolean(tournamentLogo) && !tournamentLogoFailed;
     const sportLabel = tournamentData?.sportId ? tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1) : '';
     const standingsEntityLabel = isMotorsportTournament ? 'Piloto' : 'Equipo';
     const summaryResultsTitle = isMotorsportTournament ? 'Ultimas carreras' : 'Últimos Resultados';
@@ -2226,6 +2233,7 @@ export default function TournamentDetailPage({
         const candidate = String((initialData?.tournament as any)?.id || tournamentData?.id || '').trim();
         return UUID_RE.test(candidate) ? candidate : null;
     })();
+
     const favoriteTournamentId = id;
     const externalTournamentEditorHref = (() => {
         if (!externalTournamentOverrideId) return null;
@@ -3124,8 +3132,8 @@ export default function TournamentDetailPage({
                         <div className={styles.heroLeft}>
                             {/* Logo */}
                             <div className={styles.heroLogoWrap}>
-                                {tournamentLogo
-                                    ? <img src={tournamentLogo} alt={tournamentName} className={styles.heroLogoImg} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                {shouldShowTournamentLogo
+                                    ? <img src={tournamentLogo} alt={tournamentName} className={styles.heroLogoImg} onError={() => setTournamentLogoFailed(true)} />
                                     : <span className={styles.heroLogoPlaceholder}>{tournamentName[0]}</span>}
                             </div>
 

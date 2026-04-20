@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { AlertCircle, CheckCircle2, Download, FileText, Loader2, Upload, X } from 'lucide-react';
 import { importPeopleFromCSV, type CSVRow } from '@/lib/services/csvService';
@@ -21,27 +21,19 @@ type ImportResult = {
 };
 
 const PLAYER_IMPORT_HEADERS = [
-    'first_name',
-    'last_name',
-    'id_number',
-    'birth_date',
-    'role',
-    'position',
-    'division_id',
-    'jersey_number',
-    'squad_role',
-    'status',
-    'photo_url',
-    'weight',
-    'height',
+    'nombre',
+    'apellido',
+    'fecha_nacimiento',
+    'posicion',
+    'peso',
 ] as const;
 
 const PLAYER_IMPORT_SAMPLE_ROWS = [
-    ['Juan', 'Perez', '32123123', '2004-05-11', 'player', 'Wing', '', '14', 'titular', 'active', '', '82.5', '182'],
-    ['Tomas', 'Gomez', '29888777', '2002-08-20', 'player', 'Apertura', '', '10', 'suplente', 'active', '', '79.3', '178'],
+    ['Juan', 'Perez', '2004-05-11', 'Wing', '82.5'],
+    ['Tomas', 'Gomez', '2002-08-20', 'Apertura', '79.3'],
 ];
 
-const HEADER_ALIASES: Record<string, (typeof PLAYER_IMPORT_HEADERS)[number]> = {
+const HEADER_ALIASES: Record<string, keyof CSVRow> = {
     nombre: 'first_name',
     first_name: 'first_name',
     firstname: 'first_name',
@@ -56,6 +48,8 @@ const HEADER_ALIASES: Record<string, (typeof PLAYER_IMPORT_HEADERS)[number]> = {
     birth_date: 'birth_date',
     fecha_nacimiento: 'birth_date',
     fecha_de_nacimiento: 'birth_date',
+    'fecha de nacimiento': 'birth_date',
+    'fecha nacimiento': 'birth_date',
     role: 'role',
     rol: 'role',
     posicion: 'position',
@@ -76,6 +70,7 @@ const HEADER_ALIASES: Record<string, (typeof PLAYER_IMPORT_HEADERS)[number]> = {
     avatar_url: 'photo_url',
     weight: 'weight',
     peso: 'weight',
+    peso_kg: 'weight',
     height: 'height',
     altura: 'height',
 };
@@ -114,6 +109,43 @@ function buildTemplateCsv() {
     return rows.join('\n');
 }
 
+function parseInlineTextInput(rawInput: string) {
+    const trimmed = rawInput.trim();
+    if (!trimmed) return [];
+
+    const lines = trimmed
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+    if (lines.length === 0) return [];
+
+    const firstLine = lines[0].toLowerCase();
+    const hasHeader = ['nombre', 'apellido', 'fecha_nacimiento', 'posicion', 'peso', 'first_name', 'last_name']
+        .some((token) => firstLine.includes(token));
+    const dataLines = hasHeader ? lines.slice(1) : lines;
+
+    return dataLines.map((line) => {
+        const delimiter = line.includes('\t')
+            ? '\t'
+            : line.includes(';')
+                ? ';'
+                : ',';
+
+        const [nombre = '', apellido = '', fecha_nacimiento = '', posicion = '', peso = ''] = line
+            .split(delimiter)
+            .map((value) => value.trim());
+
+        return {
+            nombre,
+            apellido,
+            fecha_nacimiento,
+            posicion,
+            peso,
+        };
+    });
+}
+
 function mapWorkbookRows(input: Record<string, unknown>[], selectedDivisionId?: string) {
     const errors: string[] = [];
     const rows: CSVRow[] = [];
@@ -130,7 +162,11 @@ function mapWorkbookRows(input: Record<string, unknown>[], selectedDivisionId?: 
 
         const directFirstName = toOptionalString(mappedEntries.first_name);
         const directLastName = toOptionalString(mappedEntries.last_name);
-        const fullName = toOptionalString((rawRow as Record<string, unknown>).full_name) || toOptionalString((rawRow as Record<string, unknown>).name);
+        const fullName = toOptionalString((rawRow as Record<string, unknown>).full_name)
+            || toOptionalString((rawRow as Record<string, unknown>).name)
+            || toOptionalString((rawRow as Record<string, unknown>).nombre_apellido)
+            || toOptionalString((rawRow as Record<string, unknown>)['nombre completo'])
+            || toOptionalString((rawRow as Record<string, unknown>)['full name']);
         const splitName = fullName ? splitFullName(fullName) : null;
         const firstName = directFirstName || splitName?.firstName || '';
         const lastName = directLastName || splitName?.lastName || '';
@@ -162,11 +198,22 @@ function mapWorkbookRows(input: Record<string, unknown>[], selectedDivisionId?: 
 
 export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, fixedDivisionId }: Props) {
     const [file, setFile] = useState<File | null>(null);
+    const [rawInput, setRawInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<ImportResult | null>(null);
     const [selectedDivisionId, setSelectedDivisionId] = useState<string>(fixedDivisionId || '');
 
     const templatePreview = useMemo(() => buildTemplateCsv(), []);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        setFile(null);
+        setRawInput('');
+        setResult(null);
+        setLoading(false);
+        setSelectedDivisionId(fixedDivisionId || '');
+    }, [fixedDivisionId, isOpen]);
 
     if (!isOpen) return null;
 
@@ -188,17 +235,25 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
     };
 
     const processFile = async () => {
-        if (!file) return;
         setLoading(true);
 
         try {
-            const buffer = await file.arrayBuffer();
-            const workbook = XLSX.read(buffer, { type: 'array', cellDates: false });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, {
-                defval: '',
-                raw: false,
-            });
+            let rawRows: Record<string, unknown>[] = [];
+
+            if (rawInput.trim()) {
+                rawRows = parseInlineTextInput(rawInput);
+            } else if (file) {
+                const buffer = await file.arrayBuffer();
+                const workbook = XLSX.read(buffer, { type: 'array', cellDates: false });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, {
+                    defval: '',
+                    raw: false,
+                });
+            } else {
+                setResult({ count: 0, errors: ['Pega datos en el recuadro o selecciona un archivo para importar.'] });
+                return;
+            }
 
             if (rawRows.length === 0) {
                 setResult({ count: 0, errors: ['El archivo no contiene filas para importar.'] });
@@ -234,10 +289,10 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                     <div className="space-y-1">
                         <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
                             <Upload className="w-6 h-6 text-blue-500" />
-                            Importar jugadores
+                            Importacion masiva
                         </h2>
                         <p className="text-[10px] font-mono text-[var(--color-text-muted)] uppercase tracking-widest">
-                            Formato masivo CSV / Excel para club y planteles
+                            Pega datos o importa CSV / Excel para alta rapida de jugadores
                         </p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-[var(--color-bg-hover)] rounded-full transition" type="button">
@@ -248,49 +303,62 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                 {!result ? (
                     <div className="space-y-6">
                         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                            <div className="p-6 border-2 border-dashed border-[var(--color-border)] rounded-xl bg-[var(--color-bg-tertiary)] flex flex-col items-center justify-center text-center space-y-4">
-                                <div className="w-12 h-12 rounded-full bg-[var(--color-bg-primary)] flex items-center justify-center">
-                                    <FileText className="w-6 h-6 text-[var(--color-text-muted)]" />
+                            <div className="p-6 border border-[var(--color-border)] rounded-xl bg-[var(--color-bg-tertiary)] space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full bg-[var(--color-bg-primary)] flex items-center justify-center">
+                                        <FileText className="w-6 h-6 text-[var(--color-text-muted)]" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-[var(--color-text-primary)]">Pegar datos</p>
+                                        <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest font-mono">
+                                            Abre directo para escribir o pegar filas
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-bold text-[var(--color-text-primary)]">Seleccionar archivo CSV o Excel</p>
-                                    <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest font-mono">
-                                        Encabezados nombrados, no dependemos del orden de columnas
-                                    </p>
-                                </div>
-                                <input
-                                    type="file"
-                                    accept=".csv,.xlsx,.xls"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                    id="csv-upload"
+
+                                <textarea
+                                    autoFocus
+                                    value={rawInput}
+                                    onChange={(event) => setRawInput(event.target.value)}
+                                    className="min-h-[260px] w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-4 py-4 text-sm leading-6 text-[var(--color-text-primary)] outline-none focus:border-blue-500"
+                                    placeholder={`nombre,apellido,fecha_nacimiento,posicion,peso\nJuan,Perez,2004-05-11,Wing,82.5\nTomas,Gomez,,Apertura,\n\nTambien puedes pegar filas sin encabezado en ese mismo orden.`}
                                 />
-                                <label
-                                    htmlFor="csv-upload"
-                                    className="btn btn-primary cursor-pointer !h-10"
-                                >
-                                    {file ? file.name : 'Buscar archivo'}
-                                </label>
-                                <button type="button" className="btn gap-2 !h-10" onClick={handleDownloadTemplate}>
-                                    <Download className="w-4 h-4" />
-                                    Descargar plantilla
-                                </button>
+
+                                <div className="flex flex-wrap gap-3">
+                                    <input
+                                        type="file"
+                                        accept=".csv,.xlsx,.xls"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        id="csv-upload"
+                                    />
+                                    <label
+                                        htmlFor="csv-upload"
+                                        className="btn cursor-pointer !h-10"
+                                    >
+                                        {file ? file.name : 'Elegir archivo'}
+                                    </label>
+                                    <button type="button" className="btn gap-2 !h-10" onClick={handleDownloadTemplate}>
+                                        <Download className="w-4 h-4" />
+                                        Descargar plantilla
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="space-y-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-5">
                                 <div>
                                     <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">Formato soportado</p>
                                     <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                                        Columnas recomendadas: <span className="font-mono text-[var(--color-text-primary)]">first_name</span>, <span className="font-mono text-[var(--color-text-primary)]">last_name</span>, <span className="font-mono text-[var(--color-text-primary)]">id_number</span>, <span className="font-mono text-[var(--color-text-primary)]">birth_date</span>, <span className="font-mono text-[var(--color-text-primary)]">position</span>, <span className="font-mono text-[var(--color-text-primary)]">jersey_number</span>, <span className="font-mono text-[var(--color-text-primary)]">division_id</span>.
+                                        Formato rapido recomendado: <span className="font-mono text-[var(--color-text-primary)]">nombre</span>, <span className="font-mono text-[var(--color-text-primary)]">apellido</span>, <span className="font-mono text-[var(--color-text-primary)]">fecha_nacimiento</span>, <span className="font-mono text-[var(--color-text-primary)]">posicion</span>, <span className="font-mono text-[var(--color-text-primary)]">peso</span>.
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">Reglas</p>
                                     <ul className="mt-2 space-y-1 text-sm text-[var(--color-text-secondary)]">
-                                        <li>Se requiere nombre y apellido.</li>
-                                        <li>Si no envias <span className="font-mono">division_id</span>, se registra a nivel club.</li>
-                                        <li><span className="font-mono">jersey_number</span> y <span className="font-mono">squad_role</span> impactan en el plantel.</li>
-                                        <li>Si cargás jugadores desde Match Center, también se crean en el club al guardar.</li>
+                                        <li><span className="font-mono">nombre</span> y <span className="font-mono">apellido</span> son obligatorios.</li>
+                                        <li><span className="font-mono">fecha_nacimiento</span>, <span className="font-mono">posicion</span> y <span className="font-mono">peso</span> son opcionales.</li>
+                                        <li>Si no envias <span className="font-mono">division_id</span>, queda en el plantel base del club.</li>
+                                        <li>Tambien se aceptan columnas avanzadas como <span className="font-mono">division_id</span>, <span className="font-mono">jersey_number</span> y <span className="font-mono">squad_role</span>.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -306,7 +374,7 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                 disabled={Boolean(fixedDivisionId)}
                                 className="w-full rounded-lg px-4 py-3 text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--color-bg-primary)] border border-[var(--color-border)] text-[var(--color-text-primary)] focus:border-blue-500"
                             >
-                                {!fixedDivisionId && <option value="">-- CLUB GLOBAL --</option>}
+                                {!fixedDivisionId && <option value="">-- PLANTEL BASE DEL CLUB --</option>}
                                 {divisions.map((division) => (
                                     <option key={division.id} value={division.id}>
                                         {division.name.toUpperCase()} ({division.season})
@@ -316,7 +384,7 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                         </div>
 
                         <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-4">
-                            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">Plantilla base</p>
+                            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">Plantilla rapida</p>
                             <pre className="max-h-40 overflow-auto whitespace-pre-wrap text-[11px] leading-5 text-[var(--color-text-secondary)]">{templatePreview}</pre>
                         </div>
 
@@ -324,7 +392,7 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                             <button onClick={onClose} className="btn flex-1 h-12" type="button">Cancelar</button>
                             <button
                                 onClick={processFile}
-                                disabled={!file || loading}
+                                disabled={(!file && !rawInput.trim()) || loading}
                                 className="btn btn-primary flex-[2] h-12 gap-3"
                                 type="button"
                             >

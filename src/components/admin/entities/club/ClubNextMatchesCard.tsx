@@ -84,7 +84,7 @@ export function ClubNextMatchesCard({ categories, matches, loading }: ClubNextMa
 
                             <div style={{ flex: 1 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                    <span style={{ padding: '0.125rem 0.375rem', background: 'rgba(59, 130, 246, 0.14)', color: '#bfdbfe', fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', borderRadius: '999px' }}>
+                                    <span style={{ padding: '0.125rem 0.375rem', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.16)', color: 'var(--accent)', fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', borderRadius: '999px' }}>
                                         Primera
                                     </span>
                                     <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>

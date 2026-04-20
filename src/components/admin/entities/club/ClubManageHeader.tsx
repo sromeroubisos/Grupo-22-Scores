@@ -1,7 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ExternalLink, Loader2, Save } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import Link from 'next/link';
@@ -34,21 +32,7 @@ export function ClubManageHeader({
     currentClubId,
     familyClubCount,
 }: ClubManageHeaderProps) {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
     const currentClub = managedClubs.find((club) => club.id === currentClubId) ?? null;
-    const familyOptions = useMemo(
-        () => managedClubs.filter((club) => club.familyRootId === currentClub?.familyRootId),
-        [currentClub?.familyRootId, managedClubs]
-    );
-
-    const handleClubChange = (clubId: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('club', clubId);
-        params.set('type', 'club');
-        router.push(`${pathname}?${params.toString()}`);
-    };
 
     return (
         <header className="main-header">
@@ -70,31 +54,6 @@ export function ClubManageHeader({
             </div>
 
             <div className="header-tools">
-                <div className="club-selector-block">
-                    <span className="club-selector-label">
-                        {familyOptions.length > 1 ? 'Club seleccionado' : 'Unidad activa'}
-                    </span>
-                    {familyOptions.length > 1 ? (
-                        <div className="club-selector-pill-wrap">
-                            <select
-                                className="club-selector-pill"
-                                value={currentClubId}
-                                onChange={(event) => handleClubChange(event.target.value)}
-                            >
-                                {familyOptions.map((club) => (
-                                    <option key={club.id} value={club.id}>
-                                        {club.shortName || club.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    ) : (
-                        <div className="club-selector-static">
-                            {data.short_name || currentClub?.shortName || 'Principal'}
-                        </div>
-                    )}
-                </div>
-
                 {isDirty ? (
                     <div className="dirty-indicator">
                         <div className="dirty-dot"></div>

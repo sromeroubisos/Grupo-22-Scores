@@ -19,6 +19,7 @@ import {
   getClubSportValue,
   getSportDisplayName,
 } from '@/lib/clubDerivatives';
+import { buildClubCreateHref, buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 
 const activeSports = getActiveSports();
 
@@ -78,6 +79,7 @@ interface FormState extends Omit<ClubCreateInput, 'slug'> {
 
 interface NewClubFormProps {
   unions?: { id: string; name: string; country?: string | null }[];
+  navigationMode?: ClubConsoleMode;
   derivedPrefill?: {
     baseClub: {
       id: string;
@@ -185,7 +187,11 @@ function getDerivedClubSuffix(type: ClubDerivativeType, sportLabel?: string | nu
   return 'Derivado';
 }
 
-export default function NewClubForm({ unions = [], derivedPrefill = null }: NewClubFormProps) {
+export default function NewClubForm({
+  unions = [],
+  derivedPrefill = null,
+  navigationMode = 'admin',
+}: NewClubFormProps) {
   const router = useRouter();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -653,7 +659,7 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
     setShowSuccessModal(false);
     setCreatedClubId(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    router.replace('/admin/super/clubes/crear');
+    router.replace(buildClubCreateHref(navigationMode));
   };
 
   const scrollToSection = (id: string) => {
@@ -674,7 +680,7 @@ export default function NewClubForm({ unions = [], derivedPrefill = null }: NewC
               <button
                 type="button"
                 className={styles.btnConfirmModal}
-                onClick={() => createdClubId && router.push(`/admin/entities/${createdClubId}/manage?type=club`)}
+                onClick={() => createdClubId && router.push(buildClubManageHref(createdClubId, 'general', navigationMode))}
                 disabled={!createdClubId}
               >
                 Ir al panel

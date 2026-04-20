@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { ClubAccessHub } from '@/components/admin/entities/club/ClubAccessHub';
 import { ClubManageShell } from '@/components/admin/entities/club/ClubManageShell';
 import type { Database } from '@/lib/database.types';
 import { requireUserAccessContext } from '@/lib/auth/permissions';
@@ -24,9 +25,9 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
     const availableClubIds = new Set(managed.clubs.map((club) => club.id));
     const targetClubId = requestedClubId && availableClubIds.has(requestedClubId)
         ? requestedClubId
-        : managed.defaultClubId || managed.clubs[0]?.id || null;
+        : null;
 
-    if (!targetClubId) {
+    if (!managed.clubs.length) {
         return (
             <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
                 <div className="max-w-xl w-full rounded-[28px] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-[var(--shadow-card)]">
@@ -38,6 +39,10 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
                 </div>
             </div>
         );
+    }
+
+    if (!targetClubId) {
+        return <ClubAccessHub clubs={managed.clubs} />;
     }
 
     const [{ data: clubData }, { data: unionsData }] = await Promise.all([
@@ -72,6 +77,7 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
             data={clubData as ClubRow}
             unions={unionsData ?? []}
             managedClubs={managed.clubs}
+            navigationMode="club-admin"
         />
     );
 }

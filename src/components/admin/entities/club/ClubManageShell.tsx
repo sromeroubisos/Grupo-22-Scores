@@ -13,7 +13,6 @@ import { ClubManageHeader } from './ClubManageHeader';
 import { ClubManageSidebar } from './ClubManageSidebar';
 import { ClubManageTabs } from './ClubManageTabs';
 import { ClubNextMatchesCard } from './ClubNextMatchesCard';
-import { ClubRelatedClubsTab } from './ClubRelatedClubsTab';
 import { ClubSponsorsTab } from './ClubSponsorsTab';
 import { ClubSquadsCard } from './ClubSquadsCard';
 import { ClubSquadsTab } from './ClubSquadsTab';
@@ -21,9 +20,10 @@ import { ClubStaffTab } from './ClubStaffTab';
 import { ClubStandingsCard } from './ClubStandingsCard';
 import { ClubStandingsOverviewTab } from './ClubStandingsOverviewTab';
 import { ClubSummaryHero } from './ClubSummaryHero';
-import type { ClubDashboardMatch, ClubDashboardOverview, ClubDashboardStanding } from '@/lib/club-admin/dashboard-types';
+import type { ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
 import { EMPTY_CLUB_DASHBOARD_OVERVIEW } from '@/lib/club-admin/dashboard-types';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
+import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 
 import './vitreous-club.css';
 
@@ -35,25 +35,7 @@ interface ClubManageShellProps {
     data: ClubRow | null;
     unions: { id: string; name: string }[];
     managedClubs: ManagedClubSummary[];
-}
-
-interface ClubRelatedClub {
-    id: string;
-    name: string;
-    shortName: string | null;
-    logoUrl: string | null;
-    sport: string | null;
-    familyRootId: string;
-    parentClubId: string | null;
-    parentClubName: string | null;
-    isRoot: boolean;
-    isCurrent: boolean;
-}
-
-interface ClubRelatedData {
-    rootClubId: string;
-    rootClubName: string | null;
-    clubs: ClubRelatedClub[];
+    navigationMode?: ClubConsoleMode;
 }
 
 async function readJsonOrThrow<T>(response: Response): Promise<T> {
@@ -81,15 +63,6 @@ async function fetchClubDashboardData(clubId: string): Promise<ClubDashboardOver
         console.error('Club dashboard request failed:', error);
         return EMPTY_CLUB_DASHBOARD_OVERVIEW;
     }
-}
-
-async function fetchClubRelatedData(clubId: string): Promise<ClubRelatedData> {
-    const response = await fetch(`/api/clubs/${encodeURIComponent(clubId)}/family`, {
-        credentials: 'same-origin',
-        cache: 'no-store',
-    });
-    const payload = await readJsonOrThrow<{ data?: ClubRelatedData; error?: string }>(response);
-    return payload.data ?? { rootClubId: clubId, rootClubName: null, clubs: [] };
 }
 
 async function createClubEntity(form: ClubFormState): Promise<{ id: string }> {
@@ -155,11 +128,7 @@ function formatSportLabel(sport?: string | null) {
         .join(' ');
 }
 
-function getDivisionDisplayName(division: Division) {
-    return division.name?.trim() || division.category?.trim() || 'Sin nombre';
-}
-
-export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageShellProps) {
+export function ClubManageShell({ id, data, unions, managedClubs, navigationMode = 'admin' }: ClubManageShellProps) {
     const isCreate = id === 'new';
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -186,12 +155,6 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
 
     const [dashboardData, setDashboardData] = useState<ClubDashboardOverview>(EMPTY_CLUB_DASHBOARD_OVERVIEW);
     const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
-    const [relatedData, setRelatedData] = useState<ClubRelatedData>({
-        rootClubId: id,
-        rootClubName: null,
-        clubs: [],
-    });
-    const [isLoadingRelated, setIsLoadingRelated] = useState(false);
     const [linkedDivisions, setLinkedDivisions] = useState<Division[]>([]);
     const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate);
 
@@ -211,29 +174,6 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
         };
 
         void loadDashboard();
-    }, [id, isCreate]);
-
-    useEffect(() => {
-        if (isCreate) return;
-
-        const loadRelated = async () => {
-            setIsLoadingRelated(true);
-            try {
-                const response = await fetchClubRelatedData(id);
-                setRelatedData(response);
-            } catch (error) {
-                console.error('Related clubs load error:', error);
-                setRelatedData({
-                    rootClubId: id,
-                    rootClubName: null,
-                    clubs: [],
-                });
-            } finally {
-                setIsLoadingRelated(false);
-            }
-        };
-
-        void loadRelated();
     }, [id, isCreate]);
 
     useEffect(() => {
@@ -285,7 +225,7 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
     const unionName = unions.find((union) => union.id === form.union_id)?.name;
     const legacyCategories = form.categories || [];
     const divisionFilterOptions = linkedDivisions.length > 0
-        ? Array.from(new Set(linkedDivisions.map((division) => getDivisionDisplayName(division))))
+        ? Array.from(new Set(linkedDivisions.map((division) => division.name?.trim() || division.category?.trim() || 'Sin nombre')))
         : legacyCategories;
     const linkedSports = Array.from(
         new Set(
@@ -359,7 +299,7 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
             if (isCreate) {
                 const response = await createClubEntity(form);
                 setIsDirty(false);
-                router.push(`/admin/entities/${response.id}/manage?type=club&tab=general`);
+                router.push(buildClubManageHref(response.id, 'general', navigationMode));
                 return;
             }
 
@@ -393,7 +333,7 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
         setIsSaving(true);
         try {
             await deleteClubEntity(id);
-            router.push('/admin/super/clubes');
+            router.push(navigationMode === 'club-admin' ? '/club-admin' : '/admin/super/clubes');
         } catch (error) {
             alert(error instanceof Error ? error.message : String(error));
             setIsSaving(false);
@@ -430,7 +370,6 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
                                 managedClubs={managedClubs}
                                 currentClubId={id}
                                 primarySportLabel={primarySportLabel}
-                                familyClubCount={clubFamilyCount}
                             />
                         </Suspense>
                     </aside>
@@ -525,44 +464,15 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
                                         </>
                                     ) : null}
 
-                                    {currentTab === 'equipos' ? (
-                                        <>
-                                            <div className="card col-7">
-                                                <ClubSquadsCard
-                                                    divisions={linkedDivisions}
-                                                    fallbackCategories={legacyCategories}
-                                                    loading={isLoadingDivisions}
-                                                />
-                                            </div>
-
-                                            <div className="card col-5">
-                                                <div className="club-tab-stack">
-                                                    <div className="card-title">Estructura deportiva</div>
-                                                    <h3 className="club-tab-heading">Equipos, relaciones y alcance</h3>
-                                                    <p className="club-tab-copy">
-                                                        Primera, intermedia, juveniles y familia de club deben convivir en una estructura clara,
-                                                        editable y lista para operar sin recargar toda la app.
-                                                    </p>
-                                                    <div className="club-inline-metrics">
-                                                        <div><strong>{summaryMetrics.teams}</strong><span>equipos</span></div>
-                                                        <div><strong>{relatedData.clubs.length}</strong><span>clubes vinculados</span></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="card col-12">
-                                                <ClubRelatedClubsTab
-                                                    clubs={relatedData.clubs}
-                                                    rootClubName={relatedData.rootClubName}
-                                                    loading={isLoadingRelated}
-                                                />
-                                            </div>
-                                        </>
+                                                                        {currentTab === 'equipos' ? (
+                                        <div className="card col-12">
+                                            <ClubIdentityTab id={id} data={form as ClubRow} unions={unions} />
+                                        </div>
                                     ) : null}
 
                                     {currentTab === 'planteles' ? (
                                         <div className="col-12">
-                                            <ClubSquadsTab id={id} data={form as ClubRow} />
+                                            <ClubSquadsTab id={id} data={form as ClubRow} navigationMode={navigationMode} />
                                         </div>
                                     ) : null}
 
@@ -699,3 +609,4 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
         </ClubContext.Provider>
     );
 }
+

@@ -2,6 +2,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { parseClubBaseRosterId } from '@/lib/clubRoster';
 
 export interface PersonWithRole {
     id: string;
@@ -111,6 +112,14 @@ async function resolveRosterScope(
     supabaseClient?: any,
     divisionId?: string,
 ) {
+    const clubBaseRosterId = parseClubBaseRosterId(divisionId);
+    if (clubBaseRosterId) {
+        return {
+            rosterOwnerClubId: clubBaseRosterId,
+            rosterDivisionId: undefined,
+        };
+    }
+
     const familyDivision = parseFamilyDivisionId(divisionId);
     const sharedRosterOwnerClubId = await resolveSharedRosterOwnerClubId(clubId, supabaseClient);
     const rosterOwnerClubId = familyDivision?.rosterOwnerClubId ?? sharedRosterOwnerClubId;
@@ -678,6 +687,12 @@ export async function fetchPeopleByClub(clubId: string): Promise<PersonWithRole[
 }
 
 export async function fetchPeopleByDivision(clubId: string, divisionId: string): Promise<PersonWithRole[]> {
+    const clubBaseRosterId = parseClubBaseRosterId(divisionId);
+    if (clubBaseRosterId) {
+        const clubRosterPeople = await fetchPeopleByClub(clubBaseRosterId);
+        return clubRosterPeople.filter((person) => !person.division_id);
+    }
+
     const familyDivision = parseFamilyDivisionId(divisionId);
     const supabase = await createClient();
     const rosterScope = await resolveRosterScope(clubId, supabase as any, divisionId);

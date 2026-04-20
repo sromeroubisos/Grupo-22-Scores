@@ -13,6 +13,7 @@ import LogoUploader from '@/components/LogoUploader';
 import { FlashScoreIntegrationSection } from './FlashScoreIntegrationSection';
 import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
+import { normalizeSlug, normalizeText } from '@/lib/utils/normalize';
 import '../club/vitreous-club.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -191,7 +192,11 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
     }, [isDirty]);
 
     async function handleSave() {
-        if (form.name.trim().length < 3) {
+        const normalizedName = normalizeText(form.name) || '';
+        const normalizedCountryId = normalizeText(form.country_id);
+        const normalizedCountryLabel = normalizeText(selectedCountryLabel || form.country_label);
+
+        if (normalizedName.length < 3) {
             setMessage({ type: 'error', text: 'El nombre requiere al menos 3 caracteres' });
             return;
         }
@@ -205,21 +210,21 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
             const persistedLogoUrl = await persistTournamentLogo(id, form.logo_url);
             await updateEntity('tournament', id, {
                 ...(isApiManaged ? {
-                    display_name: form.name.trim(),
+                    display_name: normalizedName,
                     logo_url: persistedLogoUrl,
                     priority: form.priority ?? 0,
                 } : {
-                    name: form.name.trim(),
-                    slug: form.slug || null,
-                    season_id: form.season_id || null,
+                    name: normalizedName,
+                    slug: normalizeSlug(form.slug) || null,
+                    season_id: normalizeText(form.season_id),
                     priority: form.priority ?? 0,
-                    sport_id: form.sport_id || null,
-                    union_id: form.union_id || null,
-                    country: form.country_id ? (selectedCountryLabel || form.country_id) : null,
-                    country_id: form.country_id || null,
-                    region: form.region || null,
-                    category: form.category || null,
-                    age_grade: form.age_grade || null,
+                    sport_id: normalizeText(form.sport_id),
+                    union_id: normalizeText(form.union_id),
+                    country: normalizedCountryId ? (normalizedCountryLabel || normalizedCountryId) : null,
+                    country_id: normalizedCountryId,
+                    region: normalizeText(form.region),
+                    category: normalizeText(form.category),
+                    age_grade: normalizeText(form.age_grade),
                     logo_url: persistedLogoUrl,
                     ruleset: form.ruleset,
                 })

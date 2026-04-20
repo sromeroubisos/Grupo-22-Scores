@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 
 interface RelatedClubItem {
     id: string;
@@ -19,6 +20,7 @@ interface ClubRelatedClubsTabProps {
     clubs: RelatedClubItem[];
     rootClubName?: string | null;
     loading?: boolean;
+    navigationMode?: ClubConsoleMode;
 }
 
 function getRoleLabel(club: RelatedClubItem) {
@@ -31,6 +33,7 @@ export function ClubRelatedClubsTab({
     clubs,
     rootClubName,
     loading,
+    navigationMode = 'admin',
 }: ClubRelatedClubsTabProps) {
     if (loading) {
         return (
@@ -140,7 +143,7 @@ export function ClubRelatedClubsTab({
                                 </span>
                                 {!club.isCurrent && (
                                     <Link
-                                        href={`/admin/entities/${club.id}/manage?type=club&tab=equipos`}
+                                        href={buildClubManageHref(club.id, 'equipos', navigationMode)}
                                         className="btn"
                                         style={{ textDecoration: 'none' }}
                                     >

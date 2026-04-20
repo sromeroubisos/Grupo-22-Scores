@@ -139,7 +139,7 @@ export function ClubManageSidebar({
                     </div>
                     <div className="action-square">
                         <Plus className="w-4 h-4 mx-auto mb-1" style={{ color: 'var(--text-muted)' }} />
-                        <div>Planteles</div>
+                        <div>Jugadores</div>
                     </div>
                     <div className="action-square">
                         <Sparkles className="w-4 h-4 mx-auto mb-1" style={{ color: 'var(--text-muted)' }} />

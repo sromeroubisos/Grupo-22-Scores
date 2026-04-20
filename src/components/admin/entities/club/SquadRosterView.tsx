@@ -17,6 +17,7 @@ import { fetchPeopleByDivision, deletePersonFromClub, PersonWithRole } from '@/l
 import { Division } from '@/lib/services/divisionService';
 import { PersonManagementModal } from './PersonManagementModal';
 import { CSVImportModal } from './CSVImportModal';
+import { isClubBaseRosterId } from '@/lib/clubRoster';
 
 interface Props {
     clubId: string;
@@ -31,6 +32,7 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
     const [editingPlayer, setEditingPlayer] = useState<PersonWithRole | null>(null);
+    const isBaseRoster = isClubBaseRosterId(division.id, clubId);
 
     const loadPlayers = useCallback(async () => {
         setLoading(true);
@@ -75,7 +77,9 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                         <h1 className="!mb-1">PLANILLA: {division.name}</h1>
                         <p className="muted flex items-center gap-2">
                             <Calendar className="w-3 h-3" />
-                            Actualizado hace unos instantes - {players.length} jugadores registrados
+                            {isBaseRoster
+                                ? `Plantel base del club - ${players.length} jugadores registrados`
+                                : `Actualizado hace unos instantes - ${players.length} jugadores registrados`}
                         </p>
                     </div>
                 </div>

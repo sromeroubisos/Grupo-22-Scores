@@ -165,6 +165,13 @@ function sanitizeInlineAssetUrl(value: unknown): string | null {
     return normalized;
 }
 
+function preserveTournamentLogoValue(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim();
+    if (!normalized) return null;
+    return normalized;
+}
+
 function resolveParticipantClubLogo(
     participant: TournamentParticipantRow,
     club: TournamentClubSource | null | undefined,
@@ -636,8 +643,8 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             partial: Object.values(queryErrors).some(Boolean),
             tournament: tournamentRow ? {
                 ...tournamentRow,
-                logo_url: sanitizeInlineAssetUrl(tournamentRow.logo_url),
-                banner_url: sanitizeInlineAssetUrl(tournamentRow.banner_url),
+                logo_url: preserveTournamentLogoValue(tournamentRow.logo_url),
+                banner_url: preserveTournamentLogoValue(tournamentRow.banner_url),
                 sport_id: tournamentRow.sport_id || tournamentRow.legacy_sport || 'rugby',
                 country_name: tournamentRow.country || (tournamentRow.country_ref as { name?: string } | null)?.name || null,
             } : null,

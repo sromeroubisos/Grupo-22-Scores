@@ -1,4 +1,5 @@
 import { getCachedLogo } from './logoCache';
+import { normalizeLogoUrl } from './logoUrl';
 
 const TOURNAMENT_SOURCE_PATHS = [
     [],
@@ -18,6 +19,13 @@ const TOURNAMENT_LOGO_PATHS = [
     ['logo'],
     ['logo_url'],
     ['logoUrl'],
+    ['banner'],
+    ['banner_url'],
+    ['bannerUrl'],
+    ['league_logo'],
+    ['leagueLogo'],
+    ['current_league_logo'],
+    ['currentLeagueLogo'],
     ['image'],
     ['image_path'],
     ['small_image_path'],
@@ -67,6 +75,13 @@ function pushUnique(target: string[], value: string | null) {
     }
 }
 
+function pushUniqueLogo(target: string[], value: string | null) {
+    const normalized = normalizeLogoUrl(value);
+    if (normalized && !target.includes(normalized)) {
+        target.push(normalized);
+    }
+}
+
 function collectTournamentIds(source: unknown): string[] {
     const ids: string[] = [];
 
@@ -90,7 +105,7 @@ function collectTournamentLogos(source: unknown): string[] {
         if (!isRecord(scopedSource)) continue;
 
         for (const logoPath of TOURNAMENT_LOGO_PATHS) {
-            pushUnique(logos, readNonEmptyString(scopedSource, logoPath));
+            pushUniqueLogo(logos, readNonEmptyString(scopedSource, logoPath));
         }
     }
 
@@ -98,6 +113,11 @@ function collectTournamentLogos(source: unknown): string[] {
 }
 
 export function resolveTournamentLogo(source: unknown, fallbackLogo?: string | null): string | null {
+    const normalizedFallback = normalizeLogoUrl(fallbackLogo);
+    if (normalizedFallback) {
+        return normalizedFallback;
+    }
+
     const directLogos = collectTournamentLogos(source);
 
     for (const logo of directLogos) {
@@ -109,5 +129,5 @@ export function resolveTournamentLogo(source: unknown, fallbackLogo?: string | n
         if (cachedLogo) return cachedLogo;
     }
 
-    return typeof fallbackLogo === 'string' && fallbackLogo.trim() ? fallbackLogo.trim() : null;
+    return null;
 }

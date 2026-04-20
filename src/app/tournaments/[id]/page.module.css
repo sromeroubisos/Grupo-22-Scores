@@ -44,6 +44,11 @@
     --fl-follow-hov:    rgba(0, 0, 0, 0.6);
     --fl-shimmer:       rgba(255, 255, 255, 0.09);
     --fl-scrollbar:     rgba(255, 255, 255, 0.06);
+    --fl-logo-plate-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+    --fl-logo-plate-ring: rgba(255, 255, 255, 0.1);
+    --fl-logo-plate-glow: rgba(0, 0, 0, 0.38);
+    --fl-logo-plate-highlight: rgba(255, 255, 255, 0.12);
+    --fl-logo-image-shadow: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.28));
 
     /* ── Shape & Font ── */
     --fl-radius:        20px;
@@ -86,6 +91,11 @@
     --fl-follow-hov:    rgba(0, 0, 0, 0.1);
     --fl-shimmer:       rgba(0, 0, 0, 0.05);
     --fl-scrollbar:     rgba(0, 0, 0, 0.12);
+    --fl-logo-plate-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(232, 239, 247, 0.98));
+    --fl-logo-plate-ring: rgba(15, 23, 42, 0.08);
+    --fl-logo-plate-glow: rgba(15, 23, 42, 0.14);
+    --fl-logo-plate-highlight: rgba(0, 163, 101, 0.12);
+    --fl-logo-image-shadow: drop-shadow(0 6px 16px rgba(15, 23, 42, 0.16));
 }
 
 /* ── Light Mode: gradient overrides (can't tokenize) ────────────── */
@@ -227,19 +237,34 @@
     width: 80px;
     height: 80px;
     border-radius: 16px;
-    background: var(--fl-surface-alt);
-    border: 1px solid var(--fl-border);
+    background: var(--fl-logo-plate-bg);
+    border: 1px solid var(--fl-logo-plate-ring);
     display: grid;
     place-items: center;
     flex-shrink: 0;
     overflow: hidden;
-    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 28px -14px var(--fl-logo-plate-glow);
+    position: relative;
+    isolation: isolate;
+}
+.heroLogoWrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+        radial-gradient(circle at top left, var(--fl-logo-plate-highlight), transparent 58%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 42%);
+    pointer-events: none;
 }
 .heroLogoImg {
     width: 100%;
     height: 100%;
     object-fit: contain;
     padding: 10px;
+    position: relative;
+    z-index: 1;
+    filter: var(--fl-logo-image-shadow);
 }
 .heroLogoPlaceholder {
     font-size: 2.2rem;
@@ -247,6 +272,8 @@
     color: var(--fl-primary);
     line-height: 1;
     font-family: var(--fl-mono);
+    position: relative;
+    z-index: 1;
 }
 
 /* Info */

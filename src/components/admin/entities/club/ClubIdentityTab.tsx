@@ -1,13 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Database } from '@/lib/database.types';
-import { Shield, MapPin, Palette, Plus, X, Image as ImageIcon, ChevronRight } from 'lucide-react';
+import { Shield, MapPin, Image as ImageIcon } from 'lucide-react';
 import { clsx } from 'clsx';
 import LogoUploader from '@/components/LogoUploader';
 import { SPORTS } from '@/lib/data/sports';
-import { fetchDivisions, type Division } from '@/lib/services/divisionService';
 import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
@@ -18,37 +16,9 @@ interface ClubIdentityTabProps {
     unions: { id: string; name: string }[];
 }
 
-function normalizeSegmentValue(value?: string | null) {
-    return value?.trim().toUpperCase() || '';
-}
-
-function formatDivisionStatus(status?: Division['status']) {
-    switch (status) {
-        case 'active':
-            return 'ACTIVO';
-        case 'draft':
-            return 'BORRADOR';
-        case 'archived':
-            return 'ARCHIVADO';
-        default:
-            return 'PENDIENTE';
-    }
-}
-
-function formatDivisionMeta(division: Division) {
-    const parts = [division.sport, division.gender, division.category]
-        .map((value) => value?.trim())
-        .filter((value): value is string => Boolean(value));
-
-    return parts.length > 0 ? parts.join(' / ') : 'Segmento sin clasificar';
-}
-
-export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
+export function ClubIdentityTab({ data, unions }: ClubIdentityTabProps) {
     const [form, setForm] = useState(data);
-    const [tagInput, setTagInput] = useState('');
     const [logoTab, setLogoTab] = useState<'url' | 'upload'>('url');
-    const [linkedDivisions, setLinkedDivisions] = useState<Division[]>([]);
-    const [loadingDivisions, setLoadingDivisions] = useState(true);
 
     useEffect(() => {
         setForm(data);
@@ -64,9 +34,6 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
             return (left.priority ?? 999) - (right.priority ?? 999);
         });
 
-    const linkedDivisionCategoryKeys = new Set(
-        linkedDivisions.map((division) => normalizeSegmentValue(division.category || division.name))
-    );
     const previewLogo = resolveLogoPreviewSrc(form.logo_url);
 
     const updateField = (field: Partial<ClubRow>) => {
@@ -92,74 +59,6 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
 
         updateField(updates);
     };
-
-    const addTag = () => {
-        const val = tagInput.trim().toUpperCase();
-        if (!val) return;
-        if (form.categories?.includes(val)) return;
-        if (linkedDivisionCategoryKeys.has(val)) return;
-
-        const newCats = [...(form.categories || []), val];
-        updateField({ categories: newCats });
-        setTagInput('');
-    };
-
-    const removeTag = (tag: string) => {
-        const newCats = (form.categories || []).filter((category) => category !== tag);
-        updateField({ categories: newCats });
-    };
-
-    useEffect(() => {
-        let isMounted = true;
-
-        const loadLinkedDivisions = async () => {
-            if (!id || id === 'new') {
-                if (isMounted) {
-                    setLinkedDivisions([]);
-                    setLoadingDivisions(false);
-                }
-                return;
-            }
-
-            if (isMounted) {
-                setLoadingDivisions(true);
-            }
-
-            try {
-                const divisions = await fetchDivisions(id);
-                if (isMounted) {
-                    setLinkedDivisions(divisions);
-                }
-            } catch (error) {
-                console.error('Error loading club divisions for identity tab:', error);
-                if (isMounted) {
-                    setLinkedDivisions([]);
-                }
-            } finally {
-                if (isMounted) {
-                    setLoadingDivisions(false);
-                }
-            }
-        };
-
-        void loadLinkedDivisions();
-
-        const refreshDivisions = () => {
-            void loadLinkedDivisions();
-        };
-
-        window.addEventListener('club:divisions-updated', refreshDivisions);
-
-        return () => {
-            isMounted = false;
-            window.removeEventListener('club:divisions-updated', refreshDivisions);
-        };
-    }, [id]);
-
-    const legacyCategories = (form.categories || []).filter((category) => {
-        const normalizedCategory = normalizeSegmentValue(category);
-        return normalizedCategory && !linkedDivisionCategoryKeys.has(normalizedCategory);
-    });
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
@@ -389,140 +288,6 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                 </div>
             </div>
 
-            <div className="manager-card mt-10">
-                <header className="manager-header">
-                    <div className="manager-header-titles">
-                        <h1 className="flex items-center gap-3"><Palette className="w-6 h-6 text-[var(--accent)]" /> Segmentacion</h1>
-                        <p>Planteles, equipos y categorias oficiales asociadas.</p>
-                    </div>
-                </header>
-
-                <div className="manager-input-group">
-                    <label className="manager-field-label">Divisiones vinculadas al club</label>
-                    <div className="p-6 min-h-[100px] mb-4" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                        {loadingDivisions ? (
-                            <div className="flex items-center justify-center min-h-[88px]">
-                                <p className="text-[12px] uppercase tracking-widest self-center italic text-center" style={{ color: 'var(--text-muted)' }}>
-                                    Cargando divisiones...
-                                </p>
-                            </div>
-                        ) : linkedDivisions.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                                {linkedDivisions.map((division) => {
-                                    const divisionName = division.name?.trim() || division.category?.trim() || 'Sin nombre';
-                                    const divisionMeta = formatDivisionMeta(division);
-                                    const canOpenDivision = !division.id.startsWith('legacy-');
-                                    const content = (
-                                        <>
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div>
-                                                    <p className="text-[13px] font-black uppercase tracking-tight" style={{ color: 'var(--text)' }}>
-                                                        {divisionName}
-                                                    </p>
-                                                    <p className="text-[11px] uppercase tracking-[0.16em] mt-1" style={{ color: 'var(--text-muted)' }}>
-                                                        {divisionMeta}
-                                                    </p>
-                                                </div>
-                                                <span className={clsx(
-                                                    'text-[10px] px-2 py-1 border font-black uppercase tracking-[0.18em] whitespace-nowrap',
-                                                    division.status === 'active'
-                                                        ? 'text-[var(--success)] border-[rgba(0,255,133,0.25)] bg-[rgba(0,255,133,0.08)]'
-                                                        : division.status === 'draft'
-                                                            ? 'text-[var(--accent)] border-[rgba(255,145,0,0.25)] bg-[rgba(255,145,0,0.08)]'
-                                                            : 'text-[#999] border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.03)]'
-                                                )}>
-                                                    {formatDivisionStatus(division.status)}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)]">
-                                                <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: 'var(--text-muted)' }}>
-                                                    Temporada {division.season || '--'}
-                                                </span>
-                                                {canOpenDivision ? (
-                                                    <span className="inline-flex items-center gap-1 text-[11px] text-[var(--accent)] font-black uppercase tracking-[0.14em]">
-                                                        Ver plantel
-                                                        <ChevronRight className="w-3.5 h-3.5" />
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-[11px] text-[#777] font-black uppercase tracking-[0.14em]">
-                                                        Legacy
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </>
-                                    );
-
-                                    if (canOpenDivision) {
-                                        return (
-                                            <Link
-                                                key={division.id}
-                                                href={`/admin/super/clubes/${id}/planteles/${division.id}`}
-                                                className="block p-4 bg-[var(--surface-elevated)] border border-[rgba(255,255,255,0.12)] hover:border-[var(--accent)] transition-all"
-                                            >
-                                                {content}
-                                            </Link>
-                                        );
-                                    }
-
-                                    return (
-                                        <div
-                                            key={division.id}
-                                            className="p-4 bg-[var(--surface-elevated)] border border-[rgba(255,255,255,0.12)]"
-                                        >
-                                            {content}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="flex items-center justify-center min-h-[88px]">
-                                <p className="text-[12px] uppercase tracking-widest self-center italic text-center" style={{ color: 'var(--text-muted)' }}>
-                                    Sin divisiones vinculadas
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    <p className="text-xs uppercase tracking-[0.16em] mb-6" style={{ color: 'var(--text-muted)' }}>
-                        Esta seccion se sincroniza automaticamente con los planteles creados para este club.
-                    </p>
-
-                    {legacyCategories.length > 0 && (
-                        <>
-                            <label className="manager-field-label">Categorias manuales legacy</label>
-                            <div className="flex flex-wrap gap-2 p-6 min-h-[76px] mb-4" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                                {legacyCategories.map((tag) => (
-                                    <div key={tag} className="flex items-center gap-2 px-3 py-1.5 bg-[var(--surface-elevated)] border border-[rgba(255,255,255,0.2)] group hover:border-[var(--accent)] transition-all">
-                                        <span className="text-[12px] font-black uppercase tracking-tighter" style={{ color: 'var(--text)' }}>{tag}</span>
-                                        <button type="button" onClick={() => removeTag(tag)} className="transition-colors" style={{ color: 'var(--text-muted)' }}>
-                                            <X className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </>
-                    )}
-
-                    <label className="manager-field-label">Agregar categoria manual</label>
-                    <div className="flex gap-4 max-w-md">
-                        <input
-                            type="text"
-                            placeholder="ESCRIBE CATEGORIA LEGACY (M16...)"
-                            className="manager-url-input uppercase font-bold text-sm"
-                            value={tagInput}
-                            onChange={(e) => setTagInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && addTag()}
-                        />
-                        <button
-                            type="button"
-                            onClick={addTag}
-                            className="bg-[var(--accent)] text-[var(--bg)] px-6 font-bold uppercase tracking-widest text-xs border border-[var(--accent)] hover:opacity-80 transition-opacity"
-                        >
-                            <Plus className="w-5 h-5 mx-auto" />
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

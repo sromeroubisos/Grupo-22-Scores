@@ -87,6 +87,54 @@ function normalizeTournamentUrl(raw?: string): string | undefined {
     return trimmed;
 }
 
+function applyDbTournamentPresentationOverrides(
+    payload: unknown,
+    dbTournamentMeta: {
+        name?: string | null;
+        display_name?: string | null;
+        logo_url?: string | null;
+        banner_url?: string | null;
+        country_id?: string | null;
+        url?: string | null;
+    } | null,
+) {
+    const basePayload = payload && typeof payload === 'object'
+        ? payload as Record<string, unknown>
+        : {};
+
+    if (!dbTournamentMeta) {
+        return basePayload;
+    }
+
+    const resolvedName = normalizeId(dbTournamentMeta.display_name || dbTournamentMeta.name);
+    const resolvedLogo = normalizeId(dbTournamentMeta.logo_url || dbTournamentMeta.banner_url);
+    const resolvedCountryId = normalizeId(dbTournamentMeta.country_id);
+    const resolvedUrl = normalizeTournamentUrl(dbTournamentMeta.url || undefined) || normalizeId(dbTournamentMeta.url);
+
+    return {
+        ...basePayload,
+        ...(resolvedName ? {
+            name: resolvedName,
+            display_name: resolvedName,
+        } : {}),
+        ...(resolvedLogo ? {
+            logo_url: resolvedLogo,
+            image: resolvedLogo,
+            logo: resolvedLogo,
+            image_path: resolvedLogo,
+            logo_path: resolvedLogo,
+            tournament_logo: resolvedLogo,
+            tournament_image_path: resolvedLogo,
+        } : {}),
+        ...(resolvedCountryId ? {
+            country_id: resolvedCountryId,
+        } : {}),
+        ...(resolvedUrl ? {
+            url: resolvedUrl,
+        } : {}),
+    };
+}
+
 function isRugbyApiSportsTournamentId(value: string): boolean {
     return /^ras-league-\d+$/i.test(value.trim());
 }
@@ -933,6 +981,8 @@ export async function GET(request: Request) {
                 }
             }
 
+            detailsPayload = applyDbTournamentPresentationOverrides(detailsPayload, dbTournamentMeta);
+
             try {
                 persistFromTournamentPayload({
                     ids: {
@@ -1063,6 +1113,8 @@ export async function GET(request: Request) {
                     customStandingsTables = overriddenStandings.customTables;
                 }
             }
+
+            detailsPayload = applyDbTournamentPresentationOverrides(detailsPayload, dbTournamentMeta);
 
             try {
                 persistFromTournamentPayload({
@@ -1459,6 +1511,8 @@ export async function GET(request: Request) {
             }
         }
 
+        detailsPayload = applyDbTournamentPresentationOverrides(detailsPayload, dbTournamentMeta);
+
         if (requestedName) {
             const currentDetails = detailsPayload && typeof detailsPayload === 'object'
                 ? detailsPayload as Record<string, unknown>
@@ -1681,6 +1735,8 @@ export async function GET(request: Request) {
                     fallbackCustomStandingsTables = overriddenStandings.customTables;
                 }
             }
+
+            fallbackDetailsPayload = applyDbTournamentPresentationOverrides(fallbackDetailsPayload, dbTournamentMeta);
 
             const hasAnySnapshot = Object.values(fallbackSources).some((v) => v === 'snapshot');
             if (hasAnySnapshot) {

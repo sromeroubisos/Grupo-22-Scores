@@ -16,6 +16,7 @@ import {
 } from './TournamentContext';
 import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
+import { normalizeSlug, normalizeText } from '@/lib/utils/normalize';
 import './basalt.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -73,28 +74,31 @@ function buildTournamentDetailsUpdates(
     draft: TournamentDetailsDraft,
 ): Record<string, unknown> {
     const isApiManaged = Boolean(tournament.is_api_managed);
+    const normalizedName = normalizeText(draft.name) || '';
+    const normalizedCountryId = normalizeText(draft.country_id);
+    const normalizedCountryLabel = normalizeText(draft.country_label);
 
     if (isApiManaged) {
         return {
-            display_name: draft.name.trim(),
-            logo_url: draft.logo_url || null,
+            display_name: normalizedName,
+            logo_url: normalizeText(draft.logo_url),
             priority: typeof draft.priority === 'number' ? draft.priority : 0,
         };
     }
 
     return {
-        name: draft.name.trim(),
-        slug: draft.slug || null,
-        season_id: draft.season_id || null,
-        sport_id: draft.sport_id || null,
-        union_id: draft.union_id || null,
-        country: draft.country_id ? (draft.country_label || draft.country_id) : null,
-        country_id: draft.country_id || null,
+        name: normalizedName,
+        slug: normalizeSlug(draft.slug) || null,
+        season_id: normalizeText(draft.season_id),
+        sport_id: normalizeText(draft.sport_id),
+        union_id: normalizeText(draft.union_id),
+        country: normalizedCountryId ? (normalizedCountryLabel || normalizedCountryId) : null,
+        country_id: normalizedCountryId,
         priority: typeof draft.priority === 'number' ? draft.priority : 0,
-        region: draft.region || null,
-        category: draft.category || null,
-        age_grade: draft.age_grade || null,
-        logo_url: draft.logo_url || null,
+        region: normalizeText(draft.region),
+        category: normalizeText(draft.category),
+        age_grade: normalizeText(draft.age_grade),
+        logo_url: normalizeText(draft.logo_url),
         ruleset: draft.ruleset,
     };
 }

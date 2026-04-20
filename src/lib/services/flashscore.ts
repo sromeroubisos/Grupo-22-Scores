@@ -746,8 +746,9 @@ export async function getTournamentDetails(tournamentStageId: string) {
         cacheTtl: CACHE_TTL_TOURNAMENTS
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
-    return data;
+    const normalized = normalizeFlashScoreTournamentDetails(data);
+    if (normalized) memoryCache.set(cacheKey, normalized, CACHE_TTL_TOURNAMENTS);
+    return normalized;
 }
 
 /**
@@ -1143,6 +1144,85 @@ function normalizeFlashScoreTournamentList(payload: any) {
                     null,
             }))
             .filter((tournament) => (tournament.tournament_id != null || tournament.url) && tournament.name),
+    };
+}
+
+function pickFlashScoreTournamentLogo(source: any): string | null {
+    const candidate =
+        source?.logo_url ??
+        source?.logo ??
+        source?.image ??
+        source?.image_path ??
+        source?.logo_path ??
+        source?.league_logo ??
+        source?.current_league_logo ??
+        source?.tournament_logo ??
+        source?.tournament_image_path ??
+        source?.league?.logo ??
+        source?.league?.image ??
+        source?.league?.logo_url ??
+        source?.competition?.logo ??
+        source?.competition?.image ??
+        source?.competition?.logo_url ??
+        source?.tournament?.logo ??
+        source?.tournament?.image ??
+        source?.tournament?.logo_url ??
+        null;
+
+    return typeof candidate === 'string' && candidate.trim() ? candidate.trim() : null;
+}
+
+function normalizeFlashScoreTournamentDetails(payload: any) {
+    const data = payload?.DATA || payload;
+    if (!data || typeof data !== 'object') return payload;
+
+    const resolvedLogo = pickFlashScoreTournamentLogo(data);
+    const resolvedName =
+        (typeof data.name === 'string' && data.name.trim() ? data.name.trim() : null) ||
+        (typeof data.tournament_name === 'string' && data.tournament_name.trim() ? data.tournament_name.trim() : null) ||
+        (typeof data.league_name === 'string' && data.league_name.trim() ? data.league_name.trim() : null) ||
+        (typeof data.display_name === 'string' && data.display_name.trim() ? data.display_name.trim() : null) ||
+        (typeof data.tournament?.name === 'string' && data.tournament.name.trim() ? data.tournament.name.trim() : null) ||
+        (typeof data.league?.name === 'string' && data.league.name.trim() ? data.league.name.trim() : null) ||
+        null;
+
+    return {
+        ...payload,
+        ...(payload?.DATA && typeof payload.DATA === 'object'
+            ? {
+                DATA: {
+                    ...payload.DATA,
+                    ...(resolvedName ? { name: resolvedName, display_name: resolvedName } : {}),
+                    ...(resolvedLogo
+                        ? {
+                            logo_url: resolvedLogo,
+                            logo: resolvedLogo,
+                            image: resolvedLogo,
+                            image_path: resolvedLogo,
+                            logo_path: resolvedLogo,
+                            tournament_logo: resolvedLogo,
+                            tournament_image_path: resolvedLogo,
+                            league_logo: resolvedLogo,
+                            current_league_logo: resolvedLogo,
+                        }
+                        : {}),
+                },
+            }
+            : {}),
+        ...(resolvedName ? { name: resolvedName, display_name: resolvedName } : {}),
+        ...(resolvedLogo
+            ? {
+                logo_url: resolvedLogo,
+                logo: resolvedLogo,
+                image: resolvedLogo,
+                image_path: resolvedLogo,
+                logo_path: resolvedLogo,
+                tournament_logo: resolvedLogo,
+                tournament_image_path: resolvedLogo,
+                league_logo: resolvedLogo,
+                current_league_logo: resolvedLogo,
+            }
+            : {}),
     };
 }
 
