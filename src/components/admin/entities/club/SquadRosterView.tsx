@@ -98,7 +98,7 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
             </header>
 
             <section className="panel">
-                <div className="p-4 border-b border-neutral-800 bg-neutral-900/30 flex flex-col md:flex-row gap-3">
+                <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-bg-tertiary)] flex flex-col md:flex-row gap-3">
                     <div className="relative flex-1 search-wrapper">
                         <Search className="search-icon" />
                         <input
@@ -109,7 +109,7 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                             className="search"
                         />
                     </div>
-                    <button className="btn gap-2 text-neutral-500">
+                    <button className="btn gap-2 text-[var(--color-text-secondary)]">
                         <Filter className="w-4 h-4" />
                         Filtros avanzados
                     </button>
@@ -118,16 +118,16 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-sm">
                         <thead>
-                            <tr className="border-b border-neutral-800">
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Jugador</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Documento</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">F. Nacimiento</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Posicion</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-neutral-500 uppercase tracking-widest">Estado</th>
-                                <th className="px-4 py-3 text-right text-[10px] font-black text-neutral-500 uppercase tracking-widest">Acciones</th>
+                            <tr className="border-b border-[var(--color-border)]">
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Jugador</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Documento</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">F. Nacimiento</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Posicion</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Estado</th>
+                                <th className="px-4 py-3 text-right text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-800/50">
+                        <tbody className="divide-y divide-[var(--color-border)]">
                             {loading ? (
                                 <tr>
                                     <td colSpan={6} className="py-20 text-center">
@@ -136,7 +136,7 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                 </tr>
                             ) : filteredPlayers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="py-32 text-center text-neutral-600 space-y-4">
+                                    <td colSpan={6} className="py-32 text-center text-[var(--color-text-muted)] space-y-4">
                                         <User className="w-16 h-16 opacity-10 mx-auto" />
                                         <p className="text-[14px] font-black uppercase tracking-[0.3em] opacity-30">Planilla vacia</p>
                                         <button
@@ -153,29 +153,29 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                     </td>
                                 </tr>
                             ) : filteredPlayers.map((person) => (
-                                <tr key={person.id} className="hover:bg-neutral-800/20 transition-colors group">
+                                <tr key={person.id} className="hover:bg-[var(--color-bg-hover)] transition-colors group">
                                     <td className="px-4 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                            <div className="w-9 h-9 rounded-full bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 {person.photo_url ? (
                                                     <img src={person.photo_url} alt={person.first_name} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <User className="w-4 h-4 text-neutral-600" />
+                                                    <User className="w-4 h-4 text-[var(--color-text-muted)]" />
                                                 )}
                                             </div>
                                             <div>
-                                                <div className="text-sm font-black text-white uppercase">
+                                                <div className="text-sm font-black text-[var(--color-text-primary)] uppercase">
                                                     {person.first_name} {person.last_name}
                                                 </div>
-                                                <div className="text-[9px] text-neutral-600 font-mono">#{person.id.slice(0, 8)}</div>
+                                                <div className="text-[9px] text-[var(--color-text-muted)] font-mono">#{person.id.slice(0, 8)}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-4 text-xs font-mono text-neutral-400">
-                                        {person.id_number || <span className="text-neutral-700">-</span>}
+                                    <td className="px-4 py-4 text-xs font-mono text-[var(--color-text-secondary)]">
+                                        {person.id_number || <span className="text-[var(--color-text-muted)]">-</span>}
                                     </td>
-                                    <td className="px-4 py-4 text-xs font-mono text-neutral-400">
-                                        {person.birth_date ? new Date(person.birth_date).toLocaleDateString() : <span className="text-neutral-700">-</span>}
+                                    <td className="px-4 py-4 text-xs font-mono text-[var(--color-text-secondary)]">
+                                        {person.birth_date ? new Date(person.birth_date).toLocaleDateString() : <span className="text-[var(--color-text-muted)]">-</span>}
                                     </td>
                                     <td className="px-4 py-4">
                                         <span className={clsx(
@@ -198,16 +198,16 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                                     setEditingPlayer(person);
                                                     setIsAddModalOpen(true);
                                                 }}
-                                                className="p-2 hover:bg-neutral-700 rounded transition-colors border border-neutral-800"
+                                                className="p-2 hover:bg-[var(--color-bg-hover)] rounded transition-colors border border-[var(--color-border)]"
                                                 title="Editar jugador"
                                             >
-                                                <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
+                                                <ExternalLink className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
                                             </button>
                                             <button
                                                 onClick={() => handleRemovePlayer(person.id, `${person.first_name} ${person.last_name}`)}
-                                                className="p-2 hover:bg-red-500/10 hover:border-red-500/50 rounded transition-colors border border-neutral-800 group/trash"
+                                                className="p-2 hover:bg-red-500/10 hover:border-red-500/50 rounded transition-colors border border-[var(--color-border)] group/trash"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5 text-neutral-400 group-hover/trash:text-red-500" />
+                                                <Trash2 className="w-3.5 h-3.5 text-[var(--color-text-secondary)] group-hover/trash:text-red-500" />
                                             </button>
                                         </div>
                                     </td>

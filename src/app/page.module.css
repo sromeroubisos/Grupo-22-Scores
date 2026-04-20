@@ -114,6 +114,12 @@
     box-shadow: 0 18px 40px -30px rgba(0, 0, 0, 0.75);
 }
 
+:global([data-theme="light"]) .dateSelector {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.92) 100%);
+    border-color: rgba(148, 163, 184, 0.28);
+    box-shadow: 0 18px 40px -30px rgba(15, 23, 42, 0.18);
+}
+
 .dateSelectorInner {
     display: flex;
     align-items: center;
@@ -215,9 +221,21 @@
     transition: all 0.2s ease;
 }
 
+:global([data-theme="light"]) .mobileNavArrow {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(148, 163, 184, 0.28);
+    color: var(--color-text-secondary);
+    box-shadow: 0 6px 18px -16px rgba(15, 23, 42, 0.2);
+}
+
 .mobileNavArrow:hover:not(:disabled) {
     background: var(--color-bg-tertiary);
     color: var(--color-text-primary);
+}
+
+:global([data-theme="light"]) .mobileNavArrow:hover:not(:disabled) {
+    background: rgba(241, 245, 249, 0.96);
+    border-color: rgba(100, 116, 139, 0.3);
 }
 
 .mobileNavArrow:disabled {
@@ -231,6 +249,10 @@
     color: var(--color-text-primary);
     text-transform: capitalize;
     letter-spacing: 0.02em;
+}
+
+:global([data-theme="light"]) .mobileCurrentDate {
+    color: var(--color-text-primary);
 }
 
 .dateLabel {
@@ -627,6 +649,16 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+:global([data-theme="light"]) .leagueSection {
+    background:
+        linear-gradient(180deg, var(--league-surface-light, rgba(59, 130, 246, 0.06)) 0%, rgba(255, 255, 255, 0) 88px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
+    border-color: var(--league-border, rgba(148, 163, 184, 0.24));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 18px 32px -28px rgba(15, 23, 42, 0.18);
+}
+
 .motorsportLeagueSection {
     background:
         linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
@@ -688,6 +720,11 @@
     gap: 12px;
     height: 48px;
     /* Fixed height goal */
+}
+
+:global([data-theme="light"]) .leagueSectionHeader {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.06) 0%, rgba(255, 255, 255, 0) 92%);
+    border-bottom-color: var(--league-divider, rgba(148, 163, 184, 0.18));
 }
 
 .motorsportLeagueSectionHeader {
@@ -813,6 +850,14 @@
     text-decoration: none;
     color: inherit;
     transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+:global([data-theme="light"]) .matchRow {
+    border-bottom-color: rgba(148, 163, 184, 0.16);
+}
+
+:global([data-theme="light"]) .matchRow:hover {
+    background: rgba(241, 245, 249, 0.72);
 }
 
 .matchRowLive {
@@ -1091,6 +1136,11 @@
     border-color: rgba(255, 255, 255, 0.08);
     color: var(--color-text-primary);
     transform: scale(1.04);
+}
+
+:global([data-theme="light"]) .clubFavoriteBtn:hover {
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(148, 163, 184, 0.22);
 }
 
 .clubFavoriteBtnActive {

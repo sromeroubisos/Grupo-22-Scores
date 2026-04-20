@@ -185,9 +185,9 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                     <span>Sin escudo</span>
                                 </div>
                             )}
-                            <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                                <p className="text-[10px] text-white font-bold uppercase text-center leading-tight">Configura a la derecha</p>
-                            </div>
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4" style={{ background: 'rgba(15, 23, 42, 0.68)' }}>
+                                    <p className="text-[10px] font-bold uppercase text-center leading-tight" style={{ color: '#fff' }}>Configura a la derecha</p>
+                                </div>
                         </div>
 
                         <div className="manager-metadata-box">
@@ -219,7 +219,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                         <button type="button" className="manager-btn-inline secondary" onClick={(e) => { e.preventDefault(); updateField({ logo_url: '' }); }}>Limpiar</button>
                                     </div>
                                 </div>
-                                <p className="text-xs text-[#888] mt-2 leading-relaxed">
+                                <p className="text-xs mt-2 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
                                     Acepta URLs directas, snippets HTML y enlaces de Flaticon de paises para convertirlos en banderas al guardar.
                                 </p>
                             </div>
@@ -246,7 +246,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                         value={form.primary_color || '#3b82f6'}
                                         onChange={(e) => updateField({ primary_color: e.target.value })}
                                     />
-                                    <span className="font-mono text-[13px] text-[#e2e2e2] font-bold">{form.primary_color?.toUpperCase() || '#3B82F6'}</span>
+                                    <span className="font-mono text-[13px] font-bold" style={{ color: 'var(--text)' }}>{form.primary_color?.toUpperCase() || '#3B82F6'}</span>
                                 </div>
                             </div>
                             <div className="manager-input-group">
@@ -265,7 +265,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                             form.is_visible ? 'translate-x-6 bg-[var(--success)]' : 'translate-x-0 bg-[#52525b]'
                                         )} />
                                     </button>
-                                    <span className="text-[13px] font-bold text-[#e2e2e2] uppercase tracking-tighter">
+                                    <span className="text-[13px] font-bold uppercase tracking-tighter" style={{ color: 'var(--text)' }}>
                                         {form.is_visible ? 'Visible en Website' : 'Oculto / Privado'}
                                     </span>
                                 </div>
@@ -307,7 +307,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                     <div className="manager-input-group">
                         <label className="manager-field-label">Ruta URL (Slug)</label>
                         <div className="relative flex items-center">
-                            <span className="absolute left-4 text-[#888] font-mono text-xs">/clubs/</span>
+                            <span className="absolute left-4 font-mono text-xs" style={{ color: 'var(--text-muted)' }}>/clubs/</span>
                             <input
                                 type="text"
                                 className="manager-url-input pl-20"
@@ -399,10 +399,10 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
 
                 <div className="manager-input-group">
                     <label className="manager-field-label">Divisiones vinculadas al club</label>
-                    <div className="p-6 bg-[#0a0a0c] border border-[rgba(255,255,255,0.1)] min-h-[100px] mb-4">
+                    <div className="p-6 min-h-[100px] mb-4" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
                         {loadingDivisions ? (
                             <div className="flex items-center justify-center min-h-[88px]">
-                                <p className="text-[#888] text-[12px] uppercase tracking-widest self-center italic text-center">
+                                <p className="text-[12px] uppercase tracking-widest self-center italic text-center" style={{ color: 'var(--text-muted)' }}>
                                     Cargando divisiones...
                                 </p>
                             </div>
@@ -416,10 +416,10 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                         <>
                                             <div className="flex items-start justify-between gap-3">
                                                 <div>
-                                                    <p className="text-[13px] font-black text-[#e2e2e2] uppercase tracking-tight">
+                                                    <p className="text-[13px] font-black uppercase tracking-tight" style={{ color: 'var(--text)' }}>
                                                         {divisionName}
                                                     </p>
-                                                    <p className="text-[11px] text-[#888] uppercase tracking-[0.16em] mt-1">
+                                                    <p className="text-[11px] uppercase tracking-[0.16em] mt-1" style={{ color: 'var(--text-muted)' }}>
                                                         {divisionMeta}
                                                     </p>
                                                 </div>
@@ -435,7 +435,7 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)]">
-                                                <span className="text-[11px] text-[#888] uppercase tracking-[0.14em]">
+                                                <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: 'var(--text-muted)' }}>
                                                     Temporada {division.season || '--'}
                                                 </span>
                                                 {canOpenDivision ? (
@@ -476,25 +476,25 @@ export function ClubIdentityTab({ id, data, unions }: ClubIdentityTabProps) {
                             </div>
                         ) : (
                             <div className="flex items-center justify-center min-h-[88px]">
-                                <p className="text-[#888] text-[12px] uppercase tracking-widest self-center italic text-center">
+                                <p className="text-[12px] uppercase tracking-widest self-center italic text-center" style={{ color: 'var(--text-muted)' }}>
                                     Sin divisiones vinculadas
                                 </p>
                             </div>
                         )}
                     </div>
 
-                    <p className="text-xs text-[#888] uppercase tracking-[0.16em] mb-6">
+                    <p className="text-xs uppercase tracking-[0.16em] mb-6" style={{ color: 'var(--text-muted)' }}>
                         Esta seccion se sincroniza automaticamente con los planteles creados para este club.
                     </p>
 
                     {legacyCategories.length > 0 && (
                         <>
                             <label className="manager-field-label">Categorias manuales legacy</label>
-                            <div className="flex flex-wrap gap-2 p-6 bg-[#0a0a0c] border border-[rgba(255,255,255,0.1)] min-h-[76px] mb-4">
+                            <div className="flex flex-wrap gap-2 p-6 min-h-[76px] mb-4" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
                                 {legacyCategories.map((tag) => (
                                     <div key={tag} className="flex items-center gap-2 px-3 py-1.5 bg-[var(--surface-elevated)] border border-[rgba(255,255,255,0.2)] group hover:border-[var(--accent)] transition-all">
-                                        <span className="text-[12px] font-black text-[#e2e2e2] uppercase tracking-tighter">{tag}</span>
-                                        <button type="button" onClick={() => removeTag(tag)} className="text-[#888] hover:text-[var(--error)] transition-colors">
+                                        <span className="text-[12px] font-black uppercase tracking-tighter" style={{ color: 'var(--text)' }}>{tag}</span>
+                                        <button type="button" onClick={() => removeTag(tag)} className="transition-colors" style={{ color: 'var(--text-muted)' }}>
                                             <X className="w-3.5 h-3.5" />
                                         </button>
                                     </div>

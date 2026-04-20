@@ -229,32 +229,32 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="card scale-in w-full max-w-3xl p-8 shadow-2xl overflow-hidden border-blue-500/20">
+            <div className="card scale-in w-full max-w-3xl p-8 shadow-2xl overflow-hidden border-blue-500/20 bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)]">
                 <div className="flex items-center justify-between mb-8">
                     <div className="space-y-1">
                         <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
                             <Upload className="w-6 h-6 text-blue-500" />
                             Importar jugadores
                         </h2>
-                        <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
+                        <p className="text-[10px] font-mono text-[var(--color-text-muted)] uppercase tracking-widest">
                             Formato masivo CSV / Excel para club y planteles
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-neutral-800 rounded-full transition" type="button">
-                        <X className="w-5 h-5 text-neutral-500" />
+                    <button onClick={onClose} className="p-2 hover:bg-[var(--color-bg-hover)] rounded-full transition" type="button">
+                        <X className="w-5 h-5 text-[var(--color-text-muted)]" />
                     </button>
                 </div>
 
                 {!result ? (
                     <div className="space-y-6">
                         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                            <div className="p-6 border-2 border-dashed border-neutral-800 rounded-xl bg-neutral-900/50 flex flex-col items-center justify-center text-center space-y-4">
-                                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center">
-                                    <FileText className="w-6 h-6 text-neutral-500" />
+                            <div className="p-6 border-2 border-dashed border-[var(--color-border)] rounded-xl bg-[var(--color-bg-tertiary)] flex flex-col items-center justify-center text-center space-y-4">
+                                <div className="w-12 h-12 rounded-full bg-[var(--color-bg-primary)] flex items-center justify-center">
+                                    <FileText className="w-6 h-6 text-[var(--color-text-muted)]" />
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-sm font-bold text-white">Seleccionar archivo CSV o Excel</p>
-                                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-mono">
+                                    <p className="text-sm font-bold text-[var(--color-text-primary)]">Seleccionar archivo CSV o Excel</p>
+                                    <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest font-mono">
                                         Encabezados nombrados, no dependemos del orden de columnas
                                     </p>
                                 </div>
@@ -277,16 +277,16 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                 </button>
                             </div>
 
-                            <div className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-900/40 p-5">
+                            <div className="space-y-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-5">
                                 <div>
-                                    <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-400">Formato soportado</p>
-                                    <p className="mt-2 text-sm text-neutral-300">
-                                        Columnas recomendadas: <span className="font-mono text-white">first_name</span>, <span className="font-mono text-white">last_name</span>, <span className="font-mono text-white">id_number</span>, <span className="font-mono text-white">birth_date</span>, <span className="font-mono text-white">position</span>, <span className="font-mono text-white">jersey_number</span>, <span className="font-mono text-white">division_id</span>.
+                                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">Formato soportado</p>
+                                    <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                                        Columnas recomendadas: <span className="font-mono text-[var(--color-text-primary)]">first_name</span>, <span className="font-mono text-[var(--color-text-primary)]">last_name</span>, <span className="font-mono text-[var(--color-text-primary)]">id_number</span>, <span className="font-mono text-[var(--color-text-primary)]">birth_date</span>, <span className="font-mono text-[var(--color-text-primary)]">position</span>, <span className="font-mono text-[var(--color-text-primary)]">jersey_number</span>, <span className="font-mono text-[var(--color-text-primary)]">division_id</span>.
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-400">Reglas</p>
-                                    <ul className="mt-2 space-y-1 text-sm text-neutral-400">
+                                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">Reglas</p>
+                                    <ul className="mt-2 space-y-1 text-sm text-[var(--color-text-secondary)]">
                                         <li>Se requiere nombre y apellido.</li>
                                         <li>Si no envias <span className="font-mono">division_id</span>, se registra a nivel club.</li>
                                         <li><span className="font-mono">jersey_number</span> y <span className="font-mono">squad_role</span> impactan en el plantel.</li>
@@ -297,14 +297,14 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                            <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
                                 {fixedDivisionId ? 'Plantel de destino' : 'Asignar a plantel por defecto'}
                             </label>
                             <select
                                 value={selectedDivisionId}
                                 onChange={(e) => setSelectedDivisionId(e.target.value)}
                                 disabled={Boolean(fixedDivisionId)}
-                                className="w-full bg-neutral-900 border border-neutral-800 focus:border-blue-500 rounded-lg px-4 py-3 text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full rounded-lg px-4 py-3 text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--color-bg-primary)] border border-[var(--color-border)] text-[var(--color-text-primary)] focus:border-blue-500"
                             >
                                 {!fixedDivisionId && <option value="">-- CLUB GLOBAL --</option>}
                                 {divisions.map((division) => (
@@ -315,9 +315,9 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                             </select>
                         </div>
 
-                        <div className="rounded-xl border border-neutral-800 bg-black/30 p-4">
-                            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Plantilla base</p>
-                            <pre className="max-h-40 overflow-auto whitespace-pre-wrap text-[11px] leading-5 text-neutral-300">{templatePreview}</pre>
+                        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-4">
+                            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">Plantilla base</p>
+                            <pre className="max-h-40 overflow-auto whitespace-pre-wrap text-[11px] leading-5 text-[var(--color-text-secondary)]">{templatePreview}</pre>
                         </div>
 
                         <div className="flex gap-4 pt-2">
@@ -335,11 +335,11 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                     </div>
                 ) : (
                     <div className="space-y-6 animate-in fade-in duration-500">
-                        <div className="p-6 rounded-xl bg-neutral-900/50 border border-neutral-800 text-center">
+                        <div className="p-6 rounded-xl bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-center">
                             <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
                             <h3 className="text-lg font-black uppercase mb-1">Carga finalizada</h3>
-                            <p className="text-sm text-neutral-400">
-                                Se importaron <span className="text-white font-bold">{result.count}</span> jugadores correctamente.
+                            <p className="text-sm text-[var(--color-text-secondary)]">
+                                Se importaron <span className="text-[var(--color-text-primary)] font-bold">{result.count}</span> jugadores correctamente.
                             </p>
                         </div>
 
@@ -351,13 +351,13 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                 </div>
                                 <div className="max-h-48 overflow-y-auto space-y-1">
                                     {result.errors.map((error, index) => (
-                                        <p key={`${error}-${index}`} className="text-[10px] text-neutral-500 font-mono">{error}</p>
+                                        <p key={`${error}-${index}`} className="text-[10px] text-[var(--color-text-secondary)] font-mono">{error}</p>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        <button onClick={onClose} className="btn w-full h-12 !bg-white !text-black border-none font-black" type="button">
+                        <button onClick={onClose} className="btn w-full h-12 !bg-[var(--color-bg-primary)] !text-[var(--color-text-primary)] border border-[var(--color-border)] font-black" type="button">
                             Entendido
                         </button>
                     </div>

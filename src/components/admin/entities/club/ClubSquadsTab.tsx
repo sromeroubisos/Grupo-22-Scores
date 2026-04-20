@@ -172,7 +172,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                     <div className="manager-input-group">
                         <label className="manager-field-label">Busqueda Rapida</label>
                         <div className="relative flex items-center">
-                            <Search className="absolute left-4 w-4 h-4 text-[#888]" />
+                            <Search className="absolute left-4 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
                             <input
                                 type="text"
                                 className="manager-url-input pl-12"
@@ -212,7 +212,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                 <Plus className="w-4 h-4" />
                                 Registrar Jugador
                             </button>
-                            <button className="px-4 py-3 bg-[rgba(255,255,255,0.05)] border border-[var(--border)] text-[#e2e2e2] font-bold uppercase text-xs hover:bg-[rgba(255,255,255,0.08)] transition-all flex items-center justify-center">
+                            <button className="px-4 py-3 border border-[var(--border)] font-bold uppercase text-xs transition-all flex items-center justify-center" style={{ background: 'var(--surface-soft-strong)', color: 'var(--text)' }}>
                                 <Filter className="w-4 h-4" />
                             </button>
                         </div>
@@ -223,10 +223,11 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
             {actionMessage && (
                 <div className="manager-card border-[var(--accent)]/25">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <p className="text-sm text-[#cfcfcf]">{actionMessage}</p>
+                        <p className="text-sm" style={{ color: 'var(--text)' }}>{actionMessage}</p>
                         <button
                             type="button"
-                            className="px-4 py-2 bg-[rgba(255,255,255,0.05)] border border-[var(--border)] text-[#e2e2e2] font-bold uppercase text-xs hover:bg-[rgba(255,255,255,0.08)] transition-all"
+                            className="px-4 py-2 border border-[var(--border)] font-bold uppercase text-xs transition-all"
+                            style={{ background: 'var(--surface-soft-strong)', color: 'var(--text)' }}
                             onClick={() => setActionMessage(null)}
                         >
                             Entendido
@@ -239,7 +240,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                 <div className="manager-card">
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <div className="w-12 h-12 border-2 border-[var(--accent)]/20 border-t-[var(--accent)] rounded-full animate-spin"></div>
-                        <p className="text-[#888] uppercase text-xs tracking-widest">Cargando planteles...</p>
+                        <p className="uppercase text-xs tracking-widest" style={{ color: 'var(--text-muted)' }}>Cargando planteles...</p>
                     </div>
                 </div>
             ) : viewMode === 'cards' ? (
@@ -265,7 +266,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     >
                                         <div className={clsx('h-28 relative overflow-hidden bg-gradient-to-br', squad.colorClass)}>
                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-white/10 text-7xl font-black tracking-tighter">{squad.shortName}</span>
+                                                <span className="text-7xl font-black tracking-tighter" style={{ color: 'rgba(148, 163, 184, 0.18)' }}>{squad.shortName}</span>
                                             </div>
                                             <div className="absolute top-3 right-3 flex gap-2">
                                                 {squad.status === 'active' && (
@@ -275,20 +276,20 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                         </div>
 
                                         <div className="p-5">
-                                            <h3 className="font-bold text-lg text-[#e2e2e2] mb-1 truncate uppercase tracking-tight">
+                                            <h3 className="font-bold text-lg mb-1 truncate uppercase tracking-tight" style={{ color: 'var(--text)' }}>
                                                 {squad.name}
                                             </h3>
-                                            <p className="text-[#888] text-xs uppercase tracking-widest mb-4 font-bold">
+                                            <p className="text-xs uppercase tracking-widest mb-4 font-bold" style={{ color: 'var(--text-muted)' }}>
                                                 {squad.sport} / {squad.category}
                                             </p>
 
                                             <div className="flex items-center justify-between pt-4 border-t border-[rgba(255,255,255,0.05)]">
-                                                <div className="flex items-center gap-2 text-[#e2e2e2]">
+                                                <div className="flex items-center gap-2" style={{ color: 'var(--text)' }}>
                                                     <Users className="w-4 h-4 text-[var(--accent)]" />
                                                     <span className="font-black text-sm">{squad.players}</span>
-                                                    <span className="text-[#888] text-xs uppercase">jugadores</span>
+                                                    <span className="text-xs uppercase" style={{ color: 'var(--text-muted)' }}>jugadores</span>
                                                 </div>
-                                                <div className="anodized-tag text-[#888]">
+                                                <div className="anodized-tag" style={{ color: 'var(--text-muted)' }}>
                                                     {squad.season}
                                                 </div>
                                             </div>
@@ -320,15 +321,15 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     >
                                         <div className="h-28 relative overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800">
                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-white/10 text-7xl font-black tracking-tighter">{squad.shortName}</span>
+                                                <span className="text-7xl font-black tracking-tighter" style={{ color: 'rgba(148, 163, 184, 0.18)' }}>{squad.shortName}</span>
                                             </div>
                                         </div>
 
                                         <div className="p-5">
-                                            <h3 className="font-bold text-lg text-[#e2e2e2] mb-1 truncate uppercase tracking-tight">
+                                            <h3 className="font-bold text-lg mb-1 truncate uppercase tracking-tight" style={{ color: 'var(--text)' }}>
                                                 {squad.name}
                                             </h3>
-                                            <p className="text-[#888] text-xs uppercase tracking-widest mb-4 font-bold">
+                                            <p className="text-xs uppercase tracking-widest mb-4 font-bold" style={{ color: 'var(--text-muted)' }}>
                                                 {squad.sport} / {squad.category}
                                             </p>
 
@@ -336,7 +337,7 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                                 <div className="anodized-tag text-[var(--warning)] border-[var(--warning)]/30">
                                                     BORRADOR
                                                 </div>
-                                                <div className="anodized-tag text-[#888]">
+                                                <div className="anodized-tag" style={{ color: 'var(--text-muted)' }}>
                                                     {squad.season}
                                                 </div>
                                             </div>
@@ -368,20 +369,20 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     >
                                         <div className="h-28 relative overflow-hidden bg-gradient-to-br from-gray-600 to-gray-700">
                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-white/10 text-7xl font-black tracking-tighter">{squad.shortName}</span>
+                                                <span className="text-7xl font-black tracking-tighter" style={{ color: 'rgba(148, 163, 184, 0.18)' }}>{squad.shortName}</span>
                                             </div>
                                         </div>
 
                                         <div className="p-5">
-                                            <h3 className="font-bold text-lg text-[#e2e2e2] mb-1 truncate uppercase tracking-tight">
+                                            <h3 className="font-bold text-lg mb-1 truncate uppercase tracking-tight" style={{ color: 'var(--text)' }}>
                                                 {squad.name}
                                             </h3>
-                                            <p className="text-[#888] text-xs uppercase tracking-widest mb-4 font-bold">
+                                            <p className="text-xs uppercase tracking-widest mb-4 font-bold" style={{ color: 'var(--text-muted)' }}>
                                                 Temporada {squad.season}
                                             </p>
 
                                             <div className="flex items-center justify-between pt-4 border-t border-[rgba(255,255,255,0.05)]">
-                                                <div className="anodized-tag text-[#666]">
+                                                <div className="anodized-tag" style={{ color: 'var(--text-dim)' }}>
                                                     ARCHIVADO
                                                 </div>
                                             </div>
@@ -396,9 +397,9 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                         <div className="manager-card">
                             <div className="flex flex-col gap-6">
                                 <div className="flex flex-col items-center justify-center py-10 gap-4">
-                                    <Shield className="w-16 h-16 text-[#333] opacity-50" />
-                                    <p className="text-[#888] uppercase text-sm tracking-widest">No se encontraron planteles</p>
-                                    <p className="max-w-xl text-center text-[#666] text-xs uppercase tracking-widest">
+                                    <Shield className="w-16 h-16 opacity-50" style={{ color: 'var(--text-dim)' }} />
+                                    <p className="uppercase text-sm tracking-widest" style={{ color: 'var(--text-muted)' }}>No se encontraron planteles</p>
+                                    <p className="max-w-xl text-center text-xs uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
                                         Todavia no hay divisiones configuradas. Igual podes registrar jugadores a nivel club.
                                     </p>
                                     <button
@@ -418,8 +419,8 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                     <div className="border-t border-[rgba(255,255,255,0.06)] pt-6">
                                         <div className="flex items-center justify-between gap-4 mb-4">
                                             <div>
-                                                <p className="text-[#e2e2e2] uppercase font-black tracking-tight">Jugadores del club</p>
-                                                <p className="text-[#666] text-xs uppercase tracking-widest">
+                                                <p className="uppercase font-black tracking-tight" style={{ color: 'var(--text)' }}>Jugadores del club</p>
+                                                <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
                                                     Registrados sin division especifica.
                                                 </p>
                                             </div>
@@ -447,19 +448,19 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                                         }
                                                     }}
                                                 >
-                                                    <div className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                    <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0" style={{ background: 'var(--surface-row)', border: '1px solid var(--border-standard)' }}>
                                                         {person.photo_url ? (
                                                             // eslint-disable-next-line @next/next/no-img-element
                                                             <img src={person.photo_url} alt={person.first_name} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <Users className="w-4 h-4 text-neutral-600" />
+                                                            <Users className="w-4 h-4" style={{ color: 'var(--text-dim)' }} />
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="text-sm font-black text-[#e2e2e2] truncate uppercase">
+                                                        <p className="text-sm font-black truncate uppercase" style={{ color: 'var(--text)' }}>
                                                             {person.first_name} {person.last_name}
                                                         </p>
-                                                        <p className="text-[10px] text-[#888] uppercase tracking-widest truncate">
+                                                        <p className="text-[10px] uppercase tracking-widest truncate" style={{ color: 'var(--text-muted)' }}>
                                                             {person.position || 'Sin posicion'}
                                                         </p>
                                                     </div>
@@ -485,11 +486,11 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="border-b border-[var(--border)]">
-                                    <th className="px-6 py-4 text-left text-xs font-black text-[#888] uppercase tracking-widest">Plantel</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-[#888] uppercase tracking-widest">Deporte</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-[#888] uppercase tracking-widest">Temporada</th>
-                                    <th className="px-6 py-4 text-center text-xs font-black text-[#888] uppercase tracking-widest">Jugadores</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-[#888] uppercase tracking-widest">Estado</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Plantel</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Deporte</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Temporada</th>
+                                    <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Jugadores</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -500,15 +501,15 @@ export function ClubSquadsTab({ id }: ClubSquadsTabProps) {
                                         onClick={() => openRoster(squad.id)}
                                     >
                                         <td className="px-6 py-5">
-                                            <div className="font-bold text-sm text-[#e2e2e2] uppercase tracking-tight">{squad.name}</div>
-                                            <div className="text-xs text-[#888] mt-0.5 font-mono">{squad.category}</div>
+                                            <div className="font-bold text-sm uppercase tracking-tight" style={{ color: 'var(--text)' }}>{squad.name}</div>
+                                            <div className="text-xs mt-0.5 font-mono" style={{ color: 'var(--text-muted)' }}>{squad.category}</div>
                                         </td>
-                                        <td className="px-6 py-5 text-sm text-[#e2e2e2] font-medium uppercase">{squad.sport}</td>
+                                        <td className="px-6 py-5 text-sm font-medium uppercase" style={{ color: 'var(--text)' }}>{squad.sport}</td>
                                         <td className="px-6 py-5">
                                             <div className="anodized-tag inline-block">{squad.season}</div>
                                         </td>
                                         <td className="px-6 py-5 text-center">
-                                            <span className="font-black text-[#e2e2e2] text-base">{squad.players}</span>
+                                            <span className="font-black text-base" style={{ color: 'var(--text)' }}>{squad.players}</span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <span className={clsx(

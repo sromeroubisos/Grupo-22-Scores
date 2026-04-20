@@ -249,7 +249,7 @@ export default function AdminPage() {
                         {superNavGroups.map((group) => (
                             <section key={group.id} style={{ display: 'grid', gap: 14 }}>
                                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                                    <div style={{ fontSize: 14, fontWeight: 700, color: '#ececec' }}>{group.label}</div>
+                                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-strong)' }}>{group.label}</div>
                                     <div style={{ fontSize: 11, color: 'var(--basalt-400)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                         {group.items.length} modulos
                                     </div>
@@ -330,7 +330,7 @@ export default function AdminPage() {
                             </div>
                         </div>
                     ) : (
-                        <div style={{ padding: 20, textAlign: 'center', color: '#666', fontSize: '0.9rem' }}>
+                        <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-subtle)', fontSize: '0.9rem' }}>
                             No hay noticias recientes en el sistema.
                         </div>
                     )}
@@ -340,7 +340,7 @@ export default function AdminPage() {
                     <span className={styles.slabLabel}>Control de acceso</span>
                     <div className={styles.rolesList}>
                         <div className={styles.roleRow}>
-                            <div className={styles.roleAvatar} style={{ background: '#1a1d24', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>U</div>
+                            <div className={styles.roleAvatar} style={{ background: 'var(--surface-panel-alt)', color: 'var(--text-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>U</div>
                             <div>
                                 <div className={styles.roleName}>{user.name}</div>
                                 <div className={`${styles.roleTag} ${styles.roleTagCyan}`}>
@@ -348,7 +348,7 @@ export default function AdminPage() {
                                 </div>
                             </div>
                         </div>
-                        <p style={{ fontSize: '11px', color: '#666', marginTop: '12px', lineHeight: '1.4' }}>
+                        <p style={{ fontSize: '11px', color: 'var(--text-subtle)', marginTop: '12px', lineHeight: '1.4' }}>
                             Tu sesión está autenticada con privilegios de administración global. Los cambios se registran en el audit log.
                         </p>
                         <button className={`${styles.btn}`} style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }}>Cerrar sesión</button>

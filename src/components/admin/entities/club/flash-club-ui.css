@@ -3,7 +3,7 @@
    Premium design system with refined hierarchy
    ============================================ */
 
-:root {
+.squads-wrap {
     /* Core Palette */
     --bg-void: #0a0a0b;
     --surface-panel: rgba(20, 20, 22, 0.55);
@@ -42,6 +42,30 @@
     --grid-line: rgba(255, 255, 255, 0.025);
 }
 
+[data-theme="light"] .squads-wrap {
+    --bg-void: transparent;
+    --surface-panel: rgba(255, 255, 255, 0.82);
+    --surface-row: rgba(248, 250, 252, 0.9);
+    --surface-row-hover: rgba(241, 245, 249, 0.95);
+    --surface-elevated: #ffffff;
+    --border-subtle: rgba(148, 163, 184, 0.16);
+    --border-standard: rgba(148, 163, 184, 0.24);
+    --border-heavy: rgba(100, 116, 139, 0.34);
+    --anodized-silver: #475569;
+    --anodized-dim: #64748b;
+    --anodized-dark: #94a3b8;
+    --accent-glow: rgba(59, 130, 246, 0.18);
+    --accent-subtle: rgba(59, 130, 246, 0.1);
+    --success: #16a34a;
+    --warning: #ca8a04;
+    --error: #dc2626;
+    --draft: #64748b;
+    --text-main: #0f172a;
+    --text-secondary: #334155;
+    --text-dim: rgba(15, 23, 42, 0.58);
+    --grid-line: rgba(15, 23, 42, 0.04);
+}
+
 /* ============================================
    GLOBAL CONTAINER
    ============================================ */
@@ -59,6 +83,11 @@
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: dark;
+}
+
+[data-theme="light"] .squads-wrap {
+    color-scheme: light;
 }
 
 /* ============================================
@@ -402,6 +431,12 @@
     color: var(--text-dim);
     margin-bottom: 20px;
     font-weight: 500;
+}
+
+[data-theme="light"] .squads-wrap .card {
+    background: var(--surface-panel);
+    border-color: var(--border-standard);
+    box-shadow: 0 14px 32px -24px rgba(15, 23, 42, 0.18);
 }
 
 /* ============================================

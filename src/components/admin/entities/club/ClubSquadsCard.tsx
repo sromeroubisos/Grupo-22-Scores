@@ -77,7 +77,7 @@ export function ClubSquadsCard({ divisions, fallbackCategories, loading }: ClubS
                                     </div>
                                 </td>
                                 <td style={{ textAlign: 'right' }}>
-                                    <ChevronRight className="w-4 h-4 text-muted inline-block cursor-pointer hover:text-white" />
+                                    <ChevronRight className="w-4 h-4 text-muted inline-block cursor-pointer" style={{ color: 'var(--text-muted)' }} />
                                 </td>
                             </tr>
                         ))}
@@ -130,7 +130,7 @@ export function ClubSquadsCard({ divisions, fallbackCategories, loading }: ClubS
                                     </div>
                                 </td>
                                 <td style={{ textAlign: 'right' }}>
-                                    <ChevronRight className="w-4 h-4 text-muted inline-block cursor-pointer hover:text-white" />
+                                    <ChevronRight className="w-4 h-4 text-muted inline-block cursor-pointer" style={{ color: 'var(--text-muted)' }} />
                                 </td>
                             </tr>
                         ))}
@@ -146,7 +146,7 @@ export function ClubSquadsCard({ divisions, fallbackCategories, loading }: ClubS
                 <div className="card-title">Planteles Registrados</div>
                 <button className="btn">Gestionar</button>
             </div>
-            <div className="py-16 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-2xl opacity-30">
+            <div className="py-16 flex flex-col items-center justify-center rounded-2xl opacity-30" style={{ border: '2px dashed var(--border)' }}>
                 <UserPlus className="w-10 h-10 mb-4" />
                 <p className="text-[11px] font-black uppercase tracking-[0.2em]">Sincronizar planteles registrados</p>
             </div>

@@ -70,7 +70,7 @@ export function ClubDataHealthCard({ diagnostics }: ClubDataHealthCardProps) {
                                     )}
                                     <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text)' }}>{issue.label}</span>
                                 </div>
-                                <ArrowRight className="w-4 h-4 text-muted group-hover:text-white transition-all transform -translate-x-1 group-hover:translate-x-0" />
+                                <ArrowRight className="w-4 h-4 transition-all transform -translate-x-1 group-hover:translate-x-0" style={{ color: 'var(--text-muted)' }} />
                             </div>
                         ))}
                     </div>

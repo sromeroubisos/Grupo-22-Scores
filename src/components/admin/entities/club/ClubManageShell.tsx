@@ -413,7 +413,7 @@ export function ClubManageShell({ id, data, unions, managedClubs }: ClubManageSh
     return (
         <ClubContext.Provider value={{ isDirty, setDirty: setIsDirty }}>
             <div
-                className="flash-ui-container dark"
+                className="flash-ui-container"
                 style={{
                     '--accent': '#3b82f6',
                     '--accent-secondary': '#3b82f6',

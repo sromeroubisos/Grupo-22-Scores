@@ -68,8 +68,8 @@ function getAgeLabel(birthDate: string) {
 
 function CompletionRow({ complete, label }: { complete: boolean; label: string }) {
     return (
-        <div className="flex items-center justify-between gap-3 border border-white/10 bg-white/[0.035] px-3 py-2 text-xs">
-            <span className="font-semibold text-neutral-300">{label}</span>
+        <div className="flex items-center justify-between gap-3 rounded-[14px] border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-2 text-xs">
+            <span className="font-semibold text-[var(--color-text-secondary)]">{label}</span>
             <span className={`inline-flex items-center gap-1.5 font-black ${complete ? 'text-emerald-300' : 'text-red-300'}`}>
                 {complete ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
                 {complete ? 'OK' : 'Falta'}
@@ -204,11 +204,11 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-[#0b0f13] shadow-[0_28px_90px_rgba(0,0,0,0.76)] scale-in">
+            <div className="relative w-full max-w-6xl overflow-hidden rounded-[30px] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-[0_28px_90px_rgba(0,0,0,0.32)] scale-in">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
                 <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 bg-emerald-400/10 blur-3xl" />
 
-                <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-7 py-6 md:px-8">
+                <div className="relative flex items-center justify-between gap-4 border-b border-[var(--color-border)] px-7 py-6 md:px-8">
                     <div className="flex min-w-0 items-center gap-3">
                         <div className="grid h-11 w-11 shrink-0 place-items-center border border-emerald-300/25 bg-emerald-400/10 text-emerald-200">
                             <UserPlus className="h-5 w-5" />
@@ -217,10 +217,10 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                             <div className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-300">
                                 Ficha de club
                             </div>
-                            <div className="mt-0.5 truncate text-2xl font-black tracking-[-0.04em] text-white">
+                            <div className="mt-0.5 truncate text-2xl font-black tracking-[-0.04em] text-[var(--color-text-primary)]">
                                 {formLabel}
                             </div>
-                            <p className="mt-1 text-xs font-medium text-neutral-400">
+                            <p className="mt-1 text-xs font-medium text-[var(--color-text-secondary)]">
                                 Carga rapida, preview lateral y asignacion opcional a division.
                             </p>
                         </div>
@@ -228,7 +228,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                     <button
                         type="button"
                         onClick={onClose}
-                        className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-neutral-400 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] transition hover:border-[var(--color-border-light)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)]"
                         aria-label="Cerrar formulario"
                     >
                         <X className="h-4 w-4" />
@@ -246,28 +246,28 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
 
                     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_270px]">
                         <div className="space-y-5">
-                            <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                            <section className="rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                                 <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                     Identidad
                                 </div>
                                 <div className="grid gap-4 md:grid-cols-2">
                                     <label className="space-y-2">
-                                        <span className="text-xs font-bold text-neutral-300">Nombre</span>
+                                        <span className="text-xs font-bold text-[var(--color-text-secondary)]">Nombre</span>
                                         <input
                                             autoFocus
                                             value={firstName}
                                             onChange={e => setFirstName(e.target.value)}
-                                            className="h-12 w-full border border-white/15 bg-black/25 px-4 text-sm font-semibold text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-300/80 focus:bg-black/35"
+                                            className="h-12 w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-4 text-sm font-semibold text-[var(--color-text-primary)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-emerald-300/80"
                                             placeholder="Ej: Juan"
                                             required
                                         />
                                     </label>
                                     <label className="space-y-2">
-                                        <span className="text-xs font-bold text-neutral-300">Apellido</span>
+                                        <span className="text-xs font-bold text-[var(--color-text-secondary)]">Apellido</span>
                                         <input
                                             value={lastName}
                                             onChange={e => setLastName(e.target.value)}
-                                            className="h-12 w-full border border-white/15 bg-black/25 px-4 text-sm font-semibold text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-300/80 focus:bg-black/35"
+                                            className="h-12 w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-4 text-sm font-semibold text-[var(--color-text-primary)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-emerald-300/80"
                                             placeholder="Ej: Perez"
                                             required
                                         />
@@ -275,23 +275,23 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 </div>
                             </section>
 
-                            <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                            <section className="rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                                 <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                     Datos deportivos
                                 </div>
                                 <div className="grid gap-5 lg:grid-cols-[250px_1fr]">
                                     <label className="space-y-2">
-                                        <span className="text-xs font-bold text-neutral-300">Fecha de nacimiento</span>
+                                        <span className="text-xs font-bold text-[var(--color-text-secondary)]">Fecha de nacimiento</span>
                                         <div className="relative">
                                             <input
                                                 type="date"
                                                 value={birthDate}
                                                 onChange={e => setBirthDate(e.target.value)}
-                                                className="h-12 w-full border border-white/15 bg-black/25 px-4 pr-11 font-mono text-sm font-semibold text-white outline-none transition focus:border-emerald-300/80 focus:bg-black/35"
+                                                className="h-12 w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-4 pr-11 font-mono text-sm font-semibold text-[var(--color-text-primary)] outline-none transition focus:border-emerald-300/80"
                                             />
-                                            <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                                            <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-secondary)]" />
                                         </div>
-                                        <span className="block text-xs font-medium text-neutral-500">Edad: {getAgeLabel(birthDate)}</span>
+                                        <span className="block text-xs font-medium text-[var(--color-text-muted)]">Edad: {getAgeLabel(birthDate)}</span>
                                     </label>
 
                                     {initialMode === 'player' ? (
@@ -299,7 +299,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                             {RUGBY_POSITION_GROUPS.map((group) => (
                                                 <div key={group.label}>
                                                     <div className="mb-3 flex items-center justify-between">
-                                                        <span className="text-xs font-black uppercase tracking-[0.18em] text-neutral-400">
+                                                        <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--color-text-secondary)]">
                                                             {group.label}
                                                         </span>
                                                         <span className="h-px flex-1 bg-white/10 ml-3" />
@@ -314,7 +314,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                                                     onClick={() => setPosition(item)}
                                                                     className={`min-h-12 rounded-2xl border px-4 py-3 text-left text-xs font-black transition ${selected
                                                                         ? 'border-emerald-300/70 bg-emerald-400 text-neutral-950 shadow-lg shadow-emerald-500/20'
-                                                                        : 'border-white/10 bg-black/20 text-neutral-300 hover:border-white/25 hover:bg-white/[0.06] hover:text-white'
+                                                                        : 'border-[var(--color-border)] bg-[var(--color-bg-primary)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-light)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)]'
                                                                         }`}
                                                                 >
                                                                     {item}
@@ -327,11 +327,11 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                         </div>
                                     ) : (
                                         <label className="space-y-2">
-                                            <span className="text-xs font-bold text-neutral-300">Cargo en staff</span>
+                                            <span className="text-xs font-bold text-[var(--color-text-secondary)]">Cargo en staff</span>
                                             <select
                                                 value={role}
                                                 onChange={e => setRole(e.target.value)}
-                                                className="h-12 w-full border border-white/15 bg-[#12181d] px-4 text-sm font-bold text-white outline-none transition focus:border-emerald-300/80"
+                                                className="h-12 w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-4 text-sm font-bold text-[var(--color-text-primary)] outline-none transition focus:border-emerald-300/80"
                                             >
                                                 {STAFF_ROLES.map(([value, label]) => (
                                                     <option key={value} value={value}>{label}</option>
@@ -343,55 +343,55 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                             </section>
 
                             {initialMode === 'player' && (
-                                <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                                <section className="rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                                     <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                         Datos fisicos
                                     </div>
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <label className="space-y-2">
-                                            <span className="text-xs font-bold text-neutral-300">Peso</span>
+                                            <span className="text-xs font-bold text-[var(--color-text-secondary)]">Peso</span>
                                             <div className="relative">
                                                 <input
                                                     type="number"
                                                     step="0.1"
                                                     value={weight}
                                                     onChange={e => setWeight(e.target.value)}
-                                                    className="h-12 w-full border border-white/15 bg-black/25 px-4 pr-14 font-mono text-sm font-semibold text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-300/80 focus:bg-black/35"
+                                                    className="h-12 w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-4 pr-14 font-mono text-sm font-semibold text-[var(--color-text-primary)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-emerald-300/80"
                                                     placeholder="75.5"
                                                 />
-                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-neutral-500">KG</span>
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-[var(--color-text-muted)]">KG</span>
                                             </div>
                                         </label>
                                         <label className="space-y-2">
-                                            <span className="text-xs font-bold text-neutral-300">Altura</span>
+                                            <span className="text-xs font-bold text-[var(--color-text-secondary)]">Altura</span>
                                             <div className="relative">
                                                 <input
                                                     type="number"
                                                     step="0.1"
                                                     value={height}
                                                     onChange={e => setHeight(e.target.value)}
-                                                    className="h-12 w-full border border-white/15 bg-black/25 px-4 pr-14 font-mono text-sm font-semibold text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-300/80 focus:bg-black/35"
+                                                    className="h-12 w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-4 pr-14 font-mono text-sm font-semibold text-[var(--color-text-primary)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-emerald-300/80"
                                                     placeholder="180"
                                                 />
-                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-neutral-500">CM</span>
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-[var(--color-text-muted)]">CM</span>
                                             </div>
                                         </label>
                                     </div>
                                 </section>
                             )}
 
-                            <section className="rounded-[24px] border border-white/10 bg-white/[0.035] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                            <section className="rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                                 <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
                                     Asignacion
                                 </div>
                                 {!lockDivisionId && divisions && divisions.length > 0 ? (
                                     <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_280px]">
                                         <label className="space-y-2">
-                                            <span className="text-xs font-bold text-neutral-300">Division</span>
+                                            <span className="text-xs font-bold text-[var(--color-text-secondary)]">Division</span>
                                             <select
                                                 value={divisionId}
                                                 onChange={e => setDivisionId(e.target.value)}
-                                                className="h-12 w-full border border-white/15 bg-[#12181d] px-4 text-sm font-bold text-white outline-none transition focus:border-emerald-300/80"
+                                                className="h-12 w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-4 text-sm font-bold text-[var(--color-text-primary)] outline-none transition focus:border-emerald-300/80"
                                             >
                                                 <option value="">Club global</option>
                                                 {divisions.map(d => (
@@ -399,7 +399,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                                 ))}
                                             </select>
                                         </label>
-                                        <div className="border border-white/10 bg-black/20 px-4 py-3 text-xs font-medium leading-5 text-neutral-400">
+                                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-4 py-3 text-xs font-medium leading-5 text-[var(--color-text-secondary)]">
                                             {linkedDivisionClubs.length > 0 ? (
                                                 <div className="space-y-2">
                                                     <p className="font-black uppercase tracking-[0.12em] text-emerald-300">
@@ -422,24 +422,24 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="border border-white/10 bg-black/20 px-4 py-3 text-xs font-medium leading-5 text-neutral-400">
+                                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-4 py-3 text-xs font-medium leading-5 text-[var(--color-text-secondary)]">
                                         Se registra a nivel club. Cuando existan divisiones, vas a poder asignarlo a un plantel especifico.
                                     </div>
                                 )}
                             </section>
                         </div>
 
-                        <aside className="h-fit rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] lg:sticky lg:top-2">
-                            <div className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500">
+                        <aside className="h-fit rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] lg:sticky lg:top-2">
+                            <div className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                                 Preview
                             </div>
                             <div className="mt-4 flex flex-col items-center text-center">
                                 <div className="relative">
-                                    <div className="grid h-24 w-24 place-items-center overflow-hidden rounded-[22px] border border-white/10 bg-neutral-900">
+                                    <div className="grid h-24 w-24 place-items-center overflow-hidden rounded-[22px] border border-[var(--color-border)] bg-[var(--color-bg-primary)]">
                                         {photoUrl ? (
                                             <img src={photoUrl} alt="Preview" className="h-full w-full object-cover" />
                                         ) : (
-                                            <User className="h-11 w-11 text-neutral-500" />
+                                            <User className="h-11 w-11 text-[var(--color-text-muted)]" />
                                         )}
                                     </div>
                                     <label
@@ -450,13 +450,13 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                         <Upload className="h-4 w-4" />
                                     </label>
                                 </div>
-                                <div className="mt-5 max-w-full truncate text-lg font-black text-white">{displayName}</div>
+                                <div className="mt-5 max-w-full truncate text-lg font-black text-[var(--color-text-primary)]">{displayName}</div>
                                 <div className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
                                     {initialMode === 'player'
                                         ? position || 'Sin posicion'
                                         : STAFF_ROLES.find(([value]) => value === role)?.[1] || 'Staff'}
                                 </div>
-                                <div className="mt-2 rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-semibold text-neutral-400">
+                                <div className="mt-2 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-secondary)]">
                                     {selectedDivision ? selectedDivision.name : 'Club global'}
                                 </div>
                                 {linkedDivisionClubs.length > 0 && (
@@ -466,9 +466,9 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 )}
                             </div>
 
-                            <div className="my-5 h-px bg-white/10" />
+                            <div className="my-5 h-px bg-[var(--color-border)]" />
                             <div className="space-y-2">
-                                <div className="mb-3 text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500">
+                                <div className="mb-3 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                                     Estado
                                 </div>
                                 <CompletionRow label="Identidad" complete={identityComplete} />
@@ -479,7 +479,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                         </aside>
                     </div>
 
-                    <div className="mt-6 flex flex-col-reverse gap-4 border-t border-white/10 pt-5 sm:flex-row sm:justify-end">
+                    <div className="mt-6 flex flex-col-reverse gap-4 border-t border-[var(--color-border)] pt-5 sm:flex-row sm:justify-end">
                         {formError && (
                             <div className="flex min-h-12 flex-1 items-center border border-red-400/30 bg-red-500/10 px-4 text-sm font-bold text-red-200">
                                 {formError}
@@ -488,7 +488,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                         <button
                             type="button"
                             onClick={onClose}
-                            className="h-12 rounded-2xl border border-white/15 px-7 text-sm font-black uppercase tracking-wide text-white transition hover:bg-white/10"
+                            className="h-12 rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-primary)] px-7 text-sm font-black uppercase tracking-wide text-[var(--color-text-primary)] transition hover:bg-[var(--color-bg-hover)]"
                         >
                             Cancelar
                         </button>

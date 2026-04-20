@@ -28,11 +28,11 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
 
     if (!targetClubId) {
         return (
-            <div className="min-h-screen bg-[#050508] text-white flex items-center justify-center p-6">
-                <div className="max-w-xl w-full rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+            <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+                <div className="max-w-xl w-full rounded-[28px] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-[var(--shadow-card)]">
                     <p className="text-xs uppercase tracking-[0.24em] text-[#00ff88] font-black">Club Admin</p>
                     <h1 className="mt-4 text-3xl font-black tracking-tight">No hay clubes asignados</h1>
-                    <p className="mt-4 text-sm text-slate-400">
+                    <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
                         Esta cuenta todavia no tiene memberships de club o familia de club con permisos operativos.
                     </p>
                 </div>
@@ -54,11 +54,11 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
 
     if (!clubData) {
         return (
-            <div className="min-h-screen bg-[#050508] text-white flex items-center justify-center p-6">
-                <div className="max-w-xl w-full rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+            <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+                <div className="max-w-xl w-full rounded-[28px] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-[var(--shadow-card)]">
                     <p className="text-xs uppercase tracking-[0.24em] text-[#00ff88] font-black">Club Admin</p>
                     <h1 className="mt-4 text-3xl font-black tracking-tight">No pudimos abrir el club</h1>
-                    <p className="mt-4 text-sm text-slate-400">
+                    <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
                         El club seleccionado ya no existe o no esta disponible para esta cuenta.
                     </p>
                 </div>
