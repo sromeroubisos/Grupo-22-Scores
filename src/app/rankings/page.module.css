@@ -245,6 +245,11 @@
     min-width: 0;
 }
 
+.topClubLogo {
+    width: 28px;
+    height: 28px;
+}
+
 .topRank {
     font-family: var(--mono);
     color: var(--rankings-accent);
@@ -454,7 +459,21 @@
     font-size: 18px;
     font-weight: 700;
     line-height: 1.2;
+}
+
+.rankHeader {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 4px;
+}
+
+.rankLogo {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
 }
 
 .rankMeta {
@@ -615,20 +634,14 @@
     font-weight: 600;
 }
 
-.clubLogo,
-.clubLogoPlaceholder {
+.clubLogo {
     width: 28px;
     height: 28px;
     flex-shrink: 0;
 }
 
-.clubLogo {
-    object-fit: contain;
-}
-
-.clubLogoPlaceholder {
-    background: #222;
-    border-radius: 4px;
+.clubLogoFallbackText {
+    font-size: 0.6rem;
 }
 
 .clubCopy {
@@ -1032,8 +1045,7 @@
         flex-shrink: 0;
     }
 
-    .clubLogo,
-    .clubLogoPlaceholder {
+    .clubLogo {
         width: 18px;
         height: 18px;
     }
@@ -1112,8 +1124,7 @@
         font-size: 10px;
     }
 
-    .clubLogo,
-    .clubLogoPlaceholder {
+    .clubLogo {
         width: 16px;
         height: 16px;
     }

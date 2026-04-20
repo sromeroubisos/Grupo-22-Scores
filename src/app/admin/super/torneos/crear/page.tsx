@@ -4,14 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ChevronLeft, Trophy, Globe, Shield, Settings, CheckCircle,
-    LayoutGrid, ListOrdered, GitMerge, Search, Loader2
+    LayoutGrid, ListOrdered, GitMerge, Search, Loader2, Plus, RefreshCw
 } from 'lucide-react';
 import PhaseCreator, { type PhaseConfiguration, type Team as PhaseTeam } from '@/app/admin/components/PhaseCreator';
 import LogoUploader from '@/components/LogoUploader';
+import { useSuperConsole } from '../../SuperConsoleContext';
 import { createClient } from '@/lib/supabase/client';
 import { createEntitySafe, updateEntitySafe } from '@/app/admin/entities/actions';
+import { invalidateCache } from '@/lib/cache/superAdminCache';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports } from '@/lib/data/sports';
+import { createUnion } from '@/lib/services/unionService';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 import {
     buildTournamentCompetitionConfig,
@@ -107,6 +110,15 @@ const DEFAULT_PHASE_TAGS = [
 type UnionOption = {
     id: string;
     name: string;
+    country?: string | null;
+};
+
+type InlineUnionFormState = {
+    name: string;
+    slug: string;
+    country: string;
+    unionLevel: string;
+    slugManuallyEdited: boolean;
 };
 
 type ClubRecord = {
@@ -170,6 +182,10 @@ function formatSquadLabel(squad: SquadRecord): string {
 function sameIdList(left: string[], right: string[]): boolean {
     if (left.length !== right.length) return false;
     return left.every((value, index) => value === right[index]);
+}
+
+function sortUnionOptions(unions: UnionOption[]): UnionOption[] {
+    return [...unions].sort((left, right) => left.name.localeCompare(right.name));
 }
 
 function mapFormatToPhaseType(format: string): PhaseConfiguration['phaseType'] {
@@ -298,10 +314,11 @@ export default function SuperCreateTournament() {
     const searchParams = useSearchParams();
     const tournamentId = searchParams?.get('tournamentId');
     const supabase = createClient();
+    const { unions: cachedUnions, loading: superConsoleLoading, refresh } = useSuperConsole();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [isEdit, setIsEdit] = useState(false);
-    const [unions, setUnions] = useState<UnionOption[]>([]);
+    const [availableUnions, setAvailableUnions] = useState<UnionOption[]>([]);
     const [clubs, setClubs] = useState<ClubRecord[]>([]);
     const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
     const [selectedDivisionByClub, setSelectedDivisionByClub] = useState<Record<string, string>>({});
@@ -311,6 +328,17 @@ export default function SuperCreateTournament() {
     const [saving, setSaving] = useState(false);
     const [countryOptions, setCountryOptions] = useState<TournamentCountryOption[]>(() => getTournamentCountryOptions());
     const [phaseConfig, setPhaseConfig] = useState<PhaseConfiguration | null>(null);
+    const [showUnionCreator, setShowUnionCreator] = useState(false);
+    const [creatingUnion, setCreatingUnion] = useState(false);
+    const [unionCreateError, setUnionCreateError] = useState<string | null>(null);
+    const [unionCreateSuccess, setUnionCreateSuccess] = useState<string | null>(null);
+    const [unionCreateForm, setUnionCreateForm] = useState<InlineUnionFormState>({
+        name: '',
+        slug: '',
+        country: 'Argentina',
+        unionLevel: 'regional',
+        slugManuallyEdited: false,
+    });
 
     const [formData, setFormData] = useState({
         name: '',
@@ -353,6 +381,25 @@ export default function SuperCreateTournament() {
         }
     };
 
+    useEffect(() => {
+        setAvailableUnions(sortUnionOptions(
+            cachedUnions.map((union) => ({
+                id: union.id,
+                name: union.name,
+                country: union.country,
+            })),
+        ));
+    }, [cachedUnions]);
+
+    useEffect(() => {
+        if (!unionCreateForm.slugManuallyEdited) {
+            setUnionCreateForm((prev) => ({
+                ...prev,
+                slug: slugify(prev.name),
+            }));
+        }
+    }, [unionCreateForm.name, unionCreateForm.slugManuallyEdited]);
+
     const toggleAllClubs = () => {
         if (selectedClubs.length === clubs.length) {
             setSelectedClubs([]);
@@ -365,9 +412,6 @@ export default function SuperCreateTournament() {
 
     // Load reference data
     useEffect(() => {
-        supabase.from('unions').select('*').order('name').then(({ data }) => {
-            setUnions(data || []);
-        });
         supabase.from('clubs').select('*').order('name').then(({ data }) => {
             setClubs(data || []);
         });
@@ -375,6 +419,91 @@ export default function SuperCreateTournament() {
             setCountryOptions(getTournamentCountryOptions(data || []));
         });
     }, [supabase]);
+
+    const handleUnionCreateSlugChange = (value: string) => {
+        setUnionCreateForm((prev) => ({
+            ...prev,
+            slug: slugify(value),
+            slugManuallyEdited: true,
+        }));
+    };
+
+    const handleToggleUnionCreator = () => {
+        setUnionCreateError(null);
+        setUnionCreateSuccess(null);
+
+        setShowUnionCreator((prev) => {
+            const nextOpen = !prev;
+            if (nextOpen) {
+                setUnionCreateForm((current) => ({
+                    ...current,
+                    country: current.country || selectedCountryOption?.label || formData.country || 'Argentina',
+                }));
+            }
+            return nextOpen;
+        });
+    };
+
+    const handleCreateUnion = async () => {
+        const unionName = unionCreateForm.name.trim();
+        const unionSlug = slugify(unionCreateForm.slug || unionName);
+
+        if (unionName.length < 2) {
+            setUnionCreateError('Ingresa un nombre valido para la union.');
+            return;
+        }
+
+        if (!unionSlug) {
+            setUnionCreateError('Ingresa un slug valido para la union.');
+            return;
+        }
+
+        setCreatingUnion(true);
+        setUnionCreateError(null);
+        setUnionCreateSuccess(null);
+
+        try {
+            const result = await createUnion({
+                name: unionName,
+                slug: unionSlug,
+                country: unionCreateForm.country || selectedCountryOption?.label || formData.country || null,
+                sport: formData.sport || null,
+                union_level: unionCreateForm.unionLevel || 'regional',
+            });
+
+            if (!result.success || !result.union) {
+                setUnionCreateError(result.error || 'No se pudo crear la union.');
+                return;
+            }
+
+            const createdUnion: UnionOption = {
+                id: result.union.id,
+                name: result.union.name,
+                country: result.union.country || unionCreateForm.country || null,
+            };
+
+            setAvailableUnions((prev) => sortUnionOptions([
+                ...prev.filter((union) => union.id !== createdUnion.id),
+                createdUnion,
+            ]));
+            setFormData((prev) => ({ ...prev, unionId: createdUnion.id }));
+            invalidateCache('unions_list');
+            refresh('unions');
+            setUnionCreateSuccess('Union creada y seleccionada.');
+            setShowUnionCreator(false);
+            setUnionCreateForm({
+                name: '',
+                slug: '',
+                country: selectedCountryOption?.label || formData.country || 'Argentina',
+                unionLevel: 'regional',
+                slugManuallyEdited: false,
+            });
+        } catch (error) {
+            setUnionCreateError(error instanceof Error ? error.message : 'No se pudo crear la union.');
+        } finally {
+            setCreatingUnion(false);
+        }
+    };
 
     // Load tournament data when editing
     useEffect(() => {
@@ -961,10 +1090,117 @@ export default function SuperCreateTournament() {
                                             onChange={e => setFormData({ ...formData, unionId: e.target.value })}
                                         >
                                             <option value="">Independiente (Sin vínculo)</option>
-                                            {unions.map(u => (
+                                            {availableUnions.map(u => (
                                                 <option key={u.id} value={u.id}>{u.name}</option>
                                             ))}
                                         </select>
+                                        <div className="inline-union-toolbar">
+                                            <p className="field-help">
+                                                {superConsoleLoading.unions && availableUnions.length === 0
+                                                    ? 'Cargando uniones...'
+                                                    : availableUnions.length > 0
+                                                        ? `${availableUnions.length} uniones disponibles para vincular este torneo.`
+                                                        : 'No hay uniones cargadas todavia.'}
+                                            </p>
+                                            <div className="inline-union-actions">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline btn-inline"
+                                                    onClick={() => refresh('unions')}
+                                                >
+                                                    <RefreshCw size={14} />
+                                                    Recargar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-secondary btn-inline"
+                                                    onClick={handleToggleUnionCreator}
+                                                >
+                                                    <Plus size={14} />
+                                                    {showUnionCreator ? 'Cancelar' : 'Nueva union'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {unionCreateSuccess && (
+                                            <p className="field-help field-help-success">{unionCreateSuccess}</p>
+                                        )}
+                                        {showUnionCreator && (
+                                            <div className="inline-union-creator">
+                                                <div className="grid-2">
+                                                    <div className="field-group">
+                                                        <label>NOMBRE DE LA UNION</label>
+                                                        <input
+                                                            className="form-input"
+                                                            type="text"
+                                                            value={unionCreateForm.name}
+                                                            onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, name: e.target.value }))}
+                                                            placeholder="Ej: Union Cordobesa de Rugby"
+                                                        />
+                                                    </div>
+                                                    <div className="field-group">
+                                                        <label>SLUG</label>
+                                                        <input
+                                                            className="form-input"
+                                                            type="text"
+                                                            value={unionCreateForm.slug}
+                                                            onChange={(e) => handleUnionCreateSlugChange(e.target.value)}
+                                                            placeholder="union-cordobesa-rugby"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid-2">
+                                                    <div className="field-group">
+                                                        <label>PAIS</label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={unionCreateForm.country}
+                                                            onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, country: e.target.value }))}
+                                                        >
+                                                            <option value="">No especificado</option>
+                                                            {countryOptions.map((country) => (
+                                                                <option key={country.id} value={country.label}>{country.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div className="field-group">
+                                                        <label>NIVEL</label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={unionCreateForm.unionLevel}
+                                                            onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, unionLevel: e.target.value }))}
+                                                        >
+                                                            <option value="local">Local</option>
+                                                            <option value="regional">Regional</option>
+                                                            <option value="provincial">Provincial</option>
+                                                            <option value="national">Nacional</option>
+                                                            <option value="international">Internacional</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                {unionCreateError && (
+                                                    <p className="field-help field-help-danger">{unionCreateError}</p>
+                                                )}
+                                                <div className="inline-union-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline btn-inline"
+                                                        onClick={handleToggleUnionCreator}
+                                                        disabled={creatingUnion}
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-primary btn-inline"
+                                                        onClick={handleCreateUnion}
+                                                        disabled={creatingUnion}
+                                                    >
+                                                        {creatingUnion ? <Loader2 size={14} className="spin" /> : <Plus size={14} />}
+                                                        {creatingUnion ? 'Creando...' : 'Crear y vincular'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

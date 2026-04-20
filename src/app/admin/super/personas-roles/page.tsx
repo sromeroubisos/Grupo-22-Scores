@@ -46,12 +46,29 @@ const ROLE_PRESETS = [
         accent: '#60a5fa',
     },
     {
+        id: 'admin_club',
+        title: 'Administrador de Club',
+        desc: 'Gestiona un club y puede operar el panel de club con alcance asignado.',
+        accent: '#22c55e',
+    },
+    {
+        id: 'familia_club',
+        title: 'Familia de Club',
+        desc: 'Opera una familia de clubes y comparte gestion sobre estructuras vinculadas.',
+        accent: '#f59e0b',
+    },
+    {
         id: 'fan',
         title: 'Fan',
         desc: 'Experiencia publica, perfil y favoritos sin permisos administrativos.',
         accent: '#38bdf8',
     },
-];
+] satisfies Array<{
+    id: AppUserRole;
+    title: string;
+    desc: string;
+    accent: string;
+}>;
 
 export default function PersonasRolesPage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -111,7 +128,7 @@ export default function PersonasRolesPage() {
         });
     }, [searchQuery, users]);
 
-    const roleOptions: AppUserRole[] = ['fan', 'admin_general', 'super_admin'];
+    const roleOptions: AppUserRole[] = ['fan', 'familia_club', 'admin_club', 'admin_general', 'super_admin'];
 
     const openEdit = (user: AppUserRow) => {
         setEditingUser(user);
@@ -119,10 +136,10 @@ export default function PersonasRolesPage() {
         setSaveError(null);
     };
 
-    const closeEdit = () => {
+    const closeEdit = useCallback(() => {
         setEditingUser(null);
         setSaveError(null);
-    };
+    }, []);
 
     const handleSaveRole = useCallback(async () => {
         if (!editingUser) {

@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import styles from './search.module.css';
 import { Search, X, Clock } from 'lucide-react';
+import TeamLogo from '@/components/TeamLogo';
+import styles from './search.module.css';
 
 interface HistoryItem {
     id: string;
@@ -24,8 +25,6 @@ interface ResultRow {
     logo_url?: string;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
 function SkeletonRows() {
     return (
         <div className={styles.skeletonList}>
@@ -45,13 +44,24 @@ function SkeletonRows() {
 function ResultRowItem({ row, onSave }: { row: ResultRow; onSave: (r: ResultRow) => void }) {
     return (
         <Link href={row.url} className={styles.row} onClick={() => onSave(row)}>
-            <div className={styles.rowIcon}>
-                {row.logo_url ? (
-                    <img src={row.logo_url} alt={row.title} />
-                ) : (
-                    row.type === 'tournament' ? '🏆' : '🛡️'
-                )}
-            </div>
+            {row.type === 'club' ? (
+                <TeamLogo
+                    name={row.title}
+                    teamId={row.id}
+                    logoUrl={row.logo_url}
+                    className={styles.rowIcon}
+                    size={44}
+                />
+            ) : (
+                <div className={styles.rowIcon}>
+                    {row.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={row.logo_url} alt={row.title} />
+                    ) : (
+                        '🏆'
+                    )}
+                </div>
+            )}
             <div className={styles.rowInfo}>
                 <span className={styles.rowTitle}>{row.title}</span>
                 <span className={styles.rowSubtitle}>{row.subtitle}</span>
@@ -66,14 +76,14 @@ function ResultRowItem({ row, onSave }: { row: ResultRow; onSave: (r: ResultRow)
     );
 }
 
-// ─── Hooks ────────────────────────────────────────────────────────────────────
-
 function useDebounce(value: string, delay: number) {
     const [debouncedValue, setDebouncedValue] = useState(value);
+
     useEffect(() => {
         const handler = setTimeout(() => setDebouncedValue(value), delay);
         return () => clearTimeout(handler);
     }, [value, delay]);
+
     return debouncedValue;
 }
 
@@ -81,43 +91,54 @@ const HISTORY_KEY = 'search_history_v1';
 const HISTORY_LIMIT = 20;
 
 function useSearchHistory() {
-    const [history, setHistory] = useState<HistoryItem[]>([]);
-
-    useEffect(() => {
+    const [history, setHistory] = useState<HistoryItem[]>(() => {
+        if (typeof window === 'undefined') return [];
         try {
             const raw = localStorage.getItem(HISTORY_KEY);
-            if (raw) setHistory(JSON.parse(raw));
-        } catch { /* ignore */ }
-    }, []);
+            return raw ? JSON.parse(raw) : [];
+        } catch {
+            return [];
+        }
+    });
 
     const saveItem = useCallback((item: Omit<HistoryItem, 'lastViewedAt'>) => {
-        setHistory(prev => {
-            const filtered = prev.filter(h => h.id !== item.id);
+        setHistory((prev) => {
+            const filtered = prev.filter((entry) => entry.id !== item.id);
             const next = [{ ...item, lastViewedAt: Date.now() }, ...filtered].slice(0, HISTORY_LIMIT);
-            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+            } catch {
+                // Ignore localStorage write issues.
+            }
             return next;
         });
     }, []);
 
     const removeItem = useCallback((id: string) => {
-        setHistory(prev => {
-            const next = prev.filter(h => h.id !== id);
-            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+        setHistory((prev) => {
+            const next = prev.filter((entry) => entry.id !== id);
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+            } catch {
+                // Ignore localStorage write issues.
+            }
             return next;
         });
     }, []);
 
     const clearAll = useCallback(() => {
         setHistory([]);
-        try { localStorage.removeItem(HISTORY_KEY); } catch { /* ignore */ }
+        try {
+            localStorage.removeItem(HISTORY_KEY);
+        } catch {
+            // Ignore localStorage delete issues.
+        }
     }, []);
 
     return { history, saveItem, removeItem, clearAll };
 }
 
 const TRENDING = ['Copa del Mundo', 'Los Pumas', 'Playoffs URBA', 'Leonas', 'Inter Miami', 'Top 14'];
-
-// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
@@ -148,7 +169,7 @@ export default function SearchPage() {
             }
         };
 
-        fetchResults();
+        void fetchResults();
     }, [debouncedQuery]);
 
     const handleSave = useCallback((row: ResultRow | HistoryItem) => {
@@ -157,21 +178,19 @@ export default function SearchPage() {
             type: row.type,
             title: row.title,
             subtitle: row.subtitle,
-            url: (row as any).url || (row as any).href,
-            logo_url: row.logo_url
+            url: (row as ResultRow).url || (row as HistoryItem).url,
+            logo_url: row.logo_url,
         });
     }, [saveItem]);
 
     const hasQuery = debouncedQuery.length >= 2;
     const showEmpty = !isLoading && !hasQuery && query.length < 2;
 
-    // Grouping logic
-    const tournaments = results.filter(r => r.type === 'tournament');
-    const clubs = results.filter(r => r.type === 'club');
+    const tournaments = results.filter((row) => row.type === 'tournament');
+    const clubs = results.filter((row) => row.type === 'club');
 
     return (
         <div className={styles.page}>
-            {/* ── Sticky header ── */}
             <header className={styles.header}>
                 <div className={styles.inputWrapper}>
                     <Search className={styles.inputIcon} size={20} />
@@ -180,30 +199,31 @@ export default function SearchPage() {
                         className={styles.input}
                         placeholder="Buscar torneos o clubes..."
                         value={query}
-                        onChange={e => setQuery(e.target.value)}
+                        onChange={(event) => setQuery(event.target.value)}
                         autoComplete="off"
                         autoCorrect="off"
                         spellCheck={false}
                     />
-                    {query.length > 0 && (
+                    {query.length > 0 ? (
                         <button
                             className={styles.clearBtn}
-                            onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus(); }}
-                            aria-label="Limpiar búsqueda"
+                            onClick={() => {
+                                setQuery('');
+                                setResults([]);
+                                inputRef.current?.focus();
+                            }}
+                            aria-label="Limpiar busqueda"
                         >
                             <X size={16} />
                         </button>
-                    )}
+                    ) : null}
                 </div>
             </header>
 
-            {/* ── Content ── */}
             <div className={styles.content}>
-
-                {/* State A: empty query → recientes + tendencias */}
-                {showEmpty && (
+                {showEmpty ? (
                     <>
-                        {history.length > 0 && (
+                        {history.length > 0 ? (
                             <section className={styles.section}>
                                 <div className={styles.sectionHeader}>
                                     <span className={styles.sectionLabel}>Recientes</span>
@@ -211,27 +231,43 @@ export default function SearchPage() {
                                         Borrar todo
                                     </button>
                                 </div>
-                                {history.map(item => (
+                                {history.map((item) => (
                                     <Link
                                         key={item.id}
                                         href={item.url}
                                         className={styles.recentRow}
                                         onClick={() => handleSave(item)}
                                     >
-                                        <div className={styles.recentIconWrapper}>
-                                            {item.logo_url ? (
-                                                <img src={item.logo_url} className={styles.recentLogo} alt="" />
-                                            ) : (
-                                                <Clock size={15} className={styles.recentIcon} />
-                                            )}
-                                        </div>
+                                        {item.type === 'club' ? (
+                                            <TeamLogo
+                                                name={item.title}
+                                                teamId={item.id}
+                                                logoUrl={item.logo_url}
+                                                className={styles.recentLogo}
+                                                size={32}
+                                                radius="round"
+                                            />
+                                        ) : (
+                                            <div className={styles.recentIconWrapper}>
+                                                {item.logo_url ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img src={item.logo_url} className={styles.recentLogo} alt="" />
+                                                ) : (
+                                                    <Clock size={15} className={styles.recentIcon} />
+                                                )}
+                                            </div>
+                                        )}
                                         <div className={styles.rowInfo}>
                                             <span className={styles.rowTitle}>{item.title}</span>
                                             <span className={styles.rowSubtitle}>{item.subtitle}</span>
                                         </div>
                                         <button
                                             className={styles.removeBtn}
-                                            onClick={e => { e.preventDefault(); e.stopPropagation(); removeItem(item.id); }}
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                removeItem(item.id);
+                                            }}
                                             aria-label="Eliminar del historial"
                                         >
                                             <X size={14} />
@@ -239,14 +275,14 @@ export default function SearchPage() {
                                     </Link>
                                 ))}
                             </section>
-                        )}
+                        ) : null}
 
                         <section className={styles.section}>
                             <div className={styles.sectionHeader}>
                                 <span className={styles.sectionLabel}>Tendencias</span>
                             </div>
                             <div className={styles.trendingGrid}>
-                                {TRENDING.map(tag => (
+                                {TRENDING.map((tag) => (
                                     <button
                                         key={tag}
                                         className={styles.trendChip}
@@ -258,38 +294,36 @@ export default function SearchPage() {
                             </div>
                         </section>
                     </>
-                )}
+                ) : null}
 
-                {/* Loading state */}
-                {isLoading && <SkeletonRows />}
+                {isLoading ? <SkeletonRows /> : null}
 
-                {/* Results list */}
-                {!showEmpty && !isLoading && hasQuery && (
+                {!showEmpty && !isLoading && hasQuery ? (
                     results.length > 0 ? (
                         <div className={styles.resultList}>
-                            {tournaments.length > 0 && (
+                            {tournaments.length > 0 ? (
                                 <>
                                     <div className={styles.groupHeader}>Torneos</div>
-                                    {tournaments.map(row => (
+                                    {tournaments.map((row) => (
                                         <ResultRowItem key={row.id} row={row} onSave={handleSave} />
                                     ))}
                                 </>
-                            )}
-                            {clubs.length > 0 && (
+                            ) : null}
+                            {clubs.length > 0 ? (
                                 <>
                                     <div className={styles.groupHeader}>Clubes</div>
-                                    {clubs.map(row => (
+                                    {clubs.map((row) => (
                                         <ResultRowItem key={row.id} row={row} onSave={handleSave} />
                                     ))}
                                 </>
-                            )}
+                            ) : null}
                         </div>
                     ) : (
                         <div className={styles.noResults}>
-                            <p>No se encontraron resultados para "{debouncedQuery}"</p>
+                            <p>No se encontraron resultados para &quot;{debouncedQuery}&quot;</p>
                         </div>
                     )
-                )}
+                ) : null}
             </div>
         </div>
     );

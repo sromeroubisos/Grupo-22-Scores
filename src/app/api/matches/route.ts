@@ -70,6 +70,14 @@ function normalizeSportValue(value: unknown): string | null {
     return normalized || null;
 }
 
+function sanitizeInlineAssetUrl(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim();
+    if (!normalized) return null;
+    if (normalized.startsWith('data:')) return null;
+    return normalized;
+}
+
 function resolveTournamentCountry(tournament: any): string {
     const relationCountry = tournament?.country?.nameEs || tournament?.country?.name || null;
     if (relationCountry) return relationCountry;
@@ -110,24 +118,27 @@ function buildResolvedMatchTeam(
     const shortName = typeof team?.shortName === 'string' && team.shortName.trim()
         ? team.shortName
         : (name.substring(0, 3).toUpperCase() || fallbackShortName);
+    const resolvedLogo = sanitizeInlineAssetUrl(resolveTeamLogo({
+        id,
+        team_id: id,
+        name,
+        short_name: shortName,
+        logo: team?.logo || '',
+        logo_url: team?.logo_url || '',
+        image_path: team?.image_path || '',
+        small_image_path: team?.small_image_path || '',
+        source: team?.source || '',
+        team_url: team?.team_url || team?.teamUrl || '',
+    }));
+    const imagePath = resolvedLogo || sanitizeInlineAssetUrl(team?.image_path || team?.small_image_path || team?.logo || team?.logo_url || null);
+    const smallImagePath = resolvedLogo || sanitizeInlineAssetUrl(team?.small_image_path || team?.image_path || team?.logo || team?.logo_url || null);
 
     return {
         id,
         name,
-        logo: resolveTeamLogo({
-            id,
-            team_id: id,
-            name,
-            short_name: shortName,
-            logo: team?.logo || '',
-            logo_url: team?.logo_url || '',
-            image_path: team?.image_path || '',
-            small_image_path: team?.small_image_path || '',
-            source: team?.source || '',
-            team_url: team?.team_url || team?.teamUrl || '',
-        }),
-        image_path: team?.image_path || team?.small_image_path || team?.logo || team?.logo_url || null,
-        small_image_path: team?.small_image_path || team?.image_path || team?.logo || team?.logo_url || null,
+        logo: resolvedLogo,
+        image_path: imagePath,
+        small_image_path: smallImagePath,
         team_url: team?.team_url || team?.teamUrl || null,
         teamUrl: team?.team_url || team?.teamUrl || null,
         shortName,

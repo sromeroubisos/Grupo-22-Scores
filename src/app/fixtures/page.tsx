@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ExportImage from '@/components/ExportImage';
 import DateStrip from '@/components/DateStrip';
+import TeamLogo from '@/components/TeamLogo';
 import { useSport } from '@/context/SportContext';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { getMatchPenaltyScore, hasMatchPenaltyShootout } from '@/lib/matchUtils';
@@ -295,11 +296,29 @@ export default function FixturesPage() {
                                     </div>
                                     <div className={styles.liveTeams}>
                                         <span className={styles.liveTeam}>
-                                            <span>{match.home}</span>
+                                            <span className={styles.liveTeamIdentity}>
+                                                <TeamLogo
+                                                    name={match.home}
+                                                    logoUrl={match.homeLogo}
+                                                    className={styles.liveTeamLogo}
+                                                    size={28}
+                                                    radius="round"
+                                                />
+                                                <span className={styles.liveTeamName}>{match.home}</span>
+                                            </span>
                                             <span className={styles.liveScore}>{match.homeScore ?? '-'}</span>
                                         </span>
                                         <span className={styles.liveTeam}>
-                                            <span>{match.away}</span>
+                                            <span className={styles.liveTeamIdentity}>
+                                                <TeamLogo
+                                                    name={match.away}
+                                                    logoUrl={match.awayLogo}
+                                                    className={styles.liveTeamLogo}
+                                                    size={28}
+                                                    radius="round"
+                                                />
+                                                <span className={styles.liveTeamName}>{match.away}</span>
+                                            </span>
                                             <span className={styles.liveScore}>{match.awayScore ?? '-'}</span>
                                         </span>
                                     </div>

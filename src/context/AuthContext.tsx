@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supabase/supabase-js';
 import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
@@ -68,7 +68,7 @@ const isSupabaseNetworkError = (err: unknown) => {
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const isMounted = useRef(true);
     const authProviderStartedAt = useRef(nowMs());
 

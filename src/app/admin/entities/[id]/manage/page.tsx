@@ -20,6 +20,8 @@ import { TournamentOperationTab } from '@/components/admin/entities/tournament/T
 import { TournamentRelatedTab } from '@/components/admin/entities/tournament/TournamentRelatedTab';
 import { Database } from '@/lib/database.types';
 import { getTournamentLinkedRelations, getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
+import { requireUserAccessContext } from '@/lib/auth/permissions';
+import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 type TournamentSeasonMenuItem = {
@@ -35,6 +37,13 @@ interface ManagePageProps {
     searchParams: Promise<{ type?: string; tab?: string; subtab?: string; offset?: string; from?: string }>;
 }
 
+const LEGACY_CREATE_ROUTE_BY_TYPE: Partial<Record<EntityType, string>> = {
+    club: '/admin/super/clubes/crear',
+    tournament: '/admin/super/torneos/crear',
+    union: '/admin/super/uniones/crear',
+    match: '/admin/super/partidos/crear',
+};
+
 export default async function ManageEntityPage({ params, searchParams }: ManagePageProps) {
     const { id } = await params;
     const { type, tab, subtab, offset: offsetParam, from } = await searchParams;
@@ -42,19 +51,18 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
     const offset = parseInt(offsetParam || '0', 10);
     const limit = 20;
 
-    // Legacy redirect: old crear path & new entity creation
+    // Legacy redirect: old crear/new paths now point to the dedicated creators.
     if (id === 'crear' || id === 'new') {
-        const target = type
-            ? `/admin/entities/new?type=${type}`
-            : `/admin/entities/new`;
-        redirect(target);
+        const normalizedType = typeof type === 'string' ? type.toLowerCase() as EntityType : undefined;
+        const target = normalizedType ? LEGACY_CREATE_ROUTE_BY_TYPE[normalizedType] : null;
+        redirect(target || '/admin/super');
     }
 
     // 1. Check Auth & Permissions (Basic check, RLS enforces mutations later)
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
 
-    if (!user) {
+    if (!session?.user) {
         redirect('/login');
     }
 
@@ -218,12 +226,20 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     const isClub = result.entityType === 'club';
     if (isClub) {
-        const { data: unionsData } = await supabase.from('unions').select('id, name').order('name');
+        const [context, { data: unionsData }] = await Promise.all([
+            requireUserAccessContext(supabase).catch(() => null),
+            supabase.from('unions').select('id, name').order('name'),
+        ]);
+        const managed = context
+            ? await getManagedClubSummaries(supabase as never, context.memberships)
+            : { clubs: [], defaultClubId: null };
+
         return (
             <ClubManageShell
                 id={id}
                 data={result.data as ResolvedClubRow}
                 unions={unionsData ?? []}
+                managedClubs={managed.clubs}
             />
         );
     }

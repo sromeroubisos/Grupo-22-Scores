@@ -126,3 +126,23 @@ export async function PATCH(
     if (error) return err('Error al actualizar club', 500, error.message);
     return NextResponse.json({ data });
 }
+
+export async function DELETE(
+    _request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+    const supabase = await createClient();
+
+    const perm = await resolvePermission(supabase, id);
+    if (!perm) return err('No autenticado', 401);
+    if (!perm.allowed) return err('Sin permisos para eliminar este club', 403);
+
+    const { error } = await supabase
+        .from('clubs')
+        .delete()
+        .eq('id', id);
+
+    if (error) return err('Error al eliminar club', 500, error.message);
+    return NextResponse.json({ success: true });
+}

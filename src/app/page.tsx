@@ -117,6 +117,15 @@ function normalizeTournamentLookupKey(value: string | null | undefined): string 
     .trim();
 }
 
+function formatMatchRoundLabel(roundId: unknown): string {
+  const normalized = String(roundId ?? '').trim();
+  if (!normalized) return 'General';
+  if (/^f\d+$/i.test(normalized)) {
+    return normalized.replace(/^f/i, 'Fecha ');
+  }
+  return normalized;
+}
+
 const FAVORITE_TEAMS_SECTION_ID = '__favorite-teams__';
 
 function getTournamentCountryName(tournament: { country?: unknown } | null | undefined): string {
@@ -923,88 +932,93 @@ export default function HomePage() {
     // e.g. countryName="South America", name="SOUTH AMERICA: Super Rugby Americas"
     // → cleaned = "Super Rugby Americas"
     matches.forEach(match => {
-      const tournament = match.tournament;
-      if (!tournament) return;
-      if (!shouldIncludeMatchForAudience(tournament)) return;
+      try {
+        const tournament = match?.tournament;
+        if (!tournament) return;
+        if (!shouldIncludeMatchForAudience(tournament)) return;
 
-      const overriddenTournament = tournament.id ? loadedRugbyTournamentMap.get(String(tournament.id)) : undefined;
-      const rawCountryName = overriddenTournament
-        ? (getCountryById(overriddenTournament.countryId || '')?.name || overriddenTournament.countryId || getTournamentCountryName(tournament))
-        : getTournamentCountryName(tournament);
-      const countryName = rawCountryName.replace(/\b\w/g, (c: string) => c.toUpperCase());
-      const tournamentName = overriddenTournament?.displayName || overriddenTournament?.name || tournament.name;
-      const tournamentPriority = Math.max(
-        getTournamentPriority(tournament),
-        overriddenTournament ? getTournamentPriority(overriddenTournament) : 0,
-      );
-      const cleanedName = cleanLeagueName(tournamentName, countryName);
-      const isMotorsportGroup = selectedSport.id === 'motorsport';
-      const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
+        const overriddenTournament = tournament.id ? loadedRugbyTournamentMap.get(String(tournament.id)) : undefined;
+        const rawCountryName = overriddenTournament
+          ? (getCountryById(overriddenTournament.countryId || '')?.name || overriddenTournament.countryId || getTournamentCountryName(tournament))
+          : getTournamentCountryName(tournament);
+        const countryName = String(rawCountryName || 'Internacional').replace(/\b\w/g, (c: string) => c.toUpperCase());
+        const tournamentName = String(overriddenTournament?.displayName || overriddenTournament?.name || tournament.name || 'Competencia');
+        const tournamentPriority = Math.max(
+          getTournamentPriority(tournament),
+          overriddenTournament ? getTournamentPriority(overriddenTournament) : 0,
+        );
+        const cleanedName = cleanLeagueName(tournamentName, countryName) || 'Competencia';
+        const isMotorsportGroup = selectedSport.id === 'motorsport';
+        const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
 
-      const existingId = dedupByKey.get(dedupKey);
-      const groupKey = isMotorsportGroup
-        ? `${String(tournament.id || 'motorsport')}::${String(match.id)}`
-        : (existingId ?? tournament.id);
-      const favoriteLeagueId = String(tournament.id || groupKey);
+        const existingId = dedupByKey.get(dedupKey);
+        const fallbackGroupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
+        const groupKey = isMotorsportGroup
+          ? `${String(tournament.id || 'motorsport')}::${String(match.id || fallbackGroupKey)}`
+          : String(existingId || tournament.id || fallbackGroupKey);
+        const favoriteLeagueId = String(tournament.id || groupKey);
 
-      if (!groups[groupKey]) {
-        groups[groupKey] = {
-          league: `${countryName}: ${cleanedName}`,
-          leagueId: groupKey,
-          logoUrl: overriddenTournament?.logoUrl || (tournament as any)?.logoUrl || (tournament as any)?.logo_url || null,
-          favoriteLeagueId,
-          favoriteLeagueIds: favoriteLeagueId ? [favoriteLeagueId] : [],
-          country: countryName,
-          flag: '',
-          round: match.roundId?.startsWith('F') ? match.roundId.replace('F', 'Fecha ') : (match.roundId || 'General'),
-          priority: tournamentPriority,
-          matches: []
-        };
-        if (!isMotorsportGroup) {
-          dedupByKey.set(dedupKey, groupKey);
+        if (!groups[groupKey]) {
+          groups[groupKey] = {
+            league: `${countryName}: ${cleanedName}`,
+            leagueId: groupKey,
+            logoUrl: overriddenTournament?.logoUrl || (tournament as any)?.logoUrl || (tournament as any)?.logo_url || null,
+            favoriteLeagueId,
+            favoriteLeagueIds: favoriteLeagueId ? [favoriteLeagueId] : [],
+            country: countryName,
+            flag: '',
+            round: formatMatchRoundLabel(match.roundId),
+            priority: tournamentPriority,
+            matches: []
+          };
+          if (!isMotorsportGroup) {
+            dedupByKey.set(dedupKey, groupKey);
+          }
+        } else if (tournamentPriority > groups[groupKey].priority) {
+          groups[groupKey].priority = tournamentPriority;
         }
-      } else if (tournamentPriority > groups[groupKey].priority) {
-        groups[groupKey].priority = tournamentPriority;
-      }
 
-      if (favoriteLeagueId) {
-        const currentFavoriteIds = groups[groupKey].favoriteLeagueIds || [];
-        if (!currentFavoriteIds.includes(favoriteLeagueId)) {
-          currentFavoriteIds.push(favoriteLeagueId);
+        if (favoriteLeagueId) {
+          const currentFavoriteIds = groups[groupKey].favoriteLeagueIds || [];
+          if (!currentFavoriteIds.includes(favoriteLeagueId)) {
+            currentFavoriteIds.push(favoriteLeagueId);
+          }
+          groups[groupKey].favoriteLeagueIds = currentFavoriteIds;
         }
-        groups[groupKey].favoriteLeagueIds = currentFavoriteIds;
+
+        const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
+        const normalizedMatchStatus = String(match.status || '').trim().toLowerCase();
+
+        let status: 'live' | 'scheduled' | 'finished' = 'scheduled';
+        if (normalizedMatchStatus === 'live' || normalizedMatchStatus === 'in_play') status = 'live';
+        if (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft') status = 'finished';
+
+        groups[groupKey].matches.push({
+          id: match.id,
+          time: timeStr,
+          home: String(match.homeTeam?.name || 'Local'),
+          homeLogo: resolveTeamLogo(match.homeTeam),
+          homeScore: typeof match.score?.home === 'number' ? match.score.home : (status === 'scheduled' ? null : 0),
+          away: String(match.awayTeam?.name || 'Visita'),
+          awayLogo: resolveTeamLogo(match.awayTeam),
+          awayScore: typeof match.score?.away === 'number' ? match.score.away : (status === 'scheduled' ? null : 0),
+          status: status,
+          // minutes will be calculated by the MatchRow component using the original dateTime
+          minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,
+          _dateTime: match.dateTime, // Preserve for real-time calculation
+          homeClubId: match.homeClubId,
+          awayClubId: match.awayClubId,
+          venue: match.venue || undefined,
+          eventLabel: (match as any).eventName || undefined,
+          footerLabel: normalizedMatchStatus === 'live'
+            ? 'Telemetry'
+            : (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft')
+              ? 'Race data'
+              : 'Event details',
+        } as any);
+      } catch (error) {
+        console.error('[HomePage] Error rendering match row:', error, match);
       }
-
-      const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
-      const normalizedMatchStatus = String(match.status || '').trim().toLowerCase();
-
-      let status: 'live' | 'scheduled' | 'finished' = 'scheduled';
-      if (normalizedMatchStatus === 'live' || normalizedMatchStatus === 'in_play') status = 'live';
-      if (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft') status = 'finished';
-
-      groups[groupKey].matches.push({
-        id: match.id,
-        time: timeStr,
-        home: match.homeTeam?.name || 'Local',
-        homeLogo: resolveTeamLogo(match.homeTeam),
-        homeScore: typeof match.score?.home === 'number' ? match.score.home : (status === 'scheduled' ? null : 0),
-        away: match.awayTeam?.name || 'Visita',
-        awayLogo: resolveTeamLogo(match.awayTeam),
-        awayScore: typeof match.score?.away === 'number' ? match.score.away : (status === 'scheduled' ? null : 0),
-        status: status,
-        // minutes will be calculated by the MatchRow component using the original dateTime
-        minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,
-        _dateTime: match.dateTime, // Preserve for real-time calculation
-        homeClubId: match.homeClubId,
-        awayClubId: match.awayClubId,
-        venue: match.venue || undefined,
-        eventLabel: (match as any).eventName || undefined,
-        footerLabel: normalizedMatchStatus === 'live'
-          ? 'Telemetry'
-          : (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft')
-            ? 'Race data'
-            : 'Event details',
-      } as any);
     });
 
     const leaguesArray = Object.values(groups);
@@ -1964,7 +1978,7 @@ export default function HomePage() {
                 </div>
               )}
               {/* Source error indicator — shown when FlashScore or Supabase is down */}
-              {sourceError?.scenario === 'fs_cache' && (
+              {false && sourceError?.scenario === 'fs_cache' && (
                 <div style={{
                   display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
                   borderRadius: '6px', background: 'rgba(100,180,255,0.07)',
@@ -1975,7 +1989,7 @@ export default function HomePage() {
                   <span style={{ opacity: 0.8 }}>Datos de FlashScore desde caché — puede haber un leve retraso.</span>
                 </div>
               )}
-              {sourceError?.scenario === 'fs_down_db_ok' && (
+              {false && sourceError?.scenario === 'fs_down_db_ok' && (
                 <div style={{
                   display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
                   borderRadius: '6px', background: 'rgba(255,160,0,0.08)',
@@ -1986,7 +2000,7 @@ export default function HomePage() {
                   <span style={{ opacity: 0.8 }}>FlashScore no disponible — mostrando solo partidos locales.</span>
                 </div>
               )}
-              {sourceError?.scenario === 'db_down_fs_ok' && (
+              {false && sourceError?.scenario === 'db_down_fs_ok' && (
                 <div style={{
                   display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
                   borderRadius: '6px', background: 'rgba(255,160,0,0.08)',
@@ -1997,7 +2011,7 @@ export default function HomePage() {
                   <span style={{ opacity: 0.8 }}>Partidos de la base de datos no disponibles — solo datos de FlashScore.</span>
                 </div>
               )}
-              {sourceError?.scenario === 'both_down' && (
+              {false && sourceError?.scenario === 'both_down' && (
                 <div style={{
                   display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
                   borderRadius: '6px', background: 'rgba(255,60,60,0.08)',

@@ -1526,6 +1526,43 @@ a {
     box-sizing: border-box;
 }
 
+/* ===== NATIVE SELECT POPUP NORMALIZATION ===== */
+/*
+  On Windows/Chromium, many dark-themed native <select> controls keep a light OS popup.
+  If the control text color is white, option labels become effectively invisible.
+  We normalize native popup rendering for dark surfaces and keep option text legible.
+*/
+html[data-theme="dark"] select,
+html.dark select,
+body:not([data-theme="light"]) .basalt-body select,
+body:not([data-theme="light"]) .creation-body select,
+body:not([data-theme="light"]) .match-center-container select {
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] select option,
+html[data-theme="dark"] select optgroup,
+html.dark select option,
+html.dark select optgroup,
+body:not([data-theme="light"]) .basalt-body select option,
+body:not([data-theme="light"]) .basalt-body select optgroup,
+body:not([data-theme="light"]) .creation-body select option,
+body:not([data-theme="light"]) .creation-body select optgroup,
+body:not([data-theme="light"]) .match-center-container select option,
+body:not([data-theme="light"]) .match-center-container select optgroup {
+    background-color: #121214;
+    color: #f2f2f2;
+}
+
+html[data-theme="dark"] select option:checked,
+html.dark select option:checked,
+body:not([data-theme="light"]) .basalt-body select option:checked,
+body:not([data-theme="light"]) .creation-body select option:checked,
+body:not([data-theme="light"]) .match-center-container select option:checked {
+    background: linear-gradient(135deg, rgba(0, 163, 101, 0.34), rgba(0, 163, 101, 0.18));
+    color: #ffffff;
+}
+
 @media (max-width: 900px) {
     .g22-container {
         padding: 0 16px;

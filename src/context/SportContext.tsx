@@ -57,13 +57,15 @@ export function SportProvider({ children }: { children: ReactNode }) {
                 }).sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
 
                 setAllSports(merged);
-                
-                // If current selected sport is now hidden, select first visible
-                const currentIsHidden = merged.find(s => s.id === selectedSport.id)?.isVisible === false;
-                if (currentIsHidden) {
-                    const firstVisible = merged.find(s => s.isVisible !== false);
-                    if (firstVisible) setSelectedSport(firstVisible);
-                }
+
+                setSelectedSport((currentSelected) => {
+                    const mergedSelected = merged.find((sport) => sport.id === currentSelected.id);
+                    if (mergedSelected?.isVisible !== false) {
+                        return mergedSelected ?? currentSelected;
+                    }
+
+                    return merged.find((sport) => sport.isVisible !== false) ?? currentSelected;
+                });
             } catch (err) {
                 console.error('Error loading sports config:', err);
                 setAllSports(Object.values(SPORTS) as Sport[]);
@@ -73,7 +75,7 @@ export function SportProvider({ children }: { children: ReactNode }) {
         };
 
         fetchConfig();
-    }, [selectedSport.id, supabase]);
+    }, [supabase]);
 
     useEffect(() => {
         if (!user || allSports.length === 0) return;

@@ -136,7 +136,7 @@ function applyClubDetail(rows: ClubFollowRow[], detail: FavoriteUpdatedDetail): 
 export function useFavorites() {
     const pathname = usePathname();
     const { login, user } = useAuth();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     const [leagueRows, setLeagueRows] = useState<LeagueFollowRow[]>([]);
     const [clubRows, setClubRows] = useState<ClubFollowRow[]>([]);

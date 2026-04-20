@@ -1498,6 +1498,13 @@ export default function TournamentDetailPage({
             !!initialData?.queryErrors?.groups ||
             !!initialData?.queryErrors?.teamLabels;
         const shouldPreferDbSource = !!initialData?.ok;
+        const hasCompletePreloadedMeta = Boolean(
+            preloaded?.tournamentMeta &&
+            preloaded.tournamentMeta.name &&
+            preloaded.tournamentMeta.name !== 'Cargando...' &&
+            preloaded.tournamentMeta.sportId &&
+            String(preloaded.tournamentMeta.logoUrl || '').trim(),
+        );
         const shouldKeepDbCircuitStandings = Boolean(
             preloaded?.isCircuitCompetition ||
             isCircuitTournamentRuleset(preloaded?.tournamentMeta?.ruleset) ||
@@ -1703,7 +1710,17 @@ export default function TournamentDetailPage({
                 }
 
                 // Local DB metadata for UUID/slug routes that also use a FlashScore URL (fixture from API, nombre/logo desde Supabase).
-                if (!id.toLowerCase().startsWith('fs-') && !isRugbyApiSportsTournamentId(id) && !isEspnAmericanFootballTournamentId(id)) {
+                const shouldFetchDbMeta =
+                    !shouldPreferDbSource ||
+                    shouldRetryDbSnapshot ||
+                    !hasCompletePreloadedMeta;
+
+                if (
+                    shouldFetchDbMeta &&
+                    !id.toLowerCase().startsWith('fs-') &&
+                    !isRugbyApiSportsTournamentId(id) &&
+                    !isEspnAmericanFootballTournamentId(id)
+                ) {
                     try {
                         const metaRes = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}`, {
                             cache: 'no-store',

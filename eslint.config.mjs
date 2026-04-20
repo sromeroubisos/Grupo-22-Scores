@@ -12,6 +12,18 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    ".agent/**",
+    "tmp/**",
+    "scripts/**",
+    "src/scripts/**",
+    "eslint_output.json",
+    "eslint.json",
+    "diagnose_data.ts",
+    "fix*.js",
+    "inspect_*.js",
+    "list-users.js",
+    "patch*.js",
+    "test_db.js",
   ]),
 ]);
 

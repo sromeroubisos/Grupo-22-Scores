@@ -2,6 +2,7 @@ import { getReadClient } from '@/lib/supabase/read';
 import { normalizeTeamLabelAssignments } from '@/lib/teamLabels';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SLUG_LOOKUP_TIMEOUT_MS = 5000;
@@ -156,6 +157,32 @@ type TournamentStandingRow = Record<string, unknown> & {
     group_id: string | null;
 };
 
+function sanitizeInlineAssetUrl(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim();
+    if (!normalized) return null;
+    if (normalized.startsWith('data:')) return null;
+    return normalized;
+}
+
+function resolveParticipantClubLogo(
+    participant: TournamentParticipantRow,
+    club: TournamentClubSource | null | undefined,
+): string | null {
+    const candidateId = participant.club_id || club?.id || participant.id || null;
+    const resolved = resolveTeamLogo({
+        id: candidateId,
+        team_id: candidateId,
+        participant_id: participant.id,
+        name: club?.name ?? participant.name ?? '',
+        short_name: club?.short_name ?? '',
+        logo_url: club?.logo_url ?? '',
+        logo: club?.logo_url ?? '',
+    });
+
+    return sanitizeInlineAssetUrl(resolved);
+}
+
 function emptyTournamentData(error?: string): TournamentInitialData {
     return {
         ok: false,
@@ -204,10 +231,36 @@ function normalizeParticipantClub(participant: TournamentParticipantRow): Tourna
     return {
         id: String(id),
         name: club?.name ?? participant?.name ?? null,
-        logo_url: club?.logo_url ?? null,
+        logo_url: resolveParticipantClubLogo(participant, club),
         short_name: club?.short_name ?? null,
         slug: club?.slug ?? null,
     };
+}
+
+function sanitizeParticipantClubSource(
+    participant: TournamentParticipantRow,
+    club: TournamentClubSource,
+): TournamentClubSource {
+    return {
+        ...club,
+        logo_url: resolveParticipantClubLogo(participant, club),
+    };
+}
+
+function sanitizeParticipantRows(participants: TournamentParticipantRow[]): TournamentParticipantRow[] {
+    return participants.map((participant) => {
+        const sourceClubs = Array.isArray(participant.clubs)
+            ? participant.clubs
+            : participant.clubs
+                ? [participant.clubs]
+                : [];
+        const clubs = sourceClubs.map((club) => sanitizeParticipantClubSource(participant, club));
+
+        return {
+            ...participant,
+            clubs,
+        };
+    });
 }
 
 function buildClubLookup(participants: TournamentParticipantRow[]): Map<string, TournamentClubLookup> {
@@ -231,10 +284,29 @@ function hydrateMatches(matches: TournamentMatchRow[], clubsById: Map<string, To
 }
 
 function hydrateStandingsRows(rows: TournamentStandingRow[], clubsById: Map<string, TournamentClubLookup>) {
-    return rows.map((row) => ({
-        ...row,
-        club: row.club_id ? clubsById.get(String(row.club_id)) ?? null : null,
-    }));
+    return rows.map((row) => {
+        const club = row.club_id ? clubsById.get(String(row.club_id)) ?? null : null;
+        const stats = row.stats && typeof row.stats === 'object'
+            ? {
+                ...row.stats,
+                team_logo: club?.logo_url || sanitizeInlineAssetUrl(resolveTeamLogo({
+                    id: row.club_id,
+                    team_id: row.club_id,
+                    name: typeof row.stats.team_name === 'string' ? row.stats.team_name : club?.name || '',
+                    short_name: club?.short_name ?? '',
+                    team_logo: (row.stats as Record<string, unknown>).team_logo ?? '',
+                    logo_url: club?.logo_url ?? '',
+                    logo: club?.logo_url ?? '',
+                })),
+            }
+            : row.stats;
+
+        return {
+            ...row,
+            stats,
+            club,
+        };
+    });
 }
 
 async function settleSupabaseQuery<T>(
@@ -526,6 +598,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             }
         }
 
+        const sanitizedParticipants = sanitizeParticipantRows(participantsRes.data);
         const normalizedTeamLabels = normalizeTeamLabelAssignments(teamLabelsRes.data);
 
         const queryErrors: TournamentQueryErrors = {
@@ -541,7 +614,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
 
         const hasAnyData = Boolean(
             tournamentRow ||
-            participantsRes.data.length ||
+            sanitizedParticipants.length ||
             matchesRes.data.length ||
             standingsRes.data.length ||
             phasesRes.data.length ||
@@ -554,7 +627,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             return null;
         }
 
-        const clubsById = buildClubLookup(participantsRes.data);
+        const clubsById = buildClubLookup(sanitizedParticipants);
         const hydratedMatches = hydrateMatches(matchesRes.data, clubsById);
         const hydratedStandings = hydrateStandingsRows(standingsRes.data, clubsById);
 
@@ -563,10 +636,12 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             partial: Object.values(queryErrors).some(Boolean),
             tournament: tournamentRow ? {
                 ...tournamentRow,
+                logo_url: sanitizeInlineAssetUrl(tournamentRow.logo_url),
+                banner_url: sanitizeInlineAssetUrl(tournamentRow.banner_url),
                 sport_id: tournamentRow.sport_id || tournamentRow.legacy_sport || 'rugby',
                 country_name: tournamentRow.country || (tournamentRow.country_ref as { name?: string } | null)?.name || null,
             } : null,
-            participants: participantsRes.data,
+            participants: sanitizedParticipants,
             matches: hydratedMatches,
             standings: hydratedStandings,
             phases: phasesRes.data,

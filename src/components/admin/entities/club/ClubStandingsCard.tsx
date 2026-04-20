@@ -67,7 +67,7 @@ export function ClubStandingsCard({ tournamentName, standings, loading }: ClubSt
                                     <td className="mono" style={{ color: 'var(--text-muted)' }}>{row.pos}</td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{ width: '0.25rem', height: '0.25rem', borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 8px var(--accent-glow)' }} />
+                                            <div style={{ width: '0.25rem', height: '0.25rem', borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 8px var(--accent)' }} />
                                             <span style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '-0.025em', color: 'var(--text)' }}>
                                                 {row.label}
                                             </span>
@@ -87,7 +87,7 @@ export function ClubStandingsCard({ tournamentName, standings, loading }: ClubSt
                     {tournamentName || 'Resumen de posiciones'}
                 </span>
                 <button style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>
-                    Ver posiciones →
+                    Ver posiciones {'->'}
                 </button>
             </div>
         </div>

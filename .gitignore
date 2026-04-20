@@ -46,3 +46,6 @@ next-env.d.ts
 *.log
 supabase/.temp/
 
+# local-only admin login shortcuts
+/public/local-dev/
+

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Shield, Star, Trophy } from 'lucide-react';
+import TeamLogo from '@/components/TeamLogo';
 import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_DISABLED_MESSAGE, FAVORITES_ENABLED } from '@/lib/favorites/config';
 
@@ -79,7 +80,16 @@ export default function FavoritesPage() {
                                         href={getFavoriteHref(favorite.entity_type, favorite.id)}
                                         className={styles.favoriteContent}
                                     >
-                                        {favorite.logo_url ? (
+                                        {favorite.entity_type === 'club' ? (
+                                            <TeamLogo
+                                                name={favorite.name}
+                                                teamId={favorite.id}
+                                                logoUrl={favorite.logo_url}
+                                                className={styles.favoriteImage}
+                                                size={48}
+                                                radius="round"
+                                            />
+                                        ) : favorite.logo_url ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
                                                 src={favorite.logo_url}

@@ -306,7 +306,7 @@ export async function createEntity(
 
     await writeAuditLog(actorUserId, type, id, 'create', { initial: cleanPayload });
 
-    revalidatePath('/admin/entities/new');
+    revalidatePath('/admin/super');
     revalidatePath(`/admin/entities/${id}/manage`);
     revalidatePath(`/${type}s/${id}`);
 

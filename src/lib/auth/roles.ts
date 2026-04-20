@@ -9,6 +9,7 @@ export type AppUserRole =
     | 'admin_torneo'
     | 'operador'
     | 'admin_club'
+    | 'familia_club'
     | 'gestor_deportes'
     | 'gestor_torneos'
     | 'gestor_partidos'
@@ -39,6 +40,7 @@ export const APP_ROLES: AppUserRole[] = [
     'admin_torneo',
     'operador',
     'admin_club',
+    'familia_club',
     'gestor_deportes',
     'gestor_torneos',
     'gestor_partidos',
@@ -55,6 +57,10 @@ const ROLE_ALIASES: Record<string, AppUserRole> = {
     admin_torneo: 'admin_torneo',
     admin_club: 'admin_club',
     club_admin: 'admin_club',
+    familia_club: 'familia_club',
+    family_club: 'familia_club',
+    club_family: 'familia_club',
+    club_family_admin: 'familia_club',
     operador: 'operador',
     operator: 'operador',
     gestor_deportes: 'gestor_deportes',
@@ -86,7 +92,8 @@ export const ROLE_LABELS: Record<AppUserRole, string> = {
     admin_union: 'Admin Unión',
     admin_torneo: 'Admin Torneo',
     operador: 'Operador',
-    admin_club: 'Admin Club',
+    admin_club: 'Administrador de Club',
+    familia_club: 'Familia de Club',
     gestor_deportes: 'Gestor de Deportes',
     gestor_torneos: 'Gestor de Torneos',
     gestor_partidos: 'Gestor de Partidos',
@@ -97,6 +104,7 @@ export const DEFAULT_SCOPE_FOR_ROLE: Partial<Record<AppUserRole, MembershipScope
     admin_union: 'union',
     admin_torneo: 'tournament',
     admin_club: 'club',
+    familia_club: 'club_family',
     gestor_deportes: 'sport',
     gestor_torneos: 'tournament',
     gestor_partidos: 'match',
@@ -221,7 +229,7 @@ export function resolveAdminPanel(
         return { href: '/admin/super', label: 'Super Admin' };
     }
 
-    if (normalized === 'admin_club') {
+    if (normalized === 'admin_club' || normalized === 'familia_club') {
         return { href: '/club-admin', label: 'Panel Club' };
     }
 
@@ -285,6 +293,7 @@ export function isAdminUser(role?: string | null, memberships?: MembershipLike[]
     return (
         hasFederationAdminAccess(normalized, memberships) ||
         normalized === 'admin_club' ||
+        normalized === 'familia_club' ||
         hasClubPanelMembershipAccess(memberships)
     );
 }

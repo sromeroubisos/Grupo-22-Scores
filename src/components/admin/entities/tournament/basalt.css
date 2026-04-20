@@ -3996,12 +3996,19 @@ select.basalt-input {
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.04);
     color: var(--text-main);
+    color-scheme: dark;
 }
 
 .basalt-body .manager-url-input:focus,
 .basalt-body .manager-url-select:focus {
     border-color: rgba(0, 214, 136, 0.36);
     box-shadow: 0 0 0 3px rgba(0, 163, 101, 0.12);
+}
+
+.basalt-body .manager-url-select option,
+.basalt-body .manager-url-select optgroup {
+    background: #121214;
+    color: #f2f2f2;
 }
 
 .basalt-body .manager-btn-inline {

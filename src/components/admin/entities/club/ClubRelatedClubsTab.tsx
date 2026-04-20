@@ -140,7 +140,7 @@ export function ClubRelatedClubsTab({
                                 </span>
                                 {!club.isCurrent && (
                                     <Link
-                                        href={`/admin/entities/${club.id}/manage?type=club&tab=relacionados`}
+                                        href={`/admin/entities/${club.id}/manage?type=club&tab=equipos`}
                                         className="btn"
                                         style={{ textDecoration: 'none' }}
                                     >

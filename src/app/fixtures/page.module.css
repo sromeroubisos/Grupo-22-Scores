@@ -164,17 +164,31 @@
 .liveTeam {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--spacing-sm);
     font-size: 0.9375rem;
 }
 
-.liveTeam span:first-child {
-    font-size: 1.25rem;
+.liveTeamIdentity {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex: 1;
+    min-width: 0;
 }
 
-.liveTeam span:nth-child(2) {
+.liveTeamLogo {
+    width: 28px;
+    height: 28px;
+}
+
+.liveTeamName {
     flex: 1;
     font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .liveScore {

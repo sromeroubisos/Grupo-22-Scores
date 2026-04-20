@@ -128,6 +128,16 @@ function firstNonEmptyString(...values: unknown[]): string {
     return '';
 }
 
+function hasExternalCandidatePrefix(value: string): boolean {
+    const normalized = value.trim().toLowerCase();
+    return (
+        normalized.startsWith('fs-team-') ||
+        normalized.startsWith('fs-') ||
+        normalized.startsWith('ras-team-') ||
+        normalized.startsWith('espn-team-')
+    );
+}
+
 function extractTeamDetailsLogo(details: any): string {
     return normalizeSourceUrl(firstNonEmptyString(
         details?.image_path,
@@ -139,6 +149,52 @@ function extractTeamDetailsLogo(details: any): string {
         details?.team?.logo,
         details?.team?.logo_url,
     ));
+}
+
+function normalizeLabel(value: string): string {
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, ' ')
+        .trim();
+}
+
+function getFallbackInitials(teamName: string, key: string): string {
+    const normalized = normalizeLabel(teamName || key);
+    if (!normalized) return 'CL';
+
+    const parts = normalized.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+        return parts[0].slice(0, 2).toUpperCase();
+    }
+
+    return `${parts[0][0] || ''}${parts[1][0] || ''}`.toUpperCase() || 'CL';
+}
+
+function buildFallbackLogoResponse(teamName: string, key: string) {
+    const initials = getFallbackInitials(teamName, key);
+    const title = teamName || key || 'Club';
+    const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="${title}">
+            <defs>
+                <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#25364a" />
+                    <stop offset="100%" stop-color="#101820" />
+                </linearGradient>
+            </defs>
+            <rect x="10" y="8" width="76" height="80" rx="22" fill="url(#bg)" stroke="#d7e4f2" stroke-opacity="0.35" stroke-width="4" />
+            <path d="M48 20c12 0 22 7 22 7v22c0 15-11 24-22 28-11-4-22-13-22-28V27s10-7 22-7Z" fill="#182634" stroke="#eef5ff" stroke-opacity="0.55" stroke-width="2.5" />
+            <text x="48" y="56" text-anchor="middle" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#ffffff">${initials}</text>
+        </svg>
+    `.trim();
+
+    return new NextResponse(svg, {
+        headers: {
+            'Content-Type': 'image/svg+xml; charset=utf-8',
+            'Cache-Control': PROXY_CACHE_CONTROL,
+            'Access-Control-Allow-Origin': '*',
+        },
+    });
 }
 
 async function findLogoFile(key: string): Promise<string | null> {
@@ -172,6 +228,71 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
 
     try {
         const readClient = await getReadClient();
+        const clubIdCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate) && !hasExternalCandidatePrefix(candidate));
+        const allowClubNameLookup = !teamUrl && !candidates.some((candidate) => hasExternalCandidatePrefix(candidate));
+
+        if (clubIdCandidates.length > 0) {
+            const { data } = await (readClient as any)
+                .from('clubs')
+                .select('id, name, short_name, logo_url')
+                .in('id', clubIdCandidates);
+
+            const byId = new Map<string, Record<string, unknown>>();
+            for (const row of data || []) {
+                if (row?.id) {
+                    byId.set(String(row.id), row);
+                }
+            }
+
+            for (const candidate of candidates) {
+                const record = byId.get(candidate);
+                if (record?.logo_url) {
+                    return String(record.logo_url);
+                }
+            }
+
+            const { data: bySlug } = await (readClient as any)
+                .from('clubs')
+                .select('id, name, short_name, slug, logo_url')
+                .in('slug', clubIdCandidates);
+
+            const slugMap = new Map<string, Record<string, unknown>>();
+            for (const row of bySlug || []) {
+                if (typeof row?.slug === 'string' && row.slug.trim()) {
+                    slugMap.set(String(row.slug), row);
+                }
+            }
+
+            for (const candidate of candidates) {
+                const record = slugMap.get(candidate);
+                if (record?.logo_url) {
+                    return String(record.logo_url);
+                }
+            }
+        }
+
+        if (allowClubNameLookup && teamName) {
+            const { data: byName } = await (readClient as any)
+                .from('clubs')
+                .select('id, name, short_name, logo_url')
+                .eq('name', teamName)
+                .maybeSingle();
+
+            if (byName?.logo_url) {
+                return String(byName.logo_url);
+            }
+
+            const { data: byShortName } = await (readClient as any)
+                .from('clubs')
+                .select('id, name, short_name, logo_url')
+                .eq('short_name', teamName)
+                .maybeSingle();
+
+            if (byShortName?.logo_url) {
+                return String(byShortName.logo_url);
+            }
+        }
+
         const idCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate));
         if (idCandidates.length > 0) {
             const { data } = await (readClient as any)
@@ -348,5 +469,5 @@ export async function GET(request: Request) {
         return buildImageResponse(fallback, url);
     }
 
-    return NextResponse.json({ ok: false, error: 'logo not found' }, { status: 404 });
+    return buildFallbackLogoResponse(teamName, key);
 }

@@ -1,286 +1,96 @@
-'use client';
+import type { ComponentProps } from 'react';
+import NewClubForm from './NewClubForm';
+import { createClient } from '@/lib/supabase/server';
+import {
+  CREATABLE_CLUB_DERIVATIVE_TYPES,
+  type CreatableClubDerivativeType,
+  type ClubDerivativeType,
+} from '@/lib/clubDerivatives';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getActiveSports } from '@/lib/data/sports';
-import { ChevronLeft, CheckCircle, AlertCircle } from 'lucide-react';
-import '../../creation-forms.css';
-
-const activeSports = getActiveSports();
-
-type StepId = 1 | 2;
-
-const steps = [
-    { id: 1, name: 'Básico' },
-    { id: 2, name: 'Listo' },
-] as const;
-
-function slugify(value: string) {
-    return value
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .slice(0, 60);
+interface CreateClubPageProps {
+  searchParams?: Promise<{
+    derivedFrom?: string;
+    derivativeType?: string;
+    derivedSport?: string;
+  }>;
 }
 
-function Toast({ message, type }: { message: string; type: 'success' | 'error' }) {
-    return (
-        <div style={{
-            position: 'fixed', bottom: '100px', right: '24px', zIndex: 9999,
-            background: type === 'success' ? 'rgba(0,163,101,0.2)' : 'rgba(239,68,68,0.2)',
-            backdropFilter: 'blur(20px)',
-            border: `1px solid ${type === 'success' ? '#00a365' : '#ef4444'}`,
-            borderRadius: '12px', padding: '16px 24px',
-            display: 'flex', alignItems: 'center', gap: '12px',
-            color: 'white', fontSize: '14px', maxWidth: '400px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            fontWeight: 700
-        }}>
-            {type === 'success'
-                ? <CheckCircle size={20} color="#00a365" />
-                : <AlertCircle size={20} color="#ef4444" />}
-            {message}
-        </div>
-    );
+type DerivedPrefill = NonNullable<ComponentProps<typeof NewClubForm>['derivedPrefill']>;
+type UnionOption = NonNullable<ComponentProps<typeof NewClubForm>['unions']>[number];
+
+function isCreatableDerivativeType(value: string | undefined): value is CreatableClubDerivativeType {
+  if (!value) return false;
+  return CREATABLE_CLUB_DERIVATIVE_TYPES.includes(value as CreatableClubDerivativeType);
 }
 
-export default function CreateClubSuper() {
-    const router = useRouter();
+async function loadUnions(): Promise<UnionOption[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('unions')
+    .select('id, name, country')
+    .order('name');
 
-    const [currentStep, setCurrentStep] = useState<number>(1);
-    const [createdClubId, setCreatedClubId] = useState<string | null>(null);
-    const [creating, setCreating] = useState(false);
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  if (error) {
+    console.warn('[clubes/crear] No se pudieron cargar las uniones:', error.message);
+    return [];
+  }
 
-    const [form, setForm] = useState({
-        name: '',
-        sport: 'rugby',
-        slug: '',
-        union_id: 'uar',
-        city: '',
-    });
+  return (data ?? []).map((union) => ({
+    id: union.id,
+    name: union.name,
+    country: union.country ?? null,
+  }));
+}
 
-    const showToast = (message: string, type: 'success' | 'error') => {
-        setToast({ message, type });
-        setTimeout(() => setToast(null), 3500);
-    };
+async function loadDerivedPrefill(rawParams?: Awaited<CreateClubPageProps['searchParams']>): Promise<DerivedPrefill | null> {
+  const derivedFrom = rawParams?.derivedFrom?.trim();
+  const derivativeType = rawParams?.derivativeType?.trim();
 
-    const update = (field: string, value: string) =>
-        setForm(prev => ({ ...prev, [field]: value }));
+  if (!derivedFrom || !isCreatableDerivativeType(derivativeType)) {
+    return null;
+  }
 
-    const handleNameChange = (name: string) => {
-        setForm(prev => ({ ...prev, name, slug: slugify(name) }));
-    };
+  const supabase = await createClient();
+  const { data: baseClub, error } = await supabase
+    .from('clubs')
+    .select('id, name, short_name, union_id, country, region, city, logo_url, primary_color, sport, sport_id')
+    .eq('id', derivedFrom)
+    .maybeSingle();
 
-    const handleCreateClub = async () => {
-        if (!form.name.trim()) {
-            showToast('El nombre del club es requerido', 'error');
-            return;
-        }
-        if (!form.slug) {
-            showToast('El slug es inválido', 'error');
-            return;
-        }
+  if (error) {
+    console.warn('[clubes/crear] No se pudo cargar el club base derivado:', error.message);
+    return null;
+  }
 
-        setCreating(true);
-        try {
-            const res = await fetch('/api/clubs', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: form.name.trim(),
-                    slug: form.slug,
-                    sport: form.sport,
-                    union_id: form.union_id,
-                }),
-            });
+  if (!baseClub) {
+    return null;
+  }
 
-            const json = await res.json();
+  return {
+    baseClub: {
+      id: baseClub.id,
+      name: baseClub.name,
+      short_name: baseClub.short_name ?? null,
+      union_id: baseClub.union_id ?? null,
+      country: baseClub.country ?? null,
+      region: baseClub.region ?? null,
+      city: baseClub.city ?? null,
+      logo_url: baseClub.logo_url ?? null,
+      primary_color: baseClub.primary_color ?? null,
+      sport: baseClub.sport ?? null,
+      sport_id: baseClub.sport_id ?? null,
+    },
+    derivativeType,
+    derivedSport: rawParams?.derivedSport?.trim() || null,
+  };
+}
 
-            if (res.status === 409) {
-                showToast('El slug ya está en uso. Modificá el nombre o el slug.', 'error');
-                return;
-            }
+export default async function CreateClubPage({ searchParams }: CreateClubPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const [unions, derivedPrefill] = await Promise.all([
+    loadUnions(),
+    loadDerivedPrefill(resolvedSearchParams),
+  ]);
 
-            if (!res.ok) {
-                showToast(json.error || 'Error al crear el club', 'error');
-                return;
-            }
-
-            setCreatedClubId(json.data.id);
-            showToast('Club registrado con éxito.', 'success');
-            setCurrentStep(2);
-        } catch {
-            showToast('Error de red al crear el club', 'error');
-        } finally {
-            setCreating(false);
-        }
-    };
-
-    const handleGoToManage = () => {
-        if (createdClubId) {
-            router.push(`/admin/entities/${createdClubId}/manage?type=club`);
-        }
-    };
-
-    return (
-        <div className="creation-body">
-            <div className="creation-container">
-
-                {/* Header */}
-                <header className="creation-header">
-                    <button
-                        onClick={() => router.push('/admin/super/clubes')}
-                        className="btn btn-outline"
-                        style={{ padding: '8px 16px', marginBottom: '24px', height: 'auto', width: 'auto' }}
-                    >
-                        <ChevronLeft size={16} /> Volver a Clubes
-                    </button>
-                    <h1>{currentStep === 2 ? '¡Todo listo!' : 'Nuevo Club'}</h1>
-                    <p>Registrá los datos básicos. La identidad visual se configura en el panel de gestión.</p>
-                </header>
-
-                {/* Stepper */}
-                <nav className="stepper-nav">
-                    {steps.map(step => (
-                        <button
-                            key={step.id}
-                            className={`step-pill ${currentStep === step.id ? 'active' : ''} ${createdClubId && step.id < currentStep ? 'done' : ''}`}
-                            onClick={() => {
-                                if (step.id < currentStep) setCurrentStep(step.id);
-                            }}
-                        >
-                            {createdClubId && step.id < currentStep ? '✓ ' : `${step.id}. `}
-                            {step.name}
-                        </button>
-                    ))}
-                </nav>
-
-                {/* ── STEP 1: Básico ──────────────────────────────────────── */}
-                {currentStep === 1 && (
-                    <article className="partition">
-                        <div className="partition-header">
-                            <h2>Datos Generales</h2>
-                            <p>Información básica para registrar al club en el sistema.</p>
-                        </div>
-                        <div className="partition-body">
-                            <div className="form-grid">
-                                <div className="field-group">
-                                    <label>NOMBRE DEL CLUB *</label>
-                                    <input
-                                        className="form-input"
-                                        value={form.name}
-                                        onChange={e => handleNameChange(e.target.value)}
-                                        placeholder="Ej: San Isidro Club"
-                                    />
-                                </div>
-
-                                <div className="field-group">
-                                    <label>SLUG (IDENTIFICADOR) *</label>
-                                    <input
-                                        className="form-input"
-                                        value={form.slug}
-                                        onChange={e => update('slug', e.target.value)}
-                                        style={{ color: 'var(--accent)', fontFamily: 'JetBrains Mono' }}
-                                    />
-                                    <p style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                                        URL amigable. Solo minúsculas, números y guiones.
-                                    </p>
-                                </div>
-
-                                <div className="field-group" style={{ gap: 16 }}>
-                                    <label>DEPORTE PRINCIPAL</label>
-                                    <div className="choice-grid">
-                                        {activeSports.map(sport => (
-                                            <button
-                                                key={sport.id}
-                                                type="button"
-                                                onClick={() => update('sport', sport.id)}
-                                                className={`choice-btn ${form.sport === sport.id ? 'selected' : ''}`}
-                                            >
-                                                <span className="choice-icon">{sport.icon}</span>
-                                                <span className="choice-label">{sport.nameEs}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="grid-2">
-                                    <div className="field-group">
-                                        <label>UNIÓN / ORGANISMO</label>
-                                        <input
-                                            className="form-input"
-                                            value={form.union_id}
-                                            onChange={e => update('union_id', e.target.value)}
-                                            placeholder="Ej: UAR, URBA..."
-                                        />
-                                    </div>
-                                    <div className="field-group">
-                                        <label>CIUDAD / REGIÓN</label>
-                                        <input
-                                            className="form-input"
-                                            value={form.city}
-                                            onChange={e => update('city', e.target.value)}
-                                            placeholder="Buenos Aires"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                )}
-
-                {/* ── STEP 2: Listo ─────────────────────────────────────── */}
-                {currentStep === 2 && createdClubId && (
-                    <article className="partition" style={{ textAlign: 'center' }}>
-                        <div className="partition-body" style={{ padding: '60px 40px' }}>
-                            <div style={{ fontSize: '4rem', marginBottom: '24px' }}>🏆</div>
-                            <h2 style={{ fontSize: '2rem', fontWeight: 950, textTransform: 'uppercase', marginBottom: '12px' }}>
-                                Club Creado con Éxito
-                            </h2>
-                            <div style={{
-                                display: 'inline-block',
-                                background: 'var(--accent-glow)',
-                                border: '1px solid var(--accent)',
-                                padding: '8px 16px',
-                                borderRadius: '8px',
-                                marginBottom: '24px'
-                            }}>
-                                <span style={{ color: 'var(--accent)', fontFamily: 'JetBrains Mono', fontWeight: 800 }}>{form.slug}</span>
-                            </div>
-                            <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 40px' }}>
-                                La institución ya forma parte del ecosistema. Configurá escudo, colores, planteles y sedes desde el panel de gestión.
-                            </p>
-
-                            <div className="grid-2" style={{ maxWidth: 500, margin: '0 auto' }}>
-                                <button className="btn btn-outline" onClick={() => router.push('/admin/super/clubes')}>
-                                    LISTADO GENERAL
-                                </button>
-                                <button className="btn btn-primary" onClick={handleGoToManage}>
-                                    IR A GESTIÓN <ChevronLeft size={16} style={{ transform: 'rotate(180deg)' }} />
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-                )}
-
-                {/* Footer Actions */}
-                <footer className="actions-footer">
-                    {currentStep === 1 && (
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleCreateClub}
-                            disabled={creating || !form.name.trim() || !form.slug}
-                        >
-                            {creating ? 'PROCESANDO...' : 'REGISTRAR CLUB'}
-                        </button>
-                    )}
-                </footer>
-            </div>
-
-            {toast && <Toast message={toast.message} type={toast.type} />}
-        </div>
-    );
+  return <NewClubForm unions={unions} derivedPrefill={derivedPrefill} />;
 }

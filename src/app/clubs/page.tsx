@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState, useEffect } from 'react';
+import TeamLogo from '@/components/TeamLogo';
 
 type Club = {
     id: string;
@@ -13,8 +14,6 @@ type Club = {
     categories?: string[];
     is_visible: boolean;
 };
-
-const formatNumber = (value: number) => value.toLocaleString('es-AR');
 
 export default function ClubesPage() {
     const [clubs, setClubs] = useState<Club[]>([]);
@@ -130,11 +129,15 @@ export default function ClubesPage() {
                                                     <div className="g22-card-content">
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-12 h-12 flex-shrink-0 bg-neutral-800 rounded-lg overflow-hidden flex items-center justify-center border border-neutral-700">
-                                                                {club.logo_url ? (
-                                                                    <img src={club.logo_url} alt={club.name} className="w-10 h-10 object-contain" />
-                                                                ) : (
-                                                                    <span className="text-xl font-bold text-neutral-600">{club.name[0]}</span>
-                                                                )}
+                                                                <TeamLogo
+                                                                    name={club.name}
+                                                                    teamId={club.id}
+                                                                    logoUrl={club.logo_url}
+                                                                    className="w-12 h-12 rounded-lg"
+                                                                    imgClassName="w-10 h-10 object-contain"
+                                                                    style={{ background: 'transparent', border: 'none' }}
+                                                                    size={48}
+                                                                />
                                                             </div>
                                                             <div>
                                                                 <div className="g22-cardTitle" style={{ textTransform: 'uppercase' }}>{club.name}</div>

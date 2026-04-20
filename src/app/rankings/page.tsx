@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable @next/next/no-img-element */
 
 import Link from 'next/link';
 import { Suspense, useEffect, useMemo, useState } from 'react';
@@ -23,6 +22,7 @@ import { isGlobalAdminRole } from '@/lib/auth/roles';
 import type { Sport } from '@/lib/types';
 import ExportImage from '@/components/ExportImage';
 import MobileSectionTabs from '@/components/MobileSectionTabs';
+import TeamLogo from '@/components/TeamLogo';
 import {
     buildRankingExportRows,
     formatRankingRating,
@@ -517,6 +517,14 @@ function RankingsPageContent() {
                                 <div className={styles.topThreeList}>
                                     {topThree.map((entry) => (
                                         <div key={entry.id} className={styles.topClub}>
+                                            <TeamLogo
+                                                name={getRankingClubName(entry)}
+                                                shortName={getRankingClubShortName(entry)}
+                                                teamId={entry.club_id}
+                                                logoUrl={entry.clubs?.logo_url}
+                                                className={styles.topClubLogo}
+                                                size={28}
+                                            />
                                             <span className={styles.topRank}>
                                                 {String(entry.current_position || '-').padStart(2, '0')}
                                             </span>
@@ -638,8 +646,18 @@ function RankingsPageContent() {
                                         data-rank={String(position)}
                                     >
                                         <div className={styles.rankBadge}>{position}</div>
-                                        <div className={styles.rankName}>
-                                            {entry.clubs?.short_name || entry.clubs?.name || entry.source_name}
+                                        <div className={styles.rankHeader}>
+                                            <TeamLogo
+                                                name={getRankingClubName(entry)}
+                                                shortName={getRankingClubShortName(entry)}
+                                                teamId={entry.club_id}
+                                                logoUrl={entry.clubs?.logo_url}
+                                                className={styles.rankLogo}
+                                                size={42}
+                                            />
+                                            <div className={styles.rankName}>
+                                                {entry.clubs?.short_name || entry.clubs?.name || entry.source_name}
+                                            </div>
                                         </div>
                                         <div className={styles.rankMeta}>
                                             {entry.source_region || selectedRanking?.scope || 'Sin region informada'}
@@ -730,15 +748,16 @@ function RankingsPageContent() {
                                                         </span>
                                                     </td>
                                                     <td className={styles.clubCell} data-label="Club">
-                                                        {entry.clubs?.logo_url ? (
-                                                            <img
-                                                                src={entry.clubs.logo_url}
-                                                                alt={`Logo de ${clubName}`}
-                                                                className={styles.clubLogo}
-                                                            />
-                                                        ) : (
-                                                            <div className={styles.clubLogoPlaceholder} />
-                                                        )}
+                                                        <TeamLogo
+                                                            name={clubName}
+                                                            shortName={getRankingClubShortName(entry)}
+                                                            teamId={entry.club_id}
+                                                            logoUrl={entry.clubs?.logo_url}
+                                                            className={styles.clubLogo}
+                                                            fallbackClassName={styles.clubLogoFallbackText}
+                                                            size={28}
+                                                            title={`Logo de ${clubName}`}
+                                                        />
                                                         <div className={styles.clubCopy}>
                                                             <strong>{clubName}</strong>
                                                             <span>{getRankingClubShortName(entry)}</span>

@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { getReadClient } from '@/lib/supabase/read';
+import { cookies } from 'next/headers';
 import { resolveClubFamilyIds } from '@/lib/club-admin/managedClubFamily';
 import {
     EDIT_MEMBERSHIP_ROLES,
@@ -14,6 +16,8 @@ import {
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type AllowedMembershipRoles = ReadonlySet<string>;
+const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
+const MISSING_TABLE_CODES = new Set(['PGRST204', '42P01']);
 
 export interface UserAccessContext {
     userId: string;
@@ -21,6 +25,12 @@ export interface UserAccessContext {
     role: AppUserRole;
     memberships: MembershipLike[];
 }
+
+type GuestClubCookiePayload = {
+    kind?: string;
+    clubHint?: string;
+    membershipRole?: string;
+};
 
 export interface TournamentManagementTarget {
     tournamentId: string;
@@ -53,20 +63,162 @@ function normalizeMembershipRows(
     }));
 }
 
+function getErrorCode(error: unknown) {
+    if (!error || typeof error !== 'object' || !('code' in error)) {
+        return null;
+    }
+
+    const code = (error as { code?: unknown }).code;
+    return typeof code === 'string' ? code : null;
+}
+
+function isMissingTableError(error: unknown) {
+    const code = getErrorCode(error);
+    return Boolean(code && MISSING_TABLE_CODES.has(code));
+}
+
+function normalizeLookupToken(value: string) {
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+}
+
+function isAllowedGuestClubHint(value: string) {
+    const normalized = normalizeLookupToken(value);
+    return normalized === 'la tablada' || normalized === 'tablada';
+}
+
+function parseGuestClubCookie(rawValue?: string | null): GuestClubCookiePayload | null {
+    if (!rawValue) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(rawValue) as GuestClubCookiePayload;
+        return parsed?.kind === 'club_family_guest' ? parsed : null;
+    } catch {
+        return null;
+    }
+}
+
+async function resolveGuestClubIdFromHint(clubHint: string): Promise<string | null> {
+    const normalizedHint = normalizeLookupToken(clubHint);
+    if (!normalizedHint || !isAllowedGuestClubHint(normalizedHint)) {
+        return null;
+    }
+
+    const readClient = await getReadClient();
+    const searchTerms = Array.from(new Set([
+        normalizedHint,
+        normalizedHint.replace(/\s+/g, '-'),
+        ...normalizedHint.split(' ').filter((chunk) => chunk.length >= 3),
+    ]));
+
+    for (const term of searchTerms) {
+        const { data, error } = await readClient
+            .from('clubs')
+            .select('id, name, short_name')
+            .or(`name.ilike.%${term}%,short_name.ilike.%${term}%`)
+            .limit(25);
+
+        if (error) {
+            throw error;
+        }
+
+        const rows = Array.isArray(data) ? data : [];
+        const ranked = rows
+            .map((row) => {
+                const name = normalizeLookupToken(row?.name ?? '');
+                const shortName = normalizeLookupToken(row?.short_name ?? '');
+                const exactName = name === normalizedHint;
+                const exactShortName = shortName === normalizedHint;
+                const includesName = Boolean(name && name.includes(normalizedHint));
+                const includesShortName = Boolean(shortName && shortName.includes(normalizedHint));
+                const wordMatch = normalizedHint.split(' ').some((word) => word.length >= 3 && (
+                    name.includes(word) || shortName.includes(word)
+                ));
+
+                const score = exactName || exactShortName
+                    ? 100
+                    : includesName || includesShortName
+                        ? 70
+                        : wordMatch
+                            ? 40
+                            : 0;
+
+                return {
+                    id: typeof row?.id === 'string' ? row.id : null,
+                    score,
+                };
+            })
+            .filter((row): row is { id: string; score: number } => Boolean(row.id && row.score > 0))
+            .sort((left, right) => right.score - left.score);
+
+        if (ranked[0]?.id) {
+            return ranked[0].id;
+        }
+    }
+
+    return null;
+}
+
+async function getGuestAccessContext(): Promise<UserAccessContext | null> {
+    const cookieStore = await cookies();
+    const payload = parseGuestClubCookie(cookieStore.get(GUEST_CLUB_ACCESS_COOKIE)?.value);
+
+    if (!payload?.clubHint) {
+        return null;
+    }
+
+    if (!isAllowedGuestClubHint(payload.clubHint)) {
+        return null;
+    }
+
+    const clubId = await resolveGuestClubIdFromHint(payload.clubHint).catch(() => null);
+    if (!clubId) {
+        return null;
+    }
+
+    return {
+        userId: `guest:${clubId}`,
+        rawRole: 'familia_club',
+        role: 'familia_club',
+        memberships: [{
+            scopeType: 'club_family',
+            scopeId: clubId,
+            role: payload.membershipRole === 'admin' ? 'admin' : 'editor',
+        }],
+    };
+}
+
 export async function getUserAccessContext(
     supabase: SupabaseServerClient
 ): Promise<UserAccessContext | null> {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
-        return null;
+        return getGuestAccessContext();
     }
 
-    const { data: profileData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
+    const [{ data: profileData }, membershipsResult] = await Promise.all([
+        supabase
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle(),
+        supabase
+            .from('memberships')
+            .select('scope_type, scope_id, role')
+            .eq('user_id', user.id),
+    ]);
+
+    const memberships = membershipsResult.error && !isMissingTableError(membershipsResult.error)
+        ? []
+        : normalizeMembershipRows(membershipsResult.data);
 
     const rawRole = profileData?.role || user.user_metadata?.role || null;
 
@@ -74,7 +226,7 @@ export async function getUserAccessContext(
         userId: user.id,
         rawRole,
         role: normalizeRole(rawRole),
-        memberships: [],
+        memberships,
     };
 }
 

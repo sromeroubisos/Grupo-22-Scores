@@ -4,7 +4,9 @@ import { Database } from "../database.types";
 
 export type UserRole =
     | 'admin_general'
+    | 'admin_club'
     | 'fan'
+    | 'familia_club'
     | 'user'
     | 'super_admin';
 

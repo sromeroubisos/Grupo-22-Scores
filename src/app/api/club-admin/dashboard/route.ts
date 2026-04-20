@@ -6,7 +6,9 @@ import {
     requireUserAccessContext,
 } from '@/lib/auth/permissions';
 import { getClubDashboardOverview } from '@/lib/club-admin/dashboard';
+import { EMPTY_CLUB_DASHBOARD_OVERVIEW } from '@/lib/club-admin/dashboard-types';
 import { createClient } from '@/lib/supabase/server';
+import { getReadClient } from '@/lib/supabase/read';
 
 function err(message: string, status: number) {
     return NextResponse.json({ ok: false, error: message }, { status });
@@ -34,7 +36,11 @@ export async function GET(request: NextRequest) {
             return err('Sin permisos para ver este club', 403);
         }
 
-        const data = await getClubDashboardOverview(supabase, clubId);
+        const readClient = await getReadClient();
+        const data = await getClubDashboardOverview(readClient as never, clubId).catch((error) => {
+            console.error('[club-admin/dashboard] Falling back to empty overview:', error);
+            return EMPTY_CLUB_DASHBOARD_OVERVIEW;
+        });
 
         return NextResponse.json({
             ok: true,

@@ -5,6 +5,7 @@ import OAuthButtons from './components/OAuthButtons'
 import EmailLoginForm from './components/EmailLoginForm'
 import AuthErrorBanner from './components/AuthErrorBanner'
 import AuthSuccessBanner from './components/AuthSuccessBanner'
+import LocalDevAccessPanel from './components/LocalDevAccessPanel'
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -53,6 +54,8 @@ function LoginContent() {
             </div>
 
             <EmailLoginForm onError={setError} />
+
+            <LocalDevAccessPanel onError={setError} />
 
             <div className={styles.secondaryLinks}>
                 <Link href="/auth/forgot-password" className={styles.link}>

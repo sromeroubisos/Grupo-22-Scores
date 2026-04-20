@@ -52,12 +52,12 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/admin/super/torneos/:id',
+        source: '/admin/super/torneos/:id((?!crear$|ingesta$|new$)[^/]+)',
         destination: '/admin/entities/:id/manage',
         permanent: false,
       },
       {
-        source: '/admin/super/clubes/:id',
+        source: '/admin/super/clubes/:id((?!crear$|new$)[^/]+)',
         destination: '/admin/entities/:id/manage',
         permanent: false,
       },

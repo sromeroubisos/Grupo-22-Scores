@@ -476,7 +476,7 @@ export default function SuperadminTorneosPage() {
                         <RefreshCw size={14} style={{ marginRight: 6, animation: isLoading ? 'spin 2s linear infinite' : 'none' }} />
                         Refrescar
                     </button>
-                    <Link href="/admin/entities/new?type=tournament" className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
+                    <Link href="/admin/super/torneos/crear" className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
                         <Plus size={14} style={{ marginRight: 6 }} /> Nuevo Torneo
                     </Link>
                 </div>

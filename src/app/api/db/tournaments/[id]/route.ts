@@ -22,6 +22,14 @@ type TournamentLookupRow = {
 const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, format, ruleset, is_visible, status';
 const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, country_id, slug, format, ruleset, is_visible, status';
 
+function sanitizeInlineAssetUrl(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim();
+    if (!normalized) return null;
+    if (normalized.startsWith('data:')) return null;
+    return normalized;
+}
+
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
@@ -75,6 +83,8 @@ export async function GET(
         ok: true,
         tournament: {
             ...data,
+            logo_url: sanitizeInlineAssetUrl(data.logo_url),
+            banner_url: sanitizeInlineAssetUrl(data.banner_url),
             sport_id: data.sport_id || data.legacy_sport || 'rugby',
         }
     });

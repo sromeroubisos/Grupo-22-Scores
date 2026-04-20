@@ -289,6 +289,12 @@
     margin-bottom: 12px;
 }
 
+.scoreValue {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
 .scoreNum {
     font-family: var(--font-mono);
     font-size: 104px;
@@ -296,6 +302,13 @@
     line-height: 1;
     letter-spacing: -0.05em;
     text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+}
+
+.scorePenalty {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--muted);
 }
 
 .scoreSep {
@@ -2418,6 +2431,10 @@
         gap: 4px;
     }
 
+    .scoreValue {
+        gap: 6px;
+    }
+
     .scoreNum {
         font-size: 36px;
         font-weight: 800;
@@ -2425,6 +2442,10 @@
         line-height: 1;
         font-family: 'JetBrains Mono', monospace;
         /* Ensure mono */
+    }
+
+    .scorePenalty {
+        font-size: 14px;
     }
 
     .scoreSep {

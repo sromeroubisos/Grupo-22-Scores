@@ -938,5 +938,191 @@
       }
     ],
     "updated_at": "2026-04-16T14:16:31.547Z"
+  },
+  "fs-w248drhd": {
+    "id": "fs-w248drhd",
+    "source": "external-api",
+    "groups": [],
+    "assignments": [
+      {
+        "id": "team:qukigcua",
+        "team_id": "QukIgCUa",
+        "team_name": "Chicago Hounds",
+        "team_url": "/team/chicago-hounds/QukIgCUa/",
+        "group_id": null,
+        "points": 1
+      },
+      {
+        "id": "team:xmzdi6dk",
+        "team_id": "xMZDI6Dk",
+        "team_name": "California Legion",
+        "team_url": "/team/california-legion/xMZDI6Dk/",
+        "group_id": null,
+        "points": 1
+      },
+      {
+        "id": "team:kjm3dptt",
+        "team_id": "KjM3DPTT",
+        "team_name": "Anthem RC",
+        "team_url": "/team/anthem-rc/KjM3DPTT/",
+        "group_id": null,
+        "points": 0
+      },
+      {
+        "id": "team:yss3gyii",
+        "team_id": "YsS3GyIi",
+        "team_name": "Old Glory DC",
+        "team_url": "/team/old-glory-dc/YsS3GyIi/",
+        "group_id": null,
+        "points": 1
+      },
+      {
+        "id": "team:xx9nwtae",
+        "team_id": "xx9NWtaE",
+        "team_name": "Seattle Seawolves",
+        "team_url": "/team/seattle-seawolves/xx9NWtaE/",
+        "group_id": null,
+        "points": 1
+      },
+      {
+        "id": "team:6yzihypp",
+        "team_id": "6yzIhYPp",
+        "team_name": "New England Free Jacks",
+        "team_url": "/team/new-england-free-jacks/6yzIhYPp/",
+        "group_id": null,
+        "points": 1
+      }
+    ],
+    "labels": [
+      {
+        "id": "label-1775407552535-1__p1",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 1,
+        "group_id": null
+      },
+      {
+        "id": "label-1775407552535-1__p2",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 2,
+        "group_id": null
+      },
+      {
+        "id": "label-1775407552535-1__p3",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 3,
+        "group_id": null
+      },
+      {
+        "id": "label-1775407552535-1__p4",
+        "name": "Playoffs",
+        "color": "#00a365",
+        "position": 4,
+        "group_id": null
+      }
+    ],
+    "tables": [
+      {
+        "id": "fs-w248drhd:standings",
+        "key": "standings",
+        "name": "Tabla general",
+        "source_key": "standings",
+        "order_index": 0,
+        "groups": [],
+        "assignments": [
+          {
+            "id": "team:qukigcua",
+            "team_id": "QukIgCUa",
+            "team_name": "Chicago Hounds",
+            "team_url": "/team/chicago-hounds/QukIgCUa/",
+            "group_id": null,
+            "points": 1
+          },
+          {
+            "id": "team:xmzdi6dk",
+            "team_id": "xMZDI6Dk",
+            "team_name": "California Legion",
+            "team_url": "/team/california-legion/xMZDI6Dk/",
+            "group_id": null,
+            "points": 1
+          },
+          {
+            "id": "team:kjm3dptt",
+            "team_id": "KjM3DPTT",
+            "team_name": "Anthem RC",
+            "team_url": "/team/anthem-rc/KjM3DPTT/",
+            "group_id": null,
+            "points": 0
+          },
+          {
+            "id": "team:yss3gyii",
+            "team_id": "YsS3GyIi",
+            "team_name": "Old Glory DC",
+            "team_url": "/team/old-glory-dc/YsS3GyIi/",
+            "group_id": null,
+            "points": 1
+          },
+          {
+            "id": "team:xx9nwtae",
+            "team_id": "xx9NWtaE",
+            "team_name": "Seattle Seawolves",
+            "team_url": "/team/seattle-seawolves/xx9NWtaE/",
+            "group_id": null,
+            "points": 1
+          },
+          {
+            "id": "team:6yzihypp",
+            "team_id": "6yzIhYPp",
+            "team_name": "New England Free Jacks",
+            "team_url": "/team/new-england-free-jacks/6yzIhYPp/",
+            "group_id": null,
+            "points": 1
+          }
+        ],
+        "labels": [
+          {
+            "id": "label-1775407552535-1__p1",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 1,
+            "group_id": null
+          },
+          {
+            "id": "label-1775407552535-1__p2",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 2,
+            "group_id": null
+          },
+          {
+            "id": "label-1775407552535-1__p3",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 3,
+            "group_id": null
+          },
+          {
+            "id": "label-1775407552535-1__p4",
+            "name": "Playoffs",
+            "color": "#00a365",
+            "position": 4,
+            "group_id": null
+          }
+        ]
+      },
+      {
+        "id": "fs-w248drhd:standingsForm",
+        "key": "standingsForm",
+        "name": "Forma",
+        "source_key": "standingsForm",
+        "order_index": 1,
+        "groups": [],
+        "assignments": [],
+        "labels": []
+      }
+    ],
+    "updated_at": "2026-04-20T15:37:21.158Z"
   }
 }

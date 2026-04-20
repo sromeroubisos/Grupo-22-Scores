@@ -384,6 +384,10 @@ export function resolveTeamLogo(...sources: TeamLogoSource[]): string {
         return extendProxyLogoUrl(fallbackLogo, candidateKey || '', '', teamUrl, teamName, version);
     }
 
+    if (candidateKey && fallbackLogo.startsWith('data:')) {
+        return buildProxyLogoUrl(candidateKey, '', teamUrl, teamName, version);
+    }
+
     if (candidateKey && (hasExternalContext(...sources) || hasExternalKeyPrefix(candidateKey))) {
         return buildProxyLogoUrl(candidateKey, fallbackLogo, teamUrl, teamName, version);
     }

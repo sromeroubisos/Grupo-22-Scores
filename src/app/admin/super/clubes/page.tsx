@@ -159,7 +159,7 @@ export default function SuperadminClubesPage() {
             search.set('derivedSport', derivedSport);
         }
 
-        router.push(`/admin/entities/new?${search.toString()}`);
+        router.push(`/admin/super/clubes/crear?${search.toString()}`);
     };
 
     const handleToggleVisibility = async (club: ClubWithUnion) => {
@@ -369,7 +369,10 @@ export default function SuperadminClubesPage() {
                         <RefreshCw size={13} style={{ marginRight: 4, animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
                         Refrescar
                     </button>
-                    <Link href="/admin/entities/new?type=club" className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
+                    <Link
+                        href="/admin/super/clubes/crear"
+                        className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
+                    >
                         <Plus size={13} style={{ marginRight: 4 }} /> Crear Club
                     </Link>
                 </div>
