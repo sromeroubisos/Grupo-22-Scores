@@ -185,8 +185,16 @@ const TIEBREAKER_LABELS: Record<string, string> = {
     coin_toss: 'Coin Toss',
 };
 
+type StandingsPointsBase = {
+    win: number;
+    draw: number;
+    loss: number;
+    shootout_win: number | null;
+    shootout_loss: number | null;
+};
+
 type StandingsPreset = {
-    points_base: Record<string, number>;
+    points_base: StandingsPointsBase;
     bonus_rules: Array<{ id: string; label: string; points_awarded: number }>;
 };
 
@@ -226,7 +234,7 @@ type OrganizerUnionEntry = {
 };
 
 const DEFAULT_STANDINGS_PRESET: StandingsPreset = {
-    points_base: { win: 1, draw: 0, loss: 0 },
+    points_base: { win: 1, draw: 0, loss: 0, shootout_win: null, shootout_loss: null },
     bonus_rules: [],
 };
 
@@ -270,38 +278,38 @@ const TIEBREAKER_OPTIONS: Array<{ key: string; label: string; description: strin
 
 const SPORT_PRESETS: Record<string, StandingsPreset> = {
     rugby: {
-        points_base: { win: 4, draw: 2, loss: 0 }, bonus_rules: [
+        points_base: makePointsBase(4, 2, 0), bonus_rules: [
             { id: 'try_bonus', label: '4+ Tries', points_awarded: 1 },
             { id: 'close_loss', label: 'Loss < 7 pts', points_awarded: 1 },
         ]
     },
     'rugby-union': {
-        points_base: { win: 4, draw: 2, loss: 0 }, bonus_rules: [
+        points_base: makePointsBase(4, 2, 0), bonus_rules: [
             { id: 'try_bonus', label: '4+ Tries', points_awarded: 1 },
             { id: 'close_loss', label: 'Loss < 7 pts', points_awarded: 1 },
         ]
     },
-    'rugby-league': { points_base: { win: 2, draw: 1, loss: 0 }, bonus_rules: [] },
-    football: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
-    futsal: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
-    'beach-soccer': { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
-    hockey: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
-    'field-hockey': { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
-    floorball: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
-    bandy: { points_base: { win: 3, draw: 1, loss: 0 }, bonus_rules: [] },
-    basketball: { points_base: { win: 2, draw: 0, loss: 1 }, bonus_rules: [] },
-    netball: { points_base: { win: 2, draw: 0, loss: 1 }, bonus_rules: [] },
-    volleyball: { points_base: { win: 3, draw: 0, loss: 0 }, bonus_rules: [] },
-    'beach-volleyball': { points_base: { win: 3, draw: 0, loss: 0 }, bonus_rules: [] },
-    handball: { points_base: { win: 2, draw: 1, loss: 0 }, bonus_rules: [] },
-    'american-football': { points_base: { win: 1, draw: 0, loss: 0 }, bonus_rules: [] },
-    baseball: { points_base: { win: 1, draw: 0, loss: 0 }, bonus_rules: [] },
-    cricket: { points_base: { win: 1, draw: 0, loss: 0 }, bonus_rules: [] },
-    tennis: { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
-    'table-tennis': { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
-    badminton: { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
-    'water-polo': { points_base: { win: 2, draw: 1, loss: 0 }, bonus_rules: [] },
-    kabaddi: { points_base: { win: 2, draw: 0, loss: 0 }, bonus_rules: [] },
+    'rugby-league': { points_base: makePointsBase(2, 1, 0), bonus_rules: [] },
+    football: { points_base: makePointsBase(3, 1, 0), bonus_rules: [] },
+    futsal: { points_base: makePointsBase(3, 1, 0), bonus_rules: [] },
+    'beach-soccer': { points_base: makePointsBase(3, 1, 0), bonus_rules: [] },
+    hockey: { points_base: makePointsBase(3, 1, 0), bonus_rules: [] },
+    'field-hockey': { points_base: makePointsBase(3, 1, 0), bonus_rules: [] },
+    floorball: { points_base: makePointsBase(3, 1, 0), bonus_rules: [] },
+    bandy: { points_base: makePointsBase(3, 1, 0), bonus_rules: [] },
+    basketball: { points_base: makePointsBase(2, 0, 1), bonus_rules: [] },
+    netball: { points_base: makePointsBase(2, 0, 1), bonus_rules: [] },
+    volleyball: { points_base: makePointsBase(3, 0, 0), bonus_rules: [] },
+    'beach-volleyball': { points_base: makePointsBase(3, 0, 0), bonus_rules: [] },
+    handball: { points_base: makePointsBase(2, 1, 0), bonus_rules: [] },
+    'american-football': { points_base: makePointsBase(1, 0, 0), bonus_rules: [] },
+    baseball: { points_base: makePointsBase(1, 0, 0), bonus_rules: [] },
+    cricket: { points_base: makePointsBase(1, 0, 0), bonus_rules: [] },
+    tennis: { points_base: makePointsBase(2, 0, 0), bonus_rules: [] },
+    'table-tennis': { points_base: makePointsBase(2, 0, 0), bonus_rules: [] },
+    badminton: { points_base: makePointsBase(2, 0, 0), bonus_rules: [] },
+    'water-polo': { points_base: makePointsBase(2, 1, 0), bonus_rules: [] },
+    kabaddi: { points_base: makePointsBase(2, 0, 0), bonus_rules: [] },
 };
 
 function getSportPreset(sportId: string | null | undefined): StandingsPreset {
@@ -315,12 +323,27 @@ function toPositiveInteger(value: unknown, fallback: number): number {
     return Math.max(0, Math.floor(numericValue));
 }
 
+function toNullableNumber(value: unknown): number | null {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : null;
+}
+
 function toLegCount(value: unknown, fallback: 1 | 2): 1 | 2 {
     return Number(value) === 2 ? 2 : fallback;
 }
 
 function dedupeStringArray(values: Array<string | null | undefined>): string[] {
     return Array.from(new Set(values.map((value) => String(value || '').trim()).filter(Boolean)));
+}
+
+function makePointsBase(win: number, draw: number, loss: number): StandingsPointsBase {
+    return {
+        win,
+        draw,
+        loss,
+        shootout_win: null,
+        shootout_loss: null,
+    };
 }
 
 function buildDefaultGroupNames(count: number) {
@@ -463,11 +486,32 @@ function normalisePhaseState(
     const fallbackFormat = isCircuitCompetition ? 'league' : (index === 0 ? 'league' : 'knockout');
     const rawFormat = normalizeTournamentFormat(phase?.format ?? phase?.settings?.phaseFormat ?? fallbackFormat);
     const format = isCircuitCompetition && rawFormat === 'circuit' ? 'league' : rawFormat;
-    const standings = JSON.parse(JSON.stringify(
-        phase?.standings && typeof phase.standings === 'object'
-            ? phase.standings
-            : baseStandings,
-    )) as StandingsPreset;
+    const rawStandings = phase?.standings && typeof phase.standings === 'object'
+        ? phase.standings
+        : baseStandings;
+    const legacyShootout = phase?.settings?.pointsSystem?.shootout;
+    const standings = {
+        points_base: {
+            win: Number(rawStandings?.points_base?.win ?? baseStandings.points_base.win),
+            draw: Number(rawStandings?.points_base?.draw ?? baseStandings.points_base.draw),
+            loss: Number(rawStandings?.points_base?.loss ?? baseStandings.points_base.loss),
+            shootout_win: toNullableNumber(
+                rawStandings?.points_base?.shootout_win
+                ?? rawStandings?.points_base?.shootoutWin
+                ?? legacyShootout?.win
+                ?? baseStandings.points_base.shootout_win,
+            ),
+            shootout_loss: toNullableNumber(
+                rawStandings?.points_base?.shootout_loss
+                ?? rawStandings?.points_base?.shootoutLoss
+                ?? legacyShootout?.loss
+                ?? baseStandings.points_base.shootout_loss,
+            ),
+        },
+        bonus_rules: Array.isArray(rawStandings?.bonus_rules)
+            ? rawStandings.bonus_rules
+            : baseStandings.bonus_rules,
+    } as StandingsPreset;
     const tiebreakerOrder = Array.isArray(phase?.tiebreakers?.order) && phase.tiebreakers.order.length > 0
         ? phase.tiebreakers.order.filter((item: unknown) => typeof item === 'string' && item.trim())
         : baseTiebreakers.order;
@@ -553,6 +597,15 @@ function buildTournamentPhasePayload(
     const bonusConfig = inferBonusConfig(phase.standings.bonus_rules);
     const normalizedPhaseFormat = normalizeTournamentFormat(phase.format);
     const isSingleEventStage = normalizedPhaseFormat === 'event';
+    const hasShootoutPoints =
+        Number.isFinite(Number(phase.standings.points_base.shootout_win))
+        && Number.isFinite(Number(phase.standings.points_base.shootout_loss));
+    const shootoutConfig = hasShootoutPoints
+        ? {
+            win: Number(phase.standings.points_base.shootout_win),
+            loss: Number(phase.standings.points_base.shootout_loss),
+        }
+        : null;
 
     return {
         name: phase.name.trim() || buildDefaultPhaseName(Math.max(orderIndex - 1, 0), phase.format, isCircuitCompetition),
@@ -571,10 +624,20 @@ function buildTournamentPhasePayload(
             group_names: phaseType === 'group_stage' ? phase.group_names : [],
             groupLabels: phase.groupLabels,
             groupTags: phase.groupLabels.map((label) => label.name),
+            points: isSingleEventStage ? null : {
+                win: phase.standings.points_base.win,
+                draw: phase.standings.points_base.draw,
+                loss: phase.standings.points_base.loss,
+                ...(shootoutConfig ? {
+                    shootoutWin: shootoutConfig.win,
+                    shootoutLoss: shootoutConfig.loss,
+                } : {}),
+            },
             pointsSystem: isSingleEventStage ? null : {
                 win: phase.standings.points_base.win,
                 draw: phase.standings.points_base.draw,
                 loss: phase.standings.points_base.loss,
+                shootout: shootoutConfig,
                 allowBonusPoints: phase.standings.bonus_rules.length > 0,
                 bonusTry: bonusConfig.bonusTry,
                 bonusLoss: bonusConfig.bonusLoss,
@@ -593,6 +656,15 @@ function buildTournamentPhasePayload(
                         { if: { draw: true }, then: { add: phase.standings.points_base.draw } },
                         { if: { loss: true }, then: { add: phase.standings.points_base.loss } },
                     ],
+                    shootoutLogic: shootoutConfig
+                        ? {
+                            enabledWhen: { regularTimeDraw: true },
+                            requires: ['score.penalties'],
+                            howToApply: 'replace_draw_points_with_shootout_points',
+                            win: shootoutConfig.win,
+                            loss: shootoutConfig.loss,
+                        }
+                        : null,
                     bonusTry: bonusConfig.bonusTry,
                     bonusLoss: bonusConfig.bonusLoss,
                     idempotency: {
@@ -2154,6 +2226,32 @@ export function TournamentEditor({
                                                             />
                                                         </div>
                                                     </div>
+
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+                                                        <div>
+                                                            <label style={{ ...S.label, fontSize: '0.6rem' }}>Shootout Win</label>
+                                                            <input
+                                                                type="number"
+                                                                value={phase.standings.points_base.shootout_win ?? ''}
+                                                                onChange={e => handleRulesetChange(`phases.${idx}.standings.points_base.shootout_win`, e.target.value === '' ? null : (parseInt(e.target.value, 10) || 0))}
+                                                                placeholder="Opcional"
+                                                                style={{ ...S.input, padding: '0.5rem', textAlign: 'center', fontFamily: T.mono, color: T.neon }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label style={{ ...S.label, fontSize: '0.6rem' }}>Shootout Loss</label>
+                                                            <input
+                                                                type="number"
+                                                                value={phase.standings.points_base.shootout_loss ?? ''}
+                                                                onChange={e => handleRulesetChange(`phases.${idx}.standings.points_base.shootout_loss`, e.target.value === '' ? null : (parseInt(e.target.value, 10) || 0))}
+                                                                placeholder="Opcional"
+                                                                style={{ ...S.input, padding: '0.5rem', textAlign: 'center', fontFamily: T.mono, color: T.neon }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <p style={{ color: T.textDim, fontSize: '0.72rem', marginTop: '0.65rem', lineHeight: 1.5 }}>
+                                                        Si el partido termina empatado y se define por penales o shootout, estos valores reemplazan el puntaje de empate.
+                                                    </p>
 
                                                     <div style={{ marginTop: '1.5rem', borderTop: `1px solid ${T.border}`, paddingTop: '1.5rem' }}>
                                                         <label style={S.label}>Bonus Points System</label>

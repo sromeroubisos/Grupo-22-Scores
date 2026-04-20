@@ -16,6 +16,15 @@ export async function PUT(
         }
 
         const supabase = await createClient();
+        const hasShootoutPoints =
+            Number.isFinite(Number(rules.points_for_shootout_win))
+            && Number.isFinite(Number(rules.points_for_shootout_loss));
+        const shootoutConfig = hasShootoutPoints
+            ? {
+                win: Number(rules.points_for_shootout_win),
+                loss: Number(rules.points_for_shootout_loss),
+            }
+            : null;
 
         // Check permissions later (Assumed validated via middleware)
 
@@ -41,7 +50,32 @@ export async function PUT(
             points: {
                 win: rules.points_for_win,
                 draw: rules.points_for_draw,
-                loss: rules.points_for_loss
+                loss: rules.points_for_loss,
+                ...(shootoutConfig
+                    ? {
+                        shootoutWin: shootoutConfig.win,
+                        shootoutLoss: shootoutConfig.loss,
+                    }
+                    : {}),
+            },
+            pointsSystem: {
+                ...phase.settings?.pointsSystem,
+                win: rules.points_for_win,
+                draw: rules.points_for_draw,
+                loss: rules.points_for_loss,
+                shootout: shootoutConfig,
+                behavior: {
+                    ...(phase.settings?.pointsSystem?.behavior ?? {}),
+                    shootoutLogic: shootoutConfig
+                        ? {
+                            enabledWhen: { regularTimeDraw: true },
+                            requires: ['score.penalties'],
+                            howToApply: 'replace_draw_points_with_shootout_points',
+                            win: shootoutConfig.win,
+                            loss: shootoutConfig.loss,
+                        }
+                        : null,
+                },
             },
             bonus: {
                 offensive: rules.offensive_bonus_rule,

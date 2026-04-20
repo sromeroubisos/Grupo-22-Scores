@@ -69,6 +69,10 @@ export interface PhasePointsSystem {
   win: number;
   draw: number;
   loss: number;
+  shootout?: {
+    win: number;
+    loss: number;
+  } | null;
   extraTimeAlternativeSystem: boolean;
   allowBonusPoints?: boolean;
   conditionalRules?: any[];
@@ -93,6 +97,13 @@ export interface PhasePointsSystem {
       draw?: number;
       loss?: number;
     };
+    shootoutLogic?: {
+      enabledWhen: { regularTimeDraw: boolean };
+      requires: string[];
+      howToApply: string;
+      win: number;
+      loss: number;
+    } | null;
     idempotency: {
       key: string;
       rule: string;

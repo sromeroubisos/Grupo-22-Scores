@@ -3,6 +3,7 @@ import {
   countTeamOffensiveMetric,
   resolveOffensiveBonusRule,
 } from '@/lib/bonusRuleMetrics';
+import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
 
 export interface PhaseSettings {
   standings?: {
@@ -14,6 +15,8 @@ export interface PhaseSettings {
     win: number;
     draw: number;
     loss: number;
+    shootoutWin?: number | null;
+    shootoutLoss?: number | null;
   };
   bonus?: {
     offensive?: any;
@@ -157,6 +160,24 @@ export class StandingsEngine {
         tournamentPointsSystem?.loss ??
         tournamentRuleset?.pointsLoss ??
         defaults.loss,
+      points_for_shootout_win:
+        phaseSettings?.points?.shootoutWin ??
+        phasePointsSystem?.shootout?.win ??
+        phasePointsSystem?.behavior?.shootoutLogic?.win ??
+        tournamentRuleset?.points?.shootoutWin ??
+        tournamentPointsSystem?.shootout?.win ??
+        tournamentPointsSystem?.behavior?.shootoutLogic?.win ??
+        tournamentRuleset?.pointsShootoutWin ??
+        null,
+      points_for_shootout_loss:
+        phaseSettings?.points?.shootoutLoss ??
+        phasePointsSystem?.shootout?.loss ??
+        phasePointsSystem?.behavior?.shootoutLogic?.loss ??
+        tournamentRuleset?.points?.shootoutLoss ??
+        tournamentPointsSystem?.shootout?.loss ??
+        tournamentPointsSystem?.behavior?.shootoutLogic?.loss ??
+        tournamentRuleset?.pointsShootoutLoss ??
+        null,
       offensive_bonus_rule: resolvedOffensiveBonusRule,
       defensive_bonus_rule: resolvedDefensiveBonusRule,
       tiebreakers,
@@ -383,22 +404,18 @@ export class StandingsEngine {
       const homeTries = countTeamEventMetric(m.score, m.events, 'home', 'try');
       const awayTries = countTeamEventMetric(m.score, m.events, 'away', 'try');
       const hasManualPoints = m.points_autocalculated === false;
-      let homeBasePoints = rules.points_for_draw;
-      let awayBasePoints = rules.points_for_draw;
-      let homeResult = 'D';
-      let awayResult = 'D';
-
-      if (homeScore > awayScore) {
-        homeBasePoints = rules.points_for_win;
-        awayBasePoints = rules.points_for_loss;
-        homeResult = 'W';
-        awayResult = 'L';
-      } else if (homeScore < awayScore) {
-        homeBasePoints = rules.points_for_loss;
-        awayBasePoints = rules.points_for_win;
-        homeResult = 'L';
-        awayResult = 'W';
-      }
+      const {
+        home: homeBasePoints,
+        away: awayBasePoints,
+        homeResult,
+        awayResult,
+      } = calculateBasePointsFromScore(m.score, {
+        win: Number(rules.points_for_win ?? 0),
+        draw: Number(rules.points_for_draw ?? 0),
+        loss: Number(rules.points_for_loss ?? 0),
+        shootoutWin: rules.points_for_shootout_win ?? null,
+        shootoutLoss: rules.points_for_shootout_loss ?? null,
+      });
 
       if (tableType === 'general' || tableType === 'home') {
         homeStats.played += 1;

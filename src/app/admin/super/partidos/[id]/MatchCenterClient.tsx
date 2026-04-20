@@ -19,6 +19,7 @@ import {
     type NormalizedOffensiveBonusRule,
 } from '@/lib/bonusRuleMetrics';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
 import {
     APP_TIMEZONE,
     combineLocalDateTimeToUtcIso,
@@ -581,6 +582,8 @@ interface PointsRules {
     win: number;
     draw: number;
     loss: number;
+    shootoutWin: number | null;
+    shootoutLoss: number | null;
     offensive: NormalizedOffensiveBonusRule | null;
     defensive: {
         margin: number;
@@ -593,6 +596,8 @@ const DEFAULT_POINTS_RULES: PointsRules = {
     win: 4,
     draw: 2,
     loss: 0,
+    shootoutWin: null,
+    shootoutLoss: null,
     offensive: null,
     defensive: null,
 };
@@ -630,6 +635,12 @@ function normalizePointsRules(rawRules: ReturnType<typeof StandingsEngine.resolv
         win: Number(rawRules?.points_for_win ?? DEFAULT_POINTS_RULES.win),
         draw: Number(rawRules?.points_for_draw ?? DEFAULT_POINTS_RULES.draw),
         loss: Number(rawRules?.points_for_loss ?? DEFAULT_POINTS_RULES.loss),
+        shootoutWin: Number.isFinite(Number(rawRules?.points_for_shootout_win))
+            ? Number(rawRules?.points_for_shootout_win)
+            : DEFAULT_POINTS_RULES.shootoutWin,
+        shootoutLoss: Number.isFinite(Number(rawRules?.points_for_shootout_loss))
+            ? Number(rawRules?.points_for_shootout_loss)
+            : DEFAULT_POINTS_RULES.shootoutLoss,
         offensive: offensive && Number.isFinite(offensive.threshold) && Number.isFinite(offensive.points)
             ? offensive
             : null,
@@ -851,13 +862,9 @@ function calculateAutocalculatedPoints(
     let homeBonus = 0;
     let awayBonus = 0;
 
-    if (score.home > score.away) {
-        homeBase = rules.win;
-        awayBase = rules.loss;
-    } else if (score.home < score.away) {
-        homeBase = rules.loss;
-        awayBase = rules.win;
-    }
+    const resolvedBasePoints = calculateBasePointsFromScore(score, rules);
+    homeBase = resolvedBasePoints.home;
+    awayBase = resolvedBasePoints.away;
 
     const homeOffensiveMetric = countTeamOffensiveMetric(score, events, 'home', rules.offensive);
     const awayOffensiveMetric = countTeamOffensiveMetric(score, events, 'away', rules.offensive);
@@ -3067,7 +3074,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                             {match.status === 'final' && score.home === score.away ? (
                                 <>
                                     <div className="form-group">
-                                        <label>Penales Local</label>
+                                        <label>Penales / Shootout Local</label>
                                         <input
                                             type="number"
                                             value={score.penalties?.home ?? ''}
@@ -3078,7 +3085,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label>Penales Visitante</label>
+                                        <label>Penales / Shootout Visitante</label>
                                         <input
                                             type="number"
                                             value={score.penalties?.away ?? ''}

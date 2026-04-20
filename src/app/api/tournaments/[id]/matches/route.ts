@@ -52,7 +52,19 @@ export async function POST(
             }
         }
 
-        const body = await request.json();
+        const rawBody = await request.json();
+        const body = {
+            ...rawBody,
+            streamUrl: typeof rawBody?.streamUrl === 'string' && rawBody.streamUrl.trim()
+                ? rawBody.streamUrl.trim()
+                : (typeof rawBody?.watchUrl === 'string' && rawBody.watchUrl.trim() ? rawBody.watchUrl.trim() : null),
+            category: typeof rawBody?.category === 'string' && rawBody.category.trim()
+                ? rawBody.category.trim()
+                : null,
+            referee: typeof rawBody?.referee === 'string' && rawBody.referee.trim()
+                ? rawBody.referee.trim()
+                : null,
+        };
 
         const match = await perf.measureStep(
             'create_match',

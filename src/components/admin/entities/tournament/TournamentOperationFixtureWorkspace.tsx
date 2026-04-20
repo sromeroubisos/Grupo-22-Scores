@@ -30,6 +30,7 @@ import type { Database } from '@/lib/database.types';
 import type { MatchStatus, MatchWithClubs, RoundWithMatches } from '@/lib/types/fixture';
 import type { FixtureImportPreviewResult } from '@/lib/types/fixture-import';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
 import {
   APP_TIMEZONE,
   combineLocalDateTimeToUtcIso,
@@ -48,7 +49,13 @@ type WorkspaceSubtabId = 'add_matches' | 'manage_fixture';
 type ManageViewMode = 'cards' | 'list';
 type ManageGroupingMode = 'rounds' | 'groups' | 'orphans';
 type ValidationResult = { isValid?: boolean; diagnostics?: Array<{ type?: string; message?: string; context?: string }> } | null;
-type PointsRules = { win: number; draw: number; loss: number };
+type PointsRules = {
+  win: number;
+  draw: number;
+  loss: number;
+  shootoutWin: number | null;
+  shootoutLoss: number | null;
+};
 type RulesConfig = {
   points?: {
     win?: number;
@@ -211,6 +218,12 @@ function resolvePointsRules(phaseSettings: RulesConfig | null | undefined, tourn
     win: Number(resolved.points_for_win ?? 4),
     draw: Number(resolved.points_for_draw ?? 2),
     loss: Number(resolved.points_for_loss ?? 0),
+    shootoutWin: Number.isFinite(Number(resolved.points_for_shootout_win))
+      ? Number(resolved.points_for_shootout_win)
+      : null,
+    shootoutLoss: Number.isFinite(Number(resolved.points_for_shootout_loss))
+      ? Number(resolved.points_for_shootout_loss)
+      : null,
   };
 }
 
@@ -248,10 +261,18 @@ function shouldShowPenaltyFields(form: Pick<QuickResultFormState, 'status' | 'ho
   return Number.isFinite(homeScore) && Number.isFinite(awayScore) && homeScore === awayScore;
 }
 
-function calculateBasePoints(score: { home: number; away: number }, rules: PointsRules) {
-  if (score.home > score.away) return { home: rules.win, away: rules.loss };
-  if (score.home < score.away) return { home: rules.loss, away: rules.win };
-  return { home: rules.draw, away: rules.draw };
+function calculateBasePoints(
+  score: {
+    home: number;
+    away: number;
+    penalties?: {
+      home: number | null;
+      away: number | null;
+    };
+  },
+  rules: PointsRules,
+) {
+  return calculateBasePointsFromScore(score, rules);
 }
 
 function applyQuickPointsAutofill(form: QuickResultFormState, rules: PointsRules): QuickResultFormState {
@@ -271,6 +292,16 @@ function applyQuickPointsAutofill(form: QuickResultFormState, rules: PointsRules
     {
       home: Math.max(0, parseQuickNumber(form.homeScore)),
       away: Math.max(0, parseQuickNumber(form.awayScore)),
+      ...(form.status === 'final'
+        && form.homePenalties.trim()
+        && form.awayPenalties.trim()
+        ? {
+            penalties: {
+              home: Math.max(0, parseQuickNumber(form.homePenalties)),
+              away: Math.max(0, parseQuickNumber(form.awayPenalties)),
+            },
+          }
+        : {}),
     },
     rules,
   );
@@ -2089,17 +2120,17 @@ function MatchCard({
               <div className="fixture-quick-points-head">
                 <div>
                   <span className="fixture-quick-kicker">Desempate</span>
-                  <strong>Penales opcionales</strong>
+                  <strong>Penales / shootout opcionales</strong>
                 </div>
               </div>
               <div className="fixture-quick-grid fixture-quick-grid-score">
                 <label className="fixture-quick-field">
-                  <span>Penales local</span>
+                  <span>Penales / shootout local</span>
                   <input type="number" min={0} value={quickResultForm.homePenalties} onChange={(event) => onQuickResultFieldChange('homePenalties', event.target.value)} placeholder="Opcional" />
                   {quickResultErrors.homePenalties ? <small className="operation-field-error">{quickResultErrors.homePenalties}</small> : null}
                 </label>
                 <label className="fixture-quick-field">
-                  <span>Penales visitante</span>
+                  <span>Penales / shootout visitante</span>
                   <input type="number" min={0} value={quickResultForm.awayPenalties} onChange={(event) => onQuickResultFieldChange('awayPenalties', event.target.value)} placeholder="Opcional" />
                   {quickResultErrors.awayPenalties ? <small className="operation-field-error">{quickResultErrors.awayPenalties}</small> : null}
                 </label>

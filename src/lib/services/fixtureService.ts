@@ -359,7 +359,10 @@ export class FixtureService {
         .select(`
           id, tournament_id, round_uuid, round_id, phase_id, group_id,
           date_time, venue, status, score,
+          referee, pitch, category,
           round_label, notes,
+          broadcast_url, replay_url,
+          home_division_id, away_division_id,
           home_club_id, away_club_id,
           home_base_points, away_base_points,
           home_bonus_points, away_bonus_points,
@@ -478,7 +481,10 @@ export class FixtureService {
           .select(`
             id, tournament_id, round_uuid, round_id, phase_id, group_id,
             date_time, venue, status, score,
+            referee, pitch, category,
             round_label, notes,
+            broadcast_url, replay_url,
+            home_division_id, away_division_id,
             home_club_id, away_club_id,
             home_base_points, away_base_points,
             home_bonus_points, away_bonus_points,
@@ -641,6 +647,8 @@ export class FixtureService {
       supportsHomeDivision,
       supportsAwayDivision,
       supportsCategory,
+      supportsReferee,
+      supportsPitch,
       supportsBroadcastUrl,
       supportsReplayUrl,
       supportsHomeBasePoints,
@@ -654,6 +662,8 @@ export class FixtureService {
       data.homeSquadId ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
       data.awaySquadId ? this.checkMatchColumnSupport('away_division_id') : Promise.resolve(false),
       data.category ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
+      data.referee !== undefined ? this.checkMatchColumnSupport('referee') : Promise.resolve(false),
+      data.pitch !== undefined ? this.checkMatchColumnSupport('pitch') : Promise.resolve(false),
       data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url') : Promise.resolve(false),
       data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url') : Promise.resolve(false),
       data.homeBasePoints !== undefined ? this.checkMatchColumnSupport('home_base_points') : Promise.resolve(false),
@@ -718,6 +728,14 @@ export class FixtureService {
       insertData.category = data.category || null;
     }
 
+    if (supportsReferee && data.referee !== undefined) {
+      insertData.referee = data.referee || null;
+    }
+
+    if (supportsPitch && data.pitch !== undefined) {
+      insertData.pitch = data.pitch || null;
+    }
+
     if (supportsBroadcastUrl && data.streamUrl !== undefined) {
       insertData.broadcast_url = data.streamUrl || null;
     }
@@ -761,6 +779,8 @@ export class FixtureService {
       supportsHomeDivision,
       supportsAwayDivision,
       supportsCategory,
+      supportsReferee,
+      supportsPitch,
       supportsBroadcastUrl,
       supportsReplayUrl,
       supportsClock,
@@ -775,6 +795,8 @@ export class FixtureService {
       data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id', supabase) : Promise.resolve(false),
       data.awaySquadId !== undefined ? this.checkMatchColumnSupport('away_division_id', supabase) : Promise.resolve(false),
       data.category !== undefined ? this.checkMatchColumnSupport('category', supabase) : Promise.resolve(false),
+      data.referee !== undefined ? this.checkMatchColumnSupport('referee', supabase) : Promise.resolve(false),
+      data.pitch !== undefined ? this.checkMatchColumnSupport('pitch', supabase) : Promise.resolve(false),
       data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url', supabase) : Promise.resolve(false),
       data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url', supabase) : Promise.resolve(false),
       data.clock !== undefined ? this.checkMatchColumnSupport('clock', supabase) : Promise.resolve(false),
@@ -860,6 +882,14 @@ export class FixtureService {
 
     if (supportsCategory && data.category !== undefined) {
       updateData.category = data.category || null;
+    }
+
+    if (supportsReferee && data.referee !== undefined) {
+      updateData.referee = data.referee || null;
+    }
+
+    if (supportsPitch && data.pitch !== undefined) {
+      updateData.pitch = data.pitch || null;
     }
 
     if (data.phaseId) updateData.phase_id = data.phaseId;
