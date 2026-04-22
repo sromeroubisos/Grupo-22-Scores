@@ -1,19 +1,10 @@
 const BLOCKED_TOURNAMENT_IDS = [
     'fs-ofv2oc3e',
     'fs-folzz955',
+    'fs-n5pklrhj',
     'ras-league-1',
     'ras-league-41',
 ] as const;
-
-const BLOCKED_TOURNAMENT_ID_SET = new Set(
-    BLOCKED_TOURNAMENT_IDS.map((value) => value.toLowerCase()),
-);
-
-const BLOCKED_RUGBY_API_SPORTS_LEAGUE_ID_SET = new Set(
-    BLOCKED_TOURNAMENT_IDS
-        .map((value) => /^ras-league-(\d+)$/i.exec(value)?.[1] ?? null)
-        .filter((value): value is string => Boolean(value)),
-);
 
 function normalizeValue(value: unknown): string | null {
     if (typeof value === 'number' && Number.isFinite(value)) {
@@ -44,6 +35,16 @@ function buildBlockedCandidates(value: unknown): string[] {
 
     return [...candidates];
 }
+
+const BLOCKED_TOURNAMENT_ID_SET = new Set(
+    BLOCKED_TOURNAMENT_IDS.flatMap((value) => buildBlockedCandidates(value)),
+);
+
+const BLOCKED_RUGBY_API_SPORTS_LEAGUE_ID_SET = new Set(
+    BLOCKED_TOURNAMENT_IDS
+        .map((value) => /^ras-league-(\d+)$/i.exec(value)?.[1] ?? null)
+        .filter((value): value is string => Boolean(value)),
+);
 
 export function isBlockedTournamentId(value: unknown): boolean {
     return buildBlockedCandidates(value).some((candidate) => BLOCKED_TOURNAMENT_ID_SET.has(candidate));

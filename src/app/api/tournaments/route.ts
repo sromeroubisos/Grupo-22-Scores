@@ -774,6 +774,19 @@ export async function GET(request: Request) {
     let drawStageId = searchParams.get('draw_stage_id') || searchParams.get('drawStageId') || undefined;
     const flashScoreEnabledForSport = isFlashScoreEnabledForSport(sport);
 
+    if (
+        isBlockedTournamentId(id) ||
+        isBlockedTournamentId(tournamentId) ||
+        isBlockedTournamentId(stageId) ||
+        isBlockedTournamentId(templateId) ||
+        isBlockedTournamentId(drawStageId)
+    ) {
+        return perf.json(
+            { ok: false, error: 'Tournament not found' },
+            { status: 404 }
+        );
+    }
+
     // Try to get tournament from local data to check for flashScoreIds
     let localTournament: any = null;
     if (id) {
