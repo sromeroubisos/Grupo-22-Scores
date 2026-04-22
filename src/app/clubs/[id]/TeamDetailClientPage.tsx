@@ -9,7 +9,7 @@ import { useFavorite } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
-import ExportImage from '@/components/ExportImage';
+import ExportImage, { type SquadData } from '@/components/ExportImage';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
@@ -68,6 +68,7 @@ const POSITION_LABELS: Record<number, string> = {
     2: 'Mediocampistas',
     3: 'Delanteros',
     4: 'Cuerpo Tecnico',
+    5: 'Otros',
 };
 
 type PublicRelatedClub = {
@@ -89,7 +90,7 @@ function groupSquadByPosition(squad: any): Record<number, any[]> {
             if (!Array.isArray(tab.list)) continue;
             for (const posGroup of tab.list) {
                 const posName = (posGroup.name || '').toLowerCase();
-                const orderIdx = POSITION_ORDER[posName] ?? POSITION_ORDER[posName.replace(/s$/, '')] ?? 3;
+                const orderIdx = POSITION_ORDER[posName] ?? POSITION_ORDER[posName.replace(/s$/, '')] ?? 5;
                 const playersArr = Array.isArray(posGroup.players) ? posGroup.players : [];
                 for (const p of playersArr) {
                     if (!groups[orderIdx]) groups[orderIdx] = [];
@@ -121,7 +122,7 @@ function groupSquadByPosition(squad: any): Record<number, any[]> {
             Object.entries(squad).forEach(([key, value]) => {
                 if (Array.isArray(value)) {
                     const posKey = key.toLowerCase();
-                    const orderIdx = POSITION_ORDER[posKey] ?? 3;
+                    const orderIdx = POSITION_ORDER[posKey] ?? 5;
                     value.forEach((p: any) => {
                         if (!groups[orderIdx]) groups[orderIdx] = [];
                         groups[orderIdx].push(p);
@@ -135,7 +136,7 @@ function groupSquadByPosition(squad: any): Record<number, any[]> {
     // Group flat player list by position field
     players.forEach((p: any) => {
         const pos = (p.position || p.position_name || p.role || '').toLowerCase().trim();
-        const orderIdx = POSITION_ORDER[pos] ?? 3;
+        const orderIdx = POSITION_ORDER[pos] ?? 5;
         if (!groups[orderIdx]) groups[orderIdx] = [];
         groups[orderIdx].push(p);
     });
@@ -145,6 +146,28 @@ function groupSquadByPosition(squad: any): Record<number, any[]> {
 
 function formatClubDate(timestamp: number, options: Intl.DateTimeFormatOptions) {
     return formatDateInTimeZone(new Date(timestamp * 1000), 'es-AR', options, APP_TIMEZONE) || '';
+}
+
+function formatPlayerBirthDate(value: unknown) {
+    if (typeof value !== 'string' || !value.trim()) return null;
+
+    const raw = value.trim();
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+    if (isoMatch) {
+        return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+    }
+
+    const parsed = new Date(raw);
+    if (Number.isNaN(parsed.getTime())) return null;
+
+    return parsed.toLocaleDateString('es-AR');
+}
+
+function formatPlayerStatus(value: unknown) {
+    if (typeof value !== 'string' || !value.trim()) return null;
+
+    const normalized = value.trim().replace(/[_-]+/g, ' ');
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function TeamDetailInner({ id }: { id: string }) {
@@ -225,6 +248,7 @@ function TeamDetailInner({ id }: { id: string }) {
                 setFixtures(sortMatchesByDate(payload.fixtures || [], 'asc'));
                 setSquad(null);
                 setSquadFetched(false);
+                setSelectedSquadTab('');
                 setTransfers(payload.transfers || []);
             } catch (err) {
                 console.error('Error fetching team data:', err);
@@ -294,10 +318,15 @@ function TeamDetailInner({ id }: { id: string }) {
 
     // Auto-select first squad tab when squad loads
     useEffect(() => {
-        if (squadTabs.length > 0 && !selectedSquadTab) {
+        if (squadTabs.length === 0) {
+            if (selectedSquadTab) setSelectedSquadTab('');
+            return;
+        }
+
+        if (!selectedSquadTab || !squadTabs.includes(selectedSquadTab)) {
             setSelectedSquadTab(squadTabs[0]);
         }
-    }, [squadTabs]);
+    }, [selectedSquadTab, squadTabs]);
 
     // Filtered matches by sport
     const filteredResults = selectedSport === 'all' ? results : results.filter(m => String(m.sport_id) === selectedSport);
@@ -310,12 +339,18 @@ function TeamDetailInner({ id }: { id: string }) {
         return null;
     }, [externalTeamId, rawId, resolvedClubId]);
     const visibleTabs = useMemo(() => {
-        const supportedTabs = Array.isArray(details?.supported_tabs) ? details.supported_tabs : null;
-        if (!supportedTabs) {
-            return TABS.filter((tab) => DEFAULT_PUBLIC_TABS.has(tab.id));
+        const supportedTabs = new Set<string>(
+            Array.isArray(details?.supported_tabs)
+                ? details.supported_tabs.filter((tab: unknown): tab is string => typeof tab === 'string')
+                : Array.from(DEFAULT_PUBLIC_TABS)
+        );
+
+        if (details?.is_internal || resolvedClubId) {
+            supportedTabs.add('squad');
         }
-        return TABS.filter((tab) => supportedTabs.includes(tab.id));
-    }, [details?.supported_tabs]);
+
+        return TABS.filter((tab) => supportedTabs.has(tab.id));
+    }, [details?.is_internal, details?.supported_tabs, resolvedClubId]);
     const relatedFamilyClubs = useMemo(() => {
         const familyClubs: PublicRelatedClub[] = Array.isArray(details?.related_clubs)
             ? details.related_clubs.filter((club: unknown): club is PublicRelatedClub => {
@@ -474,11 +509,67 @@ function TeamDetailInner({ id }: { id: string }) {
     };
 
     // Group squad by position, filtered by selected tab
-    const selectedSquadData = squadTabs.length > 0 && selectedSquadTab
-        ? (Array.isArray(squad) ? squad.filter((t: any) => t.tab_name === selectedSquadTab) : squad)
+    const activeSquadTabValue = selectedSquadTab || squadTabs[0] || '';
+    const selectedSquadData = squadTabs.length > 0 && activeSquadTabValue
+        ? (Array.isArray(squad) ? squad.filter((t: any) => t.tab_name === activeSquadTabValue) : squad)
         : squad;
     const squadGroups = groupSquadByPosition(selectedSquadData);
-    const sortedPositionKeys = Object.keys(squadGroups).map(Number).sort((a, b) => a - b);
+    const sortedPositionKeys = Object.keys(squadGroups)
+        .map(Number)
+        .sort((a, b) => a - b);
+    const exportPositionKeys = sortedPositionKeys.filter((posIdx) => Array.isArray(squadGroups[posIdx]) && squadGroups[posIdx].length > 0);
+    const normalizedSquadTab = activeSquadTabValue.trim().toLowerCase();
+    const squadExportSubtitle = activeSquadTabValue
+        && normalizedSquadTab !== 'active'
+        && normalizedSquadTab !== 'squad'
+        && activeSquadTabValue !== teamName
+        ? activeSquadTabValue
+        : 'Plantel completo';
+    const getExportPositionLabel = (posIdx: number) => {
+        if (posIdx === 5) {
+            return exportPositionKeys.length === 1 ? 'Jugadores' : 'Sin posicion';
+        }
+
+        return POSITION_LABELS[posIdx] || 'Jugadores';
+    };
+    const squadExportData: SquadData | null = exportPositionKeys.length > 0
+        ? {
+            title: 'Plantel',
+            subtitle: squadExportSubtitle,
+            tournament: teamName,
+            tournamentLogo: teamLogoUrl,
+            teamName,
+            teamLogo: teamLogoUrl,
+            groups: exportPositionKeys.map((posIdx) => ({
+                label: getExportPositionLabel(posIdx),
+                players: squadGroups[posIdx]
+                    .map((player: any) => {
+                        const playerName = player.name || player.player_name || 'Jugador';
+                        const playerCountry = player.country?.name || player.nationality || '';
+                        const jerseyNumber = player.jersey_number || player.shirt_number || player.number || '';
+                        const pId = player.player_id || player.id || '';
+                        const playerPosition = player.position || player.position_name || '';
+                        const playerDivision = player.team_name || player.tab_name || player.division_name || '';
+                        const playerBirthDate = formatPlayerBirthDate(player.birth_date);
+                        const playerAge = typeof player.age === 'number' || typeof player.age === 'string'
+                            ? String(player.age).trim()
+                            : '';
+
+                        return {
+                            id: pId || null,
+                            number: jerseyNumber || null,
+                            name: playerName,
+                            country: playerCountry || null,
+                            position: playerPosition || null,
+                            teamLabel: playerDivision && playerDivision !== activeSquadTabValue && playerDivision !== teamName ? playerDivision : null,
+                            age: playerAge || null,
+                            birthDate: playerBirthDate || null,
+                        };
+                    })
+                    .filter((player: any) => player && player.name),
+            })).filter((group) => group.players.length > 0),
+        }
+        : null;
 
     return (
         <div className={styles.page}>
@@ -746,7 +837,16 @@ function TeamDetailInner({ id }: { id: string }) {
                         {/* Squad Tab */}
                         {activeTab === 'squad' && (
                             <div className={styles.section}>
-                                <h2 className={styles.pageTitle} style={{ marginBottom: '16px' }}>Plantilla</h2>
+                                <div className={styles.sectionHeader} style={{ marginBottom: '16px' }}>
+                                    <h2 className={styles.pageTitle}>Plantilla</h2>
+                                    {isSuperAdminUser && squadExportData ? (
+                                        <ExportImage
+                                            template="squad"
+                                            filename={`plantel-${teamName}`}
+                                            data={squadExportData}
+                                        />
+                                    ) : null}
+                                </div>
                                 {squadLoading ? (
                                     <div>
                                         {[1, 2, 3, 4, 5, 6].map(i => (
@@ -767,6 +867,13 @@ function TeamDetailInner({ id }: { id: string }) {
                                                     const playerCountry = player.country?.name || player.nationality || '';
                                                     const jerseyNumber = player.jersey_number || player.shirt_number || player.number || '';
                                                     const pId = player.player_id || player.id || '';
+                                                    const playerPosition = player.position || player.position_name || '';
+                                                    const playerDivision = player.team_name || player.tab_name || player.division_name || '';
+                                                    const playerBirthDate = formatPlayerBirthDate(player.birth_date);
+                                                    const playerStatus = formatPlayerStatus(player.status);
+                                                    const playerAge = typeof player.age === 'number' || typeof player.age === 'string'
+                                                        ? player.age
+                                                        : null;
 
                                                     return (
                                                         <div key={pId || idx} className={styles.playerRow}>
@@ -777,14 +884,42 @@ function TeamDetailInner({ id }: { id: string }) {
                                                                     <div className={styles.playerPhotoPlaceholder} />
                                                                 )}
                                                             </div>
-                                                            <div>
+                                                            <div className={styles.playerIdentity}>
                                                                 <div className={styles.playerName}>
                                                                     {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{playerName}</Link> : playerName}
                                                                 </div>
                                                                 {playerCountry && <div className={styles.playerCountry}>{playerCountry}</div>}
+                                                                {(playerPosition || playerDivision) && (
+                                                                    <div className={styles.playerMeta}>
+                                                                        {playerPosition ? <span className={styles.playerMetaChip}>{playerPosition}</span> : null}
+                                                                        {playerDivision ? <span className={styles.playerMetaChip}>{playerDivision}</span> : null}
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                            <div className={styles.playerNumber}>{jerseyNumber || '-'}</div>
-                                                            <div className={styles.tdVal}>{player.age || '-'}</div>
+                                                            <div className={styles.playerNumberBlock}>
+                                                                <span className={styles.playerStatLabel}>Dorsal</span>
+                                                                <span className={styles.playerNumber}>{jerseyNumber || '-'}</span>
+                                                            </div>
+                                                            <div className={styles.playerDetails}>
+                                                                {playerAge !== null ? (
+                                                                    <div className={styles.playerDetailItem}>
+                                                                        <span className={styles.playerDetailLabel}>Edad</span>
+                                                                        <span className={styles.playerDetailValue}>{playerAge}</span>
+                                                                    </div>
+                                                                ) : null}
+                                                                {playerBirthDate ? (
+                                                                    <div className={styles.playerDetailItem}>
+                                                                        <span className={styles.playerDetailLabel}>Nacimiento</span>
+                                                                        <span className={styles.playerDetailValue}>{playerBirthDate}</span>
+                                                                    </div>
+                                                                ) : null}
+                                                                {playerStatus ? (
+                                                                    <div className={styles.playerDetailItem}>
+                                                                        <span className={styles.playerDetailLabel}>Estado</span>
+                                                                        <span className={styles.playerDetailValue}>{playerStatus}</span>
+                                                                    </div>
+                                                                ) : null}
+                                                            </div>
                                                         </div>
                                                     );
                                                 })}

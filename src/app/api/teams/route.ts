@@ -27,6 +27,7 @@ import {
     normalizeRugbyGameForTournamentViews,
     normalizeRugbyStandingsRows,
 } from '@/lib/services/rugbyApiSportsTransforms';
+import { fetchPeopleByClub, type PersonWithRole } from '@/lib/services/personService';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 
@@ -520,6 +521,72 @@ function calculateAge(birthDate?: string | null) {
     return age >= 0 ? age : null;
 }
 
+function isPlayerRosterRole(role: string | null | undefined) {
+    const normalized = String(role || '').trim().toLowerCase();
+    return normalized === 'player' || normalized === 'jugador';
+}
+
+function mapClubRosterPersonToSquad(person: PersonWithRole, clubId: string) {
+    const name = person.full_name || `${person.first_name || ''} ${person.last_name || ''}`.trim() || 'Jugador';
+    const tabName = person.division_name?.trim() || 'Club';
+
+    return {
+        id: person.id,
+        player_id: person.id,
+        name,
+        player_name: name,
+        image_path: person.photo_url || person.avatar_url || '',
+        photo: person.photo_url || person.avatar_url || '',
+        jersey_number: null,
+        shirt_number: null,
+        number: null,
+        position: person.position || null,
+        age: calculateAge(person.birth_date),
+        birth_date: person.birth_date || null,
+        id_number: person.id_number || null,
+        weight: person.weight ?? null,
+        height: person.height ?? null,
+        status: person.status || 'active',
+        role: person.role,
+        division_id: person.division_id || null,
+        division_name: person.division_name || null,
+        team_id: person.division_id || clubId,
+        team_name: tabName,
+        tab_name: tabName,
+    };
+}
+
+async function fetchClubRosterFallback(
+    readClient: ReadClient,
+    clubId: string,
+    includePlayers: boolean,
+): Promise<InternalSquadState | null> {
+    const rosterPeople = await fetchPeopleByClub(clubId, readClient as never);
+    const players = rosterPeople.filter((person) => isPlayerRosterRole(person.role));
+
+    if (players.length === 0) {
+        return null;
+    }
+
+    if (!includePlayers) {
+        return { squad: [], hasSquad: true, source: 'legacy' as const };
+    }
+
+    const squad = players
+        .map((person) => mapClubRosterPersonToSquad(person, clubId))
+        .sort((left, right) => {
+            const teamCompare = String(left.tab_name || '').localeCompare(String(right.tab_name || ''));
+            if (teamCompare !== 0) return teamCompare;
+            return String(left.name || '').localeCompare(String(right.name || ''));
+        });
+
+    return {
+        squad,
+        hasSquad: squad.length > 0,
+        source: 'legacy' as const,
+    };
+}
+
 function buildSupportedTabs(options: {
     supportedTabs?: unknown;
     hasSquad: boolean;
@@ -740,6 +807,8 @@ async function fetchInternalClubSquad(
 
         const divisionRows = Array.isArray(divisions) ? divisions : [];
         if (divisionRows.length === 0) {
+            const clubRosterFallback = await fetchClubRosterFallback(readClient, clubId, includePlayers);
+            if (clubRosterFallback) return clubRosterFallback;
             return fallbackToFamilyBase();
         }
 
@@ -758,6 +827,8 @@ async function fetchInternalClubSquad(
             : [];
 
         if (playerRoles.length === 0) {
+            const clubRosterFallback = await fetchClubRosterFallback(readClient, clubId, includePlayers);
+            if (clubRosterFallback) return clubRosterFallback;
             return fallbackToFamilyBase();
         }
 
@@ -848,6 +919,8 @@ async function fetchInternalClubSquad(
         };
     } catch (error) {
         console.error('Teams API internal squad error (legacy):', error);
+        const clubRosterFallback = await fetchClubRosterFallback(readClient, clubId, includePlayers).catch(() => null);
+        if (clubRosterFallback) return clubRosterFallback;
         return fallbackToFamilyBase();
     }
 

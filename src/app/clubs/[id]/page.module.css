@@ -497,8 +497,9 @@
 
 .playerRow {
     display: grid;
-    grid-template-columns: 48px 1fr 80px 60px;
+    grid-template-columns: 48px minmax(0, 1fr) 80px minmax(120px, 156px);
     align-items: center;
+    gap: 14px;
     padding: 10px 16px;
     border-top: 1px solid var(--color-border);
     font-size: 0.9rem;
@@ -529,15 +530,86 @@
     font-weight: 500;
 }
 
+.playerIdentity {
+    min-width: 0;
+}
+
 .playerCountry {
     color: var(--color-text-muted);
     font-size: 0.8rem;
 }
 
-.playerNumber {
-    color: var(--color-text-secondary);
+.playerMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.playerMetaChip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
     font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.playerNumberBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.playerStatLabel {
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.playerNumber {
+    color: var(--color-text-primary);
+    font-weight: 700;
     text-align: center;
+    font-family: var(--font-mono, monospace);
+}
+
+.playerDetails {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.playerDetailItem {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.playerDetailLabel {
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.playerDetailValue {
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-align: right;
 }
 
 /* Transfers table */
@@ -645,10 +717,20 @@
 
     .playerRow {
         grid-template-columns: 40px 1fr 60px;
+        align-items: start;
     }
 
-    .playerRow> :nth-child(4) {
+    .playerDetails {
         display: none;
+    }
+
+    .playerNumberBlock {
+        align-items: flex-end;
+        gap: 2px;
+    }
+
+    .playerMeta {
+        margin-top: 6px;
     }
 }
 
