@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { G22Client } from "./g22Client.js";
 import {
-  apiToolOutputSchema,
   searchMatchInputSchema,
   updateResultInputSchema
 } from "./schemas.js";
@@ -21,7 +20,6 @@ export function registerG22Tools(server: McpServer, client: G22Client): void {
         "Returns the G22 API JSON with minimal wrapping."
       ].join(" "),
       inputSchema: searchMatchInputSchema.shape,
-      outputSchema: apiToolOutputSchema.shape,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -50,7 +48,6 @@ export function registerG22Tools(server: McpServer, client: G22Client): void {
         "Returns the original API JSON, expected to include the updated match, updated table, rules, summary.short, and summary.changes."
       ].join(" "),
       inputSchema: updateResultInputSchema.shape,
-      outputSchema: apiToolOutputSchema.shape,
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,

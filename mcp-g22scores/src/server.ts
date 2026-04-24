@@ -1,17 +1,10 @@
 import express, { type Request, type Response } from "express";
-import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { loadConfig } from "./config.js";
 import { G22Client } from "./g22Client.js";
 import { registerG22Tools } from "./tools.js";
-
-type StreamableSession = {
-  server: McpServer;
-  transport: StreamableHTTPServerTransport;
-};
 
 type SseSession = {
   server: McpServer;
@@ -19,7 +12,6 @@ type SseSession = {
 };
 
 const config = loadConfig();
-const streamableSessions = new Map<string, StreamableSession>();
 const sseSessions = new Map<string, SseSession>();
 const sseMessagePath = joinPath(config.mcpPath, "messages");
 const app = express();
@@ -32,6 +24,7 @@ app.get("/health", (_req, res) => {
     ok: true,
     service: "g22scores-mcp-server",
     mcp_path: config.mcpPath,
+    transport: "streamable_http_stateless",
     sse_message_path: sseMessagePath,
     tools: ["search_match", "update_result"]
   });
@@ -43,42 +36,22 @@ app.options(config.mcpPath, (_req, res) => {
 });
 
 app.post(config.mcpPath, async (req, res) => {
-  try {
-    const sessionId = singleHeader(req, "mcp-session-id");
-    let session = sessionId ? streamableSessions.get(sessionId) : undefined;
-
-    if (!session) {
-      if (sessionId) {
-        sendJsonRpcError(res, 404, -32001, "Session not found.");
-        return;
-      }
-
-      if (!containsInitializeRequest(req.body)) {
-        sendJsonRpcError(res, 400, -32600, "Bad Request: expected an MCP initialize request.");
-        return;
-      }
-
-      session = await createSession();
-    }
-
-    await session.transport.handleRequest(req, res, req.body);
-  } catch (error) {
-    handleServerError(res, error);
-  }
+  await handleStreamableHttpRequest(req, res);
 });
 
 app.get(config.mcpPath, async (req, res) => {
-  const sessionId = singleHeader(req, "mcp-session-id");
-
-  if (!sessionId && acceptsEventStream(req)) {
+  if (acceptsEventStream(req) && !singleHeader(req, "mcp-protocol-version")) {
     await createSseSession(res, sseMessagePath);
     return;
   }
 
-  await handleExistingSessionRequest(req, res);
+  sendJsonRpcError(res, 405, -32000, "Method not allowed. Send MCP JSON-RPC requests with POST.");
 });
 
-app.delete(config.mcpPath, handleExistingSessionRequest);
+app.delete(config.mcpPath, (_req, res) => {
+  sendJsonRpcError(res, 405, -32000, "Method not allowed. This MCP endpoint is stateless.");
+});
+
 app.get("/sse", async (_req, res) => {
   await createSseSession(res, "/messages");
 });
@@ -100,53 +73,33 @@ const httpServer = app.listen(config.port, () => {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
-async function handleExistingSessionRequest(req: Request, res: Response): Promise<void> {
-  try {
-    const sessionId = singleHeader(req, "mcp-session-id");
-
-    if (!sessionId) {
-      sendJsonRpcError(res, 400, -32600, "Bad Request: Mcp-Session-Id header is required.");
-      return;
-    }
-
-    const session = streamableSessions.get(sessionId);
-
-    if (!session) {
-      sendJsonRpcError(res, 404, -32001, "Session not found.");
-      return;
-    }
-
-    await session.transport.handleRequest(req, res);
-  } catch (error) {
-    handleServerError(res, error);
-  }
-}
-
-async function createSession(): Promise<StreamableSession> {
+async function handleStreamableHttpRequest(req: Request, res: Response): Promise<void> {
   const server = createMcpServer();
-  let transport: StreamableHTTPServerTransport;
-
-  transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => randomUUID(),
-    enableJsonResponse: true,
-    onsessioninitialized: (sessionId) => {
-      streamableSessions.set(sessionId, { server, transport });
-    }
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true
   });
 
-  transport.onclose = () => {
-    const sessionId = transport.sessionId;
-
-    if (sessionId) {
-      streamableSessions.delete(sessionId);
+  let closed = false;
+  const close = () => {
+    if (closed) {
+      return;
     }
 
+    closed = true;
+    void transport.close();
     void server.close();
   };
 
-  await server.connect(transport);
-
-  return { server, transport };
+  try {
+    res.on("close", close);
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  } catch (error) {
+    handleServerError(res, error);
+  } finally {
+    close();
+  }
 }
 
 function createMcpServer(): McpServer {
@@ -200,14 +153,6 @@ async function handleSseMessageRequest(req: Request, res: Response): Promise<voi
   }
 }
 
-function containsInitializeRequest(body: unknown): boolean {
-  if (Array.isArray(body)) {
-    return body.some((entry) => isInitializeRequest(entry));
-  }
-
-  return isInitializeRequest(body);
-}
-
 function singleHeader(req: Request, name: string): string | undefined {
   const value = req.headers[name.toLowerCase()];
 
@@ -254,17 +199,11 @@ function handleServerError(res: Response, error: unknown): void {
 function shutdown(signal: string): void {
   console.log(`Received ${signal}; closing G22 Scores MCP server.`);
 
-  for (const session of streamableSessions.values()) {
-    void session.transport.close();
-    void session.server.close();
-  }
-
   for (const session of sseSessions.values()) {
     void session.transport.close();
     void session.server.close();
   }
 
-  streamableSessions.clear();
   sseSessions.clear();
   httpServer.close(() => process.exit(0));
 }

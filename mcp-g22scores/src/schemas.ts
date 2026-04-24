@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const matchLookupShape = {
-  match_id: z.union([z.string().min(1), z.number().int().nonnegative()]).optional()
-    .describe("ID exacto del partido. Si se envia, tiene prioridad sobre los demas filtros."),
+  match_id: z.string().min(1).optional()
+    .describe("ID exacto del partido como texto. Si se envia, tiene prioridad sobre los demas filtros."),
   tournament: z.string().min(1).optional()
     .describe("Nombre o slug del torneo."),
   category: z.string().min(1).optional()
@@ -19,12 +19,6 @@ const matchLookupShape = {
 
 export const searchMatchInputSchema = z.object(matchLookupShape).strict();
 
-const correctionsSchema = z.union([
-  z.string().min(1),
-  z.array(z.string().min(1)),
-  z.record(z.unknown())
-]);
-
 export const updateResultInputSchema = z.object({
   ...matchLookupShape,
   home_score: z.number().int().nonnegative()
@@ -33,13 +27,13 @@ export const updateResultInputSchema = z.object({
     .describe("Puntos/goles del equipo visitante. Requerido."),
   observations: z.string().min(1).optional()
     .describe("Notas visibles o internas sobre la carga del resultado."),
-  corrections: correctionsSchema.optional()
-    .describe("Correcciones o metadatos de ajuste que la API REST ya soporte."),
+  corrections: z.string().min(1).optional()
+    .describe("Correcciones o metadatos de ajuste en texto."),
   status: z.string().min(1).optional()
     .describe("Estado del partido, por ejemplo finished, postponed o cancelled."),
   source: z.string().min(1).optional()
     .describe("Fuente del resultado informado."),
-  bonus_point: z.union([z.boolean(), z.number(), z.string().min(1)]).optional()
+  bonus_point: z.boolean().optional()
     .describe("Campo legacy/atajo de punto bonus, si la API lo admite."),
   bonus_target: z.enum(["home", "away", "both", "none"]).optional()
     .describe("Equipo al que aplica bonus_point."),

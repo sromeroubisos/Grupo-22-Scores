@@ -72,8 +72,12 @@ http://localhost:3001/mcp
 
 El endpoint `/mcp` soporta dos transportes MCP:
 
-- Streamable HTTP: `POST /mcp`, `GET /mcp`, `DELETE /mcp`
+- Streamable HTTP stateless: `POST /mcp`
 - SSE legacy: `GET /mcp` con `Accept: text/event-stream`, mensajes en `/mcp/messages`
+
+El modo Streamable HTTP es stateless a proposito: no depende del header `Mcp-Session-Id`.
+Esto evita que ChatGPT conecte pero no pueda listar tools cuando un proxy o hosting no preserva
+headers MCP no estandar.
 
 Health check:
 
@@ -87,6 +91,47 @@ Build de produccion:
 npm run build
 npm start
 ```
+
+## Verificacion MCP
+
+Con el servidor local corriendo:
+
+```bash
+cd mcp-g22scores
+npm run build
+npm start
+```
+
+En otra terminal, listar tools con el cliente MCP oficial:
+
+```bash
+node --input-type=module -e "import { Client } from '@modelcontextprotocol/sdk/client/index.js'; import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'; const client = new Client({ name: 'g22-test-client', version: '1.0.0' }); const transport = new StreamableHTTPClientTransport(new URL('http://localhost:3001/mcp')); await client.connect(transport); console.log(JSON.stringify(await client.listTools(), null, 2)); await client.close();"
+```
+
+La respuesta debe incluir exactamente estas tools:
+
+```json
+{
+  "tools": [
+    { "name": "search_match" },
+    { "name": "update_result" }
+  ]
+}
+```
+
+Tambien podes usar MCP Inspector:
+
+```bash
+npx @modelcontextprotocol/inspector@latest
+```
+
+URL del servidor:
+
+```text
+http://localhost:3001/mcp
+```
+
+Click en `List Tools`; deben aparecer `search_match` y `update_result`.
 
 ## Tools
 
@@ -201,11 +246,29 @@ Respuesta esperada:
 {
   "ok": true,
   "service": "g22scores-mcp-server",
+  "transport": "streamable_http_stateless",
   "mcp_path": "/mcp",
-  "sse_message_path": "/mcp/messages",
-  "tools": ["search_match", "update_result"]
+  "tools": [
+    "search_match",
+    "update_result"
+  ]
 }
 ```
+
+Para verificar el listado real MCP en produccion:
+
+```bash
+cd mcp-g22scores
+node --input-type=module -e "import { Client } from '@modelcontextprotocol/sdk/client/index.js'; import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'; const client = new Client({ name: 'g22-prod-test-client', version: '1.0.0' }); const transport = new StreamableHTTPClientTransport(new URL('https://mcp.g22scores.com/mcp')); await client.connect(transport); console.log(JSON.stringify(await client.listTools(), null, 2)); await client.close();"
+```
+
+En ChatGPT:
+
+1. Settings -> Apps & Connectors -> Advanced settings -> activar Developer Mode.
+2. Settings -> Connectors -> Create.
+3. Connector URL: `https://mcp.g22scores.com/mcp`.
+4. Despues de deploys o cambios de metadata, entrar al connector y usar `Refresh`.
+5. Confirmar que la UI muestra `search_match` y `update_result`.
 
 Nota: para produccion, evita publicar este MCP en una URL facil de adivinar si no agregas OAuth o una capa de autenticacion delante. La API key queda protegida en el servidor, pero el endpoint MCP puede ejecutar `update_result`.
 
@@ -213,9 +276,9 @@ Nota: para produccion, evita publicar este MCP en una URL facil de adivinar si n
 
 1. Publica el servidor con HTTPS.
 2. Abri ChatGPT.
-3. Anda a `Settings -> Apps -> Advanced settings`.
+3. Anda a `Settings -> Apps & Connectors -> Advanced settings`.
 4. Activa `Developer mode`.
-5. En `ChatGPT Apps settings`, usa `Create app`.
+5. En `Settings -> Connectors`, usa `Create`.
 6. Carga la URL remota del MCP, por ejemplo `https://tu-dominio.com/mcp`.
 7. Elegi `No Authentication` si lo publicaste sin OAuth.
 8. Guarda el draft, refresca las tools y verifica que aparezcan solo:
