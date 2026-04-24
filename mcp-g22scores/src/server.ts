@@ -1,19 +1,27 @@
 import express, { type Request, type Response } from "express";
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { loadConfig } from "./config.js";
 import { G22Client } from "./g22Client.js";
 import { registerG22Tools } from "./tools.js";
 
-type Session = {
+type StreamableSession = {
   server: McpServer;
   transport: StreamableHTTPServerTransport;
 };
 
+type SseSession = {
+  server: McpServer;
+  transport: SSEServerTransport;
+};
+
 const config = loadConfig();
-const sessions = new Map<string, Session>();
+const streamableSessions = new Map<string, StreamableSession>();
+const sseSessions = new Map<string, SseSession>();
+const sseMessagePath = joinPath(config.mcpPath, "messages");
 const app = express();
 
 app.disable("x-powered-by");
@@ -23,7 +31,9 @@ app.get("/health", (_req, res) => {
   res.status(200).json({
     ok: true,
     service: "g22scores-mcp-server",
-    mcp_path: config.mcpPath
+    mcp_path: config.mcpPath,
+    sse_message_path: sseMessagePath,
+    tools: ["search_match", "update_result"]
   });
 });
 
@@ -35,7 +45,7 @@ app.options(config.mcpPath, (_req, res) => {
 app.post(config.mcpPath, async (req, res) => {
   try {
     const sessionId = singleHeader(req, "mcp-session-id");
-    let session = sessionId ? sessions.get(sessionId) : undefined;
+    let session = sessionId ? streamableSessions.get(sessionId) : undefined;
 
     if (!session) {
       if (sessionId) {
@@ -57,8 +67,23 @@ app.post(config.mcpPath, async (req, res) => {
   }
 });
 
-app.get(config.mcpPath, handleExistingSessionRequest);
+app.get(config.mcpPath, async (req, res) => {
+  const sessionId = singleHeader(req, "mcp-session-id");
+
+  if (!sessionId && acceptsEventStream(req)) {
+    await createSseSession(res, sseMessagePath);
+    return;
+  }
+
+  await handleExistingSessionRequest(req, res);
+});
+
 app.delete(config.mcpPath, handleExistingSessionRequest);
+app.get("/sse", async (_req, res) => {
+  await createSseSession(res, "/messages");
+});
+app.post(sseMessagePath, handleSseMessageRequest);
+app.post("/messages", handleSseMessageRequest);
 
 app.use((_req, res) => {
   res.status(404).json({
@@ -84,7 +109,7 @@ async function handleExistingSessionRequest(req: Request, res: Response): Promis
       return;
     }
 
-    const session = sessions.get(sessionId);
+    const session = streamableSessions.get(sessionId);
 
     if (!session) {
       sendJsonRpcError(res, 404, -32001, "Session not found.");
@@ -97,7 +122,34 @@ async function handleExistingSessionRequest(req: Request, res: Response): Promis
   }
 }
 
-async function createSession(): Promise<Session> {
+async function createSession(): Promise<StreamableSession> {
+  const server = createMcpServer();
+  let transport: StreamableHTTPServerTransport;
+
+  transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: () => randomUUID(),
+    enableJsonResponse: true,
+    onsessioninitialized: (sessionId) => {
+      streamableSessions.set(sessionId, { server, transport });
+    }
+  });
+
+  transport.onclose = () => {
+    const sessionId = transport.sessionId;
+
+    if (sessionId) {
+      streamableSessions.delete(sessionId);
+    }
+
+    void server.close();
+  };
+
+  await server.connect(transport);
+
+  return { server, transport };
+}
+
+function createMcpServer(): McpServer {
   const client = new G22Client({
     baseUrl: config.baseUrl,
     apiKey: config.apiKey,
@@ -110,29 +162,42 @@ async function createSession(): Promise<Session> {
 
   registerG22Tools(server, client);
 
-  let transport: StreamableHTTPServerTransport;
+  return server;
+}
 
-  transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => randomUUID(),
-    enableJsonResponse: true,
-    onsessioninitialized: (sessionId) => {
-      sessions.set(sessionId, { server, transport });
-    }
-  });
+async function createSseSession(res: Response, messagePath: string): Promise<void> {
+  const server = createMcpServer();
+  const transport = new SSEServerTransport(messagePath, res);
 
   transport.onclose = () => {
-    const sessionId = transport.sessionId;
-
-    if (sessionId) {
-      sessions.delete(sessionId);
-    }
-
+    sseSessions.delete(transport.sessionId);
     void server.close();
   };
 
+  sseSessions.set(transport.sessionId, { server, transport });
   await server.connect(transport);
+}
 
-  return { server, transport };
+async function handleSseMessageRequest(req: Request, res: Response): Promise<void> {
+  try {
+    const sessionId = typeof req.query.sessionId === "string" ? req.query.sessionId : undefined;
+
+    if (!sessionId) {
+      res.status(400).send("Missing sessionId query parameter.");
+      return;
+    }
+
+    const session = sseSessions.get(sessionId);
+
+    if (!session) {
+      res.status(404).send("SSE session not found.");
+      return;
+    }
+
+    await session.transport.handlePostMessage(req, res, req.body);
+  } catch (error) {
+    handleServerError(res, error);
+  }
 }
 
 function containsInitializeRequest(body: unknown): boolean {
@@ -151,6 +216,15 @@ function singleHeader(req: Request, name: string): string | undefined {
   }
 
   return value;
+}
+
+function acceptsEventStream(req: Request): boolean {
+  const accept = singleHeader(req, "accept") ?? "";
+  return accept.includes("text/event-stream");
+}
+
+function joinPath(basePath: string, childPath: string): string {
+  return `${basePath.replace(/\/+$/, "")}/${childPath.replace(/^\/+/, "")}`;
 }
 
 function sendJsonRpcError(
@@ -180,11 +254,17 @@ function handleServerError(res: Response, error: unknown): void {
 function shutdown(signal: string): void {
   console.log(`Received ${signal}; closing G22 Scores MCP server.`);
 
-  for (const session of sessions.values()) {
+  for (const session of streamableSessions.values()) {
     void session.transport.close();
     void session.server.close();
   }
 
-  sessions.clear();
+  for (const session of sseSessions.values()) {
+    void session.transport.close();
+    void session.server.close();
+  }
+
+  streamableSessions.clear();
+  sseSessions.clear();
   httpServer.close(() => process.exit(0));
 }

@@ -70,6 +70,11 @@ El servidor queda disponible en:
 http://localhost:3001/mcp
 ```
 
+El endpoint `/mcp` soporta dos transportes MCP:
+
+- Streamable HTTP: `POST /mcp`, `GET /mcp`, `DELETE /mcp`
+- SSE legacy: `GET /mcp` con `Accept: text/event-stream`, mensajes en `/mcp/messages`
+
 Health check:
 
 ```bash
@@ -176,6 +181,30 @@ La URL publica para ChatGPT debe apuntar al endpoint MCP:
 
 ```text
 https://tu-dominio.com/mcp
+```
+
+Para `mcp.g22scores.com`, la URL esperada es:
+
+```text
+https://mcp.g22scores.com/mcp
+```
+
+El health check debe devolver las tools publicadas:
+
+```bash
+curl https://mcp.g22scores.com/health
+```
+
+Respuesta esperada:
+
+```json
+{
+  "ok": true,
+  "service": "g22scores-mcp-server",
+  "mcp_path": "/mcp",
+  "sse_message_path": "/mcp/messages",
+  "tools": ["search_match", "update_result"]
+}
 ```
 
 Nota: para produccion, evita publicar este MCP en una URL facil de adivinar si no agregas OAuth o una capa de autenticacion delante. La API key queda protegida en el servidor, pero el endpoint MCP puede ejecutar `update_result`.
