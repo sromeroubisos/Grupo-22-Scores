@@ -63,6 +63,7 @@ function toDateTimeLocalInput(value: string | Date | null | undefined) {
 interface MatchLineups {
     home: LineupPlayer[];
     away: LineupPlayer[];
+    [key: string]: unknown;
 }
 
 interface MatchRosterPlayer {
@@ -501,7 +502,19 @@ interface MatchCenterClientProps {
     initialMatch: MatchRow;
     matchId: string;
     onClose?: () => void;
+    apiEndpoint?: string;
+    backHref?: string;
+    initialTab?: string;
 }
+
+type MatchCenterTabId =
+    | 'resumen'
+    | 'alineaciones'
+    | 'eventos'
+    | 'estadisticas'
+    | 'contenido'
+    | 'oficiales'
+    | 'configuracion';
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const TABS = [
@@ -513,6 +526,10 @@ const TABS = [
     { id: 'oficiales', label: 'Oficiales', icon: Users },
     { id: 'configuracion', label: 'Configuracion', icon: Settings },
 ];
+
+function isMatchCenterTab(value: string | null | undefined): value is MatchCenterTabId {
+    return TABS.some((tab) => tab.id === value);
+}
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function statusLabel(s: string): string {
@@ -976,10 +993,18 @@ function toLocalPoints(match: MatchRow): MatchPoints {
 }
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ CLIENT COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-export default function MatchCenterClient({ initialMatch, matchId, onClose }: MatchCenterClientProps) {
+export default function MatchCenterClient({
+    initialMatch,
+    matchId,
+    onClose,
+    apiEndpoint,
+    backHref,
+    initialTab,
+}: MatchCenterClientProps) {
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
-    const adminMatchEndpoint = `/api/admin/matches/${matchId}`;
+    const resolvedMatchEndpoint = apiEndpoint || `/api/admin/matches/${matchId}`;
+    const resolvedInitialTab = isMatchCenterTab(initialTab) ? initialTab : 'resumen';
     const initialEvents = normalizeMatchEvents(initialMatch.events);
     const initialLineups = normalizeMatchLineups(initialMatch.lineups);
     const initialScore = normalizeMatchScore(initialMatch.score);
@@ -993,7 +1018,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
     );
 
     const [match, setMatch] = useState<MatchRow>(initialMatch);
-    const [activeTab, setActiveTab] = useState('resumen');
+    const [activeTab, setActiveTab] = useState<string>(resolvedInitialTab);
     const [saving, setSaving] = useState(false);
     const [saveMsg, setSaveMsg] = useState<{ type: 'ok' | 'warn' | 'err'; text: string } | null>(null);
     const [scoreDraft, setScoreDraft] = useState<MatchScore>(initialScore);
@@ -1419,7 +1444,7 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
                 ...pointsPayload,
             };
 
-        const res = await fetch(adminMatchEndpoint, {
+        const res = await fetch(resolvedMatchEndpoint, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalPayload),
@@ -1452,7 +1477,13 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             match: updatedMatch,
             warnings,
         };
-    }, [adminMatchEndpoint, applyMatchResponse, buildPointsPatchPayload, localPoints.points_autocalculated, match.status, pointsRules, resolveOfficialScore]);
+    }, [applyMatchResponse, buildPointsPatchPayload, localPoints.points_autocalculated, match.status, pointsRules, resolvedMatchEndpoint, resolveOfficialScore]);
+
+    useEffect(() => {
+        if (isMatchCenterTab(initialTab)) {
+            setActiveTab(initialTab);
+        }
+    }, [initialTab]);
 
     /* â”€â”€â”€ REFRESH (for after saves / config changes) â”€â”€â”€ */
     const refreshMatchConfiguration = useCallback(async () => {
@@ -2074,7 +2105,23 @@ export default function MatchCenterClient({ initialMatch, matchId, onClose }: Ma
             {/* â•â•â•â•â•â•â•â•â•â•â• 1. HEADER â•â•â•â•â•â•â•â•â•â•â• */}
             <header className="match-center-header">
                 <div className="header-left">
-                    <button onClick={() => onClose ? onClose() : router.back()} className="mc-btn mc-btn-outline" style={{ border: 'none' }}>
+                    <button
+                        onClick={() => {
+                            if (onClose) {
+                                onClose();
+                                return;
+                            }
+
+                            if (backHref) {
+                                router.push(backHref);
+                                return;
+                            }
+
+                            router.back();
+                        }}
+                        className="mc-btn mc-btn-outline"
+                        style={{ border: 'none' }}
+                    >
                         <ChevronLeft size={16} /> Volver
                     </button>
                 </div>
