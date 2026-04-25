@@ -71,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = useMemo(() => createClient(), []);
     const isMounted = useRef(true);
     const authProviderStartedAt = useRef(nowMs());
+    const activeProfileFetchRef = useRef<{ userId: string; startedAt: number } | null>(null);
 
     const trackAuthDuplicate = useCallback((step: string, metadata: Record<string, unknown> = {}) => {
         return warnIfDuplicateWindow(
@@ -103,6 +104,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     const fetchAndSetUser = useCallback(async (sbUser: SupabaseUser) => {
+        const activeFetch = activeProfileFetchRef.current;
+        const currentTime = nowMs();
+        if (activeFetch?.userId === sbUser.id && currentTime - activeFetch.startedAt < 5000) {
+            return;
+        }
+
+        activeProfileFetchRef.current = { userId: sbUser.id, startedAt: currentTime };
         trackAuthDuplicate('restoreUser', { userId: sbUser.id });
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
         const fallbackOnboarding = resolveFallbackOnboarding(sbUser);
@@ -112,9 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 'restore_user_profile',
                 async () => supabase
                     .from('users')
-                    .select('*')
+                    .select('id, name, email, role, avatar_url')
                     .eq('id', sbUser.id)
-                    .single(),
+                    .maybeSingle(),
                 {
                     runtime: 'client',
                     tags: ['AUTH'],
@@ -310,7 +318,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!isMounted.current) return;
 
             try {
-                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || (event as string) === 'INITIAL_SESSION') {
+                if ((event as string) === 'INITIAL_SESSION') {
+                    return;
+                }
+
+                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
                     if (session?.user) {
                         console.log('[AuthContext] Event result: fetching user for event:', event);
                         fetchAndSetUser(session.user).catch((backgroundError: unknown) => {

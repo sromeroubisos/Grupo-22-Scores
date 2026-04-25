@@ -807,12 +807,12 @@ function buildCustomizationRowId(userId: string, designSlug: string) {
 }
 
 function getAuthenticatedExportCustomizationUserId(supabase: SupabaseBrowserClient): Promise<string | null> {
-    return supabase.auth.getUser().then(({ data, error }) => {
+    return supabase.auth.getSession().then(({ data, error }) => {
         if (error) {
             logUnexpectedExportCustomizationSyncFailure('Export customization auth read warning:', error);
             return null;
         }
-        return data.user?.id ?? null;
+        return data.session?.user?.id ?? null;
     });
 }
 
@@ -854,17 +854,6 @@ async function persistRemoteExportDesignCustomization(
     const normalizedName = normalizeCustomizationName(designSlug);
     const migratedState = applyExportDesignCustomizationMigrations(designSlug, state) ?? state;
 
-    const { error: deleteError } = await supabase
-        .from('user_export_presets')
-        .delete()
-        .eq('user_id', userId)
-        .eq('preset_type', EXPORT_DESIGN_CUSTOMIZATION_PRESET_TYPE)
-        .eq('name_normalized', normalizedName);
-
-    if (deleteError) {
-        throw deleteError;
-    }
-
     const { error: insertError } = await supabase
         .from('user_export_presets')
         .upsert({
@@ -874,7 +863,7 @@ async function persistRemoteExportDesignCustomization(
             name: `Customization ${designSlug}`,
             name_normalized: normalizedName,
             payload: migratedState,
-        }, { onConflict: 'id' });
+        }, { onConflict: 'user_id,preset_type,name_normalized' });
 
     if (insertError) {
         throw insertError;

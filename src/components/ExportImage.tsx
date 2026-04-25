@@ -3143,6 +3143,19 @@ function normalizePresetName(name: string): string {
     return name.trim().toLocaleLowerCase('es-AR');
 }
 
+function encodeRemotePresetIdSegment(value: string): string {
+    return encodeURIComponent(value).replace(/%/g, '_');
+}
+
+function buildRemotePresetRowId(userId: string, presetType: ExportPresetKind, presetName: string): string {
+    return [
+        'export_preset',
+        encodeRemotePresetIdSegment(userId),
+        presetType,
+        encodeRemotePresetIdSegment(normalizePresetName(presetName)),
+    ].join(':');
+}
+
 function upsertSavedEditorialPreset(
     presets: SavedMatchEditorialPreset[],
     preset: SavedMatchEditorialPreset,
@@ -3448,12 +3461,12 @@ function mapRemoteGradientPresetRows(rows: PersistedExportPresetRow[]): SavedMat
 }
 
 async function getAuthenticatedPresetUserId(supabase: SupabaseBrowserClient): Promise<string | null> {
-    const { data, error } = await supabase.auth.getUser();
+    const { data, error } = await supabase.auth.getSession();
     if (error) {
         logUnexpectedPresetSyncFailure('Preset auth read warning:', error);
         return null;
     }
-    return data.user?.id ?? null;
+    return data.session?.user?.id ?? null;
 }
 
 async function readRemotePresetRows(
@@ -3485,20 +3498,8 @@ async function replaceRemoteEditorialPresets(
     userId: string,
     presets: SavedMatchEditorialPreset[],
 ): Promise<void> {
-    const { error: deleteError } = await supabase
-        .from(EXPORT_PRESETS_TABLE)
-        .delete()
-        .eq('user_id', userId)
-        .eq('preset_type', 'editorial');
-
-    if (deleteError) {
-        throw deleteError;
-    }
-
-    if (!presets.length) return;
-
     const rows = presets.map((preset) => ({
-        id: preset.id,
+        id: buildRemotePresetRowId(userId, 'editorial', preset.name),
         user_id: userId,
         preset_type: 'editorial',
         name: preset.name,
@@ -3512,12 +3513,29 @@ async function replaceRemoteEditorialPresets(
         },
     }));
 
-    const { error: insertError } = await supabase
-        .from(EXPORT_PRESETS_TABLE)
-        .upsert(rows, { onConflict: 'id' });
+    if (rows.length > 0) {
+        const { error: insertError } = await supabase
+            .from(EXPORT_PRESETS_TABLE)
+            .upsert(rows, { onConflict: 'user_id,preset_type,name_normalized' });
 
-    if (insertError) {
-        throw insertError;
+        if (insertError) {
+            throw insertError;
+        }
+    }
+
+    const retainedNames = rows.map((row) => row.name_normalized);
+    const deleteQuery = supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .delete()
+        .eq('user_id', userId)
+        .eq('preset_type', 'editorial');
+
+    const { error: deleteError } = retainedNames.length > 0
+        ? await deleteQuery.not('name_normalized', 'in', `(${retainedNames.map((name) => `"${name.replace(/"/g, '""')}"`).join(',')})`)
+        : await deleteQuery;
+
+    if (deleteError) {
+        throw deleteError;
     }
 }
 
@@ -3526,20 +3544,8 @@ async function replaceRemoteGradientPresets(
     userId: string,
     presets: SavedMatchGradientPreset[],
 ): Promise<void> {
-    const { error: deleteError } = await supabase
-        .from(EXPORT_PRESETS_TABLE)
-        .delete()
-        .eq('user_id', userId)
-        .eq('preset_type', 'gradient');
-
-    if (deleteError) {
-        throw deleteError;
-    }
-
-    if (!presets.length) return;
-
     const rows = presets.map((preset) => ({
-        id: preset.id,
+        id: buildRemotePresetRowId(userId, 'gradient', preset.name),
         user_id: userId,
         preset_type: 'gradient',
         name: preset.name,
@@ -3551,12 +3557,29 @@ async function replaceRemoteGradientPresets(
         },
     }));
 
-    const { error: insertError } = await supabase
-        .from(EXPORT_PRESETS_TABLE)
-        .upsert(rows, { onConflict: 'id' });
+    if (rows.length > 0) {
+        const { error: insertError } = await supabase
+            .from(EXPORT_PRESETS_TABLE)
+            .upsert(rows, { onConflict: 'user_id,preset_type,name_normalized' });
 
-    if (insertError) {
-        throw insertError;
+        if (insertError) {
+            throw insertError;
+        }
+    }
+
+    const retainedNames = rows.map((row) => row.name_normalized);
+    const deleteQuery = supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .delete()
+        .eq('user_id', userId)
+        .eq('preset_type', 'gradient');
+
+    const { error: deleteError } = retainedNames.length > 0
+        ? await deleteQuery.not('name_normalized', 'in', `(${retainedNames.map((name) => `"${name.replace(/"/g, '""')}"`).join(',')})`)
+        : await deleteQuery;
+
+    if (deleteError) {
+        throw deleteError;
     }
 }
 
