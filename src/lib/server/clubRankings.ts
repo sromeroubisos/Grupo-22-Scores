@@ -1390,7 +1390,10 @@ async function applyMatchToRanking(
 
     const { error: applicationError } = await supabase
         .from('club_ranking_match_applications')
-        .insert(applicationPayload);
+        .upsert(applicationPayload, {
+            onConflict: 'ranking_id,match_id',
+            ignoreDuplicates: true,
+        });
 
     if (applicationError) {
         if (

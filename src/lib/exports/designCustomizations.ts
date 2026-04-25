@@ -867,14 +867,14 @@ async function persistRemoteExportDesignCustomization(
 
     const { error: insertError } = await supabase
         .from('user_export_presets')
-        .insert({
+        .upsert({
             id: buildCustomizationRowId(userId, designSlug),
             user_id: userId,
             preset_type: EXPORT_DESIGN_CUSTOMIZATION_PRESET_TYPE,
             name: `Customization ${designSlug}`,
             name_normalized: normalizedName,
             payload: migratedState,
-        });
+        }, { onConflict: 'id' });
 
     if (insertError) {
         throw insertError;

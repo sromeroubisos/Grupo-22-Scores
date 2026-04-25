@@ -3514,7 +3514,7 @@ async function replaceRemoteEditorialPresets(
 
     const { error: insertError } = await supabase
         .from(EXPORT_PRESETS_TABLE)
-        .insert(rows);
+        .upsert(rows, { onConflict: 'id' });
 
     if (insertError) {
         throw insertError;
@@ -3553,7 +3553,7 @@ async function replaceRemoteGradientPresets(
 
     const { error: insertError } = await supabase
         .from(EXPORT_PRESETS_TABLE)
-        .insert(rows);
+        .upsert(rows, { onConflict: 'id' });
 
     if (insertError) {
         throw insertError;
