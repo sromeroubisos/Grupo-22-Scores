@@ -36,9 +36,11 @@ type PublicClubRow = {
     status: string | null;
     sport: string | null;
     sport_id: string | null;
-    legacy_sport: string | null;
     sport_ref: { name: string } | null;
 };
+
+const PUBLIC_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
+const ADMIN_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
 
 function resolveSportFilter(rawSport: string | null) {
     const normalizedSport = canonicalizeSportId(rawSport);
@@ -52,6 +54,13 @@ function resolveSportFilter(rawSport: string | null) {
     }
 
     return [normalizedSport];
+}
+
+function requestHasSupabaseSession(request: NextRequest) {
+    return request.cookies.getAll().some((cookie) => {
+        const name = cookie.name.toLowerCase();
+        return name.startsWith('sb-') && name.includes('auth-token') && Boolean(cookie.value);
+    });
 }
 
 async function getAuthenticatedUser(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -159,46 +168,58 @@ export async function POST(request: NextRequest) {
 // Lista pública (solo clubes visibles). Super admin ve todos.
 
 export async function GET(request: NextRequest) {
-    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const unionId = searchParams.get('union_id');
     const sport = searchParams.get('sport');
     const sportFilter = resolveSportFilter(sport);
+    const wantsAdminScope = searchParams.get('include_hidden') === 'true' || searchParams.get('admin') === 'true';
+    const shouldCheckAdmin = wantsAdminScope && requestHasSupabaseSession(request);
+    const supabase = shouldCheckAdmin ? await createClient() : null;
 
-    const authUser = await getAuthenticatedUser(supabase);
     let isSuperAdmin = false;
 
-    if (authUser) {
-        const { data: profile } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', authUser.id)
-            .single();
-        isSuperAdmin = isGlobalAdminRole(profile?.role);
+    if (supabase) {
+        const authUser = await getAuthenticatedUser(supabase);
+
+        if (authUser) {
+            const { data: profile } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', authUser.id)
+                .single();
+            isSuperAdmin = isGlobalAdminRole(profile?.role);
+        }
     }
 
-    const readClient = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : supabase;
+    const readClient = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : (supabase ?? await createClient());
 
     let query = readClient
         .from('clubs')
-        .select('*')
+        .select(isSuperAdmin ? ADMIN_CLUB_SELECT : PUBLIC_CLUB_SELECT)
         .order('name');
 
     if (!isSuperAdmin) {
         query = query.neq('is_visible', false);
     }
     if (unionId) query = query.eq('union_id', unionId);
+    if (sport) {
+        query = query.or(
+            sportFilter
+                .map((value) => `sport.eq.${value},sport_id.eq.${value}`)
+                .join(',')
+        );
+    }
 
     const { data, error } = await query;
     if (error) return err('Error al obtener clubes', 500, error.message);
 
     const clubs = ((data || []) as PublicClubRow[]).filter((club) => {
         if (!sport) return true;
-        const normalizedSport = club.sport || club.sport_id || club.legacy_sport || 'rugby';
+        const normalizedSport = club.sport || club.sport_id || 'rugby';
         return sportFilter.includes(normalizedSport);
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
         data: clubs.map((club) => ({
             id: club.id,
             name: club.name,
@@ -207,8 +228,14 @@ export async function GET(request: NextRequest) {
             city: club.city,
             country: club.country,
             is_visible: club.is_visible !== false,
-            sport: club.sport || club.sport_id || club.legacy_sport || 'rugby',
+            sport: club.sport || club.sport_id || 'rugby',
             status: club.status ?? 'published',
         }))
     });
+
+    if (!wantsAdminScope) {
+        response.headers.set('Cache-Control', 'public, max-age=120, s-maxage=300, stale-while-revalidate=600');
+    }
+
+    return response;
 }

@@ -634,12 +634,11 @@ async function fetchPublicSupabaseMatches(options: {
 function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | null }) {
     const headers = new Headers();
 
-    // The route already maintains its own application-level caches.
-    // Avoid browser HTTP caching so the UI does not get stuck with an empty
-    // "today" snapshot while the server-side cache has already refreshed.
-    if (options.liveOnly || options.date) {
+    if (options.liveOnly) {
         headers.set('Cache-Control', 'private, no-store, no-cache, max-age=0, must-revalidate');
         headers.set('Pragma', 'no-cache');
+    } else if (options.date) {
+        headers.set('Cache-Control', 'public, max-age=20, s-maxage=30, stale-while-revalidate=90');
     }
 
     return headers;

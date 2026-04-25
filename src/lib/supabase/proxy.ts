@@ -4,6 +4,7 @@ import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
 
 const AUTH_REFRESH_TIMEOUT_MS = 2500;
+const SHOULD_LOG_PROXY_AUTH = process.env.ENABLE_SERVER_PERF_LOGS === 'true' || process.env.NODE_ENV !== 'production';
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -35,7 +36,9 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet) {
-                    console.log('[Middleware] Setting cookies:', cookiesToSet.map(c => c.name).join(', '));
+                    if (SHOULD_LOG_PROXY_AUTH) {
+                        console.log('[Middleware] Setting cookies:', cookiesToSet.map(c => c.name).join(', '));
+                    }
                     cookiesToSet.forEach(({ name, value }) => {
                         request.cookies.set(name, value)
                     })
@@ -102,7 +105,9 @@ export async function updateSession(request: NextRequest) {
             },
         )
     } catch (error) {
-        console.warn('[Middleware] Session refresh skipped:', error);
+        if (SHOULD_LOG_PROXY_AUTH) {
+            console.warn('[Middleware] Session refresh skipped:', error);
+        }
         logPerf(
             ['PROXY', 'WARN'],
             {
@@ -122,9 +127,13 @@ export async function updateSession(request: NextRequest) {
             console.error('[Middleware] getUser error:', error.message);
         }
     } else if (user) {
-        console.log('[Middleware] Active session for:', user.email);
+        if (SHOULD_LOG_PROXY_AUTH) {
+            console.log('[Middleware] Active session for:', user.email);
+        }
     } else {
-        console.log('[Middleware] No session session found on request');
+        if (SHOULD_LOG_PROXY_AUTH) {
+            console.log('[Middleware] No session session found on request');
+        }
     }
 
     logPerf(

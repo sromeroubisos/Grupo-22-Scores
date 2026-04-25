@@ -917,7 +917,11 @@ export default function HomePage() {
   }, [groupedTournaments, searchQuery]);
 
   // Matches via unified hook (cache + prefetch 7 days + live polling)
-  const { matches, loading, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id);
+  const { matches, loading, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id, {
+    prefetchWindowDays: 0,
+    livePollIntervalMs: 60_000,
+    runInitialLivePoll: false,
+  });
 
   const loadedRugbyTournamentMap = useMemo(() => (
     new Map(loadedRugbyPublicTournaments.map((tournament) => [tournament.id, tournament]))

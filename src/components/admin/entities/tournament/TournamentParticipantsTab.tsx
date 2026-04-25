@@ -218,7 +218,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             const request = beginClientRequest('clubs:catalog', 'mount', {
                 component: 'TournamentParticipantsTab',
             });
-            const response = await fetch('/api/clubs', { cache: 'no-store' });
+            const response = await fetch('/api/clubs?include_hidden=true', { cache: 'no-store' });
             request.end({
                 status: response.status,
                 error: !response.ok,
