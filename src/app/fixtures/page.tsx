@@ -113,7 +113,9 @@ export default function FixturesPage() {
     const timeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedTournament, setSelectedTournament] = useState('all');
-    const { matches, loading, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id);
+    const { matches, loading, error: sourceError } = useMatchesStore(selectedDate, selectedSport.id, {
+        prefetchWindowDays: 2,
+    });
 
     useEffect(() => {
         const today = generateLocalDateKeys(timeZone, 0, 0)[0]?.dateKey || '';

@@ -19,7 +19,9 @@ interface ClubStandingsCardProps {
 
 export function ClubStandingsCard({ tournamentName, standings, loading }: ClubStandingsCardProps) {
     const displayStandings = standings || [];
-    const currentPos = displayStandings[0]?.pos || '-';
+    const currentPos = typeof displayStandings[0]?.pos === 'number' && displayStandings[0].pos > 0
+        ? displayStandings[0].pos
+        : '-';
 
     if (loading) {
         return (

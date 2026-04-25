@@ -23,6 +23,8 @@ import { getTournamentLinkedRelations, getTournamentRelatedTabData } from '@/lib
 import { requireUserAccessContext } from '@/lib/auth/permissions';
 import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
 
+export const dynamic = 'force-dynamic';
+
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 type TournamentSeasonMenuItem = {
     id: string;

@@ -1,6 +1,10 @@
 'use server';
 
-import { addPersonToClub } from './personService';
+import {
+    addPersonToClub,
+    findPotentialPersonIdentityMatches,
+    type PersonIdentityMatch,
+} from './personService';
 
 export interface CSVRow {
     first_name: string;
@@ -16,6 +20,52 @@ export interface CSVRow {
     photo_url?: string;
     weight?: number;
     height?: number;
+    existing_person_id?: string;
+    force_create_new?: boolean;
+}
+
+export interface CSVImportConflict {
+    rowIndex: number;
+    row: CSVRow;
+    matches: PersonIdentityMatch[];
+}
+
+function normalizeFullName(row: Pick<CSVRow, 'first_name' | 'last_name'>) {
+    return `${String(row.first_name || '').trim().toLowerCase()}::${String(row.last_name || '').trim().toLowerCase()}`;
+}
+
+export async function previewPeopleImportConflicts(clubId: string, rows: CSVRow[]): Promise<CSVImportConflict[]> {
+    const conflicts: CSVImportConflict[] = [];
+    const cache = new Map<string, PersonIdentityMatch[]>();
+
+    for (let index = 0; index < rows.length; index += 1) {
+        const row = rows[index];
+        const firstName = String(row.first_name || '').trim();
+        const lastName = String(row.last_name || '').trim();
+        if (!firstName || !lastName || row.existing_person_id || row.force_create_new) {
+            continue;
+        }
+
+        const cacheKey = normalizeFullName(row);
+        let matches = cache.get(cacheKey);
+        if (!matches) {
+            matches = await findPotentialPersonIdentityMatches(clubId, {
+                first_name: firstName,
+                last_name: lastName,
+            });
+            cache.set(cacheKey, matches);
+        }
+
+        if (matches.length > 0) {
+            conflicts.push({
+                rowIndex: index,
+                row,
+                matches,
+            });
+        }
+    }
+
+    return conflicts;
 }
 
 /**
@@ -48,12 +98,18 @@ export async function importPeopleFromCSV(clubId: string, rows: CSVRow[]): Promi
                 photo_url: row.photo_url,
                 weight: row.weight,
                 height: row.height,
+                existing_person_id: row.existing_person_id,
+                force_create_new: row.force_create_new,
             });
 
             if (res.success) {
                 importedCount++;
             } else {
-                errors.push(`Error en ${row.first_name} ${row.last_name}: ${res.error}`);
+                errors.push(
+                    res.code === 'identity_confirmation_required'
+                        ? `Error en ${row.first_name} ${row.last_name}: requiere confirmacion manual por homonimo.`
+                        : `Error en ${row.first_name} ${row.last_name}: ${res.error}`
+                );
             }
         } catch (err) {
             errors.push(`Excepción en ${row.first_name} ${row.last_name}: ${String(err)}`);

@@ -25,9 +25,18 @@ const SESSION_REFRESH_REQUIRED_PREFIXES = [
     '/api/prode/predictions',
 ]
 
+const AUTH_CALLBACK_PATHS = new Set([
+    '/api/auth/callback/google',
+    '/auth/callback',
+])
+
 function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): boolean {
     if (pathname === '/' && searchParams.has('code')) {
         return true
+    }
+
+    if (AUTH_CALLBACK_PATHS.has(pathname)) {
+        return false
     }
 
     return SESSION_REFRESH_REQUIRED_PREFIXES.some(prefix => pathname.startsWith(prefix))

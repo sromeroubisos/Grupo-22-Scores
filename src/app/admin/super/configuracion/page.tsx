@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from '../page.module.css';
+import { TelegramBotAuthorizationPanel } from './TelegramBotAuthorizationPanel';
 
 type ResultsApiKeySettings = {
   keyName: string;
@@ -299,6 +300,8 @@ export default function ConfiguracionPage() {
             </div>
           </div>
         </section>
+
+        <TelegramBotAuthorizationPanel />
 
         {generatedKey ? (
           <section className={styles.section}>

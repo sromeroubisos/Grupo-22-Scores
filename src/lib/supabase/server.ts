@@ -14,6 +14,12 @@ export async function createClient() {
         url,
         key,
         {
+            auth: {
+                autoRefreshToken: false,
+                detectSessionInUrl: false,
+                persistSession: true,
+                flowType: 'pkce',
+            },
             cookies: {
                 getAll() {
                     return cookieStore.getAll()

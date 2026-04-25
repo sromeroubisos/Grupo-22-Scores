@@ -14,7 +14,13 @@ import {
     X,
     XCircle,
 } from 'lucide-react';
-import { addPersonToClub, PersonWithRole, updatePersonInClub } from '@/lib/services/personService';
+import {
+    addPersonToClub,
+    PersonWithRole,
+    type PersonClubInput,
+    type PersonIdentityMatch,
+    updatePersonInClub,
+} from '@/lib/services/personService';
 import { Division } from '@/lib/services/divisionService';
 
 const RUGBY_POSITION_GROUPS = [
@@ -49,6 +55,14 @@ interface Props {
     person?: PersonWithRole | null;
     submitMode?: 'service' | 'club-admin-api';
 }
+
+type RosterMutationApiResponse = {
+    ok?: boolean;
+    data?: unknown;
+    error?: string;
+    code?: 'identity_confirmation_required';
+    matches?: PersonIdentityMatch[];
+};
 
 function getAgeLabel(birthDate: string) {
     if (!birthDate) return 'Sin fecha';
@@ -90,6 +104,8 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
     const [weight, setWeight] = useState('');
     const [height, setHeight] = useState('');
     const [formError, setFormError] = useState<string | null>(null);
+    const [identityMatches, setIdentityMatches] = useState<PersonIdentityMatch[]>([]);
+    const [pendingPayload, setPendingPayload] = useState<PersonClubInput | null>(null);
 
     const displayName = `${firstName || 'Juan'} ${lastName || 'Perez'}`.trim();
     const selectedDivision = useMemo(
@@ -105,11 +121,18 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
     const currentRoleLabel = STAFF_ROLES.find(([value]) => value === role)?.[1] || 'STAFF';
     const previewMeta = initialMode === 'player' ? (position || 'Sin posicion').toUpperCase() : currentRoleLabel;
     const assignmentLabel = selectedDivision ? selectedDivision.name : 'Plantel base del club';
+    const hasIdentityPrompt = Boolean(identityMatches.length > 0 && pendingPayload && !isEditing);
+
+    const resetIdentityPrompt = () => {
+        setIdentityMatches([]);
+        setPendingPayload(null);
+    };
 
     useEffect(() => {
         if (!isOpen) return;
 
         setFormError(null);
+        resetIdentityPrompt();
         setFirstName(person?.first_name ?? '');
         setLastName(person?.last_name ?? '');
         setBirthDate(person?.birth_date ?? '');
@@ -120,6 +143,13 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         setWeight(person?.weight ? String(person.weight) : '');
         setHeight(person?.height ? String(person.height) : '');
     }, [initialMode, isOpen, lockDivisionId, person]);
+
+    useEffect(() => {
+        if (!hasIdentityPrompt) return;
+        setIdentityMatches([]);
+        setPendingPayload(null);
+        setFormError(null);
+    }, [firstName, lastName, birthDate, position, role, divisionId, photoUrl, weight, height, hasIdentityPrompt]);
 
     if (!isOpen) return null;
 
@@ -134,6 +164,91 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         reader.readAsDataURL(file);
     };
 
+    const submitPayload = async (payload: PersonClubInput) => {
+        const result = submitMode === 'club-admin-api'
+            ? await (async () => {
+                const response = await fetch('/api/club-admin/roster', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        clubId,
+                        ...payload,
+                    }),
+                });
+                const result = await response.json().catch(() => ({})) as RosterMutationApiResponse;
+
+                return response.ok && result.ok
+                    ? { success: true as const, data: result.data }
+                    : {
+                        success: false as const,
+                        error: result.error || `No se pudo guardar ${initialMode === 'player' ? 'el jugador' : 'el miembro del staff'}.`,
+                        code: result.code,
+                        matches: result.matches,
+                    };
+            })()
+            : await addPersonToClub(clubId, payload);
+
+        if (result.success) {
+            resetIdentityPrompt();
+            setFirstName('');
+            setLastName('');
+            setBirthDate('');
+            setPosition('');
+            setPhotoUrl('');
+            setWeight('');
+            setHeight('');
+            onClose();
+            await onSuccess();
+            return;
+        }
+
+        if (result.code === 'identity_confirmation_required' && result.matches?.length) {
+            setIdentityMatches(result.matches);
+            setPendingPayload(payload);
+            setFormError(null);
+            return;
+        }
+
+        setFormError(result.error || `No se pudo guardar ${initialMode === 'player' ? 'el jugador' : 'el miembro del staff'}.`);
+    };
+
+    const handleUseExistingPerson = async (existingPersonId: string) => {
+        if (!pendingPayload) return;
+
+        setLoading(true);
+        setFormError(null);
+        try {
+            await submitPayload({
+                ...pendingPayload,
+                existing_person_id: existingPersonId,
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'No se pudo vincular la ficha existente.';
+            setFormError(message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreateNewPerson = async () => {
+        if (!pendingPayload) return;
+
+        setLoading(true);
+        setFormError(null);
+        try {
+            await submitPayload({
+                ...pendingPayload,
+                force_create_new: true,
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'No se pudo crear la nueva ficha.';
+            setFormError(message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -144,9 +259,10 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
 
         setLoading(true);
         setFormError(null);
+        resetIdentityPrompt();
 
         try {
-            const payload = {
+            const payload: PersonClubInput = {
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
                 birth_date: birthDate,
@@ -158,40 +274,36 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                 division_id: divisionId || undefined,
                 status: 'active',
             };
-            const res = submitMode === 'club-admin-api'
-                ? await (async () => {
-                    const response = await fetch('/api/club-admin/roster', {
-                        method: isEditing && person?.id ? 'PATCH' : 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'same-origin',
-                        body: JSON.stringify({
-                            clubId,
-                            personId: person?.id,
-                            ...payload,
-                        }),
-                    });
-                    const result = await response.json() as { ok?: boolean; data?: unknown; error?: string };
 
-                    return response.ok && result.ok
-                        ? { success: true as const, data: result.data }
-                        : { success: false as const, error: result.error || `No se pudo guardar ${initialMode === 'player' ? 'el jugador' : 'el miembro del staff'}.` };
-                })()
-                : isEditing && person?.id
-                    ? await updatePersonInClub(clubId, person.id, payload)
-                    : await addPersonToClub(clubId, payload);
+            if (isEditing && person?.id) {
+                const res = submitMode === 'club-admin-api'
+                    ? await (async () => {
+                        const response = await fetch('/api/club-admin/roster', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({
+                                clubId,
+                                personId: person.id,
+                                ...payload,
+                            }),
+                        });
+                        const result = await response.json().catch(() => ({})) as RosterMutationApiResponse;
 
-            if (res.success) {
-                setFirstName('');
-                setLastName('');
-                setBirthDate('');
-                setPosition('');
-                setPhotoUrl('');
-                setWeight('');
-                setHeight('');
-                onClose();
-                await onSuccess();
+                        return response.ok && result.ok
+                            ? { success: true as const, data: result.data }
+                            : { success: false as const, error: result.error || `No se pudo guardar ${initialMode === 'player' ? 'el jugador' : 'el miembro del staff'}.` };
+                    })()
+                    : await updatePersonInClub(clubId, person.id, payload);
+
+                if (res.success) {
+                    onClose();
+                    await onSuccess();
+                } else {
+                    setFormError(res.error || `No se pudo guardar ${initialMode === 'player' ? 'el jugador' : 'el miembro del staff'}.`);
+                }
             } else {
-                setFormError(res.error || `No se pudo guardar ${initialMode === 'player' ? 'el jugador' : 'el miembro del staff'}.`);
+                await submitPayload(payload);
             }
         } catch (error) {
             const message = error instanceof Error ? error.message : `Error inesperado al guardar ${initialMode === 'player' ? 'el jugador' : 'el miembro del staff'}.`;
@@ -531,6 +643,85 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                             )}
                         </section>
                     </div>
+
+                    {hasIdentityPrompt && (
+                        <div className="mt-[10px] rounded-[5px] border border-amber-200 bg-amber-50/90 px-[10px] py-[10px]">
+                            <div className="flex flex-col gap-[10px]">
+                                <div>
+                                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-amber-600">Posible misma persona</p>
+                                    <p className="mt-2 text-sm font-medium text-amber-900">
+                                        Encontramos fichas con el mismo nombre. Elige una para vincularla a este club o crea una nueva si no es la misma persona.
+                                    </p>
+                                </div>
+
+                                <div className="grid gap-[10px]">
+                                    {identityMatches.map((match) => (
+                                        <div key={match.person_id} className="rounded-[5px] border border-amber-200 bg-white/90 p-[10px]">
+                                            <div className="flex flex-col gap-[10px] lg:flex-row lg:items-start lg:justify-between">
+                                                <div className="space-y-2">
+                                                    <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">{match.full_name}</div>
+                                                    <div className="text-xs font-medium text-slate-500">
+                                                        {match.birth_date ? `Nacimiento: ${match.birth_date}` : 'Sin fecha de nacimiento'}
+                                                        {match.id_number ? ` / DNI: ${match.id_number}` : ' / Sin DNI'}
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-[10px]">
+                                                        {match.already_linked_to_club ? (
+                                                            <span className="rounded-[5px] border border-emerald-200 bg-emerald-50 px-[10px] py-1 text-[10px] font-black uppercase tracking-[0.08em] text-emerald-600">
+                                                                Ya vinculado a este club
+                                                            </span>
+                                                        ) : null}
+                                                        {match.club_links.map((link) => (
+                                                            <span key={`${match.person_id}-${link.club_id}-${link.division_id || 'base'}-${link.role || 'role'}`} className="rounded-[5px] border border-slate-200 bg-slate-50 px-[10px] py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-600">
+                                                                {link.club_name}
+                                                                {link.division_name ? ` / ${link.division_name}` : ''}
+                                                                {link.role ? ` / ${link.role}` : ''}
+                                                            </span>
+                                                        ))}
+                                                        {match.club_links.length === 0 ? (
+                                                            <span className="rounded-[5px] border border-slate-200 bg-slate-50 px-[10px] py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-500">
+                                                                Sin vinculos visibles
+                                                            </span>
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => void handleUseExistingPerson(match.person_id)}
+                                                    disabled={loading}
+                                                    className="inline-flex min-w-[210px] items-center justify-center rounded-[5px] border border-sky-300 bg-sky-500 px-[14px] py-[12px] text-sm font-black uppercase tracking-wide text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
+                                                >
+                                                    Usar esta ficha
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex flex-col gap-[10px] sm:flex-row sm:justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            resetIdentityPrompt();
+                                            setFormError(null);
+                                        }}
+                                        disabled={loading}
+                                        className="inline-flex items-center justify-center rounded-[5px] border border-slate-300 bg-white px-[14px] py-[12px] text-sm font-black uppercase tracking-wide text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        Seguir editando
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => void handleCreateNewPerson()}
+                                        disabled={loading}
+                                        className="inline-flex items-center justify-center rounded-[5px] border border-amber-300 bg-amber-400 px-[14px] py-[12px] text-sm font-black uppercase tracking-wide text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        Crear ficha nueva
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="mt-[10px] flex flex-col-reverse gap-[10px] border-t border-slate-200/80 pt-[10px] sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-h-12 flex-1">

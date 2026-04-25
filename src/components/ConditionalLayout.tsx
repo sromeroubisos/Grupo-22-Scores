@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
@@ -16,10 +16,12 @@ interface ConditionalLayoutProps {
 
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const router = useRouter();
     const { user, isAuthenticated, isLoading } = useAuth();
     const isManagementPage = pathname?.startsWith('/admin');
     const isOnboardingPage = pathname?.startsWith('/onboarding');
+    const isClubAdminPizarra = pathname?.startsWith('/club-admin') && searchParams.get('tab') === 'pizarra';
     const returnTo = pathname || '/';
 
     useEffect(() => {
@@ -54,6 +56,14 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
         return (
             <SportProvider>
                 <Header />
+                {children}
+            </SportProvider>
+        );
+    }
+
+    if (isClubAdminPizarra) {
+        return (
+            <SportProvider>
                 {children}
             </SportProvider>
         );

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { getActiveSports } from '@/lib/data/sports'
+import { SPORTS, getActiveSports } from '@/lib/data/sports'
 import { buildOnboardingMetadata, getOnboardingMetadataStatus } from '@/lib/onboardingStatus'
 import {
     completeOnboarding,
@@ -26,7 +26,6 @@ type SavePreferencesPayload = {
 type SportRow = {
     id: string
     name: string
-    name_es: string | null
     icon: string | null
     display_order: number | null
 }
@@ -65,22 +64,27 @@ async function getCurrentUserId() {
 async function getSports(supabase: Awaited<ReturnType<typeof createClient>>) {
     const { data, error } = await supabase
         .from('sports')
-        .select('id, name, name_es, icon, display_order')
+        .select('id, name, icon, display_order')
         .neq('is_visible', false)
-        .is('group_key', null)
         .order('display_order', { ascending: true })
 
     if (error) {
         console.warn('[api/onboarding/preferences] sports query error, using fallback:', error.message)
     }
 
-    const mapped = ((data ?? []) as SportRow[]).map(sport => ({
-        id: sport.id,
-        name: sport.name,
-        nameEs: sport.name_es || sport.name,
-        icon: sport.icon || '?',
-        displayOrder: sport.display_order ?? 100,
-    }))
+    const mapped = ((data ?? []) as SportRow[])
+        .filter(sport => !SPORTS[sport.id as keyof typeof SPORTS]?.groupKey)
+        .map(sport => {
+            const staticSport = SPORTS[sport.id as keyof typeof SPORTS]
+
+            return {
+                id: sport.id,
+                name: sport.name,
+                nameEs: staticSport?.nameEs || sport.name,
+                icon: sport.icon || staticSport?.icon || '?',
+                displayOrder: sport.display_order ?? staticSport?.priority ?? 100,
+            }
+        })
 
     return mapped.length > 0 ? mapped : buildFallbackSports()
 }

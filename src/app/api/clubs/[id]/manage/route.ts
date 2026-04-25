@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import {
     canManageClubContext,
     getClubManagementTarget,
     requireUserAccessContext,
 } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES, VIEW_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import type { ClubUpdateInput } from '@/lib/types/clubs';
 import { fetchClubFull, updateClub } from '@/lib/services/clubService';
@@ -40,7 +42,7 @@ export async function GET(
     if (!perm) return err('No autenticado', 401);
     if (!perm.allowed) return err('Sin permisos para ver este club', 403);
 
-    const club = await fetchClubFull(id);
+    const club = await fetchClubFull(id, { supabaseClient: createAdminClient() });
     if (!club) return err('Club no encontrado', 404);
 
     return NextResponse.json({ data: club });
@@ -68,9 +70,18 @@ export async function PATCH(
         return err('No se enviaron cambios válidos', 400);
     }
 
-    const result = await updateClub(id, body);
+    const result = await updateClub(id, body, { supabaseClient: createAdminClient() });
     if (!result.success || !result.club) {
         return err(result.error || 'Error al actualizar club', 400, result.validationErrors);
+    }
+
+    const updatedSlug = result.club.core.slug || id;
+    revalidatePath('/club-admin');
+    revalidatePath(`/admin/entities/${id}/manage`);
+    revalidatePath('/admin/super/clubes');
+    revalidatePath(`/clubs/${id}`);
+    if (updatedSlug !== id) {
+        revalidatePath(`/clubs/${updatedSlug}`);
     }
 
     return NextResponse.json({ data: result.club });

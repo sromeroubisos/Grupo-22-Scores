@@ -50,7 +50,7 @@ export function ClubManageSidebar({
         },
         {
             label: 'Competencias',
-            detail: metrics.competitions > 0 ? `${metrics.competitions} competencia(s) activas` : 'Sin torneos vinculados',
+            detail: metrics.competitions > 0 ? `${metrics.competitions} competencia(s) vinculadas` : 'Sin torneos vinculados',
             ready: metrics.competitions > 0,
             Icon: Trophy,
         },

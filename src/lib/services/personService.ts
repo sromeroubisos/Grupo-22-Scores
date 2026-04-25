@@ -22,6 +22,58 @@ export interface PersonWithRole {
     height?: number;
 }
 
+export interface PersonIdentityClubLink {
+    club_id: string;
+    club_name: string;
+    division_id?: string;
+    division_name?: string;
+    role?: string;
+    status?: string;
+}
+
+export interface PersonIdentityMatch {
+    person_id: string;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    birth_date?: string;
+    id_number?: string;
+    photo_url?: string;
+    already_linked_to_club: boolean;
+    club_links: PersonIdentityClubLink[];
+}
+
+export interface PersonClubInput {
+    first_name: string;
+    last_name: string;
+    role: string;
+    division_id?: string;
+    status?: string;
+    position?: string;
+    birth_date?: string;
+    id_number?: string;
+    photo_url?: string;
+    weight?: number;
+    height?: number;
+    jersey_number?: number;
+    squad_role?: string;
+    existing_person_id?: string;
+    force_create_new?: boolean;
+}
+
+export type PersonMutationResult =
+    | {
+        success: true;
+        data: any;
+        reused_existing_person?: boolean;
+    }
+    | {
+        success: false;
+        error: string;
+        code?: 'identity_confirmation_required';
+        matches?: PersonIdentityMatch[];
+    };
+
 type TeamLookupRow = {
     id: string;
     legacy_division_id: string | null;
@@ -68,6 +120,15 @@ const FAMILY_DIVISION_ID_PREFIX = 'family-division';
 
 function isMissingTableError(error: any) {
     return Boolean(error && typeof error.code === 'string' && MISSING_TABLE_CODES.has(error.code));
+}
+
+function normalizePersonText(value: string | null | undefined) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeOptionalText(value: string | null | undefined) {
+    const normalized = normalizePersonText(value);
+    return normalized || undefined;
 }
 
 function parseFamilyDivisionId(divisionId?: string) {
@@ -185,6 +246,26 @@ async function fetchPersonRowsByIds(supabase: any, personIds: string[]): Promise
         weight: null,
         height: null,
     })) as PersonRow[];
+}
+
+async function fetchPersonRowById(supabase: any, personId: string): Promise<PersonRow | null> {
+    const rows = await fetchPersonRowsByIds(supabase, [personId]);
+    return rows[0] ?? null;
+}
+
+function mergePersonRecord(person: PersonRow, personData: PersonClubInput) {
+    return {
+        first_name: normalizePersonText(personData.first_name) || person.first_name,
+        last_name: normalizePersonText(personData.last_name) || person.last_name,
+        birth_date: personData.birth_date || person.birth_date || undefined,
+        id_number: normalizeOptionalText(personData.id_number) || person.id_number || undefined,
+        photo_url: normalizeOptionalText(personData.photo_url) || person.photo_url || person.avatar_url || undefined,
+        weight: typeof personData.weight === 'number' ? personData.weight : person.weight ?? undefined,
+        height: typeof personData.height === 'number' ? personData.height : person.height ?? undefined,
+        position: normalizeOptionalText(personData.position) || person.position || undefined,
+        role: personData.role,
+        status: personData.status || 'active',
+    };
 }
 
 async function insertPersonRecord(supabase: any, personData: {
@@ -561,8 +642,220 @@ async function syncPlayerSquadMembershipWithOptions(
     return { success: true as const };
 }
 
-async function fetchPeopleFromTeamMemberships(clubId: string, divisionId?: string): Promise<PersonWithRole[] | null> {
-    const supabase = await createClient();
+async function clearPersonAssignmentsInClub(
+    supabase: any,
+    clubId: string,
+    personId: string,
+) {
+    const { error: membershipsDeleteError } = await supabase
+        .from('team_memberships')
+        .delete()
+        .match({ club_id: clubId, person_id: personId });
+
+    if (membershipsDeleteError && !isMissingTableError(membershipsDeleteError)) {
+        return { success: false as const, error: membershipsDeleteError.message };
+    }
+
+    const { error: rolesDeleteError } = await supabase
+        .from('club_person_roles')
+        .delete()
+        .match({ club_id: clubId, person_id: personId });
+
+    if (rolesDeleteError && !isMissingTableError(rolesDeleteError)) {
+        return { success: false as const, error: rolesDeleteError.message };
+    }
+
+    return { success: true as const };
+}
+
+async function insertPersonAssignmentsInClub(
+    supabase: any,
+    params: {
+        clubId: string;
+        personId: string;
+        role: string;
+        status?: string;
+        position?: string;
+        legacyDivisionId?: string | null;
+        teamId?: string | null;
+        source?: string;
+    }
+) {
+    const { error: roleError } = await supabase
+        .from('club_person_roles')
+        .insert({
+            club_id: params.clubId,
+            person_id: params.personId,
+            role: params.role,
+            division_id: params.legacyDivisionId || null,
+            status: params.status || 'active',
+            position: params.position || null,
+        });
+
+    if (roleError && !isMissingTableError(roleError)) {
+        return { success: false as const, error: roleError.message };
+    }
+
+    const { error: membershipError } = await supabase
+        .from('team_memberships')
+        .insert({
+            club_id: params.clubId,
+            team_id: params.teamId || null,
+            person_id: params.personId,
+            role: params.role,
+            status: params.status || 'active',
+            position: params.position || null,
+            source: params.source || 'manual',
+        });
+
+    if (membershipError && !isMissingTableError(membershipError)) {
+        return { success: false as const, error: membershipError.message };
+    }
+
+    return { success: true as const };
+}
+
+async function isPersonLinkedToClub(
+    supabase: any,
+    clubId: string,
+    personId: string,
+) {
+    const [rolesRes, membershipsRes] = await Promise.all([
+        supabase
+            .from('club_person_roles')
+            .select('id')
+            .match({ club_id: clubId, person_id: personId })
+            .limit(1),
+        supabase
+            .from('team_memberships')
+            .select('id')
+            .match({ club_id: clubId, person_id: personId })
+            .limit(1),
+    ]);
+
+    const hasRoles = !rolesRes.error && Array.isArray(rolesRes.data) && rolesRes.data.length > 0;
+    const hasMemberships = !membershipsRes.error && Array.isArray(membershipsRes.data) && membershipsRes.data.length > 0;
+
+    return hasRoles || hasMemberships;
+}
+
+export async function findPotentialPersonIdentityMatches(
+    clubId: string,
+    personData: Pick<PersonClubInput, 'first_name' | 'last_name'>,
+    supabaseClient?: any,
+): Promise<PersonIdentityMatch[]> {
+    const supabase = supabaseClient ?? await createClient();
+    const db = supabase as any;
+    const firstName = normalizePersonText(personData.first_name);
+    const lastName = normalizePersonText(personData.last_name);
+
+    if (!firstName || !lastName) return [];
+
+    const { data: candidates, error: candidatesError } = await db
+        .from('people')
+        .select('id, first_name, last_name, full_name, birth_date, id_number, photo_url, avatar_url')
+        .ilike('first_name', firstName)
+        .ilike('last_name', lastName)
+        .limit(8);
+
+    if (candidatesError) {
+        if (!isMissingTableError(candidatesError)) {
+            console.error('Error searching matching people:', candidatesError);
+        }
+        return [];
+    }
+
+    const people = (candidates ?? []) as Array<{
+        id: string;
+        first_name: string;
+        last_name: string;
+        full_name: string | null;
+        birth_date: string | null;
+        id_number: string | null;
+        photo_url: string | null;
+        avatar_url: string | null;
+    }>;
+
+    if (people.length === 0) return [];
+
+    const personIds = people.map((person) => person.id);
+    const { data: roleRows, error: roleRowsError } = await db
+        .from('club_person_roles')
+        .select('person_id, club_id, division_id, role, status')
+        .in('person_id', personIds);
+
+    if (roleRowsError && !isMissingTableError(roleRowsError)) {
+        console.error('Error searching person club links:', roleRowsError);
+    }
+
+    const links = (roleRows ?? []) as Array<{
+        person_id: string;
+        club_id: string | null;
+        division_id: string | null;
+        role: string | null;
+        status: string | null;
+    }>;
+
+    const clubIds = Array.from(new Set(links.map((row) => row.club_id).filter(Boolean))) as string[];
+    const divisionIds = Array.from(new Set(links.map((row) => row.division_id).filter(Boolean))) as string[];
+
+    const [{ data: clubs }, { data: divisions }] = await Promise.all([
+        clubIds.length > 0
+            ? db.from('clubs').select('id, name').in('id', clubIds)
+            : Promise.resolve({ data: [] }),
+        divisionIds.length > 0
+            ? db.from('club_divisions').select('id, name').in('id', divisionIds)
+            : Promise.resolve({ data: [] }),
+    ]);
+
+    const clubsById = new Map<string, string>(
+        ((clubs ?? []) as Array<{ id: string; name: string | null }>)
+            .map((club) => [club.id, club.name || club.id]),
+    );
+    const divisionsById = new Map<string, string>(
+        ((divisions ?? []) as Array<{ id: string; name: string | null }>)
+            .map((division) => [division.id, division.name || division.id]),
+    );
+
+    return people.map((person) => {
+        const personLinks = links
+            .filter((row) => row.person_id === person.id && row.club_id)
+            .map((row) => ({
+                club_id: String(row.club_id),
+                club_name: clubsById.get(String(row.club_id)) || String(row.club_id),
+                division_id: row.division_id || undefined,
+                division_name: row.division_id ? divisionsById.get(String(row.division_id)) || String(row.division_id) : undefined,
+                role: row.role || undefined,
+                status: row.status || undefined,
+            }))
+            .filter((link, index, array) =>
+                array.findIndex((candidate) =>
+                    candidate.club_id === link.club_id
+                    && candidate.division_id === link.division_id
+                    && candidate.role === link.role
+                ) === index
+            );
+
+        return {
+            person_id: person.id,
+            first_name: person.first_name,
+            last_name: person.last_name,
+            full_name: person.full_name || `${person.first_name} ${person.last_name}`.trim(),
+            birth_date: person.birth_date || undefined,
+            id_number: person.id_number || undefined,
+            photo_url: person.photo_url || person.avatar_url || undefined,
+            already_linked_to_club: personLinks.some((link) => link.club_id === clubId),
+            club_links: personLinks,
+        };
+    });
+}
+
+async function fetchPeopleFromTeamMemberships(
+    clubId: string,
+    divisionId?: string,
+    supabaseClient?: any
+): Promise<PersonWithRole[] | null> {
+    const supabase = supabaseClient ?? await createClient();
     const db = supabase as any;
 
     const { data: memberships, error: membershipsError } = await db
@@ -621,8 +914,12 @@ async function fetchPeopleFromTeamMemberships(clubId: string, divisionId?: strin
         .filter(Boolean) as PersonWithRole[];
 }
 
-async function fetchPeopleFromLegacy(clubId: string, divisionId?: string): Promise<PersonWithRole[]> {
-    const supabase = await createClient();
+async function fetchPeopleFromLegacy(
+    clubId: string,
+    divisionId?: string,
+    supabaseClient?: any
+): Promise<PersonWithRole[]> {
+    const supabase = supabaseClient ?? await createClient();
     const db = supabase as any;
 
     let rolesQuery = db
@@ -678,12 +975,12 @@ async function fetchPeopleFromLegacy(clubId: string, divisionId?: string): Promi
         .filter(Boolean) as PersonWithRole[];
 }
 
-export async function fetchPeopleByClub(clubId: string): Promise<PersonWithRole[]> {
-    const supabase = await createClient();
+export async function fetchPeopleByClub(clubId: string, supabaseClient?: any): Promise<PersonWithRole[]> {
+    const supabase = supabaseClient ?? await createClient();
     const rosterOwnerClubId = await resolveSharedRosterOwnerClubId(clubId, supabase as any);
-    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterOwnerClubId);
+    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterOwnerClubId, undefined, supabase);
     if (newLayerPeople && newLayerPeople.length > 0) return newLayerPeople;
-    return fetchPeopleFromLegacy(rosterOwnerClubId);
+    return fetchPeopleFromLegacy(rosterOwnerClubId, undefined, supabase);
 }
 
 export async function fetchPeopleByDivision(clubId: string, divisionId: string): Promise<PersonWithRole[]> {
@@ -698,10 +995,10 @@ export async function fetchPeopleByDivision(clubId: string, divisionId: string):
     const rosterScope = await resolveRosterScope(clubId, supabase as any, divisionId);
     const rosterClubId = familyDivision?.rosterOwnerClubId ?? rosterScope.rosterOwnerClubId;
     const effectiveDivisionId = familyDivision ? undefined : rosterScope.rosterDivisionId;
-    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterClubId, effectiveDivisionId);
+    const newLayerPeople = await fetchPeopleFromTeamMemberships(rosterClubId, effectiveDivisionId, supabase);
     if (newLayerPeople && newLayerPeople.length > 0) return newLayerPeople;
 
-    const legacyPeople = await fetchPeopleFromLegacy(rosterClubId, effectiveDivisionId);
+    const legacyPeople = await fetchPeopleFromLegacy(rosterClubId, effectiveDivisionId, supabase);
     if (legacyPeople.length > 0) return legacyPeople;
 
     if (familyDivision && rosterClubId !== clubId) {
@@ -711,21 +1008,7 @@ export async function fetchPeopleByDivision(clubId: string, divisionId: string):
     return [];
 }
 
-export async function addPersonToClub(clubId: string, personData: {
-    first_name: string,
-    last_name: string,
-    role: string,
-    division_id?: string,
-    status?: string,
-    position?: string,
-    birth_date?: string,
-    id_number?: string,
-    photo_url?: string,
-    weight?: number,
-    height?: number,
-    jersey_number?: number,
-    squad_role?: string
-}) {
+export async function addPersonToClub(clubId: string, personData: PersonClubInput): Promise<PersonMutationResult> {
     const supabase = await createClient();
     const db = supabase as any;
     const { rosterOwnerClubId: rosterClubId, rosterDivisionId } = await resolveRosterScope(
@@ -734,19 +1017,68 @@ export async function addPersonToClub(clubId: string, personData: {
         personData.division_id,
     );
 
-    const { data: person, error: personError } = await insertPersonRecord(supabase, {
+    const normalizedPayload: PersonClubInput = {
         ...personData,
-        club_id: rosterClubId,
-    });
+        first_name: normalizePersonText(personData.first_name),
+        last_name: normalizePersonText(personData.last_name),
+        position: normalizeOptionalText(personData.position),
+        id_number: normalizeOptionalText(personData.id_number),
+        photo_url: normalizeOptionalText(personData.photo_url),
+    };
 
-    if (personError) {
-        const missingPeopleTable = isMissingTableError(personError) || personError.message?.includes("public.people");
-        return {
-            success: false,
-            error: missingPeopleTable
-                ? 'Falta la tabla public.people. Ejecuta la migracion 20260407190000_restore_people_for_club_rosters.sql y recarga el schema cache de Supabase.'
-                : personError.message,
-        };
+    if (!normalizedPayload.existing_person_id && !normalizedPayload.force_create_new) {
+        const matches = await findPotentialPersonIdentityMatches(rosterClubId, normalizedPayload, db);
+        if (matches.length > 0) {
+            return {
+                success: false,
+                code: 'identity_confirmation_required',
+                error: 'Ya existe una ficha con el mismo nombre. Confirma si se trata del mismo jugador.',
+                matches,
+            };
+        }
+    }
+
+    let person: any;
+    let reusedExistingPerson = false;
+    let replaceExistingClubAssignment = false;
+
+    if (normalizedPayload.existing_person_id) {
+        const existingPerson = await fetchPersonRowById(supabase, normalizedPayload.existing_person_id);
+        if (!existingPerson) {
+            return { success: false, error: 'No se encontro la ficha seleccionada para reutilizar.' };
+        }
+
+        const mergedPerson = mergePersonRecord(existingPerson, normalizedPayload);
+        const { data: updatedPerson, error: personError } = await updatePersonRecord(
+            supabase,
+            normalizedPayload.existing_person_id,
+            mergedPerson,
+        );
+
+        if (personError) {
+            return { success: false, error: personError.message };
+        }
+
+        person = updatedPerson;
+        reusedExistingPerson = true;
+        replaceExistingClubAssignment = await isPersonLinkedToClub(db, rosterClubId, normalizedPayload.existing_person_id);
+    } else {
+        const { data: insertedPerson, error: personError } = await insertPersonRecord(supabase, {
+            ...normalizedPayload,
+            club_id: rosterClubId,
+        });
+
+        if (personError) {
+            const missingPeopleTable = isMissingTableError(personError) || personError.message?.includes("public.people");
+            return {
+                success: false,
+                error: missingPeopleTable
+                    ? 'Falta la tabla public.people. Ejecuta la migracion 20260407190000_restore_people_for_club_rosters.sql y recarga el schema cache de Supabase.'
+                    : personError.message,
+            };
+        }
+
+        person = insertedPerson;
     }
 
     let teamReference;
@@ -756,47 +1088,38 @@ export async function addPersonToClub(clubId: string, personData: {
         return { success: false, error: error.message };
     }
 
-    const { error: roleError } = await db
-        .from('club_person_roles')
-        .insert({
-            club_id: rosterClubId,
-            person_id: person.id,
-            role: personData.role,
-            division_id: teamReference.legacyDivisionId || null,
-            status: personData.status || 'active',
-            position: personData.position || null,
-        });
-
-    if (roleError && !isMissingTableError(roleError)) {
-        return { success: false, error: roleError.message };
+    if (replaceExistingClubAssignment) {
+        const clearAssignments = await clearPersonAssignmentsInClub(db, rosterClubId, person.id);
+        if (!clearAssignments.success) {
+            return { success: false, error: clearAssignments.error };
+        }
     }
 
-    const { error: membershipError } = await db
-        .from('team_memberships')
-        .insert({
-            club_id: rosterClubId,
-            team_id: teamReference.teamId || null,
-            person_id: person.id,
-            role: personData.role,
-            status: personData.status || 'active',
-            position: personData.position || null,
-            source: 'manual',
-        });
+    const assignments = await insertPersonAssignmentsInClub(db, {
+        clubId: rosterClubId,
+        personId: person.id,
+        role: normalizedPayload.role,
+        status: normalizedPayload.status,
+        position: normalizedPayload.position,
+        legacyDivisionId: teamReference.legacyDivisionId || null,
+        teamId: teamReference.teamId || null,
+        source: reusedExistingPerson ? 'linked_existing_person' : 'manual',
+    });
 
-    if (membershipError && !isMissingTableError(membershipError)) {
-        return { success: false, error: membershipError.message };
+    if (!assignments.success) {
+        return { success: false, error: assignments.error };
     }
 
-    if (personData.role === 'player') {
+    if (normalizedPayload.role === 'player') {
         const squadSync = await syncPlayerSquadMembershipWithOptions(
             db,
             rosterClubId,
             person.id,
             {
                 nextDivisionId: teamReference.legacyDivisionId || undefined,
-                position: personData.position,
-                jerseyNumber: personData.jersey_number,
-                squadRole: personData.squad_role,
+                position: normalizedPayload.position,
+                jerseyNumber: normalizedPayload.jersey_number,
+                squadRole: normalizedPayload.squad_role,
             },
         );
 
@@ -805,7 +1128,7 @@ export async function addPersonToClub(clubId: string, personData: {
         }
     }
 
-    return { success: true, data: person };
+    return { success: true, data: person, reused_existing_person: reusedExistingPerson };
 }
 
 export async function updatePersonInClub(clubId: string, personId: string, personData: {
@@ -843,53 +1166,24 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
         return { success: false, error: error.message };
     }
 
-    const { error: membershipsDeleteError } = await db
-        .from('team_memberships')
-        .delete()
-        .match({ club_id: rosterClubId, person_id: personId });
-
-    if (membershipsDeleteError && !isMissingTableError(membershipsDeleteError)) {
-        return { success: false, error: membershipsDeleteError.message };
+    const clearAssignments = await clearPersonAssignmentsInClub(db, rosterClubId, personId);
+    if (!clearAssignments.success) {
+        return { success: false, error: clearAssignments.error };
     }
 
-    const { error: membershipError } = await db
-        .from('team_memberships')
-        .insert({
-            club_id: rosterClubId,
-            team_id: teamReference.teamId || null,
-            person_id: personId,
-            role: personData.role,
-            status: personData.status || 'active',
-            position: personData.position || null,
-            source: 'manual',
-        });
+    const assignments = await insertPersonAssignmentsInClub(db, {
+        clubId: rosterClubId,
+        personId,
+        role: personData.role,
+        status: personData.status,
+        position: personData.position,
+        legacyDivisionId: teamReference.legacyDivisionId || null,
+        teamId: teamReference.teamId || null,
+        source: 'manual',
+    });
 
-    if (membershipError && !isMissingTableError(membershipError)) {
-        return { success: false, error: membershipError.message };
-    }
-
-    const { error: rolesDeleteError } = await db
-        .from('club_person_roles')
-        .delete()
-        .match({ club_id: rosterClubId, person_id: personId });
-
-    if (rolesDeleteError && !isMissingTableError(rolesDeleteError)) {
-        return { success: false, error: rolesDeleteError.message };
-    }
-
-    const { error: roleError } = await db
-        .from('club_person_roles')
-        .insert({
-            club_id: rosterClubId,
-            person_id: personId,
-            role: personData.role,
-            division_id: teamReference.legacyDivisionId || null,
-            status: personData.status || 'active',
-            position: personData.position || null,
-        });
-
-    if (roleError && !isMissingTableError(roleError)) {
-        return { success: false, error: roleError.message };
+    if (!assignments.success) {
+        return { success: false, error: assignments.error };
     }
 
     if (personData.role === 'player') {

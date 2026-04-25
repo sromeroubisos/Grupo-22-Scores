@@ -23,6 +23,9 @@ export interface ClubDashboardMatch {
     status: string;
     venue: string | null;
     score: ClubDashboardScore | null;
+    notes: string | null;
+    lineups: unknown;
+    events: unknown;
     isHome: boolean;
     homeDivisionId: string | null;
     awayDivisionId: string | null;
@@ -53,7 +56,31 @@ export interface ClubDashboardStanding {
     form: string | null;
     phaseId: string | null;
     groupId: string | null;
+    groupName: string | null;
     updatedAt: string | null;
+}
+
+export interface ClubDashboardCompetition {
+    tournamentId: string;
+    tournamentName: string;
+    tournamentSlug: string | null;
+    clubNames: string[];
+    position: number | null;
+    played: number;
+    points: number;
+    goalDifference: number;
+    updatedAt: string | null;
+    nextMatchAt: string | null;
+    recentMatchAt: string | null;
+    divisionNames: string[];
+    phaseId: string | null;
+    phaseName: string | null;
+    phaseType: string | null;
+    groupId: string | null;
+    groupName: string | null;
+    groupNames: string[];
+    groupCount: number;
+    sourceKinds: Array<'participant' | 'standing' | 'match'>;
 }
 
 export interface ClubDashboardStats {
@@ -63,11 +90,26 @@ export interface ClubDashboardStats {
     bestPosition: number | null;
 }
 
+export interface ClubDashboardHealthIssue {
+    key: string;
+    label: string;
+    severity: 'error' | 'warning';
+}
+
+export interface ClubDashboardHealth {
+    status: 'ok' | 'warning' | 'error';
+    completeness: number;
+    issues: ClubDashboardHealthIssue[];
+}
+
 export interface ClubDashboardOverview {
     stats: ClubDashboardStats;
+    health: ClubDashboardHealth;
     upcomingMatches: ClubDashboardMatch[];
     recentMatches: ClubDashboardMatch[];
+    pastMatches: ClubDashboardMatch[];
     standings: ClubDashboardStanding[];
+    competitions: ClubDashboardCompetition[];
     matches: ClubDashboardMatch[];
 }
 
@@ -78,8 +120,15 @@ export const EMPTY_CLUB_DASHBOARD_OVERVIEW: ClubDashboardOverview = {
         tournaments: 0,
         bestPosition: null,
     },
+    health: {
+        status: 'warning',
+        completeness: 0,
+        issues: [],
+    },
     upcomingMatches: [],
     recentMatches: [],
+    pastMatches: [],
     standings: [],
+    competitions: [],
     matches: [],
 };

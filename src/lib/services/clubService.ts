@@ -318,9 +318,10 @@ export async function createClub(
  */
 export async function updateClub(
   clubId: string,
-  input: ClubUpdateInput
+  input: ClubUpdateInput,
+  options?: { supabaseClient?: any }
 ): Promise<ClubUpdateResponse> {
-  const supabase = await createServerClient();
+  const supabase = options?.supabaseClient ?? await createServerClient();
 
   try {
     // 1. Update core (clubs table)
@@ -396,10 +397,12 @@ export async function updateClub(
       }
 
       // Update clubs table with Schema Healing
-      let { error: coreError } = await supabase
+      let { data: updatedCoreRow, error: coreError } = await supabase
         .from('clubs')
         .update(normalizedCore)
-        .eq('id', clubId);
+        .eq('id', clubId)
+        .select('id')
+        .maybeSingle();
 
       // Si falla porque falta la columna 'is_visible' (o la caché está vieja), reintentamos sin ella
       if (coreError && (
@@ -417,8 +420,11 @@ export async function updateClub(
         const retry = await supabase
           .from('clubs')
           .update(fallbackCore)
-          .eq('id', clubId);
+          .eq('id', clubId)
+          .select('id')
+          .maybeSingle();
 
+        updatedCoreRow = retry.data;
         coreError = retry.error;
       }
 
@@ -456,6 +462,13 @@ export async function updateClub(
         return {
           success: false,
           error: coreError.message,
+        };
+      }
+
+      if (!updatedCoreRow) {
+        return {
+          success: false,
+          error: 'No se pudo actualizar el club. Verifica permisos de escritura para este contexto.',
         };
       }
     }
@@ -622,7 +635,7 @@ export async function updateClub(
     }
 
     // 5. Fetch updated club
-    const updatedClub = await fetchClubFull(clubId);
+    const updatedClub = await fetchClubFull(clubId, options);
     if (!updatedClub) {
       return {
         success: false,
@@ -649,8 +662,11 @@ export async function updateClub(
 /**
  * Obtiene un club completo (core + profile + arrays)
  */
-export async function fetchClubFull(clubId: string): Promise<ClubFull | null> {
-  const supabase = await createServerClient();
+export async function fetchClubFull(
+  clubId: string,
+  options?: { supabaseClient?: any }
+): Promise<ClubFull | null> {
+  const supabase = options?.supabaseClient ?? await createServerClient();
 
   // 1) Core first (needed to confirm entity exists)
   const { data: core, error: coreError } = await supabase

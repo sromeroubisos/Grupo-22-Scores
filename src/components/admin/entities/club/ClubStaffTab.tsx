@@ -28,9 +28,19 @@ function formatStaffRole(role?: string | null) {
     return STAFF_ROLE_LABELS[normalized] || normalized.replace(/_/g, ' ') || 'Staff';
 }
 
-export function ClubStaffTab({ clubId }: { clubId: string }) {
-    const [people, setPeople] = useState<PersonWithRole[]>([]);
-    const [loading, setLoading] = useState(true);
+interface ClubStaffTabProps {
+    clubId: string;
+    initialPeople?: PersonWithRole[];
+    initialPeopleLoaded?: boolean;
+}
+
+export function ClubStaffTab({
+    clubId,
+    initialPeople,
+    initialPeopleLoaded = false,
+}: ClubStaffTabProps) {
+    const [people, setPeople] = useState<PersonWithRole[]>(initialPeople ?? []);
+    const [loading, setLoading] = useState(!initialPeopleLoaded);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,7 +60,19 @@ export function ClubStaffTab({ clubId }: { clubId: string }) {
         }
     }, [clubId]);
 
-    useEffect(() => { void loadData(); }, [loadData]);
+    useEffect(() => {
+        setPeople(initialPeopleLoaded ? (initialPeople ?? []) : []);
+        setLoading(!initialPeopleLoaded);
+        setError(null);
+    }, [clubId, initialPeople, initialPeopleLoaded]);
+
+    useEffect(() => {
+        if (initialPeopleLoaded) {
+            return;
+        }
+
+        void loadData();
+    }, [initialPeopleLoaded, loadData]);
 
     const handleRemove = async (personId: string, name: string) => {
         if (!confirm(`¿Eliminar a ${name} del staff?`)) return;

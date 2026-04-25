@@ -75,10 +75,17 @@ export async function POST(request: NextRequest) {
         height: typeof body?.height === 'number' ? body.height : undefined,
         jersey_number: typeof body?.jersey_number === 'number' ? body.jersey_number : undefined,
         squad_role: typeof body?.squad_role === 'string' ? body.squad_role : undefined,
+        existing_person_id: typeof body?.existing_person_id === 'string' ? body.existing_person_id : undefined,
+        force_create_new: body?.force_create_new === true,
     });
 
     if (!result.success) {
-        return jsonError(result.error || 'No se pudo crear la ficha', 400);
+        return NextResponse.json({
+            ok: false,
+            error: result.error || 'No se pudo crear la ficha',
+            code: result.code,
+            matches: result.matches,
+        }, { status: 400 });
     }
 
     return NextResponse.json({ ok: true, data: result.data });

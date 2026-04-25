@@ -90,6 +90,9 @@ export type MatchCenterEventInput = {
   playerId?: string | null;
   playerName?: string | null;
   detail?: string | null;
+  videoTime?: string | null;
+  parentEventId?: string | null;
+  sequence?: number | null;
 };
 
 export type MatchCenterClockInput = {
@@ -103,6 +106,7 @@ export type MatchCenterClockInput = {
 export type MatchCenterLineupsInput = {
   home?: unknown[];
   away?: unknown[];
+  [key: string]: unknown;
 } | null | undefined;
 
 const EMPTY_LINEUPS = { home: [] as PersistedLineupPlayer[], away: [] as PersistedLineupPlayer[] };
@@ -239,7 +243,12 @@ function normalizeLineupCollection(players: unknown[]) {
 
 function normalizeLineups(lineups: MatchCenterLineupsInput | unknown) {
   const source = lineups && typeof lineups === 'object' ? (lineups as Record<string, unknown>) : {};
+  const metadata = Object.fromEntries(
+    Object.entries(source).filter(([key]) => key !== 'home' && key !== 'away')
+  );
+
   return {
+    ...metadata,
     home: Array.isArray(source.home) ? normalizeLineupCollection(source.home) : [],
     away: Array.isArray(source.away) ? normalizeLineupCollection(source.away) : [],
   };
@@ -254,6 +263,9 @@ function normalizeEventInput(event: MatchCenterEventInput) {
     playerId: normalizeText(event.playerId) || null,
     playerName: normalizeText(event.playerName),
     detail: normalizeText(event.detail),
+    videoTime: normalizeText(event.videoTime) || null,
+    parentEventId: normalizeText(event.parentEventId) || null,
+    sequence: Number.isFinite(event.sequence) ? Math.max(0, Math.trunc(event.sequence as number)) : null,
   };
 }
 
@@ -366,6 +378,22 @@ function mapStoredEvent(row: any, match: { home_club_id?: string | null; away_cl
       normalizeText((details as Record<string, unknown>).playerName) ||
       '',
     detail: normalizeText((details as Record<string, unknown>).detail),
+    videoTime:
+      normalizeText(row?.video_time) ||
+      normalizeText((details as Record<string, unknown>).videoTime) ||
+      normalizeText((details as Record<string, unknown>).video_time) ||
+      '',
+    parentEventId:
+      normalizeText(row?.parent_event_id) ||
+      normalizeText((details as Record<string, unknown>).parentEventId) ||
+      normalizeText((details as Record<string, unknown>).parent_event_id) ||
+      undefined,
+    sequence:
+      Number.isFinite(row?.sequence)
+        ? Number(row.sequence)
+        : Number.isFinite((details as Record<string, unknown>).sequence)
+          ? Number((details as Record<string, unknown>).sequence)
+          : undefined,
   };
 }
 
@@ -379,6 +407,14 @@ function mapJsonEvent(row: unknown) {
     playerId: normalizeText(source.playerId) || normalizeText(source.player_id) || null,
     playerName: normalizeText(source.playerName) || normalizeText(source.player_name),
     detail: normalizeText(source.detail) || normalizeText(source.description),
+    videoTime: normalizeText(source.videoTime) || normalizeText(source.video_time) || null,
+    parentEventId: normalizeText(source.parentEventId) || normalizeText(source.parent_event_id) || null,
+    sequence:
+      typeof source.sequence === 'number'
+        ? source.sequence
+        : Number.isFinite(Number(source.sequence))
+          ? Number(source.sequence)
+          : null,
   });
 }
 
@@ -399,12 +435,18 @@ function mapEventToInsert(
     player_name: event.playerName || null,
     event_type: event.type,
     minute: event.minute,
+    video_time: event.videoTime || null,
+    parent_event_id: event.parentEventId || null,
+    sequence: event.sequence ?? null,
     details: {
       detail: event.detail || null,
       team: event.team,
       legacy_id: event.id || null,
       playerId: event.playerId || null,
       playerName: event.playerName || null,
+      videoTime: event.videoTime || null,
+      parentEventId: event.parentEventId || null,
+      sequence: event.sequence ?? null,
     },
   };
 }
@@ -1097,7 +1139,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
 
   const { data: eventRows, error: eventsError } = await client
     .from('match_events')
-    .select('id, club_id, player_id, player_name, event_type, minute, details')
+    .select('id, club_id, player_id, player_name, event_type, minute, details, video_time, parent_event_id, sequence')
     .eq('match_id', matchId)
     .order('minute', { ascending: true });
 
@@ -1218,13 +1260,20 @@ export async function persistMatchCenterSupplementalData(
   const normalizedIncomingLineups =
     payload.lineups !== undefined
       ? normalizeLineups(payload.lineups)
-      : normalizedExistingLineups;
-  const baseLineups = normalizedIncomingLineups;
-  const contexts = await buildTeamContexts(client, match as MatchContextRow, baseLineups);
+      : null;
+  const mergedIncomingLineups = normalizedIncomingLineups
+    ? {
+        ...normalizedExistingLineups,
+        ...normalizedIncomingLineups,
+        home: normalizedIncomingLineups.home,
+        away: normalizedIncomingLineups.away,
+      }
+    : normalizedExistingLineups;
+  const contexts = await buildTeamContexts(client, match as MatchContextRow, mergedIncomingLineups);
 
   const resolvedLineups =
     payload.lineups !== undefined
-      ? await resolvePersistedLineups(client, contexts, payload.lineups)
+      ? await resolvePersistedLineups(client, contexts, mergedIncomingLineups)
       : normalizedExistingLineups;
 
   const resolvedEvents =

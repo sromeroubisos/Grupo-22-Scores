@@ -264,6 +264,34 @@ export async function getManagedClubSummaries(
         return { clubs: [], defaultClubId: null };
     }
 
+    const familyResolutionCache = new Map<string, Promise<{
+        rootClubId: string;
+        clubIds: string[];
+    }>>();
+    const sharedRosterCache = new Map<string, Promise<string[]>>();
+    const getFamilyResolution = (scopeId: string) => {
+        const cached = familyResolutionCache.get(scopeId);
+        if (cached) {
+            return cached;
+        }
+
+        const created = resolveClubFamilyIds(supabase, scopeId).catch(() => ({
+            rootClubId: scopeId,
+            clubIds: [scopeId],
+        }));
+        familyResolutionCache.set(scopeId, created);
+        return created;
+    };
+    const getSharedRosterLinks = (scopeId: string) => {
+        const cached = sharedRosterCache.get(scopeId);
+        if (cached) {
+            return cached;
+        }
+
+        const created = findSharedRosterLinkedClubIds(supabase, scopeId).catch(() => []);
+        sharedRosterCache.set(scopeId, created);
+        return created;
+    };
     const familyAccess = new Map<string, {
         familyRootId: string;
         accessRole: string;
@@ -273,19 +301,30 @@ export async function getManagedClubSummaries(
     }>();
     const defaultClubId = directMemberships[0]?.scopeId ?? null;
 
-    for (const membership of directMemberships) {
-        const scopeId = membership.scopeId!;
-        const managementType = membership.scopeType === 'club_family' ? 'club_family' : 'club';
-        const resolvedFamily = await resolveClubFamilyIds(supabase, scopeId).catch(() => ({
-            rootClubId: scopeId,
-            clubIds: [scopeId],
-        }));
-        const familyClubIds = managementType === 'club_family'
-            ? resolvedFamily.clubIds
-            : Array.from(new Set([
+    const preparedMemberships = await Promise.all(
+        directMemberships.map(async (membership) => {
+            const scopeId = membership.scopeId!;
+            const managementType = membership.scopeType === 'club_family' ? 'club_family' : 'club';
+            const resolvedFamily = await getFamilyResolution(scopeId);
+            const familyClubIds = managementType === 'club_family'
+                ? resolvedFamily.clubIds
+                : Array.from(new Set([
+                    scopeId,
+                    ...await getSharedRosterLinks(scopeId),
+                ]));
+
+            return {
+                membership,
                 scopeId,
-                ...await findSharedRosterLinkedClubIds(supabase, scopeId),
-            ]));
+                managementType,
+                resolvedFamily,
+                familyClubIds,
+            };
+        })
+    );
+
+    for (const preparedMembership of preparedMemberships) {
+        const { membership, scopeId, managementType, resolvedFamily, familyClubIds } = preparedMembership;
 
         for (const familyClubId of familyClubIds) {
             const current = familyAccess.get(familyClubId);

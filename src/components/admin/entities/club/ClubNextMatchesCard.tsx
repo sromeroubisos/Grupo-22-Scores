@@ -12,6 +12,11 @@ interface ClubNextMatchesCardProps {
     loading?: boolean;
 }
 
+function isFinalStatus(status: string | null | undefined) {
+    const normalized = String(status ?? '').trim().toLowerCase();
+    return normalized === 'final' || normalized === 'finished' || normalized === 'ft';
+}
+
 export function ClubNextMatchesCard({ categories, matches, loading }: ClubNextMatchesCardProps) {
     if (loading) {
         return (
@@ -49,6 +54,9 @@ export function ClubNextMatchesCard({ categories, matches, loading }: ClubNextMa
                     const day = date ? format(date, 'dd') : '--';
                     const month = date ? format(date, 'MMM', { locale: es }).toUpperCase() : '---';
                     const hour = date ? format(date, 'HH:mm') : '--:--';
+                    const isFinal = isFinalStatus(match.status);
+                    const hasScore = typeof match.score?.home === 'number' && typeof match.score?.away === 'number';
+                    const statusLabel = isFinal ? 'Finalizado' : 'Programado';
 
                     return (
                         <div
@@ -119,10 +127,32 @@ export function ClubNextMatchesCard({ categories, matches, loading }: ClubNextMa
                                     </span>
                                 </div>
                                 <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)' }}>
-                                        <Clock className="w-3.5 h-3.5" />
-                                        <span className="mono" style={{ fontSize: '0.65rem', fontWeight: 500, letterSpacing: '-0.025em' }}>{hour} HS</span>
-                                    </div>
+                                    {isFinal ? (
+                                        <div
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem',
+                                                padding: '0.35rem 0.65rem',
+                                                borderRadius: '999px',
+                                                background: 'rgba(16, 185, 129, 0.12)',
+                                                border: '1px solid rgba(16, 185, 129, 0.2)',
+                                                color: 'var(--text)',
+                                            }}
+                                        >
+                                            <span className="mono" style={{ fontSize: '0.65rem', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                                                {statusLabel}
+                                            </span>
+                                            <span className="mono" style={{ fontSize: '0.85rem', fontWeight: 900, letterSpacing: '-0.03em' }}>
+                                                {hasScore ? `${match.score.home} - ${match.score.away}` : 'Sin resultado'}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)' }}>
+                                            <Clock className="w-3.5 h-3.5" />
+                                            <span className="mono" style={{ fontSize: '0.65rem', fontWeight: 500, letterSpacing: '-0.025em' }}>{hour} HS</span>
+                                        </div>
+                                    )}
                                     {match.venue ? (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)' }}>
                                             <MapPin className="w-3.5 h-3.5" />

@@ -6,6 +6,7 @@ import {
     getClubManagementTarget,
     requireUserAccessContext,
 } from '@/lib/auth/permissions';
+import { getClubSponsors } from '@/lib/club-admin/sponsors';
 import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
@@ -46,14 +47,7 @@ export async function GET(request: NextRequest) {
         const access = await resolveClubAccess(clubId, ACCESS_VIEW_ROLE_SET);
         if ('error' in access) return access.error;
 
-        const admin = createAdminClient() as any;
-        const { data, error } = await admin
-            .from('club_sponsors')
-            .select('id, club_id, name, tier, status, placement, logo_url, website, notes, contract_start, contract_end, created_at, updated_at')
-            .eq('club_id', clubId)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
+        const data = await getClubSponsors(clubId);
         return NextResponse.json({ ok: true, data: data ?? [] });
     } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudieron cargar los sponsors';

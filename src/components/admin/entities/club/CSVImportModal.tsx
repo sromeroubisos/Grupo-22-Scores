@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { AlertCircle, CheckCircle2, Download, FileText, Loader2, Upload, X } from 'lucide-react';
-import { importPeopleFromCSV, type CSVRow } from '@/lib/services/csvService';
+import {
+    importPeopleFromCSV,
+    previewPeopleImportConflicts,
+    type CSVImportConflict,
+    type CSVRow,
+} from '@/lib/services/csvService';
 import { Division } from '@/lib/services/divisionService';
 
 interface Props {
@@ -18,6 +23,11 @@ interface Props {
 type ImportResult = {
     count: number;
     errors: string[];
+};
+
+type ConflictDecision = {
+    mode: 'reuse' | 'create';
+    personId?: string;
 };
 
 const PLAYER_IMPORT_HEADERS = [
@@ -202,8 +212,13 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<ImportResult | null>(null);
     const [selectedDivisionId, setSelectedDivisionId] = useState<string>(fixedDivisionId || '');
+    const [pendingRows, setPendingRows] = useState<CSVRow[]>([]);
+    const [pendingParseErrors, setPendingParseErrors] = useState<string[]>([]);
+    const [conflicts, setConflicts] = useState<CSVImportConflict[]>([]);
+    const [conflictDecisions, setConflictDecisions] = useState<Record<number, ConflictDecision>>({});
 
     const templatePreview = useMemo(() => buildTemplateCsv(), []);
+    const allConflictsResolved = conflicts.length > 0 && conflicts.every((conflict) => Boolean(conflictDecisions[conflict.rowIndex]));
 
     useEffect(() => {
         if (!isOpen) return;
@@ -213,6 +228,10 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
         setResult(null);
         setLoading(false);
         setSelectedDivisionId(fixedDivisionId || '');
+        setPendingRows([]);
+        setPendingParseErrors([]);
+        setConflicts([]);
+        setConflictDecisions({});
     }, [fixedDivisionId, isOpen]);
 
     if (!isOpen) return null;
@@ -232,6 +251,23 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
         link.download = 'jugadores_import_template.csv';
         link.click();
         URL.revokeObjectURL(url);
+    };
+
+    const finalizeImport = async (rows: CSVRow[], parseErrors: string[]) => {
+        const response = await importPeopleFromCSV(clubId, rows);
+
+        setConflicts([]);
+        setPendingRows([]);
+        setPendingParseErrors([]);
+        setConflictDecisions({});
+        setResult({
+            count: response.count,
+            errors: [...parseErrors, ...response.errors],
+        });
+
+        if (response.count > 0) {
+            onSuccess();
+        }
     };
 
     const processFile = async () => {
@@ -266,17 +302,54 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                 return;
             }
 
-            const response = await importPeopleFromCSV(clubId, parsed.rows);
-            setResult({
-                count: response.count,
-                errors: [...parsed.errors, ...response.errors],
-            });
-
-            if (response.count > 0) {
-                onSuccess();
+            const nextConflicts = await previewPeopleImportConflicts(clubId, parsed.rows);
+            if (nextConflicts.length > 0) {
+                setPendingRows(parsed.rows);
+                setPendingParseErrors(parsed.errors);
+                setConflicts(nextConflicts);
+                setConflictDecisions({});
+                return;
             }
+
+            await finalizeImport(parsed.rows, parsed.errors);
         } catch (error) {
             setResult({ count: 0, errors: [`Error al leer el archivo: ${String(error)}`] });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleConflictDecision = (rowIndex: number, decision: ConflictDecision) => {
+        setConflictDecisions((current) => ({
+            ...current,
+            [rowIndex]: decision,
+        }));
+    };
+
+    const handleConflictImport = async () => {
+        if (!allConflictsResolved) return;
+
+        setLoading(true);
+        try {
+            const resolvedRows = pendingRows.map((row, index) => {
+                const decision = conflictDecisions[index];
+                if (!decision) return row;
+                if (decision.mode === 'reuse' && decision.personId) {
+                    return {
+                        ...row,
+                        existing_person_id: decision.personId,
+                    };
+                }
+
+                return {
+                    ...row,
+                    force_create_new: true,
+                };
+            });
+
+            await finalizeImport(resolvedRows, pendingParseErrors);
+        } catch (error) {
+            setResult({ count: 0, errors: [`Error al resolver la importacion: ${String(error)}`] });
         } finally {
             setLoading(false);
         }
@@ -300,7 +373,133 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                     </button>
                 </div>
 
-                {!result ? (
+                {!result ? conflicts.length > 0 ? (
+                    <div className="space-y-6">
+                        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
+                            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-500">Revision de homonimos</p>
+                            <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+                                Encontramos jugadores con el mismo nombre en la base. Decide fila por fila si corresponde reutilizar una ficha existente o crear una nueva.
+                            </p>
+                        </div>
+
+                        <div className="max-h-[56vh] space-y-4 overflow-y-auto pr-1">
+                            {conflicts.map((conflict) => {
+                                const decision = conflictDecisions[conflict.rowIndex];
+                                const rowLabel = `${conflict.row.first_name} ${conflict.row.last_name}`.trim();
+
+                                return (
+                                    <div key={`${conflict.rowIndex}-${rowLabel}`} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-5">
+                                        <div className="flex flex-col gap-2 border-b border-[var(--color-border)] pb-4">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-amber-500">
+                                                    Fila {conflict.rowIndex + 2}
+                                                </span>
+                                                <span className="text-sm font-black uppercase tracking-[0.08em] text-[var(--color-text-primary)]">
+                                                    {rowLabel}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-[var(--color-text-secondary)]">
+                                                {conflict.row.birth_date ? `Nacimiento: ${conflict.row.birth_date}` : 'Sin fecha de nacimiento'}
+                                                {conflict.row.position ? ` / Posicion: ${conflict.row.position}` : ''}
+                                                {conflict.row.id_number ? ` / DNI: ${conflict.row.id_number}` : ''}
+                                            </p>
+                                        </div>
+
+                                        <div className="mt-4 space-y-3">
+                                            {conflict.matches.map((match) => {
+                                                const isSelected = decision?.mode === 'reuse' && decision.personId === match.person_id;
+
+                                                return (
+                                                    <div key={match.person_id} className={`rounded-xl border p-4 transition ${isSelected ? 'border-sky-500 bg-sky-500/5' : 'border-[var(--color-border)] bg-[var(--color-bg-primary)]'}`}>
+                                                        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                                            <div className="space-y-2">
+                                                                <p className="text-sm font-black uppercase tracking-[0.08em] text-[var(--color-text-primary)]">{match.full_name}</p>
+                                                                <p className="text-xs text-[var(--color-text-secondary)]">
+                                                                    {match.birth_date ? `Nacimiento: ${match.birth_date}` : 'Sin fecha de nacimiento'}
+                                                                    {match.id_number ? ` / DNI: ${match.id_number}` : ' / Sin DNI'}
+                                                                </p>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {match.already_linked_to_club ? (
+                                                                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-500">
+                                                                            Ya vinculado a este club
+                                                                        </span>
+                                                                    ) : null}
+                                                                    {match.club_links.map((link) => (
+                                                                        <span key={`${match.person_id}-${link.club_id}-${link.division_id || 'base'}-${link.role || 'role'}`} className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[var(--color-text-secondary)]">
+                                                                            {link.club_name}
+                                                                            {link.division_name ? ` / ${link.division_name}` : ''}
+                                                                            {link.role ? ` / ${link.role}` : ''}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleConflictDecision(conflict.rowIndex, { mode: 'reuse', personId: match.person_id })}
+                                                                className={`btn !h-10 ${isSelected ? '!bg-sky-500 !text-white' : ''}`}
+                                                            >
+                                                                Usar esta ficha
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+
+                                            <button
+                                                type="button"
+                                                onClick={() => handleConflictDecision(conflict.rowIndex, { mode: 'create' })}
+                                                className={`btn !h-10 ${decision?.mode === 'create' ? '!bg-amber-400 !text-slate-950' : ''}`}
+                                            >
+                                                Crear una ficha nueva para esta fila
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex flex-col gap-4 pt-2">
+                            {pendingParseErrors.length > 0 && (
+                                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+                                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-500">
+                                        <AlertCircle className="w-3 h-3" />
+                                        Advertencias de parseo ({pendingParseErrors.length})
+                                    </div>
+                                    <div className="mt-2 max-h-24 space-y-1 overflow-y-auto">
+                                        {pendingParseErrors.map((error, index) => (
+                                            <p key={`${error}-${index}`} className="text-[10px] font-mono text-[var(--color-text-secondary)]">{error}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => {
+                                        setConflicts([]);
+                                        setPendingRows([]);
+                                        setPendingParseErrors([]);
+                                        setConflictDecisions({});
+                                    }}
+                                    className="btn flex-1 h-12"
+                                    type="button"
+                                >
+                                    Volver
+                                </button>
+                                <button
+                                    onClick={handleConflictImport}
+                                    disabled={!allConflictsResolved || loading}
+                                    className="btn btn-primary flex-[2] h-12 gap-3"
+                                    type="button"
+                                >
+                                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                                    {loading ? 'Importando...' : 'Continuar importacion'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
                     <div className="space-y-6">
                         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                             <div className="p-6 border border-[var(--color-border)] rounded-xl bg-[var(--color-bg-tertiary)] space-y-4">

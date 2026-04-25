@@ -2,6 +2,10 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import {
+    isMissingColumnError as isMissingSupabaseColumnError,
+    isMissingTableError as isMissingSupabaseTableError,
+} from '@/lib/utils/supabaseSchema';
 
 export interface Division {
     id: string;
@@ -48,9 +52,38 @@ interface DivisionMutationResult {
 const DEFAULT_SEASON = String(new Date().getFullYear());
 const MISSING_TABLE_CODES = new Set(['PGRST204', 'PGRST205', '42P01']);
 const FAMILY_DIVISION_ID_PREFIX = 'family-division';
+const OPTIONAL_TEAM_COLUMNS = [
+    'legacy_division_id',
+    'slug',
+    'sport',
+    'gender',
+    'category',
+    'status',
+    'featured',
+    'season',
+    'format',
+    'regulation',
+] as const;
 
-function isMissingTableError(error: any) {
+function isMissingTableError(error: any, tableName?: string) {
+    if (tableName) {
+        return isMissingSupabaseTableError(error, tableName);
+    }
+
     return Boolean(error && typeof error.code === 'string' && MISSING_TABLE_CODES.has(error.code));
+}
+
+function isMissingColumnError(error: any, column: string) {
+    return isMissingSupabaseColumnError(error, column);
+}
+
+function isRecoverableDivisionFetchError(error: any) {
+    return (
+        isMissingTableError(error)
+        || isMissingTableError(error, 'club_family_divisions')
+        || isMissingColumnError(error, 'group_name')
+        || OPTIONAL_TEAM_COLUMNS.some((column) => isMissingColumnError(error, column))
+    );
 }
 
 function toNullableText(value: unknown) {
@@ -169,14 +202,39 @@ function toFamilyDivisionId(rosterOwnerClubId: string, groupName: string | null)
 }
 
 async function fetchFamilyDivisions(supabase: any, clubId: string): Promise<Division[]> {
-    const { data: seedLinks, error } = await supabase
+    let supportsGroupName = true;
+    let seedLinks: any[] = [];
+
+    const seedQuery = await supabase
         .from('club_family_divisions')
         .select('family_base_club_id, roster_owner_club_id, division_club_id, group_name')
         .or(`roster_owner_club_id.eq.${clubId},division_club_id.eq.${clubId}`);
 
-    if (error) {
-        if (isMissingTableError(error)) return [];
-        throw error;
+    if (seedQuery.error) {
+        if (isMissingTableError(seedQuery.error, 'club_family_divisions')) return [];
+
+        if (isMissingColumnError(seedQuery.error, 'group_name')) {
+            supportsGroupName = false;
+
+            const fallbackQuery = await supabase
+                .from('club_family_divisions')
+                .select('family_base_club_id, roster_owner_club_id, division_club_id')
+                .or(`roster_owner_club_id.eq.${clubId},division_club_id.eq.${clubId}`);
+
+            if (fallbackQuery.error) {
+                if (isMissingTableError(fallbackQuery.error, 'club_family_divisions')) return [];
+                throw fallbackQuery.error;
+            }
+
+            seedLinks = (fallbackQuery.data ?? []).map((link: any) => ({
+                ...link,
+                group_name: null,
+            }));
+        } else {
+            throw seedQuery.error;
+        }
+    } else {
+        seedLinks = seedQuery.data ?? [];
     }
 
     const seedGroupKeys = new Set(
@@ -188,13 +246,21 @@ async function fetchFamilyDivisions(supabase: any, clubId: string): Promise<Divi
     if (rosterOwnerIds.length > 0) {
         const { data: ownerLinks, error: ownerLinksError } = await supabase
             .from('club_family_divisions')
-            .select('family_base_club_id, roster_owner_club_id, division_club_id, group_name')
+            .select(
+                supportsGroupName
+                    ? 'family_base_club_id, roster_owner_club_id, division_club_id, group_name'
+                    : 'family_base_club_id, roster_owner_club_id, division_club_id'
+            )
             .in('roster_owner_club_id', rosterOwnerIds);
 
         if (ownerLinksError) {
-            if (!isMissingTableError(ownerLinksError)) throw ownerLinksError;
+            if (!isMissingTableError(ownerLinksError, 'club_family_divisions')) throw ownerLinksError;
         } else {
-            allLinks = (ownerLinks ?? []).filter((link: any) =>
+            const normalizedOwnerLinks = supportsGroupName
+                ? (ownerLinks ?? [])
+                : (ownerLinks ?? []).map((link: any) => ({ ...link, group_name: null }));
+
+            allLinks = normalizedOwnerLinks.filter((link: any) =>
                 seedGroupKeys.has(`${link.roster_owner_club_id}::${link.group_name || ''}`)
             );
         }
@@ -272,8 +338,23 @@ async function listClubTeams(supabase: any, clubId: string): Promise<any[] | nul
         .order('name');
 
     if (error) {
-        if (isMissingTableError(error)) return null;
-        throw error;
+        if (isMissingTableError(error, 'club_teams')) return null;
+        if (!OPTIONAL_TEAM_COLUMNS.some((column) => isMissingColumnError(error, column))) {
+            throw error;
+        }
+
+        const fallbackQuery = await supabase
+            .from('club_teams')
+            .select('id, club_id, name')
+            .eq('club_id', clubId)
+            .order('name');
+
+        if (fallbackQuery.error) {
+            if (isMissingTableError(fallbackQuery.error, 'club_teams')) return null;
+            throw fallbackQuery.error;
+        }
+
+        return fallbackQuery.data ?? [];
     }
 
     return data ?? [];
@@ -441,8 +522,8 @@ function buildDivisionResponse(team: any | null, legacyDivision: any | null): Di
     return undefined;
 }
 
-export async function fetchDivisions(clubId: string): Promise<Division[]> {
-    const supabase = await createClient();
+export async function fetchDivisions(clubId: string, supabaseClient?: any): Promise<Division[]> {
+    const supabase = supabaseClient ?? await createClient();
     const db = supabase as any;
 
     try {
@@ -465,7 +546,9 @@ export async function fetchDivisions(clubId: string): Promise<Division[]> {
 
         return fetchDivisionsFallback(clubId);
     } catch (error) {
-        console.error('Error fetching divisions, falling back to club categories:', error);
+        if (!isRecoverableDivisionFetchError(error)) {
+            console.error('Error fetching divisions, falling back to club categories:', error);
+        }
         return fetchDivisionsFallback(clubId);
     }
 }

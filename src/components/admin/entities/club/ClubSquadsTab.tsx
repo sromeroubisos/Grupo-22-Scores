@@ -15,6 +15,10 @@ interface ClubSquadsTabProps {
     id: string;
     data?: ClubRow;
     navigationMode?: ClubConsoleMode;
+    initialPlayers?: PersonWithRole[];
+    initialPlayersLoaded?: boolean;
+    initialDivisions?: Division[];
+    initialDivisionsLoaded?: boolean;
 }
 
 async function loadClubPlayers(clubId: string): Promise<PersonWithRole[]> {
@@ -30,12 +34,19 @@ async function loadClubPlayers(clubId: string): Promise<PersonWithRole[]> {
 }
 
 export function ClubSquadsTab(props: ClubSquadsTabProps) {
-    const { id, data } = props;
+    const {
+        id,
+        data,
+        initialPlayers,
+        initialPlayersLoaded = false,
+        initialDivisions,
+        initialDivisionsLoaded = false,
+    } = props;
     const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
     const [searchQuery, setSearchQuery] = useState('');
-    const [players, setPlayers] = useState<PersonWithRole[]>([]);
-    const [divisions, setDivisions] = useState<Division[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [players, setPlayers] = useState<PersonWithRole[]>(initialPlayers ?? []);
+    const [divisions, setDivisions] = useState<Division[]>(initialDivisions ?? []);
+    const [loading, setLoading] = useState(!(initialPlayersLoaded && initialDivisionsLoaded));
     const [actionMessage, setActionMessage] = useState<string | null>(null);
     const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
@@ -51,6 +62,16 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
     }
 
     useEffect(() => {
+        setPlayers(initialPlayersLoaded ? (initialPlayers ?? []) : []);
+        setDivisions(initialDivisionsLoaded ? (initialDivisions ?? []) : []);
+        setLoading(!(initialPlayersLoaded && initialDivisionsLoaded));
+    }, [id, initialDivisions, initialDivisionsLoaded, initialPlayers, initialPlayersLoaded]);
+
+    useEffect(() => {
+        if (initialPlayersLoaded && initialDivisionsLoaded) {
+            return;
+        }
+
         let isMounted = true;
 
         const loadInitialData = async () => {
@@ -83,7 +104,7 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
         return () => {
             isMounted = false;
         };
-    }, [id]);
+    }, [id, initialDivisionsLoaded, initialPlayersLoaded]);
 
     function handleRegisterPlayer() {
         setActionMessage(null);

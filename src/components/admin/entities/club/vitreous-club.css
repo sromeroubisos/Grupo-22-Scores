@@ -643,7 +643,7 @@
 
 .club-main-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
     padding: 0 2rem 2rem;
     align-items: start;
@@ -847,15 +847,14 @@
 
 .club-access-family-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
     gap: 1rem;
 }
 
 .club-access-family-card {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    justify-content: space-between;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
     gap: 1rem;
     padding: 1.15rem 1.2rem;
     border-radius: 20px;
@@ -869,9 +868,9 @@
 .club-access-family-content {
     min-width: 0;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: flex-start;
+    gap: 0.75rem;
 }
 
 .club-access-family-copy {
@@ -913,6 +912,10 @@
     line-height: 1.4;
     white-space: normal;
     overflow-wrap: anywhere;
+}
+
+.club-access-family-card .club-access-create-btn {
+    justify-self: start;
 }
 
 .club-access-grid {
@@ -2515,6 +2518,788 @@
     gap: 1rem;
 }
 
+.club-match-kpi {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+}
+
+.club-match-kpi-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.club-match-kpi-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.club-match-kpi-value {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.club-match-panel {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.25rem;
+    background: var(--surface);
+    display: grid;
+    gap: 1rem;
+}
+
+.club-match-tablist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.club-match-tab {
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+    color: var(--text-muted);
+    min-height: 42px;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.club-match-tab:hover {
+    transform: translateY(-1px);
+    border-color: rgba(59, 130, 246, 0.24);
+    color: var(--text);
+}
+
+.club-match-tab.active {
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.14);
+    color: #bfdbfe;
+}
+
+.club-match-toolbar {
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.club-match-year-filter {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.club-match-year-filter span {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+.club-match-year-filter select {
+    min-width: 180px;
+    min-height: 42px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+    color: var(--text);
+    padding: 0 0.9rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.club-match-empty,
+.club-match-placeholder {
+    padding: 1.25rem;
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    color: var(--text-muted);
+}
+
+.club-match-empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.club-match-placeholder-body {
+    display: grid;
+    gap: 0.8rem;
+    justify-items: start;
+}
+
+.club-match-placeholder-body h3 {
+    font-size: 1.2rem;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: var(--text);
+}
+
+.club-match-placeholder-body p {
+    max-width: 60ch;
+}
+
+.club-match-placeholder-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    background: rgba(59, 130, 246, 0.12);
+    color: #bfdbfe;
+}
+
+.club-match-favorites-note {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(59, 130, 246, 0.14);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.club-matches-shell {
+    display: grid;
+    gap: 1.75rem;
+}
+
+.club-matches-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.club-matches-header-copy {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.club-matches-kicker {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+}
+
+.club-matches-heading-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.club-matches-heading-row h2 {
+    font-size: clamp(2rem, 3vw, 2.75rem);
+    line-height: 0.94;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.club-matches-heading-row p {
+    margin-top: 0.45rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+.club-matches-team-selector {
+    display: grid;
+    gap: 0.45rem;
+    min-width: min(100%, 240px);
+}
+
+.club-matches-team-selector span,
+.club-matches-filter-grid label span {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+.club-matches-team-selector select,
+.club-matches-filter-grid label input,
+.club-matches-filter-grid label select {
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.035);
+    color: var(--text);
+    padding: 0 0.95rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.club-matches-header-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.club-matches-btn {
+    min-height: 44px;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    cursor: pointer;
+}
+
+.club-matches-btn:hover {
+    transform: translateY(-2px);
+}
+
+.club-matches-btn-ghost {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+}
+
+.club-matches-btn-ghost:hover {
+    border-color: rgba(59, 130, 246, 0.24);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.club-matches-btn-primary {
+    background: rgba(59, 130, 246, 0.16);
+    color: #dbeafe;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.club-matches-btn-primary:hover {
+    background: rgba(59, 130, 246, 0.24);
+}
+
+.club-matches-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.9rem;
+}
+
+.club-matches-kpi-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+        rgba(255, 255, 255, 0.015);
+    padding: 1rem 1rem 1.1rem;
+    text-align: left;
+    cursor: pointer;
+    display: grid;
+    gap: 0.5rem;
+    transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.club-matches-kpi-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: rgba(59, 130, 246, 0.9);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.club-matches-kpi-card:hover,
+.club-matches-kpi-card.active {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.16);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
+        rgba(255, 255, 255, 0.02);
+}
+
+.club-matches-kpi-card:hover::after,
+.club-matches-kpi-card.active::after {
+    opacity: 1;
+}
+
+.club-matches-kpi-card.warning .club-matches-kpi-value {
+    color: #fbbf24;
+}
+
+.club-matches-kpi-label {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.club-matches-kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.55rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.club-matches-kpi-hint {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.club-matches-filters {
+    display: none;
+}
+
+.club-matches-filters.open {
+    display: block;
+}
+
+.club-matches-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.9rem;
+    padding: 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.club-matches-filter-grid label {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.club-matches-tabs {
+    display: flex;
+    gap: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
+}
+
+.club-matches-tab {
+    position: relative;
+    min-height: 44px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0 0 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.club-matches-tab.active {
+    color: var(--text);
+}
+
+.club-matches-tab.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: rgba(59, 130, 246, 0.95);
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.45);
+}
+
+.club-matches-timeline {
+    display: grid;
+    gap: 1rem;
+}
+
+.club-match-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.9fr);
+    gap: 1rem;
+    padding: 1.35rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.04), transparent 30%),
+        rgba(255, 255, 255, 0.015);
+    backdrop-filter: blur(12px);
+    transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+}
+
+.club-match-card:hover {
+    transform: scale(1.005);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.club-match-card.has-pending {
+    border-left: 4px solid rgba(245, 158, 11, 0.9);
+}
+
+.club-match-card-main {
+    display: grid;
+    gap: 1rem;
+}
+
+.club-match-card-header {
+    display: grid;
+    grid-template-columns: 118px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.club-match-card-date {
+    display: grid;
+    gap: 0.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: #93c5fd;
+}
+
+.club-match-card-date span {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.club-match-card-date strong {
+    font-size: 1.05rem;
+}
+
+.club-match-card-identity {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.club-match-card-identity h3 {
+    font-size: 1.35rem;
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.club-match-opponent-name {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.club-match-card-title-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.club-match-card-score {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.25rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    letter-spacing: -0.02em;
+}
+
+[data-theme="light"] .flash-ui-container .club-match-card-score {
+    background: rgba(15, 23, 42, 0.06);
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+.club-match-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.club-match-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.club-match-status.tone-scheduled {
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.24);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.club-match-status.tone-live {
+    color: #fde68a;
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.club-match-status.tone-played {
+    color: #86efac;
+    border-color: rgba(16, 185, 129, 0.28);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.club-match-status.tone-alert {
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.club-match-origin {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.67rem;
+    opacity: 0.62;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.club-match-operational {
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.18);
+    display: grid;
+    gap: 0.9rem;
+}
+
+.club-match-operational-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.club-match-operational-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 0.25rem;
+}
+
+.club-match-operational-head strong {
+    font-size: 0.98rem;
+    font-weight: 800;
+}
+
+.club-match-operational-alert,
+.club-match-operational-ok {
+    min-height: 30px;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.club-match-operational-alert {
+    color: #fde68a;
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.club-match-operational-ok {
+    color: #86efac;
+    border: 1px solid rgba(16, 185, 129, 0.26);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.club-match-triage-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.club-match-triage-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 34px;
+    padding: 0.45rem 0.7rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.club-match-triage-item i {
+    font-style: normal;
+    line-height: 1;
+}
+
+.club-match-triage-item.complete {
+    color: #86efac;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.club-match-triage-item.complete i::before {
+    content: "●";
+}
+
+.club-match-triage-item.pending {
+    color: var(--text-muted);
+    opacity: 0.72;
+    border-color: rgba(239, 68, 68, 0.16);
+}
+
+.club-match-triage-item.pending i::before {
+    content: "○";
+}
+
+.club-match-indicators {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    font-size: 0.76rem;
+}
+
+.club-match-indicators span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.club-match-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    align-content: start;
+}
+
+.club-match-action {
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 0.7rem 0.8rem;
+    transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.club-match-action:hover {
+    transform: translateY(-1px);
+    border-color: rgba(59, 130, 246, 0.22);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.club-match-action:disabled {
+    opacity: 0.68;
+    cursor: wait;
+    transform: none;
+}
+
+.club-match-action.primary {
+    grid-column: span 2;
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(59, 130, 246, 0.28);
+    color: #dbeafe;
+}
+
+.club-match-action.danger {
+    border-color: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.06);
+    color: #fecaca;
+}
+
+.club-match-action.danger:hover {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.club-matches-empty {
+    padding: 2rem 1.25rem;
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.club-matches-footer-note {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+[data-theme="light"] .flash-ui-container .club-match-tab.active {
+    color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="light"] .flash-ui-container .club-match-year-filter select {
+    background: rgba(255, 255, 255, 0.86);
+}
+
+[data-theme="light"] .flash-ui-container .club-match-placeholder-icon {
+    color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="light"] .flash-ui-container .club-matches-header,
+[data-theme="light"] .flash-ui-container .club-matches-tabs {
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme="light"] .flash-ui-container .club-matches-btn,
+[data-theme="light"] .flash-ui-container .club-matches-team-selector select,
+[data-theme="light"] .flash-ui-container .club-matches-filter-grid label input,
+[data-theme="light"] .flash-ui-container .club-matches-filter-grid label select,
+[data-theme="light"] .flash-ui-container .club-matches-kpi-card,
+[data-theme="light"] .flash-ui-container .club-matches-filter-grid,
+[data-theme="light"] .flash-ui-container .club-match-card,
+[data-theme="light"] .flash-ui-container .club-match-operational,
+[data-theme="light"] .flash-ui-container .club-match-action,
+[data-theme="light"] .flash-ui-container .club-matches-empty {
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme="light"] .flash-ui-container .club-matches-btn-ghost,
+[data-theme="light"] .flash-ui-container .club-matches-team-selector select,
+[data-theme="light"] .flash-ui-container .club-matches-filter-grid label input,
+[data-theme="light"] .flash-ui-container .club-matches-filter-grid label select,
+[data-theme="light"] .flash-ui-container .club-matches-kpi-card,
+[data-theme="light"] .flash-ui-container .club-matches-filter-grid,
+[data-theme="light"] .flash-ui-container .club-match-card,
+[data-theme="light"] .flash-ui-container .club-match-operational,
+[data-theme="light"] .flash-ui-container .club-match-action {
+    background: rgba(255, 255, 255, 0.82);
+}
+
 .club-tab-heading {
     font-size: 1.35rem;
     line-height: 1.05;
@@ -2559,6 +3344,1078 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-weight: 800;
+}
+
+.club-competition-loading {
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.club-competitions-shell {
+    --competition-gold: #c5a368;
+    --competition-paper: rgba(255, 255, 255, 0.035);
+    --competition-paper-strong: rgba(255, 255, 255, 0.06);
+    display: grid;
+    gap: 1.5rem;
+}
+
+[data-theme="light"] .flash-ui-container .club-competitions-shell {
+    --competition-paper: rgba(255, 255, 255, 0.82);
+    --competition-paper-strong: rgba(255, 255, 255, 0.92);
+}
+
+.club-competition-topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    align-items: flex-end;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.club-competition-title-group {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.club-competition-kicker {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 800;
+}
+
+.club-competition-title {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 0.98;
+    font-weight: 900;
+    letter-spacing: -0.08em;
+    text-transform: uppercase;
+}
+
+.club-competition-subtitle {
+    max-width: 62ch;
+    color: var(--text-muted);
+    font-size: 0.94rem;
+}
+
+.club-competition-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.club-competition-action {
+    min-height: 42px;
+    padding: 0.72rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.club-competition-action:hover {
+    transform: translateY(-1px);
+    border-color: rgba(197, 163, 104, 0.34);
+}
+
+.club-competition-action.is-primary {
+    background: linear-gradient(135deg, rgba(197, 163, 104, 0.22), rgba(197, 163, 104, 0.1));
+    border-color: rgba(197, 163, 104, 0.34);
+}
+
+.club-competition-filter-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 220px)) minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    background:
+        linear-gradient(135deg, rgba(197, 163, 104, 0.08), transparent 40%),
+        linear-gradient(180deg, var(--competition-paper-strong), var(--competition-paper));
+}
+
+.club-competition-filter {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.club-competition-filter span {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+.club-competition-filter select {
+    min-height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+    color: var(--text);
+    padding: 0 0.95rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.club-competition-filter-note {
+    align-self: end;
+    justify-self: end;
+    display: grid;
+    gap: 0.2rem;
+    text-align: right;
+}
+
+.club-competition-filter-note strong {
+    font-size: 1.6rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.club-competition-filter-note span {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.club-competition-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.club-competition-kpi-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    background:
+        linear-gradient(180deg, var(--competition-paper-strong), var(--competition-paper)),
+        radial-gradient(circle at top left, rgba(197, 163, 104, 0.12), transparent 45%);
+    padding: 1.2rem 1.1rem 1rem;
+}
+
+.club-competition-kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(197, 163, 104, 0.9), rgba(197, 163, 104, 0.1));
+}
+
+.club-competition-kpi-label {
+    display: block;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 800;
+}
+
+.club-competition-kpi-card strong {
+    display: block;
+    margin-top: 0.45rem;
+    font-size: 1.85rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.club-competition-kpi-card small {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.club-competition-segment-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.9rem;
+}
+
+.club-competition-segment-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.club-competition-segment {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 0 0 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+}
+
+.club-competition-segment span {
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    font-size: 0.66rem;
+}
+
+.club-competition-segment.is-active {
+    color: var(--text);
+    border-bottom-color: var(--competition-gold);
+}
+
+.club-competition-segment.is-active span {
+    background: rgba(197, 163, 104, 0.16);
+    border-color: rgba(197, 163, 104, 0.34);
+}
+
+.club-competition-segment-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.club-competition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+.club-competition-card {
+    border-radius: 28px;
+    border: 1px solid var(--border);
+    background:
+        linear-gradient(180deg, var(--competition-paper-strong), rgba(0, 0, 0, 0.04)),
+        radial-gradient(circle at top right, rgba(197, 163, 104, 0.12), transparent 28%);
+    box-shadow: 0 20px 40px -28px rgba(0, 0, 0, 0.55);
+    display: grid;
+    cursor: pointer;
+    transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+}
+
+.club-competition-card:hover,
+.club-competition-card.is-selected {
+    transform: translateY(-2px);
+    border-color: rgba(197, 163, 104, 0.3);
+    box-shadow: 0 28px 54px -30px rgba(0, 0, 0, 0.7);
+}
+
+.club-competition-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-card-header {
+    border-bottom-color: rgba(15, 23, 42, 0.1);
+}
+
+.club-competition-card-header h4 {
+    font-size: 1.35rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+}
+
+.club-competition-card-header span {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.club-competition-status {
+    padding: 0.38rem 0.62rem;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+
+.club-competition-status.is-active {
+    background: rgba(197, 163, 104, 0.16);
+    color: #f4d8a7;
+    border-color: rgba(197, 163, 104, 0.28);
+}
+
+.club-competition-status.is-upcoming {
+    background: rgba(59, 130, 246, 0.16);
+    color: #bfdbfe;
+    border-color: rgba(59, 130, 246, 0.28);
+}
+
+.club-competition-status.is-finished {
+    background: rgba(34, 197, 94, 0.15);
+    color: #86efac;
+    border-color: rgba(34, 197, 94, 0.24);
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-status.is-active {
+    color: #8a641f;
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-status.is-upcoming {
+    color: #1d4ed8;
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-status.is-finished {
+    color: #15803d;
+}
+
+.club-competition-card-body {
+    display: grid;
+    gap: 1rem;
+    padding: 1.2rem 1.25rem 0;
+}
+
+.club-competition-main-standing {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.club-competition-rank {
+    font-size: 3.6rem;
+    line-height: 0.9;
+    font-weight: 900;
+    letter-spacing: -0.1em;
+    color: var(--competition-gold);
+}
+
+.club-competition-standing-copy {
+    display: grid;
+    gap: 0.1rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.club-competition-standing-copy div:first-child {
+    font-size: 1.2rem;
+    color: var(--text);
+    font-weight: 800;
+}
+
+.club-competition-context-box {
+    padding: 0.85rem 0.95rem;
+    border-left: 3px solid var(--competition-gold);
+    border-radius: 0 16px 16px 0;
+    background: rgba(197, 163, 104, 0.08);
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-context-box {
+    background: rgba(197, 163, 104, 0.12);
+}
+
+.club-competition-form-row {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.club-competition-form-label {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.club-competition-form-dots,
+.club-competition-table-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.club-competition-form-dot {
+    width: 1.95rem;
+    height: 1.95rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: white;
+}
+
+.club-competition-form-dot.is-win {
+    background: var(--success);
+}
+
+.club-competition-form-dot.is-loss {
+    background: var(--danger);
+}
+
+.club-competition-form-dot.is-draw {
+    background: #d9a441;
+    color: #111827;
+}
+
+.club-competition-form-empty {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.club-competition-operational-state {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.club-competition-operational-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 32px;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.club-competition-operational-pill.is-ready {
+    background: rgba(34, 197, 94, 0.08);
+    color: #86efac;
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+.club-competition-operational-pill.is-missing {
+    background: rgba(239, 68, 68, 0.08);
+    color: #fda4af;
+    border-color: rgba(239, 68, 68, 0.18);
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-operational-pill.is-ready {
+    color: #15803d;
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-operational-pill.is-missing {
+    color: #b91c1c;
+}
+
+.club-competition-next-match {
+    margin: 0 -1.25rem;
+    padding: 1rem 1.25rem 1.15rem;
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.82)),
+        radial-gradient(circle at top right, rgba(197, 163, 104, 0.2), transparent 32%);
+    color: #f8fafc;
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-next-match {
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.92)),
+        radial-gradient(circle at top right, rgba(197, 163, 104, 0.18), transparent 32%);
+}
+
+.club-competition-next-label {
+    display: block;
+    color: rgba(248, 250, 252, 0.62);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+.club-competition-next-headline {
+    margin-top: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.club-competition-next-headline strong {
+    font-size: 1rem;
+}
+
+.club-competition-next-headline span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(248, 250, 252, 0.75);
+}
+
+.club-competition-next-match p {
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: rgba(248, 250, 252, 0.84);
+}
+
+.club-competition-card-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding: 1rem 1.25rem 1.2rem;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-card-actions {
+    background: rgba(15, 23, 42, 0.03);
+}
+
+.club-competition-card-actions button {
+    min-height: 38px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.club-competition-card-actions button:hover {
+    border-color: rgba(197, 163, 104, 0.28);
+    background: rgba(197, 163, 104, 0.08);
+}
+
+.club-competition-detail-shell {
+    display: grid;
+    gap: 1rem;
+    padding: 1.35rem;
+    border-radius: 28px;
+    border: 1px solid var(--border);
+    background:
+        linear-gradient(135deg, rgba(197, 163, 104, 0.06), transparent 30%),
+        linear-gradient(180deg, var(--competition-paper-strong), var(--competition-paper));
+}
+
+.club-competition-detail-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.club-competition-detail-header h3 {
+    margin-top: 0.25rem;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.club-competition-detail-header p {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.club-competition-detail-summary {
+    display: grid;
+    gap: 0.35rem;
+    justify-items: end;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.club-competition-detail-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.club-competition-detail-tab {
+    min-height: 40px;
+    padding: 0.68rem 0.95rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+}
+
+.club-competition-detail-tab.is-active {
+    color: var(--text);
+    border-color: rgba(197, 163, 104, 0.3);
+    background: rgba(197, 163, 104, 0.12);
+}
+
+.club-competition-detail-body,
+.club-competition-detail-split {
+    display: grid;
+    gap: 1rem;
+}
+
+.club-competition-detail-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.club-competition-panel {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1.15rem;
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+}
+
+.club-competition-panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.club-competition-panel-head h4 {
+    margin-top: 0.25rem;
+    font-size: 1.1rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.club-competition-panel-kicker,
+.club-competition-panel-meta {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+}
+
+.club-competition-empty-state,
+.club-competition-empty-block,
+.club-competition-loading-inline {
+    padding: 1.15rem;
+    border-radius: 18px;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+}
+
+.club-competition-empty-state {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+}
+
+.club-competition-empty-block strong,
+.club-competition-empty-state strong {
+    display: block;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.club-competition-empty-block p,
+.club-competition-empty-state p {
+    margin-top: 0.35rem;
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.club-competition-match-list {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.club-competition-match-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-match-row {
+    border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+.club-competition-match-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.club-competition-match-row strong {
+    display: block;
+    font-size: 0.94rem;
+}
+
+.club-competition-match-row span {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.club-competition-match-meta {
+    display: grid;
+    gap: 0.2rem;
+    justify-items: end;
+    text-align: right;
+}
+
+.club-competition-match-meta span {
+    margin-top: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+}
+
+.club-competition-match-meta small {
+    color: var(--text-muted);
+    font-size: 0.74rem;
+}
+
+.club-competition-match-row.is-result {
+    display: grid;
+    gap: 1rem;
+    align-items: stretch;
+    padding: 1.15rem;
+    border-radius: 22px;
+    border: 1px solid rgba(197, 163, 104, 0.22);
+    background:
+        radial-gradient(circle at top, rgba(197, 163, 104, 0.12), transparent 58%),
+        rgba(255, 255, 255, 0.025);
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-match-row.is-result {
+    background:
+        radial-gradient(circle at top, rgba(197, 163, 104, 0.16), transparent 58%),
+        rgba(15, 23, 42, 0.025);
+    border-color: rgba(197, 163, 104, 0.32);
+}
+
+.club-competition-result-head,
+.club-competition-result-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.club-competition-result-status,
+.club-competition-result-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+    margin-top: 0;
+}
+
+.club-competition-result-status {
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 163, 104, 0.28);
+    background: rgba(197, 163, 104, 0.14);
+    color: #f3d7a2;
+}
+
+.club-competition-result-date {
+    color: var(--text-muted);
+}
+
+.club-competition-result-board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+}
+
+.club-competition-result-team {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.club-competition-result-team.is-away {
+    text-align: right;
+}
+
+.club-competition-result-team strong {
+    font-size: 1rem;
+    line-height: 1.1;
+}
+
+.club-competition-result-team span,
+.club-competition-result-meta span,
+.club-competition-result-meta small {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-top: 0;
+}
+
+.club-competition-result-score {
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+    padding: 0.85rem 1rem;
+    border-radius: 20px;
+    border: 1px solid rgba(197, 163, 104, 0.24);
+    background: rgba(197, 163, 104, 0.08);
+    min-width: 170px;
+}
+
+.club-competition-result-score-value {
+    font-size: clamp(2rem, 4vw, 3.35rem);
+    line-height: 0.9;
+    font-weight: 900;
+    letter-spacing: -0.08em;
+    color: var(--text);
+    text-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+    margin-top: 0;
+}
+
+.club-competition-result-score small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+    .club-competition-result-board {
+        grid-template-columns: 1fr;
+    }
+
+    .club-competition-result-team,
+    .club-competition-result-team.is-away,
+    .club-competition-result-meta {
+        text-align: left;
+    }
+
+    .club-competition-result-score {
+        width: 100%;
+    }
+}
+
+.club-competition-table-wrap {
+    overflow-x: auto;
+}
+
+.club-competition-data-table td,
+.club-competition-data-table th {
+    white-space: nowrap;
+}
+
+.club-competition-data-table tbody tr.is-current td {
+    background: rgba(197, 163, 104, 0.1);
+}
+
+.club-competition-table-team {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.club-competition-table-team span {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.club-competition-performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.8rem;
+}
+
+.club-competition-performance-grid article {
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1rem;
+}
+
+[data-theme="light"] .flash-ui-container .club-competition-performance-grid article {
+    background: rgba(15, 23, 42, 0.03);
+}
+
+.club-competition-performance-grid span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 800;
+}
+
+.club-competition-performance-grid strong {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 1.45rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+}
+
+.club-competition-performance-grid small {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    line-height: 1.4;
+}
+
+.club-competition-analysis-list,
+.club-competition-state-stack {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.club-competition-analysis-list > div,
+.club-competition-state-item {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.club-competition-analysis-list strong,
+.club-competition-state-item strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.club-competition-analysis-list span,
+.club-competition-state-item span {
+    display: block;
+    margin-top: 0.18rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.club-competition-analysis-list svg,
+.club-competition-state-item svg {
+    color: var(--competition-gold);
+    margin-top: 0.1rem;
+}
+
+@media (max-width: 1100px) {
+    .club-competition-topbar,
+    .club-competition-detail-header,
+    .club-competition-segment-bar {
+        grid-template-columns: minmax(0, 1fr);
+        display: grid;
+        align-items: start;
+    }
+
+    .club-competition-actions,
+    .club-competition-detail-summary {
+        justify-content: flex-start;
+        justify-items: start;
+    }
+
+    .club-competition-filter-panel,
+    .club-competition-detail-split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .club-competition-filter-note {
+        justify-self: start;
+        text-align: left;
+    }
+}
+
+@media (max-width: 760px) {
+    .club-competition-card-header,
+    .club-competition-next-headline {
+        grid-template-columns: minmax(0, 1fr);
+        display: grid;
+    }
+
+    .club-competition-main-standing {
+        align-items: center;
+    }
+
+    .club-competition-rank {
+        font-size: 3rem;
+    }
+
+    .club-competition-card-actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .club-competition-segment-tabs {
+        gap: 0.6rem;
+    }
+
+    .club-competition-segment {
+        padding-bottom: 0.35rem;
+        font-size: 0.72rem;
+    }
+
+    .club-competition-match-row {
+        grid-template-columns: minmax(0, 1fr);
+        display: grid;
+    }
+
+    .club-competition-match-meta {
+        justify-items: start;
+        text-align: left;
+    }
 }
 
 .club-role-list {
@@ -3091,7 +4948,2148 @@
 
     .content-kpis,
     .club-inline-metrics,
-    .club-surface-band-metrics {
+    .club-surface-band-metrics,
+    .club-matches-kpi-grid {
         grid-template-columns: 1fr;
+    }
+
+    .club-matches-header {
+        align-items: stretch;
+    }
+
+    .club-matches-header-actions {
+        justify-content: stretch;
+    }
+
+    .club-matches-btn {
+        width: 100%;
+    }
+
+    .club-match-card {
+        grid-template-columns: 1fr;
+    }
+
+    .club-match-card-header {
+        grid-template-columns: 1fr;
+    }
+
+    .club-match-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .club-match-action.primary {
+        grid-column: span 1;
+    }
+
+    .flash-ui-container.is-pizarra-focus,
+    .flash-ui-container.is-pizarra-focus .club-admin-shell,
+    .flash-ui-container.is-pizarra-focus .club-admin-main,
+    .flash-ui-container.is-pizarra-focus .club-workspace {
+        min-height: 100svh;
+    }
+
+    .flash-ui-container.is-pizarra-focus .club-admin-nav,
+    .flash-ui-container.is-pizarra-focus .main-header {
+        display: none;
+    }
+
+    .flash-ui-container.is-pizarra-focus .club-main-grid,
+    .flash-ui-container.is-pizarra-focus .content-area {
+        padding: 0;
+        gap: 0;
+    }
+
+    .flash-ui-container.is-pizarra-focus .club-pizarra-card {
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+    }
+}
+
+
+/* ── TRAINING MODULE EXTENSIONS ── */
+.club-training-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    font-size: 0.65rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.club-training-type-badge.type-field {
+    color: #86efac;
+    border-color: rgba(16, 185, 129, 0.28);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.club-training-type-badge.type-gym {
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.28);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.club-training-type-badge.type-video {
+    color: #d8b4fe;
+    border-color: rgba(168, 85, 247, 0.28);
+    background: rgba(168, 85, 247, 0.12);
+}
+
+.club-training-type-badge.type-recovery {
+    color: #cbd5e1;
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(148, 163, 184, 0.12);
+}
+
+.club-training-status-dots {
+    display: flex;
+    gap: 1rem;
+}
+
+.club-training-status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.club-training-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #334155;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.club-training-status-dot.is-complete {
+    background: var(--success);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+.club-training-status-dot.is-pending {
+    background: var(--danger);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.club-training-plan-block {
+    padding: 1.25rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.18);
+    display: grid;
+    gap: 0.6rem;
+}
+
+.club-training-plan-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.club-training-plan-block-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.club-training-plan-block-note {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.club-training-plan-block-pizarra {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border: 1px dashed var(--border);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.club-training-add-block {
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 0.5rem;
+}
+
+.club-training-add-block:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    color: var(--text);
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.club-training-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+}
+
+.club-training-modal {
+    background: #0f1117;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 40px 80px -24px rgba(0, 0, 0, 0.6);
+}
+
+.club-training-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.club-training-modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.club-training-modal-body {
+    padding: 1.5rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.club-training-modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.club-training-form-label {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+}
+
+.club-training-form-input,
+.club-training-form-select,
+.club-training-form-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    color: var(--text);
+    font-size: 0.85rem;
+    transition: border-color 0.2s ease;
+}
+
+.club-training-form-input:focus,
+.club-training-form-select:focus,
+.club-training-form-textarea:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.club-training-form-textarea {
+    resize: none;
+    min-height: 80px;
+}
+
+.club-training-architect {
+    max-width: min(1360px, calc(100vw - 24px));
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(244, 63, 94, 0.08), transparent 26%),
+        #0b0f15;
+}
+
+.club-training-architect-header {
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.club-training-architect-copy {
+    display: grid;
+    gap: 0.65rem;
+    flex: 1;
+}
+
+.club-training-architect-kicker {
+    color: #93c5fd;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+}
+
+.club-training-architect-title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    align-items: flex-end;
+}
+
+.club-training-architect-title-row h3 {
+    font-size: clamp(1.8rem, 2.7vw, 2.65rem);
+    line-height: 0.96;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.club-training-architect-title-row p {
+    margin-top: 0.45rem;
+    max-width: 58ch;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.club-training-architect-status {
+    min-width: 180px;
+    display: grid;
+    gap: 0.2rem;
+    justify-items: end;
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.club-training-architect-status span {
+    color: #bfdbfe;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+}
+
+.club-training-architect-status strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.club-training-architect-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.82fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.club-training-architect-main,
+.club-training-architect-side {
+    display: grid;
+    gap: 1rem;
+}
+
+.club-training-architect-panel,
+.club-training-architect-side-panel {
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+        rgba(255, 255, 255, 0.015);
+    padding: 1.2rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.club-training-architect-panel--timeline {
+    padding-bottom: 1rem;
+}
+
+.club-training-architect-panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.club-training-architect-chip-row,
+.club-training-architect-chip-grid,
+.club-training-architect-side-grid,
+.club-training-architect-pill-row,
+.club-training-architect-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.club-training-architect-chip,
+.club-training-architect-pill,
+.club-training-architect-status-btn,
+.club-training-architect-add-block,
+.club-training-architect-add-btn,
+.club-training-architect-library-item,
+.club-training-architect-list-row,
+.club-training-architect-icon-btn {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.club-training-architect-chip,
+.club-training-architect-pill {
+    min-height: 34px;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.club-training-architect-chip:hover,
+.club-training-architect-pill:hover,
+.club-training-architect-add-block:hover,
+.club-training-architect-library-item:hover,
+.club-training-architect-list-row:hover,
+.club-training-architect-icon-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(59, 130, 246, 0.24);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.club-training-architect-chip.active,
+.club-training-architect-pill.active,
+.club-training-architect-status-btn.active {
+    border-color: rgba(59, 130, 246, 0.28);
+    background: rgba(59, 130, 246, 0.14);
+    color: #dbeafe;
+}
+
+.club-training-architect-grid,
+.club-training-architect-subgrid,
+.club-training-architect-block-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.club-training-architect-field {
+    display: grid;
+    gap: 0.42rem;
+}
+
+.club-training-architect-field-hint {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    line-height: 1.4;
+}
+
+.club-training-architect-context-card {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.95rem;
+    padding: 0.95rem 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(59, 130, 246, 0.16);
+    background:
+        linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(15, 23, 42, 0.2)),
+        rgba(255, 255, 255, 0.02);
+}
+
+.club-training-architect-context-card strong {
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.club-training-architect-context-card span,
+.club-training-architect-context-card small {
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.club-training-architect-inline-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.club-training-architect-inline-head span:last-child {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.club-training-architect-goal-input {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+}
+
+.club-training-architect-add-btn,
+.club-training-architect-icon-btn {
+    min-width: 42px;
+    min-height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.club-training-architect-icon-btn.danger {
+    color: #fda4af;
+    border-color: rgba(244, 63, 94, 0.2);
+    background: rgba(244, 63, 94, 0.08);
+}
+
+.club-training-architect-list,
+.club-training-architect-library,
+.club-training-architect-player-list,
+.club-training-architect-timeline {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.club-training-architect-empty {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    padding: 0.95rem 1rem;
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.club-training-architect-list-row,
+.club-training-architect-library-item {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.club-training-architect-library-item strong,
+.club-training-architect-player-row strong,
+.club-training-architect-block-meta span:first-child,
+.club-training-architect-footer-copy strong {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.club-training-architect-library-item span,
+.club-training-architect-player-row span,
+.club-training-architect-note,
+.club-training-architect-footer-copy span {
+    display: block;
+    margin-top: 0.18rem;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.club-training-architect-summary {
+    display: grid;
+    justify-items: end;
+    gap: 0.18rem;
+}
+
+.club-training-architect-summary span {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.club-training-architect-summary strong {
+    font-size: 1.45rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+}
+
+.club-training-architect-timeline {
+    position: relative;
+    padding-left: 1.2rem;
+}
+
+.club-training-architect-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.2rem;
+    top: 0.2rem;
+    bottom: 0.2rem;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.04));
+}
+
+.club-training-architect-block {
+    position: relative;
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+}
+
+.club-training-architect-block::before {
+    content: "";
+    position: absolute;
+    left: -1rem;
+    top: 1.2rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.22);
+    border: 2px solid rgba(59, 130, 246, 0.42);
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.06);
+}
+
+.club-training-architect-block.active {
+    border-color: rgba(59, 130, 246, 0.24);
+    background:
+        linear-gradient(180deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.04)),
+        rgba(255, 255, 255, 0.02);
+}
+
+.club-training-architect-block-time {
+    display: grid;
+    gap: 0.25rem;
+    align-content: start;
+    padding-right: 0.6rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.club-training-architect-block-time strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #93c5fd;
+}
+
+.club-training-architect-block-time span {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+}
+
+.club-training-architect-grip {
+    display: inline-flex;
+    gap: 0.22rem;
+    width: fit-content;
+}
+
+.club-training-architect-grip span {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.club-training-architect-block-body {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.club-training-architect-block-row,
+.club-training-architect-block-meta,
+.club-training-architect-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.club-training-architect-block-actions,
+.club-training-architect-player-actions {
+    display: flex;
+    gap: 0.45rem;
+}
+
+.club-training-architect-block-meta {
+    flex-wrap: wrap;
+}
+
+.club-training-architect-block-meta span {
+    margin-top: 0;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.club-training-architect-block-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding-top: 0.25rem;
+}
+
+.club-training-architect-add-block {
+    min-height: 42px;
+    padding: 0.7rem 0.95rem;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.club-training-architect-side-panel {
+    gap: 0.9rem;
+}
+
+.club-training-architect-metric {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.club-training-architect-metric input[type="range"] {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.club-training-architect-metric span {
+    color: var(--text-muted);
+    font-size: 0.74rem;
+}
+
+.club-training-architect-metric strong {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+}
+
+.club-training-architect-mini-stats,
+.club-training-architect-status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.club-training-architect-mini-stats article,
+.club-training-architect-status-grid article {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.85rem 0.9rem;
+}
+
+.club-training-architect-mini-stats span,
+.club-training-architect-status-grid span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+}
+
+.club-training-architect-mini-stats strong,
+.club-training-architect-status-grid strong {
+    display: block;
+    margin-top: 0.3rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.club-training-architect-pizarra {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.club-training-architect-pizarra-preview {
+    min-height: 170px;
+    padding: 1.1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    background:
+        radial-gradient(circle at top, rgba(59, 130, 246, 0.14), transparent 58%),
+        rgba(59, 130, 246, 0.05);
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 0.45rem;
+}
+
+.club-training-architect-player-list {
+    max-height: 320px;
+    overflow: auto;
+    padding-right: 0.2rem;
+}
+
+.club-training-architect-player-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.club-training-architect-status-btn {
+    min-height: 30px;
+    padding: 0.32rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.club-training-architect-footer {
+    justify-content: space-between;
+}
+
+.club-training-architect-footer-copy {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.club-training-architect-footer-copy span {
+    margin-top: 0;
+    color: #93c5fd;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect,
+[data-theme="light"] .flash-ui-container .club-training-architect-panel,
+[data-theme="light"] .flash-ui-container .club-training-architect-side-panel,
+[data-theme="light"] .flash-ui-container .club-training-architect-block,
+[data-theme="light"] .flash-ui-container .club-training-architect-mini-stats article,
+[data-theme="light"] .flash-ui-container .club-training-architect-status-grid article {
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.club-training-detail-tabs {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0;
+}
+
+.club-training-detail-tab {
+    padding: 0.6rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.club-training-detail-tab:hover {
+    color: var(--text);
+}
+
+.club-training-detail-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.club-training-convocado-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.club-training-convocado-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.club-training-convocado-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.club-training-convocado-pos {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.club-training-convocado-status {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+
+.club-training-convocado-status.confirmado {
+    color: #86efac;
+    border-color: rgba(16, 185, 129, 0.25);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.club-training-convocado-status.ausente {
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.club-training-convocado-status.dudoso {
+    color: #fde68a;
+    border-color: rgba(245, 158, 11, 0.25);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.club-training-workspace-modal {
+    max-width: min(1500px, calc(100vw - 32px));
+    width: 100%;
+    height: min(92vh, 980px);
+    border-radius: 28px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.08), transparent 22%),
+        #0a0f16;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 42px 100px -24px rgba(0, 0, 0, 0.78);
+}
+
+.club-training-workspace-header {
+    flex-shrink: 0;
+    padding: 1.5rem 1.75rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+        rgba(7, 10, 16, 0.88);
+    backdrop-filter: blur(18px);
+}
+
+.club-training-workspace-header-copy {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.club-training-workspace-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #93c5fd;
+    font-weight: 800;
+}
+
+.club-training-workspace-header-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.25rem 1.5rem;
+    align-items: flex-start;
+}
+
+.club-training-workspace-header-row > *,
+.club-training-workspace-body > *,
+.club-training-workspace-summary-grid > *,
+.club-training-workspace-eval-grid > *,
+.club-training-workspace-stats-grid > *,
+.club-training-workspace-form-grid > *,
+.club-training-workspace-inline-stats > *,
+.club-training-workspace-summary-metrics > *,
+.club-training-workspace-context-metrics > *,
+.club-training-workspace-stats-hero > *,
+.club-training-workspace-plan-top > *,
+.club-training-workspace-player-row > *,
+.club-training-workspace-pizarra-card > * {
+    min-width: 0;
+}
+
+.club-training-workspace-title-group {
+    display: grid;
+    gap: 0.65rem;
+    min-width: 0;
+    max-width: min(100%, 860px);
+}
+
+.club-training-workspace-title-group h3,
+.club-training-workspace-title-input {
+    font-size: clamp(2rem, 3vw, 3rem);
+    letter-spacing: -0.06em;
+    font-weight: 900;
+    max-inline-size: clamp(12ch, 56vw, 18ch);
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-title-group h3 {
+    line-height: 0.96;
+    text-wrap: balance;
+}
+
+.club-training-workspace-title-input {
+    width: 100%;
+    min-height: calc(clamp(2rem, 3vw, 3rem) * 1.12 + 0.85rem);
+    padding: 0.38rem 0.5rem 0.42rem;
+    margin: -0.2rem -0.5rem -0.22rem;
+    border-radius: 18px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    font-family: inherit;
+    line-height: 1.04;
+    display: block;
+    resize: none;
+    overflow: hidden;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.club-training-workspace-title-input:hover {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.club-training-workspace-title-input:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(59, 130, 246, 0.08);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+}
+
+.club-training-workspace-title-input::placeholder {
+    color: rgba(248, 250, 252, 0.62);
+}
+
+.club-training-workspace-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+}
+
+.club-training-workspace-status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.club-training-workspace-status-badge.is-borrador {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.28);
+}
+
+.club-training-workspace-status-badge.is-planificado {
+    color: #f8fafc;
+    background: rgba(148, 163, 184, 0.14);
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+.club-training-workspace-status-badge.is-publicado {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(34, 197, 94, 0.24);
+}
+
+.club-training-workspace-status-badge.is-finalizado {
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.24);
+}
+
+.club-training-workspace-status-helper {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.club-training-workspace-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 34px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(248, 250, 252, 0.9);
+    font-size: 0.76rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-meta span svg {
+    flex-shrink: 0;
+}
+
+.club-training-workspace-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    justify-content: flex-end;
+    align-items: flex-start;
+    flex-shrink: 0;
+    min-width: min-content;
+    max-width: 100%;
+}
+
+.club-training-workspace-menu {
+    position: relative;
+}
+
+.club-training-workspace-menu-trigger,
+.club-training-workspace-close {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.club-training-workspace-menu-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    padding: 0.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 15, 22, 0.96);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    display: grid;
+    gap: 0.2rem;
+    z-index: 5;
+}
+
+.club-training-workspace-menu-panel button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    padding: 0.8rem 0.85rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.club-training-workspace-menu-panel button:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.club-training-workspace-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 124px minmax(0, 1fr) minmax(290px, 340px);
+    gap: 0;
+}
+
+.club-training-workspace-rail {
+    padding: 1rem 0.8rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.42) transparent;
+    scrollbar-gutter: stable;
+}
+
+.club-training-workspace-rail::-webkit-scrollbar {
+    width: 8px;
+}
+
+.club-training-workspace-rail::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.club-training-workspace-rail::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.3);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.club-training-workspace-rail::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.club-training-workspace-rail-item {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 18px;
+    min-height: 106px;
+    padding: 0.85rem 0.7rem;
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 0.55rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    min-width: 0;
+}
+
+.club-training-workspace-rail-item:hover,
+.club-training-workspace-rail-item.active {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.club-training-workspace-rail-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    flex-shrink: 0;
+}
+
+.club-training-workspace-rail-item.active .club-training-workspace-rail-icon {
+    background: rgba(59, 130, 246, 0.14);
+    color: #bfdbfe;
+}
+
+.club-training-workspace-rail-copy {
+    display: grid;
+    gap: 0.15rem;
+    width: 100%;
+    min-width: 0;
+    justify-items: center;
+}
+
+.club-training-workspace-rail-copy strong {
+    max-width: 10ch;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.18;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-rail-copy small {
+    max-width: 12ch;
+    font-size: 0.62rem;
+    line-height: 1.32;
+    color: var(--text-muted);
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-main,
+.club-training-workspace-context {
+    min-height: 0;
+    overflow: auto;
+}
+
+.club-training-workspace-main {
+    padding: 1.35rem 1.45rem 1.6rem;
+}
+
+.club-training-workspace-context {
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1.35rem 1.2rem 1.6rem;
+}
+
+.club-training-workspace-pane {
+    display: grid;
+    gap: 1rem;
+}
+
+.club-training-workspace-pane.stats {
+    gap: 1.2rem;
+}
+
+.club-training-workspace-section-head,
+.club-training-workspace-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.club-training-workspace-section-head > div:first-child,
+.club-training-workspace-card-head > div:first-child {
+    min-width: 0;
+    flex: 1 1 320px;
+}
+
+.club-training-workspace-section-kicker,
+.club-training-workspace-card-kicker {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #93c5fd;
+    font-weight: 800;
+    margin-bottom: 0.35rem;
+}
+
+.club-training-workspace-section-head h4,
+.club-training-workspace-card-head h5 {
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-card {
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+        rgba(255, 255, 255, 0.015);
+    padding: 1.15rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.club-training-workspace-inline-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: stretch;
+}
+
+.club-training-workspace-inline-stats article,
+.club-training-workspace-summary-metrics article,
+.club-training-workspace-context-metrics article,
+.club-training-workspace-stats-hero article {
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.9rem 0.95rem;
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.club-training-workspace-inline-stats span,
+.club-training-workspace-summary-metrics span,
+.club-training-workspace-context-metrics span,
+.club-training-workspace-stats-hero span,
+.club-training-workspace-next-action span {
+    color: var(--text-muted);
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    line-height: 1.3;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-inline-stats strong,
+.club-training-workspace-summary-metrics strong,
+.club-training-workspace-context-metrics strong,
+.club-training-workspace-stats-hero strong,
+.club-training-workspace-next-action strong {
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-summary-grid,
+.club-training-workspace-eval-grid,
+.club-training-workspace-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.club-training-workspace-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+}
+
+.club-training-workspace-form-grid.compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.club-training-workspace-field {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.club-training-workspace-summary-metrics,
+.club-training-workspace-context-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+}
+
+.club-training-workspace-summary-notes {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.club-training-workspace-summary-note,
+.club-training-workspace-alert {
+    padding: 0.85rem 0.9rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-alert.ok {
+    color: #86efac;
+    border-color: rgba(34, 197, 94, 0.2);
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.club-training-workspace-quick-actions,
+.club-training-workspace-action-row,
+.club-training-workspace-filter-row,
+.club-training-workspace-preview-list,
+.club-training-workspace-plan-tags,
+.club-training-workspace-plan-sticky,
+.club-training-workspace-eval-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.club-training-workspace-quick-btn,
+.club-training-workspace-filter-pill,
+.club-training-workspace-add-block {
+    min-height: 38px;
+    max-width: 100%;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-quick-btn.primary,
+.club-training-workspace-filter-pill.active {
+    border-color: rgba(59, 130, 246, 0.25);
+    background: rgba(59, 130, 246, 0.14);
+    color: #dbeafe;
+}
+
+.club-training-workspace-context-panel,
+.club-training-workspace-objective,
+.club-training-workspace-next-action,
+.club-training-workspace-alerts {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.club-training-workspace-objective p {
+    color: rgba(248, 250, 252, 0.92);
+    line-height: 1.6;
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-next-action {
+    padding: 0.95rem;
+    border-radius: 18px;
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.club-training-workspace-alerts-head {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.club-training-workspace-empty {
+    border-radius: 18px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    padding: 1.1rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-size: 0.85rem;
+}
+
+.club-training-workspace-plan-list,
+.club-training-workspace-attendance-list,
+.club-training-workspace-bars {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.club-training-workspace-plan-card {
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.club-training-workspace-plan-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--block-accent, rgba(59, 130, 246, 0.9));
+}
+
+.club-training-workspace-plan-rail {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+    padding-right: 0.8rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.club-training-workspace-plan-rail strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    color: #bfdbfe;
+}
+
+.club-training-workspace-plan-rail span {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+}
+
+.club-training-workspace-plan-grip {
+    display: inline-flex;
+    gap: 0.22rem;
+}
+
+.club-training-workspace-plan-grip span {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.club-training-workspace-plan-content {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.club-training-workspace-plan-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.club-training-workspace-type-pill,
+.club-training-workspace-focus-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    max-width: 100%;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    line-height: 1.15;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-type-pill {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.club-training-workspace-focus-pill {
+    color: #bfdbfe;
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.club-training-workspace-focus-pill.subtle {
+    color: #f8fafc;
+    background: rgba(148, 163, 184, 0.12);
+}
+
+.club-training-workspace-plan-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.club-training-workspace-plan-actions button,
+.club-training-workspace-status-choice {
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.club-training-workspace-plan-actions button.danger {
+    color: #fca5a5;
+}
+
+.club-training-workspace-toolbar {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.club-training-workspace-player-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.club-training-workspace-player-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+}
+
+.club-training-workspace-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(59, 130, 246, 0.14);
+    color: #dbeafe;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.club-training-workspace-player-meta strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-player-meta span {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-player-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-end;
+}
+
+.club-training-workspace-status-choice {
+    min-width: 46px;
+    padding: 0 0.65rem;
+}
+
+.club-training-workspace-status-choice.active {
+    border-color: rgba(59, 130, 246, 0.28);
+    background: rgba(59, 130, 246, 0.14);
+    color: #dbeafe;
+}
+
+.club-training-workspace-status-choice.ghost.active {
+    border-color: rgba(148, 163, 184, 0.24);
+    background: rgba(148, 163, 184, 0.14);
+}
+
+.club-training-workspace-pizarra-card {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: minmax(260px, 0.95fr) minmax(0, 1fr);
+    gap: 1.2rem;
+}
+
+.club-training-workspace-pizarra-field {
+    min-height: 290px;
+    border-radius: 22px;
+    position: relative;
+    border: 1px solid rgba(59, 130, 246, 0.24);
+    background:
+        linear-gradient(180deg, rgba(16, 185, 129, 0.18), rgba(8, 145, 178, 0.1)),
+        rgba(7, 17, 28, 0.92);
+    overflow: hidden;
+}
+
+.club-training-workspace-pizarra-field::before,
+.club-training-workspace-pizarra-field::after,
+.club-training-workspace-pizarra-center {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.club-training-workspace-pizarra-field::before {
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.club-training-workspace-pizarra-field::after {
+    top: 50%;
+    width: 74%;
+    height: 74%;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.14);
+}
+
+.club-training-workspace-pizarra-center {
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.24);
+    transform: translate(-50%, -50%);
+}
+
+.club-training-workspace-pizarra-goal {
+    position: absolute;
+    left: 50%;
+    width: 34%;
+    height: 52px;
+    transform: translateX(-50%);
+    border: 2px solid rgba(255, 255, 255, 0.14);
+}
+
+.club-training-workspace-pizarra-goal.top {
+    top: 0;
+    border-bottom: none;
+    border-radius: 0 0 18px 18px;
+}
+
+.club-training-workspace-pizarra-goal.bottom {
+    bottom: 0;
+    border-top: none;
+    border-radius: 18px 18px 0 0;
+}
+
+.club-training-workspace-pizarra-copy {
+    display: grid;
+    align-content: center;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.club-training-workspace-pizarra-copy p {
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.club-training-workspace-preview-list span {
+    min-height: 30px;
+    max-width: 100%;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(248, 250, 252, 0.88);
+    font-size: 0.74rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-slider-group {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.club-training-workspace-slider-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.club-training-workspace-slider-row input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+.club-training-workspace-big-metric {
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: #bfdbfe;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-stats-hero {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.club-training-workspace-stats-hero small {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.club-training-workspace-bar-row {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.club-training-workspace-bar-copy {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+}
+
+.club-training-workspace-bar-copy span {
+    color: var(--text-muted);
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-wrap: anywhere;
+}
+
+.club-training-workspace-bar-copy strong {
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.club-training-workspace-bar-track {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.club-training-workspace-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+@media (max-width: 1360px) {
+    .club-training-workspace-header-row {
+        grid-template-columns: 1fr;
+    }
+
+    .club-training-workspace-header-actions {
+        justify-content: flex-start;
+        min-width: 0;
+    }
+
+    .club-training-workspace-title-group h3,
+    .club-training-workspace-title-input {
+        max-inline-size: min(100%, 18ch);
+    }
+
+    .club-training-workspace-body {
+        grid-template-columns: 124px minmax(0, 1fr);
+    }
+
+    .club-training-workspace-context {
+        grid-column: 1 / -1;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+}
+
+@media (max-width: 1180px) {
+    .club-training-workspace-body {
+        grid-template-columns: 116px minmax(0, 1fr);
+    }
+
+    .club-training-workspace-context {
+        grid-column: 1 / -1;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .club-training-workspace-stats-hero {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .club-training-workspace-rail-item {
+        min-height: 98px;
+        padding-inline: 0.6rem;
+    }
+
+    .club-training-workspace-rail-copy strong {
+        max-width: 9ch;
+        font-size: 0.64rem;
+    }
+
+    .club-training-workspace-rail-copy small {
+        max-width: 10ch;
+        font-size: 0.58rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .club-training-workspace-modal {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .club-training-workspace-header-row,
+    .club-training-workspace-summary-grid,
+    .club-training-workspace-eval-grid,
+    .club-training-workspace-stats-grid,
+    .club-training-workspace-form-grid,
+    .club-training-workspace-form-grid.compact,
+    .club-training-workspace-pizarra-card,
+    .club-training-workspace-body,
+    .club-training-workspace-player-row {
+        display: grid;
+    }
+
+    .club-training-workspace-body {
+        grid-template-columns: 1fr;
+    }
+
+    .club-training-workspace-rail {
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(136px, 1fr);
+        overflow: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        scrollbar-gutter: auto;
+    }
+
+    .club-training-workspace-rail-item {
+        min-height: 0;
+        padding: 0.8rem 0.7rem;
+    }
+
+    .club-training-workspace-rail-copy strong,
+    .club-training-workspace-rail-copy small {
+        max-width: none;
+    }
+
+    .club-training-workspace-context {
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .club-training-workspace-stats-hero,
+    .club-training-workspace-summary-metrics,
+    .club-training-workspace-context-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .club-training-workspace-plan-card {
+        grid-template-columns: 1fr;
+    }
+
+    .club-training-workspace-plan-rail {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-right: 0;
+        padding-bottom: 0.7rem;
+    }
+
+    .club-training-workspace-header-actions {
+        justify-content: flex-start;
+    }
+
+    .club-training-workspace-main,
+    .club-training-workspace-context {
+        padding: 1rem;
+    }
+
+    .club-training-architect {
+        max-width: 100%;
+        border-radius: 18px;
+    }
+
+    .club-training-architect-body,
+    .club-training-architect-grid,
+    .club-training-architect-subgrid,
+    .club-training-architect-block-grid,
+    .club-training-architect-mini-stats,
+    .club-training-architect-status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .club-training-architect-title-row,
+    .club-training-architect-panel-head,
+    .club-training-architect-block,
+    .club-training-architect-footer {
+        display: grid;
+    }
+
+    .club-training-architect-status,
+    .club-training-architect-summary {
+        justify-items: start;
+    }
+
+    .club-training-architect-block {
+        grid-template-columns: 1fr;
+    }
+
+    .club-training-architect-block-time {
+        border-right: none;
+        padding-right: 0;
+        padding-bottom: 0.6rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .club-training-architect-player-row {
+        display: grid;
+    }
+
+    .club-training-architect-player-actions,
+    .club-training-architect-footer-actions {
+        flex-wrap: wrap;
+    }
+
+    .club-training-status-dots {
+        gap: 0.6rem;
+    }
+    .club-training-modal {
+        max-width: 100%;
+        border-radius: 16px;
     }
 }

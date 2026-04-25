@@ -69,6 +69,7 @@ export function ClubManageHeader({
                 ) : null}
 
                 <button
+                    type="button"
                     onClick={onSave}
                     disabled={isSaving || (!isDirty && id !== 'new')}
                     className="btn btn-primary"

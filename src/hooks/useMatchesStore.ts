@@ -22,6 +22,13 @@ interface MatchesStoreResult {
   error: SourceError | null;
 }
 
+interface UseMatchesStoreOptions {
+  livePollIntervalMs?: number;
+  prefetchWindowDays?: number;
+  prefetchBatchSize?: number;
+  runInitialLivePoll?: boolean;
+}
+
 const ERROR_RECOVERY_TTL = 60 * 1000; // 1 minute - retry faster when a source fails
 const PUBLIC_STALE_TTL = 5 * 60 * 1000;     // 5 minutes - shared public cache window
 const PUBLIC_LIVE_POLL_INTERVAL = 60_000;   // 1 minute - live refresh cadence
@@ -66,7 +73,8 @@ function reconcileLiveOverlay<T extends { id: string; status?: string | null; li
 
 export function useMatchesStore(
   selectedDate: string,
-  sportId: string
+  sportId: string,
+  options: UseMatchesStoreOptions = {}
 ): MatchesStoreResult {
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -83,6 +91,10 @@ export function useMatchesStore(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     []
   );
+  const livePollIntervalMs = options.livePollIntervalMs ?? PUBLIC_LIVE_POLL_INTERVAL;
+  const prefetchWindowDays = Math.max(0, options.prefetchWindowDays ?? PREFETCH_WINDOW_DAYS);
+  const prefetchBatchSize = Math.max(1, options.prefetchBatchSize ?? PREFETCH_BATCH_SIZE);
+  const runInitialLivePoll = options.runInitialLivePoll ?? false;
 
   const abortRef = useRef<AbortController | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -255,24 +267,25 @@ export function useMatchesStore(
 
     if (!isPageVisible || !isOnline) return;
     if (prefetchedRef.current) return;
+    if (prefetchWindowDays === 0) return;
     prefetchedRef.current = true;
 
     const controller = new AbortController();
-    const allDates = generateLocalDateKeys(timeZone, 0, PREFETCH_WINDOW_DAYS).map(e => e.dateKey);
+    const allDates = generateLocalDateKeys(timeZone, 0, prefetchWindowDays).map(e => e.dateKey);
     // Remove the selectedDate (already fetched)
     const toFetch = allDates.filter(d => d !== selectedDate);
 
     // Batch prefetch with delay to avoid API rate limiting
     // Debounce the start of prefetching by 3 seconds to ensure user stays on the sport
     const prefetchTimeout = setTimeout(async () => {
-      for (let i = 0; i < toFetch.length; i += PREFETCH_BATCH_SIZE) {
+      for (let i = 0; i < toFetch.length; i += prefetchBatchSize) {
         if (controller.signal.aborted) break;
         // Wait between batches so the main fetch completes first
         if (i > 0) {
           await new Promise(r => setTimeout(r, 1500));
           if (controller.signal.aborted) break;
         }
-        const batch = toFetch.slice(i, i + PREFETCH_BATCH_SIZE);
+        const batch = toFetch.slice(i, i + prefetchBatchSize);
         await Promise.all(
           batch.map(d => fetchDate(d, controller.signal).then(r => r.matches))
         );
@@ -283,7 +296,7 @@ export function useMatchesStore(
       clearTimeout(prefetchTimeout);
       controller.abort();
     };
-  }, [selectedDate, sportId, timeZone, fetchDate, isPageVisible, isOnline]);
+  }, [selectedDate, sportId, timeZone, fetchDate, isPageVisible, isOnline, prefetchWindowDays, prefetchBatchSize]);
 
   // LIVE polling: only when selectedDate is today
   // Smart control: stops when no live matches remain; restarts via full-refresh path.
@@ -306,7 +319,7 @@ export function useMatchesStore(
     // ── Interval helpers (scoped — no stale closure risk) ─────────────────
     function startLivePolling(tick: () => Promise<void>): void {
       if (pollingRef.current != null) return;
-      pollingRef.current = setInterval(() => { void tick(); }, PUBLIC_LIVE_POLL_INTERVAL);
+      pollingRef.current = setInterval(() => { void tick(); }, livePollIntervalMs);
     }
 
     function stopLivePolling(): void {
@@ -362,6 +375,10 @@ export function useMatchesStore(
 
     startLivePolling(pollLiveMatches);
 
+    if (runInitialLivePoll) {
+      void pollLiveMatches();
+    }
+
     return () => {
       controller.abort();
       if (pollingRef.current) {
@@ -369,7 +386,7 @@ export function useMatchesStore(
         pollingRef.current = null;
       }
     };
-  }, [selectedDate, sportId, timeZone, fetchLive, fetchDate, isPageVisible, isOnline]);
+  }, [selectedDate, sportId, timeZone, fetchLive, fetchDate, isPageVisible, isOnline, livePollIntervalMs, runInitialLivePoll]);
 
   const liveCount = useMemo(
     () => matches.filter(m => m.status === 'live').length,

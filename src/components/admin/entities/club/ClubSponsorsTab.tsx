@@ -2,28 +2,34 @@
 
 import { useEffect, useState } from 'react';
 import { Building2, Globe, Loader2, Megaphone, Star } from 'lucide-react';
-
-interface SponsorItem {
-    id: string;
-    name: string;
-    tier: string | null;
-    status: string | null;
-    placement: string | null;
-    logo_url: string | null;
-    website: string | null;
-    notes: string | null;
-}
+import type { ClubSponsorItem } from '@/lib/club-admin/sponsors';
 
 interface ClubSponsorsTabProps {
     clubId: string;
+    initialSponsors?: ClubSponsorItem[];
+    initialSponsorsLoaded?: boolean;
 }
 
-export function ClubSponsorsTab({ clubId }: ClubSponsorsTabProps) {
-    const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
-    const [loading, setLoading] = useState(true);
+export function ClubSponsorsTab({
+    clubId,
+    initialSponsors,
+    initialSponsorsLoaded = false,
+}: ClubSponsorsTabProps) {
+    const [sponsors, setSponsors] = useState<ClubSponsorItem[]>(initialSponsors ?? []);
+    const [loading, setLoading] = useState(!initialSponsorsLoaded);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        setSponsors(initialSponsorsLoaded ? (initialSponsors ?? []) : []);
+        setLoading(!initialSponsorsLoaded);
+        setError(null);
+    }, [clubId, initialSponsors, initialSponsorsLoaded]);
+
+    useEffect(() => {
+        if (initialSponsorsLoaded) {
+            return;
+        }
+
         let cancelled = false;
 
         const loadSponsors = async () => {
@@ -35,7 +41,7 @@ export function ClubSponsorsTab({ clubId }: ClubSponsorsTabProps) {
                     cache: 'no-store',
                     credentials: 'include',
                 });
-                const payload = await response.json() as { data?: SponsorItem[]; error?: string };
+                const payload = await response.json() as { data?: ClubSponsorItem[]; error?: string };
 
                 if (!response.ok) {
                     throw new Error(payload.error || 'No se pudieron cargar los sponsors.');
@@ -59,7 +65,7 @@ export function ClubSponsorsTab({ clubId }: ClubSponsorsTabProps) {
         return () => {
             cancelled = true;
         };
-    }, [clubId]);
+    }, [clubId, initialSponsorsLoaded]);
 
     return (
         <div className="club-ops-grid">

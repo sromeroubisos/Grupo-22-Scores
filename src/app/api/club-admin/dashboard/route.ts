@@ -9,9 +9,22 @@ import { getClubDashboardOverview } from '@/lib/club-admin/dashboard';
 import { EMPTY_CLUB_DASHBOARD_OVERVIEW } from '@/lib/club-admin/dashboard-types';
 import { createClient } from '@/lib/supabase/server';
 import { getReadClient } from '@/lib/supabase/read';
+import { normalizeError, serializeUnknownError } from '@/lib/utils/errorUtils';
 
 function err(message: string, status: number) {
     return NextResponse.json({ ok: false, error: message }, { status });
+}
+
+function logDashboardFallback(error: unknown) {
+    const normalized = normalizeError(error);
+
+    console.warn('[club-admin/dashboard] Returning empty overview after preload failure:', {
+        message: normalized.message,
+        details: normalized.details,
+        code: normalized.code,
+        hint: normalized.hint,
+        raw: serializeUnknownError(normalized.raw),
+    });
 }
 
 export async function GET(request: NextRequest) {
@@ -38,7 +51,7 @@ export async function GET(request: NextRequest) {
 
         const readClient = await getReadClient();
         const data = await getClubDashboardOverview(readClient as never, clubId).catch((error) => {
-            console.error('[club-admin/dashboard] Falling back to empty overview:', error);
+            logDashboardFallback(error);
             return EMPTY_CLUB_DASHBOARD_OVERVIEW;
         });
 

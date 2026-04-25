@@ -3,14 +3,21 @@
 import { useState, useEffect, Suspense, useEffectEvent, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Database } from '@/lib/database.types';
+import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
+import type { ClubSponsorItem } from '@/lib/club-admin/sponsors';
+import type { PersonWithRole } from '@/lib/services/personService';
 import { fetchDivisions, type Division } from '@/lib/services/divisionService';
+import type { ClubFull, ClubUpdateInput, ClubValidationError } from '@/lib/types/clubs';
 import { ClubContext } from './ClubContext';
 import { ClubContentStudioTab } from './ClubContentStudioTab';
+import { ClubCompetitionsPanel } from './ClubCompetitionsPanel';
+import { ClubPerformanceTab } from './ClubPerformanceTab';
+import { ClubPizarraTab } from './ClubPizarraTab';
+import { ClubEntrenamientosTab } from './ClubEntrenamientosTab';
 import { ClubDataHealthCard } from './ClubDataHealthCard';
 import { ClubFixtureResultsTab } from './ClubFixtureResultsTab';
 import { ClubIdentityTab } from './ClubIdentityTab';
 import { ClubManageHeader } from './ClubManageHeader';
-import { ClubManageSidebar } from './ClubManageSidebar';
 import { ClubManageTabs } from './ClubManageTabs';
 import { ClubNextMatchesCard } from './ClubNextMatchesCard';
 import { ClubSponsorsTab } from './ClubSponsorsTab';
@@ -18,7 +25,6 @@ import { ClubSquadsCard } from './ClubSquadsCard';
 import { ClubSquadsTab } from './ClubSquadsTab';
 import { ClubStaffTab } from './ClubStaffTab';
 import { ClubStandingsCard } from './ClubStandingsCard';
-import { ClubStandingsOverviewTab } from './ClubStandingsOverviewTab';
 import { ClubSummaryHero } from './ClubSummaryHero';
 import type { ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
 import { EMPTY_CLUB_DASHBOARD_OVERVIEW } from '@/lib/club-admin/dashboard-types';
@@ -30,12 +36,28 @@ import './vitreous-club.css';
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 type ClubFormState = Partial<ClubRow> & { sport?: string | null };
 
+interface ManageClubRouteResponse {
+    data?: ClubFull;
+    error?: string;
+    details?: unknown;
+}
+
 interface ClubManageShellProps {
     id: string;
     data: ClubRow | null;
     unions: { id: string; name: string }[];
     managedClubs: ManagedClubSummary[];
     navigationMode?: ClubConsoleMode;
+    initialDashboardData?: ClubDashboardOverview | null;
+    initialDashboardLoaded?: boolean;
+    initialLinkedDivisions?: Division[];
+    initialDivisionsLoaded?: boolean;
+    initialPlayers?: PersonWithRole[];
+    initialPlayersLoaded?: boolean;
+    initialStaff?: PersonWithRole[];
+    initialStaffLoaded?: boolean;
+    initialSponsors?: ClubSponsorItem[];
+    initialSponsorsLoaded?: boolean;
 }
 
 async function readJsonOrThrow<T>(response: Response): Promise<T> {
@@ -86,37 +108,6 @@ async function createClubEntity(form: ClubFormState): Promise<{ id: string }> {
     return { id: payload.data.id };
 }
 
-async function deleteClubEntity(clubId: string): Promise<void> {
-    const response = await fetch(`/api/clubs/${encodeURIComponent(clubId)}`, {
-        method: 'DELETE',
-        credentials: 'same-origin',
-    });
-    await readJsonOrThrow<{ success?: boolean; error?: string }>(response);
-}
-
-const CLUB_MANAGE_ALLOWED_TABS = new Set([
-    'general',
-    'equipos',
-    'planteles',
-    'competencias',
-    'partidos',
-    'contenido',
-    'sponsors',
-    'configuracion',
-]);
-
-const CLUB_MANAGE_TAB_ALIASES: Record<string, string> = {
-    resumen: 'general',
-    fixture: 'partidos',
-    posiciones: 'competencias',
-    relacionados: 'equipos',
-    identidad: 'configuracion',
-    staff: 'configuracion',
-    medios: 'contenido',
-    estadisticas: 'general',
-    auditoria: 'configuracion',
-};
-
 function formatSportLabel(sport?: string | null) {
     if (!sport?.trim()) return null;
 
@@ -128,17 +119,79 @@ function formatSportLabel(sport?: string | null) {
         .join(' ');
 }
 
-export function ClubManageShell({ id, data, unions, managedClubs, navigationMode = 'admin' }: ClubManageShellProps) {
-    const isCreate = id === 'new';
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const requestedTab = searchParams.get('tab') || 'general';
-    const normalizedRequestedTab = CLUB_MANAGE_TAB_ALIASES[requestedTab] || requestedTab;
-    const currentTab = CLUB_MANAGE_ALLOWED_TABS.has(normalizedRequestedTab) ? normalizedRequestedTab : 'general';
+function filterVisibleDivisions(divisions?: Division[]) {
+    return (divisions ?? []).filter((division) => !division.is_family_division);
+}
 
-    const [isDirty, setIsDirty] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [form, setForm] = useState<ClubFormState>(data || {
+function normalizeNullableText(value: unknown) {
+    if (typeof value !== 'string') {
+        return value == null ? null : String(value);
+    }
+
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+}
+
+function buildClubManagePayload(form: ClubFormState): ClubUpdateInput {
+    return {
+        core: {
+            name: typeof form.name === 'string' ? form.name : '',
+            short_name: normalizeNullableText(form.short_name) as string | null,
+            slug: typeof form.slug === 'string' ? form.slug : '',
+            sport: typeof form.sport === 'string' ? form.sport : '',
+            country: typeof form.country === 'string' ? form.country : '',
+            region: normalizeNullableText(form.region) as string | null,
+            city: normalizeNullableText(form.city) as string | null,
+            union_id: normalizeNullableText(form.union_id) as string | null,
+            logo_url: normalizeNullableText(form.logo_url) as string | null,
+            primary_color: normalizeNullableText(form.primary_color) as string | null,
+            visibility: form.is_visible === false ? 'hidden' : 'visible',
+        },
+    };
+}
+
+function buildSaveErrorMessage(payload: ManageClubRouteResponse | null | undefined) {
+    const details = payload?.details;
+    if (Array.isArray(details)) {
+        const validationMessages = details
+            .map((detail) => {
+                if (!detail || typeof detail !== 'object') {
+                    return null;
+                }
+
+                const entry = detail as Partial<ClubValidationError>;
+                if (typeof entry.message !== 'string') {
+                    return null;
+                }
+
+                return typeof entry.field === 'string'
+                    ? `${entry.field}: ${entry.message}`
+                    : entry.message;
+            })
+            .filter((value): value is string => Boolean(value));
+
+        if (validationMessages.length > 0) {
+            return validationMessages.join('\n');
+        }
+    }
+
+    if (typeof payload?.error === 'string' && payload.error.trim()) {
+        return payload.error;
+    }
+
+    if (typeof details === 'string' && details.trim()) {
+        return details;
+    }
+
+    return 'No se pudo guardar el club';
+}
+
+function createInitialClubForm(data: ClubRow | null): ClubFormState {
+    if (data) {
+        return data;
+    }
+
+    return {
         name: '',
         short_name: '',
         slug: '',
@@ -151,40 +204,112 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
         primary_color: '#3b82f6',
         is_visible: true,
         categories: [],
-    });
+    };
+}
 
-    const [dashboardData, setDashboardData] = useState<ClubDashboardOverview>(EMPTY_CLUB_DASHBOARD_OVERVIEW);
-    const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
-    const [linkedDivisions, setLinkedDivisions] = useState<Division[]>([]);
-    const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate);
+export function ClubManageShell({
+    id,
+    data,
+    unions,
+    managedClubs,
+    navigationMode = 'admin',
+    initialDashboardData = null,
+    initialDashboardLoaded = false,
+    initialLinkedDivisions,
+    initialDivisionsLoaded = false,
+    initialPlayers,
+    initialPlayersLoaded = false,
+    initialStaff,
+    initialStaffLoaded = false,
+    initialSponsors,
+    initialSponsorsLoaded = false,
+}: ClubManageShellProps) {
+    const isCreate = id === 'new';
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const currentTab = normalizeClubManageTab(searchParams.get('tab'));
+    const isPizarraFocus = currentTab === 'pizarra';
+
+    const [isDirty, setIsDirty] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [form, setForm] = useState<ClubFormState>(createInitialClubForm(data));
+
+    const [dashboardData, setDashboardData] = useState<ClubDashboardOverview>(
+        initialDashboardLoaded ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW
+    );
+    const [isLoadingDashboard, setIsLoadingDashboard] = useState(!isCreate && !initialDashboardLoaded);
+    const [linkedDivisions, setLinkedDivisions] = useState<Division[]>(filterVisibleDivisions(initialLinkedDivisions));
+    const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate && !initialDivisionsLoaded);
 
     useEffect(() => {
-        if (isCreate) return;
+        setForm(createInitialClubForm(data));
+        setIsDirty(false);
+    }, [data, id]);
+
+    useEffect(() => {
+        if (isCreate) {
+            setDashboardData(EMPTY_CLUB_DASHBOARD_OVERVIEW);
+            setIsLoadingDashboard(false);
+            return;
+        }
+
+        setDashboardData(initialDashboardLoaded ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW);
+        setIsLoadingDashboard(!initialDashboardLoaded);
+    }, [id, isCreate, initialDashboardData, initialDashboardLoaded]);
+
+    useEffect(() => {
+        if (isCreate || initialDashboardLoaded) return;
+
+        let isMounted = true;
 
         const loadDashboard = async () => {
-            setIsLoadingDashboard(true);
+            if (isMounted) {
+                setIsLoadingDashboard(true);
+            }
             try {
                 const response = await fetchClubDashboardData(id);
-                setDashboardData(response);
+                if (isMounted) {
+                    setDashboardData(response);
+                }
             } catch (error) {
                 console.error('Dashboard load error:', error);
             } finally {
-                setIsLoadingDashboard(false);
+                if (isMounted) {
+                    setIsLoadingDashboard(false);
+                }
             }
         };
 
         void loadDashboard();
-    }, [id, isCreate]);
+        return () => {
+            isMounted = false;
+        };
+    }, [id, isCreate, initialDashboardLoaded]);
+
+    useEffect(() => {
+        if (isCreate) {
+            setLinkedDivisions([]);
+            setIsLoadingDivisions(false);
+            return;
+        }
+
+        setLinkedDivisions(initialDivisionsLoaded ? filterVisibleDivisions(initialLinkedDivisions) : []);
+        setIsLoadingDivisions(!initialDivisionsLoaded);
+    }, [id, initialDivisionsLoaded, initialLinkedDivisions, isCreate]);
 
     useEffect(() => {
         let isMounted = true;
 
-        const loadLinkedDivisions = async () => {
+        const loadLinkedDivisions = async (force = false) => {
             if (isCreate) {
                 if (isMounted) {
                     setLinkedDivisions([]);
                     setIsLoadingDivisions(false);
                 }
+                return;
+            }
+
+            if (!force && initialDivisionsLoaded) {
                 return;
             }
 
@@ -195,7 +320,7 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
             try {
                 const divisions = await fetchDivisions(id);
                 if (isMounted) {
-                    setLinkedDivisions(divisions);
+                    setLinkedDivisions(divisions.filter((division) => !division.is_family_division));
                 }
             } catch (error) {
                 console.error('Division load error:', error);
@@ -209,10 +334,12 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
             }
         };
 
-        void loadLinkedDivisions();
+        if (!initialDivisionsLoaded) {
+            void loadLinkedDivisions();
+        }
 
         const refreshDivisions = () => {
-            void loadLinkedDivisions();
+            void loadLinkedDivisions(true);
         };
 
         window.addEventListener('club:divisions-updated', refreshDivisions);
@@ -220,7 +347,7 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
             isMounted = false;
             window.removeEventListener('club:divisions-updated', refreshDivisions);
         };
-    }, [id, isCreate]);
+    }, [id, initialDivisionsLoaded, isCreate]);
 
     const unionName = unions.find((union) => union.id === form.union_id)?.name;
     const legacyCategories = form.categories || [];
@@ -239,25 +366,19 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
         ? 'Multideporte'
         : linkedSports[0] || configuredSportLabel || (legacyCategories.length > 0 ? 'Rugby' : 'Deporte');
     const squadCount = linkedDivisions.length > 0 ? linkedDivisions.length : legacyCategories.length;
-    const competitionCount = Array.from(
-        new Set(
-            dashboardData.standings
-                .map((standing) => standing.tournamentId)
-                .filter(Boolean)
-        )
-    ).length;
+    const competitionCount = dashboardData.competitions.length;
 
     const summaryMetrics = {
         teams: squadCount,
-        upcomingMatches: dashboardData.upcomingMatches.length,
-        competitions: competitionCount,
+        upcomingMatches: dashboardData.stats.upcomingMatches,
+        competitions: dashboardData.stats.tournaments || competitionCount,
         standings: dashboardData.standings.length,
     };
     const currentManagedClub = managedClubs.find((club) => club.id === id) ?? null;
     const clubFamilyCount = currentManagedClub
         ? managedClubs.filter((club) => club.familyRootId === currentManagedClub.familyRootId).length
         : managedClubs.length;
-    const upcomingMatch = dashboardData.upcomingMatches[0] ?? null;
+    const pizarraBackHref = buildClubManageHref(id, 'general', navigationMode);
 
     useEffect(() => {
         const handler = (event: Event) => {
@@ -303,19 +424,19 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
                 return;
             }
 
-            const response = await fetch(`/api/clubs/${id}`, {
+            const response = await fetch(`/api/clubs/${id}/manage`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',
-                body: JSON.stringify(form),
+                body: JSON.stringify(buildClubManagePayload(form)),
             });
-            const payload = await response.json() as { data?: ClubRow; error?: string };
+            const payload = await response.json() as ManageClubRouteResponse;
 
-            if (!response.ok || !payload.data) {
-                throw new Error(payload.error || 'No se pudo guardar el club');
+            if (!response.ok || !payload.data?.core) {
+                throw new Error(buildSaveErrorMessage(payload));
             }
 
-            setForm(payload.data);
+            setForm(payload.data.core as ClubRow);
             setIsDirty(false);
             window.dispatchEvent(new CustomEvent('club:save-success'));
             router.refresh();
@@ -327,33 +448,10 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
         }
     }
 
-    const handleDelete = async () => {
-        if (!window.confirm('Eliminar este club es irreversible. Continuar?')) return;
-
-        setIsSaving(true);
-        try {
-            await deleteClubEntity(id);
-            router.push(navigationMode === 'club-admin' ? '/club-admin' : '/admin/super/clubes');
-        } catch (error) {
-            alert(error instanceof Error ? error.message : String(error));
-            setIsSaving(false);
-        }
-    };
-
-    const diagnostics = {
-        hasName: !!form.name,
-        hasSlug: !!form.slug,
-        hasCountry: !!form.country,
-        hasLogo: !!form.logo_url,
-        hasUnion: !!form.union_id,
-    };
-
-    const completeness = Object.values(diagnostics).filter(Boolean).length / 5 * 100;
-
     return (
         <ClubContext.Provider value={{ isDirty, setDirty: setIsDirty }}>
             <div
-                className="flash-ui-container"
+                className={`flash-ui-container${isPizarraFocus ? ' is-pizarra-focus' : ''}`}
                 style={{
                     '--accent': '#3b82f6',
                     '--accent-secondary': '#3b82f6',
@@ -411,13 +509,13 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
                                             </div>
 
                                             <div className="card col-5">
-                                                <ClubDataHealthCard diagnostics={diagnostics} />
+                                                <ClubDataHealthCard health={dashboardData.health} />
                                             </div>
 
                                             <div className="card col-8">
                                                 <ClubNextMatchesCard
                                                     categories={divisionFilterOptions}
-                                                    matches={dashboardData.matches}
+                                                    matches={dashboardData.upcomingMatches}
                                                     loading={isLoadingDashboard}
                                                 />
                                             </div>
@@ -472,73 +570,57 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
 
                                     {currentTab === 'planteles' ? (
                                         <div className="col-12">
-                                            <ClubSquadsTab id={id} data={form as ClubRow} navigationMode={navigationMode} />
+                                            <ClubSquadsTab
+                                                id={id}
+                                                data={form as ClubRow}
+                                                navigationMode={navigationMode}
+                                                initialPlayers={initialPlayers}
+                                                initialPlayersLoaded={initialPlayersLoaded}
+                                                initialDivisions={initialLinkedDivisions}
+                                                initialDivisionsLoaded={initialDivisionsLoaded}
+                                            />
                                         </div>
                                     ) : null}
 
                                     {currentTab === 'competencias' ? (
-                                        <>
-                                            <div className="card col-8">
-                                                <ClubStandingsOverviewTab
-                                                    standings={dashboardData.standings}
-                                                    loading={isLoadingDashboard}
-                                                />
-                                            </div>
+                                        <div className="card col-12">
+                                            <ClubCompetitionsPanel
+                                                competitions={dashboardData.competitions}
+                                                standings={dashboardData.standings}
+                                                matches={dashboardData.matches}
+                                                clubName={form.name || currentManagedClub?.name || 'el club'}
+                                                loading={isLoadingDashboard}
+                                            />
+                                        </div>
+                                    ) : null}
 
-                                            <div className="card col-4">
-                                                <div className="club-tab-stack">
-                                                    <div className="card-title">Participacion competitiva</div>
-                                                    <h3 className="club-tab-heading">Torneos activos e historicos</h3>
-                                                    <p className="club-tab-copy">
-                                                        Conecta cada equipo con sus torneos y sostiene standings, fixture, contenido y analitica.
-                                                    </p>
-                                                    <div className="club-inline-metrics">
-                                                        <div><strong>{summaryMetrics.competitions}</strong><span>torneos</span></div>
-                                                        <div><strong>{dashboardData.standings.length}</strong><span>filas activas</span></div>
-                                                    </div>
-                                                    <button className="btn club-ops-secondary">Vincular a torneo</button>
-                                                </div>
-                                            </div>
-                                        </>
+                                    {currentTab === 'rendimiento' ? (
+                                        <div className="col-12">
+                                            <ClubPerformanceTab
+                                                clubId={id}
+                                                clubName={form.name || currentManagedClub?.name || 'Club'}
+                                                sport={form.sport}
+                                                divisions={linkedDivisions}
+                                                players={initialPlayers ?? []}
+                                                staff={initialStaff ?? []}
+                                                dashboardData={dashboardData}
+                                                loading={isLoadingDashboard || isLoadingDivisions}
+                                            />
+                                        </div>
                                     ) : null}
 
                                     {currentTab === 'partidos' ? (
-                                        <>
-                                            <div className="card col-8">
-                                                <ClubFixtureResultsTab
-                                                    upcomingMatches={dashboardData.upcomingMatches}
-                                                    recentMatches={dashboardData.recentMatches}
-                                                    loading={isLoadingDashboard}
-                                                />
-                                            </div>
-
-                                            <div className="card col-4">
-                                                <div className="club-tab-stack">
-                                                    <div className="card-title">Operacion de partidos</div>
-                                                    <h3 className="club-tab-heading">Horario, sede, live y resultado</h3>
-                                                    <p className="club-tab-copy">
-                                                        Este modulo diferencia a G22 de una web de resultados: el club opera el partido,
-                                                        no solo lo ve.
-                                                    </p>
-                                                    <div className="content-ops-list compact">
-                                                        <div className="content-ops-item">
-                                                            <span className="club-status-dot live" />
-                                                            <div>
-                                                                <strong>Live control</strong>
-                                                                <span>Activa cobertura y eventos en tiempo real.</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="content-ops-item">
-                                                            <span className="club-status-dot" />
-                                                            <div>
-                                                                <strong>Resultado final</strong>
-                                                                <span>Cierra score y dispara piezas automaticas.</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </>
+                                        <div className="card col-12">
+                                            <ClubFixtureResultsTab
+                                                clubId={id}
+                                                clubName={form.name || currentManagedClub?.name || 'Club'}
+                                                divisions={linkedDivisions}
+                                                upcomingMatches={dashboardData.upcomingMatches}
+                                                recentMatches={dashboardData.recentMatches}
+                                                pastMatches={dashboardData.pastMatches}
+                                                loading={isLoadingDashboard}
+                                            />
+                                        </div>
                                     ) : null}
 
                                     {currentTab === 'contenido' ? (
@@ -551,9 +633,42 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
                                         </div>
                                     ) : null}
 
+                                    {currentTab === 'pizarra' ? (
+                                        <div className="card col-12 club-pizarra-card">
+                                            <ClubPizarraTab
+                                                key={`${id}:${form.sport ?? 'rugby'}`}
+                                                clubId={id}
+                                                sport={form.sport}
+                                                primaryColor={form.primary_color}
+                                                clubName={form.name || currentManagedClub?.name || 'Club'}
+                                                backHref={pizarraBackHref}
+                                                mobileCanvasFirst={isPizarraFocus}
+                                            />
+                                        </div>
+                                    ) : null}
+
                                     {currentTab === 'sponsors' ? (
                                         <div className="col-12">
-                                            <ClubSponsorsTab clubId={id} />
+                                            <ClubSponsorsTab
+                                                clubId={id}
+                                                initialSponsors={initialSponsors}
+                                                initialSponsorsLoaded={initialSponsorsLoaded}
+                                            />
+                                        </div>
+                                    ) : null}
+
+                                    {currentTab === 'entrenamientos' ? (
+                                        <div className="col-12">
+                                            <ClubEntrenamientosTab
+                                                clubId={id}
+                                                clubName={form.name || currentManagedClub?.name || 'Club'}
+                                                sport={form.sport}
+                                                divisions={linkedDivisions}
+                                                players={initialPlayers ?? []}
+                                                staff={initialStaff ?? []}
+                                                dashboardData={dashboardData}
+                                                loading={isLoadingDashboard || isLoadingDivisions}
+                                            />
                                         </div>
                                     ) : null}
 
@@ -564,7 +679,11 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
                                             </div>
 
                                             <div className="card col-8">
-                                                <ClubStaffTab clubId={id} />
+                                                <ClubStaffTab
+                                                    clubId={id}
+                                                    initialPeople={initialStaff}
+                                                    initialPeopleLoaded={initialStaffLoaded}
+                                                />
                                             </div>
 
                                             <div className="card col-4">
@@ -586,22 +705,6 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
                                 </div>
                             </section>
 
-                            <aside className="club-context-shell">
-                                <ClubManageSidebar
-                                    onDelete={handleDelete}
-                                    completeness={completeness}
-                                    metrics={{
-                                        teams: summaryMetrics.teams,
-                                        upcomingMatches: summaryMetrics.upcomingMatches,
-                                        competitions: summaryMetrics.competitions,
-                                    }}
-                                    diagnostics={diagnostics}
-                                    clubName={form.name || currentManagedClub?.name || 'Club'}
-                                    clubShortName={form.short_name || currentManagedClub?.shortName || null}
-                                    primaryColor={form.primary_color || '#3b82f6'}
-                                    nextMatchLabel={upcomingMatch?.opponentShortName || upcomingMatch?.opponentName || null}
-                                />
-                            </aside>
                         </div>
                     </main>
                 </div>
@@ -609,4 +712,3 @@ export function ClubManageShell({ id, data, unions, managedClubs, navigationMode
         </ClubContext.Provider>
     );
 }
-

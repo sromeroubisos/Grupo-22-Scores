@@ -36,9 +36,9 @@ export function ClubStandingsOverviewTab({
                 <div>
                     <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Trophy className="w-4 h-4 text-accent" />
-                        Posiciones en torneos
+                        Torneos del club
                     </div>
-                    <div className="subinfo">Tablas reales vinculadas al club en competencias activas o recientes</div>
+                    <div className="subinfo">Posiciones reales del club en los torneos donde participa</div>
                 </div>
             </div>
 
@@ -76,7 +76,7 @@ export function ClubStandingsOverviewTab({
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                                         <strong>{standing.tournamentName}</strong>
                                         <span style={{ color: 'var(--text-muted)' }}>
-                                            {standing.groupId ? `Grupo ${standing.groupId}` : 'Tabla general'}
+                                            {standing.groupId ? (standing.groupName || 'Grupo asignado') : 'Tabla general'}
                                         </span>
                                     </div>
                                 </td>
