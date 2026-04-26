@@ -1469,6 +1469,16 @@ export default function TournamentDetailPage({
     const [standingsOverUnderTeamLabels, setStandingsOverUnderTeamLabels] = useState<any[]>([]);
     const [customStandingsTables, setCustomStandingsTables] = useState<any[]>([]);
     const [archives, setArchives] = useState<any[]>([]);
+    const [seasonOptions, setSeasonOptions] = useState<Array<{
+        id: string;
+        label: string;
+        name: string;
+        slug: string | null;
+        seasonId: string | null;
+        isCurrent: boolean;
+        href: string;
+    }>>([]);
+    const [seasonMenuOpen, setSeasonMenuOpen] = useState(false);
     const [results, setResults] = useState<any[]>(preloaded?.results ?? []);
     const [fixtures, setFixtures] = useState<any[]>(preloaded?.fixtures ?? []);
     const [details, setDetails] = useState<any>(null);
@@ -1869,6 +1879,58 @@ export default function TournamentDetailPage({
     useEffect(() => {
         setTournamentLogoFailed(false);
     }, [details, tournamentData]);
+
+    useEffect(() => {
+        const isExternalId =
+            id.toLowerCase().startsWith('fs-') ||
+            id.toLowerCase().startsWith('ras-league-') ||
+            id.toLowerCase().startsWith('espn-league-');
+        if (isExternalId) {
+            setSeasonOptions([]);
+            return;
+        }
+        const controller = new AbortController();
+        (async () => {
+            try {
+                const res = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}/seasons`, {
+                    signal: controller.signal,
+                    cache: 'no-store',
+                });
+                if (!res.ok) {
+                    setSeasonOptions([]);
+                    return;
+                }
+                const json = await res.json();
+                if (json?.ok && Array.isArray(json.seasons)) {
+                    setSeasonOptions(json.seasons);
+                } else {
+                    setSeasonOptions([]);
+                }
+            } catch (err: any) {
+                if (err?.name !== 'AbortError') setSeasonOptions([]);
+            }
+        })();
+        return () => controller.abort();
+    }, [id]);
+
+    useEffect(() => {
+        if (!seasonMenuOpen) return;
+        const onDocClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (!target) return;
+            if (target.closest(`.${styles.seasonSwitcher}`)) return;
+            setSeasonMenuOpen(false);
+        };
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setSeasonMenuOpen(false);
+        };
+        document.addEventListener('mousedown', onDocClick);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('mousedown', onDocClick);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [seasonMenuOpen]);
 
     const hasDbKnockoutPhase = useMemo(
         () => dbPhases.some((phase: any) => isKnockoutPhaseType(phase?.phase_type)),
@@ -3147,7 +3209,55 @@ export default function TournamentDetailPage({
                                     {yearDisplay && (
                                         <>
                                             <span className={styles.heroMetaDot} />
-                                            <span className={styles.heroMetaItem}>{yearDisplay}</span>
+                                            {seasonOptions.length > 1 ? (
+                                                <span className={styles.seasonSwitcher}>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.seasonSwitcherTrigger}
+                                                        onClick={() => setSeasonMenuOpen((open) => !open)}
+                                                        aria-haspopup="listbox"
+                                                        aria-expanded={seasonMenuOpen}
+                                                        title="Cambiar temporada"
+                                                    >
+                                                        <span>{yearDisplay}</span>
+                                                        <svg
+                                                            className={`${styles.seasonSwitcherCaret} ${seasonMenuOpen ? styles.seasonSwitcherCaretOpen : ''}`}
+                                                            width="12"
+                                                            height="12"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2.5"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            aria-hidden="true"
+                                                        >
+                                                            <polyline points="6 9 12 15 18 9" />
+                                                        </svg>
+                                                    </button>
+                                                    {seasonMenuOpen && (
+                                                        <div className={styles.seasonSwitcherMenu} role="listbox">
+                                                            {seasonOptions.map((season) => (
+                                                                <Link
+                                                                    key={season.id}
+                                                                    href={season.href}
+                                                                    className={`${styles.seasonSwitcherItem} ${season.isCurrent ? styles.seasonSwitcherItemActive : ''}`}
+                                                                    onClick={() => setSeasonMenuOpen(false)}
+                                                                    role="option"
+                                                                    aria-selected={season.isCurrent}
+                                                                >
+                                                                    <span className={styles.seasonSwitcherItemLabel}>{season.label}</span>
+                                                                    {season.name && season.name !== season.label && (
+                                                                        <span className={styles.seasonSwitcherItemSubtitle}>{season.name}</span>
+                                                                    )}
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className={styles.heroMetaItem}>{yearDisplay}</span>
+                                            )}
                                         </>
                                     )}
                                     {details?.current_stage_has_cup_trees && (

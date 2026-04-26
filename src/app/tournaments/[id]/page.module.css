@@ -310,6 +310,108 @@
     flex-shrink: 0;
 }
 
+/* Season switcher */
+.seasonSwitcher {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.seasonSwitcherTrigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--fl-surface-hover, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--fl-border, rgba(255, 255, 255, 0.08));
+    border-radius: 999px;
+    padding: 3px 10px 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--fl-text);
+    cursor: pointer;
+    line-height: 1.1;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.seasonSwitcherTrigger:hover,
+.seasonSwitcherTrigger:focus-visible {
+    background: var(--fl-surface-active, rgba(255, 255, 255, 0.08));
+    border-color: var(--fl-border-strong, rgba(255, 255, 255, 0.18));
+    color: var(--fl-text);
+    outline: none;
+}
+
+.seasonSwitcherCaret {
+    display: inline-block;
+    transition: transform 150ms ease;
+    color: var(--fl-text-muted);
+}
+
+.seasonSwitcherCaretOpen {
+    transform: rotate(180deg);
+    color: var(--fl-text);
+}
+
+.seasonSwitcherMenu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 30;
+    min-width: 180px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: var(--fl-surface, #14181f);
+    border: 1px solid var(--fl-border, rgba(255, 255, 255, 0.1));
+    border-radius: 10px;
+    padding: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.seasonSwitcherItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fl-text);
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: background 120ms ease;
+}
+
+.seasonSwitcherItem:hover {
+    background: var(--fl-surface-hover, rgba(255, 255, 255, 0.06));
+}
+
+.seasonSwitcherItemActive {
+    background: var(--fl-accent-soft, rgba(59, 130, 246, 0.15));
+    color: var(--fl-accent, #60a5fa);
+}
+
+.seasonSwitcherItemActive:hover {
+    background: var(--fl-accent-soft, rgba(59, 130, 246, 0.22));
+}
+
+.seasonSwitcherItemLabel {
+    font-weight: 600;
+    line-height: 1.15;
+}
+
+.seasonSwitcherItemSubtitle {
+    font-size: 0.7rem;
+    color: var(--fl-text-muted);
+    line-height: 1.15;
+}
+
+.seasonSwitcherItemActive .seasonSwitcherItemSubtitle {
+    color: inherit;
+    opacity: 0.85;
+}
+
 /* Right column */
 .heroRight {
     display: flex;
