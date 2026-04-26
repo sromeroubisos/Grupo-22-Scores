@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import {
     type ClubDashboardCompetition,
+    type ClubDashboardMode,
     EMPTY_CLUB_DASHBOARD_OVERVIEW,
     type ClubDashboardClubRef,
     type ClubDashboardHealth,
@@ -62,6 +63,10 @@ type MatchRow = {
     home: ClubRow | ClubRow[] | null;
     away: ClubRow | ClubRow[] | null;
     tournament: TournamentRow | TournamentRow[] | null;
+};
+
+type ClubDashboardOptions = {
+    mode?: ClubDashboardMode;
 };
 
 type StandingStatsRow =
@@ -199,6 +204,27 @@ function normalizeMatchScore(score: MatchScoreRow) {
     };
 }
 
+function countArrayValue(value: unknown) {
+    return Array.isArray(value) ? value.length : 0;
+}
+
+function countLineupEntries(lineups: unknown) {
+    if (!lineups || typeof lineups !== 'object') return 0;
+
+    const source = lineups as { home?: unknown; away?: unknown };
+    return Math.max(countArrayValue(source.home), countArrayValue(source.away));
+}
+
+function countEventEntries(events: unknown) {
+    if (Array.isArray(events)) return events.length;
+    if (!events || typeof events !== 'object') return 0;
+
+    return Object.values(events as Record<string, unknown>).reduce(
+        (total, value) => total + countArrayValue(value),
+        0
+    );
+}
+
 function buildMatchFilter(clubIds: string[]) {
     if (clubIds.length === 1) {
         const clubId = clubIds[0];
@@ -228,7 +254,8 @@ function dedupeMatches(rows: ClubDashboardMatch[]) {
 function normalizeMatch(
     row: MatchRow,
     scopedClubIds: Set<string>,
-    divisionNameById: Map<string, string>
+    divisionNameById: Map<string, string>,
+    includeOperationalPayload = false
 ): ClubDashboardMatch {
     const isHome = row.home_club_id ? scopedClubIds.has(row.home_club_id) : false;
     const home = normalizeClub(unwrapRelationRow(row.home));
@@ -243,8 +270,10 @@ function normalizeMatch(
         venue: row.venue ?? null,
         score: normalizeMatchScore(row.score),
         notes: row.notes ?? null,
-        lineups: row.lineups ?? null,
-        events: row.events ?? null,
+        lineups: includeOperationalPayload ? row.lineups ?? null : null,
+        events: includeOperationalPayload ? row.events ?? null : null,
+        lineupCount: countLineupEntries(row.lineups),
+        statsCount: countEventEntries(row.events),
         isHome,
         homeDivisionId: row.home_division_id ?? null,
         awayDivisionId: row.away_division_id ?? null,
@@ -775,17 +804,19 @@ function buildCompetitions(params: {
 
 export async function getClubDashboardOverview(
     supabase: SupabaseServerClient,
-    clubId: string
+    clubId: string,
+    options: ClubDashboardOptions = {}
 ): Promise<ClubDashboardOverview> {
     if (!clubId) {
         return EMPTY_CLUB_DASHBOARD_OVERVIEW;
     }
 
+    const includeOperationalPayload = options.mode === 'operational';
     const scopedClubIds = [clubId].filter((value): value is string => typeof value === 'string' && value.length > 0);
     const scopedClubIdSet = new Set(scopedClubIds);
     const nowIso = new Date().toISOString();
     const matchSelect = `
-        id, date_time, status, venue, score, notes, lineups, events, tournament_id, home_club_id, away_club_id, home_division_id, away_division_id,
+        id, date_time, status, venue, score, notes${includeOperationalPayload ? ', lineups, events' : ''}, tournament_id, home_club_id, away_club_id, home_division_id, away_division_id,
         home:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, slug),
         away:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, slug),
         tournament:tournaments(id, name, slug)
@@ -800,7 +831,6 @@ export async function getClubDashboardOverview(
         tournamentMatchesResult,
         participantTournamentsResult,
         standingsResult,
-        scopedClubsResult,
         selectedClubCoreResult,
         selectedClubProfileResult,
         sponsorsCountResult,
@@ -855,10 +885,6 @@ export async function getClubDashboardOverview(
             .order('position', { ascending: true }),
         supabase
             .from('clubs')
-            .select('id, name, short_name, logo_url, slug')
-            .in('id', scopedClubIds),
-        supabase
-            .from('clubs')
             .select('*')
             .eq('id', clubId)
             .maybeSingle(),
@@ -880,7 +906,6 @@ export async function getClubDashboardOverview(
     if (tournamentMatchesResult.error) throw tournamentMatchesResult.error;
     if (participantTournamentsResult.error) throw participantTournamentsResult.error;
     if (standingsResult.error) throw standingsResult.error;
-    if (scopedClubsResult.error) throw scopedClubsResult.error;
     if (selectedClubCoreResult.error) throw selectedClubCoreResult.error;
     if (selectedClubProfileResult.error && !isMissingTableError(selectedClubProfileResult.error)) {
         throw selectedClubProfileResult.error;
@@ -918,15 +943,15 @@ export async function getClubDashboardOverview(
     }
 
     const upcomingMatches = ((upcomingMatchesResult.data ?? []) as unknown as MatchRow[]).map((row) =>
-        normalizeMatch(row, scopedClubIdSet, divisionNameById)
+        normalizeMatch(row, scopedClubIdSet, divisionNameById, includeOperationalPayload)
     );
     const pastMatches = ((pastMatchesResult.data ?? []) as unknown as MatchRow[]).map((row) =>
-        normalizeMatch(row, scopedClubIdSet, divisionNameById)
+        normalizeMatch(row, scopedClubIdSet, divisionNameById, includeOperationalPayload)
     );
     const recentMatches = pastMatches.slice(0, 5);
     const allMatches = dedupeMatches([...upcomingMatches, ...pastMatches]);
-    const clubLookup = new Map(
-        ((scopedClubsResult.data ?? []) as ClubRow[]).map((club) => [club.id ?? '', club])
+    const clubLookup = new Map<string, ClubRow>(
+        clubCore?.id ? [[clubCore.id, clubCore as unknown as ClubRow]] : []
     );
     const linkedTournamentIds = new Set(
         tournamentMatchRows

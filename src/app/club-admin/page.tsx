@@ -2,7 +2,12 @@ import { redirect } from 'next/navigation';
 import { ClubAccessHub } from '@/components/admin/entities/club/ClubAccessHub';
 import { ClubManageShell } from '@/components/admin/entities/club/ClubManageShell';
 import { getClubDashboardOverview } from '@/lib/club-admin/dashboard';
-import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
+import {
+    getClubDashboardModeForTab,
+    normalizeClubManageTab,
+    shouldLoadClubDashboardForTab,
+    shouldLoadClubDivisionsForTab,
+} from '@/lib/club-admin/manageTabs';
 import type { Database } from '@/lib/database.types';
 import { requireUserAccessContext } from '@/lib/auth/permissions';
 import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
@@ -104,17 +109,8 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
         return <ClubAccessHub clubs={managed.clubs} />;
     }
 
-    const shouldLoadDashboard = currentTab === 'general'
-        || currentTab === 'rendimiento'
-        || currentTab === 'competencias'
-        || currentTab === 'partidos'
-        || currentTab === 'contenido'
-        || currentTab === 'entrenamientos';
-    const shouldLoadDivisions = currentTab === 'general'
-        || currentTab === 'rendimiento'
-        || currentTab === 'partidos'
-        || currentTab === 'planteles'
-        || currentTab === 'entrenamientos';
+    const shouldLoadDashboard = shouldLoadClubDashboardForTab(currentTab);
+    const shouldLoadDivisions = shouldLoadClubDivisionsForTab(currentTab);
     const shouldLoadPlayers = currentTab === 'planteles'
         || currentTab === 'rendimiento'
         || currentTab === 'entrenamientos';
@@ -142,7 +138,9 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
             .order('name'),
         preloadResource(shouldLoadDashboard, 'Dashboard', async () => {
             const client = await getReadClient();
-            return getClubDashboardOverview(client as never, targetClubId);
+            return getClubDashboardOverview(client as never, targetClubId, {
+                mode: getClubDashboardModeForTab(currentTab),
+            });
         }),
         preloadResource(shouldLoadDivisions, 'Division', () => fetchDivisions(targetClubId, supabase as never)),
         preloadResource(shouldLoadPlayers || shouldLoadStaff, 'People', () => fetchPeopleByClub(targetClubId, supabase as never)),
@@ -179,8 +177,10 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
             navigationMode="club-admin"
             initialDashboardData={dashboardPreload.data}
             initialDashboardLoaded={dashboardPreload.loaded}
+            initialDashboardRequested={shouldLoadDashboard}
             initialLinkedDivisions={divisionsPreload.data ?? undefined}
             initialDivisionsLoaded={divisionsPreload.loaded}
+            initialDivisionsRequested={shouldLoadDivisions}
             initialPlayers={initialPlayers ?? undefined}
             initialPlayersLoaded={shouldLoadPlayers && peoplePreload.loaded}
             initialStaff={initialStaff ?? undefined}

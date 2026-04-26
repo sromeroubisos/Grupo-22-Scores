@@ -33,6 +33,11 @@ export interface HistoricalImportPhasePreview {
   endDate: string | null;
 }
 
+export interface HistoricalImportPhaseOverride {
+  name?: string | null;
+  phaseType?: 'league' | 'playoff' | null;
+}
+
 export interface HistoricalImportMatchPreview {
   id: string;
   phaseKey: string;

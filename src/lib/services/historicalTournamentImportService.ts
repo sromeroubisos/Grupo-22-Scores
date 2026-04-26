@@ -5,12 +5,36 @@ import type {
   HistoricalImportConfirmResult,
   HistoricalImportIssue,
   HistoricalImportMatchPreview,
+  HistoricalImportPhaseOverride,
   HistoricalImportPhasePreview,
   HistoricalImportPreviewResult,
   HistoricalImportStandingRow,
 } from '@/lib/types/historical-tournament-import';
 
 type SupabaseClientLike = ReturnType<typeof createAdminClient>;
+type SupabaseErrorLike = { code?: string | null; message?: string | null };
+type SupabaseQueryResult<T> = { data: T | null; error: SupabaseErrorLike | null };
+type SupabaseMutationResult = { error: SupabaseErrorLike | null };
+type UntypedDeleteBuilder = {
+  eq: (column: string, value: unknown) => Promise<SupabaseMutationResult>;
+};
+type UntypedFilterBuilder<T> = PromiseLike<SupabaseQueryResult<T>> & {
+  select: (columns?: string) => UntypedFilterBuilder<T>;
+  eq: (column: string, value: unknown) => UntypedFilterBuilder<T>;
+  in: (column: string, values: unknown[]) => UntypedFilterBuilder<T>;
+  order: (column: string, options?: { ascending?: boolean }) => UntypedFilterBuilder<T>;
+  single: () => Promise<SupabaseQueryResult<T>>;
+  maybeSingle: () => Promise<SupabaseQueryResult<T>>;
+  insert: (payload: unknown) => Promise<SupabaseMutationResult>;
+  upsert: (
+    payload: unknown,
+    options?: { onConflict?: string; ignoreDuplicates?: boolean }
+  ) => Promise<SupabaseMutationResult>;
+  delete: () => UntypedDeleteBuilder;
+};
+type UntypedSupabaseClient = {
+  from: <T = unknown>(table: string) => UntypedFilterBuilder<T>;
+};
 
 type TournamentContext = {
   tournament: {
@@ -90,6 +114,16 @@ type ParsedStanding = {
   note: string | null;
 };
 
+type PhaseKey = ParsedMatch['phaseKey'];
+type PhaseOverrideMap = Record<string, HistoricalImportPhaseOverride>;
+type ResolvedHistoricalTeam = {
+  key: string;
+  clubId: string;
+  clubName: string;
+  shortCode: string | null;
+  position: number | null;
+};
+
 type HistoricalModel = {
   seasonId: string;
   parsedMatches: ParsedMatch[];
@@ -112,6 +146,7 @@ type ConfirmParams = {
   actorUserId: string;
   rawText: string;
   overrides?: Record<string, string | null>;
+  phaseOverrides?: PhaseOverrideMap;
   tournamentName?: string | null;
   displayName?: string | null;
   slug?: string | null;
@@ -154,8 +189,9 @@ export class HistoricalTournamentImportService {
 
   static async confirm(params: ConfirmParams): Promise<HistoricalImportConfirmResult> {
     const supabase = createAdminClient();
+    const db = supabase as unknown as UntypedSupabaseClient;
     const context = await this.loadContext(supabase, params.baseTournamentId);
-    const model = this.buildModel(context, params.rawText, params.overrides || {});
+    const model = this.buildModel(context, params.rawText, params.overrides || {}, params.phaseOverrides || {});
     const warnings = model.issues
       .filter((issue) => issue.severity !== 'error')
       .map((issue) => issue.message);
@@ -186,206 +222,248 @@ export class HistoricalTournamentImportService {
         .filter((club): club is HistoricalImportClubResolution & { matchedClubId: string } => Boolean(club.matchedClubId))
         .map((club) => [club.normalizedName, club.matchedClubId as string])
     );
+    const sameClubMatches = model.parsedMatches.filter((match) => {
+      const homeClubId = resolvedClubIds.get(this.normalizeKey(match.homeTeam));
+      const awayClubId = resolvedClubIds.get(this.normalizeKey(match.awayTeam));
+      return Boolean(homeClubId && awayClubId && homeClubId === awayClubId);
+    });
+
+    if (sameClubMatches.length > 0) {
+      return {
+        ok: false,
+        tournamentId: null,
+        relationCreated: false,
+        created: { participants: 0, phases: 0, rounds: 0, matches: 0, standings: 0 },
+        warnings: [
+          ...warnings,
+          ...sameClubMatches.slice(0, 5).map((match) =>
+            `El partido "${match.homeTeam} - ${match.awayTeam}" resuelve ambos lados al mismo club.`
+          ),
+        ],
+      };
+    }
 
     const teamRows = this.buildResolvedTeams(model, resolvedClubIds);
     const leagueNeeded = model.parsedStandings.length > 0 || model.parsedMatches.some((match) => match.phaseKey === 'league');
     const playoffNeeded = model.parsedMatches.some((match) => match.phaseKey === 'playoff');
     const startDate = model.parsedMatches.length ? model.parsedMatches[0].date : null;
     const endDate = model.parsedMatches.length ? model.parsedMatches[model.parsedMatches.length - 1].date : null;
+    const phaseByKey = new Map(model.phases.map((phase) => [phase.key, phase]));
+    let tournamentInserted = false;
 
-    const { error: tournamentError } = await supabase
-      .from('tournaments')
-      .insert({
-        id: importedTournamentId,
-        name: targetName,
-        display_name: targetDisplayName,
-        slug: uniqueSlug,
-        season_id: model.seasonId,
-        sport_id: context.tournament.sport_id,
-        union_id: context.tournament.union_id,
-        country_id: context.tournament.country_id,
-        country: context.tournament.country,
-        category: context.tournament.category,
-        age_grade: context.tournament.age_grade,
-        format: context.tournament.format,
-        logo_url: context.tournament.logo_url,
-        banner_url: context.tournament.banner_url,
-        primary_color: context.tournament.primary_color,
-        secondary_color: context.tournament.secondary_color,
-        region: context.tournament.region,
-        ruleset: context.tournament.ruleset,
-        is_popular: false,
-        is_visible: publish,
-        status: publish ? 'published' : 'draft',
+    try {
+      const { error: tournamentError } = await db
+        .from('tournaments')
+        .insert({
+          id: importedTournamentId,
+          name: targetName,
+          display_name: targetDisplayName,
+          slug: uniqueSlug,
+          season_id: model.seasonId,
+          sport_id: context.tournament.sport_id,
+          union_id: context.tournament.union_id,
+          country_id: context.tournament.country_id,
+          country: context.tournament.country,
+          category: context.tournament.category,
+          age_grade: context.tournament.age_grade,
+          format: context.tournament.format,
+          logo_url: context.tournament.logo_url,
+          banner_url: context.tournament.banner_url,
+          primary_color: context.tournament.primary_color,
+          secondary_color: context.tournament.secondary_color,
+          region: context.tournament.region,
+          ruleset: context.tournament.ruleset,
+          is_popular: false,
+          is_visible: publish,
+          status: publish ? 'published' : 'draft',
+          created_at: now,
+          updated_at: now,
+        });
+
+      if (tournamentError) {
+        throw new Error(tournamentError.message || 'No se pudo crear el torneo historico.');
+      }
+      tournamentInserted = true;
+
+      const seasonRecord = await this.createSeasonRecord(supabase, {
+        tournamentId: importedTournamentId,
+        seasonId: model.seasonId,
+        teamsCount: teamRows.length,
+        startDate,
+        endDate,
+      });
+      if (!seasonRecord.ok && seasonRecord.message) {
+        warnings.push(seasonRecord.message);
+      }
+
+      const participantInserts = teamRows.map((team) => ({
+        tournament_id: importedTournamentId,
+        club_id: team.clubId,
+        name: team.clubName,
+        type: 'club',
+        status: 'active',
+        seed: team.position,
+        short_code: team.shortCode,
+        notes: null,
         created_at: now,
         updated_at: now,
-      });
+      }));
 
-    if (tournamentError) {
-      throw new Error(tournamentError.message || 'No se pudo crear el torneo historico.');
-    }
+      const { error: participantError } = await db.from('tournament_participants').insert(participantInserts);
+      if (participantError) {
+        throw new Error(participantError.message || 'No se pudieron crear los participantes.');
+      }
 
-    await supabase.from('seasons').insert({
-      tournament_id: importedTournamentId,
-      season_id: model.seasonId,
-      teams_count: teamRows.length,
-      is_active: false,
-      start_date: startDate,
-      end_date: endDate,
-    });
-
-    const participantInserts = teamRows.map((team) => ({
-      tournament_id: importedTournamentId,
-      club_id: team.clubId,
-      name: team.clubName,
-      type: 'club',
-      status: 'active',
-      seed: team.position,
-      short_code: team.shortCode,
-      notes: null,
-      created_at: now,
-      updated_at: now,
-    }));
-
-    const { error: participantError } = await supabase.from('tournament_participants').insert(participantInserts);
-    if (participantError) {
-      throw new Error(participantError.message || 'No se pudieron crear los participantes.');
-    }
-
-    const phaseBlueprints = [
-      leagueNeeded
-        ? {
-            key: 'league' as const,
-            name: 'Temporada regular',
-            phase_type: 'league',
-            order_index: 1,
-            is_active: true,
-            settings: {
-              source: 'historical_import',
-              imported: true,
-              standings: {
-                mode: 'fully_manual',
-                editable: false,
+      const phaseBlueprints = [
+        leagueNeeded
+          ? {
+              key: 'league' as const,
+              name: phaseByKey.get('league')?.name || 'Temporada regular',
+              phase_type: phaseByKey.get('league')?.phaseType || 'league',
+              order_index: 1,
+              is_active: true,
+              settings: {
+                source: 'historical_import',
+                imported: true,
+                standings: {
+                  mode: 'fully_manual',
+                  editable: false,
+                },
               },
-            },
-          }
-        : null,
-      playoffNeeded
-        ? {
-            key: 'playoff' as const,
-            name: 'Playoffs',
-            phase_type: 'playoff',
-            order_index: leagueNeeded ? 2 : 1,
-            is_active: !leagueNeeded,
-            settings: {
-              source: 'historical_import',
-              imported: true,
-            },
-          }
-        : null,
-    ].filter(Boolean) as Array<{
-      key: 'league' | 'playoff';
-      name: string;
-      phase_type: string;
-      order_index: number;
-      is_active: boolean;
-      settings: Record<string, unknown>;
-    }>;
+            }
+          : null,
+        playoffNeeded
+          ? {
+              key: 'playoff' as const,
+              name: phaseByKey.get('playoff')?.name || 'Playoffs',
+              phase_type: phaseByKey.get('playoff')?.phaseType || 'playoff',
+              order_index: leagueNeeded ? 2 : 1,
+              is_active: !leagueNeeded,
+              settings: {
+                source: 'historical_import',
+                imported: true,
+              },
+            }
+          : null,
+      ].filter(Boolean) as Array<{
+        key: 'league' | 'playoff';
+        name: string;
+        phase_type: string;
+        order_index: number;
+        is_active: boolean;
+        settings: Record<string, unknown>;
+      }>;
 
-    const phaseIdByKey = new Map<'league' | 'playoff', string>();
-    for (const phase of phaseBlueprints) {
-      const phaseId = crypto.randomUUID();
-      phaseIdByKey.set(phase.key, phaseId);
-      const { error } = await supabase.from('tournament_phases').insert({
-        id: phaseId,
-        tournament_id: importedTournamentId,
-        name: phase.name,
-        phase_type: phase.phase_type,
-        order_index: phase.order_index,
-        is_active: phase.is_active,
-        settings: phase.settings,
-        start_date: startDate,
-        end_date: endDate,
-        created_at: now,
-        updated_at: now,
+      const phaseIdByKey = new Map<'league' | 'playoff', string>();
+      for (const phase of phaseBlueprints) {
+        const phaseId = crypto.randomUUID();
+        phaseIdByKey.set(phase.key, phaseId);
+        const { error } = await this.insertWithOptionalColumns(
+          db,
+          'tournament_phases',
+          {
+            id: phaseId,
+            tournament_id: importedTournamentId,
+            name: phase.name,
+            phase_type: phase.phase_type,
+            order_index: phase.order_index,
+            is_active: phase.is_active,
+            settings: phase.settings,
+            start_date: startDate,
+            end_date: endDate,
+            created_at: now,
+            updated_at: now,
+          },
+          ['start_date', 'end_date', 'settings', 'created_at', 'updated_at']
+        );
+
+        if (error) {
+          throw new Error(error.message || `No se pudo crear la fase ${phase.name}.`);
+        }
+      }
+
+      const roundBlueprints = this.buildRoundBlueprints(model);
+      const roundIdByKey = new Map<string, string>();
+      for (const round of roundBlueprints) {
+        const phaseId = phaseIdByKey.get(round.phaseKey);
+        if (!phaseId) continue;
+        const roundId = crypto.randomUUID();
+        roundIdByKey.set(round.key, roundId);
+        const { error } = await this.insertWithOptionalColumns(
+          db,
+          'tournament_rounds',
+          {
+            id: roundId,
+            phase_id: phaseId,
+            name: round.name,
+            order_index: round.orderIndex,
+            start_date: round.date,
+            end_date: round.date,
+            is_completed: true,
+            notes: round.notes,
+            created_at: now,
+            updated_at: now,
+          },
+          ['start_date', 'end_date', 'is_completed', 'notes', 'created_at', 'updated_at']
+        );
+
+        if (error) {
+          throw new Error(error.message || `No se pudo crear la ronda ${round.name}.`);
+        }
+      }
+
+      const scoreRules = this.resolvePointsRules(context.tournament.ruleset);
+      const matchInserts = model.parsedMatches.map((match) => {
+        const homeClubId = resolvedClubIds.get(this.normalizeKey(match.homeTeam)) || null;
+        const awayClubId = resolvedClubIds.get(this.normalizeKey(match.awayTeam)) || null;
+        const phaseId = phaseIdByKey.get(match.phaseKey) || null;
+        const roundId = roundIdByKey.get(match.roundKey) || null;
+        const basePoints = this.calculateBasePoints(match.homeScore, match.awayScore, scoreRules);
+
+        return {
+          id: crypto.randomUUID(),
+          tournament_id: importedTournamentId,
+          phase_id: phaseId,
+          round_uuid: roundId,
+          group_id: null,
+          home_club_id: homeClubId,
+          away_club_id: awayClubId,
+          date_time: this.toMiddayIso(match.date),
+          venue: null,
+          status: 'final',
+          score: { home: match.homeScore, away: match.awayScore },
+          notes: `Importado desde ${match.stageLabel}`,
+          home_base_points: basePoints.home,
+          away_base_points: basePoints.away,
+          home_bonus_points: 0,
+          away_bonus_points: 0,
+          points_autocalculated: true,
+          points_override_reason: null,
+          created_at: now,
+          updated_at: now,
+        };
       });
 
-      if (error) {
-        throw new Error(error.message || `No se pudo crear la fase ${phase.name}.`);
+      if (matchInserts.length > 0) {
+        const { error: matchesError } = await db.from('matches').insert(matchInserts);
+        if (matchesError) {
+          throw new Error(matchesError.message || 'No se pudieron crear los partidos.');
+        }
       }
-    }
 
-    const roundBlueprints = this.buildRoundBlueprints(model);
-    const roundIdByKey = new Map<string, string>();
-    for (const round of roundBlueprints) {
-      const phaseId = phaseIdByKey.get(round.phaseKey);
-      if (!phaseId) continue;
-      const roundId = crypto.randomUUID();
-      roundIdByKey.set(round.key, roundId);
-      const { error } = await supabase.from('tournament_rounds').insert({
-        id: roundId,
-        phase_id: phaseId,
-        name: round.name,
-        order_index: round.orderIndex,
-        start_date: round.date,
-        end_date: round.date,
-        is_completed: true,
-        notes: round.notes,
-        created_at: now,
-        updated_at: now,
-      });
-
-      if (error) {
-        throw new Error(error.message || `No se pudo crear la ronda ${round.name}.`);
-      }
-    }
-
-    const scoreRules = this.resolvePointsRules(context.tournament.ruleset);
-    const matchInserts = model.parsedMatches.map((match) => {
-      const homeClubId = resolvedClubIds.get(this.normalizeKey(match.homeTeam)) || null;
-      const awayClubId = resolvedClubIds.get(this.normalizeKey(match.awayTeam)) || null;
-      const phaseId = phaseIdByKey.get(match.phaseKey) || null;
-      const roundId = roundIdByKey.get(match.roundKey) || null;
-      const basePoints = this.calculateBasePoints(match.homeScore, match.awayScore, scoreRules);
-
-      return {
-        id: crypto.randomUUID(),
-        tournament_id: importedTournamentId,
-        phase_id: phaseId,
-        round_uuid: roundId,
-        group_id: null,
-        home_club_id: homeClubId,
-        away_club_id: awayClubId,
-        date_time: this.toMiddayIso(match.date),
-        venue: null,
-        status: 'final',
-        score: { home: match.homeScore, away: match.awayScore },
-        notes: `Importado desde ${match.stageLabel}`,
-        home_base_points: basePoints.home,
-        away_base_points: basePoints.away,
-        home_bonus_points: 0,
-        away_bonus_points: 0,
-        points_autocalculated: true,
-        points_override_reason: null,
-        created_at: now,
-        updated_at: now,
-      };
-    });
-
-    if (matchInserts.length > 0) {
-      const { error: matchesError } = await supabase.from('matches').insert(matchInserts);
-      if (matchesError) {
-        throw new Error(matchesError.message || 'No se pudieron crear los partidos.');
-      }
-    }
-
-    const standingsPhaseId = phaseIdByKey.get('league') || null;
-    if (standingsPhaseId && model.parsedStandings.length > 0) {
-      const standingsInserts = model.parsedStandings
-        .map((row) => {
+      const standingsPhaseId = phaseIdByKey.get('league') || null;
+      let standingsInsertedCount = 0;
+      if (standingsPhaseId && model.parsedStandings.length > 0) {
+        const seenStandingClubIds = new Set<string>();
+        const standingsInserts = model.parsedStandings.flatMap((row) => {
           const clubId = resolvedClubIds.get(this.normalizeKey(row.teamName));
-          if (!clubId) return null;
-          return {
+          if (!clubId) return [];
+          if (seenStandingClubIds.has(clubId)) {
+            warnings.push(`Se omitio una fila duplicada de tabla para "${row.teamName}".`);
+            return [];
+          }
+          seenStandingClubIds.add(clubId);
+          return [{
             id: crypto.randomUUID(),
             tournament_id: importedTournamentId,
             phase_id: standingsPhaseId,
@@ -412,70 +490,81 @@ export class HistoricalTournamentImportService {
               status: row.note,
             },
             last_updated: now,
-          };
-        })
-        .filter(Boolean);
+          }];
+        });
 
-      if (standingsInserts.length > 0) {
-        const { error: standingsError } = await supabase.from('tournament_standings').insert(standingsInserts);
-        if (standingsError) {
-          throw new Error(standingsError.message || 'No se pudo guardar la tabla importada.');
+        standingsInsertedCount = standingsInserts.length;
+        if (standingsInserts.length > 0) {
+          const { error: standingsError } = await db.from('tournament_standings').insert(standingsInserts);
+          if (standingsError) {
+            throw new Error(standingsError.message || 'No se pudo guardar la tabla importada.');
+          }
         }
       }
-    }
 
-    await this.learnAliases(supabase, model.clubs);
+      await this.learnAliases(supabase, model.clubs);
 
-    const relationCreated = await this.createSeasonRelation(
-      supabase,
-      params.baseTournamentId,
-      importedTournamentId,
-      model.seasonId
-    );
+      const relationResult = await this.createSeasonRelation(
+        supabase,
+        params.baseTournamentId,
+        importedTournamentId,
+        model.seasonId
+      );
+      const relationCreated = relationResult.ok;
+      if (!relationCreated && relationResult.message) {
+        warnings.push(relationResult.message);
+      }
 
-    await this.writeAudit(supabase, params.actorUserId, importedTournamentId, {
-      scope: 'historical_import',
-      source_tournament_id: params.baseTournamentId,
-      season_id: model.seasonId,
-      champion: model.champion,
-      runner_up: model.runnerUp,
-      teams: teamRows.length,
-      matches: matchInserts.length,
-      standings: model.parsedStandings.length,
-      relation_created: relationCreated,
-    });
-
-    await this.writeAudit(supabase, params.actorUserId, params.baseTournamentId, {
-      scope: 'historical_import',
-      imported_tournament_id: importedTournamentId,
-      season_id: model.seasonId,
-      relation_created: relationCreated,
-    });
-
-    return {
-      ok: true,
-      tournamentId: importedTournamentId,
-      relationCreated,
-      created: {
-        participants: participantInserts.length,
-        phases: phaseBlueprints.length,
-        rounds: roundBlueprints.length,
+      await this.writeAudit(supabase, params.actorUserId, importedTournamentId, {
+        scope: 'historical_import',
+        source_tournament_id: params.baseTournamentId,
+        season_id: model.seasonId,
+        champion: model.champion,
+        runner_up: model.runnerUp,
+        teams: teamRows.length,
         matches: matchInserts.length,
-        standings: model.parsedStandings.length,
-      },
-      warnings,
-    };
+        standings: standingsInsertedCount,
+        relation_created: relationCreated,
+      });
+
+      await this.writeAudit(supabase, params.actorUserId, params.baseTournamentId, {
+        scope: 'historical_import',
+        imported_tournament_id: importedTournamentId,
+        season_id: model.seasonId,
+        relation_created: relationCreated,
+      });
+
+      return {
+        ok: true,
+        tournamentId: importedTournamentId,
+        relationCreated,
+        created: {
+          participants: participantInserts.length,
+          phases: phaseBlueprints.length,
+          rounds: roundBlueprints.length,
+          matches: matchInserts.length,
+          standings: standingsInsertedCount,
+        },
+        warnings,
+      };
+    } catch (error) {
+      if (tournamentInserted) {
+        await this.cleanupImportedTournament(supabase, importedTournamentId);
+      }
+      throw error;
+    }
   }
 
   private static async loadContext(supabase: SupabaseClientLike, baseTournamentId: string): Promise<TournamentContext> {
+    const db = supabase as unknown as UntypedSupabaseClient;
     const [{ data: tournament, error: tournamentError }, { data: participants, error: participantsError }] = await Promise.all([
-      supabase
-        .from('tournaments')
+      db
+        .from<TournamentContext['tournament']>('tournaments')
         .select('id, name, display_name, slug, season_id, sport_id, union_id, country_id, country, category, age_grade, format, logo_url, banner_url, primary_color, secondary_color, region, ruleset')
         .eq('id', baseTournamentId)
         .single(),
-      supabase
-        .from('tournament_participants')
+      db
+        .from<ParticipantAliasRow[]>('tournament_participants')
         .select('club_id, name, short_code, clubs:club_id(id, name, short_name)')
         .eq('tournament_id', baseTournamentId),
     ]);
@@ -488,7 +577,10 @@ export class HistoricalTournamentImportService {
       throw new Error('No se pudieron cargar los participantes del torneo base.');
     }
 
-    let clubsQuery = supabase.from('clubs').select('id, name, short_name, union_id').order('name', { ascending: true });
+    let clubsQuery = db
+      .from<Array<{ id: string; name: string; short_name: string | null; union_id: string | null }>>('clubs')
+      .select('id, name, short_name, union_id')
+      .order('name', { ascending: true });
     if (tournament.union_id) {
       clubsQuery = clubsQuery.eq('union_id', tournament.union_id);
     }
@@ -500,7 +592,7 @@ export class HistoricalTournamentImportService {
 
     const clubIds = (clubs || []).map((club) => club.id);
     const { data: clubAliases } = clubIds.length > 0
-      ? await supabase.from('club_aliases').select('club_id, alias').in('club_id', clubIds)
+      ? await db.from<Array<{ club_id: string; alias: string }>>('club_aliases').select('club_id, alias').in('club_id', clubIds)
       : { data: [] as Array<{ club_id: string; alias: string }> };
 
     const participantRows = (participants || []) as ParticipantAliasRow[];
@@ -556,7 +648,8 @@ export class HistoricalTournamentImportService {
   private static buildModel(
     context: TournamentContext,
     rawText: string,
-    overrides: Record<string, string | null>
+    overrides: Record<string, string | null>,
+    phaseOverrides: PhaseOverrideMap = {}
   ): HistoricalModel {
     const issues: HistoricalImportIssue[] = [];
     const lines = rawText
@@ -637,12 +730,12 @@ export class HistoricalTournamentImportService {
       seasonId,
       parsedMatches,
       parsedStandings,
-      phases: this.summarizePhases(parsedMatches),
+      phases: this.summarizePhases(parsedMatches, phaseOverrides, parsedStandings.length > 0),
       clubs,
       matches: parsedMatches.map((match) => ({
         id: match.id,
         phaseKey: match.phaseKey,
-        phaseName: match.phaseKey === 'league' ? 'Temporada regular' : 'Playoffs',
+        phaseName: this.resolvePhaseConfig(match.phaseKey, phaseOverrides).name,
         roundName: match.roundName,
         roundDate: match.date,
         homeTeam: match.homeTeam,
@@ -902,12 +995,16 @@ export class HistoricalTournamentImportService {
     };
   }
 
-  private static summarizePhases(matches: ParsedMatch[]): HistoricalImportPhasePreview[] {
+  private static summarizePhases(
+    matches: ParsedMatch[],
+    phaseOverrides: PhaseOverrideMap = {},
+    includeStandingsLeague = false
+  ): HistoricalImportPhasePreview[] {
     const grouped = new Map<string, HistoricalImportPhasePreview>();
     const roundsByPhase = new Map<string, Set<string>>();
 
     for (const match of matches) {
-      const phaseName = match.phaseKey === 'league' ? 'Temporada regular' : 'Playoffs';
+      const phaseConfig = this.resolvePhaseConfig(match.phaseKey, phaseOverrides);
       const current = grouped.get(match.phaseKey);
       const rounds = roundsByPhase.get(match.phaseKey) || new Set<string>();
       rounds.add(match.roundKey);
@@ -916,8 +1013,8 @@ export class HistoricalTournamentImportService {
       if (!current) {
         grouped.set(match.phaseKey, {
           key: match.phaseKey,
-          name: phaseName,
-          phaseType: match.phaseKey === 'league' ? 'league' : 'playoff',
+          name: phaseConfig.name,
+          phaseType: phaseConfig.phaseType,
           roundCount: 1,
           matchCount: 1,
           startDate: match.date,
@@ -931,10 +1028,26 @@ export class HistoricalTournamentImportService {
       current.endDate = current.endDate && current.endDate > match.date ? current.endDate : match.date;
     }
 
-    return Array.from(grouped.values()).map((phase) => ({
-      ...phase,
-      roundCount: roundsByPhase.get(phase.key)?.size || 0,
-    }));
+    if (includeStandingsLeague && !grouped.has('league')) {
+      const phaseConfig = this.resolvePhaseConfig('league', phaseOverrides);
+      grouped.set('league', {
+        key: 'league',
+        name: phaseConfig.name,
+        phaseType: phaseConfig.phaseType,
+        roundCount: 0,
+        matchCount: 0,
+        startDate: null,
+        endDate: null,
+      });
+    }
+
+    const phaseOrder = (key: string) => (key === 'league' ? 1 : 2);
+    return Array.from(grouped.values())
+      .sort((left, right) => phaseOrder(left.key) - phaseOrder(right.key))
+      .map((phase) => ({
+        ...phase,
+        roundCount: roundsByPhase.get(phase.key)?.size || 0,
+      }));
   }
 
   private static inferPodium(matches: ParsedMatch[], standings: ParsedStanding[]) {
@@ -1002,39 +1115,87 @@ export class HistoricalTournamentImportService {
     return rounds;
   }
 
-  private static buildResolvedTeams(model: HistoricalModel, resolvedClubIds: Map<string, string>) {
-    const teamsFromStandings = model.parsedStandings.map((row) => ({
-      key: this.normalizeKey(row.teamName),
-      clubId: resolvedClubIds.get(this.normalizeKey(row.teamName)) as string,
-      clubName: model.clubs.find((club) => club.normalizedName === this.normalizeKey(row.teamName))?.matchedClubName || row.teamName,
-      shortCode: model.clubs.find((club) => club.normalizedName === this.normalizeKey(row.teamName))?.matchedClubShortName || null,
-      position: row.position,
-    }));
+  private static buildResolvedTeams(model: HistoricalModel, resolvedClubIds: Map<string, string>): ResolvedHistoricalTeam[] {
+    const teamsFromStandings = model.parsedStandings.flatMap((row) => {
+      const clubId = resolvedClubIds.get(this.normalizeKey(row.teamName));
+      if (!clubId) return [];
+      return [{
+        key: this.normalizeKey(row.teamName),
+        clubId,
+        clubName: model.clubs.find((club) => club.normalizedName === this.normalizeKey(row.teamName))?.matchedClubName || row.teamName,
+        shortCode: model.clubs.find((club) => club.normalizedName === this.normalizeKey(row.teamName))?.matchedClubShortName || null,
+        position: row.position,
+      }];
+    });
 
     const missingFromMatches = model.clubs
       .filter((club) => !teamsFromStandings.some((team) => team.key === club.normalizedName))
-      .map((club) => ({
-        key: club.normalizedName,
-        clubId: resolvedClubIds.get(club.normalizedName) as string,
-        clubName: club.matchedClubName || club.sourceName,
-        shortCode: club.matchedClubShortName,
-        position: null,
-      }));
+      .flatMap((club) => {
+        const clubId = resolvedClubIds.get(club.normalizedName);
+        if (!clubId) return [];
+        return [{
+          key: club.normalizedName,
+          clubId,
+          clubName: club.matchedClubName || club.sourceName,
+          shortCode: club.matchedClubShortName,
+          position: null,
+        }];
+      });
 
-    return [...teamsFromStandings, ...missingFromMatches];
+    const dedupedByClubId = new Map<string, ResolvedHistoricalTeam>();
+    [...teamsFromStandings, ...missingFromMatches].forEach((team) => {
+      const existing = dedupedByClubId.get(team.clubId);
+      if (!existing) {
+        dedupedByClubId.set(team.clubId, team);
+        return;
+      }
+      if (existing.position === null && team.position !== null) {
+        dedupedByClubId.set(team.clubId, team);
+      }
+    });
+
+    return Array.from(dedupedByClubId.values());
   }
 
   private static async ensureUniqueSlug(supabase: SupabaseClientLike, baseSlug: string): Promise<string> {
+    const db = supabase as unknown as UntypedSupabaseClient;
     const normalizedBase = normalizeSlug(baseSlug) || `historical-${Date.now()}`;
     let candidate = normalizedBase;
     let suffix = 1;
 
     while (true) {
-      const { data } = await supabase.from('tournaments').select('id').eq('slug', candidate).maybeSingle();
+      const { data } = await db.from<{ id: string }>('tournaments').select('id').eq('slug', candidate).maybeSingle();
       if (!data) return candidate;
       suffix += 1;
       candidate = `${normalizedBase}-${suffix}`;
     }
+  }
+
+  private static async createSeasonRecord(
+    supabase: SupabaseClientLike,
+    params: {
+      tournamentId: string;
+      seasonId: string;
+      teamsCount: number;
+      startDate: string | null;
+      endDate: string | null;
+    }
+  ): Promise<{ ok: boolean; message?: string }> {
+    const db = supabase as unknown as UntypedSupabaseClient;
+    const { error } = await db.from('seasons').upsert({
+      tournament_id: params.tournamentId,
+      season_id: params.seasonId,
+      teams_count: params.teamsCount,
+      is_active: false,
+      start_date: params.startDate,
+      end_date: params.endDate,
+    }, { onConflict: 'season_id,tournament_id' });
+
+    if (!error) return { ok: true };
+    if (this.isMissingTableError(error, 'seasons')) {
+      return { ok: false, message: 'La temporada se creo, pero falta la tabla seasons para guardar metadata historica.' };
+    }
+    return { ok: false, message: `La temporada se creo, pero no se pudo guardar metadata en seasons: ${error.message}` };
   }
 
   private static async createSeasonRelation(
@@ -1042,24 +1203,39 @@ export class HistoricalTournamentImportService {
     sourceTournamentId: string,
     targetTournamentId: string,
     seasonId: string
-  ): Promise<boolean> {
+  ): Promise<{ ok: boolean; message?: string }> {
     try {
-      const relationsClient = supabase as unknown as {
-        from: (table: 'tournament_relations') => {
-          insert: (payload: Record<string, unknown>) => Promise<{ error: { message?: string } | null }>;
-        };
-      };
-      const { error } = await relationsClient.from('tournament_relations').insert({
+      const db = supabase as unknown as UntypedSupabaseClient;
+      const { error } = await db.from('tournament_relations').upsert({
         source_tournament_id: sourceTournamentId,
         target_tournament_id: targetTournamentId,
         relation_type: 'previous_season',
         relation_direction: 'reference',
         status: 'active',
         description: `${RELATION_DESCRIPTION_PREFIX} ${seasonId}`,
-      });
-      return !error;
+      }, { onConflict: 'source_tournament_id,target_tournament_id,relation_type' });
+
+      if (!error) return { ok: true };
+      if (this.isMissingTableError(error, 'tournament_relations')) {
+        return { ok: false, message: 'La temporada se creo, pero falta la tabla tournament_relations para vincularla al torneo actual.' };
+      }
+      return { ok: false, message: `La temporada se creo, pero no se pudo crear el vinculo historico: ${error.message}` };
+    } catch (error) {
+      return {
+        ok: false,
+        message: error instanceof Error
+          ? `La temporada se creo, pero no se pudo crear el vinculo historico: ${error.message}`
+          : 'La temporada se creo, pero no se pudo crear el vinculo historico.',
+      };
+    }
+  }
+
+  private static async cleanupImportedTournament(supabase: SupabaseClientLike, tournamentId: string) {
+    try {
+      const db = supabase as unknown as UntypedSupabaseClient;
+      await db.from('tournaments').delete().eq('id', tournamentId);
     } catch {
-      return false;
+      // Best-effort rollback. The original creation error is more useful to the caller.
     }
   }
 
@@ -1074,7 +1250,8 @@ export class HistoricalTournamentImportService {
     if (rows.length === 0) return;
 
     try {
-      await supabase.from('club_aliases').upsert(rows, { onConflict: 'club_id,alias', ignoreDuplicates: true });
+      const db = supabase as unknown as UntypedSupabaseClient;
+      await db.from('club_aliases').upsert(rows, { onConflict: 'club_id,alias', ignoreDuplicates: true });
     } catch {
       // Alias learning should not block the import.
     }
@@ -1087,7 +1264,8 @@ export class HistoricalTournamentImportService {
     changes: Record<string, unknown>
   ) {
     try {
-      await supabase.from('admin_audit_log').insert({
+      const db = supabase as unknown as UntypedSupabaseClient;
+      await db.from('admin_audit_log').insert({
         actor_user_id: actorUserId,
         entity_type: 'tournament',
         entity_id: entityId,
@@ -1164,6 +1342,19 @@ export class HistoricalTournamentImportService {
     return normalized.includes('regular season') || normalized.includes('league');
   }
 
+  private static resolvePhaseConfig(phaseKey: PhaseKey, phaseOverrides: PhaseOverrideMap = {}) {
+    const override = phaseOverrides[phaseKey];
+    const defaultPhaseType = phaseKey === 'league' ? 'league' : 'playoff';
+    const phaseType = override?.phaseType === 'league' || override?.phaseType === 'playoff'
+      ? override.phaseType
+      : defaultPhaseType;
+
+    return {
+      name: this.readText(override?.name) || (phaseKey === 'league' ? 'Temporada regular' : 'Playoffs'),
+      phaseType,
+    };
+  }
+
   private static toIsoDate(rawDate: string) {
     const match = rawDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (!match) return rawDate;
@@ -1215,6 +1406,59 @@ export class HistoricalTournamentImportService {
       seen.add(key);
       return true;
     });
+  }
+
+  private static isMissingTableError(error: { code?: string | null; message?: string | null } | null | undefined, tableName: string) {
+    if (!error) return false;
+    const message = String(error.message || '').toLowerCase();
+    return error.code === '42P01' || message.includes(tableName.toLowerCase());
+  }
+
+  // Detects "Could not find the 'X' column of 'Y' in the schema cache" /
+  // "column ... does not exist" errors so callers can retry with a
+  // sanitized payload when an optional column is missing on the remote DB.
+  private static missingColumnFromError(
+    error: { code?: string | null; message?: string | null } | null | undefined
+  ): string | null {
+    if (!error) return null;
+    const message = String(error.message || '');
+    const schemaCacheMatch = message.match(/Could not find the '([^']+)' column/i);
+    if (schemaCacheMatch) return schemaCacheMatch[1];
+    const pgMissingMatch = message.match(/column "([^"]+)" of relation/i);
+    if (pgMissingMatch) return pgMissingMatch[1];
+    if (error.code === '42703' || error.code === 'PGRST204') {
+      const fallback = message.match(/'([^']+)'/);
+      if (fallback) return fallback[1];
+    }
+    return null;
+  }
+
+  // Inserts a row, automatically retrying without optional columns that the
+  // remote schema doesn't currently know about. This makes the importer
+  // tolerant to environments where late additions like start_date / end_date
+  // / settings haven't been applied yet.
+  private static async insertWithOptionalColumns<T extends Record<string, unknown>>(
+    db: UntypedSupabaseClient,
+    table: string,
+    payload: T,
+    optionalColumns: ReadonlyArray<keyof T & string>
+  ): Promise<SupabaseMutationResult> {
+    let attempt: Record<string, unknown> = { ...payload };
+    const removed = new Set<string>();
+    for (let i = 0; i <= optionalColumns.length; i++) {
+      const result = await db.from(table).insert(attempt);
+      if (!result.error) return result;
+      const missing = this.missingColumnFromError(result.error);
+      if (!missing) return result;
+      const removable = optionalColumns.find(
+        (column) => column === missing && !removed.has(column)
+      );
+      if (!removable) return result;
+      removed.add(removable);
+      const { [removable]: _omitted, ...rest } = attempt as Record<string, unknown>;
+      attempt = rest;
+    }
+    return await db.from(table).insert(attempt);
   }
 
   private static readText(value: string | null | undefined) {

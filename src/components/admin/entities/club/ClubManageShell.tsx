@@ -3,7 +3,12 @@
 import { useState, useEffect, Suspense, useEffectEvent, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Database } from '@/lib/database.types';
-import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
+import {
+    getClubDashboardModeForTab,
+    normalizeClubManageTab,
+    shouldLoadClubDashboardForTab,
+    shouldLoadClubDivisionsForTab,
+} from '@/lib/club-admin/manageTabs';
 import type { ClubSponsorItem } from '@/lib/club-admin/sponsors';
 import type { PersonWithRole } from '@/lib/services/personService';
 import { fetchDivisions, type Division } from '@/lib/services/divisionService';
@@ -26,7 +31,7 @@ import { ClubSquadsTab } from './ClubSquadsTab';
 import { ClubStaffTab } from './ClubStaffTab';
 import { ClubStandingsCard } from './ClubStandingsCard';
 import { ClubSummaryHero } from './ClubSummaryHero';
-import type { ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
+import type { ClubDashboardMode, ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
 import { EMPTY_CLUB_DASHBOARD_OVERVIEW } from '@/lib/club-admin/dashboard-types';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
@@ -50,8 +55,10 @@ interface ClubManageShellProps {
     navigationMode?: ClubConsoleMode;
     initialDashboardData?: ClubDashboardOverview | null;
     initialDashboardLoaded?: boolean;
+    initialDashboardRequested?: boolean;
     initialLinkedDivisions?: Division[];
     initialDivisionsLoaded?: boolean;
+    initialDivisionsRequested?: boolean;
     initialPlayers?: PersonWithRole[];
     initialPlayersLoaded?: boolean;
     initialStaff?: PersonWithRole[];
@@ -73,9 +80,13 @@ async function readJsonOrThrow<T>(response: Response): Promise<T> {
     return payload;
 }
 
-async function fetchClubDashboardData(clubId: string): Promise<ClubDashboardOverview> {
+async function fetchClubDashboardData(clubId: string, mode: ClubDashboardMode): Promise<ClubDashboardOverview> {
     try {
-        const response = await fetch(`/api/club-admin/dashboard?club=${encodeURIComponent(clubId)}`, {
+        const params = new URLSearchParams({
+            club: clubId,
+            mode,
+        });
+        const response = await fetch(`/api/club-admin/dashboard?${params.toString()}`, {
             credentials: 'same-origin',
             cache: 'no-store',
         });
@@ -215,8 +226,10 @@ export function ClubManageShell({
     navigationMode = 'admin',
     initialDashboardData = null,
     initialDashboardLoaded = false,
+    initialDashboardRequested = false,
     initialLinkedDivisions,
     initialDivisionsLoaded = false,
+    initialDivisionsRequested = false,
     initialPlayers,
     initialPlayersLoaded = false,
     initialStaff,
@@ -229,17 +242,20 @@ export function ClubManageShell({
     const searchParams = useSearchParams();
     const currentTab = normalizeClubManageTab(searchParams.get('tab'));
     const isPizarraFocus = currentTab === 'pizarra';
+    const shouldUseDashboard = shouldLoadClubDashboardForTab(currentTab);
+    const shouldUseDivisions = shouldLoadClubDivisionsForTab(currentTab);
+    const dashboardMode = getClubDashboardModeForTab(currentTab);
 
     const [isDirty, setIsDirty] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [form, setForm] = useState<ClubFormState>(createInitialClubForm(data));
 
     const [dashboardData, setDashboardData] = useState<ClubDashboardOverview>(
-        initialDashboardLoaded ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW
+        initialDashboardLoaded && initialDashboardRequested ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW
     );
-    const [isLoadingDashboard, setIsLoadingDashboard] = useState(!isCreate && !initialDashboardLoaded);
+    const [isLoadingDashboard, setIsLoadingDashboard] = useState(!isCreate && shouldUseDashboard && !initialDashboardLoaded);
     const [linkedDivisions, setLinkedDivisions] = useState<Division[]>(filterVisibleDivisions(initialLinkedDivisions));
-    const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate && !initialDivisionsLoaded);
+    const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate && shouldUseDivisions && !initialDivisionsLoaded);
 
     useEffect(() => {
         setForm(createInitialClubForm(data));
@@ -247,18 +263,18 @@ export function ClubManageShell({
     }, [data, id]);
 
     useEffect(() => {
-        if (isCreate) {
+        if (isCreate || !shouldUseDashboard) {
             setDashboardData(EMPTY_CLUB_DASHBOARD_OVERVIEW);
             setIsLoadingDashboard(false);
             return;
         }
 
-        setDashboardData(initialDashboardLoaded ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW);
-        setIsLoadingDashboard(!initialDashboardLoaded);
-    }, [id, isCreate, initialDashboardData, initialDashboardLoaded]);
+        setDashboardData(initialDashboardLoaded && initialDashboardRequested ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW);
+        setIsLoadingDashboard(!(initialDashboardLoaded && initialDashboardRequested));
+    }, [id, initialDashboardData, initialDashboardLoaded, initialDashboardRequested, isCreate, shouldUseDashboard]);
 
     useEffect(() => {
-        if (isCreate || initialDashboardLoaded) return;
+        if (isCreate || !shouldUseDashboard || (initialDashboardLoaded && initialDashboardRequested)) return;
 
         let isMounted = true;
 
@@ -267,7 +283,7 @@ export function ClubManageShell({
                 setIsLoadingDashboard(true);
             }
             try {
-                const response = await fetchClubDashboardData(id);
+                const response = await fetchClubDashboardData(id, dashboardMode);
                 if (isMounted) {
                     setDashboardData(response);
                 }
@@ -284,24 +300,24 @@ export function ClubManageShell({
         return () => {
             isMounted = false;
         };
-    }, [id, isCreate, initialDashboardLoaded]);
+    }, [dashboardMode, id, initialDashboardLoaded, initialDashboardRequested, isCreate, shouldUseDashboard]);
 
     useEffect(() => {
-        if (isCreate) {
+        if (isCreate || !shouldUseDivisions) {
             setLinkedDivisions([]);
             setIsLoadingDivisions(false);
             return;
         }
 
-        setLinkedDivisions(initialDivisionsLoaded ? filterVisibleDivisions(initialLinkedDivisions) : []);
-        setIsLoadingDivisions(!initialDivisionsLoaded);
-    }, [id, initialDivisionsLoaded, initialLinkedDivisions, isCreate]);
+        setLinkedDivisions(initialDivisionsLoaded && initialDivisionsRequested ? filterVisibleDivisions(initialLinkedDivisions) : []);
+        setIsLoadingDivisions(!(initialDivisionsLoaded && initialDivisionsRequested));
+    }, [id, initialDivisionsLoaded, initialDivisionsRequested, initialLinkedDivisions, isCreate, shouldUseDivisions]);
 
     useEffect(() => {
         let isMounted = true;
 
         const loadLinkedDivisions = async (force = false) => {
-            if (isCreate) {
+            if (isCreate || !shouldUseDivisions) {
                 if (isMounted) {
                     setLinkedDivisions([]);
                     setIsLoadingDivisions(false);
@@ -309,7 +325,7 @@ export function ClubManageShell({
                 return;
             }
 
-            if (!force && initialDivisionsLoaded) {
+            if (!force && initialDivisionsLoaded && initialDivisionsRequested) {
                 return;
             }
 
@@ -334,7 +350,7 @@ export function ClubManageShell({
             }
         };
 
-        if (!initialDivisionsLoaded) {
+        if (!(initialDivisionsLoaded && initialDivisionsRequested)) {
             void loadLinkedDivisions();
         }
 
@@ -347,7 +363,7 @@ export function ClubManageShell({
             isMounted = false;
             window.removeEventListener('club:divisions-updated', refreshDivisions);
         };
-    }, [id, initialDivisionsLoaded, isCreate]);
+    }, [id, initialDivisionsLoaded, initialDivisionsRequested, isCreate, shouldUseDivisions]);
 
     const unionName = unions.find((union) => union.id === form.union_id)?.name;
     const legacyCategories = form.categories || [];

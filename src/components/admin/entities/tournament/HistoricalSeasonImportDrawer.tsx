@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ArchiveRestore, X } from 'lucide-react';
 import { HistoricalSeasonImportWizard } from './HistoricalSeasonImportWizard';
 import './drawer-premium.css';
@@ -37,13 +38,13 @@ export function HistoricalSeasonImportDrawer({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <>
-      <div className="pp-drawer-overlay" onClick={onClose} />
+      <div className="pp-drawer-overlay historical-season-overlay" onClick={onClose} />
       <div
-        className="pp-drawer-panel pp-drawer-panel-wide"
+        className="pp-drawer-panel pp-drawer-panel-wide historical-season-drawer"
         role="dialog"
         aria-modal="true"
         aria-label="Importar temporada historica"
@@ -72,7 +73,7 @@ export function HistoricalSeasonImportDrawer({
           </div>
         </div>
 
-        <div className="pp-drawer-body">
+        <div className="pp-drawer-body historical-season-drawer-body">
           <HistoricalSeasonImportWizard
             tournamentId={tournamentId}
             onBack={onClose}
@@ -84,6 +85,7 @@ export function HistoricalSeasonImportDrawer({
           />
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

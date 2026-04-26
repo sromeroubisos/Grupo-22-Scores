@@ -25,6 +25,23 @@ export const CLUB_MANAGE_ALLOWED_TABS = new Set<ClubManageTabId>([
     'configuracion',
 ]);
 
+export const CLUB_MANAGE_DASHBOARD_TABS = new Set<ClubManageTabId>([
+    'general',
+    'rendimiento',
+    'competencias',
+    'partidos',
+    'contenido',
+    'entrenamientos',
+]);
+
+export const CLUB_MANAGE_DIVISION_TABS = new Set<ClubManageTabId>([
+    'general',
+    'rendimiento',
+    'partidos',
+    'planteles',
+    'entrenamientos',
+]);
+
 export const CLUB_MANAGE_TAB_ALIASES: Record<string, ClubManageTabId> = {
     resumen: 'general',
     gimnasio: 'rendimiento',
@@ -49,4 +66,16 @@ export function normalizeClubManageTab(requestedTab?: string | null): ClubManage
     }
 
     return 'general';
+}
+
+export function shouldLoadClubDashboardForTab(tab: ClubManageTabId) {
+    return CLUB_MANAGE_DASHBOARD_TABS.has(tab);
+}
+
+export function shouldLoadClubDivisionsForTab(tab: ClubManageTabId) {
+    return CLUB_MANAGE_DIVISION_TABS.has(tab);
+}
+
+export function getClubDashboardModeForTab(tab: ClubManageTabId): 'summary' | 'operational' {
+    return tab === 'partidos' ? 'operational' : 'summary';
 }

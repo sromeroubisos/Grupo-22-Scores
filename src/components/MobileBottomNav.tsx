@@ -10,7 +10,7 @@ const navItems = [
     { href: '/', label: 'Partidos', icon: 'matches', matchPrefixes: ['/', '/matches'] },
     { href: '/noticias', label: 'Noticias', icon: 'news', matchPrefixes: ['/noticias'] },
     { href: '/tournaments', label: 'Ligas', icon: 'trophy', matchPrefixes: ['/tournaments'] },
-    { href: '/profile', label: 'Usuario', icon: 'user', matchPrefixes: ['/profile', '/favorites', '/prode'] },
+    { href: '/profile', label: 'Usuario', icon: 'user', matchPrefixes: ['/profile', '/favorites', '/notifications', '/prode'] },
     { href: '/search', label: 'Buscar', icon: 'search', matchPrefixes: ['/search'] },
 ];
 

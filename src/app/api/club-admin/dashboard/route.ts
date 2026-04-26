@@ -50,7 +50,8 @@ export async function GET(request: NextRequest) {
         }
 
         const readClient = await getReadClient();
-        const data = await getClubDashboardOverview(readClient as never, clubId).catch((error) => {
+        const mode = request.nextUrl.searchParams.get('mode') === 'operational' ? 'operational' : 'summary';
+        const data = await getClubDashboardOverview(readClient as never, clubId, { mode }).catch((error) => {
             logDashboardFallback(error);
             return EMPTY_CLUB_DASHBOARD_OVERVIEW;
         });

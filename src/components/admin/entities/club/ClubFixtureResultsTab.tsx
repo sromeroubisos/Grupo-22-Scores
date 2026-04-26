@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useDeferredValue, useState, startTransition } from 'react';
-import { Calendar, ChevronRight, ClipboardList, FileBarChart2, Filter, LayoutList, NotebookPen, Plus, ShieldAlert, Sparkles, Target, Users, X } from 'lucide-react';
+import { Calendar, ChevronRight, ClipboardList, FileBarChart2, Filter, LayoutList, NotebookPen, ShieldAlert, Sparkles, Target, Users, X } from 'lucide-react';
 import { getStoredActiveTeamId, persistActiveTeamId } from '@/lib/club-admin/activeTeamSelection';
 import type { ClubDashboardMatch } from '@/lib/club-admin/dashboard-types';
 import type { Division } from '@/lib/services/divisionService';
@@ -117,7 +117,10 @@ function isPlayedMatch(match: ClubDashboardMatch) {
     return normalized === 'final' || normalized === 'finished' || normalized === 'ft';
 }
 
-function getLineupCount(lineups: unknown) {
+function getLineupCount(match: ClubDashboardMatch) {
+    if (typeof match.lineupCount === 'number') return match.lineupCount;
+
+    const lineups = match.lineups;
     if (!lineups || typeof lineups !== 'object') return 0;
 
     const source = lineups as { home?: unknown; away?: unknown };
@@ -126,7 +129,10 @@ function getLineupCount(lineups: unknown) {
     return Math.max(homeCount, awayCount);
 }
 
-function getStatsCount(events: unknown) {
+function getStatsCount(match: ClubDashboardMatch) {
+    if (typeof match.statsCount === 'number') return match.statsCount;
+
+    const events = match.events;
     if (Array.isArray(events)) return events.length;
     if (!events || typeof events !== 'object') return 0;
 
@@ -143,10 +149,10 @@ function hasScore(match: ClubDashboardMatch) {
 }
 
 function inferOperationalState(match: ClubDashboardMatch): MatchOperationalState {
-    const lineupCount = getLineupCount(match.lineups);
+    const lineupCount = getLineupCount(match);
     const hasNotes = hasMeaningfulNotes(match.notes);
     const played = isPlayedMatch(match);
-    const stats = played ? getStatsCount(match.events) > 0 || hasScore(match) : false;
+    const stats = played ? getStatsCount(match) > 0 || hasScore(match) : false;
     const report = played ? hasNotes : false;
     const state = {
         callup: lineupCount > 0,
@@ -202,8 +208,8 @@ function buildTimelineEntry(
         statusLabel: normalizeStatus(match.status),
         originLabel: inferOrigin(match),
         operationalState,
-        lineupCount: getLineupCount(match.lineups),
-        statsCount: getStatsCount(match.events),
+        lineupCount: getLineupCount(match),
+        statsCount: getStatsCount(match),
         hasUrgentPending: operationalState.completed < 4,
         isUpcoming: upcoming,
         isPlayed: played,
@@ -900,7 +906,7 @@ export function ClubFixtureResultsTab({
                                         window.open(`/club-admin/matches/${data.id}`, '_blank');
                                         // Refresh list after short delay
                                         setTimeout(() => window.location.reload(), 500);
-                                    } catch (err) {
+                                    } catch {
                                         alert('Error al crear el partido');
                                     } finally {
                                         setCreating(false);

@@ -527,11 +527,11 @@ export async function fetchDivisions(clubId: string, supabaseClient?: any): Prom
     const db = supabase as any;
 
     try {
-        const [teamDivisions, legacyDivisions] = await Promise.all([
+        const [teamDivisions, legacyDivisions, familyDivisions] = await Promise.all([
             fetchDivisionsFromTeams(db, clubId),
             fetchDivisionsFromLegacy(db, clubId),
+            fetchFamilyDivisions(db, clubId),
         ]);
-        const familyDivisions = await fetchFamilyDivisions(db, clubId);
 
         const hasTeamRows = Boolean(teamDivisions && teamDivisions.length > 0);
         const hasLegacyRows = Boolean(legacyDivisions && legacyDivisions.length > 0);

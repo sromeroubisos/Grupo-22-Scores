@@ -31,6 +31,7 @@ export async function POST(
         actorUserId,
         rawText,
         overrides: body?.overrides || {},
+        phaseOverrides: body?.phaseOverrides || {},
         tournamentName: body?.tournamentName || null,
         displayName: body?.displayName || null,
         slug: body?.slug || null,

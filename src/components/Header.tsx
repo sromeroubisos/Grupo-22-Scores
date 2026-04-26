@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSport } from '@/context/SportContext';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import NotificationsBell from '@/components/NotificationsBell';
 const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
 import { getRoleLabel, resolveAdminPanel } from '@/lib/auth/roles';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
@@ -120,6 +121,7 @@ export default function Header() {
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
     const isProdeRoute = pathname?.startsWith('/prode') ?? false;
+    const isNotificationsRoute = pathname?.startsWith('/notifications') ?? false;
     const rankingsHref = `/rankings?sport=${encodeURIComponent(selectedSport.id)}`;
 
     return (
@@ -184,6 +186,8 @@ export default function Header() {
                         </svg>
                         <span>Rankings</span>
                     </Link>
+
+                    <NotificationsBell />
 
                     <button 
                         className="g22-mobile-search-btn" 
@@ -267,6 +271,14 @@ export default function Header() {
                                                 Mis Seguidos
                                             </Link>
                                         )}
+
+                                        <Link href="/notifications" onClick={() => setIsUserMenuOpen(false)} aria-current={isNotificationsRoute ? 'page' : undefined}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill={isNotificationsRoute ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                                            </svg>
+                                            Notificaciones
+                                        </Link>
 
                                         <Link href="/profile?tab=prode" onClick={() => setIsUserMenuOpen(false)}>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -17,6 +17,8 @@ export interface ClubDashboardScore {
     away: number | null;
 }
 
+export type ClubDashboardMode = 'summary' | 'operational';
+
 export interface ClubDashboardMatch {
     id: string;
     dateTime: string | null;
@@ -26,6 +28,8 @@ export interface ClubDashboardMatch {
     notes: string | null;
     lineups: unknown;
     events: unknown;
+    lineupCount: number;
+    statsCount: number;
     isHome: boolean;
     homeDivisionId: string | null;
     awayDivisionId: string | null;
