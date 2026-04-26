@@ -19,6 +19,7 @@ import {
   toInputTimeInTimeZone,
 } from '@/lib/timezone';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { assertUuid, isUuid } from '@/lib/utils/postgrest';
 import type {
   TournamentFixture,
   TournamentPhase,
@@ -552,6 +553,7 @@ export class FixtureService {
    * Get matches for a specific round
    */
   static async getMatchesForRound(roundId: string): Promise<MatchWithClubs[] | null> {
+    if (!isUuid(roundId)) return null;
     const supabase = await getReadClient();
 
     const { data: matches, error: matchesError } = await supabase
@@ -1305,49 +1307,64 @@ export class FixtureService {
    * Mass reschedule all matches in a round
    */
   static async massRescheduleRound(params: MassRescheduleParams): Promise<boolean> {
+    const roundId = assertUuid(params.roundId, 'roundId');
     const supabase = await this.getWriteClient();
 
-    if (params.newDate) {
-      const { data: matches } = await supabase
+    // When changing the date, each match keeps its own time-of-day unless a
+    // new time is also provided, so we must recompute date_time per row.
+    // We still avoid the previous N+1: rows are grouped by their resulting
+    // date_time and updated with one query per distinct value (typically 1).
+    const needsPerRowReschedule = Boolean(params.newDate || (params.newTime && !params.newDate));
+
+    if (needsPerRowReschedule) {
+      const { data: matches, error: matchesError } = await supabase
         .from('matches')
         .select('id, date_time')
-        .or(`round_uuid.eq.${params.roundId},round_id.eq.${params.roundId}`);
+        .or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`);
 
-      if (matches) {
-        for (const match of matches) {
-          const nextDate = params.newDate;
-          const nextTime = params.newTime || toInputTimeInTimeZone(match.date_time, APP_TIMEZONE) || '00:00';
-          const nextDateTime = combineLocalDateTimeToUtcIso(nextDate, nextTime, APP_TIMEZONE);
-
-          if (!nextDateTime) {
-            throw new Error('No se pudo recalcular la fecha de la jornada.');
-          }
-
-          await supabase
-            .from('matches')
-            .update({ date_time: nextDateTime })
-            .eq('id', match.id);
-        }
+      if (matchesError) {
+        console.error('Error fetching matches for reschedule:', matchesError);
+        return false;
       }
-    } else if (params.newTime) {
-      const { data: matches } = await supabase
-        .from('matches')
-        .select('id, date_time')
-        .or(`round_uuid.eq.${params.roundId},round_id.eq.${params.roundId}`);
 
-      if (matches) {
-        for (const match of matches) {
-          const existingDate = toInputDateInTimeZone(match.date_time, APP_TIMEZONE);
-          const nextDateTime = combineLocalDateTimeToUtcIso(existingDate, params.newTime, APP_TIMEZONE);
+      const rows = matches ?? [];
+      const groups = new Map<string, string[]>();
 
-          if (!nextDateTime) {
-            throw new Error('No se pudo recalcular la hora de la jornada.');
-          }
+      for (const match of rows) {
+        let nextDate: string | null;
+        let nextTime: string | null;
 
-          await supabase
-            .from('matches')
-            .update({ date_time: nextDateTime })
-            .eq('id', match.id);
+        if (params.newDate) {
+          nextDate = params.newDate;
+          nextTime = params.newTime || toInputTimeInTimeZone(match.date_time, APP_TIMEZONE) || '00:00';
+        } else {
+          nextDate = toInputDateInTimeZone(match.date_time, APP_TIMEZONE);
+          nextTime = params.newTime!;
+        }
+
+        const nextDateTime = nextDate && nextTime
+          ? combineLocalDateTimeToUtcIso(nextDate, nextTime, APP_TIMEZONE)
+          : null;
+
+        if (!nextDateTime) {
+          throw new Error('No se pudo recalcular la fecha/hora de la jornada.');
+        }
+
+        const bucket = groups.get(nextDateTime) ?? [];
+        bucket.push(match.id);
+        groups.set(nextDateTime, bucket);
+      }
+
+      // One UPDATE per distinct target datetime instead of one per match.
+      for (const [nextDateTime, ids] of groups) {
+        const { error } = await supabase
+          .from('matches')
+          .update({ date_time: nextDateTime })
+          .in('id', ids);
+
+        if (error) {
+          console.error('Error rescheduling matches:', error);
+          return false;
         }
       }
     }
@@ -1356,7 +1373,7 @@ export class FixtureService {
       const { error } = await supabase
         .from('matches')
         .update({ venue: params.newVenue })
-        .or(`round_uuid.eq.${params.roundId},round_id.eq.${params.roundId}`);
+        .or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`);
 
       if (error) {
         console.error('Error updating venue:', error);
@@ -1371,6 +1388,7 @@ export class FixtureService {
    * Reset a round (delete all matches)
    */
   static async resetRound(roundId: string): Promise<boolean> {
+    if (!isUuid(roundId)) return false;
     const supabase = await this.getWriteClient();
 
     const { error } = await supabase.from('matches').delete().or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`);
@@ -1390,70 +1408,80 @@ export class FixtureService {
    * Validate fixture structure and common issues
    */
   static async validateFixture(tournamentId: string): Promise<any> {
+    if (!isUuid(tournamentId)) {
+      return { isValid: false, diagnostics: [{ type: 'error', message: 'tournamentId inválido.' }] };
+    }
     const supabase = await getReadClient();
     const diagnostics: any[] = [];
 
-    // 1. Check for rounds without matches
-    const { data: rounds } = await supabase
-      .from('tournament_rounds')
-      .select('id, name, phase_id, tournament_phases(name)')
-      .eq('phase_id', (await supabase.from('tournament_phases').select('id').eq('tournament_id', tournamentId).limit(1).single()).data?.id); // Simplified
+    // Fetch all phases of the tournament (previous code used .limit(1) and
+    // therefore only validated the first phase by mistake) along with all
+    // their rounds in two queries instead of N+1.
+    const [phasesRes, matchesRes] = await Promise.all([
+      supabase
+        .from('tournament_phases')
+        .select('id, name, tournament_rounds(id, name)')
+        .eq('tournament_id', tournamentId),
+      supabase
+        .from('matches')
+        .select('id, round_uuid, round_id, home_club_id, away_club_id')
+        .eq('tournament_id', tournamentId),
+    ]);
 
-    if (rounds) {
-      for (const round of rounds) {
-        const { count } = await supabase
-          .from('matches')
-          .select('*', { count: 'exact', head: true })
-          .or(`round_uuid.eq.${round.id},round_id.eq.${round.id}`);
+    const matches = matchesRes.data ?? [];
 
-        if (count === 0) {
+    // Build a Set of round IDs that already have at least one match.
+    const roundsWithMatches = new Set<string>();
+    for (const m of matches) {
+      const rid = this.getMatchRoundId(m);
+      if (rid) roundsWithMatches.add(rid);
+    }
+
+    // 1. Rounds without matches (across ALL phases).
+    for (const phase of phasesRes.data ?? []) {
+      const phaseRounds = (phase as any).tournament_rounds || [];
+      for (const round of phaseRounds) {
+        if (!roundsWithMatches.has(round.id)) {
           diagnostics.push({
             type: 'warning',
             message: `La jornada "${round.name}" no tiene partidos programados.`,
-            context: (round as any).tournament_phases?.name,
-            action: 'generate'
+            context: (phase as any).name,
+            action: 'generate',
           });
         }
       }
     }
 
-    // 2. Check for teams with multiple matches in same round
-    const { data: matches } = await supabase
-      .from('matches')
-      .select('id, round_uuid, round_id, home_club_id, away_club_id')
-      .eq('tournament_id', tournamentId);
+    // 2. Teams with multiple matches in the same round.
+    const roundTeams = new Map<string, Set<string>>();
+    matches.forEach((m) => {
+      const roundId = this.getMatchRoundId(m);
+      if (!roundId) return;
+      if (!roundTeams.has(roundId)) roundTeams.set(roundId, new Set());
+      const teams = roundTeams.get(roundId)!;
 
-    if (matches) {
-      const roundTeams = new Map<string, Set<string>>();
-      matches.forEach(m => {
-        const roundId = this.getMatchRoundId(m);
-        if (!roundId) return;
-        if (!roundTeams.has(roundId)) roundTeams.set(roundId, new Set());
-        const teams = roundTeams.get(roundId)!;
+      if (teams.has(m.home_club_id)) {
+        diagnostics.push({
+          type: 'error',
+          message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
+          context: roundId,
+        });
+      }
+      teams.add(m.home_club_id);
 
-        if (teams.has(m.home_club_id)) {
-          diagnostics.push({
-            type: 'error',
-            message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
-            context: roundId
-          });
-        }
-        teams.add(m.home_club_id);
-
-        if (teams.has(m.away_club_id)) {
-          diagnostics.push({
-            type: 'error',
-            message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
-            context: roundId
-          });
-        }
-        teams.add(m.away_club_id);
-      });
-    }
+      if (teams.has(m.away_club_id)) {
+        diagnostics.push({
+          type: 'error',
+          message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
+          context: roundId,
+        });
+      }
+      teams.add(m.away_club_id);
+    });
 
     return {
-      isValid: diagnostics.filter(d => d.type === 'error').length === 0,
-      diagnostics
+      isValid: diagnostics.filter((d) => d.type === 'error').length === 0,
+      diagnostics,
     };
   }
 

@@ -354,61 +354,72 @@ export class HistoricalTournamentImportService {
         settings: Record<string, unknown>;
       }>;
 
+      // Generate IDs first, then insert all phases / rounds in a single
+      // batch each. Previously this loop fired one round-trip per phase and
+      // per round, which dominated the import time on tournaments with many
+      // matchdays.
       const phaseIdByKey = new Map<'league' | 'playoff', string>();
-      for (const phase of phaseBlueprints) {
+      const phaseRows = phaseBlueprints.map((phase) => {
         const phaseId = crypto.randomUUID();
         phaseIdByKey.set(phase.key, phaseId);
-        const { error } = await this.insertWithOptionalColumns(
+        return {
+          id: phaseId,
+          tournament_id: importedTournamentId,
+          name: phase.name,
+          phase_type: phase.phase_type,
+          order_index: phase.order_index,
+          is_active: phase.is_active,
+          settings: phase.settings,
+          start_date: startDate,
+          end_date: endDate,
+          created_at: now,
+          updated_at: now,
+        };
+      });
+
+      if (phaseRows.length > 0) {
+        const { error: phasesError } = await this.insertManyWithOptionalColumns(
           db,
           'tournament_phases',
-          {
-            id: phaseId,
-            tournament_id: importedTournamentId,
-            name: phase.name,
-            phase_type: phase.phase_type,
-            order_index: phase.order_index,
-            is_active: phase.is_active,
-            settings: phase.settings,
-            start_date: startDate,
-            end_date: endDate,
-            created_at: now,
-            updated_at: now,
-          },
+          phaseRows,
           ['start_date', 'end_date', 'settings', 'created_at', 'updated_at']
         );
-
-        if (error) {
-          throw new Error(error.message || `No se pudo crear la fase ${phase.name}.`);
+        if (phasesError) {
+          throw new Error(phasesError.message || 'No se pudieron crear las fases del torneo.');
         }
       }
 
       const roundBlueprints = this.buildRoundBlueprints(model);
       const roundIdByKey = new Map<string, string>();
+      const roundRows: Record<string, unknown>[] = [];
       for (const round of roundBlueprints) {
         const phaseId = phaseIdByKey.get(round.phaseKey);
         if (!phaseId) continue;
         const roundId = crypto.randomUUID();
         roundIdByKey.set(round.key, roundId);
-        const { error } = await this.insertWithOptionalColumns(
+        roundRows.push({
+          id: roundId,
+          phase_id: phaseId,
+          name: round.name,
+          order_index: round.orderIndex,
+          start_date: round.date,
+          end_date: round.date,
+          is_completed: true,
+          notes: round.notes,
+          created_at: now,
+          updated_at: now,
+        });
+      }
+
+      if (roundRows.length > 0) {
+        const { error: roundsError } = await this.insertManyWithOptionalColumns(
           db,
           'tournament_rounds',
-          {
-            id: roundId,
-            phase_id: phaseId,
-            name: round.name,
-            order_index: round.orderIndex,
-            start_date: round.date,
-            end_date: round.date,
-            is_completed: true,
-            notes: round.notes,
-            created_at: now,
-            updated_at: now,
-          },
+          roundRows,
           ['start_date', 'end_date', 'is_completed', 'notes', 'created_at', 'updated_at']
         );
-
-        if (error) {
-          throw new Error(error.message || `No se pudo crear la ronda ${round.name}.`);
+        if (roundsError) {
+          throw new Error(roundsError.message || 'No se pudieron crear las jornadas del torneo.');
         }
       }
 
@@ -1459,6 +1470,39 @@ export class HistoricalTournamentImportService {
       attempt = rest;
     }
     return await db.from(table).insert(attempt);
+  }
+
+  // Bulk version of insertWithOptionalColumns. Inserts an array of rows with
+  // the same shape and retries dropping optional columns from ALL rows when
+  // the remote schema is missing them. Avoids the N+1 round-trip pattern of
+  // calling insertWithOptionalColumns inside a for-loop for phases / rounds.
+  private static async insertManyWithOptionalColumns<T extends Record<string, unknown>>(
+    db: UntypedSupabaseClient,
+    table: string,
+    rows: T[],
+    optionalColumns: ReadonlyArray<keyof T & string>
+  ): Promise<SupabaseMutationResult> {
+    if (rows.length === 0) {
+      return { error: null } as SupabaseMutationResult;
+    }
+    let attempts: Record<string, unknown>[] = rows.map((row) => ({ ...row }));
+    const removed = new Set<string>();
+    for (let i = 0; i <= optionalColumns.length; i++) {
+      const result = await db.from(table).insert(attempts);
+      if (!result.error) return result;
+      const missing = this.missingColumnFromError(result.error);
+      if (!missing) return result;
+      const removable = optionalColumns.find(
+        (column) => column === missing && !removed.has(column)
+      );
+      if (!removable) return result;
+      removed.add(removable);
+      attempts = attempts.map((row) => {
+        const { [removable]: _omitted, ...rest } = row as Record<string, unknown>;
+        return rest;
+      });
+    }
+    return await db.from(table).insert(attempts);
   }
 
   private static readText(value: string | null | undefined) {

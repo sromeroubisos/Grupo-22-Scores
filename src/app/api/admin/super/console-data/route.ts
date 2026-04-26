@@ -87,19 +87,37 @@ async function selectWithFallback<T>(
             ) => PromiseLike<{
                 data: T[] | null;
                 error: QueryError;
+            }> & {
+                range: (from: number, to: number) => PromiseLike<{
+                    data: T[] | null;
+                    error: QueryError;
+                }>;
+            };
+            range: (from: number, to: number) => PromiseLike<{
+                data: T[] | null;
+                error: QueryError;
             }>;
         };
     },
     variants: string[],
-    orderBy?: { column: string; ascending?: boolean }
+    orderBy?: { column: string; ascending?: boolean },
+    range?: { from: number; to: number },
 ) {
     let lastError: QueryError = null;
 
     for (const columns of variants) {
         const query = baseQuery.select(columns);
-        const result = orderBy
-            ? await query.order(orderBy.column, { ascending: orderBy.ascending })
-            : await query;
+        let pending: PromiseLike<{ data: T[] | null; error: QueryError }>;
+        if (orderBy && range) {
+            pending = query.order(orderBy.column, { ascending: orderBy.ascending }).range(range.from, range.to);
+        } else if (orderBy) {
+            pending = query.order(orderBy.column, { ascending: orderBy.ascending });
+        } else if (range) {
+            pending = query.range(range.from, range.to);
+        } else {
+            pending = query;
+        }
+        const result = await pending;
 
         if (!result?.error) {
             return { data: result?.data || [], error: null };
@@ -216,6 +234,27 @@ function normalizeSportValue(value: string | null | undefined) {
     return normalized || null;
 }
 
+// Server-side caps to prevent dashboards from accidentally streaming the
+// entire matches/clubs/tournaments tables on every load. Callers can request
+// smaller pages via ?limit= and traverse with ?offset=.
+const DEFAULT_PAGE_SIZE: Record<string, number> = {
+    matches: 500,
+    clubs: 500,
+    tournaments: 500,
+};
+const MAX_PAGE_SIZE = 2000;
+
+function parsePagination(searchParams: URLSearchParams, resource: string) {
+    const defaultLimit = DEFAULT_PAGE_SIZE[resource] ?? 500;
+    const limitParam = parseInt(searchParams.get('limit') || '', 10);
+    const offsetParam = parseInt(searchParams.get('offset') || '', 10);
+    const limit = Number.isFinite(limitParam) && limitParam > 0
+        ? Math.min(limitParam, MAX_PAGE_SIZE)
+        : defaultLimit;
+    const offset = Number.isFinite(offsetParam) && offsetParam >= 0 ? offsetParam : 0;
+    return { limit, offset, range: { from: offset, to: offset + limit - 1 } };
+}
+
 export async function GET(request: NextRequest) {
     try {
         await requireAdminApiUser();
@@ -223,11 +262,14 @@ export async function GET(request: NextRequest) {
         return jsonError('Unauthorized', 401);
     }
 
-    const resource = new URL(request.url).searchParams.get('resource');
+    const url = new URL(request.url);
+    const resource = url.searchParams.get('resource');
 
     if (!resource || !['clubs', 'matches', 'tournaments'].includes(resource)) {
         return jsonError('Invalid resource', 400);
     }
+
+    const pagination = parsePagination(url.searchParams, resource);
 
     try {
         const readClient = await getReadClient();
@@ -243,7 +285,9 @@ export async function GET(request: NextRequest) {
                         'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport, sport_id',
                         'id, name, short_name, city, country, logo_url, primary_color, slug, is_visible, union_id, sport',
                         'id, name, city, country, logo_url, slug, is_visible, union_id',
-                    ]
+                    ],
+                    { column: 'name', ascending: true },
+                    pagination.range,
                 ),
                 withSoftTimeout(
                     readClient
@@ -289,7 +333,8 @@ export async function GET(request: NextRequest) {
                         'id, name, sport_id, country_id, logo_url, created_at, updated_at',
                         'id, name'
                     ],
-                    { column: 'updated_at', ascending: false }
+                    { column: 'updated_at', ascending: false },
+                    pagination.range,
                 ),
             ]);
 
@@ -346,7 +391,8 @@ export async function GET(request: NextRequest) {
                 'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport',
                 'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id'
             ],
-            { column: 'date_time', ascending: false }
+            { column: 'date_time', ascending: false },
+            pagination.range,
         );
 
         const { data: matches, error: matchesError } = matchesResult;

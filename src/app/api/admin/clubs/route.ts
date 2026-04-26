@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { escapePostgrestLike } from '@/lib/utils/postgrest';
 
 /**
  * GET /api/admin/clubs
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
         .order('name', { ascending: true });
 
       if (search) {
-        const escapedSearch = search.replace(/[%_,]/g, (match) => `\\${match}`);
+        const escapedSearch = escapePostgrestLike(search);
         query = query.or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`);
       }
 

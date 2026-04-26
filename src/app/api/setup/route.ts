@@ -4,8 +4,26 @@ import {
     AUTHORIZED_SUPER_ADMIN_EMAILS,
     SUPER_ADMIN_EMAIL,
 } from '@/lib/types/user'
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin'
 
-const SUPER_ADMIN_PASSWORD = 'SuperAdmin123!'
+// The setup endpoint can recreate or reset the super-admin account, so it MUST
+// require an existing global admin session and an explicit opt-in via env flag.
+// Without these guards the route is a public super-admin takeover vector
+// (anyone could hit GET /api/setup and obtain the credentials).
+const SETUP_ENABLED = process.env.ENABLE_SETUP_ENDPOINT === 'true'
+
+function readSetupPassword(): string | null {
+    const candidates = [
+        process.env.SUPER_ADMIN_PASSWORD,
+        process.env.SETUP_SUPER_ADMIN_PASSWORD,
+    ]
+    for (const value of candidates) {
+        if (typeof value === 'string' && value.trim().length >= 12) {
+            return value.trim()
+        }
+    }
+    return null
+}
 
 type SetupResult = {
     auth?: string
@@ -19,9 +37,14 @@ function getErrorMessage(error: unknown): string {
 }
 
 async function ensureAdminAccount(
-    supabase: ReturnType<typeof createClient>,
+    // The setup endpoint mixes `auth` schema reads with `public.users` writes
+    // and there is no generated Database typing for the auth schema in this
+    // project, so we treat the client as untyped here. Behaviour and runtime
+    // contracts are unchanged.
+    supabase: any,
     email: string,
     role: 'super_admin',
+    password: string,
 ): Promise<SetupResult> {
     const result: SetupResult = {}
 
@@ -42,7 +65,7 @@ async function ensureAdminAccount(
     if (!authUser) {
         const { data, error } = await supabase.auth.admin.createUser({
             email,
-            password: SUPER_ADMIN_PASSWORD,
+            password,
             email_confirm: true,
             user_metadata: { full_name: 'Super Admin' },
         })
@@ -57,7 +80,7 @@ async function ensureAdminAccount(
         result.autoConfirmed = true
     } else {
         const { error: updateError } = await supabase.auth.admin.updateUserById(authUser.id, {
-            password: SUPER_ADMIN_PASSWORD,
+            password,
             email_confirm: true,
         })
 
@@ -92,6 +115,30 @@ async function ensureAdminAccount(
 }
 
 export async function GET() {
+    if (!SETUP_ENABLED) {
+        return NextResponse.json(
+            { error: 'Setup endpoint disabled. Set ENABLE_SETUP_ENDPOINT=true to enable.' },
+            { status: 404 },
+        )
+    }
+
+    try {
+        await requireAdminApiUser()
+    } catch {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const password = readSetupPassword()
+    if (!password) {
+        return NextResponse.json(
+            {
+                error:
+                    'Missing SUPER_ADMIN_PASSWORD env var (>=12 chars). The endpoint refuses to use a hardcoded fallback.',
+            },
+            { status: 500 },
+        )
+    }
+
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -132,7 +179,7 @@ export async function GET() {
     if (serviceKey) {
         const adminResults = await Promise.all(
             AUTHORIZED_SUPER_ADMIN_EMAILS.map(async (email) => {
-                const accountResult = await ensureAdminAccount(supabase, email, 'super_admin')
+                const accountResult = await ensureAdminAccount(supabase, email, 'super_admin', password)
                 return [email, accountResult] as const
             }),
         )
@@ -141,7 +188,7 @@ export async function GET() {
     } else {
         const { data, error } = await supabase.auth.signUp({
             email: SUPER_ADMIN_EMAIL,
-            password: SUPER_ADMIN_PASSWORD,
+            password,
             options: {
                 data: { full_name: 'Super Admin' },
             },
@@ -167,9 +214,10 @@ export async function GET() {
 
     return NextResponse.json({
         ok: results.connection === 'OK',
-        credentials: AUTHORIZED_SUPER_ADMIN_EMAILS.map((email) => ({
+        // NOTE: We intentionally do NOT return the password. Whoever triggered
+        // the setup should already know it (it lives in env vars).
+        accounts: AUTHORIZED_SUPER_ADMIN_EMAILS.map((email) => ({
             email,
-            password: SUPER_ADMIN_PASSWORD,
             primary: email === SUPER_ADMIN_EMAIL,
         })),
         results,

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
+import { escapePostgrestLike } from '@/lib/utils/postgrest';
 import { RUGBY_TOURNAMENTS_INTERNATIONAL } from '@/lib/data/tournaments/rugby';
 import { MOTORSPORT_TOURNAMENTS_INTERNATIONAL, MOTORSPORT_TOURNAMENTS_BY_COUNTRY } from '@/lib/data/tournaments/motorsport';
 
@@ -15,8 +16,11 @@ type TournamentCatalogRow = {
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search') || '';
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const rawSearch = (searchParams.get('search') || '').slice(0, 80);
+    const search = rawSearch.trim();
+    const escapedSearch = search ? escapePostgrestLike(search) : '';
+    const requestedLimit = parseInt(searchParams.get('limit') || '10', 10);
+    const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 50) : 10;
 
     const supabase = await getReadClient();
     const runQuery = async (columns: string): Promise<{
@@ -28,8 +32,8 @@ export async function GET(request: Request) {
             .select(columns)
             .neq('is_visible', false);
 
-        if (search) {
-            query = query.or(`name.ilike.%${search}%,display_name.ilike.%${search}%`);
+        if (escapedSearch) {
+            query = query.or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%`);
         }
 
         const result = await query.limit(limit);

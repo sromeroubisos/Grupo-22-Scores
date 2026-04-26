@@ -167,6 +167,10 @@ export async function POST(request: NextRequest) {
 // ─── GET /api/clubs ──────────────────────────────────────────────────────────
 // Lista pública (solo clubes visibles). Super admin ve todos.
 
+// Hard caps so a misbehaving client can't request the entire clubs table.
+const DEFAULT_CLUBS_LIMIT = 500;
+const MAX_CLUBS_LIMIT = 2000;
+
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const unionId = searchParams.get('union_id');
@@ -175,6 +179,13 @@ export async function GET(request: NextRequest) {
     const wantsAdminScope = searchParams.get('include_hidden') === 'true' || searchParams.get('admin') === 'true';
     const shouldCheckAdmin = wantsAdminScope && requestHasSupabaseSession(request);
     const supabase = shouldCheckAdmin ? await createClient() : null;
+
+    const limitParam = parseInt(searchParams.get('limit') || '', 10);
+    const offsetParam = parseInt(searchParams.get('offset') || '', 10);
+    const limit = Number.isFinite(limitParam) && limitParam > 0
+        ? Math.min(limitParam, MAX_CLUBS_LIMIT)
+        : DEFAULT_CLUBS_LIMIT;
+    const offset = Number.isFinite(offsetParam) && offsetParam >= 0 ? offsetParam : 0;
 
     let isSuperAdmin = false;
 
@@ -210,7 +221,7 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const { data, error } = await query;
+    const { data, error } = await query.range(offset, offset + limit - 1);
     if (error) return err('Error al obtener clubes', 500, error.message);
 
     const clubs = ((data || []) as PublicClubRow[]).filter((club) => {

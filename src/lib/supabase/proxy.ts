@@ -166,6 +166,13 @@ export async function updateSession(request: NextRequest) {
                     })
                     cookiesToSet.forEach(({ name, value, options }) => {
                         const isProd = process.env.NODE_ENV === 'production';
+                        // NOTE on httpOnly: @supabase/ssr requires the browser
+                        // client to read the auth cookie via document.cookie to
+                        // refresh sessions, so we cannot set httpOnly: true on
+                        // the sb-*-auth-token cookies without breaking client
+                        // auth. Mitigations: secure+sameSite=lax in prod, short
+                        // access-token TTL, refresh-token rotation, and a strong
+                        // CSP at the app shell to limit XSS exfiltration.
                         const cookieOptions = {
                             ...options,
                             sameSite: 'lax' as const,

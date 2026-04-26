@@ -682,54 +682,72 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
         const globalRules = resolveProdeScoringRules(competitionRow, rulesetResult.data);
         const scoredPredictions = applyScoringRulesToPredictionRows(eventRows, predictionRows, globalRules);
 
-        const predictionUpdates = scoredPredictions
-            .filter((row, index) => isPredictionChanged(predictionRows[index] || {}, row))
-            .map((row) => (
-                admin
-                    .from('prode_predictions')
-                    .update({
-                        points_awarded: row.points_awarded,
-                        status: row.status,
-                        scoring_breakdown: row.scoring_breakdown,
-                        locked_at: row.locked_at,
-                        scored_at: row.scored_at,
-                    })
-                    .eq('id', toSafeString(row.id))
-            ));
+        // Bulk upsert all changed predictions instead of firing one UPDATE per
+        // row. With 1k users x 50 events that's the difference between 50k
+        // round-trips and ~50 (one per chunk). onConflict: 'id' upserts the
+        // existing rows in place — a missing id would re-insert, which we
+        // explicitly avoid by filtering rows with valid ids first.
+        const changedPredictions = scoredPredictions
+            .map((row, index) => ({ row, index }))
+            .filter(({ row, index }) => isPredictionChanged(predictionRows[index] || {}, row))
+            .map(({ row }) => row)
+            .filter((row) => Boolean(toSafeString(row.id)));
 
-        const eventUpdates = eventRows.map((row) => {
+        const PREDICTION_CHUNK = 500;
+        for (let i = 0; i < changedPredictions.length; i += PREDICTION_CHUNK) {
+            const chunk = changedPredictions.slice(i, i + PREDICTION_CHUNK).map((row) => ({
+                id: toSafeString(row.id),
+                points_awarded: row.points_awarded,
+                status: row.status,
+                scoring_breakdown: row.scoring_breakdown,
+                locked_at: row.locked_at,
+                scored_at: row.scored_at,
+            }));
+            const { error } = await admin
+                .from('prode_predictions')
+                .upsert(chunk, { onConflict: 'id' });
+            if (error) {
+                throw new Error(error.message || 'No se pudieron persistir los puntos del prode.');
+            }
+        }
+
+        // Group events by their target update payload so we can dispatch one
+        // UPDATE…WHERE id IN (...) per distinct status transition.
+        const nowIso = new Date().toISOString();
+        const eventBuckets = new Map<string, { payload: AnyRow; ids: string[] }>();
+
+        for (const row of eventRows) {
             const officialResult = parseOfficialResult(row.official_result);
             const status = toSafeString(row.status);
+            const id = toSafeString(row.id);
+            if (!id) continue;
 
+            let payload: AnyRow | null = null;
             if (status === 'cancelled') {
-                return admin
+                payload = { scoring_status: 'void', scored_at: nowIso };
+            } else if (officialResult && (status === 'final' || status === 'scored')) {
+                payload = { status: 'scored', scoring_status: 'scored', scored_at: nowIso };
+            }
+
+            if (!payload) continue;
+
+            const bucketKey = JSON.stringify(payload);
+            const bucket = eventBuckets.get(bucketKey) ?? { payload, ids: [] };
+            bucket.ids.push(id);
+            eventBuckets.set(bucketKey, bucket);
+        }
+
+        for (const { payload, ids } of eventBuckets.values()) {
+            for (let i = 0; i < ids.length; i += PREDICTION_CHUNK) {
+                const chunk = ids.slice(i, i + PREDICTION_CHUNK);
+                const { error } = await admin
                     .from('prode_events')
-                    .update({
-                        scoring_status: 'void',
-                        scored_at: new Date().toISOString(),
-                    })
-                    .eq('id', toSafeString(row.id));
+                    .update(payload)
+                    .in('id', chunk);
+                if (error) {
+                    throw new Error(error.message || 'No se pudieron persistir los puntos del prode.');
+                }
             }
-
-            if (!officialResult || (status !== 'final' && status !== 'scored')) {
-                return null;
-            }
-
-            return admin
-                .from('prode_events')
-                .update({
-                    status: 'scored',
-                    scoring_status: 'scored',
-                    scored_at: new Date().toISOString(),
-                })
-                .eq('id', toSafeString(row.id));
-        }).filter(Boolean) as Array<PromiseLike<MutationResult>>;
-
-        const writeResults = await Promise.all([...predictionUpdates, ...eventUpdates]);
-        const failedWrite = writeResults.find((result) => result.error);
-
-        if (failedWrite?.error) {
-            throw new Error(failedWrite.error.message || 'No se pudieron persistir los puntos del prode.');
         }
 
         const globalRankings = buildRankingPayload(competitionId, memberUserIds, scoredPredictions, { scopeType: 'global' });
@@ -825,18 +843,27 @@ export async function refreshStoredProdeScoreboards() {
             throw new Error(competitionResult.error.message || 'No se pudieron cargar las competencias del prode.');
         }
 
-        await Promise.allSettled(
-            (competitionResult.data || [])
-                .map((row) => toSafeString(row.id))
-                .filter(Boolean)
-                .map(async (competitionId) => {
+        // Limit concurrency: each refreshCompetitionScoreboards already
+        // dispatches dozens of queries internally, so refreshing all
+        // competitions in parallel was a fast path to exhausting the
+        // connection pool. Run them with bounded concurrency instead.
+        const competitionIds = (competitionResult.data || [])
+            .map((row) => toSafeString(row.id))
+            .filter(Boolean);
+        const REFRESH_CONCURRENCY = 2;
+
+        for (let i = 0; i < competitionIds.length; i += REFRESH_CONCURRENCY) {
+            const batch = competitionIds.slice(i, i + REFRESH_CONCURRENCY);
+            await Promise.allSettled(
+                batch.map(async (competitionId) => {
                     try {
                         await refreshCompetitionScoreboards(competitionId);
                     } catch (error) {
                         console.error('[prode/scoring] refresh failed for competition', competitionId, error);
                     }
                 }),
-        );
+            );
+        }
 
         if (globalRefreshVersion === refreshVersion) {
             globalRefreshCompletedAt = Date.now();

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { searchFlashScore } from '@/lib/services/flashscore';
 import { getRugbyApiSportsLeagues, getRugbyApiSportsTeams } from '@/lib/services/rugbyApiSports';
 import { isBlockedRugbyApiSportsLeagueId } from '@/lib/utils/blockedTournaments';
+import { escapePostgrestLike } from '@/lib/utils/postgrest';
 
 type SearchResult = {
     id: string;
@@ -40,13 +41,16 @@ type ClubSearchRow = {
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('q') || '';
-    const limit = parseInt(searchParams.get('limit') || '12', 10);
+    const rawSearch = (searchParams.get('q') || '').slice(0, 80).trim();
+    const requestedLimit = parseInt(searchParams.get('limit') || '12', 10);
+    const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 50) : 12;
 
-    if (!search || search.length < 2) {
+    if (!rawSearch || rawSearch.length < 2) {
         return NextResponse.json({ data: [] });
     }
 
+    const search = rawSearch;
+    const escapedSearch = escapePostgrestLike(search);
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -63,11 +67,11 @@ export async function GET(request: Request) {
         const [tournamentsRes, clubsRes, fsSearchRaw, rugbyTeams, rugbyLeagues] = await Promise.all([
             supabase.from('tournaments')
                 .select('id, name, display_name, slug, logo_url, sport_id, country_id, is_visible, sport:sports(name), country:countries(name)')
-                .or(`name.ilike.%${search}%,display_name.ilike.%${search}%,slug.ilike.%${search}%`)
+                .or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
                 .limit(limit),
             supabase.from('clubs')
                 .select('id, name, short_name, slug, city, country, logo_url, is_visible')
-                .or(`name.ilike.%${search}%,short_name.ilike.%${search}%,slug.ilike.%${search}%`)
+                .or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
                 .limit(limit),
             searchFlashScore(search).catch(() => null),
             search.length >= 3 ? getRugbyApiSportsTeams({ search }).catch(() => []) : Promise.resolve([]),
@@ -201,9 +205,11 @@ export async function GET(request: Request) {
             })
             .slice(0, limit);
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             data: finalResults
         });
+        response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+        return response;
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         console.error('[Universal Search Error]:', error, debugInfo);

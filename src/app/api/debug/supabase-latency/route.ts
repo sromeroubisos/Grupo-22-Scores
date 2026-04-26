@@ -1,6 +1,8 @@
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { nowMs } from '@/lib/perf/measure';
+import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +11,18 @@ export async function GET() {
   const perf = createApiPerfTracker(route);
   const totalStartedAt = nowMs();
   const workspaceInOneDrive = process.cwd().toLowerCase().includes('onedrive');
+
+  // Latency probes touch auth + DB and reveal infra timing details. In
+  // production they must be restricted to authenticated admins to prevent
+  // anonymous DoS / fingerprinting. In dev / preview environments anyone
+  // with access to the host can keep using them freely.
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      await requireAdminApiUser();
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
 
   try {
     const supabase = await perf.measureStep('create_client', () => createClient(), {

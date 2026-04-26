@@ -665,29 +665,26 @@ async function fetchFavoritesFallback(
 }
 
 export async function fetchResolvedFavorites(supabase: SupabaseClient, userId?: string | null): Promise<ResolvedFavorite[]> {
-    const [fallback, v2] = await Promise.all([
-        fetchFavoritesFallback(supabase),
-        tryFavoritesRpc(supabase, 'get_my_favorites_enriched_v2'),
-    ]);
-
-    const sources: ResolvedFavorite[] = [];
-
+    // Previously we ran the enriched RPC and the manual fallback in parallel
+    // on every call. The fallback fans out to ~7 lookup queries (clubs by id,
+    // clubs by external_id, tournaments x2, external_teams, external_tournaments,
+    // people) and was being executed even when the RPC succeeded — a huge
+    // amount of unnecessary database work for one of the hottest hooks on the
+    // app. Now we only resort to the fallback when both RPCs return nothing.
+    const v2 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched_v2');
     if (v2 && v2.length > 0) {
-        sources.push(...v2);
-    } else {
-        const v1 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched');
-        if (v1 && v1.length > 0) {
-            sources.push(...v1);
-        }
+        return sanitizeResolvedFavorites(v2, userId);
     }
 
+    const v1 = await tryFavoritesRpc(supabase, 'get_my_favorites_enriched');
+    if (v1 && v1.length > 0) {
+        return sanitizeResolvedFavorites(v1, userId);
+    }
+
+    const fallback = await fetchFavoritesFallback(supabase);
     if (fallback.ok && fallback.items.length > 0) {
-        sources.push(...fallback.items);
+        return sanitizeResolvedFavorites(fallback.items, userId);
     }
 
-    if (sources.length === 0) {
-        return [];
-    }
-
-    return sanitizeResolvedFavorites(sources, userId);
+    return [];
 }

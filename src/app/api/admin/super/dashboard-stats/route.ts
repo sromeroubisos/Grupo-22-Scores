@@ -21,39 +21,43 @@ export async function GET() {
         const nextDayStart = new Date(dayStart);
         nextDayStart.setUTCDate(nextDayStart.getUTCDate() + 1);
 
-        const [{ data: todayMatchesRows, error: todayMatchesError }, { data: liveMatchesRows, error: liveMatchesError }, { data: unlinkedTournamentRows, error: tournamentsError }, { data: unlinkedClubRows, error: clubsError }] = await Promise.all([
+        // Use HEAD count instead of selecting all id rows. PostgREST's
+        // count: 'exact' + head: true skips the row payload entirely and
+        // returns just the total in the Content-Range header — orders of
+        // magnitude cheaper than streaming every id back to Node.
+        const [todayMatchesRes, liveMatchesRes, unlinkedTournamentsRes, unlinkedClubsRes] = await Promise.all([
             readClient
                 .from('matches')
-                .select('id')
+                .select('id', { count: 'exact', head: true })
                 .gte('date_time', dayStart.toISOString())
                 .lt('date_time', nextDayStart.toISOString()),
             readClient
                 .from('matches')
-                .select('id')
+                .select('id', { count: 'exact', head: true })
                 .eq('status', 'live')
                 .gte('date_time', dayStart.toISOString())
                 .lt('date_time', nextDayStart.toISOString()),
             readClient
                 .from('tournaments')
-                .select('id')
+                .select('id', { count: 'exact', head: true })
                 .is('union_id', null),
             readClient
                 .from('clubs')
-                .select('id')
+                .select('id', { count: 'exact', head: true })
                 .is('union_id', null),
         ]);
 
-        if (todayMatchesError) return jsonError('Failed to load today match count', 500, todayMatchesError.message);
-        if (liveMatchesError) return jsonError('Failed to load live match count', 500, liveMatchesError.message);
-        if (tournamentsError) return jsonError('Failed to load tournament conflict count', 500, tournamentsError.message);
-        if (clubsError) return jsonError('Failed to load club conflict count', 500, clubsError.message);
+        if (todayMatchesRes.error) return jsonError('Failed to load today match count', 500, todayMatchesRes.error.message);
+        if (liveMatchesRes.error) return jsonError('Failed to load live match count', 500, liveMatchesRes.error.message);
+        if (unlinkedTournamentsRes.error) return jsonError('Failed to load tournament conflict count', 500, unlinkedTournamentsRes.error.message);
+        if (unlinkedClubsRes.error) return jsonError('Failed to load club conflict count', 500, unlinkedClubsRes.error.message);
 
         return NextResponse.json({
             data: {
-                todayMatches: todayMatchesRows?.length ?? 0,
-                liveMatches: liveMatchesRows?.length ?? 0,
-                unlinkedTournaments: unlinkedTournamentRows?.length ?? 0,
-                unlinkedClubs: unlinkedClubRows?.length ?? 0,
+                todayMatches: todayMatchesRes.count ?? 0,
+                liveMatches: liveMatchesRes.count ?? 0,
+                unlinkedTournaments: unlinkedTournamentsRes.count ?? 0,
+                unlinkedClubs: unlinkedClubsRes.count ?? 0,
             },
         });
     } catch (error) {
