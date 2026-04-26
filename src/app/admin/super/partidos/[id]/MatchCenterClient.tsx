@@ -371,7 +371,7 @@ function buildScoreFromEvents(
     let hasTryEvents = false;
 
     events.forEach((event) => {
-        const points = getConfiguredEventPoints(event.type, definitionMap);
+        const points = getConfiguredEventPoints(event, definitionMap);
         if (points > 0 && event.team === 'home') {
             home += points;
             hasScoringEvents = true;
@@ -498,6 +498,92 @@ type PlayerStatRow = {
     breakdown: PlayerStatBreakdown[];
 };
 
+type TeamMetricPair = {
+    home: number;
+    away: number;
+};
+
+type CompleteMatchStats = {
+    totalEvents: number;
+    clockEvents: number;
+    assignedEvents: TeamMetricPair;
+    points: TeamMetricPair;
+    scoringEvents: TeamMetricPair;
+    goalKickAttempts: TeamMetricPair;
+    goalKicksMade: TeamMetricPair;
+    goalKicksMissed: TeamMetricPair;
+    tries: TeamMetricPair;
+    penaltyTries: TeamMetricPair;
+    conversionAttempts: TeamMetricPair;
+    conversionsMade: TeamMetricPair;
+    conversionsMissed: TeamMetricPair;
+    penaltyGoalAttempts: TeamMetricPair;
+    penaltyGoalsMade: TeamMetricPair;
+    penaltyGoalsMissed: TeamMetricPair;
+    dropGoalAttempts: TeamMetricPair;
+    dropGoalsMade: TeamMetricPair;
+    dropGoalsMissed: TeamMetricPair;
+    yellowCards: TeamMetricPair;
+    redCards: TeamMetricPair;
+    substitutions: TeamMetricPair;
+    injuries: TeamMetricPair;
+    scrumsTotal: TeamMetricPair;
+    scrumsWon: TeamMetricPair;
+    scrumsLost: TeamMetricPair;
+    linesTotal: TeamMetricPair;
+    linesWon: TeamMetricPair;
+    linesLost: TeamMetricPair;
+    rucksTotal: TeamMetricPair;
+    rucksWon: TeamMetricPair;
+    rucksLost: TeamMetricPair;
+    maulsTotal: TeamMetricPair;
+    maulsWon: TeamMetricPair;
+    maulsLost: TeamMetricPair;
+    tackles: TeamMetricPair;
+    kicks: TeamMetricPair;
+    passes: TeamMetricPair;
+    recoveries: TeamMetricPair;
+    turnoversWon: TeamMetricPair;
+    turnoversLost: TeamMetricPair;
+    penaltiesWon: TeamMetricPair;
+    penaltiesConceded: TeamMetricPair;
+    freeKicks: TeamMetricPair;
+    knockOns: TeamMetricPair;
+    forwardPasses: TeamMetricPair;
+    handlingErrors: TeamMetricPair;
+};
+
+type CompleteStatRow = {
+    key: string;
+    label: string;
+    home: number;
+    away: number;
+    accent?: boolean;
+};
+
+type CompleteStatSection = {
+    title: string;
+    rows: CompleteStatRow[];
+};
+
+type GuidedEventStep = 'team' | 'player' | 'details';
+type GuidedGoalKickResult = 'made' | 'missed';
+type GuidedContestOutcome = '' | 'won' | 'lost';
+
+type GuidedEventDraft = {
+    definition: MatchEventDefinition;
+    step: GuidedEventStep;
+    team: 'home' | 'away' | null;
+    playerId: string | null;
+    playerName: string;
+    secondaryPlayerId: string | null;
+    secondaryPlayerName: string;
+    minute: string;
+    detail: string;
+    goalKickResult: GuidedGoalKickResult;
+    contestOutcome: GuidedContestOutcome;
+};
+
 interface MatchCenterClientProps {
     initialMatch: MatchRow;
     matchId: string;
@@ -565,8 +651,14 @@ function eventTypeLabel(t: string, definitions: MatchEventDefinition[]): string 
 
     const map: Record<string, string> = {
         try: 'TRY', conversion: 'CONV', penalty_goal: 'PENAL', drop_goal: 'DROP',
-        yellow_card: 'AMARILLA', red_card: 'ROJA', substitution: 'CAMBIO',
-        start_period: 'INICIO', end_period: 'FIN', penalty: 'PENAL',
+        yellow_card: 'AMARILLA', red_card: 'ROJA', card_yellow: 'AMARILLA', card_red: 'ROJA',
+        substitution: 'CAMBIO', start_period: 'INICIO', end_period: 'FIN', penalty: 'PENAL',
+        penalty_try: 'PENAL TRY', scrum: 'SCRUM', line: 'LINE', knock_on: 'KNOCK-ON',
+        forward_pass: 'PASE FWD', free_kick: 'FREE KICK', tackle: 'TACKLE', ruck: 'RUCK',
+        maul: 'MAUL', handling_error: 'ERROR MANEJO', kick: 'PATADA', recovery: 'RECUP',
+        turnover_won: 'RECUP', turnover_lost: 'PERDIDA', penalty_won: 'PENAL GANADO',
+        penalty_conceded: 'PENAL CONCEDIDO', injury: 'LESION', pass: 'PASE',
+        match_start: 'INICIO', match_half: 'HT', match_end: 'FINAL',
     };
     return map[t] || t.toUpperCase();
 }
@@ -574,24 +666,492 @@ function eventTypeLabel(t: string, definitions: MatchEventDefinition[]): string 
 function eventTypeColor(t: string, definitions: MatchEventDefinition[]): string {
     const configured = definitions.find((definition) => definition.type === t);
     if (configured?.category === 'score') return 'var(--accent)';
-    if (configured?.category === 'card' && t === 'yellow_card') return '#eab308';
-    if (configured?.category === 'card' && t === 'red_card') return '#ef4444';
+    if (configured?.category === 'card' && (t === 'yellow_card' || t === 'card_yellow')) return '#eab308';
+    if (configured?.category === 'card' && (t === 'red_card' || t === 'card_red')) return '#ef4444';
 
     if (t === 'try') return 'var(--accent)';
-    if (t === 'yellow_card') return '#eab308';
-    if (t === 'red_card') return '#ef4444';
+    if (t === 'yellow_card' || t === 'card_yellow') return '#eab308';
+    if (t === 'red_card' || t === 'card_red') return '#ef4444';
     return '#fff';
 }
 
+function mergeMatchEventDefinitions(
+    baseDefinitions: MatchEventDefinition[],
+    overrideDefinitions: MatchEventDefinition[],
+) {
+    const merged = new Map<string, MatchEventDefinition>();
+
+    baseDefinitions.forEach((definition) => merged.set(definition.type, definition));
+    overrideDefinitions.forEach((definition) => merged.set(definition.type, definition));
+
+    return Array.from(merged.values());
+}
+
+function isGoalKickEventType(eventType: string) {
+    return eventType === 'conversion'
+        || eventType === 'penalty'
+        || eventType === 'penalty_goal'
+        || eventType === 'drop_goal';
+}
+
+function isGoalKickAttemptEvent(event: Pick<MatchEvent, 'type' | 'detail'>) {
+    if (!isGoalKickEventType(event.type)) return false;
+
+    const normalized = String(event.detail || '').toLowerCase();
+    if (event.type === 'penalty' && /touch|scrum|tap|rapido|quick|ganad|concedid/.test(normalized)) {
+        return false;
+    }
+
+    return true;
+}
+
+function isGoalKickMade(eventType: string, detail: string | null | undefined) {
+    if (!isGoalKickEventType(eventType)) return true;
+
+    const normalized = String(detail || '').toLowerCase();
+    if (/fallad|errad|miss|no convert/.test(normalized)) return false;
+    if (/convertid|acertad|made|ok/.test(normalized)) return true;
+    if (eventType === 'penalty' && normalized.trim()) return false;
+
+    return true;
+}
+
 function getConfiguredEventPoints(
-    eventType: string,
+    event: string | Pick<MatchEvent, 'type' | 'detail'>,
     definitionMap: Record<string, MatchEventDefinition>,
 ): number {
+    const eventType = typeof event === 'string' ? event : event.type;
     const definition = definitionMap[eventType];
     if (!definition || definition.category !== 'score') {
         return 0;
     }
+    if (typeof event !== 'string' && isGoalKickEventType(event.type) && !isGoalKickAttemptEvent(event)) {
+        return 0;
+    }
+    if (typeof event !== 'string' && !isGoalKickMade(event.type, event.detail)) {
+        return 0;
+    }
     return Number(definition.points) || 0;
+}
+
+function createTeamMetricPair(): TeamMetricPair {
+    return { home: 0, away: 0 };
+}
+
+function createEmptyCompleteMatchStats(): CompleteMatchStats {
+    return {
+        totalEvents: 0,
+        clockEvents: 0,
+        assignedEvents: createTeamMetricPair(),
+        points: createTeamMetricPair(),
+        scoringEvents: createTeamMetricPair(),
+        goalKickAttempts: createTeamMetricPair(),
+        goalKicksMade: createTeamMetricPair(),
+        goalKicksMissed: createTeamMetricPair(),
+        tries: createTeamMetricPair(),
+        penaltyTries: createTeamMetricPair(),
+        conversionAttempts: createTeamMetricPair(),
+        conversionsMade: createTeamMetricPair(),
+        conversionsMissed: createTeamMetricPair(),
+        penaltyGoalAttempts: createTeamMetricPair(),
+        penaltyGoalsMade: createTeamMetricPair(),
+        penaltyGoalsMissed: createTeamMetricPair(),
+        dropGoalAttempts: createTeamMetricPair(),
+        dropGoalsMade: createTeamMetricPair(),
+        dropGoalsMissed: createTeamMetricPair(),
+        yellowCards: createTeamMetricPair(),
+        redCards: createTeamMetricPair(),
+        substitutions: createTeamMetricPair(),
+        injuries: createTeamMetricPair(),
+        scrumsTotal: createTeamMetricPair(),
+        scrumsWon: createTeamMetricPair(),
+        scrumsLost: createTeamMetricPair(),
+        linesTotal: createTeamMetricPair(),
+        linesWon: createTeamMetricPair(),
+        linesLost: createTeamMetricPair(),
+        rucksTotal: createTeamMetricPair(),
+        rucksWon: createTeamMetricPair(),
+        rucksLost: createTeamMetricPair(),
+        maulsTotal: createTeamMetricPair(),
+        maulsWon: createTeamMetricPair(),
+        maulsLost: createTeamMetricPair(),
+        tackles: createTeamMetricPair(),
+        kicks: createTeamMetricPair(),
+        passes: createTeamMetricPair(),
+        recoveries: createTeamMetricPair(),
+        turnoversWon: createTeamMetricPair(),
+        turnoversLost: createTeamMetricPair(),
+        penaltiesWon: createTeamMetricPair(),
+        penaltiesConceded: createTeamMetricPair(),
+        freeKicks: createTeamMetricPair(),
+        knockOns: createTeamMetricPair(),
+        forwardPasses: createTeamMetricPair(),
+        handlingErrors: createTeamMetricPair(),
+    };
+}
+
+function bumpTeamMetric(pair: TeamMetricPair, team: 'home' | 'away', amount = 1) {
+    pair[team] += amount;
+}
+
+function isContestWonDetail(detail: string | null | undefined) {
+    return /ganad|won|recuperad|favor/i.test(String(detail || ''));
+}
+
+function isContestLostDetail(detail: string | null | undefined) {
+    return /perdid|lost|contra/i.test(String(detail || ''));
+}
+
+function countContestMetric(
+    event: MatchEvent,
+    team: 'home' | 'away',
+    total: TeamMetricPair,
+    won: TeamMetricPair,
+    lost: TeamMetricPair,
+) {
+    bumpTeamMetric(total, team);
+
+    if (isContestLostDetail(event.detail)) {
+        bumpTeamMetric(lost, team);
+        return;
+    }
+
+    if (isContestWonDetail(event.detail)) {
+        bumpTeamMetric(won, team);
+    }
+}
+
+function buildCompleteMatchStats(
+    matchEvents: MatchEvent[],
+    definitionMap: Record<string, MatchEventDefinition>,
+): CompleteMatchStats {
+    const stats = createEmptyCompleteMatchStats();
+    stats.totalEvents = matchEvents.length;
+
+    matchEvents.forEach((event) => {
+        const definition = definitionMap[event.type];
+
+        if (definition?.category === 'clock' || event.team === null) {
+            stats.clockEvents += 1;
+            return;
+        }
+
+        if (event.team !== 'home' && event.team !== 'away') return;
+
+        const team = event.team;
+        const points = getConfiguredEventPoints(event, definitionMap);
+        bumpTeamMetric(stats.assignedEvents, team);
+        bumpTeamMetric(stats.points, team, points);
+        if (points > 0) bumpTeamMetric(stats.scoringEvents, team);
+
+        const isGoalAttempt = isGoalKickAttemptEvent(event);
+        if (isGoalAttempt) {
+            const made = isGoalKickMade(event.type, event.detail);
+            bumpTeamMetric(stats.goalKickAttempts, team);
+            bumpTeamMetric(made ? stats.goalKicksMade : stats.goalKicksMissed, team);
+        }
+
+        switch (event.type) {
+            case 'try':
+                bumpTeamMetric(stats.tries, team);
+                break;
+            case 'penalty_try':
+                bumpTeamMetric(stats.penaltyTries, team);
+                break;
+            case 'conversion':
+                bumpTeamMetric(stats.conversionAttempts, team);
+                bumpTeamMetric(isGoalKickMade(event.type, event.detail) ? stats.conversionsMade : stats.conversionsMissed, team);
+                break;
+            case 'penalty':
+            case 'penalty_goal':
+                if (isGoalAttempt) {
+                    bumpTeamMetric(stats.penaltyGoalAttempts, team);
+                    bumpTeamMetric(isGoalKickMade(event.type, event.detail) ? stats.penaltyGoalsMade : stats.penaltyGoalsMissed, team);
+                }
+                break;
+            case 'drop_goal':
+                bumpTeamMetric(stats.dropGoalAttempts, team);
+                bumpTeamMetric(isGoalKickMade(event.type, event.detail) ? stats.dropGoalsMade : stats.dropGoalsMissed, team);
+                break;
+            case 'yellow_card':
+            case 'card_yellow':
+                bumpTeamMetric(stats.yellowCards, team);
+                break;
+            case 'red_card':
+            case 'card_red':
+                bumpTeamMetric(stats.redCards, team);
+                break;
+            case 'substitution':
+                bumpTeamMetric(stats.substitutions, team);
+                break;
+            case 'injury':
+                bumpTeamMetric(stats.injuries, team);
+                break;
+            case 'scrum':
+                countContestMetric(event, team, stats.scrumsTotal, stats.scrumsWon, stats.scrumsLost);
+                break;
+            case 'line':
+                countContestMetric(event, team, stats.linesTotal, stats.linesWon, stats.linesLost);
+                break;
+            case 'ruck':
+                countContestMetric(event, team, stats.rucksTotal, stats.rucksWon, stats.rucksLost);
+                break;
+            case 'maul':
+                countContestMetric(event, team, stats.maulsTotal, stats.maulsWon, stats.maulsLost);
+                break;
+            case 'tackle':
+                bumpTeamMetric(stats.tackles, team);
+                break;
+            case 'kick':
+                bumpTeamMetric(stats.kicks, team);
+                break;
+            case 'pass':
+                bumpTeamMetric(stats.passes, team);
+                break;
+            case 'recovery':
+                bumpTeamMetric(stats.recoveries, team);
+                break;
+            case 'turnover_won':
+                bumpTeamMetric(stats.turnoversWon, team);
+                bumpTeamMetric(stats.recoveries, team);
+                break;
+            case 'turnover_lost':
+                bumpTeamMetric(stats.turnoversLost, team);
+                break;
+            case 'penalty_won':
+                bumpTeamMetric(stats.penaltiesWon, team);
+                break;
+            case 'penalty_conceded':
+                bumpTeamMetric(stats.penaltiesConceded, team);
+                break;
+            case 'free_kick':
+                bumpTeamMetric(stats.freeKicks, team);
+                break;
+            case 'knock_on':
+                bumpTeamMetric(stats.knockOns, team);
+                break;
+            case 'forward_pass':
+                bumpTeamMetric(stats.forwardPasses, team);
+                break;
+            case 'handling_error':
+                bumpTeamMetric(stats.handlingErrors, team);
+                break;
+            default:
+                break;
+        }
+    });
+
+    return stats;
+}
+
+function buildCompleteStatSections(stats: CompleteMatchStats): CompleteStatSection[] {
+    const sections: CompleteStatSection[] = [
+        {
+            title: 'Marcador',
+            rows: [
+                { key: 'points', label: 'Puntos', home: stats.points.home, away: stats.points.away, accent: true },
+                { key: 'tries', label: 'Tries', home: stats.tries.home, away: stats.tries.away },
+                { key: 'penaltyTries', label: 'Try penal', home: stats.penaltyTries.home, away: stats.penaltyTries.away },
+                { key: 'conversionsMade', label: 'Conversiones OK', home: stats.conversionsMade.home, away: stats.conversionsMade.away },
+                { key: 'conversionsMissed', label: 'Conversiones falladas', home: stats.conversionsMissed.home, away: stats.conversionsMissed.away },
+                { key: 'penaltyGoalsMade', label: 'Penales OK', home: stats.penaltyGoalsMade.home, away: stats.penaltyGoalsMade.away },
+                { key: 'penaltyGoalsMissed', label: 'Penales fallados', home: stats.penaltyGoalsMissed.home, away: stats.penaltyGoalsMissed.away },
+                { key: 'dropGoalsMade', label: 'Drops OK', home: stats.dropGoalsMade.home, away: stats.dropGoalsMade.away },
+                { key: 'dropGoalsMissed', label: 'Drops fallados', home: stats.dropGoalsMissed.home, away: stats.dropGoalsMissed.away },
+            ],
+        },
+        {
+            title: 'Disciplina y errores',
+            rows: [
+                { key: 'yellowCards', label: 'Amarillas', home: stats.yellowCards.home, away: stats.yellowCards.away },
+                { key: 'redCards', label: 'Rojas', home: stats.redCards.home, away: stats.redCards.away },
+                { key: 'penaltiesWon', label: 'Penales ganados', home: stats.penaltiesWon.home, away: stats.penaltiesWon.away },
+                { key: 'penaltiesConceded', label: 'Penales concedidos', home: stats.penaltiesConceded.home, away: stats.penaltiesConceded.away },
+                { key: 'knockOns', label: 'Knock-on', home: stats.knockOns.home, away: stats.knockOns.away },
+                { key: 'forwardPasses', label: 'Pase forward', home: stats.forwardPasses.home, away: stats.forwardPasses.away },
+                { key: 'handlingErrors', label: 'Error de manejo', home: stats.handlingErrors.home, away: stats.handlingErrors.away },
+            ],
+        },
+        {
+            title: 'Juego',
+            rows: [
+                { key: 'tackles', label: 'Tackles', home: stats.tackles.home, away: stats.tackles.away },
+                { key: 'rucksWon', label: 'Rucks ganados', home: stats.rucksWon.home, away: stats.rucksWon.away },
+                { key: 'rucksLost', label: 'Rucks perdidos', home: stats.rucksLost.home, away: stats.rucksLost.away },
+                { key: 'maulsWon', label: 'Mauls ganados', home: stats.maulsWon.home, away: stats.maulsWon.away },
+                { key: 'maulsLost', label: 'Mauls perdidos', home: stats.maulsLost.home, away: stats.maulsLost.away },
+                { key: 'kicks', label: 'Patadas', home: stats.kicks.home, away: stats.kicks.away },
+                { key: 'passes', label: 'Pases', home: stats.passes.home, away: stats.passes.away },
+                { key: 'recoveries', label: 'Recuperaciones', home: stats.recoveries.home, away: stats.recoveries.away },
+                { key: 'turnoversWon', label: 'Turnovers ganados', home: stats.turnoversWon.home, away: stats.turnoversWon.away },
+                { key: 'turnoversLost', label: 'Turnovers perdidos', home: stats.turnoversLost.home, away: stats.turnoversLost.away },
+            ],
+        },
+        {
+            title: 'Formaciones fijas',
+            rows: [
+                { key: 'scrumsWon', label: 'Scrums ganados', home: stats.scrumsWon.home, away: stats.scrumsWon.away },
+                { key: 'scrumsLost', label: 'Scrums perdidos', home: stats.scrumsLost.home, away: stats.scrumsLost.away },
+                { key: 'linesWon', label: 'Lines ganados', home: stats.linesWon.home, away: stats.linesWon.away },
+                { key: 'linesLost', label: 'Lines perdidos', home: stats.linesLost.home, away: stats.linesLost.away },
+                { key: 'freeKicks', label: 'Free kicks', home: stats.freeKicks.home, away: stats.freeKicks.away },
+            ],
+        },
+        {
+            title: 'Plantel',
+            rows: [
+                { key: 'substitutions', label: 'Cambios', home: stats.substitutions.home, away: stats.substitutions.away },
+                { key: 'injuries', label: 'Lesiones', home: stats.injuries.home, away: stats.injuries.away },
+            ],
+        },
+    ];
+
+    return sections.map((section) => ({
+        ...section,
+        rows: section.rows.filter((row) => row.home > 0 || row.away > 0 || row.accent),
+    })).filter((section) => section.rows.length > 0);
+}
+
+function getEventButtonGroup(definition: MatchEventDefinition) {
+    if (definition.category === 'score') return 'Marcador';
+    if (definition.category === 'card' || definition.category === 'discipline') return 'Disciplina';
+    if (definition.category === 'substitution') return 'Plantel';
+    if (definition.category === 'clock') return 'Reloj';
+    return 'Juego';
+}
+
+function getEventButtonGlyph(type: string) {
+    const glyphs: Record<string, string> = {
+        try: 'TR',
+        penalty_try: 'PT',
+        conversion: 'CV',
+        penalty: 'PN',
+        penalty_goal: 'PN',
+        drop_goal: 'DG',
+        card_yellow: 'TA',
+        card_red: 'TR',
+        yellow_card: 'TA',
+        red_card: 'TR',
+        substitution: 'CA',
+        injury: 'LE',
+        scrum: 'SC',
+        line: 'LI',
+        knock_on: 'KO',
+        forward_pass: 'PF',
+        penalty_won: 'PG',
+        penalty_conceded: 'PC',
+        free_kick: 'FK',
+        tackle: 'TK',
+        ruck: 'RK',
+        maul: 'ML',
+        handling_error: 'EM',
+        kick: 'PK',
+        recovery: 'RC',
+        turnover_won: 'TG',
+        turnover_lost: 'TP',
+        pass: 'PS',
+        match_start: 'IN',
+        match_half: 'HT',
+        match_end: 'FN',
+    };
+
+    return glyphs[type] || type.slice(0, 2).toUpperCase();
+}
+
+function getEventButtonLabel(definition: MatchEventDefinition) {
+    const labels: Record<string, string> = {
+        penalty_try: 'Try penal',
+        conversion: 'Conversion',
+        penalty: 'Penal a los palos',
+        penalty_goal: 'Penal a los palos',
+        drop_goal: 'Drop',
+        card_yellow: 'Amarilla',
+        card_red: 'Roja',
+        yellow_card: 'Amarilla',
+        red_card: 'Roja',
+        knock_on: 'Knock-on',
+        forward_pass: 'Pase forward',
+        penalty_won: 'Penal ganado',
+        penalty_conceded: 'Penal concedido',
+        handling_error: 'Error manejo',
+        turnover_won: 'Turnover ganado',
+        turnover_lost: 'Turnover perdido',
+        match_start: 'Inicio partido',
+        match_half: 'Entretiempo',
+        match_end: 'Final partido',
+    };
+
+    return labels[definition.type] || definition.label;
+}
+
+function getEventButtonMeta(definition: MatchEventDefinition) {
+    if (isGoalKickEventType(definition.type)) return 'Convertida / fallada';
+    if (definition.points > 0) return `${definition.points} puntos`;
+    if (requiresContestOutcome(definition.type)) return 'Ganado / perdido';
+    if (definition.type === 'substitution') return 'Sale / entra';
+    if (definition.category === 'clock') return 'Sin jugador';
+    return 'Equipo + jugador';
+}
+
+function getEventButtonTone(definition: MatchEventDefinition) {
+    if (definition.category === 'score') return 'score';
+    if (definition.category === 'card') return 'card';
+    if (definition.category === 'discipline') return 'discipline';
+    if (definition.category === 'clock') return 'clock';
+    if (definition.category === 'substitution') return 'substitution';
+    return 'game';
+}
+
+function requiresContestOutcome(eventType: string) {
+    return eventType === 'scrum'
+        || eventType === 'line'
+        || eventType === 'ruck'
+        || eventType === 'maul';
+}
+
+function formatGuidedEventDetail(draft: GuidedEventDraft) {
+    const eventType = draft.definition.type;
+    const baseLabel = draft.definition.label;
+    const customDetail = draft.detail.trim();
+
+    if (eventType === 'conversion') {
+        return draft.goalKickResult === 'made' ? 'Conversion convertida' : 'Conversion fallada';
+    }
+
+    if (eventType === 'penalty' || eventType === 'penalty_goal') {
+        return draft.goalKickResult === 'made' ? 'Penal convertido' : 'Penal fallado';
+    }
+
+    if (eventType === 'drop_goal') {
+        return draft.goalKickResult === 'made' ? 'Drop convertido' : 'Drop fallado';
+    }
+
+    if (requiresContestOutcome(eventType)) {
+        if (draft.contestOutcome === 'won') return `${baseLabel} ganado`;
+        if (draft.contestOutcome === 'lost') return `${baseLabel} perdido`;
+    }
+
+    if (eventType === 'substitution' && draft.secondaryPlayerName.trim()) {
+        return `Entra: ${draft.secondaryPlayerName.trim()}`;
+    }
+
+    if (eventType === 'try') {
+        const parts = ['Try apoyado'];
+        if (draft.secondaryPlayerName.trim()) parts.push(`Asiste: ${draft.secondaryPlayerName.trim()}`);
+        if (customDetail) parts.push(customDetail);
+        return parts.join(' | ');
+    }
+
+    if (eventType === 'recovery' || eventType === 'turnover_won') return customDetail || 'Recuperacion';
+    if (eventType === 'turnover_lost') return customDetail || 'Perdida';
+    if (eventType === 'penalty_won') return customDetail || 'Penal ganado';
+    if (eventType === 'penalty_conceded') return customDetail || 'Penal concedido';
+    if (eventType === 'knock_on') return customDetail || 'Knock-on';
+    if (eventType === 'forward_pass') return customDetail || 'Pase forward';
+    if (eventType === 'handling_error') return customDetail || 'Error de manejo';
+    if (eventType === 'injury') return customDetail || 'Lesion';
+
+    return customDetail || baseLabel;
 }
 
 /* â”€â”€â”€ POINTS HELPERS â”€â”€â”€ */
@@ -1042,9 +1602,13 @@ export default function MatchCenterClient({
     const [localPoints, setLocalPoints] = useState<MatchPoints>(() => toLocalPoints(initialMatch));
     const [savingPoints, setSavingPoints] = useState(false);
     const [pointsRules, setPointsRules] = useState<PointsRules>(DEFAULT_POINTS_RULES);
+    const [matchSportId, setMatchSportId] = useState<string | null>(
+        initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null,
+    );
     const [eventDefinitions, setEventDefinitions] = useState<MatchEventDefinition[]>(
         () => getDefaultMatchEventDefinitions(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
     );
+    const [guidedEvent, setGuidedEvent] = useState<GuidedEventDraft | null>(null);
     const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(initialMatch.lineups)));
     const [quickLineupDrafts, setQuickLineupDrafts] = useState<{ home: string; away: string }>(() => ({
         home: formatQuickLineupDraft(initialLineups.home),
@@ -1055,7 +1619,11 @@ export default function MatchCenterClient({
         away: false,
     });
     const [dateTimeDraft, setDateTimeDraft] = useState(() => toDateTimeLocalInput(initialMatch.date_time));
-    const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(eventDefinitions), [eventDefinitions]);
+    const availableEventDefinitions = useMemo(
+        () => mergeMatchEventDefinitions(getDefaultMatchEventDefinitions(matchSportId ?? 'rugby'), eventDefinitions),
+        [eventDefinitions, matchSportId],
+    );
+    const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(availableEventDefinitions), [availableEventDefinitions]);
     const draftKickoffIso = useMemo(() => {
         if (!dateTimeDraft) return match.date_time;
         const [date, time] = dateTimeDraft.split('T');
@@ -1494,6 +2062,7 @@ export default function MatchCenterClient({
         });
 
         setPointsRules(configuration.pointsRules);
+        setMatchSportId(configuration.sportId);
         setEventDefinitions(configuration.eventDefinitions);
     }, [match.phase_id, match.round_id, match.tournament_id]);
 
@@ -1771,6 +2340,114 @@ export default function MatchCenterClient({
         setLocalEvents((prev) => prev.filter((event) => event.id !== eventId));
     }, []);
 
+    const openGuidedEvent = useCallback((definition: MatchEventDefinition) => {
+        const currentClock = normalizeMatchClock(clockDraftRef.current);
+        const minute = currentClock.minute || getLatestEventMinute(localEventsRef.current) || 0;
+
+        setGuidedEvent({
+            definition,
+            step: definition.team === 'none' ? 'details' : 'team',
+            team: definition.team === 'none' ? null : 'home',
+            playerId: null,
+            playerName: '',
+            secondaryPlayerId: null,
+            secondaryPlayerName: '',
+            minute: String(minute),
+            detail: '',
+            goalKickResult: 'made',
+            contestOutcome: requiresContestOutcome(definition.type) ? 'won' : '',
+        });
+    }, []);
+
+    const selectGuidedTeam = useCallback((team: 'home' | 'away') => {
+        setGuidedEvent((current) => {
+            if (!current) return current;
+            return {
+                ...current,
+                team,
+                playerId: null,
+                playerName: '',
+                secondaryPlayerId: null,
+                secondaryPlayerName: '',
+                step: current.definition.player === 'none' ? 'details' : 'player',
+            };
+        });
+    }, []);
+
+    const selectGuidedPlayer = useCallback((player: { playerId: string | null; name: string } | null) => {
+        setGuidedEvent((current) => {
+            if (!current) return current;
+            return {
+                ...current,
+                playerId: player?.playerId ?? null,
+                playerName: player?.name ?? '',
+                step: 'details',
+            };
+        });
+    }, []);
+
+    const selectGuidedSecondaryPlayer = useCallback((value: string) => {
+        setGuidedEvent((current) => {
+            if (!current || !current.team) return current;
+
+            const selected = eventPlayerOptions[current.team].find((entry) => entry.name === value);
+            return {
+                ...current,
+                secondaryPlayerId: selected?.playerId ?? null,
+                secondaryPlayerName: selected?.name ?? '',
+            };
+        });
+    }, [eventPlayerOptions]);
+
+    const saveGuidedEvent = useCallback(async () => {
+        if (!guidedEvent) return;
+
+        if (guidedEvent.definition.team === 'required' && !guidedEvent.team) {
+            setSaveMsg({ type: 'warn', text: 'Selecciona un equipo antes de guardar el evento.' });
+            return;
+        }
+
+        if (guidedEvent.definition.player === 'required' && !guidedEvent.playerName.trim()) {
+            setSaveMsg({ type: 'warn', text: 'Selecciona un jugador antes de guardar el evento.' });
+            return;
+        }
+
+        const minute = Math.max(0, Number.parseInt(guidedEvent.minute || '0', 10) || 0);
+        const nextEvent: MatchEvent = {
+            id: crypto.randomUUID(),
+            minute,
+            type: guidedEvent.definition.type,
+            team: guidedEvent.definition.team === 'none' ? null : guidedEvent.team,
+            playerId: guidedEvent.definition.player === 'none' ? null : guidedEvent.playerId,
+            playerName: guidedEvent.definition.player === 'none' ? '' : guidedEvent.playerName.trim(),
+            detail: formatGuidedEventDetail(guidedEvent),
+        };
+        const previousEvents = localEventsRef.current;
+        const nextEvents = [...previousEvents, nextEvent];
+
+        localEventsRef.current = nextEvents;
+        setLocalEvents(nextEvents);
+        setSaving(true);
+        setSaveMsg(null);
+
+        try {
+            const saveResult = await persistMatchPatch({ events: nextEvents });
+            setGuidedEvent(null);
+            setSaveMsg(
+                saveResult.warnings.lineupsNotPersisted
+                    ? { type: 'warn', text: 'Evento guardado. Las alineaciones no se persistieron en este entorno.' }
+                    : { type: 'ok', text: 'Evento guardado y estadisticas recalculadas.' },
+            );
+            setTimeout(() => setSaveMsg(null), 3000);
+        } catch (err: unknown) {
+            localEventsRef.current = previousEvents;
+            setLocalEvents(previousEvents);
+            setSaveMsg({ type: 'err', text: `No se pudo guardar el evento: ${err instanceof Error ? err.message : String(err)}` });
+        } finally {
+            setSaving(false);
+        }
+    }, [guidedEvent, persistMatchPatch]);
+
     const applyLineupSize = useCallback((requestedSize?: number) => {
         const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups));
         setLineupSizeInput(String(nextSize));
@@ -1786,7 +2463,7 @@ export default function MatchCenterClient({
     const lineups = localLineups;
 
     useEffect(() => {
-        const definitionMap = buildMatchEventDefinitionMap(eventDefinitions);
+        const definitionMap = buildMatchEventDefinitionMap(availableEventDefinitions);
 
         setLocalEvents((prev) => {
             let changed = false;
@@ -1814,7 +2491,7 @@ export default function MatchCenterClient({
 
             return changed ? nextEvents : prev;
         });
-    }, [eventDefinitions]);
+    }, [availableEventDefinitions]);
 
     useEffect(() => {
         setLocalEvents((prev) => {
@@ -1910,8 +2587,8 @@ export default function MatchCenterClient({
                 ? `${loser === 'home' ? homeName : awayName} (pierde por ${diff})`
                 : 'No';
 
-        const scoringDefinitions = eventDefinitions.filter((definition) => definition.category === 'score' && definition.points > 0);
-        const comparableDefinitions = eventDefinitions.filter((definition) => definition.team !== 'none');
+        const scoringDefinitions = availableEventDefinitions.filter((definition) => definition.category === 'score' && definition.points > 0);
+        const comparableDefinitions = availableEventDefinitions.filter((definition) => definition.team !== 'none');
         const scoringCounts = new Map<string, { homeCount: number; awayCount: number }>();
         const comparableCounts = new Map<string, { h: number; a: number }>();
 
@@ -1928,7 +2605,7 @@ export default function MatchCenterClient({
         let stAway = 0;
 
         events.forEach((event) => {
-            const points = getConfiguredEventPoints(event.type, eventDefinitionMap);
+            const points = getConfiguredEventPoints(event, eventDefinitionMap);
 
             if (points > 0 && event.team === 'home') {
                 if (event.minute <= 40) {
@@ -1951,7 +2628,7 @@ export default function MatchCenterClient({
                 }
 
                 const scoringCount = scoringCounts.get(event.type);
-                if (scoringCount) {
+                if (scoringCount && points > 0) {
                     scoringCount[event.team === 'home' ? 'homeCount' : 'awayCount'] += 1;
                 }
             }
@@ -1985,7 +2662,7 @@ export default function MatchCenterClient({
             bonusOffText,
             bonusDefText,
         };
-    }, [activeTab, awayName, eventDefinitionMap, eventDefinitions, events, homeName, match.status, pointsRules, score]);
+    }, [activeTab, awayName, availableEventDefinitions, eventDefinitionMap, events, homeName, match.status, pointsRules, score]);
     const {
         ptScore,
         stScore,
@@ -2017,7 +2694,7 @@ export default function MatchCenterClient({
             if ((event.team !== 'home' && event.team !== 'away') || !event.playerName.trim()) return;
 
             const statKey = `${event.team}:${event.playerId || normalizeLookupKey(event.playerName)}`;
-            const points = getConfiguredEventPoints(event.type, eventDefinitionMap);
+            const points = getConfiguredEventPoints(event, eventDefinitionMap);
             const definition = eventDefinitionMap[event.type];
             const existing = playerStatsMap.get(statKey) || {
                 key: statKey,
@@ -2040,11 +2717,11 @@ export default function MatchCenterClient({
 
             const currentBreakdown = existing.breakdown.get(event.type) || {
                 type: event.type,
-                label: definition?.label || eventTypeLabel(event.type, eventDefinitions),
+                label: definition?.label || eventTypeLabel(event.type, availableEventDefinitions),
                 count: 0,
                 pointsPerEvent: points,
                 totalPoints: 0,
-                color: eventTypeColor(event.type, eventDefinitions),
+                color: eventTypeColor(event.type, availableEventDefinitions),
             };
             currentBreakdown.count += 1;
             currentBreakdown.totalPoints += points;
@@ -2082,7 +2759,26 @@ export default function MatchCenterClient({
         ));
 
         return grouped;
-    }, [eventDefinitionMap, eventDefinitions, events]);
+    }, [availableEventDefinitions, eventDefinitionMap, events]);
+
+    const completeMatchStats = useMemo(
+        () => buildCompleteMatchStats(events, eventDefinitionMap),
+        [eventDefinitionMap, events],
+    );
+    const completeStatSections = useMemo(
+        () => buildCompleteStatSections(completeMatchStats),
+        [completeMatchStats],
+    );
+    const topPlayerStats = useMemo(() => (
+        [...playerStatsByTeam.home, ...playerStatsByTeam.away]
+            .sort((left, right) => (
+                right.points - left.points
+                || right.scoringEvents - left.scoringEvents
+                || right.totalEvents - left.totalEvents
+                || left.name.localeCompare(right.name)
+            ))
+            .slice(0, 6)
+    ), [playerStatsByTeam]);
     const scoreDirty = !areMatchScoresEqual(score, persistedScoreRef.current);
     const clockDirty = !areMatchClocksEqual(clockDraft, persistedClockRef.current);
     const eventsDirty = !areDraftValuesEqual(events, persistedEventsRef.current);
@@ -2097,6 +2793,27 @@ export default function MatchCenterClient({
         () => (activeTab === 'eventos' ? [...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)) : []),
         [activeTab, events],
     );
+    const eventPanelGroups = useMemo(() => {
+        const hasPenalty = availableEventDefinitions.some((definition) => definition.type === 'penalty');
+        const hasMatchClockEvents = availableEventDefinitions.some((definition) => definition.type === 'match_start' || definition.type === 'match_end');
+        const hasClubCards = availableEventDefinitions.some((definition) => definition.type === 'card_yellow' || definition.type === 'card_red');
+        const visibleDefinitions = availableEventDefinitions.filter((definition) => {
+            if (definition.type === 'penalty_goal' && hasPenalty) return false;
+            if ((definition.type === 'start_period' || definition.type === 'end_period') && hasMatchClockEvents) return false;
+            if ((definition.type === 'yellow_card' || definition.type === 'red_card') && hasClubCards) return false;
+            return true;
+        });
+        const groups = ['Marcador', 'Disciplina', 'Juego', 'Plantel', 'Reloj'];
+
+        return groups
+            .map((group) => ({
+                group,
+                definitions: visibleDefinitions.filter((definition) => getEventButtonGroup(definition) === group),
+            }))
+            .filter((group) => group.definitions.length > 0);
+    }, [availableEventDefinitions]);
+    const guidedPlayers = guidedEvent?.team ? eventPlayerOptions[guidedEvent.team] : [];
+    const guidedTeamName = guidedEvent?.team === 'home' ? homeName : guidedEvent?.team === 'away' ? awayName : '';
 
 
     /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -2321,9 +3038,9 @@ export default function MatchCenterClient({
                                         <div className="event-timeline" style={{ paddingLeft: 16 }}>
                                             {recentEvents.map((ev, i) => (
                                                 <div key={ev.id || i} className="event-entry" style={{ padding: '8px 12px', marginBottom: 8, background: 'transparent', border: 'none' }}>
-                                                    <div style={{ fontSize: '0.8rem', fontWeight: 900, color: eventTypeColor(ev.type, eventDefinitions), width: 40 }}>{ev.minute}&apos;</div>
+                                                    <div style={{ fontSize: '0.8rem', fontWeight: 900, color: eventTypeColor(ev.type, availableEventDefinitions), width: 40 }}>{ev.minute}&apos;</div>
                                                     <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                                                                {eventTypeLabel(ev.type, eventDefinitions)}{' '}
+                                                                {eventTypeLabel(ev.type, availableEventDefinitions)}{' '}
                                                         <span style={{ opacity: 0.5, fontWeight: 400, marginLeft: 8 }}>
                                                             {teamTag(ev.team)} {ev.playerName || ev.detail}
                                                         </span>
@@ -2554,35 +3271,57 @@ export default function MatchCenterClient({
 
                 {/* â”€â”€ TAB: EVENTOS â”€â”€ */}
                 {activeTab === 'eventos' && (
-                    <article className="mc-partition" style={{ maxWidth: 900, margin: '0 auto' }}>
+                    <>
+                    <div className="event-live-workspace">
+                        <article className="mc-partition live-event-console">
+                            <div className="mc-card-header">
+                                <div>
+                                    <h4>Carga rapida de eventos</h4>
+                                    <span className="live-event-header-note">Carga guiada en tres pasos, con estadisticas actualizadas al guardar.</span>
+                                </div>
+                                <span className="live-event-clock"><Clock size={14} /> {liveClockLabel}</span>
+                            </div>
+                            <div className="live-event-panel">
+                                {eventPanelGroups.map((group) => (
+                                    <section key={group.group} className="live-event-group" data-group={group.group.toLowerCase()}>
+                                        <div className="live-event-group-title">
+                                            <span>{group.group}</span>
+                                            <small>{group.definitions.length} eventos</small>
+                                        </div>
+                                        <div className="live-event-button-grid">
+                                            {group.definitions.map((definition) => (
+                                                <button
+                                                    key={definition.type}
+                                                    type="button"
+                                                    className="live-event-button"
+                                                    data-tone={getEventButtonTone(definition)}
+                                                    aria-label={`Cargar ${definition.label}`}
+                                                    onClick={() => openGuidedEvent(definition)}
+                                                >
+                                                    <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
+                                                    <span className="live-event-label">{getEventButtonLabel(definition)}</span>
+                                                    <span className="live-event-meta">{getEventButtonMeta(definition)}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </section>
+                                ))}
+                            </div>
+                        </article>
+                    </div>
+                    <article className="mc-partition event-timeline-panel">
                         <div className="mc-card-header">
-                            <h4>Timeline de Eventos ({events.length})</h4>
-                            <button className="mc-btn mc-btn-primary" onClick={() => {
-                                const defaultEvent = eventDefinitions[0] || {
-                                    type: 'score',
-                                    label: 'Punto',
-                                    category: 'score',
-                                    points: 1,
-                                    team: 'required',
-                                    player: 'optional',
-                                };
-                                const newEvent: MatchEvent = {
-                                    id: crypto.randomUUID(),
-                                    minute: 0,
-                                    type: defaultEvent.type,
-                                    team: defaultEvent.team === 'none' ? null : 'home',
-                                    playerId: null,
-                                    playerName: '',
-                                    detail: '',
-                                };
-                                setLocalEvents((prev) => [...prev, newEvent]);
-                            }}>
-                                <Plus size={14} /> Evento
-                            </button>
+                            <h4>Eventos cargados ({events.length})</h4>
+                            {eventsDirty && (
+                                <button className="mc-btn mc-btn-primary" type="button" onClick={handleSave} disabled={saving}>
+                                    {saving ? <RefreshCw className="animate-spin" size={14} /> : <Save size={14} />}
+                                    Guardar cambios
+                                </button>
+                            )}
                         </div>
                         <div className="mc-card-body" style={{ padding: 0 }}>
                             {events.length === 0 ? (
-                                <p className="empty-msg">Sin eventos. Haz clic en &quot;+ Evento&quot; para agregar.</p>
+                                <p className="empty-msg">Sin eventos. Elegi un boton del panel para iniciar la carga guiada.</p>
                             ) : (
                                 <>
                                     <div style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
@@ -2591,7 +3330,7 @@ export default function MatchCenterClient({
                                     {sortedEvents.map((ev) => {
                                         const selectedDefinition = eventDefinitionMap[ev.type] || {
                                             type: ev.type,
-                                            label: eventTypeLabel(ev.type, eventDefinitions),
+                                            label: eventTypeLabel(ev.type, availableEventDefinitions),
                                             category: 'other' as const,
                                             points: 0,
                                             team: 'optional' as const,
@@ -2627,9 +3366,9 @@ export default function MatchCenterClient({
                                                     }}
                                                 >
                                                     {!eventDefinitionMap[ev.type] && (
-                                                        <option value={ev.type}>{eventTypeLabel(ev.type, eventDefinitions)}</option>
+                                                        <option value={ev.type}>{eventTypeLabel(ev.type, availableEventDefinitions)}</option>
                                                     )}
-                                                    {eventDefinitions.map((definition) => (
+                                                    {availableEventDefinitions.map((definition) => (
                                                         <option key={definition.type} value={definition.type}>
                                                             {definition.label}
                                                         </option>
@@ -2708,11 +3447,203 @@ export default function MatchCenterClient({
                             )}
                         </div>
                     </article>
+                    </>
+                )}
+
+                {guidedEvent && (
+                    <div className="guided-event-backdrop" role="dialog" aria-modal="true" aria-label="Carga guiada de evento">
+                        <div className="guided-event-modal">
+                            <div className="guided-event-header">
+                                <div>
+                                    <span className="guided-event-kicker">Nuevo evento</span>
+                                    <h3>{guidedEvent.definition.label}</h3>
+                                </div>
+                                <button className="guided-event-close" type="button" onClick={() => setGuidedEvent(null)} aria-label="Cerrar">
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <div className="guided-event-steps">
+                                <span className={guidedEvent.step === 'team' ? 'active' : ''}>1 Equipo</span>
+                                <span className={guidedEvent.step === 'player' ? 'active' : ''}>2 Jugador</span>
+                                <span className={guidedEvent.step === 'details' ? 'active' : ''}>3 Guardar</span>
+                            </div>
+
+                            {guidedEvent.step === 'team' && (
+                                <div className="guided-event-body">
+                                    <h4>Que equipo registra este evento?</h4>
+                                    <div className="guided-team-grid">
+                                        <button className="guided-team-option" type="button" onClick={() => selectGuidedTeam('home')}>
+                                            {homeLogo ? <img src={homeLogo} alt={homeName} /> : <Shield size={28} />}
+                                            <span>{homeName}</span>
+                                        </button>
+                                        <button className="guided-team-option" type="button" onClick={() => selectGuidedTeam('away')}>
+                                            {awayLogo ? <img src={awayLogo} alt={awayName} /> : <Shield size={28} />}
+                                            <span>{awayName}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {guidedEvent.step === 'player' && (
+                                <div className="guided-event-body">
+                                    <h4>Elegi jugador de {guidedTeamName}</h4>
+                                    {guidedPlayers.length === 0 ? (
+                                        <div className="guided-empty">
+                                            No hay jugadores cargados para este equipo. Podes guardar el evento sin jugador o completar alineaciones primero.
+                                        </div>
+                                    ) : (
+                                        <div className="guided-player-grid">
+                                            {guidedPlayers.map((player) => (
+                                                <button
+                                                    key={`${player.playerId || player.name}`}
+                                                    type="button"
+                                                    className="guided-player-option"
+                                                    onClick={() => selectGuidedPlayer(player)}
+                                                >
+                                                    {player.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <button className="guided-skip-player" type="button" onClick={() => selectGuidedPlayer(null)}>
+                                        Continuar sin jugador
+                                    </button>
+                                </div>
+                            )}
+
+                            {guidedEvent.step === 'details' && (
+                                <div className="guided-event-body">
+                                    <div className="guided-details-grid">
+                                        <label>
+                                            <span>Minuto</span>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                max={160}
+                                                value={guidedEvent.minute}
+                                                onChange={(event) => setGuidedEvent((current) => current ? { ...current, minute: event.target.value } : current)}
+                                            />
+                                        </label>
+                                        {guidedEvent.team && (
+                                            <label>
+                                                <span>Equipo</span>
+                                                <select
+                                                    value={guidedEvent.team}
+                                                    onChange={(event) => selectGuidedTeam(event.target.value as 'home' | 'away')}
+                                                >
+                                                    <option value="home">{homeName}</option>
+                                                    <option value="away">{awayName}</option>
+                                                </select>
+                                            </label>
+                                        )}
+                                    </div>
+
+                                    {isGoalKickEventType(guidedEvent.definition.type) && (
+                                        <div className="guided-option-block">
+                                            <span>Resultado de la patada</span>
+                                            <div className="guided-toggle-row">
+                                                <button
+                                                    type="button"
+                                                    className={guidedEvent.goalKickResult === 'made' ? 'active' : ''}
+                                                    onClick={() => setGuidedEvent((current) => current ? { ...current, goalKickResult: 'made' } : current)}
+                                                >
+                                                    Convertida
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={guidedEvent.goalKickResult === 'missed' ? 'active' : ''}
+                                                    onClick={() => setGuidedEvent((current) => current ? { ...current, goalKickResult: 'missed' } : current)}
+                                                >
+                                                    Fallada
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {requiresContestOutcome(guidedEvent.definition.type) && (
+                                        <div className="guided-option-block">
+                                            <span>Resultado</span>
+                                            <div className="guided-toggle-row">
+                                                <button
+                                                    type="button"
+                                                    className={guidedEvent.contestOutcome === 'won' ? 'active' : ''}
+                                                    onClick={() => setGuidedEvent((current) => current ? { ...current, contestOutcome: 'won' } : current)}
+                                                >
+                                                    Ganado
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={guidedEvent.contestOutcome === 'lost' ? 'active' : ''}
+                                                    onClick={() => setGuidedEvent((current) => current ? { ...current, contestOutcome: 'lost' } : current)}
+                                                >
+                                                    Perdido
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {(guidedEvent.definition.type === 'substitution' || guidedEvent.definition.type === 'try') && guidedEvent.team && (
+                                        <label className="guided-secondary-select">
+                                            <span>{guidedEvent.definition.type === 'try' ? 'Asistencia opcional' : 'Jugador que entra'}</span>
+                                            <select
+                                                value={guidedEvent.secondaryPlayerName}
+                                                onChange={(event) => selectGuidedSecondaryPlayer(event.target.value)}
+                                            >
+                                                <option value="">Sin seleccionar</option>
+                                                {guidedPlayers.map((player) => (
+                                                    <option key={`secondary-${player.playerId || player.name}`} value={player.name}>
+                                                        {player.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                    )}
+
+                                    <label className="guided-detail-text">
+                                        <span>Detalle opcional</span>
+                                        <textarea
+                                            value={guidedEvent.detail}
+                                            onChange={(event) => setGuidedEvent((current) => current ? { ...current, detail: event.target.value } : current)}
+                                            rows={3}
+                                            placeholder="Zona, causa, contexto o aclaracion"
+                                        />
+                                    </label>
+                                </div>
+                            )}
+
+                            <div className="guided-event-footer">
+                                <button className="mc-btn mc-btn-outline" type="button" onClick={() => setGuidedEvent(null)}>Cancelar</button>
+                                {(guidedEvent.step === 'player' || (guidedEvent.step === 'details' && guidedEvent.definition.team !== 'none')) && (
+                                    <button
+                                        className="mc-btn mc-btn-outline"
+                                        type="button"
+                                        onClick={() => setGuidedEvent((current) => {
+                                            if (!current) return current;
+                                            if (current.step === 'details' && current.definition.team !== 'none') {
+                                                return { ...current, step: current.definition.player === 'none' ? 'team' : 'player' };
+                                            }
+                                            if (current.step === 'player') return { ...current, step: 'team' };
+                                            return current;
+                                        })}
+                                    >
+                                        Volver
+                                    </button>
+                                )}
+                                {guidedEvent.step === 'details' && (
+                                    <button className="mc-btn mc-btn-primary" type="button" onClick={saveGuidedEvent} disabled={saving}>
+                                        {saving ? <RefreshCw className="animate-spin" size={14} /> : <Save size={14} />}
+                                        Guardar evento
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 )}
 
                 {/* Stats */}
                 {activeTab === 'estadisticas' && (
-                    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+                    <div className="stats-workspace">
                         {events.length === 0 ? (
                             <article className="mc-partition">
                                 <div className="mc-card-body">
@@ -2720,6 +3651,91 @@ export default function MatchCenterClient({
                                 </div>
                             </article>
                         ) : (
+                            <>
+                            <article className="mc-partition stats-dashboard">
+                                <div className="mc-card-header">
+                                    <h4>Estadisticas del Partido</h4>
+                                    <span className="stats-header-note">
+                                        {scoreMismatch ? 'Calculado desde eventos' : 'Actualizacion automatica'}
+                                    </span>
+                                </div>
+                                <div className="mc-card-body stats-dashboard-body">
+                                    <div className="stats-scoreline">
+                                        <div className="stats-scoreline-team">
+                                            <span>{homeName}</span>
+                                            <strong>{completeMatchStats.points.home}</strong>
+                                        </div>
+                                        <div className="stats-scoreline-divider">PTS</div>
+                                        <div className="stats-scoreline-team away">
+                                            <span>{awayName}</span>
+                                            <strong>{completeMatchStats.points.away}</strong>
+                                        </div>
+                                    </div>
+
+                                    <div className="stats-kpi-grid">
+                                        <div className="stats-kpi">
+                                            <span>Eventos cargados</span>
+                                            <strong>{completeMatchStats.totalEvents}</strong>
+                                        </div>
+                                        <div className="stats-kpi">
+                                            <span>A los palos</span>
+                                            <strong>
+                                                {completeMatchStats.goalKicksMade.home + completeMatchStats.goalKicksMade.away}
+                                                /{completeMatchStats.goalKickAttempts.home + completeMatchStats.goalKickAttempts.away}
+                                            </strong>
+                                        </div>
+                                        <div className="stats-kpi">
+                                            <span>Errores</span>
+                                            <strong>
+                                                {completeMatchStats.knockOns.home + completeMatchStats.knockOns.away
+                                                    + completeMatchStats.forwardPasses.home + completeMatchStats.forwardPasses.away
+                                                    + completeMatchStats.handlingErrors.home + completeMatchStats.handlingErrors.away}
+                                            </strong>
+                                        </div>
+                                        <div className="stats-kpi">
+                                            <span>Disciplina</span>
+                                            <strong>
+                                                {completeMatchStats.yellowCards.home + completeMatchStats.yellowCards.away
+                                                    + completeMatchStats.redCards.home + completeMatchStats.redCards.away
+                                                    + completeMatchStats.penaltiesConceded.home + completeMatchStats.penaltiesConceded.away}
+                                            </strong>
+                                        </div>
+                                    </div>
+
+                                    <div className="stats-section-grid">
+                                        {completeStatSections.map((section) => (
+                                            <section className="stats-section" key={section.title}>
+                                                <div className="stats-section-header">
+                                                    <h5>{section.title}</h5>
+                                                    <span>{section.rows.length}</span>
+                                                </div>
+                                                <div className="stats-rows">
+                                                    {section.rows.map((row) => {
+                                                        const total = row.home + row.away;
+                                                        const homePct = total > 0 ? (row.home / total) * 100 : 0;
+                                                        const awayPct = total > 0 ? (row.away / total) * 100 : 0;
+
+                                                        return (
+                                                            <div className={row.accent ? 'stats-row accent' : 'stats-row'} key={row.key}>
+                                                                <strong className="stats-row-value home">{row.home}</strong>
+                                                                <div className="stats-row-bar home" aria-hidden="true">
+                                                                    <span style={{ width: `${homePct}%` }} />
+                                                                </div>
+                                                                <span className="stats-row-label">{row.label}</span>
+                                                                <div className="stats-row-bar away" aria-hidden="true">
+                                                                    <span style={{ width: `${awayPct}%` }} />
+                                                                </div>
+                                                                <strong className="stats-row-value away">{row.away}</strong>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </section>
+                                        ))}
+                                    </div>
+                                </div>
+                            </article>
+
                             <article className="mc-partition" style={{ background: '#111' }}>
                                 <div className="mc-card-header">
                                     <h4>Comparativo por Equipo</h4>
@@ -2793,6 +3809,26 @@ export default function MatchCenterClient({
                                             Solo se computan eventos con jugador asignado.
                                         </span>
                                     </div>
+                                    {topPlayerStats.length > 0 && (
+                                        <div className="stats-player-leaders">
+                                            <div className="stats-section-header">
+                                                <h5>Jugadores destacados</h5>
+                                                <span>Top {topPlayerStats.length}</span>
+                                            </div>
+                                            <div className="stats-leader-list">
+                                                {topPlayerStats.map((player, index) => (
+                                                    <div key={player.key} className="stats-leader-row">
+                                                        <span className="stats-leader-rank">{index + 1}</span>
+                                                        <div>
+                                                            <strong>{player.name}</strong>
+                                                            <span>{player.team === 'home' ? homeName : awayName}</span>
+                                                        </div>
+                                                        <strong>{player.points} pts</strong>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
                                         {([
                                             { team: 'home' as const, label: homeName, rows: playerStatsByTeam.home },
@@ -2852,6 +3888,7 @@ export default function MatchCenterClient({
                                     </div>
                                 </div>
                             </article>
+                            </>
                         )}
                     </div>
                 )}
