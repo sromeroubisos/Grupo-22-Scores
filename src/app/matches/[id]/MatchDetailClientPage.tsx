@@ -1412,7 +1412,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 homeName: matchData.homeClub?.name || 'Local',
                                 awayName: matchData.awayClub?.name || 'Visitante',
                             });
-                            const localStats = buildLocalTeamStats(localEvents);
+                            const localStats = buildLocalTeamStats(localEvents, sportId);
                             const resolvedDbHomeLogo = resolveMatchTeamLogo(matchData.homeClub, null, matchData.homeClub?.logo || null);
                             const resolvedDbAwayLogo = resolveMatchTeamLogo(matchData.awayClub, null, matchData.awayClub?.logo || null);
 

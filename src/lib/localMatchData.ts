@@ -1,3 +1,5 @@
+import { getDefaultMatchEventDefinitions, type MatchEventCategory } from './matchEventCatalog';
+
 export type LocalMatchTeam = 'home' | 'away';
 
 export type LocalLineupPlayer = {
@@ -246,8 +248,8 @@ export function buildLocalPlayerStatsRows(args: {
     row.points += getEventPoints(event.type);
     if (event.type === 'try') row.tries += 1;
     if (event.type === 'tackle') row.tackles += 1;
-    if (event.type === 'yellow_card') row.yellowCards += 1;
-    if (event.type === 'red_card') row.redCards += 1;
+    if (event.type === 'yellow_card' || event.type === 'card_yellow') row.yellowCards += 1;
+    if (event.type === 'red_card' || event.type === 'card_red') row.redCards += 1;
   });
 
   return Array.from(map.values()).sort((a, b) =>
@@ -258,23 +260,79 @@ export function buildLocalPlayerStatsRows(args: {
   );
 }
 
-export function buildLocalTeamStats(events: LocalPublicEvent[]) {
-  const trackedTypes = [
-    { type: 'try', label: 'Tries' },
-    { type: 'goal', label: 'Goles' },
-    { type: 'conversion', label: 'Conversiones' },
-    { type: 'penalty_goal', label: 'Penales' },
-    { type: 'drop_goal', label: 'Drop goals' },
-    { type: 'yellow_card', label: 'Tarjetas amarillas' },
-    { type: 'red_card', label: 'Tarjetas rojas' },
-    { type: 'substitution', label: 'Cambios' },
-  ];
+const STAT_VISIBLE_CATEGORIES: ReadonlyArray<MatchEventCategory> = [
+  'score',
+  'card',
+  'discipline',
+  'substitution',
+];
 
-  return trackedTypes
-    .map((definition) => ({
-      label: definition.label,
-      home: events.filter((event) => event.team === 'home' && event.type === definition.type).length,
-      away: events.filter((event) => event.team === 'away' && event.type === definition.type).length,
-    }))
-    .filter((row) => row.home > 0 || row.away > 0);
+const STAT_CATEGORY_ORDER: Record<MatchEventCategory, number> = {
+  score: 0,
+  card: 1,
+  discipline: 2,
+  substitution: 3,
+  other: 4,
+  clock: 5,
+};
+
+const STAT_LABEL_OVERRIDES: Record<string, string> = {
+  try: 'Tries',
+  penalty_try: 'Penalty tries',
+  conversion: 'Conversiones',
+  penalty: 'Penales',
+  penalty_goal: 'Penales a los palos',
+  drop_goal: 'Drops',
+  goal: 'Goles',
+  own_goal: 'Goles en contra',
+  free_throw: 'Tiros libres',
+  two_pointer: 'Dobles',
+  three_pointer: 'Triples',
+  point: 'Puntos',
+  ace: 'Aces',
+  block_point: 'Bloqueos ganadores',
+  touchdown: 'Touchdowns',
+  field_goal: 'Field goals',
+  extra_point: 'Puntos extra',
+  two_point_conversion: 'Conversiones de 2',
+  safety: 'Safeties',
+  run: 'Carreras',
+  home_run: 'Home runs',
+  seven_meter_goal: 'Goles de 7m',
+  card_yellow: 'Tarjetas amarillas',
+  card_red: 'Tarjetas rojas',
+  yellow_card: 'Tarjetas amarillas',
+  red_card: 'Tarjetas rojas',
+  green_card: 'Tarjetas verdes',
+  knock_on: 'Knock-ons',
+  forward_pass: 'Pases forward',
+  penalty_won: 'Penales ganados',
+  penalty_conceded: 'Penales concedidos',
+  free_kick: 'Free kicks',
+  handling_error: 'Errores de manejo',
+  turnover_lost: 'Turnovers perdidos',
+  foul: 'Faltas',
+  two_min_suspension: 'Suspensiones 2 min',
+  substitution: 'Cambios',
+};
+
+export function buildLocalTeamStats(events: LocalPublicEvent[], sportId?: string | null) {
+  const definitions = getDefaultMatchEventDefinitions(sportId).filter((definition) =>
+    STAT_VISIBLE_CATEGORIES.includes(definition.category),
+  );
+
+  const ordered = definitions
+    .map((definition, index) => ({ definition, index }))
+    .sort((a, b) => {
+      const orderDiff = STAT_CATEGORY_ORDER[a.definition.category] - STAT_CATEGORY_ORDER[b.definition.category];
+      if (orderDiff !== 0) return orderDiff;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.definition);
+
+  return ordered.map((definition) => ({
+    label: STAT_LABEL_OVERRIDES[definition.type] || definition.label,
+    home: events.filter((event) => event.team === 'home' && event.type === definition.type).length,
+    away: events.filter((event) => event.team === 'away' && event.type === definition.type).length,
+  }));
 }
