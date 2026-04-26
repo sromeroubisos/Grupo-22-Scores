@@ -701,7 +701,10 @@ function ExportDesignDetailPageContent({ design }: { design: ExportDesign }) {
         };
 
         window.addEventListener(EXPORT_DESIGN_CUSTOMIZATION_EVENT, syncCustomization as EventListener);
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            // Token refresh keeps the same identity; re-hydrating on every
+            // TOKEN_REFRESHED tick amplifies /token storms.
+            if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
             if (isEditingRef.current) return;
             void hydrateCustomization();
         });

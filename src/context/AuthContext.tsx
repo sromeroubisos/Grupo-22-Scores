@@ -322,17 +322,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     return;
                 }
 
-                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                     if (session?.user) {
                         console.log('[AuthContext] Event result: fetching user for event:', event);
                         fetchAndSetUser(session.user).catch((backgroundError: unknown) => {
                             console.error('[AuthContext] Background fetchAndSetUser failed:', backgroundError);
                         });
-                    } else if (event !== 'INITIAL_SESSION') {
+                    } else {
                         console.warn('[AuthContext] SIGNED_IN event received but no user present in session');
                         setUser(null);
                         setIsLoading(false);
                     }
+                } else if (event === 'TOKEN_REFRESHED') {
+                    // Token refresh keeps the same user identity; refetching the
+                    // profile/onboarding state on every refresh tick is wasteful
+                    // and amplifies refresh storms. Just keep the existing
+                    // local user state in sync with the new session.
+                    if (!session?.user) {
+                        return;
+                    }
+                    setUser((prev) => {
+                        if (!prev) return prev;
+                        if (prev.id !== session.user.id) return prev;
+                        const nextAvatar = session.user.user_metadata?.avatar_url ?? prev.avatarUrl;
+                        if (prev.avatarUrl === nextAvatar) return prev;
+                        return { ...prev, avatarUrl: nextAvatar };
+                    });
                 } else if (event === 'SIGNED_OUT') {
                     console.log('[AuthContext] Event result: signing out');
                     setUser(null);

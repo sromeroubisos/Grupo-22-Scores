@@ -5,6 +5,10 @@ import { logPerf, measureAsync } from '@/lib/perf/measure';
 
 const AUTH_REFRESH_TIMEOUT_MS = 2500;
 const SHOULD_LOG_PROXY_AUTH = process.env.ENABLE_SERVER_PERF_LOGS === 'true' || process.env.NODE_ENV !== 'production';
+// Margin before access_token expiry where the proxy will trigger a refresh.
+// Anything fresher than this window is treated as valid and the entire auth
+// roundtrip is skipped to avoid hammering Supabase Auth with /token calls.
+const ACCESS_TOKEN_REFRESH_MARGIN_SECONDS = 120;
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -20,12 +24,109 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): 
     });
 }
 
+function getSupabaseProjectRef(): string | null {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) return null;
+    try {
+        return new URL(supabaseUrl).hostname.split('.')[0] || null;
+    } catch {
+        return null;
+    }
+}
+
+function decodeBase64Url(value: string): string | null {
+    try {
+        let normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+        const padding = normalized.length % 4;
+        if (padding) normalized += '='.repeat(4 - padding);
+        if (typeof atob === 'function') {
+            return atob(normalized);
+        }
+        return Buffer.from(normalized, 'base64').toString('utf-8');
+    } catch {
+        return null;
+    }
+}
+
+function readAuthCookieValue(request: NextRequest): string | null {
+    const projectRef = getSupabaseProjectRef();
+    if (!projectRef) return null;
+
+    const baseName = `sb-${projectRef}-auth-token`;
+    const direct = request.cookies.get(baseName)?.value;
+    if (direct) return direct;
+
+    // The cookie is chunked (.0, .1, ...) when it exceeds the browser's size limit.
+    const chunks: string[] = [];
+    for (let i = 0; i < 8; i++) {
+        const chunk = request.cookies.get(`${baseName}.${i}`)?.value;
+        if (!chunk) break;
+        chunks.push(chunk);
+    }
+    return chunks.length ? chunks.join('') : null;
+}
+
+function extractAccessTokenFromCookie(cookieValue: string): string | null {
+    let payload = cookieValue;
+    if (payload.startsWith('base64-')) {
+        const decoded = decodeBase64Url(payload.slice('base64-'.length));
+        if (!decoded) return null;
+        payload = decoded;
+    }
+    try {
+        const parsed = JSON.parse(payload) as { access_token?: unknown };
+        return typeof parsed.access_token === 'string' ? parsed.access_token : null;
+    } catch {
+        return null;
+    }
+}
+
+function readAccessTokenExpirySeconds(request: NextRequest): number | null {
+    const cookieValue = readAuthCookieValue(request);
+    if (!cookieValue) return null;
+    const accessToken = extractAccessTokenFromCookie(cookieValue);
+    if (!accessToken) return null;
+    const segments = accessToken.split('.');
+    if (segments.length < 2) return null;
+    const payloadJson = decodeBase64Url(segments[1]);
+    if (!payloadJson) return null;
+    try {
+        const parsed = JSON.parse(payloadJson) as { exp?: unknown };
+        return typeof parsed.exp === 'number' ? parsed.exp : null;
+    } catch {
+        return null;
+    }
+}
+
 export async function updateSession(request: NextRequest) {
     let response = NextResponse.next({
         request: {
             headers: request.headers,
         },
     })
+
+    // Fast-path: if the access_token cookie has plenty of life left, there is
+    // no point in spinning up a Supabase client and (potentially) firing a
+    // /token refresh. This keeps high-traffic pages from creating a refresh
+    // storm against Supabase Auth (the source of repeated 429 responses).
+    const accessTokenExp = readAccessTokenExpirySeconds(request);
+    if (accessTokenExp) {
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        const remainingSeconds = accessTokenExp - nowSeconds;
+        if (remainingSeconds > ACCESS_TOKEN_REFRESH_MARGIN_SECONDS) {
+            logPerf(
+                ['PROXY'],
+                {
+                    path: request.nextUrl.pathname,
+                    authChecked: true,
+                    authFastPath: true,
+                    remainingSeconds,
+                },
+                'server',
+            )
+            return response;
+        }
+    }
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,13 +185,17 @@ export async function updateSession(request: NextRequest) {
     )
 
     // Refresh session if expired - required for Server Components and OAuth PKCE flow.
-    // DO NOT skip this call: it is needed to exchange OAuth codes and refresh tokens.
-    let authResult: Awaited<ReturnType<typeof supabase.auth.getUser>> | null = null;
+    // We use getSession() instead of getUser() because getSession() reads from
+    // cookies and only triggers a /token refresh when the access_token is close
+    // to expiry, while getUser() always pings /auth/v1/user. With many parallel
+    // middleware invocations (RSC payloads, prefetches, sub-fetches) the
+    // getUser() approach was the source of repeated 429 rate-limit responses.
+    let authResult: Awaited<ReturnType<typeof supabase.auth.getSession>> | null = null;
 
     try {
         authResult = await measureAsync(
-            'proxy_get_user',
-            async () => withTimeout(supabase.auth.getUser(), AUTH_REFRESH_TIMEOUT_MS, 'proxy_get_user'),
+            'proxy_get_session',
+            async () => withTimeout(supabase.auth.getSession(), AUTH_REFRESH_TIMEOUT_MS, 'proxy_get_session'),
             {
                 runtime: 'server',
                 tags: ['PROXY'],
@@ -100,7 +205,7 @@ export async function updateSession(request: NextRequest) {
                 },
                 describeResult: (result) => ({
                     success: !result.error,
-                    hasUser: Boolean(result.data?.user),
+                    hasSession: Boolean(result.data?.session),
                 }),
             },
         )
@@ -120,11 +225,12 @@ export async function updateSession(request: NextRequest) {
         return response
     }
 
-    const { data: { user }, error } = authResult
+    const { data: { session }, error } = authResult
+    const user = session?.user ?? null
     if (error) {
         // Only log if it's not a common "no session" state
         if (!error.message.includes('Auth session missing')) {
-            console.error('[Middleware] getUser error:', error.message);
+            console.error('[Middleware] getSession error:', error.message);
         }
     } else if (user) {
         if (SHOULD_LOG_PROXY_AUTH) {
@@ -132,7 +238,7 @@ export async function updateSession(request: NextRequest) {
         }
     } else {
         if (SHOULD_LOG_PROXY_AUTH) {
-            console.log('[Middleware] No session session found on request');
+            console.log('[Middleware] No session found on request');
         }
     }
 

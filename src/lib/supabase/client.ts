@@ -41,6 +41,12 @@ function isSupabaseAuthRequest(input: string | URL | Request, supabaseUrl: strin
     return requestUrl.startsWith(`${supabaseUrl}/auth/v1`)
 }
 
+function isRefreshTokenRequest(input: string | URL | Request, supabaseUrl: string) {
+    const requestUrl = resolveRequestUrl(input)
+    if (!requestUrl.startsWith(`${supabaseUrl}/auth/v1/token`)) return false
+    return requestUrl.includes('grant_type=refresh_token')
+}
+
 function buildAuthFailureResponse() {
     return new Response(
         JSON.stringify({
@@ -55,6 +61,15 @@ function buildAuthFailureResponse() {
         }
     )
 }
+
+// Coalesces concurrent `/token?grant_type=refresh_token` POSTs originating
+// from the same browser client into a single in-flight HTTP request. Multiple
+// callers (e.g. parallel `getSession()` calls, multiple components mounting at
+// once, autoRefresh ticker firing while a manual refresh is also in flight)
+// would otherwise each hit Supabase Auth simultaneously, with all but one
+// failing with 429 (over_request_rate_limit) due to per-IP /token caps.
+let inFlightRefresh: { promise: Promise<Response>; finishedAt: number } | null = null
+const REFRESH_RESULT_REUSE_WINDOW_MS = 1500
 
 export function createClient() {
     if (client) return client
@@ -98,7 +113,63 @@ export function createClient() {
         }
     }
 
+    const performAuthFetch = (input: string | URL | Request, init?: RequestInit) =>
+        withAuthTimeout(input, init).then((response) => response.clone())
+
     const browserFetch = async (input: string | URL | Request, init?: RequestInit) => {
+        // Single-flight refresh_token requests so concurrent callers reuse the
+        // same in-flight HTTP request instead of stampeding Supabase Auth.
+        // We also briefly cache the most recent successful refresh response so
+        // that bursts of `getSession()` calls within ~1.5s share one HTTP roundtrip.
+        if (url && isRefreshTokenRequest(input, url)) {
+            if (inFlightRefresh) {
+                const stillFresh =
+                    inFlightRefresh.finishedAt === 0 ||
+                    nowMs() - inFlightRefresh.finishedAt < REFRESH_RESULT_REUSE_WINDOW_MS
+                if (stillFresh) {
+                    try {
+                        const cached = await inFlightRefresh.promise
+                        if (cached.ok) {
+                            return cached.clone()
+                        }
+                        // Non-OK cached response (e.g. 429): fall through and
+                        // attempt a fresh request below.
+                    } catch {
+                        // Fall through to a fresh attempt if the cached one failed.
+                    }
+                }
+            }
+
+            const attempt = (async () => {
+                try {
+                    return await performAuthFetch(input, init)
+                } catch (error) {
+                    console.warn('[SupabaseClient] Auth request failed, preserving local session state:', error)
+                    return buildAuthFailureResponse()
+                }
+            })()
+
+            inFlightRefresh = { promise: attempt, finishedAt: 0 }
+
+            try {
+                const response = await attempt
+                if (response.ok) {
+                    inFlightRefresh = { promise: attempt, finishedAt: nowMs() }
+                    setTimeout(() => {
+                        if (inFlightRefresh && inFlightRefresh.promise === attempt) {
+                            inFlightRefresh = null
+                        }
+                    }, REFRESH_RESULT_REUSE_WINDOW_MS)
+                } else {
+                    inFlightRefresh = null
+                }
+                return response.clone()
+            } catch (error) {
+                inFlightRefresh = null
+                throw error
+            }
+        }
+
         try {
             return await withAuthTimeout(input, init)
         } catch (error) {

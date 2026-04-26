@@ -866,7 +866,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         };
 
         window.addEventListener(EXPORT_DESIGN_CUSTOMIZATION_EVENT, handleCustomizationChange as EventListener);
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            // Token refresh keeps the same identity; re-hydrating presets on
+            // every TOKEN_REFRESHED tick was a multiplier on /token storms.
+            if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
             void hydrateCustomization();
         });
 
@@ -941,7 +944,10 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
 
         void hydrateSavedPresets();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            // Token refresh keeps the same identity; re-hydrating presets on
+            // every TOKEN_REFRESHED tick was a multiplier on /token storms.
+            if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
             void hydrateSavedPresets();
         });
 
