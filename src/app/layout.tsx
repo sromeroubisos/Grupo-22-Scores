@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import ConditionalLayout from "@/components/ConditionalLayout";
 // Force rebuild for ChunkLoadError fix
@@ -70,7 +71,9 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <AuthProvider>
-          <ConditionalLayout>{children}</ConditionalLayout>
+          <Suspense fallback={null}>
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </Suspense>
         </AuthProvider>
         <Analytics />
       </body>
