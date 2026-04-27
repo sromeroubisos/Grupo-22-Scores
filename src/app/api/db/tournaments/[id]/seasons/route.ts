@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
+import { mergeSlugSeasonFamilyIntoSet, mergeSlugSeasonFamilyIntoSetLoose } from '@/lib/tournamentSeasonChain';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -20,6 +21,8 @@ type TournamentRow = {
     season_id: string | null;
     status: string | null;
     is_visible: boolean | null;
+    sport_id?: string | null;
+    country_id?: string | null;
 };
 
 type RelationRow = {
@@ -67,6 +70,54 @@ function compareSeasonLabels(a: SeasonOption, b: SeasonOption): number {
     return String(b.label).localeCompare(String(a.label), 'es');
 }
 
+const ANCHOR_SELECT =
+    'id, name, display_name, slug, season_id, status, is_visible, sport_id, country_id';
+
+/** DB `external_id` is often stored without the public route prefix (see favorites migrations). */
+function stripPublicRoutePrefix(routeId: string): string {
+    return routeId.replace(/^(fs-|ras-league-|espn-league-|espn-racing-league-)/i, '');
+}
+
+async function resolveSeasonAnchorRow(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    routeId: string,
+): Promise<TournamentRow | null> {
+    const { data: byIdOrSlug } = await supabase
+        .from('tournaments')
+        .select(ANCHOR_SELECT)
+        .or(`id.eq.${routeId},slug.eq.${routeId}`)
+        .maybeSingle<TournamentRow>();
+
+    if (byIdOrSlug) return byIdOrSlug;
+
+    const tryExternalId = async (value: string) => {
+        if (!value.trim()) return null;
+        const { data, error } = await supabase
+            .from('tournaments')
+            .select(ANCHOR_SELECT)
+            .eq('external_id', value)
+            .limit(1);
+        if (error || !data?.length) return null;
+        return data[0] as TournamentRow;
+    };
+
+    const direct = await tryExternalId(routeId);
+    if (direct) return direct;
+
+    const stripped = stripPublicRoutePrefix(routeId);
+    if (stripped !== routeId) {
+        const byStripped = await tryExternalId(stripped);
+        if (byStripped) return byStripped;
+    }
+
+    if (!/^fs-/i.test(routeId)) {
+        const withFs = await tryExternalId(`fs-${routeId}`);
+        if (withFs) return withFs;
+    }
+
+    return null;
+}
+
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
@@ -74,58 +125,67 @@ export async function GET(
     const { id } = await params;
     const supabase = await getReadClient();
 
-    const { data: lookup, error: lookupError } = await supabase
-        .from('tournaments')
-        .select('id, name, display_name, slug, season_id, status, is_visible')
-        .or(`id.eq.${id},slug.eq.${id}`)
-        .maybeSingle<TournamentRow>();
+    const lookup = await resolveSeasonAnchorRow(supabase, id);
 
-    if (lookupError || !lookup) {
+    if (!lookup) {
         return jsonNoStore({ ok: false, seasons: [] }, { status: 404 });
     }
 
     const currentId = lookup.id;
 
-    const { data: directRelationsData, error: directRelationsError } = await supabase
-        .from('tournament_relations')
-        .select('source_tournament_id, target_tournament_id, relation_type, status')
-        .or(`source_tournament_id.eq.${currentId},target_tournament_id.eq.${currentId}`)
-        .in('relation_type', SEASON_RELATION_TYPES as unknown as string[]);
+    const relationTypes = SEASON_RELATION_TYPES as unknown as string[];
+    const isActiveRelation = (rel: RelationRow) =>
+        (rel.status ?? 'active') !== 'inactive' && (rel.status ?? 'active') !== 'archived';
 
-    if (directRelationsError) {
-        return jsonNoStore({ ok: false, seasons: [], error: directRelationsError.message }, { status: 500 });
+    /** Full season cluster: walk previous_season/next_season as an undirected graph (linear chains were missing ends). */
+    const involvedIds = new Set<string>([currentId]);
+    let grew = true;
+    while (grew) {
+        grew = false;
+        const frontier = Array.from(involvedIds);
+        const [{ data: bySource, error: errSource }, { data: byTarget, error: errTarget }] = await Promise.all([
+            supabase
+                .from('tournament_relations')
+                .select('source_tournament_id, target_tournament_id, relation_type, status')
+                .in('source_tournament_id', frontier)
+                .in('relation_type', relationTypes),
+            supabase
+                .from('tournament_relations')
+                .select('source_tournament_id, target_tournament_id, relation_type, status')
+                .in('target_tournament_id', frontier)
+                .in('relation_type', relationTypes),
+        ]);
+
+        if (errSource || errTarget) {
+            const msg = errSource?.message || errTarget?.message || 'relations query failed';
+            return jsonNoStore({ ok: false, seasons: [], error: msg }, { status: 500 });
+        }
+
+        const batch = [...(bySource ?? []), ...(byTarget ?? [])] as RelationRow[];
+        for (const rel of batch) {
+            if (!isActiveRelation(rel)) continue;
+            const a = rel.source_tournament_id;
+            const b = rel.target_tournament_id;
+            if (!involvedIds.has(a)) {
+                involvedIds.add(a);
+                grew = true;
+            }
+            if (!involvedIds.has(b)) {
+                involvedIds.add(b);
+                grew = true;
+            }
+        }
     }
 
-    const directRelations = (directRelationsData ?? []) as RelationRow[];
-    const activeDirectRelations = directRelations.filter((rel) => (rel.status ?? 'active') !== 'inactive' && (rel.status ?? 'active') !== 'archived');
+    await mergeSlugSeasonFamilyIntoSet(supabase as any, {
+        id: lookup.id,
+        slug: lookup.slug,
+        sport_id: lookup.sport_id ?? null,
+        country_id: lookup.country_id ?? null,
+    }, involvedIds);
 
-    const involvedIds = new Set<string>([currentId]);
-    activeDirectRelations.forEach((rel) => {
-        involvedIds.add(rel.source_tournament_id);
-        involvedIds.add(rel.target_tournament_id);
-    });
-
-    const parentIds = new Set<string>();
-    activeDirectRelations.forEach((rel) => {
-        if (rel.target_tournament_id === currentId && rel.relation_type === 'previous_season') {
-            parentIds.add(rel.source_tournament_id);
-        }
-    });
-
-    if (parentIds.size > 0) {
-        const { data: siblingRelationsData } = await supabase
-            .from('tournament_relations')
-            .select('source_tournament_id, target_tournament_id, relation_type, status')
-            .in('source_tournament_id', Array.from(parentIds))
-            .in('relation_type', SEASON_RELATION_TYPES as unknown as string[]);
-
-        const siblingRelations = (siblingRelationsData ?? []) as RelationRow[];
-        siblingRelations
-            .filter((rel) => (rel.status ?? 'active') !== 'inactive' && (rel.status ?? 'active') !== 'archived')
-            .forEach((rel) => {
-                involvedIds.add(rel.source_tournament_id);
-                involvedIds.add(rel.target_tournament_id);
-            });
+    if (involvedIds.size <= 1) {
+        await mergeSlugSeasonFamilyIntoSetLoose(supabase as any, { slug: lookup.slug }, involvedIds);
     }
 
     if (involvedIds.size <= 1) {
@@ -154,9 +214,8 @@ export async function GET(
     }
 
     const rows = (tournamentRowsData ?? []) as TournamentRow[];
-    const visibleRows = rows.filter((row) => row.id === currentId || row.is_visible !== false);
-
-    const seasons: SeasonOption[] = visibleRows.map((row) => ({
+    /* Same competition / linked seasons: list every edition so the switcher stays consistent on every URL. */
+    const seasons: SeasonOption[] = rows.map((row) => ({
         id: row.id,
         label: pickLabel(row),
         name: row.display_name || row.name || 'Temporada',

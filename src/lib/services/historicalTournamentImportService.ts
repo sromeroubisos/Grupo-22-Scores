@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { ensureChronologicalSeasonEdgesForCluster } from '@/lib/tournamentSeasonChain';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import type {
   HistoricalImportClubResolution,
@@ -515,15 +516,22 @@ export class HistoricalTournamentImportService {
 
       await this.learnAliases(supabase, model.clubs);
 
+      /* previous_season: source = edicion mas vieja, target = edicion mas nueva (el torneo base desde el que importaste). */
       const relationResult = await this.createSeasonRelation(
         supabase,
-        params.baseTournamentId,
         importedTournamentId,
+        params.baseTournamentId,
         model.seasonId
       );
       const relationCreated = relationResult.ok;
       if (!relationCreated && relationResult.message) {
         warnings.push(relationResult.message);
+      }
+
+      try {
+        await ensureChronologicalSeasonEdgesForCluster(db as any, importedTournamentId);
+      } catch {
+        warnings.push('No se pudo sincronizar la cadena automatica de temporadas (revisa tournament_relations).');
       }
 
       await this.writeAudit(supabase, params.actorUserId, importedTournamentId, {

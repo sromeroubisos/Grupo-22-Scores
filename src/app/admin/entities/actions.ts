@@ -15,6 +15,11 @@ import { resolveTournamentCountryLabel } from '@/lib/data/countries';
 import { getMissingTournamentPriorityMessage, isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { getClubDashboardOverview } from '@/lib/club-admin/dashboard';
 import { getClubFamilySummary } from '@/lib/club-admin/managedClubFamily';
+import {
+    autoDetectPreviousSeasonTournamentId,
+    ensureChronologicalSeasonEdgesForCluster,
+    upsertPreviousSeasonEdge,
+} from '@/lib/tournamentSeasonChain';
 import { z } from 'zod';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -38,6 +43,12 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         priority: z.number().int().optional().nullable(),
         format: z.string().optional().nullable(),
         ruleset: z.record(z.string(), z.any()).optional().nullable(),
+        /** Opcional: UUID del torneo edicion anterior (misma competencia). Si no se envia, se intenta detectar por slug `nombre-AAAA`. */
+        link_previous_season_tournament_id: z
+            .string()
+            .optional()
+            .nullable()
+            .refine((v) => v == null || v === '' || UUID_REGEX.test(v), 'UUID de temporada anterior invalido'),
     }),
     club: z.object({
         id: z.string().optional(), // clubs use TEXT IDs (slugs)
@@ -295,7 +306,15 @@ export async function createEntity(
         await ensureTournamentCountryExists(cleanPayload);
     }
 
-    const { data, error } = await runTournamentWriteWithPriorityFallback(type, cleanPayload, (nextPayload) =>
+    let insertPayload: Record<string, any> = cleanPayload;
+    let explicitPreviousSeasonId: string | null = null;
+    if (type === 'tournament') {
+        explicitPreviousSeasonId = readOptionalScopedId(cleanPayload.link_previous_season_tournament_id);
+        const { link_previous_season_tournament_id: _omitLink, ...rest } = cleanPayload as Record<string, any>;
+        insertPayload = rest;
+    }
+
+    const { data, error } = await runTournamentWriteWithPriorityFallback(type, insertPayload, (nextPayload) =>
         mutationClient.from(table).insert(nextPayload).select().single()
     );
     if (error) {
@@ -303,6 +322,30 @@ export async function createEntity(
     }
 
     const id: string = data.id;
+
+    if (type === 'tournament') {
+        try {
+            const writer = mutationClient as any;
+            let prev = explicitPreviousSeasonId;
+            if (!prev) {
+                prev = await autoDetectPreviousSeasonTournamentId(writer, {
+                    id: data.id,
+                    sport_id: data.sport_id,
+                    country_id: data.country_id,
+                    slug: data.slug,
+                    season_id: data.season_id,
+                    display_name: data.display_name,
+                    name: data.name,
+                });
+            }
+            if (prev) {
+                await upsertPreviousSeasonEdge(writer, prev, data.id);
+            }
+            await ensureChronologicalSeasonEdgesForCluster(writer, data.id);
+        } catch (chainErr) {
+            console.warn('[admin/entities/createEntity] season chain', chainErr);
+        }
+    }
 
     await writeAuditLog(actorUserId, type, id, 'create', { initial: cleanPayload });
 
@@ -356,18 +399,44 @@ export async function updateEntity(
     const mutationClient = tournamentContext?.writer ?? supabase;
     const actorUserId = tournamentContext?.actorUserId ?? user.id;
 
+    let updatePayload: Record<string, any> = cleanUpdates;
+    let explicitPreviousSeasonOnUpdate: string | null = null;
     if (type === 'tournament') {
-        await ensureTournamentCountryExists(cleanUpdates);
+        explicitPreviousSeasonOnUpdate = readOptionalScopedId(cleanUpdates.link_previous_season_tournament_id);
+        const { link_previous_season_tournament_id: _omitLinkUpd, ...restUpd } = cleanUpdates as Record<string, any>;
+        updatePayload = restUpd;
+    }
+
+    if (type === 'tournament') {
+        await ensureTournamentCountryExists(updatePayload);
     }
 
     // Pre-state for audit diff
     const { data: oldData } = await mutationClient.from(table as any).select('*').eq('id', id).single();
 
-    const { data, error } = await runTournamentWriteWithPriorityFallback(type, cleanUpdates, (nextPayload) =>
-        mutationClient.from(table).update(nextPayload).eq('id', id).select().single()
-    );
-    if (error) {
-        throw new Error(error.message);
+    let data: any = oldData;
+    if (Object.keys(updatePayload).length > 0) {
+        const up = await runTournamentWriteWithPriorityFallback(type, updatePayload, (nextPayload) =>
+            mutationClient.from(table).update(nextPayload).eq('id', id).select().single()
+        );
+        if (up.error) {
+            throw new Error(up.error.message);
+        }
+        data = up.data;
+    } else if (type !== 'tournament') {
+        throw new Error('Validation Error: no hay campos validos para actualizar');
+    }
+
+    if (type === 'tournament') {
+        try {
+            const writer = mutationClient as any;
+            if (explicitPreviousSeasonOnUpdate) {
+                await upsertPreviousSeasonEdge(writer, explicitPreviousSeasonOnUpdate, id);
+            }
+            await ensureChronologicalSeasonEdgesForCluster(writer, id);
+        } catch (chainErr) {
+            console.warn('[admin/entities/updateEntity] season chain', chainErr);
+        }
     }
 
     // Build diff for audit

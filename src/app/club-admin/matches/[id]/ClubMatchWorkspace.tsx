@@ -26,6 +26,11 @@ import {
   X,
 } from 'lucide-react';
 import styles from './ClubMatchWorkspace.module.css';
+import {
+  isGoalKickAttemptEvent,
+  isGoalKickMade,
+  parseKickMetersFromDetail,
+} from '@/lib/matchEventStats';
 
 interface ClubInfo {
   id: string;
@@ -758,8 +763,8 @@ function parseKickType(detail: string): LiveComposerState['kickType'] {
 }
 
 function parseKickDistance(detail: string): string {
-  const match = detail.match(/Dist:\s*(\d+)/);
-  return match?.[1] || '';
+  const m = parseKickMetersFromDetail(detail);
+  return m > 0 ? String(m) : '';
 }
 
 function formatPenaltyDetail(outcome: string, zone: string, playerName: string, penaltyReason: string) {
@@ -797,8 +802,10 @@ function getEventPoints(event: ClubLiveEvent) {
   if (event.team !== 'home' && event.team !== 'away') return 0;
   if (event.type === 'try') return 5;
   if (event.type === 'penalty_try') return 7;
-  if (event.type === 'conversion' && /convertida|acertada/i.test(event.detail)) return 2;
-  if (event.type === 'penalty' && /convertido/i.test(event.detail)) return 3;
+  if (event.type === 'conversion' && isGoalKickMade('conversion', event.detail)) return 2;
+  if (event.type === 'penalty_goal' && isGoalKickMade('penalty_goal', event.detail)) return 3;
+  if (event.type === 'penalty' && isGoalKickAttemptEvent(event) && isGoalKickMade('penalty', event.detail)) return 3;
+  if (event.type === 'drop_goal' && isGoalKickMade('drop_goal', event.detail)) return 3;
   return 0;
 }
 
@@ -1374,6 +1381,7 @@ interface MatchStats {
   knockOns: { home: number; away: number };
   forwardPasses: { home: number; away: number };
   kicks: { home: number; away: number };
+  kickMeters: { home: number; away: number };
   rucks: { home: number; away: number };
   passes: { home: number; away: number };
   scrums: { home: { won: number; lost: number }; away: { won: number; lost: number } };
@@ -1458,10 +1466,6 @@ function normalizeVideoUrl(url: string): { type: 'iframe' | 'video' | 'unsupport
   }
 }
 
-function isMadeGoalDetail(detail: string) {
-  return /convertido|acertad|ok|convertida/i.test(String(detail || ''));
-}
-
 function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
   const stats: MatchStats = {
     tries: { home: 0, away: 0 },
@@ -1475,6 +1479,7 @@ function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
     knockOns: { home: 0, away: 0 },
     forwardPasses: { home: 0, away: 0 },
     kicks: { home: 0, away: 0 },
+    kickMeters: { home: 0, away: 0 },
     rucks: { home: 0, away: 0 },
     passes: { home: 0, away: 0 },
     scrums: { home: { won: 0, lost: 0 }, away: { won: 0, lost: 0 } },
@@ -1489,16 +1494,19 @@ function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
     if (!team) continue;
 
     if (event.type === 'try') stats.tries[team]++;
-    if (event.type === 'conversion' && /convertida|acertada/i.test(event.detail)) stats.conversions[team]++;
-    if (event.type === 'penalty' && /convertido/i.test(event.detail)) stats.penalties[team]++;
-    if (event.type === 'penalty_goal' && isMadeGoalDetail(event.detail)) stats.penaltyGoals[team]++;
-    if (event.type === 'drop_goal' && isMadeGoalDetail(event.detail)) stats.dropGoals[team]++;
+    if (event.type === 'conversion' && isGoalKickMade('conversion', event.detail)) stats.conversions[team]++;
+    if (event.type === 'penalty' && isGoalKickAttemptEvent(event) && isGoalKickMade('penalty', event.detail)) stats.penalties[team]++;
+    if (event.type === 'penalty_goal' && isGoalKickMade('penalty_goal', event.detail)) stats.penaltyGoals[team]++;
+    if (event.type === 'drop_goal' && isGoalKickMade('drop_goal', event.detail)) stats.dropGoals[team]++;
     if (event.type === 'penalty_try') stats.penaltyTries[team]++;
     if (event.type === 'entradas_22') stats.entradas22[team]++;
     if (event.type === 'free_kick') stats.freeKicks[team]++;
     if (event.type === 'knock_on') stats.knockOns[team]++;
     if (event.type === 'forward_pass') stats.forwardPasses[team]++;
-    if (event.type === 'kick') stats.kicks[team]++;
+    if (event.type === 'kick') {
+      stats.kicks[team]++;
+      stats.kickMeters[team] += parseKickMetersFromDetail(event.detail);
+    }
     if (event.type === 'ruck') stats.rucks[team]++;
     if (event.type === 'pass') stats.passes[team]++;
     if (event.type === 'scrum') {
@@ -1666,9 +1674,9 @@ function buildPlayerStats(events: ClubLiveEvent[]): PlayerEventStats[] {
     p.total++;
     p.points += getEventPoints(event);
     if (event.type === 'try') p.tries++;
-    if (event.type === 'conversion') p.conversions++;
+    if (event.type === 'conversion' && isGoalKickMade('conversion', event.detail)) p.conversions++;
     if (event.type === 'penalty') {
-      if (/convertido/i.test(event.detail)) p.convertedPenalties++;
+      if (isGoalKickAttemptEvent(event) && isGoalKickMade('penalty', event.detail)) p.convertedPenalties++;
       if (classifyPenaltyPhase(event.detail) === 'defense') p.defensePenalties++;
       else p.attackPenalties++;
     }
@@ -1677,7 +1685,7 @@ function buildPlayerStats(events: ClubLiveEvent[]): PlayerEventStats[] {
     if (event.type === 'forward_pass') p.forwardPasses++;
     if (event.type === 'kick') {
       p.kicks++;
-      p.kickMeters += Number(parseKickDistance(event.detail) || 0);
+      p.kickMeters += parseKickMetersFromDetail(event.detail);
     }
     if (event.type === 'ruck') {
       if (/perdido/i.test(event.detail)) p.rucksAgainst++;
@@ -1784,6 +1792,7 @@ function buildPostMatchStatGroups(stats: MatchStats) {
     ],
     continuity: [
       { label: 'Kicks', home: stats.kicks.home, away: stats.kicks.away },
+      { label: 'Metros patada (juego)', home: stats.kickMeters.home, away: stats.kickMeters.away },
       { label: 'Pases', home: stats.passes.home, away: stats.passes.away },
       { label: 'Rucks', home: stats.rucks.home, away: stats.rucks.away },
       { label: 'Knock Ons', home: stats.knockOns.home, away: stats.knockOns.away },

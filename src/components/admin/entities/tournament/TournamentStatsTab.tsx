@@ -7,6 +7,14 @@ import type { MatchWithClubs, PhaseWithRounds } from '@/lib/types/fixture';
 import { useFixture } from './FixtureContext';
 import type { StandingsDataPayload, TournamentContextData } from './standings/types';
 import styles from './TournamentStatsTab.module.css';
+import {
+  goalKickEffectivenessPercent,
+  isGoalKickAttemptEvent,
+  isGoalKickMade,
+  parseKickMetersFromDetail,
+  isContestWonDetail,
+  isContestLostDetail,
+} from '@/lib/matchEventStats';
 
 type TournamentRow = {
   id?: string;
@@ -71,11 +79,13 @@ function normalizeEvent(raw: unknown) {
   const type = t(event.type || event.event_type).toLowerCase();
   const teamText = t(event.team || event.side || event.club_side).toLowerCase();
   const playerName = t(event.playerName || event.player_name || (event.player as Record<string, unknown> | undefined)?.name || event.name) || null;
+  const detail = t(event.detail || (event as Record<string, unknown>).notes || '');
   if (!type) return null;
   return {
     type,
     team: ['home', 'local', 'h'].includes(teamText) ? 'home' : ['away', 'visitante', 'a'].includes(teamText) ? 'away' : null,
     playerName,
+    detail,
   };
 }
 
@@ -187,8 +197,11 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
           tries_scored: 0,
           tries_conceded: 0,
           conversions: 0,
+          conversion_attempts: 0,
           penalty_goals: 0,
+          penalty_goal_attempts: 0,
           drop_goals: 0,
+          kick_meters: 0,
           tackles_made: 0,
           yellow_cards: 0,
           red_cards: 0,
@@ -198,6 +211,10 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
           scrums_lost: 0,
           lineouts_won: 0,
           lineouts_lost: 0,
+          rucks_won: 0,
+          rucks_lost: 0,
+          mauls_won: 0,
+          mauls_lost: 0,
           status: 'Sin estado',
         });
       }
@@ -244,13 +261,40 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
         const opponent = event!.team === 'home' ? away : event!.team === 'away' ? home : null;
         if (!current || !opponent) return;
         if (event!.type === 'try') { current.tries_scored = n(current.tries_scored) + 1; opponent.tries_conceded = n(opponent.tries_conceded) + 1; }
-        if (event!.type === 'conversion') current.conversions = n(current.conversions) + 1;
-        if (event!.type === 'penalty_goal' || event!.type === 'penalty') { current.penalty_goals = n(current.penalty_goals) + 1; current.penalties_conceded = n(current.penalties_conceded) + 1; }
-        if (event!.type === 'drop_goal') current.drop_goals = n(current.drop_goals) + 1;
+        if (event!.type === 'conversion') {
+          current.conversion_attempts = n(current.conversion_attempts) + 1;
+          if (isGoalKickMade('conversion', event!.detail)) current.conversions = n(current.conversions) + 1;
+        }
+        if (event!.type === 'penalty_goal') {
+          current.penalty_goal_attempts = n(current.penalty_goal_attempts) + 1;
+          if (isGoalKickMade('penalty_goal', event!.detail)) current.penalty_goals = n(current.penalty_goals) + 1;
+        }
+        if (event!.type === 'penalty' && isGoalKickAttemptEvent({ type: 'penalty', detail: event!.detail })) {
+          current.penalty_goal_attempts = n(current.penalty_goal_attempts) + 1;
+          if (isGoalKickMade('penalty', event!.detail)) current.penalty_goals = n(current.penalty_goals) + 1;
+        }
+        if (event!.type === 'drop_goal' && isGoalKickMade('drop_goal', event!.detail)) current.drop_goals = n(current.drop_goals) + 1;
+        if (event!.type === 'kick') current.kick_meters = n(current.kick_meters) + parseKickMetersFromDetail(event!.detail);
         if (event!.type === 'tackle') current.tackles_made = n(current.tackles_made) + 1;
         if (event!.type === 'turnover_won') current.turnovers_won = n(current.turnovers_won) + 1;
         if (event!.type === 'yellow_card') current.yellow_cards = n(current.yellow_cards) + 1;
         if (event!.type === 'red_card') current.red_cards = n(current.red_cards) + 1;
+        if (event!.type === 'scrum') {
+          if (isContestLostDetail(event!.detail)) current.scrums_lost = n(current.scrums_lost) + 1;
+          else if (isContestWonDetail(event!.detail)) current.scrums_won = n(current.scrums_won) + 1;
+        }
+        if (event!.type === 'line' || event!.type === 'lineout') {
+          if (isContestLostDetail(event!.detail)) current.lineouts_lost = n(current.lineouts_lost) + 1;
+          else if (isContestWonDetail(event!.detail)) current.lineouts_won = n(current.lineouts_won) + 1;
+        }
+        if (event!.type === 'ruck') {
+          if (isContestLostDetail(event!.detail)) current.rucks_lost = n(current.rucks_lost) + 1;
+          else if (isContestWonDetail(event!.detail)) current.rucks_won = n(current.rucks_won) + 1;
+        }
+        if (event!.type === 'maul') {
+          if (isContestLostDetail(event!.detail)) current.mauls_lost = n(current.mauls_lost) + 1;
+          else if (isContestWonDetail(event!.detail)) current.mauls_won = n(current.mauls_won) + 1;
+        }
         if (event!.type === 'scrum_won') current.scrums_won = n(current.scrums_won) + 1;
         if (event!.type === 'scrum_lost') current.scrums_lost = n(current.scrums_lost) + 1;
         if (event!.type === 'lineout_won') current.lineouts_won = n(current.lineouts_won) + 1;
@@ -278,7 +322,13 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
           const name = t(player.name);
           if (!name) return;
           const id = `${side.teamId}:${name.toLowerCase()}`;
-          if (!byId.has(id)) byId.set(id, { entityId: id, entityName: name, entityLogo: side.teamLogo, secondary: side.teamName, position: t(player.position) || t(player.role) || '—', matches_played: 0, points: 0, tries: 0, tackles: 0, yellow_cards: 0, red_cards: 0 });
+          if (!byId.has(id)) byId.set(id, {
+            entityId: id, entityName: name, entityLogo: side.teamLogo, secondary: side.teamName,
+            position: t(player.position) || t(player.role) || '—',
+            matches_played: 0, points: 0, tries: 0, tackles: 0, yellow_cards: 0, red_cards: 0,
+            conversions: 0, conversion_attempts: 0, penalty_goals: 0, penalty_goal_attempts: 0, kick_meters: 0,
+            scrums_won: 0, scrums_lost: 0, lineouts_won: 0, lineouts_lost: 0, rucks_won: 0, rucks_lost: 0, mauls_won: 0, mauls_lost: 0,
+          });
           if (!counted.has(id)) { byId.get(id)!.matches_played = n(byId.get(id)!.matches_played) + 1; counted.add(id); }
         });
       });
@@ -287,13 +337,63 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
         const side = event!.team === 'home' ? sides[0] : event!.team === 'away' ? sides[1] : null;
         if (!side || !event!.playerName) return;
         const id = `${side.teamId}:${event!.playerName.toLowerCase()}`;
-        if (!byId.has(id)) byId.set(id, { entityId: id, entityName: event!.playerName, entityLogo: side.teamLogo, secondary: side.teamName, position: '—', matches_played: 0, points: 0, tries: 0, tackles: 0, yellow_cards: 0, red_cards: 0 });
+        if (!byId.has(id)) byId.set(id, {
+          entityId: id, entityName: event!.playerName, entityLogo: side.teamLogo, secondary: side.teamName, position: '—',
+          matches_played: 0, points: 0, tries: 0, tackles: 0, yellow_cards: 0, red_cards: 0,
+          conversions: 0, conversion_attempts: 0, penalty_goals: 0, penalty_goal_attempts: 0, kick_meters: 0,
+          scrums_won: 0, scrums_lost: 0, lineouts_won: 0, lineouts_lost: 0, rucks_won: 0, rucks_lost: 0, mauls_won: 0, mauls_lost: 0,
+        });
         if (!counted.has(id)) { byId.get(id)!.matches_played = n(byId.get(id)!.matches_played) + 1; counted.add(id); }
-        if (event!.type === 'try') byId.get(id)!.tries = n(byId.get(id)!.tries) + 1;
+        if (event!.type === 'try' || event!.type === 'penalty_try') byId.get(id)!.tries = n(byId.get(id)!.tries) + 1;
         if (event!.type === 'tackle') byId.get(id)!.tackles = n(byId.get(id)!.tackles) + 1;
         if (event!.type === 'yellow_card') byId.get(id)!.yellow_cards = n(byId.get(id)!.yellow_cards) + 1;
         if (event!.type === 'red_card') byId.get(id)!.red_cards = n(byId.get(id)!.red_cards) + 1;
-        if (['try', 'conversion', 'penalty_goal', 'penalty', 'drop_goal'].includes(event!.type)) byId.get(id)!.points = n(byId.get(id)!.points) + (event!.type === 'try' ? 5 : event!.type === 'conversion' ? 2 : 3);
+        if (event!.type === 'conversion') {
+          byId.get(id)!.conversion_attempts = n(byId.get(id)!.conversion_attempts) + 1;
+          if (isGoalKickMade('conversion', event!.detail)) byId.get(id)!.conversions = n(byId.get(id)!.conversions) + 1;
+        }
+        if (event!.type === 'penalty_goal') {
+          byId.get(id)!.penalty_goal_attempts = n(byId.get(id)!.penalty_goal_attempts) + 1;
+          if (isGoalKickMade('penalty_goal', event!.detail)) byId.get(id)!.penalty_goals = n(byId.get(id)!.penalty_goals) + 1;
+        }
+        if (event!.type === 'penalty' && isGoalKickAttemptEvent({ type: 'penalty', detail: event!.detail })) {
+          byId.get(id)!.penalty_goal_attempts = n(byId.get(id)!.penalty_goal_attempts) + 1;
+          if (isGoalKickMade('penalty', event!.detail)) byId.get(id)!.penalty_goals = n(byId.get(id)!.penalty_goals) + 1;
+        }
+        if (event!.type === 'kick') byId.get(id)!.kick_meters = n(byId.get(id)!.kick_meters) + parseKickMetersFromDetail(event!.detail);
+        {
+          const p = byId.get(id)!;
+          if (event!.type === 'scrum') {
+            if (isContestLostDetail(event!.detail)) p.scrums_lost = n(p.scrums_lost) + 1;
+            else if (isContestWonDetail(event!.detail)) p.scrums_won = n(p.scrums_won) + 1;
+          }
+          if (event!.type === 'line' || event!.type === 'lineout') {
+            if (isContestLostDetail(event!.detail)) p.lineouts_lost = n(p.lineouts_lost) + 1;
+            else if (isContestWonDetail(event!.detail)) p.lineouts_won = n(p.lineouts_won) + 1;
+          }
+          if (event!.type === 'ruck') {
+            if (isContestLostDetail(event!.detail)) p.rucks_lost = n(p.rucks_lost) + 1;
+            else if (isContestWonDetail(event!.detail)) p.rucks_won = n(p.rucks_won) + 1;
+          }
+          if (event!.type === 'maul') {
+            if (isContestLostDetail(event!.detail)) p.mauls_lost = n(p.mauls_lost) + 1;
+            else if (isContestWonDetail(event!.detail)) p.mauls_won = n(p.mauls_won) + 1;
+          }
+          if (event!.type === 'scrum_won') p.scrums_won = n(p.scrums_won) + 1;
+          if (event!.type === 'scrum_lost') p.scrums_lost = n(p.scrums_lost) + 1;
+          if (event!.type === 'lineout_won') p.lineouts_won = n(p.lineouts_won) + 1;
+          if (event!.type === 'lineout_lost') p.lineouts_lost = n(p.lineouts_lost) + 1;
+        }
+        {
+          let pts = 0;
+          if (event!.type === 'try') pts = 5;
+          else if (event!.type === 'penalty_try') pts = 7;
+          else if (event!.type === 'conversion' && isGoalKickMade('conversion', event!.detail)) pts = 2;
+          else if (event!.type === 'penalty_goal' && isGoalKickMade('penalty_goal', event!.detail)) pts = 3;
+          else if (event!.type === 'penalty' && isGoalKickAttemptEvent({ type: 'penalty', detail: event!.detail }) && isGoalKickMade('penalty', event!.detail)) pts = 3;
+          else if (event!.type === 'drop_goal' && isGoalKickMade('drop_goal', event!.detail)) pts = 3;
+          if (pts) byId.get(id)!.points = n(byId.get(id)!.points) + pts;
+        }
       });
     });
     return Array.from(byId.values())
@@ -325,28 +425,62 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
       tackles_made: avg(n(row.tackles_made), n(row.matches_played), scope),
       penalties_conceded: avg(n(row.penalties_conceded), n(row.matches_played), scope),
       set_piece_success_rate: (() => {
-        const attempts = n(row.scrums_won) + n(row.scrums_lost) + n(row.lineouts_won) + n(row.lineouts_lost);
-        return attempts > 0 ? ((n(row.scrums_won) + n(row.lineouts_won)) / attempts) * 100 : 0;
+        const won = n(row.scrums_won) + n(row.lineouts_won) + n(row.rucks_won) + n(row.mauls_won);
+        const att = n(row.scrums_won) + n(row.scrums_lost) + n(row.lineouts_won) + n(row.lineouts_lost)
+          + n(row.rucks_won) + n(row.rucks_lost) + n(row.mauls_won) + n(row.mauls_lost);
+        return att > 0 ? (won / att) * 100 : 0;
       })(),
       attack_efficiency: avg(n(row.points_for), n(row.matches_played), 'per_match'),
       defense_efficiency: avg(n(row.points_against), n(row.matches_played), 'per_match'),
       conversion_rate: n(row.tries_scored) > 0 ? (n(row.conversions) / n(row.tries_scored)) * 100 : 0,
+      conversion_kick_effectiveness: goalKickEffectivenessPercent(n(row.conversions), n(row.conversion_attempts)),
+      penalty_palos_effectiveness: goalKickEffectivenessPercent(n(row.penalty_goals), n(row.penalty_goal_attempts)),
       net_performance_index: avg(n(row.points_difference), n(row.matches_played), 'per_match') + avg(n(row.competition_points), n(row.matches_played), 'per_match'),
       defense_index: avg(n(row.tackles_made), n(row.matches_played), scope) + avg(n(row.turnovers_won), n(row.matches_played), scope) - avg(n(row.points_against), n(row.matches_played), scope),
       discipline_index: avg(n(row.penalties_conceded), n(row.matches_played), scope) + avg(n(row.yellow_cards), n(row.matches_played), scope) + avg(n(row.red_cards), n(row.matches_played), scope) * 3,
       points_scored: avg(n(row.points_for), n(row.matches_played), scope),
+      kick_meters: avg(n(row.kick_meters), n(row.matches_played), scope),
     }));
-    const players = playerRows.map((row) => ({ ...row, points: avg(n(row.points), n(row.matches_played), scope), tries: avg(n(row.tries), n(row.matches_played), scope), tackles: avg(n(row.tackles), n(row.matches_played), scope), yellow_cards: avg(n(row.yellow_cards), n(row.matches_played), scope), red_cards: avg(n(row.red_cards), n(row.matches_played), scope) }));
+    const players = playerRows.map((row) => ({
+      ...row,
+      points: avg(n(row.points), n(row.matches_played), scope),
+      tries: avg(n(row.tries), n(row.matches_played), scope),
+      tackles: avg(n(row.tackles), n(row.matches_played), scope),
+      yellow_cards: avg(n(row.yellow_cards), n(row.matches_played), scope),
+      red_cards: avg(n(row.red_cards), n(row.matches_played), scope),
+      conversions: avg(n(row.conversions), n(row.matches_played), scope),
+      conversion_attempts: avg(n(row.conversion_attempts), n(row.matches_played), scope),
+      penalty_goals: avg(n(row.penalty_goals), n(row.matches_played), scope),
+      penalty_goal_attempts: avg(n(row.penalty_goal_attempts), n(row.matches_played), scope),
+      kick_meters: avg(n(row.kick_meters), n(row.matches_played), scope),
+      conversion_kick_effectiveness: goalKickEffectivenessPercent(n(row.conversions), n(row.conversion_attempts)),
+      penalty_palos_effectiveness: goalKickEffectivenessPercent(n(row.penalty_goals), n(row.penalty_goal_attempts)),
+      contests_won: avg(
+        n(row.scrums_won) + n(row.lineouts_won) + n(row.rucks_won) + n(row.mauls_won),
+        n(row.matches_played),
+        scope,
+      ),
+      contests_lost: avg(
+        n(row.scrums_lost) + n(row.lineouts_lost) + n(row.rucks_lost) + n(row.mauls_lost),
+        n(row.matches_played),
+        scope,
+      ),
+      contest_effectiveness: goalKickEffectivenessPercent(
+        n(row.scrums_won) + n(row.lineouts_won) + n(row.rucks_won) + n(row.mauls_won),
+        n(row.scrums_won) + n(row.scrums_lost) + n(row.lineouts_won) + n(row.lineouts_lost)
+          + n(row.rucks_won) + n(row.rucks_lost) + n(row.mauls_won) + n(row.mauls_lost),
+      ),
+    }));
     switch (activeTab) {
       case 'overview': return { title: 'Team Aggregated Stats', subtitle: 'Resumen mixto del contexto actual.', chartKey: 'competition_points', empty: 'No hay datos para el filtro seleccionado.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'matches_played', label: 'PJ' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'points_for', label: scope === 'per_match' ? 'PF/PJ' : 'PF' }, { id: 'points_difference', label: scope === 'per_match' ? 'Dif/PJ' : 'Dif' }, { id: 'status', label: 'Estado' }] as Column[] };
       case 'team_stats': return { title: 'Team Statistics', subtitle: 'Tabla principal por equipo.', chartKey: 'points_difference', empty: 'No hay suficientes partidos finalizados para armar la tabla principal.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'matches_played', label: 'PJ' }, { id: 'wins', label: 'PG' }, { id: 'draws', label: 'PE' }, { id: 'losses', label: 'PP' }, { id: 'points_for', label: scope === 'per_match' ? 'PF/PJ' : 'PF' }, { id: 'points_against', label: scope === 'per_match' ? 'PC/PJ' : 'PC' }, { id: 'points_difference', label: scope === 'per_match' ? 'Dif/PJ' : 'Dif' }, { id: 'tries_scored', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }] as Column[] };
-      case 'player_stats': return { title: 'Player Statistics', subtitle: 'Derivadas desde eventos y alineaciones.', chartKey: 'points', empty: 'No hay estadísticas de jugadores disponibles todavía.', rows: players, columns: [{ id: 'entity', label: 'Player' }, { id: 'secondary', label: 'Team' }, { id: 'position', label: 'Pos' }, { id: 'matches_played', label: 'PJ' }, { id: 'points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'tries', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'tackles', label: scope === 'per_match' ? 'Tack/PJ' : 'Tack' }, { id: 'yellow_cards', label: 'YC' }, { id: 'red_cards', label: 'RC' }] as Column[] };
-      case 'attack': return { title: 'Attack Metrics', subtitle: 'Producción ofensiva real por equipo.', chartKey: 'points_scored', empty: 'No hay suficientes partidos finalizados para calcular estadísticas ofensivas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'tries_scored', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'points_scored', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'conversions', label: 'Conv' }, { id: 'penalty_goals', label: 'Pen' }, { id: 'drop_goals', label: 'Drop' }, { id: 'attack_efficiency', label: 'Attack Eff' }] as Column[] };
+      case 'player_stats': return { title: 'Player Statistics', subtitle: 'Derivadas desde eventos y alineaciones.', chartKey: 'points', empty: 'No hay estadísticas de jugadores disponibles todavía.', rows: players, columns: [{ id: 'entity', label: 'Player' }, { id: 'secondary', label: 'Team' }, { id: 'position', label: 'Pos' }, { id: 'matches_played', label: 'PJ' }, { id: 'points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'tries', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'conversions', label: 'Conv OK' }, { id: 'conversion_attempts', label: 'Conv int' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv' }, { id: 'penalty_goals', label: 'Pen palos' }, { id: 'penalty_goal_attempts', label: 'Pen int' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen.' }, { id: 'kick_meters', label: scope === 'per_match' ? 'm pat/PJ' : 'm pat' }, { id: 'contests_won', label: 'Fijos G', title: 'Scrum+line+ruck+maul ganados' }, { id: 'contests_lost', label: 'Fijos P', title: 'Scrum+line+ruck+maul perdidos' }, { id: 'contest_effectiveness', label: 'Fijos %', title: 'Efectividad en duelos con resultado' }, { id: 'tackles', label: scope === 'per_match' ? 'Tack/PJ' : 'Tack' }, { id: 'yellow_cards', label: 'YC' }, { id: 'red_cards', label: 'RC' }] as Column[] };
+      case 'attack': return { title: 'Attack Metrics', subtitle: 'Producción ofensiva real por equipo.', chartKey: 'points_scored', empty: 'No hay suficientes partidos finalizados para calcular estadísticas ofensivas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'tries_scored', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'points_scored', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'conversions', label: 'Conv OK', title: 'Conversiones anotadas (no falladas)' }, { id: 'conversion_attempts', label: 'Conv int', title: 'Intentos de conversión' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv', title: 'Efectividad al palo en conversión' }, { id: 'penalty_goals', label: 'Pen palos OK', title: 'Penales a palos convertidos' }, { id: 'penalty_goal_attempts', label: 'Pen palos int', title: 'Intentos de penal a palos' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen. palos', title: 'Efectividad en penales a palos' }, { id: 'drop_goals', label: 'Drop' }, { id: 'kick_meters', label: scope === 'per_match' ? 'm patada/PJ' : 'm patada', title: 'Metros de patada en juego' }, { id: 'attack_efficiency', label: 'Attack Eff' }] as Column[] };
       case 'defense': return { title: 'Defense Metrics', subtitle: 'Contención y recuperación derivadas desde partidos finales.', chartKey: 'defense_index', empty: 'No hay suficientes partidos finalizados para calcular estadísticas defensivas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'points_against', label: scope === 'per_match' ? 'PC/PJ' : 'PC' }, { id: 'tries_conceded', label: scope === 'per_match' ? 'Tries C/PJ' : 'Tries C' }, { id: 'tackles_made', label: scope === 'per_match' ? 'Tack/PJ' : 'Tack' }, { id: 'turnovers_won', label: 'Turnovers' }, { id: 'defense_index', label: 'Def Index', accent: true, title: 'Tackles + turnovers - puntos concedidos' }] as Column[] };
       case 'discipline': return { title: 'Discipline Metrics', subtitle: 'Tarjetas y penales registrados.', chartKey: 'discipline_index', empty: 'No hay datos disciplinarios para el filtro seleccionado.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'penalties_conceded', label: scope === 'per_match' ? 'Pen/PJ' : 'Pen' }, { id: 'yellow_cards', label: 'YC' }, { id: 'red_cards', label: 'RC' }, { id: 'discipline_index', label: 'Disc Index', accent: true }] as Column[] };
-      case 'set_pieces': return { title: 'Set Piece Efficiency', subtitle: 'Scrums y lineouts desde eventos específicos.', chartKey: 'set_piece_success_rate', empty: 'No hay eventos de scrum o lineout registrados todavía.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'scrums_won', label: 'Scrums W' }, { id: 'scrums_lost', label: 'Scrums L' }, { id: 'lineouts_won', label: 'Lineouts W' }, { id: 'lineouts_lost', label: 'Lineouts L' }, { id: 'set_piece_success_rate', label: 'Success %', accent: true }] as Column[] };
+      case 'set_pieces': return { title: 'Set Piece & contacto', subtitle: 'Scrum, line, ruck y maul con opción ganado / perdido (mismo criterio que el Match Center).', chartKey: 'set_piece_success_rate', empty: 'No hay eventos de fijos o contacto con resultado todavía.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'scrums_won', label: 'Scrums W' }, { id: 'scrums_lost', label: 'Scrums L' }, { id: 'lineouts_won', label: 'Line W' }, { id: 'lineouts_lost', label: 'Line L' }, { id: 'rucks_won', label: 'Rucks W' }, { id: 'rucks_lost', label: 'Rucks L' }, { id: 'mauls_won', label: 'Mauls W' }, { id: 'mauls_lost', label: 'Mauls L' }, { id: 'set_piece_success_rate', label: 'Efect. %', accent: true, title: 'Ganados / (G+P) en las cuatro categorías' }] as Column[] };
       case 'advanced':
-      default: return { title: 'Advanced Performance', subtitle: 'Índices derivados sobre la base real del torneo.', chartKey: 'net_performance_index', empty: 'No hay datos suficientes para las métricas avanzadas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'attack_efficiency', label: 'Attack Eff', title: 'Puntos anotados por partido' }, { id: 'defense_efficiency', label: 'Defense Eff', title: 'Puntos concedidos por partido' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts' }, { id: 'conversion_rate', label: 'Conv %', title: 'Conversiones sobre tries' }, { id: 'net_performance_index', label: 'Net Index', accent: true, title: 'Diferencial + puntos de competencia por partido' }] as Column[] };
+      default: return { title: 'Advanced Performance', subtitle: 'Índices derivados sobre la base real del torneo.', chartKey: 'net_performance_index', empty: 'No hay datos suficientes para las métricas avanzadas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'attack_efficiency', label: 'Attack Eff', title: 'Puntos anotados por partido' }, { id: 'defense_efficiency', label: 'Defense Eff', title: 'Puntos concedidos por partido' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts' }, { id: 'conversion_rate', label: 'Conv/Try %', title: 'Conversiones anotadas sobre tries' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv %', title: 'Aciertos en conversión / intentos' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen. %', title: 'Penales a palos anotados / intentos' }, { id: 'net_performance_index', label: 'Net Index', accent: true, title: 'Diferencial + puntos de competencia por partido' }] as Column[] };
     }
   }, [activeTab, playerRows, scope, teamRows]);
 
@@ -437,7 +571,9 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
           <div><h3>{table.title}</h3><p>{table.subtitle}</p></div>
           <div className={styles.sectionMeta}><span>{selectedPhase?.name || 'Fase'}</span><span>{scope === 'per_match' ? 'Per match' : 'Totals'}</span><span>{rows.length} filas</span></div>
         </div>
-        {rows.length === 0 || (activeTab === 'set_pieces' && !rows.some((row) => n(row.scrums_won) + n(row.lineouts_won) + n(row.scrums_lost) + n(row.lineouts_lost) > 0)) ? <div className={styles.emptyBlock}>{table.empty}</div> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr>{table.columns.map((column) => <th key={column.id} className={column.accent ? styles.headAccent : ''} title={column.title}><button type="button" className={styles.sortButton} onClick={() => { if (sortKey === column.id) setSortDirection((current) => current === 'desc' ? 'asc' : 'desc'); else { setSortKey(column.id); setSortDirection(column.id === DEFAULT_SORT[activeTab].key ? DEFAULT_SORT[activeTab].direction : 'desc'); } }}>{column.label}<ArrowDownUp size={12} /></button></th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.entityId}>{table.columns.map((column) => <td key={`${row.entityId}-${column.id}`}>{column.id === 'entity' ? <div className={styles.entityCell}><div className={styles.entityLogo}>{row.entityLogo ? <img src={String(row.entityLogo)} alt={row.entityName} /> : <span>{logoFallback(row.entityName)}</span>}</div><div><strong>{row.entityName}</strong>{row.secondary ? <span>{row.secondary}</span> : null}</div></div> : column.id === 'set_piece_success_rate' || column.id === 'conversion_rate' ? `${fmt(row[column.id], 1)}%` : typeof row[column.id] === 'number' ? fmt(row[column.id], Number.isInteger(n(row[column.id])) ? 0 : 1) : String(row[column.id] ?? '—')}</td>)}</tr>)}</tbody></table></div>}
+        {rows.length === 0 || (activeTab === 'set_pieces' && !rows.some((row) => n(row.scrums_won) + n(row.lineouts_won) + n(row.scrums_lost) + n(row.lineouts_lost) + n(row.rucks_won) + n(row.rucks_lost) + n(row.mauls_won) + n(row.mauls_lost) > 0)) ? <div className={styles.emptyBlock}>{table.empty}</div> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr>{table.columns.map((column) => <th key={column.id} className={column.accent ? styles.headAccent : ''} title={column.title}><button type="button" className={styles.sortButton} onClick={() => { if (sortKey === column.id) setSortDirection((current) => current === 'desc' ? 'asc' : 'desc'); else { setSortKey(column.id); setSortDirection(column.id === DEFAULT_SORT[activeTab].key ? DEFAULT_SORT[activeTab].direction : 'desc'); } }}>{column.label}<ArrowDownUp size={12} /></button></th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.entityId}>{table.columns.map((column) => <td key={`${row.entityId}-${column.id}`}>{column.id === 'entity' ? <div className={styles.entityCell}><div className={styles.entityLogo}>{row.entityLogo ? <img src={String(row.entityLogo)} alt={row.entityName} /> : <span>{logoFallback(row.entityName)}</span>}</div><div><strong>{row.entityName}</strong>{row.secondary ? <span>{row.secondary}</span> : null}</div></div> : column.id === 'set_piece_success_rate' || column.id === 'conversion_rate' || column.id === 'conversion_kick_effectiveness' || column.id === 'penalty_palos_effectiveness' || column.id === 'contest_effectiveness'
+            ? (n(row[column.id]) < 0 ? '—' : `${fmt(row[column.id], 1)}%`)
+            : typeof row[column.id] === 'number' ? fmt(row[column.id], Number.isInteger(n(row[column.id])) ? 0 : 1) : String(row[column.id] ?? '—')}</td>)}</tr>)}</tbody></table></div>}
       </section>
 
       <section className={styles.viz}>

@@ -177,6 +177,12 @@
     width: 100%;
 }
 
+/* While season dropdown is open, stack above .tabsBar (z-index: 100) */
+.heroSectionSeasonMenuOpen {
+    position: relative;
+    z-index: 110;
+}
+
 .breadcrumb {
     display: flex;
     align-items: center;
@@ -207,7 +213,9 @@
     gap: 28px;
     margin-bottom: 14px;
     position: relative;
-    overflow: hidden;
+    /* visible so season dropdown (absolute) is not clipped; stack above .quickStatsRow */
+    overflow: visible;
+    z-index: 1;
 }
 
 /* Subtle background glow */
@@ -313,6 +321,7 @@
 /* Season switcher */
 .seasonSwitcher {
     position: relative;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
 }
@@ -356,7 +365,7 @@
     position: absolute;
     top: calc(100% + 6px);
     left: 0;
-    z-index: 30;
+    z-index: 120;
     min-width: 180px;
     max-height: 280px;
     overflow-y: auto;
@@ -517,6 +526,8 @@
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
     margin-bottom: 4px;
+    position: relative;
+    z-index: 0;
 }
 
 .statCard {

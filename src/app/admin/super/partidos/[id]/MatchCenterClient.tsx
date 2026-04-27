@@ -14,6 +14,16 @@ import {
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
 import {
+    isGoalKickAttemptEvent,
+    isGoalKickEventType,
+    isGoalKickMade,
+    formatGoalKickDetailPrefix,
+    goalKickEffectivenessPercent,
+    parseKickMetersFromDetail,
+    isContestWonDetail,
+    isContestLostDetail,
+} from '@/lib/matchEventStats';
+import {
     countTeamOffensiveMetric,
     resolveOffensiveBonusRule,
     type NormalizedOffensiveBonusRule,
@@ -552,6 +562,8 @@ type CompleteMatchStats = {
     forwardPasses: TeamMetricPair;
     handlingErrors: TeamMetricPair;
     entradas22: TeamMetricPair;
+    /** Metros de patadas in-game (evento `kick`) con Dist: / m en detalle */
+    kickMeters: TeamMetricPair;
 };
 
 type CompleteStatRow = {
@@ -691,35 +703,6 @@ function mergeMatchEventDefinitions(
     return Array.from(merged.values());
 }
 
-function isGoalKickEventType(eventType: string) {
-    return eventType === 'conversion'
-        || eventType === 'penalty'
-        || eventType === 'penalty_goal'
-        || eventType === 'drop_goal';
-}
-
-function isGoalKickAttemptEvent(event: Pick<MatchEvent, 'type' | 'detail'>) {
-    if (!isGoalKickEventType(event.type)) return false;
-
-    const normalized = String(event.detail || '').toLowerCase();
-    if (event.type === 'penalty' && /touch|scrum|tap|rapido|quick|ganad|concedid/.test(normalized)) {
-        return false;
-    }
-
-    return true;
-}
-
-function isGoalKickMade(eventType: string, detail: string | null | undefined) {
-    if (!isGoalKickEventType(eventType)) return true;
-
-    const normalized = String(detail || '').toLowerCase();
-    if (/fallad|errad|miss|no convert/.test(normalized)) return false;
-    if (/convertid|acertad|made|ok/.test(normalized)) return true;
-    if (eventType === 'penalty' && normalized.trim()) return false;
-
-    return true;
-}
-
 function getConfiguredEventPoints(
     event: string | Pick<MatchEvent, 'type' | 'detail'>,
     definitionMap: Record<string, MatchEventDefinition>,
@@ -792,19 +775,12 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
         forwardPasses: createTeamMetricPair(),
         handlingErrors: createTeamMetricPair(),
         entradas22: createTeamMetricPair(),
+        kickMeters: createTeamMetricPair(),
     };
 }
 
 function bumpTeamMetric(pair: TeamMetricPair, team: 'home' | 'away', amount = 1) {
     pair[team] += amount;
-}
-
-function isContestWonDetail(detail: string | null | undefined) {
-    return /ganad|won|recuperad|favor/i.test(String(detail || ''));
-}
-
-function isContestLostDetail(detail: string | null | undefined) {
-    return /perdid|lost|contra/i.test(String(detail || ''));
 }
 
 function countContestMetric(
@@ -907,9 +883,12 @@ function buildCompleteMatchStats(
             case 'tackle':
                 bumpTeamMetric(stats.tackles, team);
                 break;
-            case 'kick':
+            case 'kick': {
                 bumpTeamMetric(stats.kicks, team);
+                const m = parseKickMetersFromDetail(event.detail);
+                if (m > 0) bumpTeamMetric(stats.kickMeters, team, m);
                 break;
+            }
             case 'pass':
                 bumpTeamMetric(stats.passes, team);
                 break;
@@ -975,6 +954,20 @@ function buildCompleteStatSections(stats: CompleteMatchStats): CompleteStatSecti
                 { key: 'conversionsMissed', label: 'Conversiones falladas', home: stats.conversionsMissed.home, away: stats.conversionsMissed.away },
                 { key: 'penaltyGoalsMade', label: 'Penales OK', home: stats.penaltyGoalsMade.home, away: stats.penaltyGoalsMade.away },
                 { key: 'penaltyGoalsMissed', label: 'Penales fallados', home: stats.penaltyGoalsMissed.home, away: stats.penaltyGoalsMissed.away },
+                {
+                    key: 'conversionEfectividad',
+                    label: 'Efectividad conversión',
+                    home: goalKickEffectivenessPercent(stats.conversionsMade.home, stats.conversionAttempts.home),
+                    away: goalKickEffectivenessPercent(stats.conversionsMade.away, stats.conversionAttempts.away),
+                    valueKind: 'percent',
+                },
+                {
+                    key: 'penalPalosEfectividad',
+                    label: 'Efectividad penales a palos',
+                    home: goalKickEffectivenessPercent(stats.penaltyGoalsMade.home, stats.penaltyGoalAttempts.home),
+                    away: goalKickEffectivenessPercent(stats.penaltyGoalsMade.away, stats.penaltyGoalAttempts.away),
+                    valueKind: 'percent',
+                },
                 { key: 'dropGoalsMade', label: 'Drops OK', home: stats.dropGoalsMade.home, away: stats.dropGoalsMade.away },
                 { key: 'dropGoalsMissed', label: 'Drops fallados', home: stats.dropGoalsMissed.home, away: stats.dropGoalsMissed.away },
             ],
@@ -1008,6 +1001,7 @@ function buildCompleteStatSections(stats: CompleteMatchStats): CompleteStatSecti
                 { key: 'maulsWon', label: 'Mauls ganados', home: stats.maulsWon.home, away: stats.maulsWon.away },
                 { key: 'maulsLost', label: 'Mauls perdidos', home: stats.maulsLost.home, away: stats.maulsLost.away },
                 { key: 'kicks', label: 'Patadas', home: stats.kicks.home, away: stats.kicks.away },
+                { key: 'kickMeters', label: 'Metros de patada (juego)', home: stats.kickMeters.home, away: stats.kickMeters.away },
                 { key: 'passes', label: 'Pases', home: stats.passes.home, away: stats.passes.away },
                 { key: 'recoveries', label: 'Recuperaciones', home: stats.recoveries.home, away: stats.recoveries.away },
                 { key: 'turnoversWon', label: 'Turnovers ganados', home: stats.turnoversWon.home, away: stats.turnoversWon.away },
@@ -1149,15 +1143,21 @@ function formatGuidedEventDetail(draft: GuidedEventDraft) {
     const customDetail = draft.detail.trim();
 
     if (eventType === 'conversion') {
-        return draft.goalKickResult === 'made' ? 'Conversion convertida' : 'Conversion fallada';
+        const human = draft.goalKickResult === 'made' ? 'Conversion convertida' : 'Conversion fallada';
+        const extra = customDetail ? ` | ${customDetail}` : '';
+        return `${formatGoalKickDetailPrefix(draft.goalKickResult === 'made')} ${human}${extra}`;
     }
 
     if (eventType === 'penalty' || eventType === 'penalty_goal') {
-        return draft.goalKickResult === 'made' ? 'Penal convertido' : 'Penal fallado';
+        const human = draft.goalKickResult === 'made' ? 'Penal convertido' : 'Penal fallado';
+        const extra = customDetail ? ` | ${customDetail}` : '';
+        return `${formatGoalKickDetailPrefix(draft.goalKickResult === 'made')} ${human}${extra}`;
     }
 
     if (eventType === 'drop_goal') {
-        return draft.goalKickResult === 'made' ? 'Drop convertido' : 'Drop fallado';
+        const human = draft.goalKickResult === 'made' ? 'Drop convertido' : 'Drop fallado';
+        const extra = customDetail ? ` | ${customDetail}` : '';
+        return `${formatGoalKickDetailPrefix(draft.goalKickResult === 'made')} ${human}${extra}`;
     }
 
     if (requiresContestOutcome(eventType)) {
@@ -3575,21 +3575,21 @@ export default function MatchCenterClient({
 
                                     {isGoalKickEventType(guidedEvent.definition.type) && (
                                         <div className="guided-option-block">
-                                            <span>Resultado de la patada</span>
+                                            <span>¿Entró entre los palos? (puntos y estadísticas)</span>
                                             <div className="guided-toggle-row">
                                                 <button
                                                     type="button"
                                                     className={guidedEvent.goalKickResult === 'made' ? 'active' : ''}
                                                     onClick={() => setGuidedEvent((current) => current ? { ...current, goalKickResult: 'made' } : current)}
                                                 >
-                                                    Convertida
+                                                    Sí, convertida
                                                 </button>
                                                 <button
                                                     type="button"
                                                     className={guidedEvent.goalKickResult === 'missed' ? 'active' : ''}
                                                     onClick={() => setGuidedEvent((current) => current ? { ...current, goalKickResult: 'missed' } : current)}
                                                 >
-                                                    Fallada
+                                                    No, fallada
                                                 </button>
                                             </div>
                                         </div>

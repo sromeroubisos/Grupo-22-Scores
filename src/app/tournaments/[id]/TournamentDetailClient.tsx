@@ -1382,6 +1382,9 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             externalId: tournament.external_id || null,
             ruleset: tournamentRuleset,
             url: tournament.url || '',
+            season_id: tournament.season_id != null && String(tournament.season_id).trim()
+                ? String(tournament.season_id).trim()
+                : null,
             type: isCircuitCompetition ? 'circuit' : 'league',
             categories: [],
             priority: 0,
@@ -1881,14 +1884,6 @@ export default function TournamentDetailPage({
     }, [details, tournamentData]);
 
     useEffect(() => {
-        const isExternalId =
-            id.toLowerCase().startsWith('fs-') ||
-            id.toLowerCase().startsWith('ras-league-') ||
-            id.toLowerCase().startsWith('espn-league-');
-        if (isExternalId) {
-            setSeasonOptions([]);
-            return;
-        }
         const controller = new AbortController();
         (async () => {
             try {
@@ -2264,11 +2259,21 @@ export default function TournamentDetailPage({
         return null;
     };
 
-    const yearDisplay = details?.is_current
+    const currentSeasonOption = seasonOptions.find((s) => s.isCurrent);
+    const rawSeasonId =
+        (tournamentData as any)?.season_id ?? (initialData?.tournament as any)?.season_id ?? null;
+    const dbSeasonYearHint =
+        rawSeasonId != null && String(rawSeasonId).trim() ? String(rawSeasonId).trim() : null;
+    const yearDisplayFromApi = details?.is_current
         ? (details?.season || 'Temporada Actual')
         : (details?.start_year && details?.end_year)
             ? `${details.start_year}/${details.end_year}`
             : (details?.season || renderYear);
+    /* Prefer Supabase season for this page so the pill matches the title/breadcrumb; FlashScore `details.season` can be another edition. */
+    const yearDisplay =
+        (currentSeasonOption?.label && String(currentSeasonOption.label).trim()) ||
+        dbSeasonYearHint ||
+        yearDisplayFromApi;
 
     const countryName = resolveCountryName(details, tournamentData);
     const tournamentLogo = getTournamentLogo(details, tournamentData);
@@ -3178,7 +3183,13 @@ export default function TournamentDetailPage({
         <div className={styles.page}>
 
             {/* ── Hero Section ───────────────────────────────────────── */}
-            <div className={styles.heroSection}>
+            <div
+                className={
+                    seasonMenuOpen
+                        ? `${styles.heroSection} ${styles.heroSectionSeasonMenuOpen}`
+                        : styles.heroSection
+                }
+            >
                 <div className="g22-container">
                     {/* Breadcrumb */}
                     <nav className={styles.breadcrumb}>

@@ -9,10 +9,10 @@ const SLUG_LOOKUP_TIMEOUT_MS = 5000;
 const PREFETCH_TIMEOUT_MS = 5000;
 const MATCHES_TIMEOUT_MS = 12000;
 const STANDINGS_TIMEOUT_MS = 12000;
-const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id';
-const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id';
-const TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id';
-const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id';
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id, season_id';
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id, season_id';
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id, season_id';
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id, season_id';
 
 export type TournamentQueryErrors = {
     tournament: string | null;
@@ -96,6 +96,7 @@ type TournamentRow = {
     ruleset: Record<string, unknown> | null;
     url?: string | null;
     external_id?: string | null;
+    season_id?: string | null;
 };
 
 type TournamentClubSource = {
