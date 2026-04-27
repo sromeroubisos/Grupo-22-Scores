@@ -1,5 +1,5 @@
 import { getDefaultMatchEventDefinitions, type MatchEventCategory } from './matchEventCatalog';
-import { goalKickOutcomeSuffixSpanish } from './matchEventStats';
+import { goalKickOutcomeSuffixSpanish, parseSubstitutionIncomingPlayer } from './matchEventStats';
 
 export type LocalMatchTeam = 'home' | 'away';
 
@@ -20,6 +20,10 @@ export type LocalMatchEvent = {
   team?: LocalMatchTeam | null;
   playerId?: string | null;
   playerName?: string | null;
+  secondaryPlayerId?: string | null;
+  secondaryPlayerName?: string | null;
+  subPlayerId?: string | null;
+  subPlayer?: string | null;
   detail?: string | null;
 };
 
@@ -116,17 +120,33 @@ export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
         ? Number(source.minute)
         : Number(source.minute || 0);
 
+    const type = text(source.type) || 'note';
+    const rawDescription = text(source.detail) || text(source.description);
+    const subPlayer =
+      text(source.secondaryPlayerName) ||
+      text(source.secondary_player_name) ||
+      text(source.subPlayer) ||
+      text(source.sub_player) ||
+      (type === 'substitution' ? parseSubstitutionIncomingPlayer(rawDescription) : '') ||
+      null;
+    const description = rawDescription || (type === 'substitution' && subPlayer ? `Entra: ${subPlayer}` : '');
+
     return {
       id: text(source.id) || `local-event-${index}`,
       time: Number.isFinite(minute) ? minute : 0,
       minute: Number.isFinite(minute) ? minute : 0,
-      type: text(source.type) || 'note',
+      type,
       team: source.team === 'home' || source.team === 'away' ? source.team : null,
       player: text(source.playerName) || text(source.player_name) || 'Jugador',
       playerId: text(source.playerId) || text(source.player_id) || null,
-      subPlayer: null,
-      subPlayerId: null,
-      description: text(source.detail) || text(source.description),
+      subPlayer,
+      subPlayerId:
+        text(source.secondaryPlayerId) ||
+        text(source.secondary_player_id) ||
+        text(source.subPlayerId) ||
+        text(source.sub_player_id) ||
+        null,
+      description,
     };
   });
 }

@@ -14,13 +14,12 @@ import {
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
 import {
-    isGoalKickAttemptEvent,
     isGoalKickEventType,
-    isGoalKickMade,
     formatGoalKickDetailPrefix,
     formatMatchTimelineEventDescription,
     goalKickEffectivenessPercent,
     minutesPlayedWhenSubstitutedOut,
+    parseSubstitutionIncomingPlayer,
     teamKickAccuracyBreakdown,
 } from '@/lib/matchEventStats';
 import {
@@ -66,6 +65,8 @@ interface MatchEvent {
     team: 'home' | 'away' | null;
     playerId?: string | null;
     playerName: string;
+    secondaryPlayerId?: string | null;
+    secondaryPlayerName?: string | null;
     detail: string;
 }
 
@@ -190,7 +191,19 @@ type PersistMatchWarnings = {
 };
 
 function normalizeMatchEvents(events: MatchRow['events']): MatchEvent[] {
-    return Array.isArray(events) ? events : [];
+    return Array.isArray(events)
+        ? events.map((event) => {
+            const detail = String(event.detail || '');
+            const secondaryPlayerName = event.secondaryPlayerName
+                || (event.type === 'substitution' ? parseSubstitutionIncomingPlayer(detail) : '');
+            return {
+                ...event,
+                secondaryPlayerId: event.secondaryPlayerId || null,
+                secondaryPlayerName,
+                detail: event.detail || (event.type === 'substitution' && secondaryPlayerName ? `Entra: ${secondaryPlayerName}` : ''),
+            };
+        })
+        : [];
 }
 
 function normalizeMatchLineups(lineups: MatchRow['lineups']): MatchLineups {
@@ -1850,6 +1863,16 @@ export default function MatchCenterClient({
         if (!match) return;
         const payload = buildPersistableMatchPayload();
         if (eventsDirty) {
+            const incompleteSubstitution = localEvents.find((event) => (
+                event.type === 'substitution'
+                && (!event.playerName.trim() || !event.secondaryPlayerName?.trim())
+            ));
+
+            if (incompleteSubstitution) {
+                setSaveMsg({ type: 'warn', text: 'Completá jugador que sale y jugador que entra en todos los cambios antes de guardar.' });
+                return;
+            }
+
             payload.events = localEvents;
         }
         if (lineupsDirty) {
@@ -2044,6 +2067,21 @@ export default function MatchCenterClient({
             return;
         }
 
+        if (guidedEvent.definition.type === 'substitution') {
+            if (!guidedEvent.playerName.trim()) {
+                setSaveMsg({ type: 'warn', text: 'Selecciona el jugador que sale antes de guardar el cambio.' });
+                return;
+            }
+            if (!guidedEvent.secondaryPlayerName.trim()) {
+                setSaveMsg({ type: 'warn', text: 'Selecciona el jugador que entra antes de guardar el cambio.' });
+                return;
+            }
+            if (guidedEvent.playerName.trim().toLowerCase() === guidedEvent.secondaryPlayerName.trim().toLowerCase()) {
+                setSaveMsg({ type: 'warn', text: 'El jugador que entra debe ser distinto al que sale.' });
+                return;
+            }
+        }
+
         const minute = Math.max(0, Number.parseInt(guidedEvent.minute || '0', 10) || 0);
         const nextEvent: MatchEvent = {
             id: crypto.randomUUID(),
@@ -2052,6 +2090,8 @@ export default function MatchCenterClient({
             team: guidedEvent.definition.team === 'none' ? null : guidedEvent.team,
             playerId: guidedEvent.definition.player === 'none' ? null : guidedEvent.playerId,
             playerName: guidedEvent.definition.player === 'none' ? '' : guidedEvent.playerName.trim(),
+            secondaryPlayerId: guidedEvent.secondaryPlayerName.trim() ? guidedEvent.secondaryPlayerId : null,
+            secondaryPlayerName: guidedEvent.secondaryPlayerName.trim(),
             detail: formatGuidedEventDetail(guidedEvent),
         };
         const previousEvents = localEventsRef.current;
@@ -2097,6 +2137,20 @@ export default function MatchCenterClient({
         () => [...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)),
         [events],
     );
+    const eventScoreById = useMemo(() => {
+        const map = new Map<string, { home: number; away: number; points: number }>();
+
+        eventsChronologicalAsc.forEach((event, index) => {
+            const scoreAtEvent = resolveOfficialScore(scoreDraft, eventsChronologicalAsc.slice(0, index + 1));
+            map.set(event.id, {
+                home: scoreAtEvent.home,
+                away: scoreAtEvent.away,
+                points: getConfiguredEventPoints(event, eventDefinitionMap),
+            });
+        });
+
+        return map;
+    }, [eventDefinitionMap, eventsChronologicalAsc, resolveOfficialScore, scoreDraft]);
 
     useEffect(() => {
         const definitionMap = buildMatchEventDefinitionMap(availableEventDefinitions);
@@ -2133,21 +2187,33 @@ export default function MatchCenterClient({
         setLocalEvents((prev) => {
             let changed = false;
             const nextEvents = prev.map((event) => {
-                if (!event.team || !event.playerName.trim()) {
+                if (!event.team) {
                     return event;
                 }
 
                 const availablePlayers = eventPlayerOptions[event.team];
-                if (isEventPlayerAvailable(availablePlayers, event.playerName)) {
-                    return event;
+                let nextEvent = event;
+
+                if (event.playerName.trim() && !isEventPlayerAvailable(availablePlayers, event.playerName)) {
+                    changed = true;
+                    nextEvent = {
+                        ...nextEvent,
+                        playerId: null,
+                        playerName: '',
+                    };
                 }
 
-                changed = true;
-                return {
-                    ...event,
-                    playerId: null,
-                    playerName: '',
-                };
+                if (event.secondaryPlayerName?.trim() && !isEventPlayerAvailable(availablePlayers, event.secondaryPlayerName)) {
+                    changed = true;
+                    nextEvent = {
+                        ...nextEvent,
+                        secondaryPlayerId: null,
+                        secondaryPlayerName: '',
+                        detail: event.type === 'substitution' ? '' : nextEvent.detail,
+                    };
+                }
+
+                return nextEvent;
             });
 
             return changed ? nextEvents : prev;
@@ -2713,6 +2779,7 @@ export default function MatchCenterClient({
                                         <div className="event-timeline" style={{ paddingLeft: 16 }}>
                                             {recentEvents.map((ev, i) => {
                                                 const chronIdx = eventsChronologicalAsc.findIndex((e) => e.id === ev.id);
+                                                const eventScore = eventScoreById.get(ev.id);
                                                 const detailLine =
                                                     ev.type === 'substitution' && chronIdx >= 0
                                                         ? formatMatchTimelineEventDescription(ev, eventsChronologicalAsc, chronIdx, ev.playerName || ev.detail || '')
@@ -2725,6 +2792,11 @@ export default function MatchCenterClient({
                                                         <span style={{ opacity: 0.5, fontWeight: 400, marginLeft: 8 }}>
                                                             {teamTag(ev.team)} {detailLine}
                                                         </span>
+                                                        {eventScore && eventScore.points > 0 ? (
+                                                            <span style={{ marginLeft: 8, padding: '2px 6px', borderRadius: 999, background: 'rgba(34,197,94,0.12)', color: '#86efac', fontSize: '0.72rem', fontWeight: 900 }}>
+                                                                Marcador {eventScore.home} - {eventScore.away}
+                                                            </span>
+                                                        ) : null}
                                                     </div>
                                                 </div>
                                                 );
@@ -3022,6 +3094,10 @@ export default function MatchCenterClient({
                                         const selectedPlayerValue = isEventPlayerAvailable(availableEventPlayers, ev.playerName)
                                             ? ev.playerName
                                             : '';
+                                        const selectedSecondaryPlayerValue = isEventPlayerAvailable(availableEventPlayers, ev.secondaryPlayerName)
+                                            ? ev.secondaryPlayerName || ''
+                                            : '';
+                                        const eventScore = eventScoreById.get(ev.id);
 
                                         return (
                                         <div key={ev.id} style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
@@ -3044,6 +3120,8 @@ export default function MatchCenterClient({
                                                             team: nextDefinition?.team === 'none' ? null : ev.team ?? (nextDefinition?.team === 'required' ? 'home' : null),
                                                             playerId: nextDefinition?.player === 'none' ? null : ev.playerId ?? null,
                                                             playerName: nextDefinition?.player === 'none' ? '' : ev.playerName,
+                                                            secondaryPlayerId: nextType === 'substitution' ? ev.secondaryPlayerId ?? null : null,
+                                                            secondaryPlayerName: nextType === 'substitution' ? ev.secondaryPlayerName ?? '' : '',
                                                         });
                                                     }}
                                                 >
@@ -3065,6 +3143,8 @@ export default function MatchCenterClient({
                                                     onChange={(e) => updateLocalEvent(ev.id, {
                                                         team: (e.target.value || null) as 'home' | 'away' | null,
                                                         playerId: null,
+                                                        secondaryPlayerId: null,
+                                                        secondaryPlayerName: '',
                                                     })}
                                                 >
                                                     <option value="">-</option>
@@ -3106,7 +3186,36 @@ export default function MatchCenterClient({
                                                         ))}
                                                     </select>
                                                 )}
-                                                {selectedDefinition.player !== 'none' && (
+                                                {selectedDefinition.player !== 'none' && ev.type === 'substitution' && (
+                                                    <select
+                                                        value={selectedSecondaryPlayerValue}
+                                                        disabled={!ev.team || availableEventPlayers.length === 0}
+                                                        className="inline-input inline-select"
+                                                        style={{ fontSize: '0.8rem', opacity: 0.85 }}
+                                                        onChange={(e) => {
+                                                            const selected = resolveEventPlayerSelection(ev.team, e.target.value);
+                                                            updateLocalEvent(ev.id, {
+                                                                secondaryPlayerId: selected.playerId,
+                                                                secondaryPlayerName: selected.playerName,
+                                                                detail: selected.playerName ? `Entra: ${selected.playerName}` : '',
+                                                            });
+                                                        }}
+                                                    >
+                                                        <option value="">
+                                                            {!ev.team
+                                                                ? 'SeleccionÃ¡ un equipo'
+                                                                : availableEventPlayers.length === 0
+                                                                    ? 'Sin participantes cargados'
+                                                                    : 'Jugador que entra'}
+                                                        </option>
+                                                        {availableEventPlayers.map((entry) => (
+                                                            <option key={`${ev.id}-secondary-${entry.playerId || entry.name}`} value={entry.name}>
+                                                                {entry.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                                {selectedDefinition.player !== 'none' && ev.type !== 'substitution' && (
                                                     <input
                                                         type="text"
                                                         value={ev.detail}
@@ -3125,6 +3234,11 @@ export default function MatchCenterClient({
                                                         </span>
                                                     );
                                                 })() : null}
+                                                {eventScore && eventScore.points > 0 ? (
+                                                    <span style={{ fontSize: '0.72rem', color: '#86efac', fontWeight: 900 }}>
+                                                        Marcador {eventScore.home} - {eventScore.away}
+                                                    </span>
+                                                ) : null}
                                             </div>
                                             <div style={{ textAlign: 'right', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                                                 <button className="mc-btn mc-btn-outline" style={{ padding: 6, color: '#ef4444', border: '1px solid #333' }} onClick={() => removeLocalEvent(ev.id)}>
@@ -4099,5 +4213,3 @@ export default function MatchCenterClient({
         </main>
     );
 }
-
-

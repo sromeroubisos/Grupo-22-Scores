@@ -1,7 +1,7 @@
 'use client';
 
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -191,6 +191,8 @@ interface ClubLiveEvent {
   team: MatchEventTeam;
   playerId?: string | null;
   playerName: string;
+  secondaryPlayerId?: string | null;
+  secondaryPlayerName?: string | null;
   detail: string;
   parentEventId?: string;
   sequence?: number;
@@ -550,18 +552,27 @@ function ensureLineupsState(source: unknown, clock?: unknown): ClubLineupsState 
 }
 
 function ensureEvents(source: unknown): ClubLiveEvent[] {
-  return ensureArray(source, (row) => ({
-    id: ensureString(row.id) || crypto.randomUUID(),
-    minute: ensureInputString(row.minute),
-    type: ensureString(row.type) || 'note',
-    team: row.team === 'home' || row.team === 'away' ? row.team : null,
-    playerId: ensureString(row.playerId ?? row.player_id) || null,
-    playerName: ensureString(row.playerName ?? row.player_name),
-    detail: ensureString(row.detail),
-    videoTime: ensureString(row.videoTime ?? row.video_time) || '',
-    parentEventId: ensureString(row.parentEventId ?? row.parent_event_id) || undefined,
-    sequence: typeof row.sequence === 'number' ? row.sequence : undefined,
-  }));
+  return ensureArray(source, (row) => {
+    const type = ensureString(row.type) || 'note';
+    const detail = ensureString(row.detail);
+    const secondaryPlayerName =
+      ensureString(row.secondaryPlayerName ?? row.secondary_player_name ?? row.subPlayer ?? row.sub_player) ||
+      (type === 'substitution' ? parseSubstitutionIncoming(detail) : '');
+    return {
+      id: ensureString(row.id) || crypto.randomUUID(),
+      minute: ensureInputString(row.minute),
+      type,
+      team: row.team === 'home' || row.team === 'away' ? row.team : null,
+      playerId: ensureString(row.playerId ?? row.player_id) || null,
+      playerName: ensureString(row.playerName ?? row.player_name),
+      secondaryPlayerId: ensureString(row.secondaryPlayerId ?? row.secondary_player_id ?? row.subPlayerId ?? row.sub_player_id) || null,
+      secondaryPlayerName,
+      detail: detail || (type === 'substitution' && secondaryPlayerName ? `Entra: ${secondaryPlayerName}` : ''),
+      videoTime: ensureString(row.videoTime ?? row.video_time) || '',
+      parentEventId: ensureString(row.parentEventId ?? row.parent_event_id) || undefined,
+      sequence: typeof row.sequence === 'number' ? row.sequence : undefined,
+    };
+  });
 }
 
 function serializeLiveEvent(event: ClubLiveEvent) {
@@ -572,6 +583,10 @@ function serializeLiveEvent(event: ClubLiveEvent) {
     team: event.team,
     playerId: event.playerId || null,
     playerName: event.playerName.trim(),
+    secondaryPlayerId: event.secondaryPlayerId || null,
+    secondaryPlayerName: event.secondaryPlayerName?.trim() || '',
+    subPlayerId: event.secondaryPlayerId || null,
+    subPlayer: event.secondaryPlayerName?.trim() || '',
     detail: event.detail.trim(),
     videoTime: event.videoTime?.trim() || null,
     parentEventId: event.parentEventId,
@@ -911,6 +926,7 @@ function buildEventFromComposer(composer: LiveComposerState): ClubLiveEvent {
       type: 'substitution',
       team: composer.team,
       playerName: composer.playerName.trim(),
+      secondaryPlayerName: composer.secondaryPlayerName.trim(),
       detail: composer.secondaryPlayerName.trim() ? `Entra: ${composer.secondaryPlayerName.trim()}` : '',
     };
   }
@@ -1124,7 +1140,7 @@ function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
       videoTime: event.videoTime || '',
       team: event.team || 'home',
       playerName: event.playerName,
-      secondaryPlayerName: parseSubstitutionIncoming(event.detail),
+      secondaryPlayerName: event.secondaryPlayerName || parseSubstitutionIncoming(event.detail),
     });
   }
 
@@ -2138,12 +2154,26 @@ export default function ClubMatchWorkspace({
     substitutions: countEvents(events, ['substitution']),
   };
   const livePanelGameStats = buildMatchStats(events);
-  const timelineEvents = [...events].sort((left, right) => {
+  const timelineEvents = useMemo(() => [...events].sort((left, right) => {
     const leftMinute = parseNumericInput(left.minute) ?? 0;
     const rightMinute = parseNumericInput(right.minute) ?? 0;
     if (leftMinute !== rightMinute) return leftMinute - rightMinute;
     return String(left.id).localeCompare(String(right.id));
-  });
+  }), [events]);
+  const timelineScoreById = useMemo(() => {
+    const map = new Map<string, { home: number; away: number; points: number }>();
+    let home = 0;
+    let away = 0;
+
+    timelineEvents.forEach((event) => {
+      const points = getEventPoints(event);
+      if (points > 0 && event.team === 'home') home += points;
+      if (points > 0 && event.team === 'away') away += points;
+      map.set(event.id, { home, away, points });
+    });
+
+    return map;
+  }, [timelineEvents]);
 
   const kpis = [
     { label: 'Convocatoria', value: callupsCount ? `${callupsCount} / 23` : 'Sin carga', tone: pendingCallups > 0 || callupsCount === 0 ? 'yellow' : 'green' },
@@ -2390,6 +2420,21 @@ export default function ClubMatchWorkspace({
 
   const submitLiveComposer = useCallback(async () => {
     if (!liveComposer) return;
+    if (liveComposer.action === 'substitution') {
+      const outgoingName = liveComposer.playerName.trim();
+      const incomingName = liveComposer.secondaryPlayerName.trim();
+
+      if (!outgoingName || !incomingName) {
+        setFeedback({ tone: 'error', message: 'Para registrar un cambio, seleccioná el jugador que sale y el que entra.' });
+        return;
+      }
+
+      if (outgoingName.toLowerCase() === incomingName.toLowerCase()) {
+        setFeedback({ tone: 'error', message: 'El jugador que entra debe ser distinto al que sale.' });
+        return;
+      }
+    }
+
     const selectedPlayers = liveComposer.team === 'home'
       ? lineupsState.home
       : liveComposer.team === 'away'
@@ -2398,6 +2443,9 @@ export default function ClubMatchWorkspace({
     const nextEvent = {
       ...buildEventFromComposer(liveComposer),
       playerId: findLineupPlayerId(selectedPlayers, liveComposer.playerName),
+      secondaryPlayerId: liveComposer.action === 'substitution'
+        ? findLineupPlayerId(selectedPlayers, liveComposer.secondaryPlayerName)
+        : undefined,
     };
     const nextDelta = getEventPoints(nextEvent);
     const serializeEventsForSave = (nextEvents: ClubLiveEvent[]) => nextEvents.map(serializeLiveEvent);
@@ -2406,16 +2454,12 @@ export default function ClubMatchWorkspace({
       const previousEvent = events.find((event) => event.id === liveComposer.eventId);
       const nextEvents = events.map((event) => event.id === liveComposer.eventId ? nextEvent : event);
       let nextScore = matchDraft.score;
-      if (matchDraft.status !== 'final') {
-        if (previousEvent) {
-          nextScore = applyScoreDelta(nextScore, previousEvent.team, -getEventPoints(previousEvent));
-        }
-        nextScore = applyScoreDelta(nextScore, nextEvent.team, nextDelta);
+      if (previousEvent) {
+        nextScore = applyScoreDelta(nextScore, previousEvent.team, -getEventPoints(previousEvent));
       }
+      nextScore = applyScoreDelta(nextScore, nextEvent.team, nextDelta);
       setEvents(nextEvents);
-      if (matchDraft.status !== 'final') {
-        setMatchDraft((current) => ({ ...current, score: nextScore }));
-      }
+      setMatchDraft((current) => ({ ...current, score: nextScore }));
       closeLiveComposer();
       void saveMatch({
         score: buildScorePayload(matchState.score, nextScore),
@@ -2471,9 +2515,7 @@ export default function ClubMatchWorkspace({
     }
 
     const nextEvents = [...events, nextEvent, ...(childEvent ? [childEvent] : [])];
-    const nextScore = matchDraft.status !== 'final'
-      ? applyScoreDelta(matchDraft.score, nextEvent.team, nextDelta)
-      : matchDraft.score;
+    const nextScore = applyScoreDelta(matchDraft.score, nextEvent.team, nextDelta);
     const successMessage = childEvent
       ? `${getEventTypeLabel(nextEvent.type)} registrado. ${getEventTypeLabel(childEvent.type)} generado.`
       : liveComposer.action === 'try'
@@ -2481,15 +2523,13 @@ export default function ClubMatchWorkspace({
         : 'Evento agregado al timeline.';
 
     setEvents(nextEvents);
-    if (matchDraft.status !== 'final') {
-      setMatchDraft((current) => ({ ...current, score: nextScore }));
-    }
+    setMatchDraft((current) => ({ ...current, score: nextScore }));
     closeLiveComposer();
     void saveMatch({
       score: buildScorePayload(matchState.score, nextScore),
       events: serializeEventsForSave(nextEvents),
     }, successMessage, { syncResponse: false });
-  }, [closeLiveComposer, events, lineupsState.away, lineupsState.home, liveComposer, matchDraft.score, matchDraft.status, matchState.score, saveMatch]);
+  }, [closeLiveComposer, events, lineupsState.away, lineupsState.home, liveComposer, matchDraft.score, matchState.score, saveMatch]);
 
   const removeLiveEvent = useCallback((eventId: string) => {
     const eventIndex = events.findIndex((event) => event.id === eventId);
@@ -2499,23 +2539,21 @@ export default function ClubMatchWorkspace({
     const removedCount = 1 + childEvents.length;
     setLastRemovedEvent({ event: targetEvent, index: eventIndex });
     setEvents((current) => current.filter((event) => event.id !== eventId && event.parentEventId !== eventId));
-    if (matchDraft.status !== 'final') {
-      setMatchDraft((current) => {
-        let nextScore = current.score;
-        nextScore = applyScoreDelta(nextScore, targetEvent.team, -getEventPoints(targetEvent));
-        childEvents.forEach((child) => {
-          nextScore = applyScoreDelta(nextScore, child.team, -getEventPoints(child));
-        });
-        return { ...current, score: nextScore };
+    setMatchDraft((current) => {
+      let nextScore = current.score;
+      nextScore = applyScoreDelta(nextScore, targetEvent.team, -getEventPoints(targetEvent));
+      childEvents.forEach((child) => {
+        nextScore = applyScoreDelta(nextScore, child.team, -getEventPoints(child));
       });
-    }
+      return { ...current, score: nextScore };
+    });
     setFeedback({
       tone: 'success',
       message: removedCount > 1
         ? `${removedCount} eventos eliminados. Pod\u00e9s deshacer la \u00faltima acci\u00f3n.`
         : 'Evento eliminado. Pod\u00e9s deshacer la \u00faltima acci\u00f3n.',
     });
-  }, [events, matchDraft.status]);
+  }, [events]);
 
   const restoreLastRemovedEvent = useCallback(() => {
     if (!lastRemovedEvent) return;
@@ -2524,15 +2562,13 @@ export default function ClubMatchWorkspace({
       next.splice(lastRemovedEvent.index, 0, lastRemovedEvent.event);
       return next;
     });
-    if (matchDraft.status !== 'final') {
-      setMatchDraft((current) => ({
-        ...current,
-        score: applyScoreDelta(current.score, lastRemovedEvent.event.team, getEventPoints(lastRemovedEvent.event)),
-      }));
-    }
+    setMatchDraft((current) => ({
+      ...current,
+      score: applyScoreDelta(current.score, lastRemovedEvent.event.team, getEventPoints(lastRemovedEvent.event)),
+    }));
     setLastRemovedEvent(null);
     setFeedback({ tone: 'success', message: 'Se restaur\u00f3 el \u00faltimo evento.' });
-  }, [lastRemovedEvent, matchDraft.status]);
+  }, [lastRemovedEvent]);
 
   const renderLiveComposerCard = (extraClassName?: string) => {
     if (!liveComposer) return null;
@@ -3716,6 +3752,14 @@ export default function ClubMatchWorkspace({
                                   <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                 </div>
                                 <p>{formatMatchTimelineEventDescription(event, timelineEvents, eventIndex, 'Sin detalle adicional')}</p>
+                                {(() => {
+                                  const eventScore = timelineScoreById.get(event.id);
+                                  return eventScore && eventScore.points > 0 ? (
+                                    <p style={{ color: '#86efac', fontWeight: 800 }}>
+                                      Marcador {eventScore.home} - {eventScore.away}
+                                    </p>
+                                  ) : null;
+                                })()}
                               </div>
                               <div className={styles.timelineActions}>
                                 <button className={styles.miniBtn} type="button" onClick={() => openLiveComposer(getLiveActionFromEventType(event.type), event)}>
@@ -4376,6 +4420,14 @@ export default function ClubMatchWorkspace({
                                     <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                   </div>
                                   <p>{formatMatchTimelineEventDescription(event, timelineEvents, eventIndex, 'Sin detalle adicional')}</p>
+                                  {(() => {
+                                    const eventScore = timelineScoreById.get(event.id);
+                                    return eventScore && eventScore.points > 0 ? (
+                                      <p style={{ color: '#86efac', fontWeight: 800 }}>
+                                        Marcador {eventScore.home} - {eventScore.away}
+                                      </p>
+                                    ) : null;
+                                  })()}
                                 </div>
                               </div>
                             ))}
@@ -4611,5 +4663,3 @@ function removeLineupPlayer(
     [lineupKey]: current[lineupKey].filter((_, currentIndex) => currentIndex !== index),
   }));
 }
-
-

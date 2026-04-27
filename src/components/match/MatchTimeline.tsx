@@ -4,7 +4,9 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from './MatchTimeline.module.css';
 import { type LocalPublicEvent } from '@/lib/localMatchData';
-import { isGoalKickAttemptEvent } from '@/lib/matchEventStats';
+import { buildMatchEventDefinitionMap, getDefaultMatchEventDefinitions, type MatchEventDefinition } from '@/lib/matchEventCatalog';
+import { getConfiguredEventPoints } from '@/lib/matchStatsFromEvents';
+import { isGoalKickAttemptEvent, parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -152,38 +154,11 @@ function eventKey(evt: TimelineEvent): string {
   return `${evt.minute}|${evt.type}|${evt.team || '-'}|${evt.player || '-'}|${evt.description || '-'}`;
 }
 
-function getEventPoints(type: string): number {
-  switch (type.toLowerCase()) {
-    case 'try':
-    case 'penalty_try':
-      return 5;
-    case 'conversion':
-      return 2;
-    case 'penalty_goal':
-    case 'penalty':
-    case 'drop_goal':
-    case 'field_goal':
-    case 'three_pointer':
-      return 3;
-    case 'two_pointer':
-    case 'two_point_conversion':
-    case 'safety':
-      return 2;
-    case 'goal':
-    case 'own_goal':
-    case 'free_throw':
-    case 'point':
-    case 'ace':
-    case 'block_point':
-    case 'extra_point':
-    case 'touchdown':
-    case 'run':
-    case 'home_run':
-    case 'seven_meter_goal':
-      return 1;
-    default:
-      return 0;
-  }
+function getEventPoints(
+  evt: Pick<TimelineEvent, 'type' | 'description'>,
+  definitionMap: Record<string, MatchEventDefinition>,
+): number {
+  return getConfiguredEventPoints({ type: evt.type, detail: evt.description }, definitionMap);
 }
 
 function getEventCategories(type: string): FilterKey[] {
@@ -402,25 +377,29 @@ function EventTypeIcon({ type, className }: { type: string; className?: string }
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export default function MatchTimeline({ events, homeTeam, awayTeam }: Props) {
+export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: Props) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
+  const definitionMap = useMemo(
+    () => buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(String(sportId || 'rugby'))),
+    [sportId],
+  );
 
   /* ---- Cálculo de marcadores en orden cronológico ---- */
   const scoreMap = useMemo(() => {
-    const map = new Map<string, { home: number; away: number }>();
-    const sorted = [...events].sort((a, b) => a.minute - b.minute || 0);
+    const map = new Map<string, { home: number; away: number; points: number }>();
+    const sorted = [...events].sort((a, b) => a.minute - b.minute || eventKey(a).localeCompare(eventKey(b)));
     let home = 0;
     let away = 0;
     for (const evt of sorted) {
-      const pts = getEventPoints(evt.type);
+      const pts = getEventPoints(evt, definitionMap);
       if (pts > 0 && evt.team) {
         if (evt.team === 'home') home += pts;
         else away += pts;
       }
-      map.set(eventKey(evt), { home, away });
+      map.set(eventKey(evt), { home, away, points: pts });
     }
     return map;
-  }, [events]);
+  }, [definitionMap, events]);
 
   /* ---- Filtrado ---- */
   const filteredEvents = useMemo(() => {
@@ -581,7 +560,7 @@ function EventCard({
   awayName,
 }: {
   evt: TimelineEvent;
-  scoreMap: Map<string, { home: number; away: number }>;
+  scoreMap: Map<string, { home: number; away: number; points: number }>;
   homeName: string;
   awayName: string;
 }) {
@@ -589,8 +568,10 @@ function EventCard({
   const color = EVENT_COLORS[evt.type.toLowerCase()] || EVENT_COLORS.default;
   const label = labelForType(evt.type);
   const detail = cleanDescription(evt.description, evt.type);
-  const isScoreEvent = getEventPoints(evt.type) > 0;
+  const isScoreEvent = (score?.points ?? 0) > 0;
   const isSubstitution = evt.type.toLowerCase().includes('subst');
+  const incomingPlayer = evt.subPlayer || parseSubstitutionIncomingPlayer(evt.description);
+  const incomingPlayerId = evt.subPlayer ? evt.subPlayerId : null;
 
   const isClockEvent = ['match_start', 'match_half', 'match_end', 'start_period', 'end_period', 'timeout'].includes(evt.type.toLowerCase());
   const hasRealPlayer = Boolean(evt.player) && evt.player !== 'Jugador';
@@ -612,21 +593,21 @@ function EventCard({
       {isSubstitution ? (
         <>
           <div className={styles.eventPlayerName}>
-            <span className={styles.subOut}>{playerLink}</span>
+            Sale: <span className={styles.subOut}>{playerLink}</span>
           </div>
           <div className={styles.eventTypeRow}>
             <EventTypeIcon type={evt.type} className={styles.eventIconSvg} />
             <span style={{ color }}>{label}</span>
           </div>
-          {evt.subPlayer && (
+          {incomingPlayer && (
             <div className={styles.eventSubDetail}>
               Entra:{' '}
-              {evt.subPlayerId ? (
-                <Link href={`/players/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                  <span className={styles.subIn}>{evt.subPlayer}</span>
+              {incomingPlayerId ? (
+                <Link href={`/players/${incomingPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                  <span className={styles.subIn}>{incomingPlayer}</span>
                 </Link>
               ) : (
-                <span className={styles.subIn}>{evt.subPlayer}</span>
+                <span className={styles.subIn}>{incomingPlayer}</span>
               )}
             </div>
           )}

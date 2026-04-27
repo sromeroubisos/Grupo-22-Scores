@@ -149,6 +149,7 @@ export type SubstitutionMinuteEvent = {
   team?: string | null;
   minute: string | number;
   playerName?: string | null;
+  secondaryPlayerName?: string | null;
   detail?: string | null;
 };
 
@@ -202,7 +203,9 @@ export function minutesPlayedWhenSubstitutedOut(
   for (let i = eventIndex - 1; i >= 0; i--) {
     const e = orderedEventsAsc[i];
     if (e.type !== 'substitution' || e.team !== team) continue;
-    const incoming = normalizeSubstitutionPlayerName(parseSubstitutionIncomingPlayer(e.detail));
+    const incoming = normalizeSubstitutionPlayerName(
+      e.secondaryPlayerName || parseSubstitutionIncomingPlayer(e.detail),
+    );
     if (incoming && incoming === outName) {
       const onMin = parseTimelineMinute(e.minute);
       return Math.max(0, offMin - onMin);
@@ -214,21 +217,23 @@ export function minutesPlayedWhenSubstitutedOut(
 
 /** Texto de línea de timeline para cambios: sale, minutos jugados, detalle (Entra: …). */
 export function formatSubstitutionTimelineDescription(
-  event: Pick<SubstitutionMinuteEvent, 'playerName' | 'detail'>,
+  event: Pick<SubstitutionMinuteEvent, 'playerName' | 'secondaryPlayerName' | 'detail'>,
   minutesPlayed: number | null,
 ): string {
   const parts: string[] = [];
   const name = String(event.playerName || '').trim();
-  if (name) parts.push(name);
+  if (name) parts.push(`Sale: ${name}`);
   if (minutesPlayed != null) parts.push(`${minutesPlayed} min jugados`);
-  const entr = String(event.detail || '').trim();
+  const entr = String(
+    event.detail || (event.secondaryPlayerName ? `Entra: ${event.secondaryPlayerName}` : ''),
+  ).trim();
   if (entr) parts.push(entr);
   return parts.join(' · ');
 }
 
 /** Detalle de fila de timeline genérico; en cambios incluye minutos del jugador que sale. */
 export function formatMatchTimelineEventDescription(
-  event: Pick<SubstitutionMinuteEvent, 'type' | 'playerName' | 'detail'>,
+  event: Pick<SubstitutionMinuteEvent, 'type' | 'playerName' | 'secondaryPlayerName' | 'detail'>,
   orderedAsc: SubstitutionMinuteEvent[],
   indexInOrdered: number,
   emptyFallback: string,

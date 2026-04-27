@@ -3,6 +3,7 @@ import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
 } from '@/lib/server/externalTournamentOverrides';
+import { parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 type SupabaseLike = {
@@ -89,6 +90,10 @@ export type MatchCenterEventInput = {
   team?: TeamKey | null;
   playerId?: string | null;
   playerName?: string | null;
+  secondaryPlayerId?: string | null;
+  secondaryPlayerName?: string | null;
+  subPlayerId?: string | null;
+  subPlayer?: string | null;
   detail?: string | null;
   videoTime?: string | null;
   parentEventId?: string | null;
@@ -96,11 +101,11 @@ export type MatchCenterEventInput = {
 };
 
 export type MatchCenterClockInput = {
-  minute?: number | null;
-  seconds?: number | null;
-  period?: string | null;
-  running?: boolean | null;
-  syncedAt?: string | null;
+  minute?: unknown;
+  seconds?: unknown;
+  period?: unknown;
+  running?: unknown;
+  syncedAt?: unknown;
 } | null | undefined;
 
 export type MatchCenterLineupsInput = {
@@ -255,14 +260,34 @@ function normalizeLineups(lineups: MatchCenterLineupsInput | unknown) {
 }
 
 function normalizeEventInput(event: MatchCenterEventInput) {
+  const source = event as MatchCenterEventInput & Record<string, unknown>;
+  const type = normalizeText(source.type) || 'note';
+  const detail = normalizeText(source.detail);
+  const secondaryPlayerName =
+    normalizeText(source.secondaryPlayerName) ||
+    normalizeText(source.secondary_player_name) ||
+    normalizeText(source.subPlayer) ||
+    normalizeText(source.sub_player) ||
+    (type === 'substitution' ? parseSubstitutionIncomingPlayer(detail) : '');
+  const normalizedDetail = type === 'substitution' && !detail && secondaryPlayerName
+    ? `Entra: ${secondaryPlayerName}`
+    : detail;
+
   return {
     id: normalizeEventId(event.id),
     minute: Number.isFinite(event.minute) ? Math.max(0, Math.trunc(event.minute as number)) : 0,
-    type: normalizeText(event.type) || 'note',
+    type,
     team: normalizeTeam(event.team),
     playerId: normalizeText(event.playerId) || null,
     playerName: normalizeText(event.playerName),
-    detail: normalizeText(event.detail),
+    secondaryPlayerId:
+      normalizeText(source.secondaryPlayerId) ||
+      normalizeText(source.secondary_player_id) ||
+      normalizeText(source.subPlayerId) ||
+      normalizeText(source.sub_player_id) ||
+      null,
+    secondaryPlayerName,
+    detail: normalizedDetail,
     videoTime: normalizeText(event.videoTime) || null,
     parentEventId: normalizeText(event.parentEventId) || null,
     sequence: Number.isFinite(event.sequence) ? Math.max(0, Math.trunc(event.sequence as number)) : null,
@@ -377,6 +402,20 @@ function mapStoredEvent(row: any, match: { home_club_id?: string | null; away_cl
       normalizeText(row?.player_name) ||
       normalizeText((details as Record<string, unknown>).playerName) ||
       '',
+    secondaryPlayerId:
+      normalizeText((details as Record<string, unknown>).secondaryPlayerId) ||
+      normalizeText((details as Record<string, unknown>).secondary_player_id) ||
+      normalizeText((details as Record<string, unknown>).subPlayerId) ||
+      normalizeText((details as Record<string, unknown>).sub_player_id) ||
+      null,
+    secondaryPlayerName:
+      normalizeText((details as Record<string, unknown>).secondaryPlayerName) ||
+      normalizeText((details as Record<string, unknown>).secondary_player_name) ||
+      normalizeText((details as Record<string, unknown>).subPlayer) ||
+      normalizeText((details as Record<string, unknown>).sub_player) ||
+      (normalizeText(row?.event_type) === 'substitution'
+        ? parseSubstitutionIncomingPlayer(normalizeText((details as Record<string, unknown>).detail))
+        : ''),
     detail: normalizeText((details as Record<string, unknown>).detail),
     videoTime:
       normalizeText(row?.video_time) ||
@@ -406,6 +445,17 @@ function mapJsonEvent(row: unknown) {
     team: normalizeTeam(source.team),
     playerId: normalizeText(source.playerId) || normalizeText(source.player_id) || null,
     playerName: normalizeText(source.playerName) || normalizeText(source.player_name),
+    secondaryPlayerId:
+      normalizeText(source.secondaryPlayerId) ||
+      normalizeText(source.secondary_player_id) ||
+      normalizeText(source.subPlayerId) ||
+      normalizeText(source.sub_player_id) ||
+      null,
+    secondaryPlayerName:
+      normalizeText(source.secondaryPlayerName) ||
+      normalizeText(source.secondary_player_name) ||
+      normalizeText(source.subPlayer) ||
+      normalizeText(source.sub_player),
     detail: normalizeText(source.detail) || normalizeText(source.description),
     videoTime: normalizeText(source.videoTime) || normalizeText(source.video_time) || null,
     parentEventId: normalizeText(source.parentEventId) || normalizeText(source.parent_event_id) || null,
@@ -444,6 +494,10 @@ function mapEventToInsert(
       legacy_id: event.id || null,
       playerId: event.playerId || null,
       playerName: event.playerName || null,
+      secondaryPlayerId: event.secondaryPlayerId || null,
+      secondaryPlayerName: event.secondaryPlayerName || null,
+      subPlayerId: event.secondaryPlayerId || null,
+      subPlayer: event.secondaryPlayerName || null,
       videoTime: event.videoTime || null,
       parentEventId: event.parentEventId || null,
       sequence: event.sequence ?? null,
@@ -1061,6 +1115,51 @@ async function resolvePersistedLineups(
   return resolved;
 }
 
+async function resolveEventPlayerReference(
+  client: SupabaseLike,
+  context: TeamResolutionContext,
+  playerId: string | null | undefined,
+  playerName: string | null | undefined,
+  fallbackIndex: number,
+) {
+  const cleanedName = normalizeText(playerName);
+  const normalizedPlayerId = normalizeText(playerId) || null;
+
+  if (!cleanedName) {
+    return { playerId: normalizedPlayerId, playerName: '' };
+  }
+
+  const nameKey = normalizeNameKey(cleanedName);
+  const preferredId = normalizedPlayerId || context.lineupPlayerIds.get(nameKey) || null;
+  const existing =
+    (preferredId ? context.roster.byId.get(preferredId) : null) ||
+    context.roster.byName.get(nameKey) ||
+    null;
+
+  if (existing) {
+    context.lineupPlayerIds.set(nameKey, existing.personId);
+    return { playerId: existing.personId, playerName: existing.name };
+  }
+
+  const created = await ensurePlayerInContext(
+    client,
+    context,
+    {
+      id: preferredId || undefined,
+      number: 0,
+      name: cleanedName,
+      position: '',
+      role: '',
+    },
+    fallbackIndex,
+  );
+
+  return {
+    playerId: created?.personId || preferredId || null,
+    playerName: created?.name || cleanedName,
+  };
+}
+
 async function resolvePersistedEvents(
   client: SupabaseLike,
   contexts: Record<TeamKey, TeamResolutionContext>,
@@ -1071,47 +1170,47 @@ async function resolvePersistedEvents(
   for (const rawEvent of events) {
     const event = normalizeEventInput(rawEvent);
     const context = event.team ? contexts[event.team] : null;
+    let nextEvent = event;
 
-    if (!context || !event.playerName) {
-      resolved.push(event);
+    if (!context) {
+      resolved.push(nextEvent);
       continue;
     }
 
-    const nameKey = normalizeNameKey(event.playerName);
-    const preferredId = event.playerId || context.lineupPlayerIds.get(nameKey) || null;
-    const existing =
-      (preferredId ? context.roster.byId.get(preferredId) : null) ||
-      context.roster.byName.get(nameKey) ||
-      null;
-
-    if (existing) {
-      context.lineupPlayerIds.set(nameKey, existing.personId);
-      resolved.push({
-        ...event,
-        playerId: existing.personId,
-        playerName: existing.name,
-      });
-      continue;
+    if (event.playerName) {
+      const resolvedPlayer = await resolveEventPlayerReference(
+        client,
+        context,
+        event.playerId,
+        event.playerName,
+        999,
+      );
+      nextEvent = {
+        ...nextEvent,
+        playerId: resolvedPlayer.playerId,
+        playerName: resolvedPlayer.playerName,
+      };
     }
 
-    const created = await ensurePlayerInContext(
-      client,
-      context,
-      {
-        id: event.playerId || undefined,
-        number: 0,
-        name: event.playerName,
-        position: '',
-        role: '',
-      },
-      999,
-    );
+    if (event.secondaryPlayerName) {
+      const resolvedSecondaryPlayer = await resolveEventPlayerReference(
+        client,
+        context,
+        event.secondaryPlayerId,
+        event.secondaryPlayerName,
+        1000,
+      );
+      nextEvent = {
+        ...nextEvent,
+        secondaryPlayerId: resolvedSecondaryPlayer.playerId,
+        secondaryPlayerName: resolvedSecondaryPlayer.playerName,
+        detail: nextEvent.type === 'substitution'
+          ? `Entra: ${resolvedSecondaryPlayer.playerName}`
+          : nextEvent.detail,
+      };
+    }
 
-    resolved.push({
-      ...event,
-      playerId: created?.personId || normalizeText(event.playerId) || null,
-      playerName: created?.name || event.playerName,
-    });
+    resolved.push(nextEvent);
   }
 
   return resolved;
