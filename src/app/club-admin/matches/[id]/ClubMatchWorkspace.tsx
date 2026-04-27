@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
