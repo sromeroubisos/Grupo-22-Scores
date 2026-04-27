@@ -2832,3 +2832,430 @@
         padding: 10px 16px;
     }
 }
+
+/* ========== Player Stats Panel Redesign ========== */
+
+.playerStatsSubtitle {
+    margin: -8px 0 16px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.playerStatsHeaderBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.playerStatsSearchWrap {
+    flex: 1;
+    min-width: 200px;
+}
+
+.playerStatsSearch {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+}
+
+.playerStatsSearch::placeholder {
+    color: var(--muted);
+}
+
+.playerStatsSearch:focus {
+    outline: none;
+    border-color: rgba(var(--color-accent-rgb), 0.4);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.08);
+}
+
+.playerStatsHeaderActions {
+    display: flex;
+    gap: 8px;
+}
+
+.playerStatsConfigBtn {
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.playerStatsConfigBtn:hover {
+    border-color: rgba(var(--color-accent-rgb), 0.3);
+    background: rgba(var(--color-accent-rgb), 0.08);
+}
+
+.playerStatsConfigBtnActive {
+    border-color: rgba(var(--color-accent-rgb), 0.4);
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--accent);
+}
+
+.playerMetricsToolbarCompact {
+    padding: 16px 18px;
+    border-radius: 18px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 16px;
+    display: grid;
+    gap: 14px;
+}
+
+.playerMetricsToolbarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.playerMetricsResetBtn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--stroke);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.playerMetricsResetBtn:hover {
+    color: var(--text);
+    border-color: rgba(var(--color-accent-rgb), 0.25);
+}
+
+.playerMetricSelectorsCompact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.playerMetricSelectWrapCompact {
+    display: grid;
+    gap: 6px;
+}
+
+.playerMetricSelectRow {
+    display: flex;
+    gap: 8px;
+}
+
+.playerMetricOrderToggle {
+    min-height: 42px;
+    width: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--muted);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.playerMetricOrderToggle:hover {
+    color: var(--text);
+    border-color: rgba(var(--color-accent-rgb), 0.3);
+}
+
+.playerMetricOrderToggleAsc {
+    color: var(--accent);
+    border-color: rgba(var(--color-accent-rgb), 0.3);
+}
+
+.playerMetricSortRadio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.playerMetricSortRadio input {
+    display: none;
+}
+
+.playerStatsQuickFilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.playerStatsFilter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.playerStatsFilter select {
+    min-height: 36px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid var(--stroke);
+    background: rgba(8, 10, 14, 0.72);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+}
+
+.playerStatsSummaryBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--stroke);
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.playerStatsSummaryItem strong {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.playerStatsSummaryHighlight {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.playerStatsSummaryHighlight strong {
+    color: var(--accent);
+}
+
+.playerStatsTableWrapEnhanced {
+    overflow-x: auto;
+    border: 1px solid var(--stroke);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.playerStatsTableEnhanced {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.playerStatsTableEnhanced thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--stroke);
+    background: rgba(18, 20, 26, 0.95);
+    backdrop-filter: blur(6px);
+}
+
+.playerStatsTableEnhanced tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.playerStatsTableEnhanced tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.playerStatsColPlayer {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    min-width: 240px;
+    background: inherit;
+}
+
+.playerStatsTableEnhanced thead th.playerStatsColPlayer {
+    z-index: 15;
+    background: rgba(18, 20, 26, 0.95);
+}
+
+.playerStatsColTeam {
+    min-width: 140px;
+}
+
+.playerStatsColMetric {
+    text-align: right;
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+.playerStatsColMetricActive {
+    color: var(--accent) !important;
+    background: rgba(var(--color-accent-rgb), 0.06);
+}
+
+.playerStatsTableEnhanced thead th.playerStatsColMetricActive {
+    background: rgba(var(--color-accent-rgb), 0.12);
+    border-bottom-color: rgba(var(--color-accent-rgb), 0.4);
+}
+
+.playerStatsHeaderButtonEnhanced {
+    width: 100%;
+    display: inline-flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+
+.playerStatsHeaderArrow {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.playerStatsRowZebra td {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.playerStatsNameWrapEnhanced {
+    display: grid;
+    gap: 4px;
+}
+
+.playerStatsPrimaryEnhanced {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.playerStatsSecondaryEnhanced {
+    font-size: 12px;
+    color: var(--muted);
+    opacity: 0.8;
+}
+
+.playerStatsBadgeCaptain {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(var(--color-accent-rgb), 0.15);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.playerStatsTeamTagEnhanced {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.playerStatsCellMetricActive {
+    background: rgba(var(--color-accent-rgb), 0.04);
+}
+
+.metricValueWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.metricValue {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.playerStatsColMetricActive .metricValue {
+    color: var(--accent);
+}
+
+.metricBarTrack {
+    width: 48px;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.metricBarFill {
+    height: 100%;
+    border-radius: 99px;
+    background: rgba(var(--color-accent-rgb), 0.45);
+}
+
+@media (max-width: 768px) {
+    .playerStatsHeaderBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .playerStatsSearchWrap {
+        min-width: auto;
+    }
+
+    .playerMetricSelectorsCompact {
+        grid-template-columns: 1fr;
+    }
+
+    .playerStatsQuickFilters {
+        flex-direction: column;
+    }
+
+    .playerStatsSummaryBar {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .playerStatsTableEnhanced {
+        min-width: auto;
+    }
+
+    .playerStatsColPlayer {
+        position: static;
+    }
+}
