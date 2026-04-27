@@ -420,7 +420,7 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
         {topN !== 'all' && <span className={styles.playerStatsSummaryItem}>Top {topN}</span>}
       </div>
 
-      {/* Tabla */}
+      {/* Tabla desktop/tablet */}
       <div className={styles.playerStatsTableWrapEnhanced}>
         <table className={styles.playerStatsTableEnhanced}>
           <thead>
@@ -514,6 +514,80 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista mobile: cards */}
+      <div className={styles.playerStatsCardsMobile}>
+        {filteredRows.map((player) => (
+          <div key={player.key} className={styles.playerStatsCard}>
+            <div className={styles.playerStatsCardHeader}>
+              <div className={styles.playerStatsCardNameWrap}>
+                <span className={styles.playerStatsCardName}>
+                  {player.playerId ? (
+                    <Link href={`/players/${player.playerId}`} className={styles.playerStatsNameLink}>
+                      {player.name}
+                    </Link>
+                  ) : (
+                    player.name
+                  )}
+                </span>
+                {player.isCaptain && <span className={styles.playerStatsBadgeCaptain}>C</span>}
+              </div>
+              <div className={styles.playerStatsCardMeta}>
+                {player.position ? player.position : 'Sin posición'}
+                {player.number != null && ` · #${player.number}`}
+              </div>
+            </div>
+            <div className={styles.playerStatsCardTeamWrap}>
+              <span
+                className={`${styles.playerStatsTeamTagEnhanced} ${
+                  player.team === 'home'
+                    ? styles.teamTagHome
+                    : player.team === 'away'
+                    ? styles.teamTagAway
+                    : ''
+                }`}
+              >
+                {player.teamName}
+              </span>
+            </div>
+            <div className={styles.playerStatsCardMetrics}>
+              {displayedMetrics.map((metricId, metricIndex) => {
+                const metricMeta = getPlayerMetricMeta(metricId, tableData.metricLabels[metricId]);
+                const value = formatPlayerMetricValue(metricId, player.metrics[metricId], tableData.metricLabels[metricId]);
+                const numericValue = parseNumericStat(player.metrics[metricId]) ?? 0;
+                const max = metricMaxValues[metricId] || 1;
+                const pct = max > 0 ? (numericValue / max) * 100 : 0;
+                const isActiveSort = activeSortSlot === metricIndex;
+                return (
+                  <div
+                    key={`${player.key}-${metricId}`}
+                    className={`${styles.playerStatsCardMetric} ${
+                      isActiveSort ? styles.playerStatsCardMetricActive : ''
+                    }`}
+                  >
+                    <div className={styles.cardMetricTop}>
+                      <span className={styles.cardMetricLabel}>{metricMeta.shortLabel}</span>
+                      {isActiveSort && (
+                        <span className={styles.cardMetricArrow}>
+                          {activeDirection === 'desc' ? '↓' : '↑'}
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.cardMetricValueWrap}>
+                      <span className={styles.cardMetricValue}>{value}</span>
+                      {pct > 0 && (
+                        <div className={styles.metricBarTrack}>
+                          <div className={styles.metricBarFill} style={{ width: `${pct}%` }} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -3259,3 +3259,155 @@
         position: static;
     }
 }
+
+/* ========== Player Stats Mobile Cards ========== */
+
+.playerStatsCardsMobile {
+    display: none;
+}
+
+.playerStatsCard {
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.02);
+    display: grid;
+    gap: 10px;
+}
+
+.playerStatsCardHeader {
+    display: grid;
+    gap: 2px;
+}
+
+.playerStatsCardNameWrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.playerStatsCardName {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+}
+
+.playerStatsCardMeta {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.playerStatsCardTeamWrap {
+    display: flex;
+}
+
+.playerStatsCardMetrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+}
+
+.playerStatsCardMetric {
+    display: grid;
+    gap: 4px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.playerStatsCardMetricActive {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border-color: rgba(var(--color-accent-rgb), 0.25);
+}
+
+.cardMetricTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cardMetricLabel {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.cardMetricArrow {
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.cardMetricValueWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cardMetricValue {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.playerStatsCardMetricActive .cardMetricValue {
+    color: var(--accent);
+}
+
+/* Scroll hint shadow for tablet table */
+.playerStatsTableWrapEnhanced {
+    background:
+        linear-gradient(to right, rgba(255,255,255,0.02) 30%, rgba(255,255,255,0) 100%) left,
+        linear-gradient(to left, rgba(255,255,255,0.02) 30%, rgba(255,255,255,0) 100%) right,
+        rgba(255, 255, 255, 0.02);
+    background-size: 40px 100%, 40px 100%, 100% 100%;
+    background-attachment: local, local, scroll;
+    background-repeat: no-repeat;
+}
+
+@media (max-width: 640px) {
+    .playerStatsTableWrapEnhanced {
+        display: none;
+    }
+
+    .playerStatsCardsMobile {
+        display: grid;
+        gap: 12px;
+    }
+
+    .playerStatsSubtitle {
+        font-size: 12px;
+    }
+
+    .playerStatsSummaryBar {
+        font-size: 11px;
+        padding: 8px 10px;
+    }
+
+    .playerMetricsToolbarCompact {
+        padding: 12px 14px;
+    }
+
+    .playerStatsHeaderBar {
+        gap: 8px;
+    }
+
+    .playerStatsConfigBtn {
+        width: 100%;
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .playerStatsSearch {
+        font-size: 16px; /* prevent iOS zoom */
+    }
+
+    .playerStatsCardMetrics {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
