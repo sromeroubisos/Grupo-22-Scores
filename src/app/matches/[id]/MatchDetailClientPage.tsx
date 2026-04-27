@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import ExportImage from '@/components/ExportImage';
 import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
+import MatchTimeline from '@/components/match/MatchTimeline';
 import styles from './page.module.css';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
@@ -989,7 +990,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const [selectedPlayerMetricOrders, setSelectedPlayerMetricOrders] = useState<PlayerMetricSortDirection[]>([]);
     const [activePlayerSortSlot, setActivePlayerSortSlot] = useState(0);
     const statusRef = useRef<string>('scheduled');
-    const [showAllEvents, setShowAllEvents] = useState(false);
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
     const isRugbyExternal = isRugbyApiSportsMatchId(id);
     const isEspnExternal = isEspnAmericanFootballMatchId(id);
@@ -2491,87 +2491,12 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         )}
 
                         {activeTab === 'timeline' && (
-                            <div className={styles.timelineContainer}>
-                                <div className={styles.panelTitle} style={{ textAlign: 'center', display: 'block' }}>Eventos</div>
-
-                                {/* Mobile: Show limited events by default */}
-                                <div className={`${styles.timelineWrapper} ${showAllEvents ? styles.expanded : ''}`}>
-                                    {eventsData.map((evt, i) => {
-                                        const isHome = evt.team === 'home';
-
-                                        // Event Icon Logic - Sport Aware
-                                        let icon = '•';
-                                        const typeLower = evt.type?.toLowerCase() || '';
-
-                                        if (typeLower.includes('goal') || typeLower.includes('try') || typeLower.includes('point')) {
-                                            icon = matchData.sportId === 1 ? '⚽' : '🏉';
-                                        } else if (typeLower.includes('card')) {
-                                            icon = typeLower.includes('yellow') ? '🟨' : '🟥';
-                                        } else if (typeLower.includes('subst')) {
-                                            icon = '🔄';
-                                        } else if (typeLower.includes('var')) {
-                                            icon = '🖥️';
-                                        } else if (typeLower.includes('penalty')) {
-                                            icon = '🎯';
-                                        }
-
-                                        return (
-                                            <div key={i} className={styles.timelineItem}>
-                                                <div className={styles.eventMinuteBadge}>{evt.time}'</div>
-
-                                                <div className={`${styles.eventSide} ${isHome ? styles.eventLeft : styles.eventRight}`}>
-                                                    <div className={styles.eventIcon}>{icon}</div>
-                                                    <div className={styles.eventDetail}>
-                                                        <div className={styles.eventPlayer}>
-                                                            {evt.playerId ? <Link href={`/players/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}
-                                                        </div>
-                                                        {evt.type?.toLowerCase().includes('subst') ? (
-                                                            <div className={styles.eventSubInfo}>
-                                                                <span className={styles.playerIn}>{evt.playerId ? <Link href={`/players/${evt.playerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.player}</Link> : evt.player}</span><br />
-                                                                <span className={styles.playerOut}>{evt.subPlayerId ? <Link href={`/players/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className={styles.eventSubInfo}>
-                                                                <span className={styles.eventKind}>{publicEventTypeDisplay(evt)}</span>
-                                                                {evt.subPlayer ? <span className={styles.assistText}>asistencia de {evt.subPlayerId ? <Link href={`/players/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span> : null}
-                                                                {evt.description && !isGoalKickAttemptEvent({ type: evt.type, detail: evt.description }) ? <span> ({evt.description})</span> : null}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {eventsData.length === 0 && <p className={styles.placeholderText}>Aún no han ocurrido eventos significativos.</p>}
-
-                                {/* Mobile: Show expand/collapse button only if there are more than 10 events */}
-                                {eventsData.length > 10 && (
-                                    <div className={styles.timelineToggleWrapper}>
-                                        <button
-                                            className={styles.timelineToggleBtn}
-                                            onClick={() => setShowAllEvents(!showAllEvents)}
-                                        >
-                                            {showAllEvents ? (
-                                                <>
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <path d="M18 15l-6-6-6 6" />
-                                                    </svg>
-                                                    Mostrar menos
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <path d="M6 9l6 6 6-6" />
-                                                    </svg>
-                                                    Mostrar todos ({eventsData.length} eventos)
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                            <MatchTimeline
+                                events={eventsData}
+                                homeTeam={{ name: matchData.home?.name || 'Local', logo: matchData.home?.logo || '' }}
+                                awayTeam={{ name: matchData.away?.name || 'Visitante', logo: matchData.away?.logo || '' }}
+                                sportId={matchData.sportId}
+                            />
                         )}
 
                         {activeTab === 'commentary' && (

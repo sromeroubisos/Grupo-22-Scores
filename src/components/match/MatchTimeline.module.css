@@ -1,0 +1,398 @@
+.timeline {
+  position: relative;
+}
+
+/* Header */
+.timelineHeader {
+  margin-bottom: 20px;
+}
+
+.timelineTitle {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.timelineSubtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.timelineSummary {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.timelineSummary span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timelineSummary strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* Filters */
+.timelineFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.filterBtn {
+  appearance: none;
+  border: 1px solid var(--stroke);
+  background: var(--panel-solid);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-main);
+}
+
+.filterBtn:hover {
+  border-color: var(--stroke-bright);
+  color: var(--text);
+}
+
+.filterBtnActive {
+  color: var(--accent);
+  border-color: rgba(var(--color-accent-rgb), 0.45);
+  background: var(--accent-muted);
+}
+
+/* Team Header */
+.timelineTeamHeader {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.teamHeaderCol {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.teamHeaderCol:first-child {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+
+.teamHeaderLogo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.teamHeaderPlaceholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+/* Body */
+.timelineBody {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timelineBody::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--stroke);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+/* Minute Group */
+.minuteGroup {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  align-items: start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.minuteBadge {
+  grid-column: 2;
+  justify-self: center;
+  width: 40px;
+  height: 40px;
+  background: var(--panel-solid);
+  border: 1px solid var(--stroke);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  margin-top: 4px;
+}
+
+/* Events Column */
+.eventsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.eventsColHome {
+  grid-column: 1;
+  align-items: flex-end;
+}
+
+.eventsColAway {
+  grid-column: 3;
+  align-items: flex-start;
+}
+
+.eventsColNeutral {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+/* Event Card */
+.eventCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-width: 0;
+  max-width: 260px;
+  width: 100%;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  overflow: hidden;
+}
+
+.eventCard:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.eventCardAccent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+
+.eventsColHome .eventCard {
+  text-align: right;
+}
+
+.eventsColHome .eventCardAccent {
+  left: auto;
+  right: 0;
+}
+
+/* Typography */
+.eventPlayerName {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 3px;
+  color: var(--text);
+}
+
+.eventPlayerName a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.eventPlayerName a:hover {
+  text-decoration: underline;
+}
+
+.eventTypeRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.eventIconSvg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.eventDetailText {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.8;
+  line-height: 1.3;
+}
+
+.eventScoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.subIn {
+  color: var(--accent);
+}
+
+.subOut {
+  color: var(--danger);
+  opacity: 0.9;
+}
+
+.eventSubDetail {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+/* Empty */
+.emptyState {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Expand */
+.expandWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--stroke);
+}
+
+.expandBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-main);
+}
+
+.expandBtn:hover {
+  border-color: var(--stroke-bright);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timelineBody {
+    max-width: 100%;
+  }
+
+  .timelineBody::before {
+    left: 20px;
+  }
+
+  .minuteGroup {
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+  }
+
+  .minuteGroupNeutral {
+    grid-template-columns: 44px 1fr;
+    justify-items: start;
+  }
+
+  .minuteBadge {
+    grid-column: 1;
+    justify-self: start;
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .minuteGroupNeutral .minuteBadge {
+    grid-column: 1;
+  }
+
+  .eventsColHome,
+  .eventsColAway,
+  .eventsColNeutral {
+    grid-column: 2 !important;
+    align-items: flex-start !important;
+  }
+
+  .eventsColNeutral {
+    max-width: 100%;
+  }
+
+  .eventCard {
+    max-width: 100%;
+    text-align: left !important;
+  }
+
+  .eventsColHome .eventCardAccent {
+    left: 0;
+    right: auto;
+  }
+
+  .timelineTeamHeader {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .timelineTeamHeader::before {
+    display: none;
+  }
+}
