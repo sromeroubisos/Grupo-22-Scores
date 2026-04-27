@@ -11,6 +11,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
+import TournamentPublicStats from './TournamentPublicStats';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getAllCountries, getCountryById } from '@/lib/data/countries';
 import { normalizeTeamLabelAssignments, resolveStandingsRowLabel } from '@/lib/teamLabels';
@@ -1681,6 +1682,9 @@ export default function TournamentDetailPage({
                                             externalId: (t as any).external_id || tournamentMeta?.externalId || null,
                                             ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
                                             url: dbStoredUrl,
+                                            season_id: (t as any).season_id != null && String((t as any).season_id).trim()
+                                                ? String((t as any).season_id).trim()
+                                                : tournamentMeta?.season_id ?? null,
                                             type: isCircuitTournamentRuleset((t as any).ruleset ?? tournamentMeta?.ruleset ?? null)
                                                 ? 'circuit'
                                                 : (tournamentMeta?.type || 'league'),
@@ -3952,33 +3956,7 @@ export default function TournamentDetailPage({
 
                 {/* ── STATS TAB ─────────────────────────────────────────── */}
                 {activeTab === 'stats' && (
-                    <div className={styles.section}>
-                        <h2 className={styles.pageTitle}>Goleadores</h2>
-                        {topScorers.length > 0 ? (
-                            <div className={styles.sectionCard}>
-                                <div className={styles.tableCard}>
-                                    <div className={styles.tableHeader} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 60px 60px' }}>
-                                        <div>#</div>
-                                        <div>Jugador</div>
-                                        <div>Equipo</div>
-                                        <div style={{ textAlign: 'center' }}>G</div>
-                                        <div style={{ textAlign: 'center' }}>A</div>
-                                    </div>
-                                    {topScorers.slice(0, 20).map((player: any, idx: number) => (
-                                        <div key={idx} className={styles.tableRow} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 60px 60px' }}>
-                                            <div className={styles.tdPos}>{idx + 1}</div>
-                                            <div className={styles.tdTeam}><span>{player.player_name || player.name}</span></div>
-                                            <div className={styles.tdTeam} style={{ color: '#94a3b8' }}><span>{player.team_name || player.team?.name}</span></div>
-                                            <div className={`${styles.tdVal} ${styles.tdPoints}`}>{player.goals}</div>
-                                            <div className={styles.tdVal}>{player.assists || '-'}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : (
-                            <p className={styles.emptyState}>No hay estadísticas disponibles.</p>
-                        )}
-                    </div>
+                    <TournamentPublicStats matches={initialData?.matches || []} topScorers={topScorers} />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}
