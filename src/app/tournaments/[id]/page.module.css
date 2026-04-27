@@ -2002,6 +2002,371 @@
     letter-spacing: -0.01em;
 }
 
+.statsHeaderBar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.statsTitleBlock {
+    min-width: 0;
+}
+
+.statsSubtitle {
+    margin: -8px 0 0;
+    color: var(--fl-text-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.statsSubTabs,
+.statsModeBar,
+.statsLimitGroup {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    background: var(--fl-surface);
+    border: 1px solid var(--fl-border);
+    border-radius: var(--fl-radius-sm);
+}
+
+.statsSubTab,
+.statsModeButton,
+.statsLimitButton {
+    border: 0;
+    background: transparent;
+    color: var(--fl-text-muted);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.16s, color 0.16s;
+}
+
+.statsSubTab:hover,
+.statsModeButton:hover,
+.statsLimitButton:hover {
+    background: var(--fl-hover-bg);
+    color: var(--fl-text);
+}
+
+.statsSubTabActive,
+.statsModeButtonActive,
+.statsLimitButtonActive {
+    background: rgba(0, 163, 101, 0.13);
+    color: var(--fl-primary);
+}
+
+.statsModeBar {
+    margin: 0 0 12px;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.statsModeBar::-webkit-scrollbar { display: none; }
+
+.statsFilterBar {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.8fr) auto minmax(130px, auto);
+    gap: 10px;
+    align-items: center;
+    margin: 0 0 12px;
+}
+
+.statsInput,
+.statsSelect {
+    width: 100%;
+    min-height: 36px;
+    border: 1px solid var(--fl-border);
+    border-radius: var(--fl-radius-sm);
+    background: var(--fl-surface);
+    color: var(--fl-text);
+    padding: 8px 11px;
+    font-size: 0.8rem;
+    font-weight: 650;
+    outline: none;
+}
+
+.statsInput::placeholder {
+    color: var(--fl-text-dim);
+}
+
+.statsInput:focus,
+.statsSelect:focus {
+    border-color: rgba(0, 163, 101, 0.42);
+    box-shadow: 0 0 0 3px rgba(0, 163, 101, 0.1);
+}
+
+.statsSortHint {
+    color: var(--fl-text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-align: right;
+}
+.statsSortHint strong {
+    color: var(--fl-text);
+    font-family: var(--fl-mono);
+}
+
+.statsMobileSort {
+    margin-bottom: 12px;
+}
+
+.statsTableWrap {
+    max-height: min(72vh, 760px);
+    overflow: auto;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: var(--fl-scrollbar) transparent;
+}
+
+.statsTableWrap::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+.statsTableWrap::-webkit-scrollbar-thumb {
+    background: var(--fl-scrollbar);
+    border-radius: 8px;
+}
+
+.statsTableHeaderRow,
+.statsTableDataRow {
+    display: grid;
+    align-items: stretch;
+}
+
+.statsTableHeaderRow {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    padding: 0;
+    background: var(--fl-surface-alt);
+    color: var(--fl-text-soft);
+}
+
+.statsTableDataRow {
+    min-height: 52px;
+    padding: 0;
+}
+
+.statsHeaderCell,
+.statsBodyCell {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    padding: 11px 12px;
+}
+
+.statsHeaderCell:not(:first-child),
+.statsBodyCell:not(:first-child) {
+    justify-content: center;
+    text-align: center;
+}
+
+.statsHeaderButton {
+    width: 100%;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.64rem;
+    font-weight: 850;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.statsHeaderCell:first-child .statsHeaderButton {
+    justify-content: flex-start;
+}
+
+.statsHeaderButtonActive {
+    color: var(--fl-text);
+}
+
+.statsSortArrow {
+    color: var(--fl-primary);
+    font-size: 0.68rem;
+    line-height: 1;
+}
+
+.statsStickyCell,
+.statsStickyHeaderCell {
+    position: sticky;
+    left: 0;
+}
+
+.statsStickyCell {
+    z-index: 3;
+    background: var(--fl-surface);
+    box-shadow: 18px 0 24px -26px rgba(0, 0, 0, 0.85);
+}
+
+.statsStickyHeaderCell {
+    z-index: 8;
+    background: var(--fl-surface-alt);
+    box-shadow: 18px 0 24px -26px rgba(0, 0, 0, 0.85);
+}
+
+.statsTableDataRow:hover .statsStickyCell {
+    background: var(--fl-surface-hov);
+}
+
+.statsEntityCell {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.statsRank {
+    width: 24px;
+    flex-shrink: 0;
+    color: var(--fl-text-dim);
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-family: var(--fl-mono);
+}
+
+.statsAvatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    border: 1px solid var(--fl-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--fl-text-soft);
+    font-size: 0.68rem;
+    font-weight: 900;
+    font-family: var(--fl-mono);
+}
+
+.statsEntityText,
+.statsMobileIdentityText {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.statsEntityName {
+    min-width: 0;
+    color: var(--fl-text);
+    font-size: 0.84rem;
+    font-weight: 850;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statsEntitySecondary {
+    min-width: 0;
+    color: var(--fl-text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statsTeamChip {
+    min-width: 0;
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--fl-border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+    color: var(--fl-text-soft);
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statsMetricValue {
+    color: var(--fl-text-soft);
+    font-size: 0.82rem;
+    font-weight: 750;
+    font-family: var(--fl-mono);
+}
+
+.statsMetricAccent {
+    color: var(--fl-text);
+    font-weight: 900;
+}
+
+.statsMetricAttack {
+    color: #7dd3fc;
+}
+
+.statsMetricDefense {
+    color: #86efac;
+}
+
+.statsMetricDanger {
+    color: #fca5a5;
+}
+
+.statsMetricMuted {
+    color: var(--fl-text-muted);
+}
+
+.statsMobileCard {
+    display: grid;
+    gap: 12px;
+    background: var(--fl-surface-alt);
+    border: 1px solid var(--fl-border);
+    border-radius: var(--fl-radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+
+.statsMobileIdentity {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.statsMobileGroup {
+    display: grid;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--fl-border-sub);
+}
+
+.statsMobileGroupTitle {
+    color: var(--fl-text-muted);
+    font-size: 0.64rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--fl-mono);
+}
+
+.statsMobileGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px 6px;
+}
+
 .emptyState {
     text-align: center;
     padding: 40px 20px;
@@ -2504,6 +2869,21 @@
 
     /* ── Page/section titles ── */
     .pageTitle { font-size: 1rem; margin-bottom: 12px; }
+    .statsHeaderBar { flex-direction: column; gap: 10px; margin-bottom: 10px; }
+    .statsSubtitle { margin-top: -6px; font-size: 0.74rem; }
+    .statsSubTabs { width: 100%; }
+    .statsSubTab { flex: 1; }
+    .statsFilterBar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .statsLimitGroup { width: 100%; }
+    .statsLimitButton { flex: 1; }
+    .statsSortHint { text-align: left; }
+    .statsModeBar { width: 100%; }
+    .statsModeButton { flex: 1; }
+    .statsMobileGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .statsEntityName { font-size: 0.82rem; }
     .emptyState { padding: 28px 16px; font-size: 0.82rem; }
 }
 
