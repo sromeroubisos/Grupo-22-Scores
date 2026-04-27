@@ -52,6 +52,7 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
     { type: 'recovery', label: 'Recuperacion', category: 'other', points: 0, team: 'required', player: 'optional' },
     { type: 'turnover_won', label: 'Recuperacion / turnover ganado', category: 'other', points: 0, team: 'required', player: 'optional' },
     { type: 'turnover_lost', label: 'Perdida / turnover perdido', category: 'discipline', points: 0, team: 'required', player: 'optional' },
+    { type: 'entradas_22', label: 'Entradas en 22', category: 'other', points: 0, team: 'required', player: 'optional' },
     { type: 'pass', label: 'Pase', category: 'other', points: 0, team: 'required', player: 'optional' },
     { type: 'match_start', label: 'Inicio partido', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'match_half', label: 'Entretiempo', category: 'clock', points: 0, team: 'none', player: 'none' },

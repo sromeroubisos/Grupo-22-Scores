@@ -551,6 +551,7 @@ type CompleteMatchStats = {
     knockOns: TeamMetricPair;
     forwardPasses: TeamMetricPair;
     handlingErrors: TeamMetricPair;
+    entradas22: TeamMetricPair;
 };
 
 type CompleteStatRow = {
@@ -559,6 +560,8 @@ type CompleteStatRow = {
     home: number;
     away: number;
     accent?: boolean;
+    /** Porcentaje 0–100; -1 = sin dato (sin visitas a 22) */
+    valueKind?: 'count' | 'percent';
 };
 
 type CompleteStatSection = {
@@ -658,6 +661,7 @@ function eventTypeLabel(t: string, definitions: MatchEventDefinition[]): string 
         maul: 'MAUL', handling_error: 'ERROR MANEJO', kick: 'PATADA', recovery: 'RECUP',
         turnover_won: 'RECUP', turnover_lost: 'PERDIDA', penalty_won: 'PENAL GANADO',
         penalty_conceded: 'PENAL CONCEDIDO', injury: 'LESION', pass: 'PASE',
+        entradas_22: '22M',
         match_start: 'INICIO', match_half: 'HT', match_end: 'FINAL',
     };
     return map[t] || t.toUpperCase();
@@ -787,6 +791,7 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
         knockOns: createTeamMetricPair(),
         forwardPasses: createTeamMetricPair(),
         handlingErrors: createTeamMetricPair(),
+        entradas22: createTeamMetricPair(),
     };
 }
 
@@ -936,12 +941,26 @@ function buildCompleteMatchStats(
             case 'handling_error':
                 bumpTeamMetric(stats.handlingErrors, team);
                 break;
+            case 'entradas_22':
+                bumpTeamMetric(stats.entradas22, team);
+                break;
             default:
                 break;
         }
     });
 
     return stats;
+}
+
+function redZone22ConversionPercent(stats: CompleteMatchStats, team: 'home' | 'away'): number {
+    const entries = team === 'home' ? stats.entradas22.home : stats.entradas22.away;
+    if (entries === 0) return -1;
+    const scored =
+        (team === 'home' ? stats.tries.home : stats.tries.away)
+        + (team === 'home' ? stats.penaltyTries.home : stats.penaltyTries.away)
+        + (team === 'home' ? stats.penaltyGoalsMade.home : stats.penaltyGoalsMade.away)
+        + (team === 'home' ? stats.dropGoalsMade.home : stats.dropGoalsMade.away);
+    return (scored / entries) * 100;
 }
 
 function buildCompleteStatSections(stats: CompleteMatchStats): CompleteStatSection[] {
@@ -975,6 +994,14 @@ function buildCompleteStatSections(stats: CompleteMatchStats): CompleteStatSecti
         {
             title: 'Juego',
             rows: [
+                { key: 'entradas22', label: 'Entradas en 22', home: stats.entradas22.home, away: stats.entradas22.away },
+                {
+                    key: 'tasaConv22',
+                    label: 'Tasa de conversión 22',
+                    home: redZone22ConversionPercent(stats, 'home'),
+                    away: redZone22ConversionPercent(stats, 'away'),
+                    valueKind: 'percent',
+                },
                 { key: 'tackles', label: 'Tackles', home: stats.tackles.home, away: stats.tackles.away },
                 { key: 'rucksWon', label: 'Rucks ganados', home: stats.rucksWon.home, away: stats.rucksWon.away },
                 { key: 'rucksLost', label: 'Rucks perdidos', home: stats.rucksLost.home, away: stats.rucksLost.away },
@@ -1008,7 +1035,12 @@ function buildCompleteStatSections(stats: CompleteMatchStats): CompleteStatSecti
 
     return sections.map((section) => ({
         ...section,
-        rows: section.rows.filter((row) => row.home > 0 || row.away > 0 || row.accent),
+        rows: section.rows.filter((row) => {
+            if (row.valueKind === 'percent') {
+                return row.home >= 0 || row.away >= 0;
+            }
+            return row.home > 0 || row.away > 0 || row.accent;
+        }),
     })).filter((section) => section.rows.length > 0);
 }
 
@@ -1050,6 +1082,7 @@ function getEventButtonGlyph(type: string) {
         turnover_won: 'TG',
         turnover_lost: 'TP',
         pass: 'PS',
+        entradas_22: '22',
         match_start: 'IN',
         match_half: 'HT',
         match_end: 'FN',
@@ -1076,6 +1109,7 @@ function getEventButtonLabel(definition: MatchEventDefinition) {
         handling_error: 'Error manejo',
         turnover_won: 'Turnover ganado',
         turnover_lost: 'Turnover perdido',
+        entradas_22: 'Entradas en 22',
         match_start: 'Inicio partido',
         match_half: 'Entretiempo',
         match_end: 'Final partido',
@@ -3711,6 +3745,25 @@ export default function MatchCenterClient({
                                                 </div>
                                                 <div className="stats-rows">
                                                     {section.rows.map((row) => {
+                                                        if (row.valueKind === 'percent') {
+                                                            const h = row.home;
+                                                            const a = row.away;
+                                                            const hLabel = h < 0 ? '—' : `${h.toFixed(1)}%`;
+                                                            const aLabel = a < 0 ? '—' : `${a.toFixed(1)}%`;
+                                                            return (
+                                                                <div className={row.accent ? 'stats-row accent' : 'stats-row'} key={row.key}>
+                                                                    <strong className="stats-row-value home">{hLabel}</strong>
+                                                                    <div className="stats-row-bar home" aria-hidden="true">
+                                                                        <span style={{ width: `${h < 0 ? 0 : Math.min(100, h)}%` }} />
+                                                                    </div>
+                                                                    <span className="stats-row-label">{row.label}</span>
+                                                                    <div className="stats-row-bar away" aria-hidden="true">
+                                                                        <span style={{ width: `${a < 0 ? 0 : Math.min(100, a)}%` }} />
+                                                                    </div>
+                                                                    <strong className="stats-row-value away">{aLabel}</strong>
+                                                                </div>
+                                                            );
+                                                        }
                                                         const total = row.home + row.away;
                                                         const homePct = total > 0 ? (row.home / total) * 100 : 0;
                                                         const awayPct = total > 0 ? (row.away / total) * 100 : 0;

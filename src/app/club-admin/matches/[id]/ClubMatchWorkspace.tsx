@@ -106,7 +106,7 @@ type MatchStatus = 'scheduled' | 'live' | 'final' | 'suspended' | 'postponed';
 type MatchEventTeam = 'home' | 'away' | null;
 type LiveSubview = 'eventos' | 'datos';
 type LivePhase = '1T' | 'HT' | '2T' | 'FT';
-type LiveActionType = 'try' | 'conversion' | 'penalty' | 'tackle' | 'substitution' | 'scrum' | 'line' | 'card' | 'knock_on' | 'forward_pass' | 'free_kick' | 'penalty_try' | 'kick' | 'ruck' | 'pass' | 'match_start' | 'match_half' | 'match_end';
+type LiveActionType = 'try' | 'conversion' | 'penalty' | 'tackle' | 'substitution' | 'scrum' | 'line' | 'card' | 'knock_on' | 'forward_pass' | 'free_kick' | 'penalty_try' | 'kick' | 'ruck' | 'pass' | 'match_start' | 'match_half' | 'match_end' | 'entradas_22';
 
 interface ClubCallup {
   name: string;
@@ -286,6 +286,7 @@ const EVENT_TYPES = [
   { value: 'match_half', label: 'Entretiempo' },
   { value: 'match_end', label: 'Final Partido' },
   { value: 'ruck', label: 'Ruck' },
+  { value: 'entradas_22', label: 'Entradas en 22' },
   { value: 'note', label: 'Nota' },
 ];
 
@@ -324,6 +325,7 @@ const LIVE_EVENT_ACTIONS: Array<{
   { id: 'match_start', label: 'Inicio', glyph: 'IN', tone: 'green' },
   { id: 'match_half', label: 'HT', glyph: 'HT', tone: 'yellow' },
   { id: 'match_end', label: 'Fin', glyph: 'FN', tone: 'red' },
+  { id: 'entradas_22', label: 'Entradas en 22', glyph: '22', tone: 'green' },
 ];
 
 const KICK_TYPES: Array<{ value: LiveComposerState['kickType']; label: string }> = [
@@ -701,6 +703,9 @@ function getEventGlyph(type: string) {
   if (type === 'match_start') return 'IN';
   if (type === 'match_half') return 'HT';
   if (type === 'match_end') return 'FN';
+  if (type === 'entradas_22') return '22';
+  if (type === 'penalty_goal') return 'PG';
+  if (type === 'drop_goal') return 'DG';
   return 'EV';
 }
 
@@ -716,6 +721,8 @@ function getEventTone(type: string) {
   if (type === 'match_start') return styles.liveToneGreen;
   if (type === 'match_half') return styles.liveToneYellow;
   if (type === 'match_end') return styles.liveToneRed;
+  if (type === 'entradas_22') return styles.liveToneGreen;
+  if (type === 'penalty_goal' || type === 'drop_goal') return styles.liveToneBlue;
   return styles.liveToneNeutral;
 }
 
@@ -780,6 +787,9 @@ function getEventSummary(event: ClubLiveEvent) {
   if (event.type === 'card_yellow') return 'Tarjeta amarilla';
   if (event.type === 'card_red') return 'Tarjeta roja';
   if (event.type === 'penalty_try') return 'Penalty Try (+7)';
+  if (event.type === 'entradas_22') return 'Entradas en 22';
+  if (event.type === 'penalty_goal') return 'Penal a los palos';
+  if (event.type === 'drop_goal') return 'Drop';
   return getEventTypeLabel(event.type);
 }
 
@@ -974,6 +984,20 @@ function buildEventFromComposer(composer: LiveComposerState): ClubLiveEvent {
       team: composer.team,
       playerName: composer.playerName.trim(),
       detail: outcome === 'won' ? 'Ruck ganado' : outcome === 'lost' ? 'Ruck perdido' : composer.zone.trim() || 'Ruck',
+    };
+  }
+
+  if (composer.action === 'entradas_22') {
+    const base = 'Entrada a 22 rival';
+    const note = composer.zone.trim();
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'entradas_22',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: note ? `${base} | ${note}` : base,
     };
   }
 
@@ -1255,6 +1279,19 @@ function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
     });
   }
 
+  if (event.type === 'entradas_22') {
+    const note = event.detail.includes('|') ? (event.detail.split('|').slice(1).join('|').trim()) : '';
+    return createLiveComposer('entradas_22', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      zone: note,
+    });
+  }
+
   return createLiveComposer('tackle', {
     mode: 'edit',
     eventId: event.id,
@@ -1278,6 +1315,7 @@ function getLiveActionFromEventType(type: string): LiveActionType {
   if (type === 'match_start') return 'match_start';
   if (type === 'match_half') return 'match_half';
   if (type === 'match_end') return 'match_end';
+  if (type === 'entradas_22') return 'entradas_22';
   return type as LiveActionType;
 }
 
@@ -1328,7 +1366,10 @@ interface MatchStats {
   tries: { home: number; away: number };
   conversions: { home: number; away: number };
   penalties: { home: number; away: number };
+  penaltyGoals: { home: number; away: number };
+  dropGoals: { home: number; away: number };
   penaltyTries: { home: number; away: number };
+  entradas22: { home: number; away: number };
   freeKicks: { home: number; away: number };
   knockOns: { home: number; away: number };
   forwardPasses: { home: number; away: number };
@@ -1417,12 +1458,19 @@ function normalizeVideoUrl(url: string): { type: 'iframe' | 'video' | 'unsupport
   }
 }
 
+function isMadeGoalDetail(detail: string) {
+  return /convertido|acertad|ok|convertida/i.test(String(detail || ''));
+}
+
 function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
   const stats: MatchStats = {
     tries: { home: 0, away: 0 },
     conversions: { home: 0, away: 0 },
     penalties: { home: 0, away: 0 },
+    penaltyGoals: { home: 0, away: 0 },
+    dropGoals: { home: 0, away: 0 },
     penaltyTries: { home: 0, away: 0 },
+    entradas22: { home: 0, away: 0 },
     freeKicks: { home: 0, away: 0 },
     knockOns: { home: 0, away: 0 },
     forwardPasses: { home: 0, away: 0 },
@@ -1443,7 +1491,10 @@ function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
     if (event.type === 'try') stats.tries[team]++;
     if (event.type === 'conversion' && /convertida|acertada/i.test(event.detail)) stats.conversions[team]++;
     if (event.type === 'penalty' && /convertido/i.test(event.detail)) stats.penalties[team]++;
+    if (event.type === 'penalty_goal' && isMadeGoalDetail(event.detail)) stats.penaltyGoals[team]++;
+    if (event.type === 'drop_goal' && isMadeGoalDetail(event.detail)) stats.dropGoals[team]++;
     if (event.type === 'penalty_try') stats.penaltyTries[team]++;
+    if (event.type === 'entradas_22') stats.entradas22[team]++;
     if (event.type === 'free_kick') stats.freeKicks[team]++;
     if (event.type === 'knock_on') stats.knockOns[team]++;
     if (event.type === 'forward_pass') stats.forwardPasses[team]++;
@@ -1467,6 +1518,18 @@ function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
   }
 
   return stats;
+}
+
+function formatTasa22FromStats(stats: MatchStats, team: 'home' | 'away'): string {
+  const d = stats.entradas22[team];
+  if (d === 0) return '—';
+  const n =
+    stats.tries[team]
+    + stats.penaltyTries[team]
+    + stats.penalties[team]
+    + stats.penaltyGoals[team]
+    + stats.dropGoals[team];
+  return `${((n / d) * 100).toFixed(1)}%`;
 }
 
 interface PlayerEventStats {
@@ -1715,6 +1778,9 @@ function buildPostMatchStatGroups(stats: MatchStats) {
       { label: 'Conversiones', home: stats.conversions.home, away: stats.conversions.away },
       { label: 'Penales', home: stats.penalties.home, away: stats.penalties.away },
       { label: 'Free Kicks', home: stats.freeKicks.home, away: stats.freeKicks.away },
+    ],
+    juego: [
+      { label: 'Entradas en 22', home: stats.entradas22.home, away: stats.entradas22.away },
     ],
     continuity: [
       { label: 'Kicks', home: stats.kicks.home, away: stats.kicks.away },
@@ -2061,6 +2127,7 @@ export default function ClubMatchWorkspace({
     cards: countEvents(events, ['card_yellow', 'card_red']),
     substitutions: countEvents(events, ['substitution']),
   };
+  const livePanelGameStats = buildMatchStats(events);
   const timelineEvents = [...events].sort((left, right) => {
     const leftMinute = parseNumericInput(left.minute) ?? 0;
     const rightMinute = parseNumericInput(right.minute) ?? 0;
@@ -2504,7 +2571,7 @@ export default function ClubMatchWorkspace({
             </select>
           </label>
 
-          {(liveComposer.action === 'try' || liveComposer.action === 'conversion' || liveComposer.action === 'tackle' || liveComposer.action === 'card' || liveComposer.action === 'knock_on' || liveComposer.action === 'forward_pass' || liveComposer.action === 'penalty_try' || liveComposer.action === 'kick' || liveComposer.action === 'ruck' || liveComposer.action === 'pass') ? (
+          {(liveComposer.action === 'try' || liveComposer.action === 'conversion' || liveComposer.action === 'tackle' || liveComposer.action === 'card' || liveComposer.action === 'knock_on' || liveComposer.action === 'forward_pass' || liveComposer.action === 'penalty_try' || liveComposer.action === 'kick' || liveComposer.action === 'ruck' || liveComposer.action === 'pass' || liveComposer.action === 'entradas_22') ? (
             <label className={styles.field}>
               <span>Jugador</span>
               <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
@@ -2515,6 +2582,13 @@ export default function ClubMatchWorkspace({
                   </option>
                 ))}
               </select>
+            </label>
+          ) : null}
+
+          {liveComposer.action === 'entradas_22' ? (
+            <label className={styles.field}>
+              <span>Nota (opcional)</span>
+              <input className={styles.input} value={liveComposer.zone} onChange={(event) => setLiveComposer((current) => current ? { ...current, zone: event.target.value } : current)} placeholder="Cómo entran al 22 rival" />
             </label>
           ) : null}
 
@@ -3273,7 +3347,7 @@ export default function ClubMatchWorkspace({
                               </select>
                             </label>
 
-                            {(liveComposer.action === 'try' || liveComposer.action === 'conversion' || liveComposer.action === 'tackle' || liveComposer.action === 'card' || liveComposer.action === 'knock_on' || liveComposer.action === 'forward_pass' || liveComposer.action === 'penalty_try' || liveComposer.action === 'kick' || liveComposer.action === 'ruck' || liveComposer.action === 'pass') ? (
+                            {(liveComposer.action === 'try' || liveComposer.action === 'conversion' || liveComposer.action === 'tackle' || liveComposer.action === 'card' || liveComposer.action === 'knock_on' || liveComposer.action === 'forward_pass' || liveComposer.action === 'penalty_try' || liveComposer.action === 'kick' || liveComposer.action === 'ruck' || liveComposer.action === 'pass' || liveComposer.action === 'entradas_22') ? (
                               <label className={styles.field}>
                                 <span>Jugador</span>
                                 <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
@@ -3284,6 +3358,13 @@ export default function ClubMatchWorkspace({
                                     </option>
                                   ))}
                                 </select>
+                              </label>
+                            ) : null}
+
+                            {liveComposer.action === 'entradas_22' ? (
+                              <label className={styles.field}>
+                                <span>Nota (opcional)</span>
+                                <input className={styles.input} value={liveComposer.zone} onChange={(event) => setLiveComposer((current) => current ? { ...current, zone: event.target.value } : current)} placeholder="Cómo entran al 22 rival" />
                               </label>
                             ) : null}
 
@@ -3769,6 +3850,14 @@ export default function ClubMatchWorkspace({
                             <div className={styles.liveMiniStat}><span>Cambios</span><strong>{liveStats.substitutions}</strong></div>
                           </div>
                         </div>
+
+                        <div className={styles.card}>
+                          <h4 style={{ marginBottom: 10, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: 0.65 }}>Juego</h4>
+                          <div className={styles.liveMiniStats}>
+                            <div className={styles.liveMiniStat}><span>Entradas en 22</span><strong>{livePanelGameStats.entradas22.home} / {livePanelGameStats.entradas22.away}</strong></div>
+                            <div className={styles.liveMiniStat}><span>Tasa de conversión 22</span><strong>{formatTasa22FromStats(livePanelGameStats, 'home')} · {formatTasa22FromStats(livePanelGameStats, 'away')}</strong></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -4103,6 +4192,7 @@ export default function ClubMatchWorkspace({
                 const insights = generateInsights(stats, matchDraft.score);
                 const allStatSections = [
                   { title: 'Puntos y definición', data: statGroups.scoring },
+                  { title: 'Juego (22m)', data: statGroups.juego },
                   { title: 'Continuidad y uso', data: statGroups.continuity },
                   { title: 'Juego fijo', data: statGroups.setPiece },
                   { title: 'Disciplina y defensa', data: statGroups.discipline },
@@ -4225,6 +4315,16 @@ export default function ClubMatchWorkspace({
                             <MiniBarChart data={section.data} />
                           </div>
                         ))}
+                        <div className={styles.card} style={{ gridColumn: '1 / -1' }}>
+                          <h4 style={{ marginBottom: 8, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6 }}>Tasa de conversión 22</h4>
+                          <p style={{ fontSize: '0.8rem', color: 'rgba(248,250,252,0.55)', marginBottom: 12 }}>
+                            (Try, try penal, penal a palos o drop) por cada visita al 22 rival.
+                          </p>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, fontSize: '0.95rem' }}>
+                            <div><span style={{ color: '#6ee7b7', fontWeight: 700 }}>{homeClub?.short_name || 'Local'}</span>: <strong style={{ fontFamily: 'monospace' }}>{formatTasa22FromStats(stats, 'home')}</strong></div>
+                            <div><span style={{ color: '#93c5fd', fontWeight: 700 }}>{awayClub?.short_name || 'Visitante'}</span>: <strong style={{ fontFamily: 'monospace' }}>{formatTasa22FromStats(stats, 'away')}</strong></div>
+                          </div>
+                        </div>
                       </div>
                     )}
 
