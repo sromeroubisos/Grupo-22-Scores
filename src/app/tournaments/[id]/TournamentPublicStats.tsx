@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './page.module.css';
 import {
     isGoalKickAttemptEvent,
@@ -17,6 +17,8 @@ interface TournamentPublicStatsProps {
     matches: any[];
     topScorers?: any[];
 }
+
+const MOBILE_BREAKPOINT = 640;
 
 const n = (value: unknown) => {
     const parsed = Number(value);
@@ -52,7 +54,20 @@ function normalizeEvent(raw: unknown) {
     };
 }
 
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+        const update = () => setIsMobile(mq.matches);
+        update();
+        mq.addEventListener('change', update);
+        return () => mq.removeEventListener('change', update);
+    }, []);
+    return isMobile;
+}
+
 export default function TournamentPublicStats({ matches, topScorers }: TournamentPublicStatsProps) {
+    const isMobile = useIsMobile();
     const [activeSubTab, setActiveSubTab] = useState<StatsSubTab>('teams');
     const [sortKey, setSortKey] = useState('points_for');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -345,6 +360,91 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
     const hasEvents = finalMatches.some((m) => Array.isArray(m.events) && m.events.length > 0);
     const showTopScorersFallback = !hasEvents && (topScorers?.length || 0) > 0;
 
+    const gridTemplate = currentColumns.map((c) => c.id === 'entity' ? '2fr' : c.id === 'secondary' ? '1.5fr' : 'minmax(48px, 0.6fr)').join(' ');
+
+    // ── Mobile card renderers ──────────────────────────────────────────────
+
+    const renderTeamCard = (row: any, idx: number) => (
+        <div
+            key={row.entityId}
+            style={{
+                background: 'var(--fl-surface-alt)',
+                borderRadius: 12,
+                border: '1px solid var(--fl-border)',
+                padding: '14px 16px',
+                marginBottom: 10,
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{ color: 'var(--fl-text-dim)', fontSize: '0.85rem', fontWeight: 700, minWidth: 22 }}>{idx + 1}</span>
+                <span style={{ fontWeight: 600, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.entityName}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px 6px' }}>
+                <MobileStat label="PJ" value={fmt(row.matches_played)} />
+                <MobileStat label="PG" value={fmt(row.wins)} />
+                <MobileStat label="PE" value={fmt(row.draws)} />
+                <MobileStat label="PP" value={fmt(row.losses)} />
+            </div>
+            <div style={{ height: 1, background: 'var(--fl-border-sub)', margin: '10px 0' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px 6px' }}>
+                <MobileStat label="PF" value={fmt(row.points_for)} accent />
+                <MobileStat label="PC" value={fmt(row.points_against)} />
+                <MobileStat label="Dif" value={fmt(row.points_difference)} accent={n(row.points_difference) > 0} danger={n(row.points_difference) < 0} />
+                <MobileStat label="Tries" value={fmt(row.tries_scored)} />
+            </div>
+            <div style={{ height: 1, background: 'var(--fl-border-sub)', margin: '10px 0' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px 6px' }}>
+                <MobileStat label="Conv" value={fmt(row.conversions)} />
+                <MobileStat label="Pen" value={fmt(row.penalty_goals)} />
+                <MobileStat label="Drop" value={fmt(row.drop_goals)} />
+                <MobileStat label="Tackles" value={fmt(row.tackles_made)} />
+            </div>
+            <div style={{ height: 1, background: 'var(--fl-border-sub)', margin: '10px 0' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px 6px' }}>
+                <MobileStat label="TA" value={fmt(row.yellow_cards)} />
+                <MobileStat label="TR" value={fmt(row.red_cards)} />
+                <MobileStat label="Scrums G" value={fmt(row.scrums_won)} />
+                <MobileStat label="Lines G" value={fmt(row.lineouts_won)} />
+            </div>
+        </div>
+    );
+
+    const renderPlayerCard = (row: any, idx: number) => (
+        <div
+            key={row.entityId}
+            style={{
+                background: 'var(--fl-surface-alt)',
+                borderRadius: 12,
+                border: '1px solid var(--fl-border)',
+                padding: '14px 16px',
+                marginBottom: 10,
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                <span style={{ color: 'var(--fl-text-dim)', fontSize: '0.85rem', fontWeight: 700, minWidth: 22 }}>{idx + 1}</span>
+                <span style={{ fontWeight: 600, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.entityName}</span>
+            </div>
+            <div style={{ color: 'var(--fl-text-muted)', fontSize: '0.8rem', marginBottom: 12, paddingLeft: 32 }}>{row.secondary}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px 6px' }}>
+                <MobileStat label="PJ" value={fmt(row.matches_played)} />
+                <MobileStat label="Pts" value={fmt(row.points)} accent />
+                <MobileStat label="Tries" value={fmt(row.tries)} />
+            </div>
+            <div style={{ height: 1, background: 'var(--fl-border-sub)', margin: '10px 0' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px 6px' }}>
+                <MobileStat label="Conv" value={fmt(row.conversions)} />
+                <MobileStat label="Pen" value={fmt(row.penalty_goals)} />
+                <MobileStat label="Tackles" value={fmt(row.tackles)} />
+            </div>
+            <div style={{ height: 1, background: 'var(--fl-border-sub)', margin: '10px 0' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px 6px' }}>
+                <MobileStat label="m pat" value={fmt(row.kick_meters)} />
+                <MobileStat label="TA" value={fmt(row.yellow_cards)} />
+                <MobileStat label="TR" value={fmt(row.red_cards)} />
+            </div>
+        </div>
+    );
+
     return (
         <div className={styles.section}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
@@ -371,6 +471,39 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                 )}
             </div>
 
+            {isMobile && !showTopScorersFallback && hasStats && (
+                <div style={{ marginBottom: 12 }}>
+                    <select
+                        value={`${sortKey}:${sortDirection}`}
+                        onChange={(e) => {
+                            const [key, dir] = e.target.value.split(':');
+                            setSortKey(key);
+                            setSortDirection(dir as SortDirection);
+                        }}
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            borderRadius: 8,
+                            border: '1px solid var(--fl-border)',
+                            background: 'var(--fl-surface-alt)',
+                            color: 'var(--fl-text)',
+                            fontSize: '0.85rem',
+                        }}
+                    >
+                        {currentColumns.map((col) => (
+                            <React.Fragment key={col.id}>
+                                {col.id !== 'entity' && col.id !== 'secondary' && (
+                                    <>
+                                        <option value={`${col.id}:desc`}>{col.label} ↓</option>
+                                        <option value={`${col.id}:asc`}>{col.label} ↑</option>
+                                    </>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </select>
+                </div>
+            )}
+
             {showTopScorersFallback ? (
                 <div className={styles.sectionCard}>
                     <div className={styles.tableCard}>
@@ -393,43 +526,51 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                     </div>
                 </div>
             ) : hasStats ? (
-                <div className={styles.sectionCard}>
-                    <div className={styles.tableCard} style={{ overflowX: 'auto' }}>
-                        <div className={styles.tableHeader} style={{ display: 'grid', gridTemplateColumns: currentColumns.map((c) => c.id === 'entity' ? '2fr' : c.id === 'secondary' ? '1.5fr' : 'minmax(48px, 0.6fr)').join(' '), minWidth: currentColumns.length * 56 }}>
-                            {currentColumns.map((col) => (
-                                <div
-                                    key={col.id}
-                                    style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
-                                    onClick={() => handleSort(col.id)}
-                                >
-                                    {col.label}
-                                </div>
-                            ))}
-                        </div>
-                        {sortedRows.map((row, idx) => (
-                            <div
-                                key={row.entityId}
-                                className={styles.tableRow}
-                                style={{ display: 'grid', gridTemplateColumns: currentColumns.map((c) => c.id === 'entity' ? '2fr' : c.id === 'secondary' ? '1.5fr' : 'minmax(48px, 0.6fr)').join(' '), minWidth: currentColumns.length * 56 }}
-                            >
+                isMobile ? (
+                    <div>
+                        {activeSubTab === 'teams'
+                            ? sortedRows.map((row, idx) => renderTeamCard(row, idx))
+                            : sortedRows.map((row, idx) => renderPlayerCard(row, idx))}
+                    </div>
+                ) : (
+                    <div className={styles.sectionCard}>
+                        <div className={styles.tableCard} style={{ overflowX: 'auto' }}>
+                            <div className={styles.tableHeader} style={{ display: 'grid', gridTemplateColumns: gridTemplate, minWidth: currentColumns.length * 56 }}>
                                 {currentColumns.map((col) => (
-                                    <div key={col.id} style={{ display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {col.id === 'entity' ? (
-                                            <>
-                                                <span style={{ color: 'var(--fl-text-dim)', minWidth: 24 }}>{idx + 1}</span>
-                                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.entityName}</span>
-                                            </>
-                                        ) : col.id === 'secondary' ? (
-                                            <span style={{ color: 'var(--fl-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.secondary}</span>
-                                        ) : (
-                                            <span>{fmt(row[col.id])}</span>
-                                        )}
+                                    <div
+                                        key={col.id}
+                                        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+                                        onClick={() => handleSort(col.id)}
+                                    >
+                                        {col.label}
                                     </div>
                                 ))}
                             </div>
-                        ))}
+                            {sortedRows.map((row, idx) => (
+                                <div
+                                    key={row.entityId}
+                                    className={styles.tableRow}
+                                    style={{ display: 'grid', gridTemplateColumns: gridTemplate, minWidth: currentColumns.length * 56 }}
+                                >
+                                    {currentColumns.map((col) => (
+                                        <div key={col.id} style={{ display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {col.id === 'entity' ? (
+                                                <>
+                                                    <span style={{ color: 'var(--fl-text-dim)', minWidth: 24 }}>{idx + 1}</span>
+                                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.entityName}</span>
+                                                </>
+                                            ) : col.id === 'secondary' ? (
+                                                <span style={{ color: 'var(--fl-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.secondary}</span>
+                                            ) : (
+                                                <span>{fmt(row[col.id])}</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )
             ) : (
                 <p className={styles.emptyState}>
                     {finalMatches.length === 0
@@ -437,6 +578,21 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                         : 'No hay estadísticas disponibles para esta sección.'}
                 </p>
             )}
+        </div>
+    );
+}
+
+function MobileStat({ label, value, accent, danger }: { label: string; value: string; accent?: boolean; danger?: boolean }) {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <span style={{ fontSize: '0.65rem', color: 'var(--fl-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+            <span style={{
+                fontSize: '0.95rem',
+                fontWeight: 700,
+                color: accent ? 'var(--fl-primary)' : danger ? 'var(--fl-danger)' : 'var(--fl-text)',
+            }}>
+                {value}
+            </span>
         </div>
     );
 }
