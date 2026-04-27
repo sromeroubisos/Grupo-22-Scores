@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import styles from './ClubMatchWorkspace.module.css';
 import {
+  formatMatchTimelineEventDescription,
   isGoalKickAttemptEvent,
   isGoalKickMade,
   parseKickMetersFromDetail,
@@ -2140,7 +2141,8 @@ export default function ClubMatchWorkspace({
   const timelineEvents = [...events].sort((left, right) => {
     const leftMinute = parseNumericInput(left.minute) ?? 0;
     const rightMinute = parseNumericInput(right.minute) ?? 0;
-    return leftMinute - rightMinute;
+    if (leftMinute !== rightMinute) return leftMinute - rightMinute;
+    return String(left.id).localeCompare(String(right.id));
   });
 
   const kpis = [
@@ -3680,7 +3682,7 @@ export default function ClubMatchWorkspace({
                         {timelineEvents.length === 0 ? <div className={styles.emptyState}>Todavía no hay eventos cargados en el partido.</div> : null}
 
                         <div className={styles.timelineList}>
-                          {timelineEvents.map((event) => (
+                          {timelineEvents.map((event, eventIndex) => (
                             <div key={event.id} className={`${styles.timelineRow}${event.parentEventId ? ' ' + styles.timelineRowChild : ''}`}>
                               <button
                                 type="button"
@@ -3713,7 +3715,7 @@ export default function ClubMatchWorkspace({
                                   <strong>{getEventSummary(event)}</strong>
                                   <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                 </div>
-                                <p>{[event.playerName, event.detail].filter(Boolean).join(' · ') || 'Sin detalle adicional'}</p>
+                                <p>{formatMatchTimelineEventDescription(event, timelineEvents, eventIndex, 'Sin detalle adicional')}</p>
                               </div>
                               <div className={styles.timelineActions}>
                                 <button className={styles.miniBtn} type="button" onClick={() => openLiveComposer(getLiveActionFromEventType(event.type), event)}>
@@ -4364,7 +4366,7 @@ export default function ClubMatchWorkspace({
                         <div className={styles.card} style={{ gridColumn: '1 / -1' }}>
                           <h4 style={{ marginBottom: 12, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6 }}>Desglose de eventos</h4>
                           <div className={styles.timelineList}>
-                            {timelineEvents.map((event) => (
+                            {timelineEvents.map((event, eventIndex) => (
                               <div key={event.id} className={`${styles.timelineRow}${event.parentEventId ? ' ' + styles.timelineRowChild : ''}`}>
                                 <div className={styles.timelineMinute}>{event.minute || '--'}&apos;</div>
                                 <div className={`${styles.timelineGlyph} ${getEventTone(event.type)}`}>{getEventGlyph(event.type)}</div>
@@ -4373,7 +4375,7 @@ export default function ClubMatchWorkspace({
                                     <strong>{getEventSummary(event)}</strong>
                                     <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                   </div>
-                                  <p>{[event.playerName, event.detail].filter(Boolean).join(' · ') || 'Sin detalle adicional'}</p>
+                                  <p>{formatMatchTimelineEventDescription(event, timelineEvents, eventIndex, 'Sin detalle adicional')}</p>
                                 </div>
                               </div>
                             ))}

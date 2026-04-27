@@ -522,6 +522,13 @@
 .eventSubInfo {
     font-size: 11px;
     color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.eventKind {
+    display: block;
 }
 
 .playerIn {
@@ -598,6 +605,157 @@
     height: 100%;
     border-radius: 99px;
     transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Public match detail — estadísticas por tabs (misma lógica que Match Center) */
+.publicStatsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.publicStatsTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0 8px;
+    border-bottom: 1px solid var(--stroke);
+    margin-bottom: 4px;
+}
+
+.publicStatsTab {
+    appearance: none;
+    border: 1px solid var(--stroke);
+    background: var(--panel-solid);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    font-family: var(--font-main);
+}
+
+.publicStatsTab:hover {
+    color: var(--text);
+    border-color: var(--stroke-bright);
+    background: var(--panel);
+}
+
+.publicStatsTabActive {
+    color: var(--accent);
+    border-color: rgba(var(--color-accent-rgb), 0.45);
+    background: var(--accent-muted);
+}
+
+.publicStatsSectionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 12px;
+}
+
+.publicStatsSection {
+    background: var(--panel-solid);
+    border: 1px solid var(--stroke);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.publicStatsSectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.publicStatsSectionHeader h5 {
+    margin: 0;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.publicStatsSectionHeader span {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.publicStatsRows {
+    display: grid;
+    gap: 9px;
+}
+
+.publicStatsRow {
+    display: grid;
+    grid-template-columns: 40px minmax(56px, 1fr) minmax(96px, 1fr) minmax(56px, 1fr) 40px;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+}
+
+.publicStatsRowAccent {
+    padding-bottom: 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.publicStatsRowValue {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.publicStatsRowValueHome {
+    text-align: right;
+}
+
+.publicStatsRowValueAway {
+    text-align: left;
+}
+
+.publicStatsRowLabel {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.publicStatsRowBar {
+    height: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.publicStatsRowBarHome {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.publicStatsRowBar span {
+    display: block;
+    height: 100%;
+    transition: width 0.25s ease;
+}
+
+.publicStatsRowBarHome span {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.publicStatsRowBarAway span {
+    background: rgba(255, 255, 255, 0.22);
 }
 
 /* Lineups */

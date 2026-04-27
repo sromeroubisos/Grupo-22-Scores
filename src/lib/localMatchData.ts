@@ -1,4 +1,5 @@
 import { getDefaultMatchEventDefinitions, type MatchEventCategory } from './matchEventCatalog';
+import { goalKickOutcomeSuffixSpanish } from './matchEventStats';
 
 export type LocalMatchTeam = 'home' | 'away';
 
@@ -128,6 +129,13 @@ export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
       description: text(source.detail) || text(source.description),
     };
   });
+}
+
+/** Texto del tipo de evento en vistas públicas; añade acertada/fallada en tiros a palos cuando el detalle lo permite. */
+export function publicEventTypeDisplay(evt: Pick<LocalPublicEvent, 'type' | 'description'>): string {
+  const rawType = text(evt.type) || 'note';
+  const label = rawType.toLowerCase();
+  return `${label}${goalKickOutcomeSuffixSpanish(rawType, evt.description)}`;
 }
 
 function getEventPoints(type: string) {

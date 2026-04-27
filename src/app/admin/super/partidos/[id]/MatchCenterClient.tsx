@@ -18,16 +18,21 @@ import {
     isGoalKickEventType,
     isGoalKickMade,
     formatGoalKickDetailPrefix,
+    formatMatchTimelineEventDescription,
     goalKickEffectivenessPercent,
-    parseKickMetersFromDetail,
-    isContestWonDetail,
-    isContestLostDetail,
+    minutesPlayedWhenSubstitutedOut,
+    teamKickAccuracyBreakdown,
 } from '@/lib/matchEventStats';
 import {
     countTeamOffensiveMetric,
     resolveOffensiveBonusRule,
     type NormalizedOffensiveBonusRule,
 } from '@/lib/bonusRuleMetrics';
+import {
+    getConfiguredEventPoints,
+    buildCompleteMatchStats,
+    buildCompleteStatTabs,
+} from '@/lib/matchStatsFromEvents';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
 import {
@@ -508,79 +513,6 @@ type PlayerStatRow = {
     breakdown: PlayerStatBreakdown[];
 };
 
-type TeamMetricPair = {
-    home: number;
-    away: number;
-};
-
-type CompleteMatchStats = {
-    totalEvents: number;
-    clockEvents: number;
-    assignedEvents: TeamMetricPair;
-    points: TeamMetricPair;
-    scoringEvents: TeamMetricPair;
-    goalKickAttempts: TeamMetricPair;
-    goalKicksMade: TeamMetricPair;
-    goalKicksMissed: TeamMetricPair;
-    tries: TeamMetricPair;
-    penaltyTries: TeamMetricPair;
-    conversionAttempts: TeamMetricPair;
-    conversionsMade: TeamMetricPair;
-    conversionsMissed: TeamMetricPair;
-    penaltyGoalAttempts: TeamMetricPair;
-    penaltyGoalsMade: TeamMetricPair;
-    penaltyGoalsMissed: TeamMetricPair;
-    dropGoalAttempts: TeamMetricPair;
-    dropGoalsMade: TeamMetricPair;
-    dropGoalsMissed: TeamMetricPair;
-    yellowCards: TeamMetricPair;
-    redCards: TeamMetricPair;
-    substitutions: TeamMetricPair;
-    injuries: TeamMetricPair;
-    scrumsTotal: TeamMetricPair;
-    scrumsWon: TeamMetricPair;
-    scrumsLost: TeamMetricPair;
-    linesTotal: TeamMetricPair;
-    linesWon: TeamMetricPair;
-    linesLost: TeamMetricPair;
-    rucksTotal: TeamMetricPair;
-    rucksWon: TeamMetricPair;
-    rucksLost: TeamMetricPair;
-    maulsTotal: TeamMetricPair;
-    maulsWon: TeamMetricPair;
-    maulsLost: TeamMetricPair;
-    tackles: TeamMetricPair;
-    kicks: TeamMetricPair;
-    passes: TeamMetricPair;
-    recoveries: TeamMetricPair;
-    turnoversWon: TeamMetricPair;
-    turnoversLost: TeamMetricPair;
-    penaltiesWon: TeamMetricPair;
-    penaltiesConceded: TeamMetricPair;
-    freeKicks: TeamMetricPair;
-    knockOns: TeamMetricPair;
-    forwardPasses: TeamMetricPair;
-    handlingErrors: TeamMetricPair;
-    entradas22: TeamMetricPair;
-    /** Metros de patadas in-game (evento `kick`) con Dist: / m en detalle */
-    kickMeters: TeamMetricPair;
-};
-
-type CompleteStatRow = {
-    key: string;
-    label: string;
-    home: number;
-    away: number;
-    accent?: boolean;
-    /** Porcentaje 0–100; -1 = sin dato (sin visitas a 22) */
-    valueKind?: 'count' | 'percent';
-};
-
-type CompleteStatSection = {
-    title: string;
-    rows: CompleteStatRow[];
-};
-
 type GuidedEventStep = 'team' | 'player' | 'details';
 type GuidedGoalKickResult = 'made' | 'missed';
 type GuidedContestOutcome = '' | 'won' | 'lost';
@@ -701,341 +633,6 @@ function mergeMatchEventDefinitions(
     overrideDefinitions.forEach((definition) => merged.set(definition.type, definition));
 
     return Array.from(merged.values());
-}
-
-function getConfiguredEventPoints(
-    event: string | Pick<MatchEvent, 'type' | 'detail'>,
-    definitionMap: Record<string, MatchEventDefinition>,
-): number {
-    const eventType = typeof event === 'string' ? event : event.type;
-    const definition = definitionMap[eventType];
-    if (!definition || definition.category !== 'score') {
-        return 0;
-    }
-    if (typeof event !== 'string' && isGoalKickEventType(event.type) && !isGoalKickAttemptEvent(event)) {
-        return 0;
-    }
-    if (typeof event !== 'string' && !isGoalKickMade(event.type, event.detail)) {
-        return 0;
-    }
-    return Number(definition.points) || 0;
-}
-
-function createTeamMetricPair(): TeamMetricPair {
-    return { home: 0, away: 0 };
-}
-
-function createEmptyCompleteMatchStats(): CompleteMatchStats {
-    return {
-        totalEvents: 0,
-        clockEvents: 0,
-        assignedEvents: createTeamMetricPair(),
-        points: createTeamMetricPair(),
-        scoringEvents: createTeamMetricPair(),
-        goalKickAttempts: createTeamMetricPair(),
-        goalKicksMade: createTeamMetricPair(),
-        goalKicksMissed: createTeamMetricPair(),
-        tries: createTeamMetricPair(),
-        penaltyTries: createTeamMetricPair(),
-        conversionAttempts: createTeamMetricPair(),
-        conversionsMade: createTeamMetricPair(),
-        conversionsMissed: createTeamMetricPair(),
-        penaltyGoalAttempts: createTeamMetricPair(),
-        penaltyGoalsMade: createTeamMetricPair(),
-        penaltyGoalsMissed: createTeamMetricPair(),
-        dropGoalAttempts: createTeamMetricPair(),
-        dropGoalsMade: createTeamMetricPair(),
-        dropGoalsMissed: createTeamMetricPair(),
-        yellowCards: createTeamMetricPair(),
-        redCards: createTeamMetricPair(),
-        substitutions: createTeamMetricPair(),
-        injuries: createTeamMetricPair(),
-        scrumsTotal: createTeamMetricPair(),
-        scrumsWon: createTeamMetricPair(),
-        scrumsLost: createTeamMetricPair(),
-        linesTotal: createTeamMetricPair(),
-        linesWon: createTeamMetricPair(),
-        linesLost: createTeamMetricPair(),
-        rucksTotal: createTeamMetricPair(),
-        rucksWon: createTeamMetricPair(),
-        rucksLost: createTeamMetricPair(),
-        maulsTotal: createTeamMetricPair(),
-        maulsWon: createTeamMetricPair(),
-        maulsLost: createTeamMetricPair(),
-        tackles: createTeamMetricPair(),
-        kicks: createTeamMetricPair(),
-        passes: createTeamMetricPair(),
-        recoveries: createTeamMetricPair(),
-        turnoversWon: createTeamMetricPair(),
-        turnoversLost: createTeamMetricPair(),
-        penaltiesWon: createTeamMetricPair(),
-        penaltiesConceded: createTeamMetricPair(),
-        freeKicks: createTeamMetricPair(),
-        knockOns: createTeamMetricPair(),
-        forwardPasses: createTeamMetricPair(),
-        handlingErrors: createTeamMetricPair(),
-        entradas22: createTeamMetricPair(),
-        kickMeters: createTeamMetricPair(),
-    };
-}
-
-function bumpTeamMetric(pair: TeamMetricPair, team: 'home' | 'away', amount = 1) {
-    pair[team] += amount;
-}
-
-function countContestMetric(
-    event: MatchEvent,
-    team: 'home' | 'away',
-    total: TeamMetricPair,
-    won: TeamMetricPair,
-    lost: TeamMetricPair,
-) {
-    bumpTeamMetric(total, team);
-
-    if (isContestLostDetail(event.detail)) {
-        bumpTeamMetric(lost, team);
-        return;
-    }
-
-    if (isContestWonDetail(event.detail)) {
-        bumpTeamMetric(won, team);
-    }
-}
-
-function buildCompleteMatchStats(
-    matchEvents: MatchEvent[],
-    definitionMap: Record<string, MatchEventDefinition>,
-): CompleteMatchStats {
-    const stats = createEmptyCompleteMatchStats();
-    stats.totalEvents = matchEvents.length;
-
-    matchEvents.forEach((event) => {
-        const definition = definitionMap[event.type];
-
-        if (definition?.category === 'clock' || event.team === null) {
-            stats.clockEvents += 1;
-            return;
-        }
-
-        if (event.team !== 'home' && event.team !== 'away') return;
-
-        const team = event.team;
-        const points = getConfiguredEventPoints(event, definitionMap);
-        bumpTeamMetric(stats.assignedEvents, team);
-        bumpTeamMetric(stats.points, team, points);
-        if (points > 0) bumpTeamMetric(stats.scoringEvents, team);
-
-        const isGoalAttempt = isGoalKickAttemptEvent(event);
-        if (isGoalAttempt) {
-            const made = isGoalKickMade(event.type, event.detail);
-            bumpTeamMetric(stats.goalKickAttempts, team);
-            bumpTeamMetric(made ? stats.goalKicksMade : stats.goalKicksMissed, team);
-        }
-
-        switch (event.type) {
-            case 'try':
-                bumpTeamMetric(stats.tries, team);
-                break;
-            case 'penalty_try':
-                bumpTeamMetric(stats.penaltyTries, team);
-                break;
-            case 'conversion':
-                bumpTeamMetric(stats.conversionAttempts, team);
-                bumpTeamMetric(isGoalKickMade(event.type, event.detail) ? stats.conversionsMade : stats.conversionsMissed, team);
-                break;
-            case 'penalty':
-            case 'penalty_goal':
-                if (isGoalAttempt) {
-                    bumpTeamMetric(stats.penaltyGoalAttempts, team);
-                    bumpTeamMetric(isGoalKickMade(event.type, event.detail) ? stats.penaltyGoalsMade : stats.penaltyGoalsMissed, team);
-                }
-                break;
-            case 'drop_goal':
-                bumpTeamMetric(stats.dropGoalAttempts, team);
-                bumpTeamMetric(isGoalKickMade(event.type, event.detail) ? stats.dropGoalsMade : stats.dropGoalsMissed, team);
-                break;
-            case 'yellow_card':
-            case 'card_yellow':
-                bumpTeamMetric(stats.yellowCards, team);
-                break;
-            case 'red_card':
-            case 'card_red':
-                bumpTeamMetric(stats.redCards, team);
-                break;
-            case 'substitution':
-                bumpTeamMetric(stats.substitutions, team);
-                break;
-            case 'injury':
-                bumpTeamMetric(stats.injuries, team);
-                break;
-            case 'scrum':
-                countContestMetric(event, team, stats.scrumsTotal, stats.scrumsWon, stats.scrumsLost);
-                break;
-            case 'line':
-                countContestMetric(event, team, stats.linesTotal, stats.linesWon, stats.linesLost);
-                break;
-            case 'ruck':
-                countContestMetric(event, team, stats.rucksTotal, stats.rucksWon, stats.rucksLost);
-                break;
-            case 'maul':
-                countContestMetric(event, team, stats.maulsTotal, stats.maulsWon, stats.maulsLost);
-                break;
-            case 'tackle':
-                bumpTeamMetric(stats.tackles, team);
-                break;
-            case 'kick': {
-                bumpTeamMetric(stats.kicks, team);
-                const m = parseKickMetersFromDetail(event.detail);
-                if (m > 0) bumpTeamMetric(stats.kickMeters, team, m);
-                break;
-            }
-            case 'pass':
-                bumpTeamMetric(stats.passes, team);
-                break;
-            case 'recovery':
-                bumpTeamMetric(stats.recoveries, team);
-                break;
-            case 'turnover_won':
-                bumpTeamMetric(stats.turnoversWon, team);
-                bumpTeamMetric(stats.recoveries, team);
-                break;
-            case 'turnover_lost':
-                bumpTeamMetric(stats.turnoversLost, team);
-                break;
-            case 'penalty_won':
-                bumpTeamMetric(stats.penaltiesWon, team);
-                break;
-            case 'penalty_conceded':
-                bumpTeamMetric(stats.penaltiesConceded, team);
-                break;
-            case 'free_kick':
-                bumpTeamMetric(stats.freeKicks, team);
-                break;
-            case 'knock_on':
-                bumpTeamMetric(stats.knockOns, team);
-                break;
-            case 'forward_pass':
-                bumpTeamMetric(stats.forwardPasses, team);
-                break;
-            case 'handling_error':
-                bumpTeamMetric(stats.handlingErrors, team);
-                break;
-            case 'entradas_22':
-                bumpTeamMetric(stats.entradas22, team);
-                break;
-            default:
-                break;
-        }
-    });
-
-    return stats;
-}
-
-function redZone22ConversionPercent(stats: CompleteMatchStats, team: 'home' | 'away'): number {
-    const entries = team === 'home' ? stats.entradas22.home : stats.entradas22.away;
-    if (entries === 0) return -1;
-    const scored =
-        (team === 'home' ? stats.tries.home : stats.tries.away)
-        + (team === 'home' ? stats.penaltyTries.home : stats.penaltyTries.away)
-        + (team === 'home' ? stats.penaltyGoalsMade.home : stats.penaltyGoalsMade.away)
-        + (team === 'home' ? stats.dropGoalsMade.home : stats.dropGoalsMade.away);
-    return (scored / entries) * 100;
-}
-
-function buildCompleteStatSections(stats: CompleteMatchStats): CompleteStatSection[] {
-    const sections: CompleteStatSection[] = [
-        {
-            title: 'Marcador',
-            rows: [
-                { key: 'points', label: 'Puntos', home: stats.points.home, away: stats.points.away, accent: true },
-                { key: 'tries', label: 'Tries', home: stats.tries.home, away: stats.tries.away },
-                { key: 'penaltyTries', label: 'Try penal', home: stats.penaltyTries.home, away: stats.penaltyTries.away },
-                { key: 'conversionsMade', label: 'Conversiones OK', home: stats.conversionsMade.home, away: stats.conversionsMade.away },
-                { key: 'conversionsMissed', label: 'Conversiones falladas', home: stats.conversionsMissed.home, away: stats.conversionsMissed.away },
-                { key: 'penaltyGoalsMade', label: 'Penales OK', home: stats.penaltyGoalsMade.home, away: stats.penaltyGoalsMade.away },
-                { key: 'penaltyGoalsMissed', label: 'Penales fallados', home: stats.penaltyGoalsMissed.home, away: stats.penaltyGoalsMissed.away },
-                {
-                    key: 'conversionEfectividad',
-                    label: 'Efectividad conversión',
-                    home: goalKickEffectivenessPercent(stats.conversionsMade.home, stats.conversionAttempts.home),
-                    away: goalKickEffectivenessPercent(stats.conversionsMade.away, stats.conversionAttempts.away),
-                    valueKind: 'percent',
-                },
-                {
-                    key: 'penalPalosEfectividad',
-                    label: 'Efectividad penales a palos',
-                    home: goalKickEffectivenessPercent(stats.penaltyGoalsMade.home, stats.penaltyGoalAttempts.home),
-                    away: goalKickEffectivenessPercent(stats.penaltyGoalsMade.away, stats.penaltyGoalAttempts.away),
-                    valueKind: 'percent',
-                },
-                { key: 'dropGoalsMade', label: 'Drops OK', home: stats.dropGoalsMade.home, away: stats.dropGoalsMade.away },
-                { key: 'dropGoalsMissed', label: 'Drops fallados', home: stats.dropGoalsMissed.home, away: stats.dropGoalsMissed.away },
-            ],
-        },
-        {
-            title: 'Disciplina y errores',
-            rows: [
-                { key: 'yellowCards', label: 'Amarillas', home: stats.yellowCards.home, away: stats.yellowCards.away },
-                { key: 'redCards', label: 'Rojas', home: stats.redCards.home, away: stats.redCards.away },
-                { key: 'penaltiesWon', label: 'Penales ganados', home: stats.penaltiesWon.home, away: stats.penaltiesWon.away },
-                { key: 'penaltiesConceded', label: 'Penales concedidos', home: stats.penaltiesConceded.home, away: stats.penaltiesConceded.away },
-                { key: 'knockOns', label: 'Knock-on', home: stats.knockOns.home, away: stats.knockOns.away },
-                { key: 'forwardPasses', label: 'Pase forward', home: stats.forwardPasses.home, away: stats.forwardPasses.away },
-                { key: 'handlingErrors', label: 'Error de manejo', home: stats.handlingErrors.home, away: stats.handlingErrors.away },
-            ],
-        },
-        {
-            title: 'Juego',
-            rows: [
-                { key: 'entradas22', label: 'Entradas en 22', home: stats.entradas22.home, away: stats.entradas22.away },
-                {
-                    key: 'tasaConv22',
-                    label: 'Tasa de conversión 22',
-                    home: redZone22ConversionPercent(stats, 'home'),
-                    away: redZone22ConversionPercent(stats, 'away'),
-                    valueKind: 'percent',
-                },
-                { key: 'tackles', label: 'Tackles', home: stats.tackles.home, away: stats.tackles.away },
-                { key: 'rucksWon', label: 'Rucks ganados', home: stats.rucksWon.home, away: stats.rucksWon.away },
-                { key: 'rucksLost', label: 'Rucks perdidos', home: stats.rucksLost.home, away: stats.rucksLost.away },
-                { key: 'maulsWon', label: 'Mauls ganados', home: stats.maulsWon.home, away: stats.maulsWon.away },
-                { key: 'maulsLost', label: 'Mauls perdidos', home: stats.maulsLost.home, away: stats.maulsLost.away },
-                { key: 'kicks', label: 'Patadas', home: stats.kicks.home, away: stats.kicks.away },
-                { key: 'kickMeters', label: 'Metros de patada (juego)', home: stats.kickMeters.home, away: stats.kickMeters.away },
-                { key: 'passes', label: 'Pases', home: stats.passes.home, away: stats.passes.away },
-                { key: 'recoveries', label: 'Recuperaciones', home: stats.recoveries.home, away: stats.recoveries.away },
-                { key: 'turnoversWon', label: 'Turnovers ganados', home: stats.turnoversWon.home, away: stats.turnoversWon.away },
-                { key: 'turnoversLost', label: 'Turnovers perdidos', home: stats.turnoversLost.home, away: stats.turnoversLost.away },
-            ],
-        },
-        {
-            title: 'Formaciones fijas',
-            rows: [
-                { key: 'scrumsWon', label: 'Scrums ganados', home: stats.scrumsWon.home, away: stats.scrumsWon.away },
-                { key: 'scrumsLost', label: 'Scrums perdidos', home: stats.scrumsLost.home, away: stats.scrumsLost.away },
-                { key: 'linesWon', label: 'Lines ganados', home: stats.linesWon.home, away: stats.linesWon.away },
-                { key: 'linesLost', label: 'Lines perdidos', home: stats.linesLost.home, away: stats.linesLost.away },
-                { key: 'freeKicks', label: 'Free kicks', home: stats.freeKicks.home, away: stats.freeKicks.away },
-            ],
-        },
-        {
-            title: 'Plantel',
-            rows: [
-                { key: 'substitutions', label: 'Cambios', home: stats.substitutions.home, away: stats.substitutions.away },
-                { key: 'injuries', label: 'Lesiones', home: stats.injuries.home, away: stats.injuries.away },
-            ],
-        },
-    ];
-
-    return sections.map((section) => ({
-        ...section,
-        rows: section.rows.filter((row) => {
-            if (row.valueKind === 'percent') {
-                return row.home >= 0 || row.away >= 0;
-            }
-            return row.home > 0 || row.away > 0 || row.accent;
-        }),
-    })).filter((section) => section.rows.length > 0);
 }
 
 function getEventButtonGroup(definition: MatchEventDefinition) {
@@ -1613,6 +1210,7 @@ export default function MatchCenterClient({
 
     const [match, setMatch] = useState<MatchRow>(initialMatch);
     const [activeTab, setActiveTab] = useState<string>(resolvedInitialTab);
+    const [statsPanelTab, setStatsPanelTab] = useState<string>('marcador');
     const [saving, setSaving] = useState(false);
     const [saveMsg, setSaveMsg] = useState<{ type: 'ok' | 'warn' | 'err'; text: string } | null>(null);
     const [scoreDraft, setScoreDraft] = useState<MatchScore>(initialScore);
@@ -2495,6 +2093,10 @@ export default function MatchCenterClient({
     const eventDerivedScore = useMemo(() => resolveEventDerivedScore(localEvents, score), [localEvents, resolveEventDerivedScore, score]);
     const events = localEvents;
     const lineups = localLineups;
+    const eventsChronologicalAsc = useMemo(
+        () => [...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)),
+        [events],
+    );
 
     useEffect(() => {
         const definitionMap = buildMatchEventDefinitionMap(availableEventDefinitions);
@@ -2586,6 +2188,7 @@ export default function MatchCenterClient({
                 ptScore: { home: 0, away: 0 },
                 stScore: { home: 0, away: 0 },
                 teamComparableStats: [] as Array<{ type: string; label: string; h: number; a: number }>,
+                teamComparableKickRates: [] as Array<{ key: string; label: string; h: number; a: number; title: string }>,
                 scoringBreakdown: [] as Array<MatchEventDefinition & { homeCount: number; awayCount: number }>,
                 recentEvents: [] as MatchEvent[],
                 totalEvents: events.length,
@@ -2668,6 +2271,39 @@ export default function MatchCenterClient({
             }
         });
 
+        const kickH = teamKickAccuracyBreakdown(events, 'home');
+        const kickA = teamKickAccuracyBreakdown(events, 'away');
+        const convPctH = goalKickEffectivenessPercent(kickH.convMade, kickH.convAttempts);
+        const convPctA = goalKickEffectivenessPercent(kickA.convMade, kickA.convAttempts);
+        const penPctH = goalKickEffectivenessPercent(kickH.penPalosMade, kickH.penPalosAttempts);
+        const penPctA = goalKickEffectivenessPercent(kickA.penPalosMade, kickA.penPalosAttempts);
+        const totPctH = goalKickEffectivenessPercent(kickH.totalMade, kickH.totalAttempts);
+        const totPctA = goalKickEffectivenessPercent(kickA.totalMade, kickA.totalAttempts);
+
+        const teamComparableKickRates = [
+            {
+                key: 'pen_palos_pct',
+                label: 'Penales a palos (%)',
+                h: penPctH,
+                a: penPctA,
+                title: `${homeName}: ${kickH.penPalosMade}/${kickH.penPalosAttempts} · ${awayName}: ${kickA.penPalosMade}/${kickA.penPalosAttempts}`,
+            },
+            {
+                key: 'conv_palos_pct',
+                label: 'Conversiones a palos (%)',
+                h: convPctH,
+                a: convPctA,
+                title: `${homeName}: ${kickH.convMade}/${kickH.convAttempts} · ${awayName}: ${kickA.convMade}/${kickA.convAttempts}`,
+            },
+            {
+                key: 'total_palos_pct',
+                label: 'Efectividad total al palo (%)',
+                h: totPctH,
+                a: totPctA,
+                title: `${homeName}: ${kickH.totalMade}/${kickH.totalAttempts} · ${awayName}: ${kickA.totalMade}/${kickA.totalAttempts} (conv., penales a palos y drops)`,
+            },
+        ];
+
         return {
             ptScore: { home: ptHome, away: ptAway },
             stScore: { home: stHome, away: stAway },
@@ -2679,6 +2315,7 @@ export default function MatchCenterClient({
                     a: comparableCounts.get(definition.type)?.a ?? 0,
                 }))
                 .filter((stat) => stat.h > 0 || stat.a > 0),
+            teamComparableKickRates,
             scoringBreakdown: scoringDefinitions
                 .map((definition) => ({
                     ...definition,
@@ -2701,6 +2338,7 @@ export default function MatchCenterClient({
         ptScore,
         stScore,
         teamComparableStats,
+        teamComparableKickRates,
         scoringBreakdown,
         recentEvents,
         totalEvents,
@@ -2799,10 +2437,13 @@ export default function MatchCenterClient({
         () => buildCompleteMatchStats(events, eventDefinitionMap),
         [eventDefinitionMap, events],
     );
-    const completeStatSections = useMemo(
-        () => buildCompleteStatSections(completeMatchStats),
-        [completeMatchStats],
+    const completeStatTabs = useMemo(
+        () => buildCompleteStatTabs(completeMatchStats, homeName, awayName),
+        [awayName, completeMatchStats, homeName],
     );
+    const firstStatsTabId = completeStatTabs[0]?.id ?? 'marcador';
+    const effectiveStatsPanelTab = completeStatTabs.some((tab) => tab.id === statsPanelTab) ? statsPanelTab : firstStatsTabId;
+    const activeStatTabContent = completeStatTabs.find((tab) => tab.id === effectiveStatsPanelTab);
     const topPlayerStats = useMemo(() => (
         [...playerStatsByTeam.home, ...playerStatsByTeam.away]
             .sort((left, right) => (
@@ -3070,17 +2711,24 @@ export default function MatchCenterClient({
                                         <p className="empty-msg">Sin eventos registrados.</p>
                                     ) : (
                                         <div className="event-timeline" style={{ paddingLeft: 16 }}>
-                                            {recentEvents.map((ev, i) => (
+                                            {recentEvents.map((ev, i) => {
+                                                const chronIdx = eventsChronologicalAsc.findIndex((e) => e.id === ev.id);
+                                                const detailLine =
+                                                    ev.type === 'substitution' && chronIdx >= 0
+                                                        ? formatMatchTimelineEventDescription(ev, eventsChronologicalAsc, chronIdx, ev.playerName || ev.detail || '')
+                                                        : (ev.playerName || ev.detail);
+                                                return (
                                                 <div key={ev.id || i} className="event-entry" style={{ padding: '8px 12px', marginBottom: 8, background: 'transparent', border: 'none' }}>
                                                     <div style={{ fontSize: '0.8rem', fontWeight: 900, color: eventTypeColor(ev.type, availableEventDefinitions), width: 40 }}>{ev.minute}&apos;</div>
                                                     <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>
                                                                 {eventTypeLabel(ev.type, availableEventDefinitions)}{' '}
                                                         <span style={{ opacity: 0.5, fontWeight: 400, marginLeft: 8 }}>
-                                                            {teamTag(ev.team)} {ev.playerName || ev.detail}
+                                                            {teamTag(ev.team)} {detailLine}
                                                         </span>
                                                     </div>
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
@@ -3361,7 +3009,7 @@ export default function MatchCenterClient({
                                     <div style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
                                         <div>MIN</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCION</div>
                                     </div>
-                                    {sortedEvents.map((ev) => {
+                                    {sortedEvents.map((ev, sortedIdx) => {
                                         const selectedDefinition = eventDefinitionMap[ev.type] || {
                                             type: ev.type,
                                             label: eventTypeLabel(ev.type, availableEventDefinitions),
@@ -3468,6 +3116,15 @@ export default function MatchCenterClient({
                                                         onChange={(e) => updateLocalEvent(ev.id, { detail: e.target.value })}
                                                     />
                                                 )}
+                                                {ev.type === 'substitution' ? (() => {
+                                                    const mins = minutesPlayedWhenSubstitutedOut(sortedEvents, sortedIdx);
+                                                    if (mins == null) return null;
+                                                    return (
+                                                        <span style={{ fontSize: '0.72rem', color: '#888', fontWeight: 600 }}>
+                                                            {mins} min jugados (jugador que sale)
+                                                        </span>
+                                                    );
+                                                })() : null}
                                             </div>
                                             <div style={{ textAlign: 'right', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                                                 <button className="mc-btn mc-btn-outline" style={{ padding: 6, color: '#ef4444', border: '1px solid #333' }} onClick={() => removeLocalEvent(ev.id)}>
@@ -3736,9 +3393,28 @@ export default function MatchCenterClient({
                                         </div>
                                     </div>
 
+                                    <div className="stats-panel-tabs" role="tablist" aria-label="Tipos de estadisticas">
+                                        {completeStatTabs.map((tab) => (
+                                            <button
+                                                key={tab.id}
+                                                type="button"
+                                                role="tab"
+                                                aria-selected={effectiveStatsPanelTab === tab.id}
+                                                className={`stats-panel-tab${effectiveStatsPanelTab === tab.id ? ' is-active' : ''}`}
+                                                onClick={() => setStatsPanelTab(tab.id)}
+                                            >
+                                                {tab.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {completeStatTabs.length === 0 ? (
+                                        <p className="empty-msg" style={{ margin: 0 }}>No hay metricas para mostrar con los eventos actuales.</p>
+                                    ) : null}
+
                                     <div className="stats-section-grid">
-                                        {completeStatSections.map((section) => (
-                                            <section className="stats-section" key={section.title}>
+                                        {(activeStatTabContent?.sections ?? []).map((section) => (
+                                            <section className="stats-section" key={`${effectiveStatsPanelTab}-${section.title}`}>
                                                 <div className="stats-section-header">
                                                     <h5>{section.title}</h5>
                                                     <span>{section.rows.length}</span>
@@ -3756,7 +3432,7 @@ export default function MatchCenterClient({
                                                                     <div className="stats-row-bar home" aria-hidden="true">
                                                                         <span style={{ width: `${h < 0 ? 0 : Math.min(100, h)}%` }} />
                                                                     </div>
-                                                                    <span className="stats-row-label">{row.label}</span>
+                                                                    <span className="stats-row-label" title={row.tooltip}>{row.label}</span>
                                                                     <div className="stats-row-bar away" aria-hidden="true">
                                                                         <span style={{ width: `${a < 0 ? 0 : Math.min(100, a)}%` }} />
                                                                     </div>
@@ -3774,7 +3450,7 @@ export default function MatchCenterClient({
                                                                 <div className="stats-row-bar home" aria-hidden="true">
                                                                     <span style={{ width: `${homePct}%` }} />
                                                                 </div>
-                                                                <span className="stats-row-label">{row.label}</span>
+                                                                <span className="stats-row-label" title={row.tooltip}>{row.label}</span>
                                                                 <div className="stats-row-bar away" aria-hidden="true">
                                                                     <span style={{ width: `${awayPct}%` }} />
                                                                 </div>
@@ -3814,6 +3490,32 @@ export default function MatchCenterClient({
                                             </div>
                                         );
                                     })}
+                                    {teamComparableKickRates.length > 0 && (
+                                        <div style={{ borderTop: '1px solid #262626', paddingTop: 16, marginTop: 4, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#666', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                                Tiros a palos (efectividad)
+                                            </div>
+                                            {teamComparableKickRates.map((row) => {
+                                                const hW = row.h < 0 ? 0 : Math.min(100, row.h);
+                                                const aW = row.a < 0 ? 0 : Math.min(100, row.a);
+                                                return (
+                                                    <div key={row.key} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 200px 1fr 60px', alignItems: 'center', gap: 16 }}>
+                                                        <div style={{ textAlign: 'right', fontWeight: 900, fontSize: '1.05rem' }}>{row.h < 0 ? '—' : `${row.h.toFixed(1)}%`}</div>
+                                                        <div style={{ height: 8, background: '#222', borderRadius: 4, display: 'flex', justifyContent: 'flex-end', overflow: 'hidden' }}>
+                                                            <div style={{ width: `${hW}%`, background: 'var(--accent)', transition: 'width .3s' }} />
+                                                        </div>
+                                                        <div style={{ textAlign: 'center', fontSize: '0.72rem', fontWeight: 800, color: '#888', textTransform: 'uppercase' }} title={row.title}>
+                                                            {row.label}
+                                                        </div>
+                                                        <div style={{ height: 8, background: '#222', borderRadius: 4, overflow: 'hidden' }}>
+                                                            <div style={{ width: `${aW}%`, background: '#555', transition: 'width .3s' }} />
+                                                        </div>
+                                                        <div style={{ textAlign: 'left', fontWeight: 900, fontSize: '1.05rem' }}>{row.a < 0 ? '—' : `${row.a.toFixed(1)}%`}</div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Score breakdown */}

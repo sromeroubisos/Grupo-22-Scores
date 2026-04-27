@@ -13,8 +13,19 @@ import {
     buildLocalTeamStats,
     normalizeLocalEvents,
     normalizeLocalLineups,
+    publicEventTypeDisplay,
     type LocalPlayerStatsRow,
 } from '@/lib/localMatchData';
+import { isGoalKickAttemptEvent } from '@/lib/matchEventStats';
+import {
+    buildMatchEventDefinitionMap,
+    getDefaultMatchEventDefinitions,
+} from '@/lib/matchEventCatalog';
+import {
+    buildCompleteMatchStats,
+    buildCompleteStatTabs,
+    type AggregatableMatchEvent,
+} from '@/lib/matchStatsFromEvents';
 import { getMatchPenaltyScore, hasMatchPenaltyShootout } from '@/lib/matchUtils';
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { SPORTS } from '@/lib/data/sports';
@@ -973,6 +984,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     });
 
     const [activeTab, setActiveTab] = useState('summary');
+    const [publicStatsTab, setPublicStatsTab] = useState('marcador');
     const [selectedPlayerMetrics, setSelectedPlayerMetrics] = useState<string[]>([]);
     const [selectedPlayerMetricOrders, setSelectedPlayerMetricOrders] = useState<PlayerMetricSortDirection[]>([]);
     const [activePlayerSortSlot, setActivePlayerSortSlot] = useState(0);
@@ -983,6 +995,25 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isEspnExternal = isEspnAmericanFootballMatchId(id);
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
     const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnMotorsportExternal;
+
+    const publicCompleteStatTabs = useMemo(() => {
+        if (state.kind !== 'ok' || !state.matchData) return [];
+        const sportId = state.matchData.sportId ?? null;
+        const defMap = buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(sportId));
+        const homeName = state.matchData.home?.name || 'Local';
+        const awayName = state.matchData.away?.name || 'Visitante';
+        const evs: AggregatableMatchEvent[] = (state.eventsData || []).map((evt: Record<string, unknown>) => {
+            const rawType = typeof evt.type === 'string' ? evt.type.trim().toLowerCase() : '';
+            const team = evt.team === 'home' || evt.team === 'away' ? evt.team : null;
+            const detail =
+                typeof evt.description === 'string'
+                    ? evt.description
+                    : (typeof evt.detail === 'string' ? evt.detail : '');
+            return { type: rawType, team, detail };
+        });
+        const stats = buildCompleteMatchStats(evs, defMap);
+        return buildCompleteStatTabs(stats, homeName, awayName);
+    }, [state.kind, state.matchData, state.eventsData]);
     const isSuperAdminUser = isGlobalAdminRole(user?.role);
     const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';
     const isEspnSource = state.matchData?.externalProvider === 'espn';
@@ -1763,6 +1794,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     }
 
     const { matchData, eventsData, statsData, issues } = state;
+    const firstPublicStatTabId = publicCompleteStatTabs[0]?.id ?? 'marcador';
+    const effectivePublicStatTab = publicCompleteStatTabs.some((t) => t.id === publicStatsTab)
+        ? publicStatsTab
+        : firstPublicStatTabId;
+    const activePublicStatTabContent = publicCompleteStatTabs.find((t) => t.id === effectivePublicStatTab);
     const localLineups = normalizeLocalLineups(matchData.lineups || null);
     const localHomeLineup = localLineups.home.filter((player) => Boolean(player.name));
     const localAwayLineup = localLineups.away.filter((player) => Boolean(player.name));
@@ -2443,7 +2479,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                         <div className={styles.eventIcon}>•</div>
                                                         <div className={styles.eventDetail}>
                                                             <div className={styles.eventPlayer} style={{ fontSize: '12px' }}>{evt.player}</div>
-                                                            <div className={styles.eventSubInfo}>{evt.type}</div>
+                                                            <div className={styles.eventSubInfo}>{publicEventTypeDisplay(evt)}</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2496,8 +2532,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                             </div>
                                                         ) : (
                                                             <div className={styles.eventSubInfo}>
-                                                                {evt.subPlayer && <span className={styles.assistText}>asistencia de {evt.subPlayerId ? <Link href={`/players/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span>}
-                                                                {evt.description && <span> ({evt.description})</span>}
+                                                                <span className={styles.eventKind}>{publicEventTypeDisplay(evt)}</span>
+                                                                {evt.subPlayer ? <span className={styles.assistText}>asistencia de {evt.subPlayerId ? <Link href={`/players/${evt.subPlayerId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{evt.subPlayer}</Link> : evt.subPlayer}</span> : null}
+                                                                {evt.description && !isGoalKickAttemptEvent({ type: evt.type, detail: evt.description }) ? <span> ({evt.description})</span> : null}
                                                             </div>
                                                         )}
                                                     </div>
@@ -2713,29 +2750,83 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         )}
 
                         {activeTab === 'stats' && (
-                            <div className={styles.statsList}>
-                                <div className={styles.panelTitle}>Estadísticas Completas</div>
-                                {statsData.map((stat, i) => {
-                                    const hVal = parseFloat(String(stat.home).replace(/[^0-9.]/g, '')) || 0;
-                                    const aVal = parseFloat(String(stat.away).replace(/[^0-9.]/g, '')) || 0;
-                                    const total = hVal + aVal;
-                                    const hPct = total > 0 ? (hVal / total) * 100 : 50;
-                                    const aPct = total > 0 ? (aVal / total) * 100 : 50;
-
-                                    return (
-                                        <div key={i} className={styles.statItem}>
-                                            <div className={styles.statRow}>
-                                                <span className={styles.statVal}>{stat.home}</span>
-                                                <span className={styles.statLabel}>{stat.label}</span>
-                                                <span className={styles.statVal}>{stat.away}</span>
-                                            </div>
-                                            <div className={styles.statProgress}>
-                                                <div className={styles.progressHome} style={{ width: `${hPct}%` }}></div>
-                                                <div className={styles.progressAway} style={{ width: `${aPct}%` }}></div>
-                                            </div>
+                            <div className={styles.publicStatsPanel}>
+                                <div className={styles.panelTitle}>Estadísticas completas</div>
+                                {publicCompleteStatTabs.length === 0 ? (
+                                    <p className={styles.placeholderText}>No hay métricas para mostrar con los eventos actuales.</p>
+                                ) : (
+                                    <>
+                                        <div className={styles.publicStatsTabs} role="tablist" aria-label="Tipos de estadísticas">
+                                            {publicCompleteStatTabs.map((tab) => (
+                                                <button
+                                                    key={tab.id}
+                                                    type="button"
+                                                    role="tab"
+                                                    aria-selected={effectivePublicStatTab === tab.id}
+                                                    className={`${styles.publicStatsTab}${effectivePublicStatTab === tab.id ? ` ${styles.publicStatsTabActive}` : ''}`}
+                                                    onClick={() => setPublicStatsTab(tab.id)}
+                                                >
+                                                    {tab.label}
+                                                </button>
+                                            ))}
                                         </div>
-                                    );
-                                })}
+                                        <div className={styles.publicStatsSectionGrid}>
+                                            {(activePublicStatTabContent?.sections ?? []).map((section) => (
+                                                <section className={styles.publicStatsSection} key={`${effectivePublicStatTab}-${section.title}`}>
+                                                    <div className={styles.publicStatsSectionHeader}>
+                                                        <h5>{section.title}</h5>
+                                                        <span>{section.rows.length}</span>
+                                                    </div>
+                                                    <div className={styles.publicStatsRows}>
+                                                        {section.rows.map((row) => {
+                                                            if (row.valueKind === 'percent') {
+                                                                const h = row.home;
+                                                                const a = row.away;
+                                                                const hLabel = h < 0 ? '—' : `${h.toFixed(1)}%`;
+                                                                const aLabel = a < 0 ? '—' : `${a.toFixed(1)}%`;
+                                                                return (
+                                                                    <div
+                                                                        className={`${styles.publicStatsRow}${row.accent ? ` ${styles.publicStatsRowAccent}` : ''}`}
+                                                                        key={row.key}
+                                                                    >
+                                                                        <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueHome}`}>{hLabel}</strong>
+                                                                        <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarHome}`} aria-hidden="true">
+                                                                            <span style={{ width: `${h < 0 ? 0 : Math.min(100, h)}%` }} />
+                                                                        </div>
+                                                                        <span className={styles.publicStatsRowLabel} title={row.tooltip}>{row.label}</span>
+                                                                        <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarAway}`} aria-hidden="true">
+                                                                            <span style={{ width: `${a < 0 ? 0 : Math.min(100, a)}%` }} />
+                                                                        </div>
+                                                                        <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueAway}`}>{aLabel}</strong>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            const total = row.home + row.away;
+                                                            const homePct = total > 0 ? (row.home / total) * 100 : 0;
+                                                            const awayPct = total > 0 ? (row.away / total) * 100 : 0;
+                                                            return (
+                                                                <div
+                                                                    className={`${styles.publicStatsRow}${row.accent ? ` ${styles.publicStatsRowAccent}` : ''}`}
+                                                                    key={row.key}
+                                                                >
+                                                                    <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueHome}`}>{row.home}</strong>
+                                                                    <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarHome}`} aria-hidden="true">
+                                                                        <span style={{ width: `${homePct}%` }} />
+                                                                    </div>
+                                                                    <span className={styles.publicStatsRowLabel} title={row.tooltip}>{row.label}</span>
+                                                                    <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarAway}`} aria-hidden="true">
+                                                                        <span style={{ width: `${awayPct}%` }} />
+                                                                    </div>
+                                                                    <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueAway}`}>{row.away}</strong>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </section>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
 
