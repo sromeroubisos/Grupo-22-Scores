@@ -98,6 +98,10 @@ export type CompleteStatTab = {
     sections: CompleteStatSection[];
 };
 
+export type CompleteStatTabsOptions = {
+    includeEmptyRows?: boolean;
+};
+
 export function getConfiguredEventPoints(
     event: string | Pick<AggregatableMatchEvent, 'type' | 'detail'>,
     definitionMap: Record<string, MatchEventDefinition>,
@@ -357,20 +361,27 @@ function contestWinPercent(won: number, lost: number): number {
     return (won / n) * 100;
 }
 
-function filterStatSectionRows(rows: CompleteStatRow[]): CompleteStatRow[] {
+function filterStatSectionRows(rows: CompleteStatRow[], options: CompleteStatTabsOptions = {}): CompleteStatRow[] {
+    if (options.includeEmptyRows) return rows;
+
     return rows.filter((row) => {
         if (row.valueKind === 'percent') return true;
         return row.home > 0 || row.away > 0 || row.accent;
     });
 }
 
-function filterStatSections(sections: CompleteStatSection[]): CompleteStatSection[] {
+function filterStatSections(sections: CompleteStatSection[], options: CompleteStatTabsOptions = {}): CompleteStatSection[] {
     return sections
-        .map((section) => ({ ...section, rows: filterStatSectionRows(section.rows) }))
+        .map((section) => ({ ...section, rows: filterStatSectionRows(section.rows, options) }))
         .filter((section) => section.rows.length > 0);
 }
 
-export function buildCompleteStatTabs(stats: CompleteMatchStats, homeName: string, awayName: string): CompleteStatTab[] {
+export function buildCompleteStatTabs(
+    stats: CompleteMatchStats,
+    homeName: string,
+    awayName: string,
+    options: CompleteStatTabsOptions = {},
+): CompleteStatTab[] {
     const tipPalos = (hMade: number, hAtt: number, aMade: number, aAtt: number, note?: string) => (
         `${homeName}: ${hMade}/${hAtt} · ${awayName}: ${aMade}/${aAtt}${note ? ` — ${note}` : ''}`
     );
@@ -457,7 +468,7 @@ export function buildCompleteStatTabs(stats: CompleteMatchStats, homeName: strin
                         },
                     ],
                 },
-            ]),
+            ], options),
         },
         {
             id: 'formaciones',
@@ -549,7 +560,7 @@ export function buildCompleteStatTabs(stats: CompleteMatchStats, homeName: strin
                         { key: 'freeKicks', label: 'Free kicks', home: stats.freeKicks.home, away: stats.freeKicks.away },
                     ],
                 },
-            ]),
+            ], options),
         },
         {
             id: 'disciplina',
@@ -566,7 +577,7 @@ export function buildCompleteStatTabs(stats: CompleteMatchStats, homeName: strin
                         { key: 'handlingErrors', label: 'Error de manejo', home: stats.handlingErrors.home, away: stats.handlingErrors.away },
                     ],
                 },
-            ]),
+            ], options),
         },
         {
             id: 'juego',
@@ -585,7 +596,7 @@ export function buildCompleteStatTabs(stats: CompleteMatchStats, homeName: strin
                         { key: 'turnoversLost', label: 'Turnovers perdidos', home: stats.turnoversLost.home, away: stats.turnoversLost.away },
                     ],
                 },
-            ]),
+            ], options),
         },
         {
             id: 'plantel',
@@ -598,7 +609,7 @@ export function buildCompleteStatTabs(stats: CompleteMatchStats, homeName: strin
                         { key: 'injuries', label: 'Lesiones', home: stats.injuries.home, away: stats.injuries.away },
                     ],
                 },
-            ]),
+            ], options),
         },
     ];
 
