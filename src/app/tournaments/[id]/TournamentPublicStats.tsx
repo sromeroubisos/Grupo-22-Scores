@@ -83,7 +83,7 @@ const TEAM_COLUMNS: Record<TeamStatsView, StatColumn[]> = {
         { id: 'tackles_made', label: 'TACK', title: 'Tackles realizados', accent: true, tone: 'defense' },
         { id: 'defense_index', label: 'DEF IDX', title: 'Índice defensivo: tackles + recuperaciones - puntos y disciplina concedida', format: 'decimal', accent: true, tone: 'defense' },
         { id: 'turnovers_won', label: 'REC', title: 'Recuperaciones / turnovers ganados', tone: 'defense' },
-        { id: 'penalties_conceded', label: 'PEN C', title: 'Penales concedidos', tone: 'danger' },
+        { id: 'penalties_conceded', label: 'PEN C', title: 'Penales cometidos', tone: 'danger' },
         { id: 'yellow_cards', label: 'TA', title: 'Tarjetas amarillas', tone: 'danger' },
         { id: 'red_cards', label: 'TR', title: 'Tarjetas rojas', tone: 'danger' },
     ],
@@ -307,11 +307,11 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                 if (event!.type === 'recovery') current.recoveries = n(current.recoveries) + 1;
                 if (event!.type === 'turnover_won') current.turnovers_won = n(current.turnovers_won) + 1;
                 if (event!.type === 'turnover_lost') current.turnovers_lost = n(current.turnovers_lost) + 1;
-                if (event!.type === 'penalty' || event!.type === 'penalty_goal' || event!.type === 'penalty_won') {
+                if (event!.type === 'penalty' || event!.type === 'penalty_goal') {
                     current.penalties_won = n(current.penalties_won) + 1;
                     opponent.penalties_conceded = n(opponent.penalties_conceded) + 1;
                 }
-                if (event!.type === 'penalty_conceded') current.penalties_conceded = n(current.penalties_conceded) + 1;
+                if (event!.type === 'penalty_committed') current.penalties_conceded = n(current.penalties_conceded) + 1;
                 if (event!.type === 'free_kick') current.free_kicks = n(current.free_kicks) + 1;
                 if (event!.type === 'knock_on') current.knock_ons = n(current.knock_ons) + 1;
                 if (event!.type === 'forward_pass') current.forward_passes = n(current.forward_passes) + 1;

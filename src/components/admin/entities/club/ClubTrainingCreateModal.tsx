@@ -101,6 +101,14 @@ const LOAD_PROFILES: Array<{ id: LoadProfile; label: string }> = [
     { id: 'mixta', label: 'Mixta' },
 ];
 
+const ATTENDANCE_OPTIONS: Array<{ id: AttendanceState; label: string; shortLabel: string }> = [
+    { id: 'presente', label: 'Presente', shortLabel: 'Pres' },
+    { id: 'ausente', label: 'Ausente', shortLabel: 'Out' },
+    { id: 'tarde', label: 'Tarde', shortLabel: 'Tarde' },
+    { id: 'lesionado', label: 'Lesionado', shortLabel: 'Les' },
+    { id: 'justificado', label: 'Justificado', shortLabel: 'Just' },
+];
+
 const SCENARIO_OPTIONS = [
     'Scrum medio',
     'Line ofensivo',
@@ -172,7 +180,7 @@ function getTodayDateString() {
 }
 
 function buildInitialPlayerStatuses(players: PersonWithRole[]) {
-    return Object.fromEntries(players.map((player) => [player.id, 'confirmado' as const]));
+    return Object.fromEntries(players.map((player) => [player.id, 'presente' as const]));
 }
 
 function normalizeText(value?: string | null) {
@@ -451,19 +459,29 @@ export function ClubTrainingCreateModal({
     const attendanceDraft = useMemo(() => {
         const next: Record<string, AttendanceState> = {};
         visiblePlayers.forEach((player) => {
-            next[player.id] = playerStatuses[player.id] ?? 'confirmado';
+            next[player.id] = playerStatuses[player.id] ?? 'presente';
         });
         return next;
     }, [playerStatuses, visiblePlayers]);
     const statusSummary = useMemo(() => {
-        return visiblePlayers.reduce<Record<AttendanceState, number>>((acc, player) => {
-            const status = playerStatuses[player.id] ?? 'confirmado';
+        return visiblePlayers.reduce<Record<'presente' | 'ausente' | 'tarde' | 'lesionado' | 'justificado', number>>((acc, player) => {
+            const status = playerStatuses[player.id] ?? 'presente';
+            if (status === 'confirmado') {
+                acc.presente += 1;
+                return acc;
+            }
+            if (status === 'dudoso') {
+                acc.justificado += 1;
+                return acc;
+            }
             acc[status] += 1;
             return acc;
         }, {
-            confirmado: 0,
-            dudoso: 0,
+            presente: 0,
             ausente: 0,
+            tarde: 0,
+            lesionado: 0,
+            justificado: 0,
         });
     }, [playerStatuses, visiblePlayers]);
     const presetLibrary = useMemo<ExerciseLibraryItem[]>(
@@ -1204,11 +1222,11 @@ export function ClubTrainingCreateModal({
                             <div className="club-training-architect-status-grid">
                                 <article>
                                     <span>Disponibles</span>
-                                    <strong>{statusSummary.confirmado}</strong>
+                                    <strong>{statusSummary.presente + statusSummary.tarde}</strong>
                                 </article>
                                 <article>
-                                    <span>Duda</span>
-                                    <strong>{statusSummary.dudoso}</strong>
+                                    <span>Lesionados</span>
+                                    <strong>{statusSummary.lesionado}</strong>
                                 </article>
                                 <article>
                                     <span>No disponibles</span>
@@ -1217,7 +1235,7 @@ export function ClubTrainingCreateModal({
                             </div>
                             <div className="club-training-architect-player-list">
                                 {visiblePlayers.map((player) => {
-                                    const status = playerStatuses[player.id] ?? 'confirmado';
+                                    const status = playerStatuses[player.id] ?? 'presente';
                                     return (
                                         <div key={player.id} className="club-training-architect-player-row">
                                             <div>
@@ -1225,14 +1243,14 @@ export function ClubTrainingCreateModal({
                                                 <span>{player.position?.trim() || 'Sin puesto'}</span>
                                             </div>
                                             <div className="club-training-architect-player-actions">
-                                                {(['confirmado', 'dudoso', 'ausente'] as AttendanceState[]).map((value) => (
+                                                {ATTENDANCE_OPTIONS.map(({ id, shortLabel }) => (
                                                     <button
-                                                        key={value}
+                                                        key={id}
                                                         type="button"
-                                                        className={`club-training-architect-status-btn${status === value ? ' active' : ''}`}
-                                                        onClick={() => setPlayerStatuses((prev) => ({ ...prev, [player.id]: value }))}
+                                                        className={`club-training-architect-status-btn${status === id ? ' active' : ''}`}
+                                                        onClick={() => setPlayerStatuses((prev) => ({ ...prev, [player.id]: id }))}
                                                     >
-                                                        {value === 'confirmado' ? 'OK' : value === 'dudoso' ? 'Duda' : 'Out'}
+                                                        {shortLabel}
                                                     </button>
                                                 ))}
                                             </div>

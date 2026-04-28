@@ -3,6 +3,7 @@ import { normalizeTeamLabelAssignments } from '@/lib/teamLabels';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SLUG_LOOKUP_TIMEOUT_MS = 5000;
@@ -13,6 +14,10 @@ const TOURNAMENT_SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, sport_id, l
 const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, url, external_id, season_id';
 const TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, legacy_sport:sport, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id, season_id';
 const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL = 'id, name, display_name, sport_id, country, country_id, country_ref:countries(name), logo_url, banner_url, status, is_visible, slug, format, ruleset, external_id, season_id';
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT_REVIEW = `${TOURNAMENT_SELECT_WITH_LEGACY_SPORT}, review_status`;
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_REVIEW = `${TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT}, review_status`;
+const TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL_REVIEW = `${TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL}, review_status`;
+const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL_REVIEW = `${TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL}, review_status`;
 
 export type TournamentQueryErrors = {
     tournament: string | null;
@@ -92,6 +97,7 @@ type TournamentRow = {
     format?: string | null;
     status: string | null;
     is_visible: boolean | null;
+    review_status?: string | null;
     slug: string | null;
     ruleset: Record<string, unknown> | null;
     url?: string | null;
@@ -347,31 +353,63 @@ async function getTournamentByIdWithSportFallback(
 ): Promise<SupabaseQueryResult<TournamentRow | null>> {
     let result: SupabaseQueryResult<TournamentRow | null> = await supabase
         .from('tournaments')
-        .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT)
+        .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT_REVIEW)
         .eq('id', tournamentId)
         .maybeSingle();
+
+    if (isMissingColumnError(result.error, 'review_status')) {
+        result = await supabase
+            .from('tournaments')
+            .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT)
+            .eq('id', tournamentId)
+            .maybeSingle();
+    }
 
     if (isMissingColumnError(result.error, 'sport')) {
         result = await supabase
             .from('tournaments')
-            .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT)
+            .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_REVIEW)
             .eq('id', tournamentId)
             .maybeSingle();
+
+        if (isMissingColumnError(result.error, 'review_status')) {
+            result = await supabase
+                .from('tournaments')
+                .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT)
+                .eq('id', tournamentId)
+                .maybeSingle();
+        }
     }
 
     if (isMissingColumnError(result.error, 'url')) {
         result = await supabase
             .from('tournaments')
-            .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL)
+            .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL_REVIEW)
             .eq('id', tournamentId)
             .maybeSingle();
+
+        if (isMissingColumnError(result.error, 'review_status')) {
+            result = await supabase
+                .from('tournaments')
+                .select(TOURNAMENT_SELECT_WITH_LEGACY_SPORT_NO_URL)
+                .eq('id', tournamentId)
+                .maybeSingle();
+        }
 
         if (isMissingColumnError(result.error, 'sport')) {
             result = await supabase
                 .from('tournaments')
-                .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL)
+                .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL_REVIEW)
                 .eq('id', tournamentId)
                 .maybeSingle();
+
+            if (isMissingColumnError(result.error, 'review_status')) {
+                result = await supabase
+                    .from('tournaments')
+                    .select(TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL)
+                    .eq('id', tournamentId)
+                    .maybeSingle();
+            }
         }
     }
 
@@ -383,6 +421,10 @@ const TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY =
     'id, name, display_name, logo_url, sport_id, legacy_sport:sport, country_id, slug, is_visible, status, format, ruleset';
 const TOURNAMENT_SELECT_MINIMAL_NO_LEGACY =
     'id, name, display_name, logo_url, sport_id, country_id, slug, is_visible, status, format, ruleset';
+const TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY_REVIEW =
+    `${TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY}, review_status`;
+const TOURNAMENT_SELECT_MINIMAL_NO_LEGACY_REVIEW =
+    `${TOURNAMENT_SELECT_MINIMAL_NO_LEGACY}, review_status`;
 
 async function getTournamentByIdMinimalFallback(
     supabase: Awaited<ReturnType<typeof getReadClient>>,
@@ -390,16 +432,32 @@ async function getTournamentByIdMinimalFallback(
 ): Promise<SupabaseQueryResult<TournamentRow | null>> {
     let result: SupabaseQueryResult<TournamentRow | null> = await supabase
         .from('tournaments')
-        .select(TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY)
+        .select(TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY_REVIEW)
         .eq('id', tournamentId)
         .maybeSingle();
+
+    if (isMissingColumnError(result.error, 'review_status')) {
+        result = await supabase
+            .from('tournaments')
+            .select(TOURNAMENT_SELECT_MINIMAL_WITH_LEGACY)
+            .eq('id', tournamentId)
+            .maybeSingle();
+    }
 
     if (isMissingColumnError(result.error, 'sport')) {
         result = await supabase
             .from('tournaments')
-            .select(TOURNAMENT_SELECT_MINIMAL_NO_LEGACY)
+            .select(TOURNAMENT_SELECT_MINIMAL_NO_LEGACY_REVIEW)
             .eq('id', tournamentId)
             .maybeSingle();
+
+        if (isMissingColumnError(result.error, 'review_status')) {
+            result = await supabase
+                .from('tournaments')
+                .select(TOURNAMENT_SELECT_MINIMAL_NO_LEGACY)
+                .eq('id', tournamentId)
+                .maybeSingle();
+        }
     }
 
     return result;
@@ -412,31 +470,63 @@ async function getTournamentByIdBareFallback(
 ): Promise<SupabaseQueryResult<TournamentRow | null>> {
     let result: SupabaseQueryResult<TournamentRow | null> = await supabase
         .from('tournaments')
-        .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, url')
+        .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, url, status, is_visible, review_status')
         .eq('id', tournamentId)
         .maybeSingle();
+
+    if (isMissingColumnError(result.error, 'review_status')) {
+        result = await supabase
+            .from('tournaments')
+            .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, url, status, is_visible')
+            .eq('id', tournamentId)
+            .maybeSingle();
+    }
 
     if (isMissingColumnError(result.error, 'banner_url')) {
         result = await supabase
             .from('tournaments')
-            .select('id, name, display_name, logo_url, sport_id, country_id, slug, url')
+            .select('id, name, display_name, logo_url, sport_id, country_id, slug, url, status, is_visible, review_status')
             .eq('id', tournamentId)
             .maybeSingle();
+
+        if (isMissingColumnError(result.error, 'review_status')) {
+            result = await supabase
+                .from('tournaments')
+                .select('id, name, display_name, logo_url, sport_id, country_id, slug, url, status, is_visible')
+                .eq('id', tournamentId)
+                .maybeSingle();
+        }
     }
 
     if (isMissingColumnError(result.error, 'url')) {
         result = await supabase
             .from('tournaments')
-            .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug')
+            .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, status, is_visible, review_status')
             .eq('id', tournamentId)
             .maybeSingle();
+
+        if (isMissingColumnError(result.error, 'review_status')) {
+            result = await supabase
+                .from('tournaments')
+                .select('id, name, display_name, logo_url, banner_url, sport_id, country_id, slug, status, is_visible')
+                .eq('id', tournamentId)
+                .maybeSingle();
+        }
 
         if (isMissingColumnError(result.error, 'banner_url')) {
             result = await supabase
                 .from('tournaments')
-                .select('id, name, display_name, logo_url, sport_id, country_id, slug')
+                .select('id, name, display_name, logo_url, sport_id, country_id, slug, status, is_visible, review_status')
                 .eq('id', tournamentId)
                 .maybeSingle();
+
+            if (isMissingColumnError(result.error, 'review_status')) {
+                result = await supabase
+                    .from('tournaments')
+                    .select('id, name, display_name, logo_url, sport_id, country_id, slug, status, is_visible')
+                    .eq('id', tournamentId)
+                    .maybeSingle();
+            }
         }
     }
 
@@ -604,6 +694,10 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
                 tournamentRow = bareRes.data;
                 tournamentError = null;
             }
+        }
+
+        if (tournamentRow && !isTournamentVisibleToPublic(tournamentRow)) {
+            return emptyTournamentData('Tournament not found');
         }
 
         const sanitizedParticipants = sanitizeParticipantRows(participantsRes.data);

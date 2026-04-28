@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  countTeamOffensiveMetric,
-  resolveOffensiveBonusRule,
-  type NormalizedOffensiveBonusRule,
-} from '@/lib/bonusRuleMetrics';
-import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
+  calculateMatchPointsPreview,
+  resolveMatchPointsRules,
+  type MatchPointsRules,
+} from '@/lib/standings/matchPointsPreview';
 import { fetchMatchCenterMatch, type MatchCenterEventInput } from '@/lib/services/matchCenterService';
-import { StandingsEngine } from '@/lib/services/standingsEngine';
 
 type SupabaseLike = {
   from: (table: string) => any;
@@ -15,6 +12,10 @@ type SupabaseLike = {
 type MatchScoreLike = {
   home?: number | null;
   away?: number | null;
+  penalties?: {
+    home?: number | null;
+    away?: number | null;
+  } | null;
 };
 
 type MatchEventLike = {
@@ -22,68 +23,20 @@ type MatchEventLike = {
   team: 'home' | 'away' | null;
 };
 
-interface PointsRules {
-  win: number;
-  draw: number;
-  loss: number;
-  shootoutWin: number | null;
-  shootoutLoss: number | null;
-  offensive: NormalizedOffensiveBonusRule | null;
-  defensive: {
-    margin: number;
-    points: number;
-  } | null;
-}
-
-const DEFAULT_POINTS_RULES: PointsRules = {
-  win: 4,
-  draw: 2,
-  loss: 0,
-  shootoutWin: null,
-  shootoutLoss: null,
-  offensive: null,
-  defensive: null,
-};
-
-function normalizePointsRules(rawRules: ReturnType<typeof StandingsEngine.resolveRules> | null | undefined): PointsRules {
-  const offensiveRule = rawRules?.offensive_bonus_rule;
-  const defensiveRule = rawRules?.defensive_bonus_rule;
-  const offensive = resolveOffensiveBonusRule(offensiveRule);
-
-  const defensive =
-    defensiveRule === true
-      ? { margin: 7, points: 1 }
-      : defensiveRule && typeof defensiveRule === 'object'
-        ? {
-          margin: Number(defensiveRule.margin ?? 7),
-          points: Number(defensiveRule.points ?? defensiveRule.value ?? 1),
-        }
-        : null;
-
-  return {
-    win: Number(rawRules?.points_for_win ?? DEFAULT_POINTS_RULES.win),
-    draw: Number(rawRules?.points_for_draw ?? DEFAULT_POINTS_RULES.draw),
-    loss: Number(rawRules?.points_for_loss ?? DEFAULT_POINTS_RULES.loss),
-    shootoutWin: Number.isFinite(Number(rawRules?.points_for_shootout_win))
-      ? Number(rawRules?.points_for_shootout_win)
-      : DEFAULT_POINTS_RULES.shootoutWin,
-    shootoutLoss: Number.isFinite(Number(rawRules?.points_for_shootout_loss))
-      ? Number(rawRules?.points_for_shootout_loss)
-      : DEFAULT_POINTS_RULES.shootoutLoss,
-    offensive: offensive && Number.isFinite(offensive.threshold) && Number.isFinite(offensive.points)
-      ? offensive
-      : null,
-    defensive: defensive && Number.isFinite(defensive.margin) && Number.isFinite(defensive.points)
-      ? defensive
-      : null,
-  };
-}
-
 function normalizeScore(score: unknown) {
   const row = score && typeof score === 'object' ? score as MatchScoreLike : {};
+  const home = Math.max(0, Number(row.home) || 0);
+  const away = Math.max(0, Number(row.away) || 0);
+  const penaltyHome = Number(row.penalties?.home);
+  const penaltyAway = Number(row.penalties?.away);
+
   return {
-    home: Math.max(0, Number(row.home) || 0),
-    away: Math.max(0, Number(row.away) || 0),
+    home,
+    away,
+    penalties:
+      home === away && Number.isFinite(penaltyHome) && Number.isFinite(penaltyAway)
+        ? { home: Math.max(0, penaltyHome), away: Math.max(0, penaltyAway) }
+        : null,
   };
 }
 
@@ -96,47 +49,17 @@ function normalizeEvents(events: MatchCenterEventInput[] | MatchEventLike[]) {
 
 function calculateAutocalculatedPoints(
   matchStatus: string,
-  score: { home: number; away: number },
+  score: ReturnType<typeof normalizeScore>,
   events: MatchEventLike[],
-  rules: PointsRules,
+  rules: MatchPointsRules,
 ) {
-  if (matchStatus !== 'final') {
-    return {
-      homeBasePoints: 0,
-      awayBasePoints: 0,
-      homeBonusPoints: 0,
-      awayBonusPoints: 0,
-      pointsAutocalculated: true,
-      pointsOverrideReason: null,
-    };
-  }
-
-  const basePoints = calculateBasePointsFromScore(score, rules);
-  let homeBonus = 0;
-  let awayBonus = 0;
-
-  const homeOffensiveMetric = countTeamOffensiveMetric(score, events, 'home', rules.offensive);
-  const awayOffensiveMetric = countTeamOffensiveMetric(score, events, 'away', rules.offensive);
-
-  if (rules.offensive) {
-    if (homeOffensiveMetric >= rules.offensive.threshold) homeBonus += rules.offensive.points;
-    if (awayOffensiveMetric >= rules.offensive.threshold) awayBonus += rules.offensive.points;
-  }
-
-  if (rules.defensive) {
-    if (score.home < score.away && (score.away - score.home) <= rules.defensive.margin) {
-      homeBonus += rules.defensive.points;
-    }
-    if (score.away < score.home && (score.home - score.away) <= rules.defensive.margin) {
-      awayBonus += rules.defensive.points;
-    }
-  }
+  const preview = calculateMatchPointsPreview(matchStatus, score, events, rules);
 
   return {
-    homeBasePoints: basePoints.home,
-    awayBasePoints: basePoints.away,
-    homeBonusPoints: homeBonus,
-    awayBonusPoints: awayBonus,
+    homeBasePoints: preview.homeBasePoints,
+    awayBasePoints: preview.awayBasePoints,
+    homeBonusPoints: preview.homeBonusPoints,
+    awayBonusPoints: preview.awayBonusPoints,
     pointsAutocalculated: true,
     pointsOverrideReason: null,
   };
@@ -179,7 +102,7 @@ async function resolvePointsRules(client: SupabaseLike, match: { phase_id?: stri
     tournamentRuleset = (tournament?.ruleset as Record<string, unknown> | null) ?? null;
   }
 
-  return normalizePointsRules(StandingsEngine.resolveRules(phaseSettings, tournamentRuleset));
+  return resolveMatchPointsRules(phaseSettings, tournamentRuleset);
 }
 
 export async function deriveClubAdminPointsPatch(

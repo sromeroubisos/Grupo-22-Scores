@@ -1,31 +1,17 @@
-import { NextResponse } from 'next/server'
-import { syncUserProfile } from '@/lib/auth/syncUserProfile'
-import { createClient } from '@/lib/supabase/server'
+import { type NextRequest, NextResponse } from 'next/server';
 
-function sanitizeNext(raw: string | null): string {
-    if (!raw) return '/'
-    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
-}
-
-export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url)
-    const code = searchParams.get('code')
-    const next = sanitizeNext(searchParams.get('next'))
-
-    if (code) {
-        const supabase = await createClient()
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-
-        if (!error && data.user) {
-            try {
-                await syncUserProfile(data.user)
-            } catch (syncError) {
-                console.error('Error syncing user:', syncError)
-            }
-
-            return NextResponse.redirect(`${origin}${next}`)
-        }
-    }
-
-    return NextResponse.redirect(`${origin}/login?error=auth-code-error`)
+/**
+ * Legacy Google callback — permanently redirects to the unified auth callback.
+ *
+ * IMPORTANT: Update your Supabase Auth dashboard so the Google provider
+ * redirect URI points to `/auth/callback` instead of `/api/auth/callback/google`.
+ * This route remains as a safety net during the transition.
+ */
+export async function GET(request: NextRequest) {
+    const { searchParams } = new URL(request.url);
+    const target = new URL('/auth/callback', request.url);
+    searchParams.forEach((value, key) => {
+        target.searchParams.set(key, value);
+    });
+    return NextResponse.redirect(target, 307);
 }

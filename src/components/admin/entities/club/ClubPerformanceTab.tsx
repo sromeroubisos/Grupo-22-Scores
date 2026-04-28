@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import {
+    BarChart3,
     ChevronRight,
     Download,
     Loader2,
@@ -29,14 +30,18 @@ import {
     type ClubPhysicalTestDefinition,
 } from '@/lib/club-admin/physicalTestDefinitions';
 import type { ClubGymPlan } from '@/lib/club-admin/gymPlans';
-import type { PlanBlock, PlanBlockType, TrainingEntry } from '@/lib/club-admin/trainings';
+import type { PlanBlock, PlanBlockType, TrainingEntry, TrainingTechnicalEvent, TrainingTechnicalEventType } from '@/lib/club-admin/trainings';
+import {
+    calculateRugbyPerformanceInsights,
+    type RugbyPerformanceRecord,
+} from '@/lib/performance/rugbyStaff';
 import type { Division } from '@/lib/services/divisionService';
 import type { PersonWithRole } from '@/lib/services/personService';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 
 import styles from './ClubPerformanceTab.module.css';
 
-type GymSection = 'sesiones' | 'plan' | 'pesos' | 'testeos';
+type PerformanceSection = 'resumen' | 'tiempo' | 'jugador' | 'equipo' | 'trabajo' | 'rugby' | 'fisico' | 'gimnasio' | 'testeos' | 'pesos' | 'planillas';
 
 type RosterOption = {
     id: string;
@@ -104,11 +109,13 @@ interface ClubPerformanceTabProps {
     onTabChange?: (tabId: ClubManageTabId) => void;
 }
 
-const SECTION_TABS: Array<{ id: GymSection; label: string }> = [
-    { id: 'sesiones', label: 'Sesiones de gimnasio' },
-    { id: 'plan', label: 'Planes y planilla' },
-    { id: 'pesos', label: 'Pesos' },
-    { id: 'testeos', label: 'Testeos fisicos' },
+const SECTION_TABS: Array<{ id: PerformanceSection; label: string }> = [
+    { id: 'resumen', label: 'Global' },
+    { id: 'tiempo', label: 'Evolucion' },
+    { id: 'jugador', label: 'Jugador' },
+    { id: 'equipo', label: 'Equipo' },
+    { id: 'trabajo', label: 'Trabajado' },
+    { id: 'rugby', label: 'Tecnico' },
 ];
 
 const PLAN_BLOCK_OPTIONS: Array<{ id: PlanBlockType; label: string }> = [
@@ -187,6 +194,51 @@ function normalizeNumberInput(value: string) {
 function formatMetricValue(value?: number | null, unit?: string | null) {
     if (typeof value !== 'number' || !Number.isFinite(value)) return '--';
     return `${value}${unit ? ` ${unit}` : ''}`;
+}
+
+function average(values: number[]) {
+    const validValues = values.filter((value) => Number.isFinite(value));
+    if (validValues.length === 0) return null;
+    return validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
+}
+
+function formatAverage(value: number | null, suffix = '') {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return '--';
+    const rounded = Math.round(value * 10) / 10;
+    return `${rounded}${suffix}`;
+}
+
+function formatPercent(value: number | null) {
+    return typeof value === 'number' && Number.isFinite(value) ? `${value}%` : '--';
+}
+
+function percentFromParts(part: number, total: number) {
+    if (!total) return null;
+    return Math.round((part / total) * 100);
+}
+
+function isPresentAttendanceState(value: unknown) {
+    return value === 'presente' || value === 'confirmado' || value === 'tarde';
+}
+
+function getTechnicalEventTypeLabel(type: TrainingTechnicalEventType) {
+    const labels: Record<TrainingTechnicalEventType, string> = {
+        patadas: 'Patadas',
+        jugadas: 'Jugadas',
+        scrums: 'Scrums',
+        lines: 'Lines',
+        secuencias: 'Secuencias',
+    };
+
+    return labels[type];
+}
+
+function getTechnicalEventTotal(event: TrainingTechnicalEvent) {
+    return event.total || event.successful + event.failed;
+}
+
+function getTechnicalEventEffectiveness(event: TrainingTechnicalEvent) {
+    return percentFromParts(event.successful, getTechnicalEventTotal(event));
 }
 
 function getDivisionLabel(division: Division | null | undefined, fallback = 'Sin equipo') {
@@ -400,6 +452,15 @@ function isGymPlanPayload(value: unknown): value is ClubGymPlan {
     );
 }
 
+function isRugbyPerformanceRecordPayload(value: unknown): value is RugbyPerformanceRecord {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return false;
+    }
+
+    const candidate = value as Record<string, unknown>;
+    return typeof candidate.id === 'string' && typeof candidate.moduleKey === 'string';
+}
+
 async function requestPersistedTrainings(clubId: string) {
     const response = await fetch(`/api/club-admin/trainings?club=${encodeURIComponent(clubId)}`, {
         cache: 'no-store',
@@ -493,6 +554,30 @@ async function requestGymPlans(clubId: string) {
 
     return Array.isArray(payload.data)
         ? payload.data.filter(isGymPlanPayload)
+        : [];
+}
+
+async function requestPerformanceRecords(clubId: string) {
+    const response = await fetch(`/api/club-admin/performance-records?club=${encodeURIComponent(clubId)}`, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+    });
+    const payload = await response.json().catch(() => null) as {
+        ok?: boolean;
+        data?: unknown;
+        error?: unknown;
+    } | null;
+
+    if (!response.ok || !payload?.ok) {
+        throw new Error(
+            typeof payload?.error === 'string'
+                ? payload.error
+                : 'No se pudieron cargar las metricas de rugby',
+        );
+    }
+
+    return Array.isArray(payload.data)
+        ? payload.data.filter(isRugbyPerformanceRecordPayload)
         : [];
 }
 
@@ -841,15 +926,18 @@ export function ClubPerformanceTab({
     const [gymPlans, setGymPlans] = useState<ClubGymPlan[]>([]);
     const [physicalRecords, setPhysicalRecords] = useState<ClubPhysicalRecord[]>([]);
     const [testDefinitions, setTestDefinitions] = useState<ClubPhysicalTestDefinition[]>([]);
+    const [performanceRecords, setPerformanceRecords] = useState<RugbyPerformanceRecord[]>([]);
     const [loadingTrainings, setLoadingTrainings] = useState(true);
     const [loadingGymPlans, setLoadingGymPlans] = useState(true);
     const [loadingRecords, setLoadingRecords] = useState(true);
     const [loadingTestDefinitions, setLoadingTestDefinitions] = useState(true);
+    const [loadingPerformanceRecords, setLoadingPerformanceRecords] = useState(true);
     const [trainingError, setTrainingError] = useState<string | null>(null);
     const [gymPlanError, setGymPlanError] = useState<string | null>(null);
     const [recordsError, setRecordsError] = useState<string | null>(null);
     const [testDefinitionError, setTestDefinitionError] = useState<string | null>(null);
-    const [activeSection, setActiveSection] = useState<GymSection>('sesiones');
+    const [performanceRecordsError, setPerformanceRecordsError] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState<PerformanceSection>('resumen');
     const [createOpen, setCreateOpen] = useState(false);
     const [createTestOpen, setCreateTestOpen] = useState(false);
     const [createGymPlanOpen, setCreateGymPlanOpen] = useState(false);
@@ -971,7 +1059,28 @@ export function ClubPerformanceTab({
             }
         };
 
-        void Promise.all([loadTrainings(), loadGymPlans(), loadRecords(), loadDefinitions()]);
+        const loadPerformanceRecords = async () => {
+            setLoadingPerformanceRecords(true);
+            setPerformanceRecordsError(null);
+
+            try {
+                const data = await requestPerformanceRecords(clubId);
+                if (!cancelled) {
+                    setPerformanceRecords(data);
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    setPerformanceRecords([]);
+                    setPerformanceRecordsError(error instanceof Error ? error.message : 'No se pudieron cargar las metricas de rugby');
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoadingPerformanceRecords(false);
+                }
+            }
+        };
+
+        void Promise.all([loadTrainings(), loadGymPlans(), loadRecords(), loadDefinitions(), loadPerformanceRecords()]);
         return () => {
             cancelled = true;
         };
@@ -1020,9 +1129,8 @@ export function ClubPerformanceTab({
         [selectedDivision, selectedRoster, staff],
     );
 
-    const gymSessions = useMemo(
+    const scopedTrainings = useMemo(
         () => trainings
-            .filter((training) => training.type === 'gimnasio')
             .filter((training) => {
                 const date = new Date(training.date);
                 return !Number.isNaN(date.getTime()) && String(date.getFullYear()) === selectedSeason;
@@ -1030,6 +1138,11 @@ export function ClubPerformanceTab({
             .filter((training) => matchesTrainingDivision(training, selectedDivision, divisions, clubName))
             .filter((training) => matchesTrainingRoster(training, selectedRoster)),
         [clubName, divisions, selectedDivision, selectedRoster, selectedSeason, trainings],
+    );
+
+    const gymSessions = useMemo(
+        () => scopedTrainings.filter((training) => training.type === 'gimnasio'),
+        [scopedTrainings],
     );
 
     const upcomingMatch = useMemo(
@@ -1228,40 +1341,46 @@ export function ClubPerformanceTab({
         onTabChange('entrenamientos');
     };
 
-    const isBusy = loading || loadingTrainings || loadingGymPlans || loadingRecords || loadingTestDefinitions;
+    const isBusy = loading || loadingTrainings || loadingGymPlans || loadingRecords || loadingTestDefinitions || loadingPerformanceRecords;
 
     async function handleRefreshAll() {
         setLoadingTrainings(true);
         setLoadingGymPlans(true);
         setLoadingRecords(true);
         setLoadingTestDefinitions(true);
+        setLoadingPerformanceRecords(true);
         setTrainingError(null);
         setGymPlanError(null);
         setRecordsError(null);
         setTestDefinitionError(null);
+        setPerformanceRecordsError(null);
 
         try {
-            const [nextTrainings, nextGymPlans, nextRecords, nextDefinitions] = await Promise.all([
+            const [nextTrainings, nextGymPlans, nextRecords, nextDefinitions, nextPerformanceRecords] = await Promise.all([
                 requestPersistedTrainings(clubId),
                 requestGymPlans(clubId),
                 requestPhysicalRecords(clubId),
                 requestPhysicalTestDefinitions(clubId),
+                requestPerformanceRecords(clubId),
             ]);
             setTrainings(sortTrainings(nextTrainings));
             setGymPlans(sortGymPlans(nextGymPlans));
             setPhysicalRecords(sortRecords(nextRecords));
             setTestDefinitions(sortTestDefinitions(nextDefinitions));
+            setPerformanceRecords(nextPerformanceRecords);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'No se pudo sincronizar el panel';
             setTrainingError(message);
             setGymPlanError(message);
             setRecordsError(message);
             setTestDefinitionError(message);
+            setPerformanceRecordsError(message);
         } finally {
             setLoadingTrainings(false);
             setLoadingGymPlans(false);
             setLoadingRecords(false);
             setLoadingTestDefinitions(false);
+            setLoadingPerformanceRecords(false);
         }
     }
 
@@ -1293,7 +1412,7 @@ export function ClubPerformanceTab({
             const nextTraining = payload.data as TrainingEntry;
             setTrainings((current) => upsertTrainingEntry(current, nextTraining));
             setSelectedSessionId(nextTraining.id);
-            setActiveSection('plan');
+            setActiveSection('gimnasio');
             setCreateOpen(false);
             return true;
         } catch (error) {
@@ -1428,7 +1547,7 @@ export function ClubPerformanceTab({
         setSelectedGymPlanId(plan.id);
         setPlanRows(parsePlanRowsFromBlocks(plan.blocks));
         setPlanDirty(true);
-        setActiveSection('plan');
+        setActiveSection('gimnasio');
     }
 
     async function handleApplyGymPlanToSession(plan: ClubGymPlan) {
@@ -1795,6 +1914,211 @@ export function ClubPerformanceTab({
         [selectedSession],
     );
 
+    const evaluatedTrainings = useMemo(
+        () => scopedTrainings.filter((training) => Boolean(training.evaluation)),
+        [scopedTrainings],
+    );
+
+    const averageLoad = useMemo(
+        () => average(evaluatedTrainings.map((training) => training.evaluation?.loadTotal ?? Number.NaN)),
+        [evaluatedTrainings],
+    );
+
+    const averageRpe = useMemo(
+        () => average(evaluatedTrainings.map((training) => training.evaluation?.rpe ?? Number.NaN)),
+        [evaluatedTrainings],
+    );
+
+    const averageFatigue = useMemo(
+        () => average(evaluatedTrainings.map((training) => training.evaluation?.fatigue ?? Number.NaN)),
+        [evaluatedTrainings],
+    );
+
+    const attendanceAverage = useMemo(() => {
+        const percentages = scopedTrainings
+            .map((training) => {
+                const attendance = training.attendance ? Object.values(training.attendance) : [];
+                const denominator = Math.max(training.players?.length || training.convocados || scopedPlayers.length || 0, 0);
+                if (!denominator || attendance.length === 0) return Number.NaN;
+                const confirmed = attendance.filter(isPresentAttendanceState).length;
+                return Math.round((confirmed / denominator) * 100);
+            });
+
+        return average(percentages);
+    }, [scopedPlayers.length, scopedTrainings]);
+
+    const injuryReports = useMemo(
+        () => evaluatedTrainings.filter((training) => training.evaluation?.injuries?.trim()).length,
+        [evaluatedTrainings],
+    );
+
+    const rugbyInsights = useMemo(
+        () => calculateRugbyPerformanceInsights(performanceRecords),
+        [performanceRecords],
+    );
+
+    const trainingTechnicalEvents = useMemo(
+        () => scopedTrainings.flatMap((training) => (
+            (training.evaluation?.technicalEvents ?? []).map((event) => ({
+                ...event,
+                trainingId: training.id,
+                trainingTitle: training.title,
+                trainingDate: training.date,
+            }))
+        )),
+        [scopedTrainings],
+    );
+
+    const exerciseScoreRows = useMemo(
+        () => scopedTrainings.flatMap((training) => (
+            (training.evaluation?.exerciseScores ?? []).map((score) => ({
+                ...score,
+                trainingId: training.id,
+                trainingTitle: training.title,
+                trainingDate: training.date,
+                blockTitle: training.plan?.blocks.find((block) => block.id === score.blockId)?.title || 'Ejercicio',
+            }))
+        )),
+        [scopedTrainings],
+    );
+
+    const technicalEventSummary = useMemo(() => {
+        const grouped = new Map<TrainingTechnicalEventType, {
+            type: TrainingTechnicalEventType;
+            total: number;
+            successful: number;
+            failed: number;
+            lostBalls: number;
+            errors: number;
+            rows: number;
+        }>();
+
+        trainingTechnicalEvents.forEach((event) => {
+            const current = grouped.get(event.type) ?? {
+                type: event.type,
+                total: 0,
+                successful: 0,
+                failed: 0,
+                lostBalls: 0,
+                errors: 0,
+                rows: 0,
+            };
+            current.total += getTechnicalEventTotal(event);
+            current.successful += event.successful;
+            current.failed += event.failed;
+            current.lostBalls += event.lostBalls;
+            current.errors += event.errors;
+            current.rows += 1;
+            grouped.set(event.type, current);
+        });
+
+        return Array.from(grouped.values()).sort((left, right) => right.total - left.total);
+    }, [trainingTechnicalEvents]);
+
+    const globalTechnicalEffectiveness = useMemo(
+        () => percentFromParts(
+            technicalEventSummary.reduce((sum, item) => sum + item.successful, 0),
+            technicalEventSummary.reduce((sum, item) => sum + item.total, 0),
+        ),
+        [technicalEventSummary],
+    );
+
+    const playerAnalysisRows = useMemo(
+        () => scopedPlayers.map((player) => {
+            const playerTrainings = scopedTrainings.filter((training) => (
+                training.players?.some((snapshot) => snapshot.id === player.id)
+            ));
+            const attendanceRows = playerTrainings
+                .map((training) => training.attendance?.[player.id])
+                .filter(Boolean);
+            const presentRows = attendanceRows.filter(isPresentAttendanceState).length;
+            const playerTests = scopedTestRecords.filter((record) => record.personId === player.id);
+            const playerGymRows = performanceRecords.filter((record) => record.moduleKey === 'gym' && record.playerId === player.id);
+
+            return {
+                player,
+                attendance: percentFromParts(presentRows, playerTrainings.length || attendanceRows.length),
+                trainings: playerTrainings.length,
+                tests: playerTests.length,
+                gymRows: playerGymRows.length,
+                latestTest: playerTests[0] ?? null,
+                latestGym: playerGymRows
+                    .slice()
+                    .sort((left, right) => new Date(right.eventDate).getTime() - new Date(left.eventDate).getTime())[0] ?? null,
+            };
+        }).sort((left, right) => (right.attendance ?? -1) - (left.attendance ?? -1)),
+        [performanceRecords, scopedPlayers, scopedTestRecords, scopedTrainings],
+    );
+
+    const activeAlertCount = useMemo(
+        () => rugbyInsights.alerts.filter((alert) => alert.level !== 'ok').length + injuryReports,
+        [injuryReports, rugbyInsights.alerts],
+    );
+
+    const loadTrend = useMemo(() => {
+        const rows = evaluatedTrainings
+            .filter((training) => typeof training.evaluation?.loadTotal === 'number')
+            .sort((left, right) => new Date(left.date).getTime() - new Date(right.date).getTime())
+            .slice(-6);
+        const maxLoad = Math.max(...rows.map((training) => training.evaluation?.loadTotal ?? 0), 1);
+
+        return rows.map((training) => ({
+            id: training.id,
+            label: formatShortDate(training.date),
+            load: training.evaluation?.loadTotal ?? 0,
+            height: Math.max(((training.evaluation?.loadTotal ?? 0) / maxLoad) * 100, 8),
+            readiness: Math.max(10, Math.min(88, ((training.evaluation?.energy ?? 5) / 10) * 100)),
+        }));
+    }, [evaluatedTrainings]);
+
+    const performanceKpis = [
+        {
+            label: 'Carga promedio',
+            value: formatAverage(averageLoad),
+            detail: `${evaluatedTrainings.length} sesiones evaluadas`,
+        },
+        {
+            label: 'Asistencia promedio',
+            value: formatAverage(attendanceAverage, '%'),
+            detail: `${scopedTrainings.length} entrenamientos filtrados`,
+        },
+        {
+            label: 'RPE promedio',
+            value: formatAverage(averageRpe),
+            detail: `Fatiga ${formatAverage(averageFatigue)}`,
+        },
+        {
+            label: 'Scrum',
+            value: formatPercent(rugbyInsights.scrumEffectiveness),
+            detail: `${rugbyInsights.matchRows} filas tecnicas`,
+        },
+        {
+            label: 'Line',
+            value: formatPercent(rugbyInsights.lineEffectiveness),
+            detail: `${rugbyInsights.matchRows} filas tecnicas`,
+        },
+        {
+            label: 'Patadas',
+            value: formatPercent(rugbyInsights.kickEffectiveness),
+            detail: rugbyInsights.topKicker ? `Top ${rugbyInsights.topKicker}` : 'sin top definido',
+        },
+        {
+            label: 'Trabajo tecnico',
+            value: formatPercent(globalTechnicalEffectiveness),
+            detail: `${trainingTechnicalEvents.length} eventos de entrenamiento`,
+        },
+        {
+            label: 'Penales',
+            value: String(rugbyInsights.penalties),
+            detail: `${rugbyInsights.triesFor}/${rugbyInsights.triesAgainst} tries`,
+        },
+        {
+            label: 'Alertas',
+            value: String(activeAlertCount),
+            detail: activeAlertCount > 0 ? 'requieren lectura del staff' : 'sin riesgos criticos',
+        },
+    ];
+
     const weightCoverageDetail = `${playersWithWeightLoaded}/${scopedPlayers.length || 0} jugadores con peso real`;
     const testCoverageDetail = selectedTestDefinition
         ? `${selectedTestCard?.playersWithResult || 0}/${scopedPlayers.length || 0} jugadores con ${selectedTestDefinition.label}`
@@ -1802,27 +2126,19 @@ export function ClubPerformanceTab({
 
     return (
         <div className={styles.shell}>
-            <ClubStaffPerformanceSuite
-                clubId={clubId}
-                clubName={clubName}
-                divisions={divisions}
-                players={players}
-                staff={staff}
-                dashboardData={dashboardData}
-            />
-
             <section className={styles.hero}>
                 <div className={styles.heroCopy}>
-                    <span className={styles.kicker}>Panel PF</span>
-                    <h2>Gimnasio y testeos</h2>
+                    <span className={styles.kicker}>Analisis del club</span>
+                    <h2>Rendimiento</h2>
                     <p>
-                        Carga de sesiones de gimnasio, planilla para armar el plan, seguimiento de pesos y cards de testeos fisicos definidos por el PF.
+                        Analiza la evolucion fisica, tecnica y competitiva del club. Aca se consolidan datos de entrenamientos, gimnasio,
+                        testeos, partidos y planillas del staff.
                     </p>
                     <p>
                         {clubName}
-                        {selectedDivision ? ` · ${getDivisionLabel(selectedDivision, clubName)}` : ''}
-                        {selectedRoster ? ` · ${selectedRoster.label}` : ''}
-                        {` · Temporada ${selectedSeason}`}
+                        {selectedDivision ? ` / ${getDivisionLabel(selectedDivision, clubName)}` : ''}
+                        {selectedRoster ? ` / ${selectedRoster.label}` : ''}
+                        {` / Temporada ${selectedSeason}`}
                     </p>
                 </div>
 
@@ -1830,17 +2146,25 @@ export function ClubPerformanceTab({
                     <button
                         type="button"
                         className={cn('btn btn-primary', styles.actionButton)}
-                        onClick={() => setCreateOpen(true)}
+                        onClick={() => onTabChange?.('entrenamientos')}
                     >
-                        <Plus className="w-4 h-4" />
-                        Nueva sesion de gimnasio
+                        <ChevronRight className="w-4 h-4" />
+                        Abrir Entrenamiento
+                    </button>
+                    <button
+                        type="button"
+                        className={cn('btn', styles.actionButton)}
+                        onClick={() => setActiveSection('trabajo')}
+                    >
+                        <BarChart3 className="w-4 h-4" />
+                        Ver trabajado
                     </button>
                     <button
                         type="button"
                         className={cn('btn', styles.actionButton)}
                         onClick={() => { void handleRefreshAll(); }}
                     >
-                        <RefreshCw className={cn('w-4 h-4', (loadingTrainings || loadingGymPlans || loadingRecords) && styles.spinning)} />
+                        <RefreshCw className={cn('w-4 h-4', isBusy && styles.spinning)} />
                         Sincronizar
                     </button>
                 </div>
@@ -1882,7 +2206,7 @@ export function ClubPerformanceTab({
                     </select>
                 </label>
                 <label className={styles.filterField}>
-                    <span>Proximo partido</span>
+                    <span>Partido</span>
                     <input
                         value={upcomingMatch ? `${formatDateTime(upcomingMatch.dateTime)} vs ${upcomingMatch.opponentShortName || upcomingMatch.opponentName}` : 'Sin partido cargado'}
                         readOnly
@@ -1890,38 +2214,33 @@ export function ClubPerformanceTab({
                 </label>
             </section>
 
-            {(trainingError || gymPlanError || recordsError || testDefinitionError) ? (
+            {(trainingError || gymPlanError || recordsError || testDefinitionError || performanceRecordsError) ? (
                 <div className={styles.inlineNotice}>
-                    <span>{trainingError || gymPlanError || recordsError || testDefinitionError}</span>
+                    <span>{trainingError || gymPlanError || recordsError || testDefinitionError || performanceRecordsError}</span>
                 </div>
             ) : null}
 
             <section className={styles.kpiGrid}>
-                <div className={styles.kpiCard}>
-                    <span className={styles.kpiLabel}>Sesiones gym</span>
-                    <strong className={styles.kpiValue}>{gymSessions.length}</strong>
-                    <span className={styles.kpiDetail}>sesiones reales persistidas</span>
-                </div>
-                <div className={styles.kpiCard}>
-                    <span className={styles.kpiLabel}>Sesiones con plan</span>
-                    <strong className={styles.kpiValue}>{sessionsWithPlan}/{gymSessions.length || 0}</strong>
-                    <span className={styles.kpiDetail}>{planRowsPersisted} filas de plan guardadas · {visibleGymPlans.length} planes reutilizables</span>
-                </div>
-                <div className={styles.kpiCard}>
-                    <span className={styles.kpiLabel}>Pesos cargados</span>
-                    <strong className={styles.kpiValue}>{playersWithWeightLoaded}</strong>
-                    <span className={styles.kpiDetail}>{weightCoverageDetail}</span>
-                </div>
-                <div className={styles.kpiCard}>
-                    <span className={styles.kpiLabel}>Testeos definidos</span>
-                    <strong className={styles.kpiValue}>{visibleTestDefinitions.length}</strong>
-                    <span className={styles.kpiDetail}>{selectedMetricRecords.length} resultados del test activo</span>
-                </div>
-                <div className={styles.kpiCard}>
-                    <span className={styles.kpiLabel}>Plantel filtrado</span>
-                    <strong className={styles.kpiValue}>{scopedPlayers.length}</strong>
-                    <span className={styles.kpiDetail}>{scopedStaff.length} staff visibles</span>
-                </div>
+                {performanceKpis
+                    .filter((kpi) => kpi.value !== '--' && kpi.value !== '--%')
+                    .map((kpi) => (
+                        <button
+                            key={kpi.label}
+                            type="button"
+                            className={styles.kpiCard}
+                            onClick={() => {
+                                if (['Scrum', 'Line', 'Patadas', 'Penales'].includes(kpi.label)) setActiveSection('rugby');
+                                else if (kpi.label === 'Trabajo tecnico') setActiveSection('trabajo');
+                                else if (kpi.label === 'Asistencia promedio') setActiveSection('equipo');
+                                else if (kpi.label === 'Alertas') setActiveSection('resumen');
+                                else setActiveSection('tiempo');
+                            }}
+                        >
+                            <span className={styles.kpiLabel}>{kpi.label}</span>
+                            <strong className={styles.kpiValue}>{kpi.value}</strong>
+                            <span className={styles.kpiDetail}>{kpi.detail}</span>
+                        </button>
+                    ))}
             </section>
 
             <div className={styles.sectionTabs}>
@@ -1930,6 +2249,7 @@ export function ClubPerformanceTab({
                         key={section.id}
                         type="button"
                         className={cn(styles.sectionTab, activeSection === section.id && styles.sectionTabActive)}
+                        aria-pressed={activeSection === section.id}
                         onClick={() => setActiveSection(section.id)}
                     >
                         {section.label}
@@ -1938,26 +2258,563 @@ export function ClubPerformanceTab({
             </div>
 
             {isBusy ? (
-                <div className={styles.emptyState}>Cargando panel de gimnasio...</div>
+                <div className={styles.emptyState}>Cargando rendimiento...</div>
             ) : null}
 
-            {!isBusy && activeSection === 'sesiones' ? (
+            {!isBusy && activeSection === 'resumen' ? (
+                <div className={styles.sectionStack}>
+                    <div className={styles.summaryGrid}>
+                        <section className={styles.panel}>
+                            <div className={styles.panelHead}>
+                                <div>
+                                    <span className={styles.panelKicker}>Resumen ejecutivo</span>
+                                    <h3>Tendencia de carga y respuesta del plantel</h3>
+                                </div>
+                                <div className={styles.panelMeta}>
+                                    <span>Filtro activo</span>
+                                    <strong>{selectedSeason}</strong>
+                                </div>
+                            </div>
+
+                            {loadTrend.length === 0 ? (
+                                <div className={styles.emptyState}>
+                                    Todavia no hay cierres de entrenamiento con carga para mostrar tendencia.
+                                </div>
+                            ) : (
+                                <>
+                                    <div className={styles.trendGrid}>
+                                        {loadTrend.map((item) => (
+                                            <div key={item.id} className={styles.trendColumn}>
+                                                <div className={styles.trendTrack}>
+                                                    <div className={styles.trendBar} style={{ height: `${item.height}%` }} />
+                                                    <span className={styles.trendReadiness} style={{ bottom: `${item.readiness}%` }} />
+                                                </div>
+                                                <strong>{item.load}</strong>
+                                                <span>{item.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className={styles.metricRibbon}>
+                                        <article>
+                                            <span>Carga</span>
+                                            <strong>{formatAverage(averageLoad)}</strong>
+                                            <small>promedio del filtro</small>
+                                        </article>
+                                        <article>
+                                            <span>RPE</span>
+                                            <strong>{formatAverage(averageRpe)}</strong>
+                                            <small>percepcion media</small>
+                                        </article>
+                                        <article>
+                                            <span>Fatiga</span>
+                                            <strong>{formatAverage(averageFatigue)}</strong>
+                                            <small>post sesion</small>
+                                        </article>
+                                        <article>
+                                            <span>Asistencia</span>
+                                            <strong>{formatAverage(attendanceAverage, '%')}</strong>
+                                            <small>confirmados</small>
+                                        </article>
+                                    </div>
+                                </>
+                            )}
+                        </section>
+
+                        <aside className={styles.panel}>
+                            <div className={styles.panelHead}>
+                                <div>
+                                    <span className={styles.panelKicker}>Alertas</span>
+                                    <h3>Lecturas principales</h3>
+                                </div>
+                            </div>
+                            <div className={styles.alertList}>
+                                {rugbyInsights.alerts.map((alert) => (
+                                    <button
+                                        key={alert.id}
+                                        type="button"
+                                        className={styles.alertItem}
+                                        onClick={() => setActiveSection('rugby')}
+                                    >
+                                        <span className={cn(
+                                            styles.alertStripe,
+                                            alert.level === 'ok' && styles.levelGreen,
+                                            alert.level === 'warning' && styles.levelYellow,
+                                            alert.level === 'danger' && styles.levelRed,
+                                        )} />
+                                        <div>
+                                            <strong>{alert.title}</strong>
+                                            <p>{alert.detail}</p>
+                                        </div>
+                                    </button>
+                                ))}
+                                {injuryReports > 0 ? (
+                                    <button type="button" className={styles.alertItem} onClick={() => setActiveSection('fisico')}>
+                                        <span className={cn(styles.alertStripe, styles.levelYellow)} />
+                                        <div>
+                                            <strong>Incidencias fisicas</strong>
+                                            <p>{injuryReports} sesiones tienen molestias o lesiones reportadas.</p>
+                                        </div>
+                                    </button>
+                                ) : null}
+                            </div>
+                        </aside>
+                    </div>
+
+                    <div className={styles.summarySecondary}>
+                        <section className={styles.panel}>
+                            <div className={styles.panelHead}>
+                                <div>
+                                    <span className={styles.panelKicker}>Top mejoras</span>
+                                    <h3>Metricas destacadas</h3>
+                                </div>
+                            </div>
+                            <div className={styles.cardGrid}>
+                                <button type="button" className={styles.infoCard} onClick={() => setActiveSection('rugby')}>
+                                    <span>Rugby</span>
+                                    <strong>{formatPercent(rugbyInsights.kickEffectiveness)}</strong>
+                                    <p>efectividad de patadas cargadas</p>
+                                </button>
+                                <button type="button" className={styles.infoCard} onClick={() => setActiveSection('jugador')}>
+                                    <span>Testeos</span>
+                                    <strong>{playersWithAnyTest}</strong>
+                                    <p>jugadores con al menos un resultado</p>
+                                </button>
+                                <button type="button" className={styles.infoCard} onClick={() => setActiveSection('tiempo')}>
+                                    <span>Pesos</span>
+                                    <strong>{playersWithWeightLoaded}</strong>
+                                    <p>{weightCoverageDetail}</p>
+                                </button>
+                            </div>
+                        </section>
+
+                        <section className={styles.panel}>
+                            <div className={styles.panelHead}>
+                                <div>
+                                    <span className={styles.panelKicker}>Proximas acciones</span>
+                                    <h3>Donde seguir</h3>
+                                </div>
+                            </div>
+                            <div className={styles.detailStack}>
+                                <button type="button" className={styles.sessionStateItem} onClick={() => setActiveSection('rugby')}>
+                                    <strong>Revisar metricas tecnicas</strong>
+                                    <span>Scrum, line, patadas, penales y tries</span>
+                                </button>
+                                <button type="button" className={styles.sessionStateItem} onClick={() => setActiveSection('tiempo')}>
+                                    <strong>Mirar carga fisica</strong>
+                                    <span>RPE, fatiga, lesiones y GPS manual</span>
+                                </button>
+                                <button type="button" className={styles.sessionStateItem} onClick={() => setActiveSection('trabajo')}>
+                                    <strong>Auditar gimnasio</strong>
+                                    <span>Historial, planes y cumplimiento por sesion</span>
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            ) : null}
+
+            {!isBusy && activeSection === 'tiempo' ? (
+                <div className={styles.sectionStack}>
+                    <section className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Evolucion</span>
+                                <h3>Carga, asistencia y respuesta en el tiempo</h3>
+                            </div>
+                            <div className={styles.panelMeta}>
+                                <span>Periodo</span>
+                                <strong>{selectedSeason}</strong>
+                            </div>
+                        </div>
+
+                        {loadTrend.length === 0 ? (
+                            <div className={styles.emptyState}>Todavia no hay suficientes cierres para graficar evolucion.</div>
+                        ) : (
+                            <div className={styles.trendGrid}>
+                                {loadTrend.map((item) => (
+                                    <div key={item.id} className={styles.trendColumn}>
+                                        <div className={styles.trendTrack}>
+                                            <div className={styles.trendBar} style={{ height: `${item.height}%` }} />
+                                            <span className={styles.trendReadiness} style={{ bottom: `${item.readiness}%` }} />
+                                        </div>
+                                        <strong>{item.load}</strong>
+                                        <span>{item.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className={styles.metricRibbon}>
+                            <article>
+                                <span>Carga promedio</span>
+                                <strong>{formatAverage(averageLoad)}</strong>
+                                <small>sesiones evaluadas</small>
+                            </article>
+                            <article>
+                                <span>Asistencia</span>
+                                <strong>{formatAverage(attendanceAverage, '%')}</strong>
+                                <small>presentes + tarde</small>
+                            </article>
+                            <article>
+                                <span>Gimnasio</span>
+                                <strong>{performanceRecords.filter((record) => record.moduleKey === 'gym').length}</strong>
+                                <small>filas de carga</small>
+                            </article>
+                            <article>
+                                <span>Testeos</span>
+                                <strong>{scopedTestRecords.length}</strong>
+                                <small>registros fisicos</small>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Ultimos cierres</span>
+                                <h3>Entrenamientos que alimentan el grafico</h3>
+                            </div>
+                        </div>
+                        <div className={styles.sessionList}>
+                            {evaluatedTrainings.slice(0, 8).map((training) => (
+                                <article key={training.id} className={styles.sessionCard}>
+                                    <div className={styles.sessionCardTop}>
+                                        <div>
+                                            <strong>{training.title}</strong>
+                                            <p>{formatDateTime(training.date)}</p>
+                                        </div>
+                                        <span className={styles.statusBadge}>{training.type}</span>
+                                    </div>
+                                    <div className={styles.sessionProgressRow}>
+                                        <span>Carga {training.evaluation?.loadTotal ?? '--'}</span>
+                                        <span>RPE {training.evaluation?.rpe ?? '--'}</span>
+                                        <span>Fatiga {training.evaluation?.fatigue ?? '--'}</span>
+                                    </div>
+                                </article>
+                            ))}
+                            {evaluatedTrainings.length === 0 ? (
+                                <div className={styles.emptyState}>Sin entrenamientos cerrados en el filtro.</div>
+                            ) : null}
+                        </div>
+                    </section>
+                </div>
+            ) : null}
+
+            {!isBusy && activeSection === 'jugador' ? (
                 <div className={styles.workspaceGrid}>
                     <section className={styles.panel}>
                         <div className={styles.panelHead}>
                             <div>
-                                <span className={styles.panelKicker}>Agenda de gym</span>
-                                <h3>Sesiones reales del PF</h3>
+                                <span className={styles.panelKicker}>Jugador</span>
+                                <h3>Lectura individual del plantel</h3>
                             </div>
                             <div className={styles.panelMeta}>
-                                <span>Fuente</span>
-                                <strong>{gymSessions.length} sesiones</strong>
+                                <span>Plantel</span>
+                                <strong>{scopedPlayers.length}</strong>
+                            </div>
+                        </div>
+
+                        <div className={styles.tableWrap}>
+                            <table className={styles.dataTable}>
+                                <thead>
+                                    <tr>
+                                        <th>Jugador</th>
+                                        <th>Asistencia</th>
+                                        <th>Entrenamientos</th>
+                                        <th>Testeos</th>
+                                        <th>Gym</th>
+                                        <th>Ultimo fisico</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {playerAnalysisRows.map((row) => (
+                                        <tr key={row.player.id}>
+                                            <td>
+                                                <button type="button" className={styles.tablePlayerButton}>
+                                                    <strong>{getPersonName(row.player)}</strong>
+                                                    <small>{row.player.position || row.player.division_name || 'Sin puesto'}</small>
+                                                </button>
+                                            </td>
+                                            <td>{formatPercent(row.attendance)}</td>
+                                            <td>{row.trainings}</td>
+                                            <td>{row.tests}</td>
+                                            <td>{row.gymRows}</td>
+                                            <td>{row.latestTest ? `${row.latestTest.metricLabel}: ${formatMetricValue(row.latestTest.valueNumeric, row.latestTest.unit)}` : '--'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <aside className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Comparativa</span>
+                                <h3>Contra promedio del equipo</h3>
+                            </div>
+                        </div>
+                        <div className={styles.metricList}>
+                            {playerAnalysisRows.slice(0, 8).map((row) => (
+                                <div key={row.player.id} className={styles.metricListItem}>
+                                    <div>
+                                        <strong>{getPersonName(row.player)}</strong>
+                                        <p>{row.trainings} entrenamientos / {row.gymRows} cargas gym</p>
+                                    </div>
+                                    <div className={styles.metricListValue}>
+                                        <strong>{formatPercent(row.attendance)}</strong>
+                                        <small>{row.latestGym ? `Gym ${formatShortDate(row.latestGym.eventDate)}` : 'Sin gym reciente'}</small>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </aside>
+                </div>
+            ) : null}
+
+            {!isBusy && activeSection === 'equipo' ? (
+                <div className={styles.sectionStack}>
+                    <section className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Equipo</span>
+                                <h3>Indicadores colectivos</h3>
+                            </div>
+                        </div>
+                        <div className={styles.metricRibbon}>
+                            <article>
+                                <span>Asistencia</span>
+                                <strong>{formatAverage(attendanceAverage, '%')}</strong>
+                                <small>promedio del filtro</small>
+                            </article>
+                            <article>
+                                <span>Efectividad tecnica</span>
+                                <strong>{formatPercent(globalTechnicalEffectiveness)}</strong>
+                                <small>eventos de entrenamiento</small>
+                            </article>
+                            <article>
+                                <span>Jugadas / secuencias</span>
+                                <strong>{trainingTechnicalEvents.filter((event) => event.type === 'jugadas' || event.type === 'secuencias').length}</strong>
+                                <small>filas trabajadas</small>
+                            </article>
+                            <article>
+                                <span>Errores</span>
+                                <strong>{trainingTechnicalEvents.reduce((sum, event) => sum + event.errors + event.lostBalls, 0)}</strong>
+                                <small>perdidas y errores</small>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Tendencias</span>
+                                <h3>Aspectos con mayor volumen</h3>
+                            </div>
+                        </div>
+                        <div className={styles.cardGrid}>
+                            {technicalEventSummary.map((item) => (
+                                <button key={item.type} type="button" className={styles.infoCard} onClick={() => setActiveSection('trabajo')}>
+                                    <span>{getTechnicalEventTypeLabel(item.type)}</span>
+                                    <strong>{formatPercent(percentFromParts(item.successful, item.total))}</strong>
+                                    <p>{item.total} repeticiones / {item.errors + item.lostBalls} errores o perdidas</p>
+                                </button>
+                            ))}
+                            {technicalEventSummary.length === 0 ? (
+                                <div className={styles.emptyState}>Carga eventos especificos desde Entrenamiento para ver tendencias tecnicas.</div>
+                            ) : null}
+                        </div>
+                    </section>
+                </div>
+            ) : null}
+
+            {!isBusy && activeSection === 'trabajo' ? (
+                <div className={styles.workspaceGrid}>
+                    <section className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Lo trabajado</span>
+                                <h3>Volumen y resultado de entrenamientos</h3>
+                            </div>
+                            <div className={styles.panelMeta}>
+                                <span>Eventos</span>
+                                <strong>{trainingTechnicalEvents.length}</strong>
+                            </div>
+                        </div>
+
+                        {technicalEventSummary.length === 0 ? (
+                            <div className={styles.emptyState}>Todavia no hay eventos de patadas, jugadas, scrums, lines o secuencias cargados.</div>
+                        ) : (
+                            <div className={styles.metricList}>
+                                {technicalEventSummary.map((item) => (
+                                    <div key={item.type} className={styles.metricListItem}>
+                                        <div>
+                                            <strong>{getTechnicalEventTypeLabel(item.type)}</strong>
+                                            <p>{item.rows} cargas / {item.total} repeticiones</p>
+                                        </div>
+                                        <div className={styles.metricListValue}>
+                                            <strong>{formatPercent(percentFromParts(item.successful, item.total))}</strong>
+                                            <small>{item.failed} fallidas / {item.lostBalls} perdidas</small>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </section>
+
+                    <aside className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Ultimas filas</span>
+                                <h3>Detalle de eventos y ejercicios</h3>
+                            </div>
+                        </div>
+                        <div className={styles.detailStack}>
+                            {trainingTechnicalEvents.slice(0, 8).map((event) => (
+                                <article key={`${event.trainingId}-${event.id}`} className={styles.detailCard}>
+                                    <strong>{event.name || getTechnicalEventTypeLabel(event.type)}</strong>
+                                    <p>{event.trainingTitle} / {formatShortDate(event.trainingDate)} / {event.zone || 'sin zona'}</p>
+                                    <div className={styles.tagCloud}>
+                                        <span className={styles.tag}>{getTechnicalEventTypeLabel(event.type)}</span>
+                                        <span className={styles.tag}>{formatPercent(getTechnicalEventEffectiveness(event))}</span>
+                                        <span className={styles.tag}>{getTechnicalEventTotal(event)} reps</span>
+                                    </div>
+                                </article>
+                            ))}
+                            {exerciseScoreRows.slice(0, 4).map((score) => (
+                                <article key={`${score.trainingId}-${score.blockId}`} className={styles.detailCard}>
+                                    <strong>{score.blockTitle}</strong>
+                                    <p>{score.trainingTitle} / puntaje {score.score}/10 / {score.result}</p>
+                                </article>
+                            ))}
+                        </div>
+                    </aside>
+                </div>
+            ) : null}
+
+            {!isBusy && (activeSection === 'rugby' || activeSection === 'planillas') ? (
+                <ClubStaffPerformanceSuite
+                    clubId={clubId}
+                    clubName={clubName}
+                    divisions={divisions}
+                    players={players}
+                    staff={staff}
+                    dashboardData={dashboardData}
+                    focus={activeSection === 'planillas' ? 'sheets' : 'rugby'}
+                />
+            ) : null}
+
+            {!isBusy && activeSection === 'fisico' ? (
+                <div className={styles.sectionStack}>
+                    <section className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Fisico</span>
+                                <h3>Carga, fatiga y estado del plantel</h3>
+                            </div>
+                            <div className={styles.panelMeta}>
+                                <span>Sesiones evaluadas</span>
+                                <strong>{evaluatedTrainings.length}</strong>
+                            </div>
+                        </div>
+                        <div className={styles.metricRibbon}>
+                            <article>
+                                <span>Carga promedio</span>
+                                <strong>{formatAverage(averageLoad)}</strong>
+                                <small>entrenamientos cerrados</small>
+                            </article>
+                            <article>
+                                <span>RPE promedio</span>
+                                <strong>{formatAverage(averageRpe)}</strong>
+                                <small>percepcion del esfuerzo</small>
+                            </article>
+                            <article>
+                                <span>Fatiga</span>
+                                <strong>{formatAverage(averageFatigue)}</strong>
+                                <small>estado post sesion</small>
+                            </article>
+                            <article>
+                                <span>Incidencias</span>
+                                <strong>{injuryReports}</strong>
+                                <small>lesiones o molestias</small>
+                            </article>
+                        </div>
+                    </section>
+
+                    <div className={styles.workspaceGrid}>
+                        <section className={styles.panel}>
+                            <div className={styles.panelHead}>
+                                <div>
+                                    <span className={styles.panelKicker}>Carga semanal</span>
+                                    <h3>Entrenamientos con cierre</h3>
+                                </div>
+                            </div>
+                            {evaluatedTrainings.length === 0 ? (
+                                <div className={styles.emptyState}>Cuando cierres sesiones, aca vas a ver carga, RPE y fatiga.</div>
+                            ) : (
+                                <div className={styles.sessionList}>
+                                    {evaluatedTrainings.slice(0, 8).map((training) => (
+                                        <article key={training.id} className={styles.sessionCard}>
+                                            <div className={styles.sessionCardTop}>
+                                                <div>
+                                                    <strong>{training.title}</strong>
+                                                    <p>{formatDateTime(training.date)}</p>
+                                                </div>
+                                                <span className={styles.statusBadge}>{training.type}</span>
+                                            </div>
+                                            <div className={styles.sessionProgressRow}>
+                                                <span>Carga {training.evaluation?.loadTotal ?? '--'}</span>
+                                                <span>RPE {training.evaluation?.rpe ?? '--'}</span>
+                                                <span>Fatiga {training.evaluation?.fatigue ?? '--'}</span>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+
+                        <aside className={styles.panel}>
+                            <div className={styles.panelHead}>
+                                <div>
+                                    <span className={styles.panelKicker}>Alertas PF</span>
+                                    <h3>Riesgos fisicos</h3>
+                                </div>
+                            </div>
+                            <div className={styles.detailStack}>
+                                <article className={styles.detailCard}>
+                                    <strong>GPS manual</strong>
+                                    <p>Los registros externos y privados de metros, velocidad y sprints se administran desde Planillas.</p>
+                                    <button type="button" className={styles.inlineGhost} onClick={() => setActiveSection('planillas')}>
+                                        Abrir planillas
+                                    </button>
+                                </article>
+                                <article className={styles.detailCard}>
+                                    <strong>Molestias reportadas</strong>
+                                    <p>{injuryReports > 0 ? `${injuryReports} sesiones requieren seguimiento.` : 'Sin incidencias en el filtro actual.'}</p>
+                                </article>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            ) : null}
+
+            {!isBusy && activeSection === 'gimnasio' ? (
+                <div className={styles.workspaceGrid}>
+                    <section className={styles.panel}>
+                        <div className={styles.panelHead}>
+                            <div>
+                                <span className={styles.panelKicker}>Gimnasio</span>
+                                <h3>Historial de sesiones fisicas</h3>
+                            </div>
+                            <div className={styles.panelMeta}>
+                                <span>Seguimiento</span>
+                                <strong>{sessionsWithPlan}/{gymSessions.length || 0} con plan</strong>
                             </div>
                         </div>
 
                         {gymSessions.length === 0 ? (
                             <div className={styles.emptyState}>
-                                No hay sesiones de gimnasio en este filtro. Crea la primera desde este panel.
+                                No hay sesiones de gimnasio en este filtro. Podes crear un registro fisico o abrir una sesion completa desde Entrenamientos.
                             </div>
                         ) : (
                             <div className={styles.sessionList}>
@@ -2064,7 +2921,7 @@ export function ClubPerformanceTab({
                                         Abrir workspace completo
                                         <ChevronRight className="w-4 h-4" />
                                     </Link>
-                                    <button type="button" className={styles.inlineGhost} onClick={() => setActiveSection('plan')}>
+                                    <button type="button" className={styles.inlineGhost} onClick={() => setActiveSection('gimnasio')}>
                                         Ir a la planilla de plan
                                     </button>
                                 </div>
@@ -2074,13 +2931,13 @@ export function ClubPerformanceTab({
                 </div>
             ) : null}
 
-            {!isBusy && activeSection === 'plan' ? (
+            {!isBusy && activeSection === 'gimnasio' ? (
                 <div className={styles.sectionStack}>
                     <section className={styles.panel}>
                         <div className={styles.panelHead}>
                             <div>
-                                <span className={styles.panelKicker}>Planilla PF</span>
-                                <h3>Armar el plan de gimnasio</h3>
+                                <span className={styles.panelKicker}>Planes reutilizables</span>
+                                <h3>Plan de gimnasio y seguimiento</h3>
                             </div>
                             <div className={styles.panelMeta}>
                                 <span>Sesion activa</span>
@@ -2287,7 +3144,7 @@ export function ClubPerformanceTab({
                                 </div>
                                 <div className={styles.panelMeta}>
                                     <span>Fuente real</span>
-                                    <strong>{visibleGymPlans.length} planes</strong>
+                                    <strong>{visibleGymPlans.length} planes / {planRowsPersisted} filas</strong>
                                 </div>
                             </div>
 

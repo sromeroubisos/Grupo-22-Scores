@@ -1,8 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
 } from '@/lib/server/externalTournamentOverrides';
+import {
+  DEFAULT_MATCH_POINTS_RULES,
+  resolveMatchPointsRules,
+} from '@/lib/standings/matchPointsPreview';
 import { parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
@@ -75,6 +78,12 @@ type ClubRosterCache = {
   byName: Map<string, ClubRosterEntry>;
 };
 
+type MatchPointsRulesContext = {
+  phase_id?: string | null;
+  round_id?: string | null;
+  tournament_id?: string | null;
+};
+
 type TeamResolutionContext = {
   team: TeamKey;
   clubId: string | null;
@@ -117,6 +126,49 @@ export type MatchCenterLineupsInput = {
 const EMPTY_LINEUPS = { home: [] as PersistedLineupPlayer[], away: [] as PersistedLineupPlayer[] };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CLOCK_SNAPSHOT_EVENT_TYPE = '__clock_state__';
+
+async function fetchMatchPointsRules(client: SupabaseLike, match: MatchPointsRulesContext) {
+  try {
+    let phaseId = match.phase_id ?? null;
+
+    if (!phaseId && match.round_id) {
+      const { data: round } = await client
+        .from('tournament_rounds')
+        .select('phase_id')
+        .eq('id', match.round_id)
+        .single();
+      phaseId = round?.phase_id ?? null;
+    }
+
+    let phaseSettings: Record<string, unknown> | null = null;
+    let tournamentId = match.tournament_id ?? null;
+
+    if (phaseId) {
+      const { data: phase } = await client
+        .from('tournament_phases')
+        .select('settings, tournament_id')
+        .eq('id', phaseId)
+        .single();
+
+      phaseSettings = (phase?.settings as Record<string, unknown> | null) ?? null;
+      tournamentId = phase?.tournament_id ?? tournamentId;
+    }
+
+    let tournamentRuleset: Record<string, unknown> | null = null;
+    if (tournamentId) {
+      const { data: tournament } = await client
+        .from('tournaments')
+        .select('ruleset')
+        .eq('id', tournamentId)
+        .single();
+      tournamentRuleset = (tournament?.ruleset as Record<string, unknown> | null) ?? null;
+    }
+
+    return resolveMatchPointsRules(phaseSettings, tournamentRuleset);
+  } catch {
+    return DEFAULT_MATCH_POINTS_RULES;
+  }
+}
 
 function isMissingMatchEventsTableError(error: SupabaseLikeError) {
   if (!error) return false;
@@ -1281,9 +1333,10 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
   const resolvedTournament = tournamentRaw
     ? applyExternalTournamentOverride(tournamentRaw, tournamentOverride)
     : null;
-  const [homeDivisionId, awayDivisionId] = await Promise.all([
+  const [homeDivisionId, awayDivisionId, pointsRules] = await Promise.all([
     resolveTeamDivisionId(client, data as MatchContextRow, 'home'),
     resolveTeamDivisionId(client, data as MatchContextRow, 'away'),
+    fetchMatchPointsRules(client, data as MatchPointsRulesContext),
   ]);
   const [homeRoster, awayRoster] = await Promise.all([
     fetchClubRosterCache(client, normalizeText((data as any).home_club_id) || null, homeDivisionId),
@@ -1315,6 +1368,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
         : null,
       homeRoster: toPublicRosterEntries(homeRoster),
       awayRoster: toPublicRosterEntries(awayRoster),
+      pointsRules,
       events,
       lineups: normalizeLineups((data as any).lineups),
       replay_url: (data as any).replay_url ?? null,

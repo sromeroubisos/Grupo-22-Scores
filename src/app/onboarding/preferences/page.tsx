@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useAuth } from '@/context/AuthContext'
 import { setOnboardingStorageStatus } from '@/lib/onboardingStatus'
+import { sanitizeReturnTo } from '@/app/login/redirects'
 
 import styles from './onboarding.module.css'
 
@@ -21,10 +22,6 @@ interface PreferencesResponse {
     favoriteSports: string[]
 }
 
-function sanitizeReturnTo(raw: string | null): string {
-    if (!raw) return '/'
-    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
-}
 
 async function readJson<T>(response: Response): Promise<T> {
     const payload = await response.json().catch(() => null)
@@ -56,7 +53,7 @@ function OnboardingPreferencesContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const isEditMode = searchParams.get('edit') === 'true'
-    const returnTo = sanitizeReturnTo(searchParams.get('returnTo'))
+    const returnTo = sanitizeReturnTo(searchParams.get('returnTo'), null)
     const { user, refreshOnboardingStatus } = useAuth()
 
     const [sports, setSports] = useState<SportOption[]>([])

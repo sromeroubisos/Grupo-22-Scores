@@ -55,6 +55,17 @@ type MatchKpiCard = {
     active: boolean;
 };
 
+type ClubTournamentOption = {
+    id: string;
+    name: string;
+    originalName?: string | null;
+    seasonId?: string | null;
+    sportId?: string | null;
+    status?: string | null;
+    reviewStatus?: string | null;
+    isPending: boolean;
+};
+
 const TIMELINE_TABS: Array<{ id: MatchTimelineTab; label: string }> = [
     { id: 'upcoming', label: 'Próximos' },
     { id: 'played', label: 'Jugados' },
@@ -285,10 +296,16 @@ export function ClubFixtureResultsTab({
         isHome: true,
         matchType: 'amistoso',
         tournamentId: '',
+        tournamentMode: 'none' as 'none' | 'existing' | 'new',
+        newTournamentName: '',
+        newTournamentSeasonId: String(new Date().getFullYear()),
         divisionId: '',
         notes: '',
     });
     const [creating, setCreating] = useState(false);
+    const [clubTournaments, setClubTournaments] = useState<ClubTournamentOption[]>([]);
+    const [loadingClubTournaments, setLoadingClubTournaments] = useState(false);
+    const [clubTournamentsError, setClubTournamentsError] = useState<string | null>(null);
     const deferredRivalFilter = useDeferredValue(rivalFilter);
 
     const [displayLimit, setDisplayLimit] = useState(50);
@@ -498,6 +515,36 @@ export function ClubFixtureResultsTab({
             setApiLoading(false);
         }
     }, [apiLoading, activeTab, clubId, apiCursor]);
+
+    const loadClubTournamentOptions = useCallback(async () => {
+        setLoadingClubTournaments(true);
+        setClubTournamentsError(null);
+
+        try {
+            const params = new URLSearchParams({ club: clubId });
+            const response = await fetch(`/api/club-admin/tournaments?${params.toString()}`, {
+                credentials: 'same-origin',
+                cache: 'no-store',
+            });
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok || !payload?.ok) {
+                throw new Error(payload?.error || 'No se pudieron cargar los torneos');
+            }
+
+            setClubTournaments(Array.isArray(payload.data?.tournaments) ? payload.data.tournaments : []);
+        } catch (error) {
+            setClubTournaments([]);
+            setClubTournamentsError(error instanceof Error ? error.message : 'No se pudieron cargar los torneos');
+        } finally {
+            setLoadingClubTournaments(false);
+        }
+    }, [clubId]);
+
+    useEffect(() => {
+        if (!createModalOpen) return;
+        void loadClubTournamentOptions();
+    }, [createModalOpen, loadClubTournamentOptions]);
 
     if (loading) {
         return (
@@ -934,6 +981,77 @@ export function ClubFixtureResultsTab({
                                 </label>
                             </div>
                             <label className="block">
+                                <span className="text-xs text-white/50 uppercase tracking-wider">Torneo</span>
+                                <select
+                                    value={createForm.tournamentMode === 'new' ? '__new__' : createForm.tournamentId}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '__new__') {
+                                            setCreateForm({
+                                                ...createForm,
+                                                tournamentMode: 'new',
+                                                tournamentId: '',
+                                            });
+                                            return;
+                                        }
+                                        setCreateForm({
+                                            ...createForm,
+                                            tournamentMode: value ? 'existing' : 'none',
+                                            tournamentId: value,
+                                        });
+                                    }}
+                                    className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
+                                >
+                                    <option value="">Sin torneo</option>
+                                    <option value="__new__">Crear torneo nuevo pendiente</option>
+                                    {clubTournaments.filter((tournament) => tournament.isPending).map((tournament) => (
+                                        <option key={tournament.id} value={tournament.id}>
+                                            {tournament.name} (pendiente)
+                                        </option>
+                                    ))}
+                                    {clubTournaments.filter((tournament) => !tournament.isPending).map((tournament) => (
+                                        <option key={tournament.id} value={tournament.id}>
+                                            {tournament.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {loadingClubTournaments ? (
+                                    <span className="mt-1 block text-xs text-white/40">Cargando torneos...</span>
+                                ) : null}
+                                {clubTournamentsError ? (
+                                    <span className="mt-1 block text-xs text-red-300">{clubTournamentsError}</span>
+                                ) : null}
+                            </label>
+                            {createForm.tournamentMode === 'new' ? (
+                                <div className="space-y-3 rounded-xl border border-[#00ff88]/20 bg-[#00ff88]/5 p-3">
+                                    <div className="grid grid-cols-[1fr_120px] gap-3">
+                                        <label className="block">
+                                            <span className="text-xs text-white/50 uppercase tracking-wider">Nombre del torneo</span>
+                                            <input
+                                                type="text"
+                                                value={createForm.newTournamentName}
+                                                onChange={(e) => setCreateForm({ ...createForm, newTournamentName: e.target.value })}
+                                                placeholder="Ej: Copa Apertura M19"
+                                                className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
+                                            />
+                                        </label>
+                                        <label className="block">
+                                            <span className="text-xs text-white/50 uppercase tracking-wider">Temporada</span>
+                                            <input
+                                                type="text"
+                                                value={createForm.newTournamentSeasonId}
+                                                onChange={(e) => setCreateForm({ ...createForm, newTournamentSeasonId: e.target.value })}
+                                                placeholder="2026"
+                                                className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
+                                            />
+                                        </label>
+                                    </div>
+                                    <p className="text-xs leading-relaxed text-white/55">
+                                        El torneo queda pendiente de revision y solo se usa dentro de tu club hasta que un Super Admin lo publique o lo vincule.
+                                    </p>
+                                </div>
+                            ) : null}
+                            <label className="block">
                                 <span className="text-xs text-white/50 uppercase tracking-wider">Equipo / División</span>
                                 <select
                                     value={createForm.divisionId}
@@ -970,30 +1088,45 @@ export function ClubFixtureResultsTab({
                                         alert('Completá rival, fecha y hora');
                                         return;
                                     }
+                                    if (createForm.tournamentMode === 'new' && !createForm.newTournamentName.trim()) {
+                                        alert('Completa el nombre del torneo');
+                                        return;
+                                    }
                                     setCreating(true);
                                     try {
                                         const response = await fetch('/api/club-admin/matches', {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify({
+                                                clubId,
                                                 awayClubId: createForm.rival,
                                                 date: createForm.date,
                                                 time: createForm.time,
                                                 venue: createForm.venue,
                                                 isHome: createForm.isHome,
                                                 matchType: createForm.matchType,
+                                                tournamentId: createForm.tournamentMode === 'existing' ? createForm.tournamentId : null,
+                                                newTournament: createForm.tournamentMode === 'new'
+                                                    ? {
+                                                        name: createForm.newTournamentName,
+                                                        seasonId: createForm.newTournamentSeasonId,
+                                                    }
+                                                    : null,
                                                 divisionId: createForm.divisionId || null,
                                                 notes: createForm.notes,
                                             }),
                                         });
-                                        if (!response.ok) throw new Error('Error al crear');
-                                        const data = await response.json();
+                                        const payload = await response.json().catch(() => null);
+                                        if (!response.ok || !payload?.ok) {
+                                            throw new Error(payload?.error || 'Error al crear');
+                                        }
+                                        const data = payload.data;
                                         setCreateModalOpen(false);
-                                        window.open(`/club-admin/matches/${data.id}`, '_blank');
+                                        window.open(`/club-admin/matches/${data.id}?club=${encodeURIComponent(clubId)}`, '_blank');
                                         // Refresh list after short delay
                                         setTimeout(() => window.location.reload(), 500);
-                                    } catch {
-                                        alert('Error al crear el partido');
+                                    } catch (error) {
+                                        alert(error instanceof Error ? error.message : 'Error al crear el partido');
                                     } finally {
                                         setCreating(false);
                                     }

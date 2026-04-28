@@ -34,6 +34,7 @@ interface ClubStaffPerformanceSuiteProps {
     players: PersonWithRole[];
     staff: PersonWithRole[];
     dashboardData: ClubDashboardOverview;
+    focus?: 'rugby' | 'sheets';
 }
 
 type ApiPayload = {
@@ -175,6 +176,7 @@ export function ClubStaffPerformanceSuite({
     players,
     staff,
     dashboardData,
+    focus = 'rugby',
 }: ClubStaffPerformanceSuiteProps) {
     const importInputRef = useRef<HTMLInputElement | null>(null);
     const [records, setRecords] = useState<RugbyPerformanceRecord[]>([]);
@@ -194,12 +196,25 @@ export function ClubStaffPerformanceSuite({
         name: getPersonName(player),
     })), [players]);
 
-    const activeModule = getPerformanceModule(activeModuleKey);
     const visibleModules = useMemo(() => (
-        privateAllowed
+        (privateAllowed
             ? RUGBY_PERFORMANCE_MODULES
-            : RUGBY_PERFORMANCE_MODULES.filter((module) => module.scope === 'match_global')
-    ), [privateAllowed]);
+            : RUGBY_PERFORMANCE_MODULES.filter((module) => module.scope === 'match_global'))
+            .filter((module) => (
+                focus === 'sheets'
+                    ? true
+                    : module.scope === 'match_global' || module.key === 'plays'
+            ))
+    ), [focus, privateAllowed]);
+    const activeModule = visibleModules.find((module) => module.key === activeModuleKey) ?? visibleModules[0] ?? getPerformanceModule(activeModuleKey);
+
+    useEffect(() => {
+        if (visibleModules.some((module) => module.key === activeModuleKey)) {
+            return;
+        }
+
+        setActiveModuleKey(visibleModules[0]?.key ?? 'kicks');
+    }, [activeModuleKey, visibleModules]);
 
     const insights = useMemo(() => calculateRugbyPerformanceInsights(records), [records]);
 
@@ -451,7 +466,7 @@ export function ClubStaffPerformanceSuite({
 
     const dashboardCards = [
         {
-            title: 'Dashboard tecnico',
+            title: 'Tecnico',
             kpis: [
                 ['Patadas', formatPercent(insights.kickEffectiveness)],
                 ['Scrum', formatPercent(insights.scrumEffectiveness)],
@@ -460,7 +475,7 @@ export function ClubStaffPerformanceSuite({
             ],
         },
         {
-            title: 'Dashboard fisico',
+            title: 'Privado club',
             kpis: [
                 ['Registros privados', String(insights.privateRows)],
                 ['Jugadores', String(players.length)],
@@ -469,7 +484,7 @@ export function ClubStaffPerformanceSuite({
             ],
         },
         {
-            title: 'Dashboard partido',
+            title: 'Partido',
             kpis: [
                 ['Eventos', String(insights.matchRows)],
                 ['Penales', String(insights.penalties)],
@@ -478,7 +493,7 @@ export function ClubStaffPerformanceSuite({
             ],
         },
         {
-            title: 'Dashboard entrenamiento',
+            title: 'Agenda asociada',
             kpis: [
                 ['Partidos agenda', String(dashboardData.matches.length)],
                 ['Proximos', String(dashboardData.upcomingMatches.length)],
@@ -488,20 +503,29 @@ export function ClubStaffPerformanceSuite({
         },
     ];
 
+    const heroCopy = focus === 'sheets'
+        ? {
+            kicker: 'Planillas',
+            title: 'Importacion, exportacion y carga manual de datos.',
+            body: `${clubName}: administra CSV, modulos globales de partido y planillas privadas del club sin convertir esta vista en una agenda de sesiones.`,
+        }
+        : {
+            kicker: 'Rugby',
+            title: 'Metricas tecnicas de partido y jugadas privadas.',
+            body: `${clubName}: patadas, scrum, line, penales, tries, powerplay y jugadas del club para analizar rendimiento deportivo.`,
+        };
+
     return (
         <section className={styles.suite}>
             <div className={styles.hero}>
                 <div className={styles.heroCopy}>
-                    <span className={styles.kicker}>Staff de entrenamiento y rendimiento</span>
-                    <h2>Partido, entrenamiento y gimnasio en una planilla operativa.</h2>
-                    <p>
-                        {clubName}: eventos globales de partido para superadmin y club admin; jugadas, planificacion,
-                        gimnasio y GPS manual quedan como informacion privada del club.
-                    </p>
+                    <span className={styles.kicker}>{heroCopy.kicker}</span>
+                    <h2>{heroCopy.title}</h2>
+                    <p>{heroCopy.body}</p>
                     <div className={styles.toolbar}>
                         <button type="button" className={styles.button} onClick={handleAddRow}>
                             <Plus className="w-4 h-4" />
-                            Agregar fila
+                            Agregar dato
                         </button>
                         <button type="button" className={styles.ghostButton} onClick={() => { void handleSave(); }} disabled={!dirty || saving}>
                             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -523,7 +547,7 @@ export function ClubStaffPerformanceSuite({
                     <article className={styles.scopeCard}>
                         <span className={styles.scopePrivate}>Privado club</span>
                         <strong>{privateAllowed ? CLUB_PRIVATE_MODULE_KEYS.length : 0} modulos</strong>
-                        <p>Solo club admin/staff con membership: jugadas internas, gym, GPS y planificacion.</p>
+                        <p>Solo club admin/staff con membership: jugadas internas, gym, GPS y planillas privadas.</p>
                     </article>
                 </div>
             </div>
@@ -586,8 +610,8 @@ export function ClubStaffPerformanceSuite({
             <div className={styles.panel}>
                 <div className={styles.sectionHead}>
                     <div>
-                        <span className={styles.panelKicker}>Alertas para planificar entrenamientos</span>
-                        <h3>Lo que el partido le pide al entrenamiento</h3>
+                        <span className={styles.panelKicker}>Insights</span>
+                        <h3>Alertas tecnicas y proximas acciones</h3>
                     </div>
                 </div>
                 <div className={styles.alertList}>
@@ -609,6 +633,7 @@ export function ClubStaffPerformanceSuite({
                         key={module.key}
                         type="button"
                         className={cn(styles.moduleButton, activeModuleKey === module.key && styles.moduleActive)}
+                        aria-pressed={activeModuleKey === module.key}
                         onClick={() => setActiveModuleKey(module.key)}
                     >
                         <strong>{module.shortLabel}</strong>
@@ -620,7 +645,7 @@ export function ClubStaffPerformanceSuite({
             <div className={styles.spreadsheet}>
                 <div className={styles.sectionHead}>
                     <div>
-                        <span className={styles.panelKicker}>Vista spreadsheet / Excel</span>
+                        <span className={styles.panelKicker}>Planilla del modulo</span>
                         <h3>{activeModule.label}</h3>
                         <p>{activeModule.description}</p>
                     </div>
@@ -649,7 +674,7 @@ export function ClubStaffPerformanceSuite({
                         Cargando planilla...
                     </div>
                 ) : filteredRows.length === 0 ? (
-                    <div className={styles.empty}>No hay filas para este modulo. Agrega una fila o importa un CSV.</div>
+                    <div className={styles.empty}>No hay filas para este modulo. Agrega un dato o importa un CSV.</div>
                 ) : (
                     <div className={styles.tableWrap}>
                         <table className={styles.table}>

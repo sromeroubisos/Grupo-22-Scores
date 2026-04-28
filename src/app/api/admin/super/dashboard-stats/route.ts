@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
+import { TOURNAMENT_REVIEW_STATUS } from '@/lib/tournamentReview';
 
 function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -25,7 +26,7 @@ export async function GET() {
         // count: 'exact' + head: true skips the row payload entirely and
         // returns just the total in the Content-Range header — orders of
         // magnitude cheaper than streaming every id back to Node.
-        const [todayMatchesRes, liveMatchesRes, unlinkedTournamentsRes, unlinkedClubsRes] = await Promise.all([
+        const [todayMatchesRes, liveMatchesRes, unlinkedTournamentsRes, pendingTournamentsRes, unlinkedClubsRes] = await Promise.all([
             readClient
                 .from('matches')
                 .select('id', { count: 'exact', head: true })
@@ -40,7 +41,12 @@ export async function GET() {
             readClient
                 .from('tournaments')
                 .select('id', { count: 'exact', head: true })
-                .is('union_id', null),
+                .is('union_id', null)
+                .neq('review_status', TOURNAMENT_REVIEW_STATUS.pendingLink),
+            readClient
+                .from('tournaments')
+                .select('id', { count: 'exact', head: true })
+                .eq('review_status', TOURNAMENT_REVIEW_STATUS.pendingLink),
             readClient
                 .from('clubs')
                 .select('id', { count: 'exact', head: true })
@@ -50,6 +56,7 @@ export async function GET() {
         if (todayMatchesRes.error) return jsonError('Failed to load today match count', 500, todayMatchesRes.error.message);
         if (liveMatchesRes.error) return jsonError('Failed to load live match count', 500, liveMatchesRes.error.message);
         if (unlinkedTournamentsRes.error) return jsonError('Failed to load tournament conflict count', 500, unlinkedTournamentsRes.error.message);
+        if (pendingTournamentsRes.error) return jsonError('Failed to load pending tournament count', 500, pendingTournamentsRes.error.message);
         if (unlinkedClubsRes.error) return jsonError('Failed to load club conflict count', 500, unlinkedClubsRes.error.message);
 
         return NextResponse.json({
@@ -57,6 +64,7 @@ export async function GET() {
                 todayMatches: todayMatchesRes.count ?? 0,
                 liveMatches: liveMatchesRes.count ?? 0,
                 unlinkedTournaments: unlinkedTournamentsRes.count ?? 0,
+                pendingTournaments: pendingTournamentsRes.count ?? 0,
                 unlinkedClubs: unlinkedClubsRes.count ?? 0,
             },
         });

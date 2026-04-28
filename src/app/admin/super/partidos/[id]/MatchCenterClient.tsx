@@ -605,6 +605,39 @@ function teamTag(evTeam: string | null): string {
     return evTeam === 'home' ? '[L]' : '[V]';
 }
 
+const PENALTY_COMMITTED_EVENT_TYPE = 'penalty_committed';
+const PENALTY_COMMITTED_REASONS = [
+    'Tackle alto o peligroso',
+    'Offside (fuera de juego)',
+    'Derribar o bloquear a un jugador sin balon',
+    'Juego sucio o conducta antideportiva',
+    'Agresiones fisicas o verbales',
+    'Colapsar intencionalmente un scrum',
+    'Colapsar intencionalmente un maul',
+    'Entrar lateralmente a un ruck',
+    'No mantenerse de pie en ruck/maul',
+    'Retener ilegalmente al portador del balon',
+    'Usar las manos ilegalmente en el ruck',
+    'Obstruccion',
+    'No retirarse 10 metros tras un penal',
+    'Cargar tarde al pateador',
+    'Golpear intencionalmente la pelota hacia adelante (knock-on deliberado)',
+    'Arrojar o sacar intencionalmente la pelota fuera del campo',
+    'Acciones peligrosas o juego temerario',
+];
+
+function isPenaltyCommittedEvent(eventType: string) {
+    return eventType === PENALTY_COMMITTED_EVENT_TYPE;
+}
+
+function getGuidedTeamQuestion(draft: GuidedEventDraft) {
+    if (isPenaltyCommittedEvent(draft.definition.type)) {
+        return 'Que club cometio el penal?';
+    }
+
+    return 'Que equipo registra este evento?';
+}
+
 function eventTypeLabel(t: string, definitions: MatchEventDefinition[]): string {
     const configured = definitions.find((definition) => definition.type === t);
     if (configured?.label) return configured.label;
@@ -616,8 +649,8 @@ function eventTypeLabel(t: string, definitions: MatchEventDefinition[]): string 
         penalty_try: 'PENAL TRY', scrum: 'SCRUM', line: 'LINE', knock_on: 'KNOCK-ON',
         forward_pass: 'PASE FWD', free_kick: 'FREE KICK', tackle: 'TACKLE', ruck: 'RUCK',
         maul: 'MAUL', handling_error: 'ERROR MANEJO', kick: 'PATADA', recovery: 'RECUP',
-        turnover_won: 'RECUP', turnover_lost: 'PERDIDA', penalty_won: 'PENAL GANADO',
-        penalty_conceded: 'PENAL CONCEDIDO', injury: 'LESION', pass: 'PASE',
+        turnover_won: 'RECUP', turnover_lost: 'PERDIDA', penalty_committed: 'PENAL COMETIDO',
+        injury: 'LESION', pass: 'PASE',
         entradas_22: '22M',
         match_start: 'INICIO', match_half: 'HT', match_end: 'FINAL',
     };
@@ -674,8 +707,7 @@ function getEventButtonGlyph(type: string) {
         line: 'LI',
         knock_on: 'KO',
         forward_pass: 'PF',
-        penalty_won: 'PG',
-        penalty_conceded: 'PC',
+        penalty_committed: 'PC',
         free_kick: 'FK',
         tackle: 'TK',
         ruck: 'RK',
@@ -708,8 +740,7 @@ function getEventButtonLabel(definition: MatchEventDefinition) {
         red_card: 'Roja',
         knock_on: 'Knock-on',
         forward_pass: 'Pase forward',
-        penalty_won: 'Penal ganado',
-        penalty_conceded: 'Penal concedido',
+        penalty_committed: 'Penal cometido',
         handling_error: 'Error manejo',
         turnover_won: 'Turnover ganado',
         turnover_lost: 'Turnover perdido',
@@ -724,6 +755,7 @@ function getEventButtonLabel(definition: MatchEventDefinition) {
 
 function getEventButtonMeta(definition: MatchEventDefinition) {
     if (isGoalKickEventType(definition.type)) return 'Convertida / fallada';
+    if (isPenaltyCommittedEvent(definition.type)) return 'Club + motivo';
     if (definition.points > 0) return `${definition.points} puntos`;
     if (requiresContestOutcome(definition.type)) return 'Ganado / perdido';
     if (definition.type === 'substitution') return 'Sale / entra';
@@ -788,8 +820,7 @@ function formatGuidedEventDetail(draft: GuidedEventDraft) {
 
     if (eventType === 'recovery' || eventType === 'turnover_won') return customDetail || 'Recuperacion';
     if (eventType === 'turnover_lost') return customDetail || 'Perdida';
-    if (eventType === 'penalty_won') return customDetail || 'Penal ganado';
-    if (eventType === 'penalty_conceded') return customDetail || 'Penal concedido';
+    if (isPenaltyCommittedEvent(eventType)) return customDetail ? `Penal cometido: ${customDetail}` : 'Penal cometido';
     if (eventType === 'knock_on') return customDetail || 'Knock-on';
     if (eventType === 'forward_pass') return customDetail || 'Pase forward';
     if (eventType === 'handling_error') return customDetail || 'Error de manejo';
@@ -2062,6 +2093,11 @@ export default function MatchCenterClient({
             return;
         }
 
+        if (isPenaltyCommittedEvent(guidedEvent.definition.type) && !guidedEvent.detail.trim()) {
+            setSaveMsg({ type: 'warn', text: 'Selecciona por que se comete el penal antes de guardar.' });
+            return;
+        }
+
         if (guidedEvent.definition.player === 'required' && !guidedEvent.playerName.trim()) {
             setSaveMsg({ type: 'warn', text: 'Selecciona un jugador antes de guardar el evento.' });
             return;
@@ -3276,7 +3312,7 @@ export default function MatchCenterClient({
 
                             {guidedEvent.step === 'team' && (
                                 <div className="guided-event-body">
-                                    <h4>Que equipo registra este evento?</h4>
+                                    <h4>{getGuidedTeamQuestion(guidedEvent)}</h4>
                                     <div className="guided-team-grid">
                                         <button className="guided-team-option" type="button" onClick={() => selectGuidedTeam('home')}>
                                             {homeLogo ? <img src={homeLogo} alt={homeName} /> : <Shield size={28} />}
@@ -3388,6 +3424,21 @@ export default function MatchCenterClient({
                                         </div>
                                     )}
 
+                                    {isPenaltyCommittedEvent(guidedEvent.definition.type) && (
+                                        <label className="guided-detail-text">
+                                            <span>Por que se comete el penal?</span>
+                                            <select
+                                                value={guidedEvent.detail}
+                                                onChange={(event) => setGuidedEvent((current) => current ? { ...current, detail: event.target.value } : current)}
+                                            >
+                                                <option value="">Selecciona un motivo</option>
+                                                {PENALTY_COMMITTED_REASONS.map((reason) => (
+                                                    <option key={reason} value={reason}>{reason}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                    )}
+
                                     {(guidedEvent.definition.type === 'substitution' || guidedEvent.definition.type === 'try') && guidedEvent.team && (
                                         <label className="guided-secondary-select">
                                             <span>{guidedEvent.definition.type === 'try' ? 'Asistencia opcional' : 'Jugador que entra'}</span>
@@ -3405,15 +3456,17 @@ export default function MatchCenterClient({
                                         </label>
                                     )}
 
-                                    <label className="guided-detail-text">
-                                        <span>Detalle opcional</span>
-                                        <textarea
-                                            value={guidedEvent.detail}
-                                            onChange={(event) => setGuidedEvent((current) => current ? { ...current, detail: event.target.value } : current)}
-                                            rows={3}
-                                            placeholder="Zona, causa, contexto o aclaracion"
-                                        />
-                                    </label>
+                                    {!isPenaltyCommittedEvent(guidedEvent.definition.type) && (
+                                        <label className="guided-detail-text">
+                                            <span>Detalle opcional</span>
+                                            <textarea
+                                                value={guidedEvent.detail}
+                                                onChange={(event) => setGuidedEvent((current) => current ? { ...current, detail: event.target.value } : current)}
+                                                rows={3}
+                                                placeholder="Zona, causa, contexto o aclaracion"
+                                            />
+                                        </label>
+                                    )}
                                 </div>
                             )}
 
@@ -3502,7 +3555,7 @@ export default function MatchCenterClient({
                                             <strong>
                                                 {completeMatchStats.yellowCards.home + completeMatchStats.yellowCards.away
                                                     + completeMatchStats.redCards.home + completeMatchStats.redCards.away
-                                                    + completeMatchStats.penaltiesConceded.home + completeMatchStats.penaltiesConceded.away}
+                                                    + completeMatchStats.penaltiesCommitted.home + completeMatchStats.penaltiesCommitted.away}
                                             </strong>
                                         </div>
                                     </div>

@@ -1,3 +1,5 @@
+import type { MatchPointsRules } from '@/lib/standings/matchPointsPreview';
+
 export interface ClubInfo {
   id: string;
   name: string;
@@ -55,6 +57,7 @@ export interface MatchData {
   away_bonus_points?: number | null;
   points_autocalculated?: boolean | null;
   points_override_reason?: string | null;
+  pointsRules?: MatchPointsRules | null;
 }
 
 export interface Division {

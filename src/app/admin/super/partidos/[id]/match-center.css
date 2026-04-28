@@ -1261,6 +1261,7 @@
 .guided-details-grid input,
 .guided-details-grid select,
 .guided-secondary-select select,
+.guided-detail-text select,
 .guided-detail-text textarea {
     width: 100%;
     background: #070707;
@@ -1269,6 +1270,21 @@
     padding: 11px 12px;
     font: inherit;
     outline: none;
+}
+
+.guided-details-grid input:focus,
+.guided-details-grid select:focus,
+.guided-secondary-select select:focus,
+.guided-detail-text select:focus,
+.guided-detail-text textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.16);
+}
+
+.guided-secondary-select select option,
+.guided-detail-text select option {
+    background: #101010;
+    color: #fff;
 }
 
 .guided-detail-text textarea {

@@ -30,6 +30,10 @@ export default async function TournamentPage({
     if (isDbTournament) {
         try {
             const data = await fetchTournamentData(id);
+            if (data?.error === 'Tournament not found') {
+                notFound();
+            }
+
             // Use any successful snapshot, even if partial, and let the client refresh it.
             if (data?.ok) {
                 initialData = data;

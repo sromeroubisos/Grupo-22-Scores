@@ -11,6 +11,7 @@ type DashboardStats = {
     todayMatches: number;
     liveMatches: number;
     unlinkedTournaments: number;
+    pendingTournaments: number;
     unlinkedClubs: number;
 };
 
@@ -18,6 +19,7 @@ const EMPTY_DASHBOARD_STATS: DashboardStats = {
     todayMatches: 0,
     liveMatches: 0,
     unlinkedTournaments: 0,
+    pendingTournaments: 0,
     unlinkedClubs: 0,
 };
 
@@ -82,7 +84,7 @@ export default function AdminPage() {
     const stats = useMemo(() => {
         return {
             matches: { value: dashboardStats.todayMatches, sub: `/ ${dashboardStats.liveMatches} en vivo` },
-            conflicts: { value: dashboardStats.unlinkedTournaments + dashboardStats.unlinkedClubs, sub: 'Sin vinculación' },
+            conflicts: { value: dashboardStats.pendingTournaments + dashboardStats.unlinkedTournaments + dashboardStats.unlinkedClubs, sub: 'Revisar datos' },
             latency: { value: 'STABLE', sub: 'v3.0 Opt' }
         };
     }, [dashboardStats]);
@@ -109,12 +111,16 @@ export default function AdminPage() {
     }, [tournaments, unions]);
 
     const conflictsMessage = useMemo(() => {
+        if (dashboardStats.pendingTournaments > 0) {
+            return `${dashboardStats.pendingTournaments} torneos creados por Club Admins esperan revision.`;
+        }
+
         const unlinkedCount = dashboardStats.unlinkedTournaments;
         if (unlinkedCount > 0) {
             return `${unlinkedCount} torneos requieren vinculación con una Unión territorial.`;
         }
         return 'Sincronización de catálogos completa.';
-    }, [dashboardStats.unlinkedTournaments]);
+    }, [dashboardStats.pendingTournaments, dashboardStats.unlinkedTournaments]);
 
     if (!user) return null;
 
@@ -229,7 +235,7 @@ export default function AdminPage() {
                     <div className={styles.conflictAlert}>
                         <span className={styles.alertIcon}>!</span>
                         <span className={styles.alertText}>{conflictsMessage}</span>
-                        <Link href="/admin/super/clubes" className={styles.btn}>
+                        <Link href={dashboardStats.pendingTournaments > 0 ? '/admin/super/torneos/pendientes' : '/admin/super/clubes'} className={styles.btn}>
                             Resolver
                         </Link>
                     </div>

@@ -56,7 +56,7 @@
     margin: 0;
     font-size: clamp(2rem, 3vw, 3.2rem);
     line-height: 0.95;
-    letter-spacing: -0.06em;
+    letter-spacing: 0;
 }
 
 .heroCopy p {
@@ -211,7 +211,7 @@
 
 .kpiGrid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.9rem;
 }
 
@@ -252,7 +252,7 @@
 .kpiValue {
     font-size: clamp(1.7rem, 2vw, 2.4rem);
     line-height: 1;
-    letter-spacing: -0.06em;
+    letter-spacing: 0;
 }
 
 .kpiDetail {
@@ -378,7 +378,7 @@
 .panelHead h3 {
     margin: 0.25rem 0 0;
     font-size: 1.35rem;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
 }
 
 .panelKicker {
@@ -473,7 +473,7 @@
 
 .metricRibbon strong {
     font-size: 1.25rem;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
 }
 
 .alertList {
@@ -568,7 +568,7 @@
 .dayCard strong,
 .planDay header strong {
     font-size: 1.35rem;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
 }
 
 .dayEventAccent {
@@ -617,6 +617,14 @@
     border: 1px solid rgba(148, 163, 184, 0.12);
     border-radius: 22px;
     background: rgba(255, 255, 255, 0.03);
+}
+
+.infoCard,
+.sessionStateItem {
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
 }
 
 .infoCard,

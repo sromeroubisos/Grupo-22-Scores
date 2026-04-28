@@ -13,35 +13,27 @@ export default function OAuthButtons() {
     const returnTo = sanitizeReturnTo(searchParams.get('returnTo'), roleIntent)
     const supabase = createClient()
 
-    const getCallbackUrl = (provider: 'google' | 'apple' | 'facebook') => {
-        const callbackUrl = new URL(
-            provider === 'google' ? '/api/auth/callback/google' : '/auth/callback',
-            window.location.origin
-        )
+    const getCallbackUrl = () => {
+        const callbackUrl = new URL('/auth/callback', window.location.origin)
         callbackUrl.searchParams.set('next', returnTo)
         return callbackUrl.toString()
     }
 
-    const handleLogin = async (provider: 'google' | 'apple' | 'facebook') => {
-        setLoading(provider)
+    const handleLogin = async () => {
+        setLoading('google')
         try {
-            console.log('[OAuthButtons] Calling signInWithOAuth targeting:', getCallbackUrl(provider));
             const { data, error } = await supabase.auth.signInWithOAuth({
-                provider,
+                provider: 'google',
                 options: {
-                    redirectTo: getCallbackUrl(provider),
-                    skipBrowserRedirect: false,
+                    redirectTo: getCallbackUrl(),
                 },
             })
-
-            console.log('[OAuthButtons] signInWithOAuth result:', { data, error });
 
             if (error) throw error
 
             // Defensively handle case where SDK doesn't redirect automatically
             if (data?.url) {
-                console.log('[OAuthButtons] Manual redirect to:', data.url);
-                window.location.href = data.url;
+                window.location.href = data.url
             }
         } catch (error) {
             console.error('OAuth error:', error)
@@ -54,7 +46,7 @@ export default function OAuthButtons() {
             <button
                 type="button"
                 className={styles.socialBtn}
-                onClick={() => handleLogin('google')}
+                onClick={() => handleLogin()}
                 disabled={!!loading}
             >
                 {loading === 'google' ? 'Conectando...' : (

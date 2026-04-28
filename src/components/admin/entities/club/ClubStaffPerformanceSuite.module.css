@@ -52,7 +52,7 @@
 .spreadsheet h3 {
     margin: 0;
     font-weight: 900;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
 }
 
 .hero h2 {
@@ -97,7 +97,7 @@
 .scopeCard strong,
 .kpiCard strong {
     font-size: 1.25rem;
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
 }
 
 .scopeCard span,

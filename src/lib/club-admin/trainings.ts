@@ -4,8 +4,10 @@ import type { ClubDashboardOverview } from './dashboard-types';
 
 export type TrainingStatus = 'planificado' | 'en_curso' | 'finalizado' | 'sin_evaluar';
 export type TrainingType = 'campo' | 'gimnasio' | 'video' | 'recuperacion';
-export type AttendanceState = 'confirmado' | 'ausente' | 'dudoso';
+export type AttendanceState = 'presente' | 'ausente' | 'tarde' | 'lesionado' | 'justificado' | 'confirmado' | 'dudoso';
 export type PlanBlockType = 'warmup' | 'tecnico' | 'tactico' | 'fisico' | 'cierre';
+export type TrainingExerciseResult = 'correcto' | 'parcial' | 'no_logrado';
+export type TrainingTechnicalEventType = 'patadas' | 'jugadas' | 'scrums' | 'lines' | 'secuencias';
 
 export interface PlanBlock {
     id: string;
@@ -20,6 +22,28 @@ export interface TrainingPlan {
     blocks: PlanBlock[];
 }
 
+export interface TrainingExerciseEvaluation {
+    blockId: string;
+    result: TrainingExerciseResult;
+    score: number;
+    comments: string;
+}
+
+export interface TrainingTechnicalEvent {
+    id: string;
+    type: TrainingTechnicalEventType;
+    name: string;
+    total: number;
+    successful: number;
+    failed: number;
+    lostBalls: number;
+    errors: number;
+    zone: string;
+    target: string;
+    failureReason: string;
+    notes: string;
+}
+
 export interface TrainingEvaluation {
     rpe: number;
     durationReal: number;
@@ -28,6 +52,8 @@ export interface TrainingEvaluation {
     energy: number;
     fatigue: number;
     injuries: string;
+    exerciseScores?: TrainingExerciseEvaluation[];
+    technicalEvents?: TrainingTechnicalEvent[];
 }
 
 export interface TrainingPlayer {

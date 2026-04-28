@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Layout, Radio, Settings2, Shield, Sparkles, Trophy, Users } from 'lucide-react';
+import { Activity, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, Users } from 'lucide-react';
 import { Select } from '@/components/admin/ui';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
 import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
@@ -20,6 +20,8 @@ interface ClubManageTabsProps {
 export const CLUB_MANAGE_VISIBLE_TABS = [
     { id: 'general', label: 'General', Icon: Shield },
     { id: 'planteles', label: 'Jugadores', Icon: Users },
+    { id: 'entrenamientos', label: 'Entrenamiento', Icon: Dumbbell },
+    { id: 'rendimiento', label: 'Rendimiento', Icon: Activity },
     { id: 'competencias', label: 'Competencias', Icon: Trophy },
     { id: 'partidos', label: 'Partidos', Icon: Radio, live: true },
     { id: 'contenido', label: 'Exports Sociales', Icon: Sparkles },
@@ -113,10 +115,12 @@ export function ClubManageTabs({
                                 <small>
                                     {tab.id === 'general' ? 'Resumen operativo' : null}
                                     {tab.id === 'planteles' ? 'Jugadores y staff' : null}
+                                    {tab.id === 'rendimiento' ? 'Graficos, evolucion y comparativas' : null}
                                     {tab.id === 'competencias' ? 'Tablas y torneos' : null}
                                     {tab.id === 'partidos' ? 'Fixture y vivo' : null}
                                     {tab.id === 'contenido' ? 'Studio y redes' : null}
                                     {tab.id === 'pizarra' ? 'Táctica y jugadas' : null}
+                                    {tab.id === 'entrenamientos' ? 'Gimnasio, campo y asistencia' : null}
                                     {tab.id === 'configuracion' ? 'Identidad y roles' : null}
                                 </small>
                             </span>

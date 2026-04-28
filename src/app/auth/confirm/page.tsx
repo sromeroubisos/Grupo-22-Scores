@@ -3,11 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-
-function sanitizeNext(raw: string | null): string {
-    if (!raw) return '/'
-    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
-}
+import { sanitizeNext } from '@/lib/auth/callbackHandler'
 
 export default function AuthConfirmPage() {
     const searchParams = useSearchParams()

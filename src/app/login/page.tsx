@@ -15,12 +15,21 @@ function LoginContent() {
     const errorParam = searchParams.get('error')
     const messageParam = searchParams.get('message')
     const [error, setError] = useState<string | null>(null)
+    const errorMessages: Record<string, string> = {
+        'auth-code-error': 'No pudimos verificar tu sesión. Intentá nuevamente.',
+        'auth-pkce-error': 'La sesión de inicio de sesión no es válida. Intentá de nuevo.',
+        'auth-expired': 'El enlace de inicio de sesión expiró. Solicitá uno nuevo.',
+        'auth-state-error': 'La solicitud de autenticación fue alterada. Intentá nuevamente.',
+        'login_cancelled': 'Inicio de sesión cancelado.',
+        'login_provider_error': 'El proveedor de autenticación reportó un error. Intentá más tarde.',
+    }
+
     const derivedError =
         error ?? (
-            errorParam === 'auth-code-error'
-                ? 'No pudimos verificar tu sesion. Intenta nuevamente.'
+            errorParam && errorMessages[errorParam]
+                ? errorMessages[errorParam]
                 : errorParam
-                    ? 'Ocurrio un error de autenticacion.'
+                    ? 'Ocurrió un error de autenticación.'
                     : null
         )
     const success =

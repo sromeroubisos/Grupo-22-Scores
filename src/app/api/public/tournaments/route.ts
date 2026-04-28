@@ -21,6 +21,7 @@ import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
+import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -31,6 +32,10 @@ const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, 
 const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade';
 const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
 const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITH_LEGACY_SPORT_AND_PRIORITY}, review_status`;
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY}, review_status`;
+const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_status`;
+const SELECT_WITHOUT_LEGACY_SPORT_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT}, review_status`;
 const FLAT_CACHE_CONTROL = 'public, max-age=300, stale-while-revalidate=600';
 const CATALOG_CACHE_CONTROL = 'no-store, no-cache, must-revalidate';
 
@@ -47,6 +52,7 @@ type PublicTournamentRow = {
     slug: string | null;
     is_visible: boolean | null;
     status: string | null;
+    review_status?: string | null;
     priority: number | null;
     category: string | null;
     age_grade: string | null;
@@ -603,8 +609,7 @@ function filterPublicDbTournaments(args: {
 }) {
     return sortTournamentsByPriority(args.tournaments
         .filter((tournament) => {
-            const status = tournament.status?.toLowerCase?.() || null;
-            if (status === 'archived' || status === 'deleted') return false;
+            if (!isTournamentVisibleToPublic(tournament)) return false;
 
             const normalizedSport = tournament.sport_id || tournament.legacy_sport || 'rugby';
             if (!args.sportFilter.includes(normalizedSport)) return false;
@@ -686,6 +691,10 @@ async function queryVisiblePublicTournaments(
     supabase: Awaited<ReturnType<typeof getReadClient>>,
 ): Promise<PublicTournamentQueryResult> {
     const attempts: Array<{ select: string; usesLegacySport: boolean; usesPriority: boolean }> = [
+        { select: SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW, usesLegacySport: true, usesPriority: true },
+        { select: SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW, usesLegacySport: false, usesPriority: true },
+        { select: SELECT_WITH_LEGACY_SPORT_REVIEW, usesLegacySport: true, usesPriority: false },
+        { select: SELECT_WITHOUT_LEGACY_SPORT_REVIEW, usesLegacySport: false, usesPriority: false },
         { select: SELECT_WITH_LEGACY_SPORT_AND_PRIORITY, usesLegacySport: true, usesPriority: true },
         { select: SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY, usesLegacySport: false, usesPriority: true },
         { select: SELECT_WITH_LEGACY_SPORT, usesLegacySport: true, usesPriority: false },

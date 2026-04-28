@@ -4,7 +4,7 @@
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/proxy'
+import { updateSession, readUserFromCookie } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
 
 // Only refresh the Supabase session on routes that genuinely depend on auth.
@@ -30,6 +30,14 @@ const AUTH_CALLBACK_PATHS = new Set([
     '/auth/callback',
 ])
 
+const PROTECTED_ROUTE_PREFIXES = ['/admin', '/club-admin', '/profile', '/prode/ligas/crear'];
+const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
+
+const SUPER_ADMIN_EMAILS = new Set([
+    'superadmin@g22scores.com',
+    'sromeroubisos@gmail.com',
+]);
+
 function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): boolean {
     if (pathname === '/' && searchParams.has('code')) {
         return true
@@ -42,11 +50,50 @@ function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): 
     return SESSION_REFRESH_REQUIRED_PREFIXES.some(prefix => pathname.startsWith(prefix))
 }
 
+function isProtectedRoute(pathname: string): boolean {
+    return PROTECTED_ROUTE_PREFIXES.some(prefix => pathname.startsWith(prefix));
+}
+
+function isSuperAdminEmail(email: string): boolean {
+    return SUPER_ADMIN_EMAILS.has(email.toLowerCase());
+}
+
+function hasGuestClubAccess(request: NextRequest): boolean {
+    const rawValue = request.cookies.get(GUEST_CLUB_ACCESS_COOKIE)?.value;
+    if (!rawValue) return false;
+
+    try {
+        const parsed = JSON.parse(rawValue) as { kind?: unknown; clubHint?: unknown };
+        return parsed.kind === 'club_family_guest' && typeof parsed.clubHint === 'string';
+    } catch {
+        return false;
+    }
+}
+
+function redirectToLogin(request: NextRequest) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('returnTo', request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
+}
+
 export async function proxy(request: NextRequest) {
     const { pathname, searchParams } = request.nextUrl;
 
-    // 1. Skip proxy-level auth refresh for public routes.
-    if (!shouldRefreshSession(pathname, searchParams)) {
+    // 1. Auth Code Redirect Handler
+    // Supabase redirects to site URL. If root and code present, forward to API handler.
+    if (pathname === '/' && searchParams.has('code')) {
+        const callbackUrl = new URL('/auth/callback', request.url)
+        callbackUrl.searchParams.set('code', searchParams.get('code')!)
+        const next = searchParams.get('next')
+        if (next) callbackUrl.searchParams.set('next', next)
+        return NextResponse.redirect(callbackUrl)
+    }
+
+    const needsRefresh = shouldRefreshSession(pathname, searchParams);
+    const protectedRoute = isProtectedRoute(pathname);
+
+    // 2. Public routes that don't need auth check at all
+    if (!needsRefresh && !protectedRoute) {
         return measureAsync(
             'proxy_bypass',
             async () => NextResponse.next(),
@@ -61,21 +108,50 @@ export async function proxy(request: NextRequest) {
         )
     }
 
+    if (protectedRoute && pathname.startsWith('/club-admin') && hasGuestClubAccess(request)) {
+        return measureAsync(
+            'proxy_guest_club_bypass',
+            async () => NextResponse.next(),
+            {
+                runtime: 'server',
+                tags: ['PROXY'],
+                metadata: {
+                    path: pathname,
+                    authChecked: false,
+                    guestClubAccess: true,
+                },
+            },
+        )
+    }
+
+    // 3. Protected routes that DON'T require a session refresh (fast-path):
+    // read the user directly from the access_token cookie to avoid Supabase roundtrips.
+    if (protectedRoute && !needsRefresh) {
+        const user = readUserFromCookie(request);
+        if (!user) {
+            return redirectToLogin(request);
+        }
+        if (pathname.startsWith('/admin/super') && !isSuperAdminEmail(user.email)) {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+        return NextResponse.next();
+    }
+
+    // 4. Routes that require session refresh (and may also be protected)
     return measureAsync(
         'proxy',
         async () => {
-            // 2. Auth Code Redirect Handler
-            // Supabase redirects to site URL. If root and code present, forward to API handler.
-            if (pathname === '/' && searchParams.has('code')) {
-                const callbackUrl = new URL('/api/auth/callback/google', request.url)
-                callbackUrl.searchParams.set('code', searchParams.get('code')!)
-                const next = searchParams.get('next')
-                if (next) callbackUrl.searchParams.set('next', next)
-                return NextResponse.redirect(callbackUrl)
+            const { response, user } = await updateSession(request);
+
+            if (protectedRoute && !user) {
+                return redirectToLogin(request);
             }
 
-            // 3. Update Session (Refresh Auth Tokens via Cookie Management)
-            return await updateSession(request)
+            if (pathname.startsWith('/admin/super') && (!user || !isSuperAdminEmail(user.email))) {
+                return NextResponse.redirect(new URL('/', request.url));
+            }
+
+            return response;
         },
         {
             runtime: 'server',

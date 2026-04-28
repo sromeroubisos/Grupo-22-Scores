@@ -296,6 +296,12 @@ export interface TournamentRow {
     original_name: string | null;
     union_id: string | null;
     external_id: string | null;
+    review_status: string | null;
+    created_by_user_id: string | null;
+    created_by_club_id: string | null;
+    linked_official_tournament_id: string | null;
+    reviewed_at: string | null;
+    review_notes: string | null;
     // Compatibility
     sport?: string | null;
     country?: string | null;
@@ -351,6 +357,12 @@ async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
             priority: typeof row.priority === 'number' ? row.priority : 0,
             display_name: row.display_name || row.name,
             original_name: row.original_name || row.name,
+            review_status: row.review_status || null,
+            created_by_user_id: row.created_by_user_id || null,
+            created_by_club_id: row.created_by_club_id || null,
+            linked_official_tournament_id: row.linked_official_tournament_id || null,
+            reviewed_at: row.reviewed_at || null,
+            review_notes: row.review_notes || null,
             is_api_managed: row.is_api_managed || false,
             is_active: row.status === 'active' || row.status === 'published'
         };

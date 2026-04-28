@@ -27,6 +27,11 @@ import {
 } from 'lucide-react';
 import styles from './ClubMatchWorkspace.module.css';
 import { formatMatchTimelineEventDescription } from '@/lib/matchEventStats';
+import {
+  calculateMatchPointsPreview,
+  DEFAULT_MATCH_POINTS_RULES,
+  type MatchPointsPreview,
+} from '@/lib/standings/matchPointsPreview';
 import type {
   ClubInfo,
   ClubCallup,
@@ -130,8 +135,43 @@ const DETAIL_ACTION_LABELS: Partial<Record<LiveActionType, string>> = {
   turnover_won: 'Ruck ganado, jackal, contraataque...',
 };
 
+const RESULT_OPTIONS: Array<{ value: ClubLiveControl['homeResult']; label: string }> = [
+  { value: 'win', label: 'Win' },
+  { value: 'draw', label: 'Draw' },
+  { value: 'loss', label: 'Loss' },
+];
+
 function isPlayerSelectionAction(action: LiveActionType) {
   return PLAYER_SELECTION_ACTIONS.has(action);
+}
+
+function resultCodeToLiveResult(result: MatchPointsPreview['homeResult']): ClubLiveControl['homeResult'] {
+  if (result === 'W') return 'win';
+  if (result === 'L') return 'loss';
+  return 'draw';
+}
+
+function formatPointValue(value: number) {
+  if (!Number.isFinite(value)) return '0';
+  if (Number.isInteger(value)) return String(value);
+  return value.toFixed(2).replace(/\.?0+$/, '');
+}
+
+function buildLiveControlWithPoints(
+  liveControl: ClubLiveControl,
+  preview: MatchPointsPreview,
+): ClubLiveControl {
+  return {
+    ...liveControl,
+    homeResult: resultCodeToLiveResult(preview.homeResult),
+    awayResult: resultCodeToLiveResult(preview.awayResult),
+    homeTablePoints: formatPointValue(preview.homeBasePoints),
+    awayTablePoints: formatPointValue(preview.awayBasePoints),
+    homeBonusOffensive: preview.homeOffensiveBonus,
+    awayBonusOffensive: preview.awayOffensiveBonus,
+    homeBonusDefensive: preview.homeDefensiveBonus,
+    awayBonusDefensive: preview.awayDefensiveBonus,
+  };
 }
 
 export default function ClubMatchWorkspace({
@@ -385,6 +425,36 @@ export default function ClubMatchWorkspace({
 
     return map;
   }, [timelineEvents]);
+  const scoreForPointsPreview = useMemo(
+    () => buildScorePayload(matchState.score, matchDraft.score),
+    [matchDraft.score, matchState.score],
+  );
+  const pointsRules = matchState.pointsRules ?? DEFAULT_MATCH_POINTS_RULES;
+  const pointsPreview = useMemo(
+    () => calculateMatchPointsPreview(matchDraft.status, scoreForPointsPreview, events, pointsRules),
+    [events, matchDraft.status, pointsRules, scoreForPointsPreview],
+  );
+  const liveControlPreview = useMemo(
+    () => buildLiveControlWithPoints(lineupsState.liveControl, pointsPreview),
+    [lineupsState.liveControl, pointsPreview],
+  );
+  const totalHomeTablePoints = pointsPreview.homeBasePoints + pointsPreview.homeBonusPoints;
+  const totalAwayTablePoints = pointsPreview.awayBasePoints + pointsPreview.awayBonusPoints;
+  const getLiveControlForPayload = useCallback((
+    overrides: Partial<Record<string, unknown>> | undefined,
+    fallbackScore: ReturnType<typeof buildScorePayload>,
+  ) => {
+    const nextStatus = typeof overrides?.status === 'string' ? overrides.status : matchDraft.status;
+    const nextScore = (overrides?.score ?? fallbackScore) as ReturnType<typeof buildScorePayload>;
+    const nextEvents = Array.isArray(overrides?.events)
+      ? overrides.events as Array<{ type?: unknown; team?: unknown }>
+      : events;
+
+    return buildLiveControlWithPoints(
+      lineupsState.liveControl,
+      calculateMatchPointsPreview(nextStatus, nextScore, nextEvents, pointsRules),
+    );
+  }, [events, lineupsState.liveControl, matchDraft.status, pointsRules]);
 
   const kpis = [
     { label: 'Convocatoria', value: callupsCount ? `${callupsCount} / 23` : 'Sin carga', tone: pendingCallups > 0 || callupsCount === 0 ? 'yellow' : 'green' },
@@ -401,33 +471,37 @@ export default function ClubMatchWorkspace({
     setEvents(ensureEvents(nextMatch.events));
   }, []);
 
-  const buildPayload = useCallback((overrides?: Partial<Record<string, unknown>>) => ({
-    status: matchDraft.status,
-    date_time: fromDateTimeLocalInput(matchDraft.dateTime),
-    venue: matchDraft.venue.trim() || null,
-    referee: matchDraft.referee.trim() || null,
-    broadcast_url: matchDraft.broadcastUrl.trim() || null,
-    score: buildScorePayload(matchState.score, matchDraft.score),
-    notes: notes.trim() || null,
-    clock: buildClockPayload(lineupsState.liveControl, matchDraft.status, matchState.clock),
-    lineups: {
-      ...lineupsState,
-      home: lineupsState.home.map((player) => ({
-        ...player,
-        name: player.name.trim(),
-        position: player.position?.trim() || '',
-        role: player.role?.trim() || 'starter',
-      })),
-      away: lineupsState.away.map((player) => ({
-        ...player,
-        name: player.name.trim(),
-        position: player.position?.trim() || '',
-        role: player.role?.trim() || 'starter',
-      })),
-    },
-    events: events.map(serializeLiveEvent),
-    ...overrides,
-  }), [events, lineupsState, matchDraft, matchState.clock, matchState.score, notes]);
+  const buildPayload = useCallback((overrides?: Partial<Record<string, unknown>>) => {
+    const score = buildScorePayload(matchState.score, matchDraft.score);
+    return {
+      status: matchDraft.status,
+      date_time: fromDateTimeLocalInput(matchDraft.dateTime),
+      venue: matchDraft.venue.trim() || null,
+      referee: matchDraft.referee.trim() || null,
+      broadcast_url: matchDraft.broadcastUrl.trim() || null,
+      score,
+      notes: notes.trim() || null,
+      clock: buildClockPayload(lineupsState.liveControl, matchDraft.status, matchState.clock),
+      lineups: {
+        ...lineupsState,
+        liveControl: getLiveControlForPayload(overrides, score),
+        home: lineupsState.home.map((player) => ({
+          ...player,
+          name: player.name.trim(),
+          position: player.position?.trim() || '',
+          role: player.role?.trim() || 'starter',
+        })),
+        away: lineupsState.away.map((player) => ({
+          ...player,
+          name: player.name.trim(),
+          position: player.position?.trim() || '',
+          role: player.role?.trim() || 'starter',
+        })),
+      },
+      events: events.map(serializeLiveEvent),
+      ...overrides,
+    };
+  }, [events, getLiveControlForPayload, lineupsState, matchDraft, matchState.clock, matchState.score, notes]);
 
   const currentPayloadSignature = JSON.stringify(buildPayload());
   const eventAutosaveSignature = JSON.stringify({
@@ -2067,53 +2141,57 @@ export default function ClubMatchWorkspace({
                         <div className={styles.card}>
                           <div className={styles.liveResultGrid}>
                             <SelectField
+                              label="Condición del partido"
+                              value={matchDraft.status}
+                              onChange={(value) => setMatchDraft((current) => ({ ...current, status: value as MatchStatus }))}
+                              options={MATCH_STATUS_OPTIONS}
+                            />
+                            <SelectField
                               label={`${homeClub?.short_name || homeClub?.name || 'Local'} resultado`}
-                              value={lineupsState.liveControl.homeResult}
-                              onChange={(value) => setLineupsState((current) => ({
-                                ...current,
-                                liveControl: { ...current.liveControl, homeResult: value as ClubLiveControl['homeResult'] },
-                              }))}
-                              options={[
-                                { value: 'win', label: 'Win' },
-                                { value: 'draw', label: 'Draw' },
-                                { value: 'loss', label: 'Loss' },
-                              ]}
+                              value={liveControlPreview.homeResult}
+                              onChange={() => undefined}
+                              options={RESULT_OPTIONS}
+                              disabled
                             />
                             <Field
-                              label="Puntos tabla local"
-                              value={lineupsState.liveControl.homeTablePoints}
-                              onChange={(value) => setLineupsState((current) => ({
-                                ...current,
-                                liveControl: { ...current.liveControl, homeTablePoints: value },
-                              }))}
+                              label="Puntos base local"
+                              value={liveControlPreview.homeTablePoints}
+                              onChange={() => undefined}
+                              readOnly
                             />
                             <SelectField
                               label={`${awayClub?.short_name || awayClub?.name || 'Visitante'} resultado`}
-                              value={lineupsState.liveControl.awayResult}
-                              onChange={(value) => setLineupsState((current) => ({
-                                ...current,
-                                liveControl: { ...current.liveControl, awayResult: value as ClubLiveControl['awayResult'] },
-                              }))}
-                              options={[
-                                { value: 'win', label: 'Win' },
-                                { value: 'draw', label: 'Draw' },
-                                { value: 'loss', label: 'Loss' },
-                              ]}
+                              value={liveControlPreview.awayResult}
+                              onChange={() => undefined}
+                              options={RESULT_OPTIONS}
+                              disabled
                             />
                             <Field
-                              label="Puntos tabla visitante"
-                              value={lineupsState.liveControl.awayTablePoints}
-                              onChange={(value) => setLineupsState((current) => ({
-                                ...current,
-                                liveControl: { ...current.liveControl, awayTablePoints: value },
-                              }))}
+                              label="Puntos base visitante"
+                              value={liveControlPreview.awayTablePoints}
+                              onChange={() => undefined}
+                              readOnly
                             />
                           </div>
                           <div className={styles.liveCheckboxGrid}>
-                            <label className={styles.liveCheckbox}><input type="checkbox" checked={lineupsState.liveControl.homeBonusOffensive} onChange={(event) => setLineupsState((current) => ({ ...current, liveControl: { ...current.liveControl, homeBonusOffensive: event.target.checked } }))} /> Bonus ofensivo local</label>
-                            <label className={styles.liveCheckbox}><input type="checkbox" checked={lineupsState.liveControl.homeBonusDefensive} onChange={(event) => setLineupsState((current) => ({ ...current, liveControl: { ...current.liveControl, homeBonusDefensive: event.target.checked } }))} /> Bonus defensivo local</label>
-                            <label className={styles.liveCheckbox}><input type="checkbox" checked={lineupsState.liveControl.awayBonusOffensive} onChange={(event) => setLineupsState((current) => ({ ...current, liveControl: { ...current.liveControl, awayBonusOffensive: event.target.checked } }))} /> Bonus ofensivo visitante</label>
-                            <label className={styles.liveCheckbox}><input type="checkbox" checked={lineupsState.liveControl.awayBonusDefensive} onChange={(event) => setLineupsState((current) => ({ ...current, liveControl: { ...current.liveControl, awayBonusDefensive: event.target.checked } }))} /> Bonus defensivo visitante</label>
+                            <label className={styles.liveCheckbox}><input type="checkbox" checked={liveControlPreview.homeBonusOffensive} readOnly disabled /> Bonus ofensivo local</label>
+                            <label className={styles.liveCheckbox}><input type="checkbox" checked={liveControlPreview.homeBonusDefensive} readOnly disabled /> Bonus defensivo local</label>
+                            <label className={styles.liveCheckbox}><input type="checkbox" checked={liveControlPreview.awayBonusOffensive} readOnly disabled /> Bonus ofensivo visitante</label>
+                            <label className={styles.liveCheckbox}><input type="checkbox" checked={liveControlPreview.awayBonusDefensive} readOnly disabled /> Bonus defensivo visitante</label>
+                          </div>
+                          <div className={styles.livePointsTotals}>
+                            <div className={styles.livePointTotalCard}>
+                              <span>Total local</span>
+                              <strong>{formatPointValue(totalHomeTablePoints)}</strong>
+                            </div>
+                            <div className={styles.livePointTotalCard}>
+                              <span>Total visitante</span>
+                              <strong>{formatPointValue(totalAwayTablePoints)}</strong>
+                            </div>
+                            <span className={styles.liveAutoBadge}>
+                              Reglas de tabla {matchDraft.status === 'final' ? 'aplicadas' : 'listas al finalizar'}
+                              {pointsPreview.resolvedByShootout ? ' · definido por penales' : ''}
+                            </span>
                           </div>
                         </div>
 
@@ -2810,16 +2888,18 @@ function Field({
   value,
   onChange,
   type = 'text',
+  readOnly = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  readOnly?: boolean;
 }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <input className={styles.input} type={type} value={value} onChange={(event) => onChange(event.target.value)} />
+      <input className={styles.input} type={type} value={value} onChange={(event) => onChange(event.target.value)} readOnly={readOnly} />
     </label>
   );
 }
@@ -2829,16 +2909,18 @@ function SelectField({
   value,
   onChange,
   options,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: Array<{ value: string; label: string }>;
+  disabled?: boolean;
 }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <select className={styles.select} value={value} onChange={(event) => onChange(event.target.value)}>
+      <select className={styles.select} value={value} onChange={(event) => onChange(event.target.value)} disabled={disabled}>
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
       </select>
     </label>

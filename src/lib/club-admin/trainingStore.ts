@@ -4,10 +4,14 @@ import type {
     AttendanceState,
     PlanBlock,
     PlanBlockType,
+    TrainingExerciseEvaluation,
+    TrainingExerciseResult,
     TrainingEntry,
     TrainingEvaluation,
     TrainingPlayer,
     TrainingStatus,
+    TrainingTechnicalEvent,
+    TrainingTechnicalEventType,
     TrainingType,
 } from './trainings';
 
@@ -37,8 +41,18 @@ type ClubTrainingRow = {
 const MISSING_TABLE_CODES = new Set(['42P01', 'PGRST204', 'PGRST205']);
 const TRAINING_TYPES = new Set<TrainingType>(['campo', 'gimnasio', 'video', 'recuperacion']);
 const TRAINING_STATUSES = new Set<TrainingStatus>(['planificado', 'en_curso', 'finalizado', 'sin_evaluar']);
-const ATTENDANCE_STATES = new Set<AttendanceState>(['confirmado', 'ausente', 'dudoso']);
+const ATTENDANCE_STATES = new Set<AttendanceState>([
+    'presente',
+    'ausente',
+    'tarde',
+    'lesionado',
+    'justificado',
+    'confirmado',
+    'dudoso',
+]);
 const PLAN_BLOCK_TYPES = new Set<PlanBlockType>(['warmup', 'tecnico', 'tactico', 'fisico', 'cierre']);
+const EXERCISE_RESULTS = new Set<TrainingExerciseResult>(['correcto', 'parcial', 'no_logrado']);
+const TECHNICAL_EVENT_TYPES = new Set<TrainingTechnicalEventType>(['patadas', 'jugadas', 'scrums', 'lines', 'secuencias']);
 const SELECT_COLUMNS = [
     'id',
     'club_id',
@@ -191,6 +205,65 @@ function normalizePlanBlocks(value: unknown): PlanBlock[] {
     });
 }
 
+function normalizeExerciseScores(value: unknown): TrainingExerciseEvaluation[] {
+    if (!Array.isArray(value)) {
+        return [];
+    }
+
+    return value.flatMap((entry) => {
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+            return [];
+        }
+
+        const row = entry as Record<string, unknown>;
+        const blockId = normalizeText(row.blockId);
+        const result = normalizeText(row.result);
+        if (!blockId || !EXERCISE_RESULTS.has(result as TrainingExerciseResult)) {
+            return [];
+        }
+
+        return [{
+            blockId,
+            result: result as TrainingExerciseResult,
+            score: normalizeInteger(row.score, 0, 0, 10),
+            comments: normalizeText(row.comments),
+        }];
+    });
+}
+
+function normalizeTechnicalEvents(value: unknown): TrainingTechnicalEvent[] {
+    if (!Array.isArray(value)) {
+        return [];
+    }
+
+    return value.flatMap((entry, index) => {
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+            return [];
+        }
+
+        const row = entry as Record<string, unknown>;
+        const type = normalizeText(row.type);
+        if (!TECHNICAL_EVENT_TYPES.has(type as TrainingTechnicalEventType)) {
+            return [];
+        }
+
+        return [{
+            id: normalizeText(row.id) || `event-${index + 1}`,
+            type: type as TrainingTechnicalEventType,
+            name: normalizeText(row.name),
+            total: normalizeInteger(row.total, 0, 0, 10000),
+            successful: normalizeInteger(row.successful, 0, 0, 10000),
+            failed: normalizeInteger(row.failed, 0, 0, 10000),
+            lostBalls: normalizeInteger(row.lostBalls, 0, 0, 10000),
+            errors: normalizeInteger(row.errors, 0, 0, 10000),
+            zone: normalizeText(row.zone),
+            target: normalizeText(row.target),
+            failureReason: normalizeText(row.failureReason),
+            notes: normalizeText(row.notes),
+        }];
+    });
+}
+
 function normalizeEvaluation(value: unknown, defaultDuration: number): TrainingEvaluation | undefined {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
         return undefined;
@@ -221,6 +294,8 @@ function normalizeEvaluation(value: unknown, defaultDuration: number): TrainingE
         energy: normalizeInteger(energy, 0, 0, 10),
         fatigue: normalizeInteger(fatigue, 0, 0, 10),
         injuries: normalizeText(row.injuries),
+        exerciseScores: normalizeExerciseScores(row.exerciseScores),
+        technicalEvents: normalizeTechnicalEvents(row.technicalEvents),
     };
 }
 

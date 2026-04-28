@@ -34,6 +34,14 @@ export const superNavGroups: SuperNavGroup[] = [
                 description: 'Altas, edicion y administracion integral de torneos.',
             },
             {
+                id: 'pending-tournaments',
+                label: 'Torneos Pendientes',
+                href: '/admin/super/torneos/pendientes',
+                iconPath:
+                    'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                description: 'Revision, vinculacion y publicacion de torneos creados por clubes.',
+            },
+            {
                 id: 'matches',
                 label: 'Partidos',
                 href: '/admin/super/partidos',

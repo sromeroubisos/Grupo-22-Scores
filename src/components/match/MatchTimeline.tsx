@@ -62,8 +62,7 @@ const TYPE_LABELS: Record<string, string> = {
   line: 'Line',
   scrum: 'Scrum',
   tackle: 'Tackle',
-  penalty_conceded: 'Penal concedido',
-  penalty_won: 'Penal ganado',
+  penalty_committed: 'Penal cometido',
   knock_on: 'Knock-on',
   forward_pass: 'Pase forward',
   handling_error: 'Error de manejo',
@@ -116,8 +115,7 @@ const EVENT_COLORS: Record<string, string> = {
   field_goal: '#3b82f6',
   kick: '#60a5fa',
   free_kick: '#60a5fa',
-  penalty_conceded: '#f43f5e',
-  penalty_won: '#f43f5e',
+  penalty_committed: '#f43f5e',
   foul: '#f43f5e',
   knock_on: '#f43f5e',
   forward_pass: '#f43f5e',
@@ -182,8 +180,8 @@ function getEventCategories(type: string): FilterKey[] {
   if (t === 'substitution') cats.push('substitutions');
 
   const foulTypes = [
-    'knock_on', 'forward_pass', 'penalty_conceded', 'handling_error',
-    'turnover_lost', 'foul', 'two_min_suspension', 'penalty_won',
+    'knock_on', 'forward_pass', 'penalty_committed', 'handling_error',
+    'turnover_lost', 'foul', 'two_min_suspension',
   ];
   if (foulTypes.includes(t)) cats.push('fouls');
 

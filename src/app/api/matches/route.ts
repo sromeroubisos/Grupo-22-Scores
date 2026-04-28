@@ -27,6 +27,7 @@ import {
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 import {
     getMatchesForDate,
     getLiveMatches,
@@ -274,6 +275,7 @@ type DbTournamentLite = {
     season_id?: string | null;
     status?: string | null;
     is_visible?: boolean | null;
+    review_status?: string | null;
     country_id?: string | null;
     union_id?: string | null;
 };
@@ -319,13 +321,7 @@ function resolveMatchSport(
 }
 
 function isTournamentPubliclyVisible(tournament?: DbTournamentLite | null) {
-    if (!tournament) return true;
-    if (tournament.is_visible === false) return false;
-
-    const status = tournament.status?.toLowerCase?.() || null;
-    if (!status) return true;
-
-    return status !== 'archived' && status !== 'deleted';
+    return isTournamentVisibleToPublic(tournament ?? null);
 }
 
 function isLookupPermissionError(error: { code?: string | null; message?: string | null; details?: string | null } | null | undefined) {
@@ -353,6 +349,7 @@ async function fetchDbLookupMaps(
             'id',
             tournamentIds,
             [
+                'id, name, sport_id, sport, priority, season_id, status, is_visible, review_status, country_id, union_id',
                 'id, name, sport_id, sport, priority, season_id, status, is_visible, country_id, union_id',
                 'id, name, sport_id, sport, priority, season_id, status, country_id, union_id',
                 'id, name, sport_id, sport, season_id, status, is_visible, country_id, union_id',
@@ -589,7 +586,9 @@ async function fetchPublicSupabaseMatches(options: {
                 const homeTeam = clubMap.get(match.home_club_id || '');
                 const awayTeam = clubMap.get(match.away_club_id || '');
 
-                if (!isTournamentPubliclyVisible(tournament)) return false;
+                if (match.tournament_id && (!tournament || !isTournamentPubliclyVisible(tournament))) {
+                    return false;
+                }
                 if (!sportVariants) return true;
 
                 const resolvedSport = resolveMatchSport(match, tournament, homeTeam, awayTeam);

@@ -227,6 +227,12 @@ type TournamentAdminListRow = {
     original_name?: string | null;
     union_id?: string | null;
     external_id?: string | null;
+    review_status?: string | null;
+    created_by_user_id?: string | null;
+    created_by_club_id?: string | null;
+    linked_official_tournament_id?: string | null;
+    reviewed_at?: string | null;
+    review_notes?: string | null;
 };
 
 function normalizeSportValue(value: string | null | undefined) {
@@ -326,6 +332,7 @@ export async function GET(request: NextRequest) {
                 selectWithFallback<TournamentAdminListRow>(
                     readClient.from('tournaments'),
                     [
+                        'id, name, slug, sport_id, country_id, logo_url, is_popular, is_active, display_order, priority, created_at, updated_at, season_id, status, category, age_grade, format, is_visible, is_api_managed, data_source, display_name, original_name, union_id, external_id, review_status, created_by_user_id, created_by_club_id, linked_official_tournament_id, reviewed_at, review_notes',
                         'id, name, slug, sport_id, country_id, logo_url, is_popular, is_active, display_order, priority, created_at, updated_at, season_id, status, category, age_grade, format, is_visible, is_api_managed, data_source, display_name, original_name, union_id, external_id',
                         'id, name, slug, sport_id, country_id, logo_url, is_popular, display_order, priority, created_at, updated_at, season_id, status, category, age_grade, format, is_visible, is_api_managed, data_source, display_name, original_name, union_id, external_id',
                         'id, name, slug, sport_id, country_id, logo_url, display_order, priority, created_at, updated_at, season_id, status, category, age_grade, format, is_visible, is_api_managed, data_source, display_name, original_name, union_id, external_id',
@@ -372,6 +379,12 @@ export async function GET(request: NextRequest) {
                 original_name: tournament.original_name ?? tournament.name ?? null,
                 union_id: tournament.union_id ?? null,
                 external_id: tournament.external_id ?? null,
+                review_status: tournament.review_status ?? null,
+                created_by_user_id: tournament.created_by_user_id ?? null,
+                created_by_club_id: tournament.created_by_club_id ?? null,
+                linked_official_tournament_id: tournament.linked_official_tournament_id ?? null,
+                reviewed_at: tournament.reviewed_at ?? null,
+                review_notes: tournament.review_notes ?? null,
                 sport: tournament.sport_id ?? null,
                 country: tournament.country_id ?? null,
             }));

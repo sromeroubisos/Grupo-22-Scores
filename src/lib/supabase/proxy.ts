@@ -98,7 +98,27 @@ function readAccessTokenExpirySeconds(request: NextRequest): number | null {
     }
 }
 
-export async function updateSession(request: NextRequest) {
+export function readUserFromCookie(request: NextRequest): { id: string; email: string } | null {
+    const cookieValue = readAuthCookieValue(request);
+    if (!cookieValue) return null;
+    const accessToken = extractAccessTokenFromCookie(cookieValue);
+    if (!accessToken) return null;
+    const segments = accessToken.split('.');
+    if (segments.length < 2) return null;
+    const payloadJson = decodeBase64Url(segments[1]);
+    if (!payloadJson) return null;
+    try {
+        const parsed = JSON.parse(payloadJson) as { sub?: unknown; email?: unknown };
+        if (typeof parsed.sub === 'string' && typeof parsed.email === 'string') {
+            return { id: parsed.sub, email: parsed.email };
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+export async function updateSession(request: NextRequest): Promise<{ response: NextResponse; user: { id: string; email: string } | null }> {
     let response = NextResponse.next({
         request: {
             headers: request.headers,
@@ -124,7 +144,8 @@ export async function updateSession(request: NextRequest) {
                 },
                 'server',
             )
-            return response;
+            const fastUser = readUserFromCookie(request);
+            return { response, user: fastUser };
         }
     }
 
@@ -229,11 +250,14 @@ export async function updateSession(request: NextRequest) {
             },
             'server',
         )
-        return response
+        return { response, user: null }
     }
 
     const { data: { session }, error } = authResult
-    const user = session?.user ?? null
+    const user = session?.user
+        ? { id: session.user.id, email: session.user.email || '' }
+        : null;
+
     if (error) {
         // Only log if it's not a common "no session" state
         if (!error.message.includes('Auth session missing')) {
@@ -259,5 +283,5 @@ export async function updateSession(request: NextRequest) {
         'server',
     )
 
-    return response
+    return { response, user }
 }

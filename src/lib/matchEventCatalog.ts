@@ -41,8 +41,7 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
     { type: 'line', label: 'Line', category: 'other', points: 0, team: 'required', player: 'optional' },
     { type: 'knock_on', label: 'Knock-on', category: 'discipline', points: 0, team: 'required', player: 'optional' },
     { type: 'forward_pass', label: 'Pase forward', category: 'discipline', points: 0, team: 'required', player: 'optional' },
-    { type: 'penalty_won', label: 'Penal ganado', category: 'discipline', points: 0, team: 'required', player: 'optional' },
-    { type: 'penalty_conceded', label: 'Penal concedido', category: 'discipline', points: 0, team: 'required', player: 'optional' },
+    { type: 'penalty_committed', label: 'Penal cometido', category: 'discipline', points: 0, team: 'required', player: 'none' },
     { type: 'free_kick', label: 'Free Kick', category: 'discipline', points: 0, team: 'required', player: 'optional' },
     { type: 'tackle', label: 'Tackle', category: 'other', points: 0, team: 'required', player: 'optional' },
     { type: 'ruck', label: 'Ruck', category: 'other', points: 0, team: 'required', player: 'optional' },
@@ -133,6 +132,8 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
   ],
 };
 
+const REMOVED_MATCH_EVENT_TYPES = new Set(['penalty_won', 'penalty_conceded']);
+
 function cloneDefinitions(definitions: MatchEventDefinition[]) {
   return definitions.map((definition) => ({ ...definition }));
 }
@@ -178,6 +179,7 @@ function normalizeStoredDefinitions(
             : '';
 
       if (!type) return null;
+      if (REMOVED_MATCH_EVENT_TYPES.has(type)) return null;
 
       const fallbackDefinition = fallback.find((definition) => definition.type === type);
       const label = typeof candidate.label === 'string' && candidate.label.trim()

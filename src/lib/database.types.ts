@@ -1018,6 +1018,8 @@ export type Database = {
           country: string | null
           country_id: string | null
           created_at: string
+          created_by_club_id: string | null
+          created_by_user_id: string | null
           display_name: string | null
           external_id: string | null
           format: string | null
@@ -1029,9 +1031,14 @@ export type Database = {
           primary_color: string | null
           priority: number
           region: string | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
           ruleset: { [key: string]: any } | null
           season_id: string | null
           secondary_color: string | null
+          linked_official_tournament_id: string | null
           slug: string | null
           sport_id: string | null
           status: string
@@ -1046,6 +1053,8 @@ export type Database = {
           country?: string | null
           country_id?: string | null
           created_at?: string
+          created_by_club_id?: string | null
+          created_by_user_id?: string | null
           display_name?: string | null
           external_id?: string | null
           format?: string | null
@@ -1057,9 +1066,14 @@ export type Database = {
           primary_color?: string | null
           priority?: number
           region?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
           ruleset?: { [key: string]: any } | null
           season_id?: string | null
           secondary_color?: string | null
+          linked_official_tournament_id?: string | null
           slug?: string | null
           sport_id?: string | null
           status?: string
@@ -1074,6 +1088,8 @@ export type Database = {
           country?: string | null
           country_id?: string | null
           created_at?: string
+          created_by_club_id?: string | null
+          created_by_user_id?: string | null
           display_name?: string | null
           external_id?: string | null
           format?: string | null
@@ -1085,9 +1101,14 @@ export type Database = {
           primary_color?: string | null
           priority?: number
           region?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
           ruleset?: { [key: string]: any } | null
           season_id?: string | null
           secondary_color?: string | null
+          linked_official_tournament_id?: string | null
           slug?: string | null
           sport_id?: string | null
           status?: string

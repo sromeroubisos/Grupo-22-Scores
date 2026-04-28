@@ -12,6 +12,7 @@ import {
     ClipboardList,
     Clock,
     Copy,
+    Dumbbell,
     FileBarChart2,
     Filter,
     LayoutDashboard,
@@ -27,6 +28,7 @@ import {
     Users,
     X,
 } from 'lucide-react';
+import { ClubTrainingGymTab } from '@/components/admin/entities/club/ClubTrainingGymTab';
 import { ClubTrainingCreateModal } from '@/components/admin/entities/club/ClubTrainingCreateModal';
 import type { ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
 import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
@@ -36,17 +38,22 @@ import {
     type AttendanceState,
     type PlanBlock,
     type PlanBlockType,
+    type TrainingExerciseEvaluation,
+    type TrainingExerciseResult,
     type TrainingEntry,
     type TrainingEvaluation,
     type TrainingStatus,
+    type TrainingTechnicalEvent,
+    type TrainingTechnicalEventType,
     type TrainingType,
 } from '@/lib/club-admin/trainings';
 import type { Division } from '@/lib/services/divisionService';
 import type { PersonWithRole } from '@/lib/services/personService';
 
 type TrainingSegment = 'upcoming' | 'today' | 'past';
+type TrainingMainTab = 'gimnasio' | 'entrenamientos';
 type TrainingOperationalFilter = 'all' | 'no_plan' | 'no_attendance' | 'no_eval' | 'no_load';
-type PlanTab = 'resumen' | 'plan' | 'convocados' | 'pizarra' | 'evaluacion' | 'stats';
+type PlanTab = 'resumen' | 'plan' | 'convocados' | 'pizarra' | 'evaluacion' | 'eventos' | 'stats';
 type AttendanceFilter = 'all' | AttendanceState | 'sin_respuesta';
 
 const SEGMENT_TABS: Array<{ id: TrainingSegment; label: string }> = [
@@ -86,9 +93,29 @@ const BLOCK_TYPE_COLORS: Record<PlanBlockType, string> = {
 };
 
 const ATTENDANCE_META: Record<AttendanceState, { label: string; shortLabel: string }> = {
-    confirmado: { label: 'Confirmado', shortLabel: 'OK' },
-    dudoso: { label: 'Dudoso', shortLabel: 'Duda' },
+    presente: { label: 'Presente', shortLabel: 'Pres' },
     ausente: { label: 'Ausente', shortLabel: 'Out' },
+    tarde: { label: 'Tarde', shortLabel: 'Tarde' },
+    lesionado: { label: 'Lesionado', shortLabel: 'Les' },
+    justificado: { label: 'Justificado', shortLabel: 'Just' },
+    confirmado: { label: 'Presente', shortLabel: 'Pres' },
+    dudoso: { label: 'Justificado', shortLabel: 'Just' },
+};
+
+const ATTENDANCE_OPTIONS: AttendanceState[] = ['presente', 'ausente', 'tarde', 'lesionado', 'justificado'];
+
+const EXERCISE_RESULT_META: Record<TrainingExerciseResult, { label: string; shortLabel: string }> = {
+    correcto: { label: 'Realizado correctamente', shortLabel: 'OK' },
+    parcial: { label: 'Parcialmente logrado', shortLabel: 'Parcial' },
+    no_logrado: { label: 'No logrado', shortLabel: 'No' },
+};
+
+const TECHNICAL_EVENT_META: Record<TrainingTechnicalEventType, { label: string; hint: string }> = {
+    patadas: { label: 'Patadas', hint: 'Totales, aciertos, fallos, zona y objetivo' },
+    jugadas: { label: 'Jugadas', hint: 'Repeticiones, ejecucion y motivo del fallo' },
+    scrums: { label: 'Scrums', hint: 'Repeticiones, acciones correctas y resultado' },
+    lines: { label: 'Lines', hint: 'Lanzamiento, llamada y ejecucion tecnica' },
+    secuencias: { label: 'Secuencias', hint: 'Repeticiones, pelota perdida y errores' },
 };
 
 const BLOCK_FOCUS_LABELS: Record<PlanBlockType, string> = {
@@ -262,6 +289,29 @@ function inferOperationalState(entry: TrainingEntry) {
     return { hasPlan, hasAttendance, hasEval, hasLoad, completed };
 }
 
+function createTechnicalEvent(type: TrainingTechnicalEventType): TrainingTechnicalEvent {
+    return {
+        id: `event-${type}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        type,
+        name: TECHNICAL_EVENT_META[type].label,
+        total: 0,
+        successful: 0,
+        failed: 0,
+        lostBalls: 0,
+        errors: 0,
+        zone: '',
+        target: '',
+        failureReason: '',
+        notes: '',
+    };
+}
+
+function calculateEventEffectiveness(event: TrainingTechnicalEvent) {
+    const total = event.total || event.successful + event.failed;
+    if (!total) return 0;
+    return Math.round((event.successful / total) * 100);
+}
+
 function isThisWeek(dateStr: string) {
     const d = new Date(dateStr).getTime();
     const now = Date.now();
@@ -332,6 +382,7 @@ export function ClubEntrenamientosTab({
     onTabChange,
 }: ClubEntrenamientosTabProps) {
     const [trainings, setTrainings] = useState<TrainingEntry[]>([]);
+    const [activeMainTab, setActiveMainTab] = useState<TrainingMainTab>('gimnasio');
     const [activeSegment, setActiveSegment] = useState<TrainingSegment>('today');
     const [operationalFilter, setOperationalFilter] = useState<TrainingOperationalFilter>('all');
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -667,7 +718,7 @@ export function ClubEntrenamientosTab({
                     <span className="club-matches-kicker">Módulo de entrenamiento</span>
                     <div className="club-matches-heading-row">
                         <div>
-                            <h2>Entrenamientos</h2>
+                            <h2>Entrenamiento</h2>
                             <p className="text-xs text-white/45 mt-2">
                                 Agenda conectada a {connectedSummary} de {clubName}
                             </p>
@@ -696,24 +747,64 @@ export function ClubEntrenamientosTab({
                     </div>
                 </div>
                 <div className="club-matches-header-actions">
-                    <button type="button" className="club-matches-btn club-matches-btn-ghost" onClick={() => setCreateOpen(true)}>
-                        <Plus className="w-4 h-4" />
-                        Crear entrenamiento
-                    </button>
-                    <button type="button" className="club-matches-btn club-matches-btn-ghost" onClick={() => setCalendarOpen(true)}>
-                        <Calendar className="w-4 h-4" />
-                        Ver calendario
-                    </button>
-                    <button type="button" className="club-matches-btn club-matches-btn-ghost">
-                        <ClipboardList className="w-4 h-4" />
-                        Plantillas
-                    </button>
-                    <button type="button" className="club-matches-btn club-matches-btn-primary" onClick={() => setFiltersOpen((c) => !c)}>
-                        <Filter className="w-4 h-4" />
-                        Filtros
-                    </button>
+                    {activeMainTab === 'gimnasio' ? (
+                        <button type="button" className="club-matches-btn club-matches-btn-primary" onClick={() => setActiveMainTab('entrenamientos')}>
+                            <ClipboardList className="w-4 h-4" />
+                            Ir a campo
+                        </button>
+                    ) : (
+                        <>
+                            <button type="button" className="club-matches-btn club-matches-btn-ghost" onClick={() => setCreateOpen(true)}>
+                                <Plus className="w-4 h-4" />
+                                Crear entrenamiento
+                            </button>
+                            <button type="button" className="club-matches-btn club-matches-btn-ghost" onClick={() => setCalendarOpen(true)}>
+                                <Calendar className="w-4 h-4" />
+                                Ver calendario
+                            </button>
+                            <button type="button" className="club-matches-btn club-matches-btn-ghost">
+                                <ClipboardList className="w-4 h-4" />
+                                Plantillas
+                            </button>
+                            <button type="button" className="club-matches-btn club-matches-btn-primary" onClick={() => setFiltersOpen((c) => !c)}>
+                                <Filter className="w-4 h-4" />
+                                Filtros
+                            </button>
+                        </>
+                    )}
                 </div>
             </header>
+
+            <nav className="club-matches-tabs" aria-label="Modulos de entrenamiento">
+                <button
+                    type="button"
+                    className={`club-matches-tab${activeMainTab === 'gimnasio' ? ' active' : ''}`}
+                    onClick={() => setActiveMainTab('gimnasio')}
+                >
+                    <Dumbbell className="w-4 h-4" />
+                    Gimnasio
+                </button>
+                <button
+                    type="button"
+                    className={`club-matches-tab${activeMainTab === 'entrenamientos' ? ' active' : ''}`}
+                    onClick={() => setActiveMainTab('entrenamientos')}
+                >
+                    <ClipboardList className="w-4 h-4" />
+                    Entrenamientos
+                </button>
+            </nav>
+
+            {activeMainTab === 'gimnasio' ? (
+                <ClubTrainingGymTab
+                    clubId={clubId}
+                    clubName={clubName}
+                    divisions={divisions}
+                    players={players}
+                />
+            ) : null}
+
+            {activeMainTab === 'entrenamientos' ? (
+                <>
 
             {/* KPIs */}
             <section className="club-matches-kpi-grid">
@@ -927,11 +1018,15 @@ export function ClubEntrenamientosTab({
                         <div className="club-training-modal-body">
                             <div className="space-y-2">
                                 {trainings
-                                    .filter((t) => isFuture(t.date) || isToday(t.date))
                                     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                                     .map((t) => {
                                         const w = formatDateTime(t.date);
                                         const tm = TYPE_META[t.type];
+                                        const status = isPast(t.date)
+                                            ? 'Realizado'
+                                            : isToday(t.date)
+                                                ? 'Pendiente'
+                                                : 'Planificado';
                                         return (
                                             <div key={t.id} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/5">
                                                 <div className="text-center min-w-[70px]">
@@ -940,6 +1035,7 @@ export function ClubEntrenamientosTab({
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="text-sm font-bold truncate">{t.title}</div>
+                                                    <div className="text-xs text-white/50">{status} / {t.objective || 'Sin objetivo'}</div>
                                                     <div className="text-xs text-white/50">{w.time} · <span className={`club-training-type-badge ${tm.className}`} style={{ fontSize: 9, padding: '1px 6px' }}>{tm.label}</span> · {t.location}</div>
                                                 </div>
                                                 <button className="text-xs px-3 py-1.5 bg-white/10 rounded-lg hover:bg-white/20" onClick={() => { setCalendarOpen(false); openDetail(t); }}>
@@ -948,7 +1044,7 @@ export function ClubEntrenamientosTab({
                                             </div>
                                         );
                                     })}
-                                {trainings.filter((t) => isFuture(t.date) || isToday(t.date)).length === 0 && (
+                                {trainings.length === 0 && (
                                     <div className="text-center text-white/40 py-8">No hay entrenamientos próximos</div>
                                 )}
                             </div>
@@ -974,6 +1070,8 @@ export function ClubEntrenamientosTab({
                     onTabChange={onTabChange}
                 />
             )}
+                </>
+            ) : null}
         </div>
     );
 }
@@ -1012,6 +1110,7 @@ function TrainingDetailModal({
         { id: 'pizarra', label: 'Pizarra', icon: <Target className="w-3.5 h-3.5" /> },
         { id: 'convocados', label: 'Convocados', icon: <Users className="w-3.5 h-3.5" /> },
         { id: 'evaluacion', label: 'Evaluación', icon: <NotebookPen className="w-3.5 h-3.5" /> },
+        { id: 'eventos', label: 'Eventos', icon: <FileBarChart2 className="w-3.5 h-3.5" /> },
         { id: 'stats', label: 'Stats', icon: <BarChart3 className="w-3.5 h-3.5" /> },
     ];
 
@@ -1195,7 +1294,7 @@ function TrainingDetailModal({
                                     className="text-xs flex items-center gap-1 text-white/60 hover:text-white"
                                     onClick={() => {
                                         const all: Record<string, AttendanceState> = {};
-                                        rosterPlayers.forEach((p) => { all[p.id] = 'confirmado'; });
+                                        rosterPlayers.forEach((p) => { all[p.id] = 'presente'; });
                                         setAttendance(all);
                                     }}
                                 >
@@ -1209,7 +1308,7 @@ function TrainingDetailModal({
                                         <div className="club-training-convocado-pos">{p.pos}</div>
                                     </div>
                                     <div className="flex gap-2">
-                                        {(['confirmado', 'ausente', 'dudoso'] as AttendanceState[]).map((st) => (
+                                        {ATTENDANCE_OPTIONS.map((st) => (
                                             <button
                                                 key={st}
                                                 className={`club-training-convocado-status${attendance[p.id] === st ? ` ${st}` : ''}`}
@@ -1538,6 +1637,7 @@ function TrainingWorkspaceModal({
         { id: 'convocados', label: 'Convocados', icon: <Users className="w-4 h-4" />, hint: 'Asistencia y respuestas' },
         { id: 'pizarra', label: 'Pizarra', icon: <Target className="w-4 h-4" />, hint: 'Secuencias tacticas' },
         { id: 'evaluacion', label: 'Evaluacion', icon: <NotebookPen className="w-4 h-4" />, hint: 'Carga y cierre' },
+        { id: 'eventos', label: 'Eventos', icon: <FileBarChart2 className="w-4 h-4" />, hint: 'Patadas y jugadas' },
         { id: 'stats', label: 'Stats', icon: <BarChart3 className="w-4 h-4" />, hint: 'Lectura rapida' },
     ];
 
@@ -1572,6 +1672,54 @@ function TrainingWorkspaceModal({
             [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
             return next;
         });
+    };
+
+    const updateExerciseScore = (blockId: string, patch: Partial<TrainingExerciseEvaluation>) => {
+        setEvalForm((current) => {
+            const currentRows = current.exerciseScores ?? [];
+            const existing = currentRows.find((row) => row.blockId === blockId);
+            const nextRow: TrainingExerciseEvaluation = {
+                blockId,
+                result: existing?.result ?? 'correcto',
+                score: existing?.score ?? 0,
+                comments: existing?.comments ?? '',
+                ...patch,
+            };
+
+            return {
+                ...current,
+                exerciseScores: [
+                    ...currentRows.filter((row) => row.blockId !== blockId),
+                    nextRow,
+                ],
+            };
+        });
+    };
+
+    const addTechnicalEvent = (type: TrainingTechnicalEventType) => {
+        setEvalForm((current) => ({
+            ...current,
+            technicalEvents: [
+                ...(current.technicalEvents ?? []),
+                createTechnicalEvent(type),
+            ],
+        }));
+    };
+
+    const updateTechnicalEvent = (id: string, patch: Partial<TrainingTechnicalEvent>) => {
+        setEvalForm((current) => ({
+            ...current,
+            technicalEvents: (current.technicalEvents ?? []).map((event) => (
+                event.id === id ? { ...event, ...patch } : event
+            )),
+        }));
+    };
+
+    const removeTechnicalEvent = (id: string) => {
+        setEvalForm((current) => ({
+            ...current,
+            technicalEvents: (current.technicalEvents ?? []).filter((event) => event.id !== id),
+        }));
     };
 
     const rosterPlayers = useMemo(
@@ -1616,14 +1764,22 @@ function TrainingWorkspaceModal({
                 acc.sin_respuesta += 1;
                 return acc;
             }
-            acc[status] += 1;
+            if (status === 'confirmado') {
+                acc.presente += 1;
+            } else if (status === 'dudoso') {
+                acc.justificado += 1;
+            } else {
+                acc[status] += 1;
+            }
             return acc;
         }, {
-            confirmado: 0,
-            dudoso: 0,
+            presente: 0,
             ausente: 0,
+            tarde: 0,
+            lesionado: 0,
+            justificado: 0,
             sin_respuesta: 0,
-        });
+        } as Record<Exclude<AttendanceState, 'confirmado' | 'dudoso'> | 'sin_respuesta', number>);
     }, [attendance, rosterPlayers]);
     const visiblePlayers = useMemo(() => {
         const query = attendanceQuery.trim().toLowerCase();
@@ -1631,6 +1787,8 @@ function TrainingWorkspaceModal({
             const status = attendance[player.id];
             if (attendanceFilter !== 'all') {
                 if (attendanceFilter === 'sin_respuesta' && status) return false;
+                if (attendanceFilter === 'presente' && status === 'confirmado') return true;
+                if (attendanceFilter === 'justificado' && status === 'dudoso') return true;
                 if (attendanceFilter !== 'sin_respuesta' && status !== attendanceFilter) return false;
             }
 
@@ -1659,7 +1817,9 @@ function TrainingWorkspaceModal({
         || evalForm.rpe !== 5
         || evalForm.durationReal !== entry.duration
         || evalForm.energy !== 7
-        || evalForm.fatigue !== 3;
+        || evalForm.fatigue !== 3
+        || (evalForm.exerciseScores?.length ?? 0) > 0
+        || (evalForm.technicalEvents?.length ?? 0) > 0;
     const workspaceStatus = useMemo(
         () => getWorkspaceStatus(entry, planBlocks, Boolean((objective || entry.objective).trim())),
         [entry, objective, planBlocks]
@@ -1694,8 +1854,9 @@ function TrainingWorkspaceModal({
             ? 'En construccion'
             : 'Listo';
     const totalPlayers = rosterPlayers.length || entry.convocados || 0;
+    const presentCount = attendanceSummary.presente + attendanceSummary.tarde;
     const attendanceRate = totalPlayers > 0
-        ? Math.round((attendanceSummary.confirmado / totalPlayers) * 100)
+        ? Math.round((presentCount / totalPlayers) * 100)
         : 0;
     const durationDelta = (entry.evaluation?.durationReal || 0) - (totalDuration || entry.duration);
     const loadDelta = computedLoad - projectedLoad;
@@ -1719,9 +1880,9 @@ function TrainingWorkspaceModal({
         biggestBlock
             ? `Bloque principal: ${biggestBlock.title || BLOCK_TYPE_LABELS[biggestBlock.type]}`
             : 'Todavia no definiste el bloque principal del dia.',
-        attendanceSummary.confirmado > 0
-            ? `${attendanceSummary.confirmado} confirmados sobre ${totalPlayers || 0}.`
-            : 'No hay confirmaciones cargadas todavia.',
+        presentCount > 0
+            ? `${presentCount} presentes sobre ${totalPlayers || 0}.`
+            : 'No hay asistencia cargada todavia.',
         hasEvaluationData
             ? 'La sesion ya tiene una evaluacion cargada.'
             : 'La evaluacion queda pendiente para el cierre.',
@@ -1925,7 +2086,7 @@ function TrainingWorkspaceModal({
                                         </article>
                                         <article>
                                             <span>Asistencia</span>
-                                            <strong>{attendanceSummary.confirmado}/{totalPlayers || 0}</strong>
+                                            <strong>{presentCount}/{totalPlayers || 0}</strong>
                                         </article>
                                         <article>
                                             <span>Carga</span>
@@ -2013,8 +2174,8 @@ function TrainingWorkspaceModal({
                                                 <strong>{averageIntensity.label}</strong>
                                             </article>
                                             <article>
-                                                <span>Asistencia confirmada</span>
-                                                <strong>{attendanceSummary.confirmado}/{totalPlayers || 0}</strong>
+                                                <span>Asistencia presente</span>
+                                                <strong>{presentCount}/{totalPlayers || 0}</strong>
                                             </article>
                                         </div>
                                         <div className="club-training-workspace-summary-notes">
@@ -2198,12 +2359,12 @@ function TrainingWorkspaceModal({
                                         <button type="button" className="club-training-workspace-quick-btn" onClick={() => {
                                             const next: Record<string, AttendanceState> = {};
                                             rosterPlayers.forEach((player) => {
-                                                next[player.id] = 'confirmado';
+                                                next[player.id] = 'presente';
                                             });
                                             setAttendance(next);
                                         }}>
                                             <CheckCircle2 className="w-4 h-4" />
-                                            Confirmar todos
+                                            Presentes todos
                                         </button>
                                         <button type="button" className="club-training-workspace-quick-btn" onClick={() => setAttendance({})}>
                                             Limpiar respuestas
@@ -2224,8 +2385,10 @@ function TrainingWorkspaceModal({
                                     <div className="club-training-workspace-filter-row">
                                         {[
                                             { id: 'all' as const, label: 'Todos' },
-                                            { id: 'confirmado' as const, label: 'Confirmados' },
-                                            { id: 'dudoso' as const, label: 'Dudosos' },
+                                            { id: 'presente' as const, label: 'Presentes' },
+                                            { id: 'tarde' as const, label: 'Tarde' },
+                                            { id: 'lesionado' as const, label: 'Lesionados' },
+                                            { id: 'justificado' as const, label: 'Justificados' },
                                             { id: 'ausente' as const, label: 'Ausentes' },
                                             { id: 'sin_respuesta' as const, label: 'Sin respuesta' },
                                         ].map((filterOption) => (
@@ -2243,12 +2406,20 @@ function TrainingWorkspaceModal({
 
                                 <div className="club-training-workspace-inline-stats attendance">
                                     <article>
-                                        <span>Confirmados</span>
-                                        <strong>{attendanceSummary.confirmado}</strong>
+                                        <span>Presentes</span>
+                                        <strong>{attendanceSummary.presente}</strong>
                                     </article>
                                     <article>
-                                        <span>Dudosos</span>
-                                        <strong>{attendanceSummary.dudoso}</strong>
+                                        <span>Tarde</span>
+                                        <strong>{attendanceSummary.tarde}</strong>
+                                    </article>
+                                    <article>
+                                        <span>Lesionados</span>
+                                        <strong>{attendanceSummary.lesionado}</strong>
+                                    </article>
+                                    <article>
+                                        <span>Justificados</span>
+                                        <strong>{attendanceSummary.justificado}</strong>
                                     </article>
                                     <article>
                                         <span>Ausentes</span>
@@ -2274,7 +2445,7 @@ function TrainingWorkspaceModal({
                                                 </div>
 
                                                 <div className="club-training-workspace-player-status">
-                                                    {(['confirmado', 'dudoso', 'ausente'] as AttendanceState[]).map((status) => (
+                                                    {ATTENDANCE_OPTIONS.map((status) => (
                                                         <button
                                                             key={status}
                                                             type="button"
@@ -2615,6 +2786,68 @@ function TrainingWorkspaceModal({
                                     </article>
                                 </div>
 
+                                <section className="club-training-workspace-card" style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
+                                    <div className="club-training-workspace-card-head">
+                                        <div>
+                                            <span className="club-training-workspace-card-kicker">5. Evaluacion por ejercicio</span>
+                                            <h5>Puntaje, logro y comentario por bloque</h5>
+                                        </div>
+                                        <button type="button" className="club-training-workspace-quick-btn" onClick={() => setTab('eventos')}>
+                                            Registrar eventos
+                                        </button>
+                                    </div>
+
+                                    {planBlocks.length === 0 ? (
+                                        <div className="club-training-workspace-empty">
+                                            Carga bloques en el plan para evaluar cada ejercicio.
+                                        </div>
+                                    ) : (
+                                        <div className="club-training-workspace-plan-list">
+                                            {planBlocks.map((block) => {
+                                                const row = evalForm.exerciseScores?.find((item) => item.blockId === block.id);
+                                                return (
+                                                    <div key={block.id} className="club-training-workspace-player-row">
+                                                        <div className="club-training-workspace-player-meta">
+                                                            <div className="club-training-workspace-avatar">{BLOCK_FOCUS_LABELS[block.type].slice(0, 2).toUpperCase()}</div>
+                                                            <div>
+                                                                <strong>{block.title || BLOCK_TYPE_LABELS[block.type]}</strong>
+                                                                <span>{block.duration} min / {BLOCK_TYPE_LABELS[block.type]}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="club-training-workspace-player-status" style={{ alignItems: 'stretch' }}>
+                                                            <select
+                                                                className="club-training-form-select"
+                                                                value={row?.result ?? 'correcto'}
+                                                                onChange={(event) => updateExerciseScore(block.id, { result: event.target.value as TrainingExerciseResult })}
+                                                            >
+                                                                {(Object.keys(EXERCISE_RESULT_META) as TrainingExerciseResult[]).map((result) => (
+                                                                    <option key={result} value={result}>{EXERCISE_RESULT_META[result].label}</option>
+                                                                ))}
+                                                            </select>
+                                                            <input
+                                                                type="number"
+                                                                min={0}
+                                                                max={10}
+                                                                className="club-training-form-input"
+                                                                value={row?.score ?? 0}
+                                                                onChange={(event) => updateExerciseScore(block.id, { score: Number(event.target.value) || 0 })}
+                                                                style={{ width: '5.5rem' }}
+                                                            />
+                                                            <input
+                                                                className="club-training-form-input"
+                                                                value={row?.comments ?? ''}
+                                                                onChange={(event) => updateExerciseScore(block.id, { comments: event.target.value })}
+                                                                placeholder="Comentario del entrenador"
+                                                                style={{ minWidth: '14rem' }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </section>
+
                                 <div className="club-training-workspace-eval-actions">
                                     <button type="button" className="btn" onClick={() => { void handleSaveEvaluationDraft(); }}>
                                         <Save className="w-4 h-4" />
@@ -2623,6 +2856,156 @@ function TrainingWorkspaceModal({
                                     <button type="button" className="btn btn-primary" onClick={() => { void handleFinishTraining(); }}>
                                         <CheckCircle2 className="w-4 h-4" />
                                         Marcar entrenamiento como finalizado
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {tab === 'eventos' && (
+                            <div className="club-training-workspace-pane">
+                                <div className="club-training-workspace-section-head">
+                                    <div>
+                                        <span className="club-training-workspace-section-kicker">Eventos especificos</span>
+                                        <h4>Patadas, jugadas, scrums, lines y secuencias</h4>
+                                    </div>
+                                    <div className="club-training-workspace-action-row">
+                                        {(Object.keys(TECHNICAL_EVENT_META) as TrainingTechnicalEventType[]).map((type) => (
+                                            <button key={type} type="button" className="club-training-workspace-quick-btn" onClick={() => addTechnicalEvent(type)}>
+                                                <Plus className="w-4 h-4" />
+                                                {TECHNICAL_EVENT_META[type].label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="club-training-workspace-stats-hero">
+                                    <article>
+                                        <span>Eventos</span>
+                                        <strong>{evalForm.technicalEvents?.length ?? 0}</strong>
+                                        <small>filas cargadas</small>
+                                    </article>
+                                    <article>
+                                        <span>Repeticiones</span>
+                                        <strong>{(evalForm.technicalEvents ?? []).reduce((sum, event) => sum + event.total, 0)}</strong>
+                                        <small>acciones observadas</small>
+                                    </article>
+                                    <article>
+                                        <span>Correctas</span>
+                                        <strong>{(evalForm.technicalEvents ?? []).reduce((sum, event) => sum + event.successful, 0)}</strong>
+                                        <small>ejecuciones logradas</small>
+                                    </article>
+                                    <article>
+                                        <span>Perdidas</span>
+                                        <strong>{(evalForm.technicalEvents ?? []).reduce((sum, event) => sum + event.lostBalls + event.errors, 0)}</strong>
+                                        <small>pelotas o errores</small>
+                                    </article>
+                                </div>
+
+                                {(evalForm.technicalEvents ?? []).length === 0 ? (
+                                    <div className="club-training-workspace-empty">
+                                        Agrega un evento para registrar efectividad por zona, jugada o secuencia.
+                                    </div>
+                                ) : (
+                                    <div className="club-training-workspace-plan-list">
+                                        {(evalForm.technicalEvents ?? []).map((event) => (
+                                            <article key={event.id} className="club-training-workspace-plan-card">
+                                                <div className="club-training-workspace-plan-rail">
+                                                    <strong>{calculateEventEffectiveness(event)}%</strong>
+                                                    <span>{TECHNICAL_EVENT_META[event.type].label}</span>
+                                                </div>
+                                                <div className="club-training-workspace-plan-content">
+                                                    <div className="club-training-workspace-plan-top">
+                                                        <div className="club-training-workspace-plan-tags">
+                                                            <span className="club-training-workspace-type-pill">{TECHNICAL_EVENT_META[event.type].label}</span>
+                                                            <span className="club-training-workspace-focus-pill">{TECHNICAL_EVENT_META[event.type].hint}</span>
+                                                        </div>
+                                                        <div className="club-training-workspace-plan-actions">
+                                                            <button type="button" className="danger" onClick={() => removeTechnicalEvent(event.id)}>
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="club-training-workspace-form-grid compact">
+                                                        <label className="club-training-workspace-field">
+                                                            <span className="club-training-form-label">Nombre / jugada</span>
+                                                            <input
+                                                                className="club-training-form-input"
+                                                                value={event.name}
+                                                                onChange={(changeEvent) => updateTechnicalEvent(event.id, { name: changeEvent.target.value })}
+                                                            />
+                                                        </label>
+                                                        <label className="club-training-workspace-field">
+                                                            <span className="club-training-form-label">Zona</span>
+                                                            <input
+                                                                className="club-training-form-input"
+                                                                value={event.zone}
+                                                                onChange={(changeEvent) => updateTechnicalEvent(event.id, { zone: changeEvent.target.value })}
+                                                                placeholder="22 rival, mitad, touch..."
+                                                            />
+                                                        </label>
+                                                        <label className="club-training-workspace-field">
+                                                            <span className="club-training-form-label">Objetivo</span>
+                                                            <input
+                                                                className="club-training-form-input"
+                                                                value={event.target}
+                                                                onChange={(changeEvent) => updateTechnicalEvent(event.id, { target: changeEvent.target.value })}
+                                                                placeholder="Palos, line, canal 2..."
+                                                            />
+                                                        </label>
+                                                    </div>
+
+                                                    <div className="club-training-workspace-form-grid compact">
+                                                        {[
+                                                            ['total', 'Total'],
+                                                            ['successful', 'Correctas'],
+                                                            ['failed', 'Fallidas'],
+                                                            ['lostBalls', 'Pelotas perdidas'],
+                                                            ['errors', 'Errores'],
+                                                        ].map(([key, label]) => (
+                                                            <label key={key} className="club-training-workspace-field">
+                                                                <span className="club-training-form-label">{label}</span>
+                                                                <input
+                                                                    type="number"
+                                                                    min={0}
+                                                                    className="club-training-form-input"
+                                                                    value={event[key as keyof TrainingTechnicalEvent] as number}
+                                                                    onChange={(changeEvent) => updateTechnicalEvent(event.id, {
+                                                                        [key]: Number(changeEvent.target.value) || 0,
+                                                                    } as Partial<TrainingTechnicalEvent>)}
+                                                                />
+                                                            </label>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="club-training-workspace-form-grid compact">
+                                                        <label className="club-training-workspace-field">
+                                                            <span className="club-training-form-label">Motivo del fallo</span>
+                                                            <input
+                                                                className="club-training-form-input"
+                                                                value={event.failureReason}
+                                                                onChange={(changeEvent) => updateTechnicalEvent(event.id, { failureReason: changeEvent.target.value })}
+                                                            />
+                                                        </label>
+                                                        <label className="club-training-workspace-field">
+                                                            <span className="club-training-form-label">Observaciones</span>
+                                                            <input
+                                                                className="club-training-form-input"
+                                                                value={event.notes}
+                                                                onChange={(changeEvent) => updateTechnicalEvent(event.id, { notes: changeEvent.target.value })}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="club-training-workspace-eval-actions">
+                                    <button type="button" className="btn btn-primary" onClick={() => { void handleSaveEvaluationDraft(); }}>
+                                        <Save className="w-4 h-4" />
+                                        Guardar eventos
                                     </button>
                                 </div>
                             </div>
@@ -2656,7 +3039,7 @@ function TrainingWorkspaceModal({
                                     <article>
                                         <span>Asistencia</span>
                                         <strong>{attendanceRate}%</strong>
-                                        <small>Confirmados sobre el plantel</small>
+                                        <small>Presentes sobre el plantel</small>
                                     </article>
                                 </div>
 
@@ -2744,8 +3127,8 @@ function TrainingWorkspaceModal({
                                     <strong>{projectedLoad || '--'}</strong>
                                 </article>
                                 <article>
-                                    <span>Confirmados</span>
-                                    <strong>{attendanceSummary.confirmado}/{totalPlayers || 0}</strong>
+                                    <span>Presentes</span>
+                                    <strong>{presentCount}/{totalPlayers || 0}</strong>
                                 </article>
                                 <article>
                                     <span>Estado del plan</span>
