@@ -20,12 +20,14 @@ import type {
     ClubDashboardMatch,
     ClubDashboardStanding,
 } from '@/lib/club-admin/dashboard-types';
+import { resolveActiveSeason, persistActiveSeason } from '@/lib/club-admin/activeSeasonSelection';
 
 interface ClubCompetitionsPanelProps {
     competitions: ClubDashboardCompetition[];
     standings: ClubDashboardStanding[];
     matches: ClubDashboardMatch[];
     clubName: string;
+    clubId?: string;
     loading?: boolean;
 }
 
@@ -509,17 +511,24 @@ export function ClubCompetitionsPanel({
     standings,
     matches,
     clubName,
+    clubId,
     loading,
 }: ClubCompetitionsPanelProps) {
     const [activeSegment, setActiveSegment] = useState<CompetitionSegment>('active');
     const [showFilters, setShowFilters] = useState(false);
-    const [selectedSeason, setSelectedSeason] = useState('all');
+    const [selectedSeason, setSelectedSeason] = useState(() => clubId ? resolveActiveSeason(clubId) : 'all');
     const [selectedDivision, setSelectedDivision] = useState('all');
     const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
     const [detailTab, setDetailTab] = useState<CompetitionDetailTab>('table');
     const [referenceNow] = useState(() => Date.now());
     const [standingsLiteCache, setStandingsLiteCache] = useState<Record<string, StandingsLiteState>>({});
     const requestedStandingsKeys = useRef<Set<string>>(new Set());
+
+    useEffect(() => {
+        if (clubId) {
+            persistActiveSeason(clubId, selectedSeason);
+        }
+    }, [clubId, selectedSeason]);
 
     const standingsByTournament = useMemo(() => {
         const map = new Map<string, ClubDashboardStanding[]>();

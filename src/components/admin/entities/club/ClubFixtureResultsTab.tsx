@@ -5,6 +5,7 @@ import { useDeferredValue, useState, startTransition, useCallback, useEffect, us
 import { Calendar, ChevronRight, ClipboardList, FileBarChart2, Filter, LayoutList, NotebookPen, ShieldAlert, Sparkles, Target, Users, X } from 'lucide-react';
 import { ClubSeasonStatsPanel } from './ClubSeasonStatsPanel';
 import { getStoredActiveTeamId, persistActiveTeamId } from '@/lib/club-admin/activeTeamSelection';
+import { resolveActiveSeason, persistActiveSeason } from '@/lib/club-admin/activeSeasonSelection';
 import type { ClubDashboardMatch } from '@/lib/club-admin/dashboard-types';
 import type { Division } from '@/lib/services/divisionService';
 
@@ -286,7 +287,7 @@ export function ClubFixtureResultsTab({
     const [conditionFilter, setConditionFilter] = useState<MatchConditionFilter>('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [operationalFilter, setOperationalFilter] = useState<MatchOperationalFilter>('all');
-    const [selectedSeason, setSelectedSeason] = useState(String(new Date().getFullYear()));
+    const [selectedSeason, setSelectedSeason] = useState(() => resolveActiveSeason(clubId));
 
     // Create internal match form state
     const [createForm, setCreateForm] = useState({
@@ -344,6 +345,14 @@ export function ClubFixtureResultsTab({
         : allMatches, [canFilterBySelectedDivision, allMatches, selectedDivision]);
 
     const timelineEntries = useMemo(() => scopedMatches.map((match) => buildTimelineEntry(match, effectiveDivision, clubName)), [scopedMatches, effectiveDivision, clubName]);
+
+    const seasonFilteredEntries = useMemo(() => {
+        if (!selectedSeason) return timelineEntries;
+        return timelineEntries.filter((entry) => {
+            if (!entry.match.dateTime) return true;
+            return String(new Date(entry.match.dateTime).getFullYear()) === selectedSeason;
+        });
+    }, [timelineEntries, selectedSeason]);
 
     const tournamentOptions = useMemo(() => Array.from(new Set(
         timelineEntries
@@ -446,7 +455,7 @@ export function ClubFixtureResultsTab({
         {
             id: 'callup',
             label: 'Alineaciones pendientes',
-            value: String(timelineEntries.filter((entry) => !entry.operationalState.lineup && entry.isUpcoming).length).padStart(2, '0'),
+            value: String(seasonFilteredEntries.filter((entry) => !entry.operationalState.lineup && entry.isUpcoming).length).padStart(2, '0'),
             hint: 'Partidos por cerrar antes de competir',
             tone: 'warning',
             onClick: () => {
@@ -460,7 +469,7 @@ export function ClubFixtureResultsTab({
         {
             id: 'analysis',
             label: 'Partidos sin análisis',
-            value: String(timelineEntries.filter((entry) => entry.isPlayed && !entry.operationalState.report).length).padStart(2, '0'),
+            value: String(seasonFilteredEntries.filter((entry) => entry.isPlayed && !entry.operationalState.report).length).padStart(2, '0'),
             hint: 'Post partido todavía abierto',
             onClick: () => {
                 startTransition(() => {
@@ -473,7 +482,7 @@ export function ClubFixtureResultsTab({
         {
             id: 'stats',
             label: 'Partidos sin stats',
-            value: String(timelineEntries.filter((entry) => entry.isPlayed && !entry.operationalState.stats).length).padStart(2, '0'),
+            value: String(seasonFilteredEntries.filter((entry) => entry.isPlayed && !entry.operationalState.stats).length).padStart(2, '0'),
             hint: 'Métricas pendientes de cierre',
             onClick: () => {
                 startTransition(() => {
@@ -486,7 +495,7 @@ export function ClubFixtureResultsTab({
         {
             id: 'load',
             label: 'Carga física pendiente',
-            value: String(timelineEntries.filter((entry) => entry.isPlayed && (!entry.operationalState.stats || !entry.operationalState.report)).length).padStart(2, '0'),
+            value: String(seasonFilteredEntries.filter((entry) => entry.isPlayed && (!entry.operationalState.stats || !entry.operationalState.report)).length).padStart(2, '0'),
             hint: 'Seguimiento post partido pendiente',
             onClick: () => {
                 startTransition(() => {
@@ -496,7 +505,7 @@ export function ClubFixtureResultsTab({
             },
             active: activeTab === 'pending' && operationalFilter === 'load',
         },
-    ], [nextMatch, timelineEntries, activeTab, operationalFilter, dateFrom, dateTo]);
+    ], [nextMatch, timelineEntries, seasonFilteredEntries, activeTab, operationalFilter, dateFrom, dateTo]);
 
     const visibleEntries = useMemo(() => sortedEntries.slice(0, displayLimit), [sortedEntries, displayLimit]);
     const hasMoreEntries = sortedEntries.length > displayLimit;
@@ -507,6 +516,10 @@ export function ClubFixtureResultsTab({
         setApiCursor(null);
         setApiHasMore(true);
     }, [activeTab]);
+
+    useEffect(() => {
+        persistActiveSeason(clubId, selectedSeason);
+    }, [clubId, selectedSeason]);
 
     const handleLoadMoreApi = useCallback(async () => {
         if (apiLoading) return;

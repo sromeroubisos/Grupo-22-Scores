@@ -38,6 +38,7 @@ import {
 import type { Division } from '@/lib/services/divisionService';
 import type { PersonWithRole } from '@/lib/services/personService';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
+import { resolveActiveSeason, persistActiveSeason } from '@/lib/club-admin/activeSeasonSelection';
 
 import styles from './ClubPerformanceTab.module.css';
 
@@ -944,7 +945,7 @@ export function ClubPerformanceTab({
     const [createSessionFromPlanOpen, setCreateSessionFromPlanOpen] = useState(false);
     const [selectedDivisionId, setSelectedDivisionId] = useState('all');
     const [selectedRosterId, setSelectedRosterId] = useState('all');
-    const [selectedSeason, setSelectedSeason] = useState(String(new Date().getFullYear()));
+    const [selectedSeason, setSelectedSeason] = useState(() => resolveActiveSeason(clubId));
     const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
     const [selectedGymPlanId, setSelectedGymPlanId] = useState<string | null>(null);
     const [planRows, setPlanRows] = useState<GymPlanRow[]>([buildEmptyPlanRow()]);
@@ -971,6 +972,10 @@ export function ClubPerformanceTab({
     useEffect(() => {
         setRoster(players);
     }, [clubId, players]);
+
+    useEffect(() => {
+        persistActiveSeason(clubId, selectedSeason);
+    }, [clubId, selectedSeason]);
 
     useEffect(() => {
         let cancelled = false;

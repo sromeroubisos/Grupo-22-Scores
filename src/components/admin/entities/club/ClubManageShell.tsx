@@ -821,6 +821,7 @@ export function ClubManageShell({
                                     {currentTab === 'competencias' || mountedTabs.includes('competencias') ? (
                                         <div className="card col-12" hidden={currentTab !== 'competencias'}>
                                             <DynamicClubCompetitionsPanel
+                                                clubId={id}
                                                 competitions={summaryDashboardData.competitions}
                                                 standings={summaryDashboardData.standings}
                                                 matches={summaryDashboardData.matches}
