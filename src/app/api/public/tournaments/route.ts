@@ -151,7 +151,7 @@ type TournamentsTraceContext = {
     parentRequestId?: string;
 };
 
-const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v3';
+const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v4';
 const tournamentsRefreshLocks = new Map<string, Promise<void>>();
 const tournamentsInFlightResponses = new Map<string, Promise<PublicTournamentsPayload>>();
 const tournamentsSnapshotPersistLocks = new Map<string, Promise<boolean>>();

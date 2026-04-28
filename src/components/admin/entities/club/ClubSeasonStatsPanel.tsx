@@ -79,11 +79,25 @@ function StatComparisonBar({ row }: { row: CompleteStatRow }) {
     );
 }
 
-export function ClubSeasonStatsPanel({ clubId, clubName }: { clubId: string; clubName: string }) {
+export function ClubSeasonStatsPanel({
+    clubId,
+    clubName,
+    season: propSeason,
+    availableSeasons = [],
+    onSeasonChange,
+}: {
+    clubId: string;
+    clubName: string;
+    season?: string;
+    availableSeasons?: string[];
+    onSeasonChange?: (season: string) => void;
+}) {
     const [data, setData] = useState<SeasonStatsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState<StatCategory>('marcador');
+
+    const effectiveSeason = propSeason ?? String(new Date().getFullYear());
 
     useEffect(() => {
         let cancelled = false;
@@ -91,7 +105,9 @@ export function ClubSeasonStatsPanel({ clubId, clubName }: { clubId: string; clu
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch(`/api/club-admin/club-stats?club=${encodeURIComponent(clubId)}`, {
+                const params = new URLSearchParams({ club: clubId });
+                if (effectiveSeason) params.set('season', effectiveSeason);
+                const res = await fetch(`/api/club-admin/club-stats?${params.toString()}`, {
                     credentials: 'same-origin',
                     cache: 'no-store',
                 });
@@ -112,7 +128,7 @@ export function ClubSeasonStatsPanel({ clubId, clubName }: { clubId: string; clu
         }
         load();
         return () => { cancelled = true; };
-    }, [clubId]);
+    }, [clubId, effectiveSeason]);
 
     const comparisonStats = data?.comparisonStats ?? data?.clubStats ?? null;
 
@@ -171,6 +187,10 @@ export function ClubSeasonStatsPanel({ clubId, clubName }: { clubId: string; clu
         );
     }
 
+    const seasonOptions = availableSeasons.length > 0
+        ? availableSeasons
+        : [String(new Date().getFullYear())];
+
     return (
         <div className="club-season-stats">
             <header className="club-season-stats-header">
@@ -178,13 +198,36 @@ export function ClubSeasonStatsPanel({ clubId, clubName }: { clubId: string; clu
                     <h3>Estadísticas de temporada - {clubName}</h3>
                     <p className="club-season-stats-sub">
                         <Calendar className="w-3.5 h-3.5 inline mr-1" />
-                        {data.matchesCount} partidos finalizados analizados
-                        {data.season ? ` - Temporada ${data.season}` : ''}
+                        {data?.matchesCount ?? 0} partidos finalizados analizados
+                        {effectiveSeason ? ` - Temporada ${effectiveSeason}` : ''}
                     </p>
                 </div>
-                <div className="club-season-stats-legend">
-                    <span className="legend-club">{clubName}</span>
-                    <span className="legend-rivals">Rivales</span>
+                <div className="club-season-stats-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {onSeasonChange ? (
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                            <span style={{ color: 'rgba(255,255,255,0.6)' }}>Periodo</span>
+                            <select
+                                value={effectiveSeason}
+                                onChange={(e) => onSeasonChange(e.target.value)}
+                                style={{
+                                    background: 'rgba(255,255,255,0.08)',
+                                    border: '1px solid rgba(255,255,255,0.12)',
+                                    borderRadius: '6px',
+                                    padding: '4px 8px',
+                                    color: '#fff',
+                                    fontSize: '0.85rem',
+                                }}
+                            >
+                                {seasonOptions.map((s) => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
+                        </label>
+                    ) : null}
+                    <div className="club-season-stats-legend">
+                        <span className="legend-club">{clubName}</span>
+                        <span className="legend-rivals">Rivales</span>
+                    </div>
                 </div>
             </header>
 

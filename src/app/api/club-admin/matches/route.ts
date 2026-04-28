@@ -141,7 +141,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      homeClubId,
       awayClubId,
       rivalName,
       date,
@@ -252,8 +251,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      ...data,
-      tournament: createdTournament,
+      ok: true,
+      data: {
+        ...data,
+        tournament: createdTournament,
+      },
     }, { status: 201 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';

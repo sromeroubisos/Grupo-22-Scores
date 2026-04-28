@@ -286,6 +286,7 @@ export function ClubFixtureResultsTab({
     const [conditionFilter, setConditionFilter] = useState<MatchConditionFilter>('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [operationalFilter, setOperationalFilter] = useState<MatchOperationalFilter>('all');
+    const [selectedSeason, setSelectedSeason] = useState(String(new Date().getFullYear()));
 
     // Create internal match form state
     const [createForm, setCreateForm] = useState({
@@ -350,10 +351,28 @@ export function ClubFixtureResultsTab({
             .filter((value): value is string => Boolean(value))
     )).sort((left, right) => left.localeCompare(right)), [timelineEntries]);
 
+    const seasonOptions = useMemo(() => {
+        const years = new Set<string>();
+        allMatches.forEach((match) => {
+            if (match.dateTime) {
+                const year = String(new Date(match.dateTime).getFullYear());
+                if (year && !Number.isNaN(Number(year))) years.add(year);
+            }
+        });
+        const currentYear = String(new Date().getFullYear());
+        years.add(currentYear);
+        return Array.from(years).sort((left, right) => Number(right) - Number(left));
+    }, [allMatches]);
+
     const filteredEntries = useMemo(() => timelineEntries.filter((entry) => {
         if (activeTab === 'upcoming' && !entry.isUpcoming) return false;
         if (activeTab === 'played' && !entry.isPlayed) return false;
         if (activeTab === 'pending' && entry.operationalState.completed === 5) return false;
+
+        if (selectedSeason && entry.match.dateTime) {
+            const matchYear = String(new Date(entry.match.dateTime).getFullYear());
+            if (matchYear !== selectedSeason) return false;
+        }
 
         if (dateFrom && entry.match.dateTime) {
             const matchDate = new Date(entry.match.dateTime);
@@ -380,7 +399,7 @@ export function ClubFixtureResultsTab({
         }
 
         return true;
-    }), [timelineEntries, activeTab, dateFrom, dateTo, tournamentFilter, conditionFilter, statusFilter, operationalFilter, deferredRivalFilter]);
+    }), [timelineEntries, activeTab, selectedSeason, dateFrom, dateTo, tournamentFilter, conditionFilter, statusFilter, operationalFilter, deferredRivalFilter]);
 
     const sortedEntries = useMemo(() => sortTimelineEntries(filteredEntries, activeTab), [filteredEntries, activeTab]);
 
@@ -588,6 +607,25 @@ export function ClubFixtureResultsTab({
                 </div>
 
                 <div className="club-matches-header-actions">
+                    <label className="club-matches-season-selector" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>Periodo</span>
+                        <select
+                            value={selectedSeason}
+                            onChange={(e) => setSelectedSeason(e.target.value)}
+                            style={{
+                                background: 'rgba(255,255,255,0.08)',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: '6px',
+                                padding: '6px 10px',
+                                color: '#fff',
+                                fontSize: '0.85rem',
+                            }}
+                        >
+                            {seasonOptions.map((s) => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
+                        </select>
+                    </label>
                     <button
                         type="button"
                         className="club-matches-btn club-matches-btn-ghost"
@@ -705,7 +743,13 @@ export function ClubFixtureResultsTab({
 
             <main className="club-matches-timeline">
                 {activeTab === 'stats' ? (
-                    <ClubSeasonStatsPanel clubId={clubId} clubName={clubName} />
+                    <ClubSeasonStatsPanel
+                        clubId={clubId}
+                        clubName={clubName}
+                        season={selectedSeason}
+                        availableSeasons={seasonOptions}
+                        onSeasonChange={setSelectedSeason}
+                    />
                 ) : (
                     <>
                         {visibleEntries.length === 0 ? (
