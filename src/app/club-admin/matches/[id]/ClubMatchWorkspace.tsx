@@ -88,6 +88,7 @@ import {
   buildEventFromComposer,
   composerFromEvent,
   getLiveActionFromEventType,
+  getLiveActionGroupTone,
   countEvents,
   findLineupPlayerId,
   normalizeVideoUrl,
@@ -405,18 +406,33 @@ export default function ClubMatchWorkspace({
     substitutions: countEvents(events, ['substitution']),
   };
   const livePanelGameStats = buildMatchStats(events);
-  const timelineEvents = useMemo(() => [...events].sort((left, right) => {
+  const timelineEventsChronological = useMemo(() => [...events].sort((left, right) => {
     const leftMinute = parseNumericInput(left.minute) ?? 0;
     const rightMinute = parseNumericInput(right.minute) ?? 0;
     if (leftMinute !== rightMinute) return leftMinute - rightMinute;
     return String(left.id).localeCompare(String(right.id));
   }), [events]);
+  const timelineEventIndexById = useMemo(
+    () => new Map(timelineEventsChronological.map((event, index) => [event.id, index])),
+    [timelineEventsChronological],
+  );
+  const timelineEventsRecentFirst = useMemo(() => [...timelineEventsChronological].sort((left, right) => {
+    const leftMinute = parseNumericInput(left.minute) ?? 0;
+    const rightMinute = parseNumericInput(right.minute) ?? 0;
+    if (leftMinute !== rightMinute) return rightMinute - leftMinute;
+
+    const leftSequence = left.sequence ?? (left.parentEventId ? 1 : 0);
+    const rightSequence = right.sequence ?? (right.parentEventId ? 1 : 0);
+    if (leftSequence !== rightSequence) return leftSequence - rightSequence;
+
+    return String(left.id).localeCompare(String(right.id));
+  }), [timelineEventsChronological]);
   const timelineScoreById = useMemo(() => {
     const map = new Map<string, { home: number; away: number; points: number }>();
     let home = 0;
     let away = 0;
 
-    timelineEvents.forEach((event) => {
+    timelineEventsChronological.forEach((event) => {
       const points = getEventPoints(event);
       if (points > 0 && event.team === 'home') home += points;
       if (points > 0 && event.team === 'away') away += points;
@@ -424,7 +440,7 @@ export default function ClubMatchWorkspace({
     });
 
     return map;
-  }, [timelineEvents]);
+  }, [timelineEventsChronological]);
   const scoreForPointsPreview = useMemo(
     () => buildScorePayload(matchState.score, matchDraft.score),
     [matchDraft.score, matchState.score],
@@ -1571,20 +1587,23 @@ export default function ClubMatchWorkspace({
                           {videoExpanded && (
                             <div className={styles.fullscreenActionsDock}>
                               <div className={styles.fullscreenActionsList}>
-                                {CLUB_EVENT_PANEL_ACTIONS.map((action) => (
-                                  <button
-                                    key={action.id}
-                                    type="button"
-                                    className={`${styles.fullscreenActionBtn} ${styles[`liveActionBtn${action.tone.charAt(0).toUpperCase()}${action.tone.slice(1)}`]}`}
-                                    onClick={() => {
-                                      void openFullscreenAction(action.id);
-                                    }}
-                                    title={`Cargar ${action.label}`}
-                                  >
-                                    <span className={styles.fullscreenActionGlyph}>{action.glyph}</span>
-                                    <span className={styles.fullscreenActionLabel}>{action.label}</span>
-                                  </button>
-                                ))}
+                                {CLUB_EVENT_PANEL_ACTIONS.map((action) => {
+                                  const groupTone = getLiveActionGroupTone(action.id);
+                                  return (
+                                    <button
+                                      key={action.id}
+                                      type="button"
+                                      className={`${styles.fullscreenActionBtn} ${styles[`liveActionBtn${groupTone.charAt(0).toUpperCase()}${groupTone.slice(1)}`]}`}
+                                      onClick={() => {
+                                        void openFullscreenAction(action.id);
+                                      }}
+                                      title={`Cargar ${action.label}`}
+                                    >
+                                      <span className={styles.fullscreenActionGlyph}>{action.glyph}</span>
+                                      <span className={styles.fullscreenActionLabel}>{action.label}</span>
+                                    </button>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
@@ -1593,7 +1612,7 @@ export default function ClubMatchWorkspace({
                               {renderLiveComposerCard(styles.liveComposerOverlayCard)}
                             </div>
                           ) : null}
-                          {!videoExpanded && timelineEvents.length > 0 && (
+                          {!videoExpanded && timelineEventsRecentFirst.length > 0 && (
                             <div className={styles.fullscreenEventsDock}>
                               <div className={styles.fullscreenEventsHeader}>
                                 <span className={styles.fullscreenEventsLabel}>Eventos del partido</span>
@@ -1608,7 +1627,7 @@ export default function ClubMatchWorkspace({
                               </div>
                               {!eventsPanelCollapsed && (
                                 <div className={styles.fullscreenEventsList}>
-                                  {timelineEvents.map((event) => (
+                                  {timelineEventsRecentFirst.map((event) => (
                                     <button
                                       key={event.id}
                                       type="button"
@@ -1644,7 +1663,7 @@ export default function ClubMatchWorkspace({
                                 <button
                                   key={action.id}
                                   type="button"
-                                  className={`${styles.liveActionBtn} ${styles[`liveActionBtn${action.tone.charAt(0).toUpperCase()}${action.tone.slice(1)}`]} ${liveComposer?.action === action.id ? styles.liveActionBtnActive : ''}`}
+                                  className={`${styles.liveActionBtn} ${styles[`liveActionBtn${group.tone.charAt(0).toUpperCase()}${group.tone.slice(1)}`]} ${liveComposer?.action === action.id ? styles.liveActionBtnActive : ''}`}
                                   onClick={() => openLiveComposer(action.id)}
                                 >
                                   <span className={styles.liveActionGlyph}>{action.glyph}</span>
@@ -2026,7 +2045,7 @@ export default function ClubMatchWorkspace({
                         <div className={styles.liveTimelineHeader}>
                           <div>
                             <h3>Timeline del partido</h3>
-                            <p>Orden cronológico, editable y listo para corregir en cancha.</p>
+                            <p>Lo más reciente primero, editable y listo para corregir en cancha.</p>
                           </div>
                           {lastRemovedEvent ? (
                             <button className={styles.miniBtn} type="button" onClick={restoreLastRemovedEvent}>
@@ -2035,10 +2054,16 @@ export default function ClubMatchWorkspace({
                           ) : null}
                         </div>
 
-                        {timelineEvents.length === 0 ? <div className={styles.emptyState}>Todavía no hay eventos cargados en el partido.</div> : null}
+                        {timelineEventsRecentFirst.length === 0 ? <div className={styles.emptyState}>Todavía no hay eventos cargados en el partido.</div> : null}
 
                         <div className={styles.timelineList}>
-                          {timelineEvents.map((event, eventIndex) => (
+                          {timelineEventsRecentFirst.map((event) => {
+                            const chronologicalIndex = timelineEventIndexById.get(event.id) ?? -1;
+                            const detailLine = chronologicalIndex >= 0
+                              ? formatMatchTimelineEventDescription(event, timelineEventsChronological, chronologicalIndex, 'Sin detalle adicional')
+                              : [event.playerName, event.detail].filter((value) => String(value || '').trim()).join(' · ') || 'Sin detalle adicional';
+
+                            return (
                             <div key={event.id} className={`${styles.timelineRow}${event.parentEventId ? ' ' + styles.timelineRowChild : ''}`}>
                               <button
                                 type="button"
@@ -2071,7 +2096,7 @@ export default function ClubMatchWorkspace({
                                   <strong>{getEventSummary(event)}</strong>
                                   <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                 </div>
-                                <p>{formatMatchTimelineEventDescription(event, timelineEvents, eventIndex, 'Sin detalle adicional')}</p>
+                                <p>{detailLine}</p>
                                 {(() => {
                                   const eventScore = timelineScoreById.get(event.id);
                                   return eventScore && eventScore.points > 0 ? (
@@ -2090,7 +2115,8 @@ export default function ClubMatchWorkspace({
                                 </button>
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -2734,7 +2760,13 @@ export default function ClubMatchWorkspace({
                         <div className={styles.card} style={{ gridColumn: '1 / -1' }}>
                           <h4 style={{ marginBottom: 12, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6 }}>Desglose de eventos</h4>
                           <div className={styles.timelineList}>
-                            {timelineEvents.map((event, eventIndex) => (
+                            {timelineEventsRecentFirst.map((event) => {
+                              const chronologicalIndex = timelineEventIndexById.get(event.id) ?? -1;
+                              const detailLine = chronologicalIndex >= 0
+                                ? formatMatchTimelineEventDescription(event, timelineEventsChronological, chronologicalIndex, 'Sin detalle adicional')
+                                : [event.playerName, event.detail].filter((value) => String(value || '').trim()).join(' · ') || 'Sin detalle adicional';
+
+                              return (
                               <div key={event.id} className={`${styles.timelineRow}${event.parentEventId ? ' ' + styles.timelineRowChild : ''}`}>
                                 <div className={styles.timelineMinute}>{event.minute || '--'}&apos;</div>
                                 <div className={`${styles.timelineGlyph} ${getEventTone(event.type)}`}>{getEventGlyph(event.type)}</div>
@@ -2743,7 +2775,7 @@ export default function ClubMatchWorkspace({
                                     <strong>{getEventSummary(event)}</strong>
                                     <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                   </div>
-                                  <p>{formatMatchTimelineEventDescription(event, timelineEvents, eventIndex, 'Sin detalle adicional')}</p>
+                                  <p>{detailLine}</p>
                                   {(() => {
                                     const eventScore = timelineScoreById.get(event.id);
                                     return eventScore && eventScore.points > 0 ? (
@@ -2754,7 +2786,8 @@ export default function ClubMatchWorkspace({
                                   })()}
                                 </div>
                               </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       </div>

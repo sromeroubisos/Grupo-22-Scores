@@ -135,9 +135,10 @@ export interface LiveEventPanelAction {
   meta: string;
 }
 
-export const CLUB_EVENT_PANEL_GROUPS: Array<{ group: string; actions: LiveEventPanelAction[] }> = [
+export const CLUB_EVENT_PANEL_GROUPS: Array<{ group: string; tone: LiveEventActionTone; actions: LiveEventPanelAction[] }> = [
   {
     group: 'Marcador',
+    tone: 'green',
     actions: [
       { id: 'try', label: 'Try', glyph: 'TR', tone: 'green', meta: '5 puntos' },
       { id: 'penalty_try', label: 'Try penal', glyph: 'PT', tone: 'green', meta: '7 puntos' },
@@ -148,6 +149,7 @@ export const CLUB_EVENT_PANEL_GROUPS: Array<{ group: string; actions: LiveEventP
   },
   {
     group: 'Disciplina',
+    tone: 'red',
     actions: [
       { id: 'card_yellow', label: 'Amarilla', glyph: 'TA', tone: 'red', meta: 'Equipo + jugador' },
       { id: 'card_red', label: 'Roja', glyph: 'TR', tone: 'red', meta: 'Equipo + jugador' },
@@ -161,6 +163,7 @@ export const CLUB_EVENT_PANEL_GROUPS: Array<{ group: string; actions: LiveEventP
   },
   {
     group: 'Juego',
+    tone: 'blue',
     actions: [
       { id: 'injury', label: 'Lesion', glyph: 'LE', tone: 'neutral', meta: 'Equipo + jugador' },
       { id: 'scrum', label: 'Scrum', glyph: 'SC', tone: 'brown', meta: 'Ganado / perdido' },
@@ -177,12 +180,14 @@ export const CLUB_EVENT_PANEL_GROUPS: Array<{ group: string; actions: LiveEventP
   },
   {
     group: 'Plantel',
+    tone: 'brown',
     actions: [
       { id: 'substitution', label: 'Cambio', glyph: 'CA', tone: 'blue', meta: 'Sale / entra' },
     ],
   },
   {
     group: 'Reloj',
+    tone: 'neutral',
     actions: [
       { id: 'match_start', label: 'Inicio partido', glyph: 'IN', tone: 'blue', meta: 'Sin jugador' },
       { id: 'match_half', label: 'Entretiempo', glyph: 'HT', tone: 'blue', meta: 'Sin jugador' },
@@ -192,6 +197,12 @@ export const CLUB_EVENT_PANEL_GROUPS: Array<{ group: string; actions: LiveEventP
 ];
 
 export const CLUB_EVENT_PANEL_ACTIONS = CLUB_EVENT_PANEL_GROUPS.flatMap((group) => group.actions);
+
+export function getLiveActionGroupTone(actionId: LiveActionType): LiveEventActionTone {
+  const group = CLUB_EVENT_PANEL_GROUPS.find((entry) => entry.actions.some((action) => action.id === actionId));
+  if (group) return group.tone;
+  return CLUB_EVENT_PANEL_ACTIONS.find((action) => action.id === actionId)?.tone || 'neutral';
+}
 
 export const KICK_TYPES: Array<{ value: LiveComposerState['kickType']; label: string }> = [
   { value: 'touch', label: 'Al touch' },
