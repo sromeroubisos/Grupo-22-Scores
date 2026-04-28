@@ -24,12 +24,58 @@ type PersonasRolesResponse = {
     details?: unknown;
 };
 
+type ClubAssignmentClub = {
+    id: string;
+    name: string;
+    short_name?: string | null;
+    region?: string | null;
+    country?: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
+};
+
+type ClubFamilyRelationRow = {
+    base_club_id: string;
+    derived_club_id: string;
+    derivative_type?: string | null;
+};
+
+type ClubAssignmentOption = {
+    id: string;
+    label: string;
+    meta: string;
+};
+
+type AccessMembershipRow = {
+    scope_type: string;
+    scope_id: string | null;
+    role: string;
+};
+
+type UserAccessResponse = {
+    data?: {
+        memberships?: AccessMembershipRow[];
+    };
+    error?: string;
+    details?: unknown;
+};
+
 function formatShortDate(value?: string | null) {
     return value ? new Date(value).toLocaleDateString() : '-';
 }
 
 function getDisplayInitials(value?: string | null) {
     return (value || '?').substring(0, 2).toUpperCase();
+}
+
+function getClubOptionMeta(club: ClubAssignmentClub) {
+    return [
+        club.short_name,
+        club.sport || club.sport_id,
+        club.region || club.country,
+    ]
+        .filter(Boolean)
+        .join(' - ');
 }
 
 const ROLE_PRESETS = [
@@ -79,6 +125,14 @@ export default function PersonasRolesPage() {
     const [editingRole, setEditingRole] = useState<string>('fan');
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [clubsForAssignment, setClubsForAssignment] = useState<ClubAssignmentClub[]>([]);
+    const [clubFamilyRelations, setClubFamilyRelations] = useState<ClubFamilyRelationRow[]>([]);
+    const [assignmentLoading, setAssignmentLoading] = useState(true);
+    const [assignmentError, setAssignmentError] = useState<string | null>(null);
+    const [scopeLoading, setScopeLoading] = useState(false);
+    const [scopeLoadError, setScopeLoadError] = useState<string | null>(null);
+    const [selectedScopeId, setSelectedScopeId] = useState('');
+    const [initialScopeId, setInitialScopeId] = useState('');
 
     const fetchUsers = useCallback(async () => {
         try {
@@ -112,6 +166,52 @@ export default function PersonasRolesPage() {
         void fetchUsers();
     }, [fetchUsers]);
 
+    const fetchAssignmentOptions = useCallback(async () => {
+        setAssignmentLoading(true);
+        setAssignmentError(null);
+
+        try {
+            const [clubsResponse, familiesResponse] = await Promise.all([
+                fetch('/api/admin/clubs?limit=1000', {
+                    cache: 'no-store',
+                    credentials: 'include',
+                }),
+                fetch('/api/admin/super/club-families', {
+                    cache: 'no-store',
+                    credentials: 'include',
+                }),
+            ]);
+
+            const clubsPayload = await clubsResponse.json().catch(() => null) as ClubAssignmentClub[] | { error?: string } | null;
+            const familiesPayload = await familiesResponse.json().catch(() => ({})) as {
+                data?: ClubFamilyRelationRow[];
+                error?: string;
+                details?: string | null;
+            };
+
+            if (!clubsResponse.ok || !Array.isArray(clubsPayload)) {
+                throw new Error(!Array.isArray(clubsPayload) ? clubsPayload?.error || 'No se pudieron cargar los clubes.' : 'No se pudieron cargar los clubes.');
+            }
+
+            if (!familiesResponse.ok) {
+                throw new Error(familiesPayload.error || familiesPayload.details || 'No se pudieron cargar las familias de clubes.');
+            }
+
+            setClubsForAssignment(clubsPayload.filter((club) => club.id && club.name));
+            setClubFamilyRelations(Array.isArray(familiesPayload.data) ? familiesPayload.data : []);
+        } catch (optionsError) {
+            setAssignmentError(optionsError instanceof Error ? optionsError.message : 'No se pudieron cargar las opciones de vinculacion.');
+            setClubsForAssignment([]);
+            setClubFamilyRelations([]);
+        } finally {
+            setAssignmentLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        void fetchAssignmentOptions();
+    }, [fetchAssignmentOptions]);
+
     const filteredUsers = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
 
@@ -128,18 +228,163 @@ export default function PersonasRolesPage() {
         });
     }, [searchQuery, users]);
 
+    useEffect(() => {
+        if (!editingUser) {
+            return;
+        }
+
+        let isActive = true;
+
+        const loadCurrentAccess = async () => {
+            setScopeLoading(true);
+            setScopeLoadError(null);
+            setSelectedScopeId('');
+            setInitialScopeId('');
+
+            try {
+                const response = await fetch(`/api/admin/users/${editingUser.id}/access`, {
+                    cache: 'no-store',
+                    credentials: 'include',
+                });
+                const payload = await response.json().catch(() => ({})) as UserAccessResponse;
+
+                if (!response.ok) {
+                    throw new Error(payload.error || 'No se pudo cargar el alcance actual del usuario.');
+                }
+
+                const normalizedRole = normalizeRole(editingUser.role);
+                const expectedScopeType = normalizedRole === 'familia_club'
+                    ? 'club_family'
+                    : normalizedRole === 'admin_club'
+                        ? 'club'
+                        : null;
+                const selectedMembership = expectedScopeType
+                    ? (payload.data?.memberships ?? []).find((membership) =>
+                        membership.scope_type === expectedScopeType && Boolean(membership.scope_id)
+                    )
+                    : null;
+                const scopeId = selectedMembership?.scope_id || '';
+
+                if (isActive) {
+                    setSelectedScopeId(scopeId);
+                    setInitialScopeId(scopeId);
+                }
+            } catch (accessError) {
+                if (isActive) {
+                    setScopeLoadError(accessError instanceof Error ? accessError.message : 'No se pudo cargar el alcance actual del usuario.');
+                }
+            } finally {
+                if (isActive) {
+                    setScopeLoading(false);
+                }
+            }
+        };
+
+        void loadCurrentAccess();
+
+        return () => {
+            isActive = false;
+        };
+    }, [editingUser]);
+
     const roleOptions: AppUserRole[] = ['fan', 'familia_club', 'admin_club', 'admin_general', 'super_admin'];
+
+    const clubScopeOptions = useMemo<ClubAssignmentOption[]>(() => {
+        return clubsForAssignment
+            .map((club) => ({
+                id: club.id,
+                label: club.name,
+                meta: getClubOptionMeta(club),
+            }))
+            .sort((left, right) => left.label.localeCompare(right.label));
+    }, [clubsForAssignment]);
+
+    const clubById = useMemo(
+        () => new Map(clubsForAssignment.map((club) => [club.id, club])),
+        [clubsForAssignment],
+    );
+
+    const familyScopeOptions = useMemo<ClubAssignmentOption[]>(() => {
+        const familyMembersByRoot = new Map<string, Set<string>>();
+
+        for (const relation of clubFamilyRelations) {
+            if (!relation.base_club_id || !relation.derived_club_id) continue;
+            if (relation.derivative_type && relation.derivative_type !== 'family') continue;
+
+            const members = familyMembersByRoot.get(relation.base_club_id) ?? new Set<string>([relation.base_club_id]);
+            members.add(relation.derived_club_id);
+            familyMembersByRoot.set(relation.base_club_id, members);
+        }
+
+        return Array.from(familyMembersByRoot.entries())
+            .map(([rootId, members]) => {
+                const rootClub = clubById.get(rootId);
+                const rootMeta = rootClub ? getClubOptionMeta(rootClub) : '';
+                const clubCountLabel = `${members.size} clubes`;
+
+                return {
+                    id: rootId,
+                    label: rootClub?.name || rootId,
+                    meta: [clubCountLabel, rootMeta].filter(Boolean).join(' - '),
+                };
+            })
+            .sort((left, right) => left.label.localeCompare(right.label));
+    }, [clubById, clubFamilyRelations]);
+
+    const currentScopeType = editingRole === 'familia_club'
+        ? 'club_family'
+        : editingRole === 'admin_club'
+            ? 'club'
+            : null;
+    const requiresScopeSelection = currentScopeType !== null;
+    const currentScopeOptions = useMemo(
+        () => editingRole === 'familia_club'
+            ? familyScopeOptions
+            : editingRole === 'admin_club'
+                ? clubScopeOptions
+                : [],
+        [clubScopeOptions, editingRole, familyScopeOptions],
+    );
+    const selectedScopeIsValid = !requiresScopeSelection || currentScopeOptions.some((option) => option.id === selectedScopeId);
+    const selectedScopeChanged = selectedScopeId !== initialScopeId;
+    const selectedScopeLabel = editingRole === 'familia_club' ? 'familia de club' : 'club';
+    const roleChanged = editingUser ? normalizeRole(editingUser.role) !== editingRole : false;
+    const saveDisabled = (
+        saving ||
+        (
+            requiresScopeSelection &&
+            (scopeLoading || assignmentLoading || !selectedScopeId || !selectedScopeIsValid)
+        ) ||
+        (!roleChanged && (!requiresScopeSelection || !selectedScopeChanged))
+    );
 
     const openEdit = (user: AppUserRow) => {
         setEditingUser(user);
         setEditingRole(normalizeRole(user.role));
+        setSelectedScopeId('');
+        setInitialScopeId('');
+        setScopeLoadError(null);
         setSaveError(null);
     };
 
     const closeEdit = useCallback(() => {
         setEditingUser(null);
         setSaveError(null);
+        setScopeLoadError(null);
+        setSelectedScopeId('');
+        setInitialScopeId('');
     }, []);
+
+    const handleRoleSelect = (role: AppUserRole) => {
+        setEditingRole((currentRole) => {
+            if (currentRole !== role) {
+                setSelectedScopeId('');
+                setSaveError(null);
+            }
+
+            return role;
+        });
+    };
 
     const handleSaveRole = useCallback(async () => {
         if (!editingUser) {
@@ -156,12 +401,36 @@ export default function PersonasRolesPage() {
                 return;
             }
 
-            const response = await fetch(`/api/admin/super/personas-roles/${editingUser.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ role: editingRole }),
-            });
+            if (requiresScopeSelection) {
+                if (!selectedScopeId) {
+                    setSaveError(`Selecciona ${selectedScopeLabel === 'club' ? 'un club' : 'una familia de club'} para completar la vinculacion.`);
+                    return;
+                }
+
+                if (!selectedScopeIsValid || !currentScopeType) {
+                    setSaveError('Selecciona una opcion valida de la lista.');
+                    return;
+                }
+            }
+
+            const response = requiresScopeSelection
+                ? await fetch(`/api/admin/users/${editingUser.id}/access`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        role: editingRole,
+                        scopeType: currentScopeType,
+                        membershipRole: 'admin',
+                        scopeIds: [selectedScopeId],
+                    }),
+                })
+                : await fetch(`/api/admin/super/personas-roles/${editingUser.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ role: editingRole }),
+                });
             const payload = await response.json() as { error?: string };
 
             if (!response.ok) {
@@ -179,7 +448,16 @@ export default function PersonasRolesPage() {
         } finally {
             setSaving(false);
         }
-    }, [closeEdit, editingRole, editingUser]);
+    }, [
+        closeEdit,
+        currentScopeType,
+        editingRole,
+        editingUser,
+        requiresScopeSelection,
+        selectedScopeId,
+        selectedScopeIsValid,
+        selectedScopeLabel,
+    ]);
 
     return (
         <>
@@ -491,7 +769,7 @@ export default function PersonasRolesPage() {
                                             key={role}
                                             type="button"
                                             disabled={disabled}
-                                            onClick={() => setEditingRole(role)}
+                                            onClick={() => handleRoleSelect(role)}
                                             style={{
                                                 width: '100%',
                                                 textAlign: 'left',
@@ -524,6 +802,64 @@ export default function PersonasRolesPage() {
                                     );
                                 })}
                             </div>
+                            {requiresScopeSelection && (
+                                <div style={{ display: 'grid', gap: 8, marginTop: 16 }}>
+                                    <label
+                                        htmlFor="personas-roles-scope"
+                                        style={{ display: 'block', fontSize: 12, color: 'var(--basalt-400)', fontWeight: 600 }}
+                                    >
+                                        {editingRole === 'familia_club' ? 'Familia asignada' : 'Club asignado'}
+                                    </label>
+                                    <select
+                                        id="personas-roles-scope"
+                                        value={selectedScopeId}
+                                        onChange={(event) => {
+                                            setSelectedScopeId(event.target.value);
+                                            setSaveError(null);
+                                        }}
+                                        disabled={assignmentLoading || currentScopeOptions.length === 0}
+                                        style={{
+                                            width: '100%',
+                                            minHeight: 42,
+                                            background: 'var(--basalt-900, #0a0d10)',
+                                            border: `1px solid ${selectedScopeId ? 'rgba(16, 185, 129, 0.65)' : 'rgba(255,255,255,0.12)'}`,
+                                            borderRadius: 10,
+                                            color: '#fff',
+                                            padding: '0 12px',
+                                            fontSize: 14,
+                                            outline: 'none',
+                                        }}
+                                    >
+                                        <option value="">
+                                            {assignmentLoading
+                                                ? 'Cargando opciones...'
+                                                : currentScopeOptions.length === 0
+                                                    ? `No hay ${editingRole === 'familia_club' ? 'familias configuradas' : 'clubes disponibles'}`
+                                                    : `Seleccionar ${selectedScopeLabel}`}
+                                        </option>
+                                        {currentScopeOptions.map((option) => (
+                                            <option key={option.id} value={option.id}>
+                                                {option.meta ? `${option.label} - ${option.meta}` : option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {scopeLoading && (
+                                        <div style={{ fontSize: 12, color: 'var(--basalt-400)' }}>
+                                            Cargando vinculacion actual...
+                                        </div>
+                                    )}
+                                    {assignmentError && (
+                                        <div style={{ fontSize: 12, color: '#fca5a5' }}>
+                                            {assignmentError}
+                                        </div>
+                                    )}
+                                    {scopeLoadError && (
+                                        <div style={{ fontSize: 12, color: '#fbbf24' }}>
+                                            {scopeLoadError}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             {getReservedAdminRole(editingUser.email) && (
                                 <div style={{ fontSize: 12, color: '#fbbf24', marginTop: 8 }}>
                                     Esta cuenta usa un email con rol reservado y debe conservarlo.
@@ -545,7 +881,7 @@ export default function PersonasRolesPage() {
                                 className={`${styles.btn} ${styles.btnPrimary}`}
                                 type="button"
                                 onClick={() => void handleSaveRole()}
-                                disabled={saving || normalizeRole(editingUser.role) === editingRole}
+                                disabled={saveDisabled}
                             >
                                 {saving ? 'Guardando...' : 'Guardar cambios'}
                             </button>
