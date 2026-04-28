@@ -12,7 +12,9 @@ import {
     Save,
 } from 'lucide-react';
 import { ClubTrainingCreateModal } from './ClubTrainingCreateModal';
+import { ClubStaffPerformanceSuite } from './ClubStaffPerformanceSuite';
 import type { ClubDashboardMatch, ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
+import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
 import {
     BODY_WEIGHT_METRIC_KEY,
     BODY_WEIGHT_METRIC_LABEL,
@@ -99,6 +101,7 @@ interface ClubPerformanceTabProps {
     staff: PersonWithRole[];
     dashboardData: ClubDashboardOverview;
     loading?: boolean;
+    onTabChange?: (tabId: ClubManageTabId) => void;
 }
 
 const SECTION_TABS: Array<{ id: GymSection; label: string }> = [
@@ -828,6 +831,7 @@ export function ClubPerformanceTab({
     staff,
     dashboardData,
     loading = false,
+    onTabChange,
 }: ClubPerformanceTabProps) {
     const pathname = usePathname();
     const consoleMode: ClubConsoleMode = pathname?.startsWith('/club-admin') ? 'club-admin' : 'admin';
@@ -1211,6 +1215,18 @@ export function ClubPerformanceTab({
     const recentTestRows = useMemo(() => selectedMetricRecords.slice(0, 10), [selectedMetricRecords]);
 
     const entrenamientosHref = buildClubManageHref(clubId, 'entrenamientos', consoleMode);
+    const handleEntrenamientosLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        if (!onTabChange) {
+            return;
+        }
+
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        event.preventDefault();
+        onTabChange('entrenamientos');
+    };
 
     const isBusy = loading || loadingTrainings || loadingGymPlans || loadingRecords || loadingTestDefinitions;
 
@@ -1786,10 +1802,19 @@ export function ClubPerformanceTab({
 
     return (
         <div className={styles.shell}>
+            <ClubStaffPerformanceSuite
+                clubId={clubId}
+                clubName={clubName}
+                divisions={divisions}
+                players={players}
+                staff={staff}
+                dashboardData={dashboardData}
+            />
+
             <section className={styles.hero}>
                 <div className={styles.heroCopy}>
                     <span className={styles.kicker}>Panel PF</span>
-                    <h2>Gimnasio</h2>
+                    <h2>Gimnasio y testeos</h2>
                     <p>
                         Carga de sesiones de gimnasio, planilla para armar el plan, seguimiento de pesos y cards de testeos fisicos definidos por el PF.
                     </p>
@@ -2030,7 +2055,12 @@ export function ClubPerformanceTab({
                                 </div>
 
                                 <div className={styles.inlineActions}>
-                                    <Link href={entrenamientosHref} className={styles.inlineLink}>
+                                    <Link
+                                        href={entrenamientosHref}
+                                        className={styles.inlineLink}
+                                        prefetch={false}
+                                        onClick={handleEntrenamientosLinkClick}
+                                    >
                                         Abrir workspace completo
                                         <ChevronRight className="w-4 h-4" />
                                     </Link>

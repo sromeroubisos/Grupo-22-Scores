@@ -15,7 +15,7 @@ import {
 type SupabaseMinimalQueryable = {
     from: (table: string) => {
         select: (columns: string) => {
-            limit: (count: number) => Promise<{ data: unknown; error: { message?: string } | null }>;
+            limit: (count: number) => PromiseLike<{ data: unknown; error: { message?: string } | null }>;
         };
     };
 };

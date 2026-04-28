@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { ArrowRight, MapPin, Shield, ShieldCheck, Sparkles } from 'lucide-react';
 import type { Database } from '@/lib/database.types';
+import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 
@@ -16,10 +17,20 @@ interface ClubSummaryHeroProps {
         competitions: number;
         standings: number;
     };
+    onTabChange?: (tabId: ClubManageTabId) => void;
 }
 
-export function ClubSummaryHero({ data, unionName, sportLabel, metrics }: ClubSummaryHeroProps) {
+export function ClubSummaryHero({ data, unionName, sportLabel, metrics, onTabChange }: ClubSummaryHeroProps) {
     const router = useRouter();
+
+    const navigateToTab = (tabId: ClubManageTabId) => {
+        if (onTabChange) {
+            onTabChange(tabId);
+            return;
+        }
+
+        router.push(`?tab=${tabId}&type=club`);
+    };
 
     return (
         <section className="club-command-hero">
@@ -59,14 +70,14 @@ export function ClubSummaryHero({ data, unionName, sportLabel, metrics }: ClubSu
                     <button
                         type="button"
                         className="btn btn-primary club-ops-primary"
-                        onClick={() => router.push('?tab=configuracion&type=club')}
+                        onClick={() => navigateToTab('configuracion')}
                     >
                         Configurar identidad
                     </button>
                     <button
                         type="button"
                         className="btn club-ops-secondary"
-                        onClick={() => router.push('?tab=contenido&type=club')}
+                        onClick={() => navigateToTab('contenido')}
                     >
                         <Sparkles className="w-4 h-4" />
                         Abrir studio
@@ -95,7 +106,7 @@ export function ClubSummaryHero({ data, unionName, sportLabel, metrics }: ClubSu
                 <button
                     type="button"
                     className="club-command-link"
-                    onClick={() => router.push('?tab=partidos&type=club')}
+                    onClick={() => navigateToTab('partidos')}
                 >
                     Ir a operacion de partidos
                     <ArrowRight className="w-4 h-4" />

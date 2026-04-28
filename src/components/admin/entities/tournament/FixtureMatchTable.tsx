@@ -79,7 +79,7 @@ export function FixtureMatchTable() {
             <div className="fixture-empty-state-icon">📋</div>
             <div className="fixture-empty-state-title">No hay partidos en esta jornada</div>
             <div className="fixture-empty-state-text">
-              Haz clic en "Crear Partido" para agregar el primer partido
+              Haz clic en &quot;Crear Partido&quot; para agregar el primer partido
             </div>
           </div>
         </div>

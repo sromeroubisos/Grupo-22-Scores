@@ -20,11 +20,11 @@ type TelegramAdminUser = {
 };
 
 type TelegramUsersResponse =
-  | { ok: true; data: { users: TelegramAdminUser[] } }
+  | { ok: true; data: { users: TelegramAdminUser[] }; error?: undefined; details?: undefined }
   | { ok: false; error?: string; details?: unknown };
 
 type TelegramUserMutationResponse =
-  | { ok: true; data: TelegramAdminUser }
+  | { ok: true; data: TelegramAdminUser; error?: undefined; details?: undefined }
   | { ok: false; error?: string; details?: unknown };
 
 type TelegramUserForm = {

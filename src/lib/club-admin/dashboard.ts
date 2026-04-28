@@ -65,8 +65,16 @@ type MatchRow = {
     tournament: TournamentRow | TournamentRow[] | null;
 };
 
-type ClubDashboardOptions = {
+export type GetClubDashboardOptions = {
     mode?: ClubDashboardMode;
+    /**
+     * Misma promesa que la query del club en la página (p. ej. club-admin) para no repetir
+     * el SELECT a `clubs` en paralelo con el resto de consultas del dashboard.
+     */
+    sharedClubRowResult?: PromiseLike<{
+        data: ClubCore | null;
+        error: unknown;
+    }>;
 };
 
 type StandingStatsRow =
@@ -104,6 +112,7 @@ type TournamentParticipantRow = {
 };
 
 type CompetitionMatchRow = {
+    id: string;
     tournament_id: string | null;
     date_time: string | null;
     status: string | null;
@@ -215,24 +224,69 @@ function countLineupEntries(lineups: unknown) {
     return Math.max(countArrayValue(source.home), countArrayValue(source.away));
 }
 
-function countEventEntries(events: unknown) {
+function countEventEntries(events: unknown): number {
     if (Array.isArray(events)) return events.length;
     if (!events || typeof events !== 'object') return 0;
 
-    return Object.values(events as Record<string, unknown>).reduce(
+    return Object.values(events as Record<string, unknown>).reduce<number>(
         (total, value) => total + countArrayValue(value),
         0
     );
 }
 
-function buildMatchFilter(clubIds: string[]) {
+function scopeMatchSideQuery(query: any, column: 'home_club_id' | 'away_club_id', clubIds: string[]) {
     if (clubIds.length === 1) {
-        const clubId = clubIds[0];
-        return `home_club_id.eq.${clubId},away_club_id.eq.${clubId}`;
+        return query.eq(column, clubIds[0]);
     }
 
-    const serializedIds = clubIds.join(',');
-    return `home_club_id.in.(${serializedIds}),away_club_id.in.(${serializedIds})`;
+    return query.in(column, clubIds);
+}
+
+function throwFirstQueryError(results: Array<{ error?: unknown }>) {
+    const failed = results.find((result) => result.error);
+    if (failed?.error) throw failed.error;
+}
+
+function sumResultCounts(results: Array<{ count?: number | null }>) {
+    let total = 0;
+    let hasCount = false;
+
+    for (const result of results) {
+        if (typeof result.count === 'number') {
+            total += result.count;
+            hasCount = true;
+        }
+    }
+
+    return hasCount ? total : null;
+}
+
+function getRowTime(row: { date_time: string | null }, fallback: number) {
+    return row.date_time ? new Date(row.date_time).getTime() : fallback;
+}
+
+function mergeMatchSideRows<T extends { id: string; date_time: string | null }>(
+    rowGroups: Array<T[] | null | undefined>,
+    direction: 'asc' | 'desc',
+    limit: number
+) {
+    const rowsById = new Map<string, T>();
+
+    for (const group of rowGroups) {
+        for (const row of group ?? []) {
+            if (row?.id && !rowsById.has(row.id)) {
+                rowsById.set(row.id, row);
+            }
+        }
+    }
+
+    return Array.from(rowsById.values())
+        .sort((left, right) => {
+            const leftTime = getRowTime(left, direction === 'asc' ? Number.MAX_SAFE_INTEGER : 0);
+            const rightTime = getRowTime(right, direction === 'asc' ? Number.MAX_SAFE_INTEGER : 0);
+            return direction === 'asc' ? leftTime - rightTime : rightTime - leftTime;
+        })
+        .slice(0, limit);
 }
 
 function dedupeMatches(rows: ClubDashboardMatch[]) {
@@ -805,7 +859,7 @@ function buildCompetitions(params: {
 export async function getClubDashboardOverview(
     supabase: SupabaseServerClient,
     clubId: string,
-    options: ClubDashboardOptions = {}
+    options: GetClubDashboardOptions = {}
 ): Promise<ClubDashboardOverview> {
     if (!clubId) {
         return EMPTY_CLUB_DASHBOARD_OVERVIEW;
@@ -821,50 +875,75 @@ export async function getClubDashboardOverview(
         away:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, slug),
         tournament:tournaments(id, name, slug)
     `;
-    const matchFilter = buildMatchFilter(scopedClubIds);
+    const selectedClubRowPromise = options.sharedClubRowResult
+        ?? supabase
+            .from('clubs')
+            .select('*')
+            .eq('id', clubId)
+            .maybeSingle();
 
     const [
-        upcomingMatchesResult,
-        pastMatchesResult,
-        upcomingMatchesCountResult,
-        playedMatchesCountResult,
-        tournamentMatchesResult,
+        upcomingHomeMatchesResult,
+        upcomingAwayMatchesResult,
+        pastHomeMatchesResult,
+        pastAwayMatchesResult,
+        upcomingHomeMatchesCountResult,
+        upcomingAwayMatchesCountResult,
+        playedHomeMatchesCountResult,
+        playedAwayMatchesCountResult,
+        tournamentHomeMatchesResult,
+        tournamentAwayMatchesResult,
         participantTournamentsResult,
         standingsResult,
         selectedClubCoreResult,
         selectedClubProfileResult,
         sponsorsCountResult,
     ] = await Promise.all([
-        supabase
-            .from('matches')
-            .select(matchSelect)
-            .or(matchFilter)
+        scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'home_club_id', scopedClubIds)
             .gte('date_time', nowIso)
             .order('date_time', { ascending: true })
             .limit(20),
-        supabase
-            .from('matches')
-            .select(matchSelect)
-            .or(matchFilter)
+        scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'away_club_id', scopedClubIds)
+            .gte('date_time', nowIso)
+            .order('date_time', { ascending: true })
+            .limit(20),
+        scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'home_club_id', scopedClubIds)
             .in('status', [...FINAL_MATCH_STATUSES])
             .order('date_time', { ascending: false })
             .limit(150),
-        supabase
-            .from('matches')
-            .select('id', { count: 'exact', head: true })
-            .or(matchFilter)
+        scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'away_club_id', scopedClubIds)
+            .in('status', [...FINAL_MATCH_STATUSES])
+            .order('date_time', { ascending: false })
+            .limit(150),
+        scopeMatchSideQuery(supabase.from('matches').select('id', { count: 'exact', head: true }), 'home_club_id', scopedClubIds)
             .gte('date_time', nowIso),
-        supabase
-            .from('matches')
-            .select('id', { count: 'exact', head: true })
-            .or(matchFilter)
+        scopeMatchSideQuery(supabase.from('matches').select('id', { count: 'exact', head: true }), 'away_club_id', scopedClubIds)
+            .gte('date_time', nowIso),
+        scopeMatchSideQuery(supabase.from('matches').select('id', { count: 'exact', head: true }), 'home_club_id', scopedClubIds)
             .in('status', [...FINAL_MATCH_STATUSES]),
-        supabase
-            .from('matches')
-            .select(`
-                tournament_id, date_time, status, phase_id, group_id, home_club_id, away_club_id, home_division_id, away_division_id
-            `)
-            .or(matchFilter)
+        scopeMatchSideQuery(supabase.from('matches').select('id', { count: 'exact', head: true }), 'away_club_id', scopedClubIds)
+            .in('status', [...FINAL_MATCH_STATUSES]),
+        scopeMatchSideQuery(
+            supabase
+                .from('matches')
+                .select(`
+                    id, tournament_id, date_time, status, phase_id, group_id, home_club_id, away_club_id, home_division_id, away_division_id
+                `),
+            'home_club_id',
+            scopedClubIds
+        )
+            .not('tournament_id', 'is', null)
+            .order('date_time', { ascending: false })
+            .limit(200),
+        scopeMatchSideQuery(
+            supabase
+                .from('matches')
+                .select(`
+                    id, tournament_id, date_time, status, phase_id, group_id, home_club_id, away_club_id, home_division_id, away_division_id
+                `),
+            'away_club_id',
+            scopedClubIds
+        )
             .not('tournament_id', 'is', null)
             .order('date_time', { ascending: false })
             .limit(200),
@@ -883,11 +962,7 @@ export async function getClubDashboardOverview(
             .in('club_id', scopedClubIds)
             .order('last_updated', { ascending: false })
             .order('position', { ascending: true }),
-        supabase
-            .from('clubs')
-            .select('*')
-            .eq('id', clubId)
-            .maybeSingle(),
+        selectedClubRowPromise,
         supabase
             .from('club_profile')
             .select('*')
@@ -899,11 +974,18 @@ export async function getClubDashboardOverview(
             .eq('club_id', clubId),
     ]);
 
-    if (upcomingMatchesResult.error) throw upcomingMatchesResult.error;
-    if (pastMatchesResult.error) throw pastMatchesResult.error;
-    if (upcomingMatchesCountResult.error) throw upcomingMatchesCountResult.error;
-    if (playedMatchesCountResult.error) throw playedMatchesCountResult.error;
-    if (tournamentMatchesResult.error) throw tournamentMatchesResult.error;
+    throwFirstQueryError([
+        upcomingHomeMatchesResult,
+        upcomingAwayMatchesResult,
+        pastHomeMatchesResult,
+        pastAwayMatchesResult,
+        upcomingHomeMatchesCountResult,
+        upcomingAwayMatchesCountResult,
+        playedHomeMatchesCountResult,
+        playedAwayMatchesCountResult,
+        tournamentHomeMatchesResult,
+        tournamentAwayMatchesResult,
+    ]);
     if (participantTournamentsResult.error) throw participantTournamentsResult.error;
     if (standingsResult.error) throw standingsResult.error;
     if (selectedClubCoreResult.error) throw selectedClubCoreResult.error;
@@ -914,14 +996,33 @@ export async function getClubDashboardOverview(
         throw sponsorsCountResult.error;
     }
 
-    const tournamentMatchRows = (tournamentMatchesResult.data ?? []) as unknown as CompetitionMatchRow[];
+    const upcomingMatchRows = mergeMatchSideRows<MatchRow>([
+        upcomingHomeMatchesResult.data as MatchRow[] | null,
+        upcomingAwayMatchesResult.data as MatchRow[] | null,
+    ], 'asc', 20);
+    const pastMatchRows = mergeMatchSideRows<MatchRow>([
+        pastHomeMatchesResult.data as MatchRow[] | null,
+        pastAwayMatchesResult.data as MatchRow[] | null,
+    ], 'desc', 150);
+    const tournamentMatchRows = mergeMatchSideRows<CompetitionMatchRow>([
+        tournamentHomeMatchesResult.data as CompetitionMatchRow[] | null,
+        tournamentAwayMatchesResult.data as CompetitionMatchRow[] | null,
+    ], 'desc', 200);
+    const upcomingMatchesCount = sumResultCounts([
+        upcomingHomeMatchesCountResult,
+        upcomingAwayMatchesCountResult,
+    ]);
+    const playedMatchesCount = sumResultCounts([
+        playedHomeMatchesCountResult,
+        playedAwayMatchesCountResult,
+    ]);
     const participantRows = (participantTournamentsResult.data ?? []) as TournamentParticipantRow[];
     const standingsRows = (standingsResult.data ?? []) as unknown as StandingRow[];
     const clubCore = (selectedClubCoreResult.data ?? null) as ClubCore | null;
     const clubProfile = (selectedClubProfileResult.data ?? null) as ClubProfile | null;
     const sponsorsCount = sponsorsCountResult.count ?? 0;
     const divisionIds = Array.from(new Set(
-        [...((upcomingMatchesResult.data ?? []) as MatchRow[]), ...((pastMatchesResult.data ?? []) as MatchRow[]), ...tournamentMatchRows]
+        [...upcomingMatchRows, ...pastMatchRows, ...tournamentMatchRows]
             .flatMap((row) => [row.home_division_id, row.away_division_id])
             .filter((value): value is string => typeof value === 'string' && value.length > 0)
     ));
@@ -942,10 +1043,10 @@ export async function getClubDashboardOverview(
         }
     }
 
-    const upcomingMatches = ((upcomingMatchesResult.data ?? []) as unknown as MatchRow[]).map((row) =>
+    const upcomingMatches = upcomingMatchRows.map((row) =>
         normalizeMatch(row, scopedClubIdSet, divisionNameById, includeOperationalPayload)
     );
-    const pastMatches = ((pastMatchesResult.data ?? []) as unknown as MatchRow[]).map((row) =>
+    const pastMatches = pastMatchRows.map((row) =>
         normalizeMatch(row, scopedClubIdSet, divisionNameById, includeOperationalPayload)
     );
     const recentMatches = pastMatches.slice(0, 5);
@@ -1064,8 +1165,8 @@ export async function getClubDashboardOverview(
 
     return {
         stats: {
-            upcomingMatches: upcomingMatchesCountResult.count ?? upcomingMatches.length,
-            playedMatches: playedMatchesCountResult.count ?? pastMatches.length,
+            upcomingMatches: upcomingMatchesCount ?? upcomingMatches.length,
+            playedMatches: playedMatchesCount ?? pastMatches.length,
             tournaments: competitions.length,
             bestPosition,
         },

@@ -1,4 +1,5 @@
 export type ClubConsoleMode = 'admin' | 'club-admin';
+export const CLUB_ADMIN_TAB_STATE_EVENT = 'club-admin:tab-state-change';
 
 function withQuery(pathname: string, searchParams: URLSearchParams) {
     const query = searchParams.toString();
@@ -26,6 +27,28 @@ export function buildClubManageHref(
     });
 
     return withQuery(`/admin/entities/${encodeURIComponent(clubId)}/manage`, searchParams);
+}
+
+export function pushClubManageHistoryState(
+    clubId: string,
+    tab = 'general',
+    mode: ClubConsoleMode = 'admin'
+) {
+    const href = buildClubManageHref(clubId, tab, mode);
+
+    if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', href);
+        window.dispatchEvent(new CustomEvent(CLUB_ADMIN_TAB_STATE_EVENT, {
+            detail: {
+                clubId,
+                tab,
+                href,
+                mode,
+            },
+        }));
+    }
+
+    return href;
 }
 
 export function buildClubRosterHref(

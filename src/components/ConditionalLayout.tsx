@@ -21,7 +21,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const { user, isAuthenticated, isLoading } = useAuth();
     const isManagementPage = pathname?.startsWith('/admin');
     const isOnboardingPage = pathname?.startsWith('/onboarding');
-    const isClubAdminPizarra = pathname?.startsWith('/club-admin') && searchParams.get('tab') === 'pizarra';
+    const isClubAdminPage = pathname?.startsWith('/club-admin');
     const returnTo = pathname || '/';
 
     useEffect(() => {
@@ -61,10 +61,14 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
         );
     }
 
-    if (isClubAdminPizarra) {
+    if (isClubAdminPage) {
         return (
             <SportProvider>
-                {children}
+                <Header />
+                <div className={styles.layoutContainer}>
+                    <main className={styles.mainContent}>{children}</main>
+                </div>
+                <MobileBottomNav />
             </SportProvider>
         );
     }

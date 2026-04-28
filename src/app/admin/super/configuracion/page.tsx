@@ -20,7 +20,7 @@ type ResultsApiKeySettings = {
 };
 
 type SettingsResponse =
-  | { ok: true; data: ResultsApiKeySettings }
+  | { ok: true; data: ResultsApiKeySettings; error?: undefined; details?: undefined }
   | { ok: false; error?: string; details?: unknown };
 
 type RotateResponse =
@@ -33,6 +33,8 @@ type RotateResponse =
         createdAt: string;
         updatedAt: string;
       };
+      error?: undefined;
+      details?: undefined;
     }
   | { ok: false; error?: string; details?: unknown };
 

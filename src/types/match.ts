@@ -36,6 +36,9 @@ export interface MatchResult {
 export interface Match {
     id: string;
     tournamentId: string;
+    /** Denormalized from external providers (e.g. Flashscore) for API responses */
+    leagueName?: string;
+    countryName?: string;
     phaseId: string;
     stageId?: string;             // opcional si ten----s sub-etapas
     groupId?: string;             // para grupos

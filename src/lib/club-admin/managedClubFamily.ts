@@ -10,6 +10,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 type ClubSummaryRow = {
     id: string;
+    slug: string | null;
     name: string | null;
     short_name: string | null;
     logo_url: string | null;
@@ -28,6 +29,7 @@ function getErrorCode(error: unknown) {
 
 export interface ManagedClubSummary {
     id: string;
+    slug: string | null;
     name: string;
     shortName: string | null;
     logoUrl: string | null;
@@ -72,7 +74,7 @@ async function fetchClubSummaryRows(
 ): Promise<ClubSummaryRow[]> {
     const fullResult = await supabase
         .from('clubs')
-        .select('id, name, short_name, logo_url, sport, sport_id')
+        .select('id, slug, name, short_name, logo_url, sport, sport_id')
         .in('id', clubIds);
 
     if (!fullResult.error) {
@@ -85,7 +87,7 @@ async function fetchClubSummaryRows(
 
     const fallbackResult = await supabase
         .from('clubs')
-        .select('id, name, short_name, logo_url')
+        .select('id, slug, name, short_name, logo_url')
         .in('id', clubIds);
 
     if (fallbackResult.error) {
@@ -304,7 +306,7 @@ export async function getManagedClubSummaries(
     const preparedMemberships = await Promise.all(
         directMemberships.map(async (membership) => {
             const scopeId = membership.scopeId!;
-            const managementType = membership.scopeType === 'club_family' ? 'club_family' : 'club';
+            const managementType: 'club' | 'club_family' = membership.scopeType === 'club_family' ? 'club_family' : 'club';
             const resolvedFamily = await getFamilyResolution(scopeId);
             const familyClubIds = managementType === 'club_family'
                 ? resolvedFamily.clubIds
@@ -379,6 +381,7 @@ export async function getManagedClubSummaries(
 
             return {
                 id: club.id,
+                slug: club.slug || null,
                 name: club.name || 'Club',
                 shortName: club.short_name || null,
                 logoUrl: club.logo_url || null,

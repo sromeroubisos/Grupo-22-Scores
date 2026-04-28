@@ -518,7 +518,7 @@ export default function SuperCreateTournament() {
                 setIsEdit(true);
 
                 const sportVal = data.sport_id ? mapExternalSportToInternalSport(data.sport_id) : 'rugby';
-                const defaults = sportDefaults[sportVal as string] || {};
+                const defaults = sportDefaults[sportVal as string] || { duration: 60, win: 1, draw: 0, loss: 0 };
                 const inferredAudience = resolveTournamentAudience({ ageGrade: data.age_grade, category: data.category });
                 const competitionConfig = (data.ruleset as { competition?: { parameters?: { champion_mode?: CircuitChampionMode } } } | null)?.competition;
 
@@ -832,7 +832,7 @@ export default function SuperCreateTournament() {
             if (isEdit && tournamentId) {
                 // On edit: don't touch the slug
                 const result = await updateEntitySafe('tournament', tournamentId, payload);
-                if (!result.success) {
+                if (result.success === false) {
                     throw new Error(result.error);
                 }
                 savedId = tournamentId;
@@ -840,7 +840,7 @@ export default function SuperCreateTournament() {
                 // On create: generate a unique slug
                 payload.slug = `${slugify(formData.name)}-${Date.now()}`;
                 const result = await createEntitySafe('tournament', payload);
-                if (!result.success) {
+                if (result.success === false) {
                     throw new Error(result.error);
                 }
                 savedId = result.id;

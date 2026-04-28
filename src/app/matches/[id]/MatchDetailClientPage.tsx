@@ -1974,7 +1974,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         <div className={styles.timelineContainer}>
                                             {eventsData.slice(-3).reverse().map((evt, i) => (
                                                 <div key={i} className={styles.timelineItem}>
-                                                    <div className={styles.eventMinuteBadge}>{evt.time}'</div>
+                                                    <div className={styles.eventMinuteBadge}>{`${evt.time}'`}</div>
                                                     <div className={`${styles.eventSide} ${evt.team === 'home' ? styles.eventLeft : styles.eventRight}`}>
                                                         <div className={styles.eventIcon}>•</div>
                                                         <div className={styles.eventDetail}>
@@ -2005,7 +2005,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 {state.commentaryData && state.commentaryData.length > 0 ? (
                                     state.commentaryData.map((comm: any, i: number) => (
                                         <div key={i} className={styles.commentaryItem}>
-                                            <div className={styles.commentaryTime}>{comm.time || comm.MINUTE || ''}'</div>
+                                            <div className={styles.commentaryTime}>{`${comm.time || comm.MINUTE || ''}'`}</div>
                                             <div className={styles.commentaryText}>{comm.text || comm.COMMENT || ''}</div>
                                         </div>
                                     ))

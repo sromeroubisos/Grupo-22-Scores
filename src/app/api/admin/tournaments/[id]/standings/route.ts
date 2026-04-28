@@ -314,14 +314,18 @@ export async function GET(
             if (pError) throw pError;
             if (mError) throw mError;
 
-            const participantMap = new Map(
-                (participants || []).map((participant) => [
+            const participantRows = (participants || []) as any[];
+            const persistedStandingRows = (persistedRows || []) as any[];
+            const matchRows = (matches || []) as any[];
+
+            const participantMap = new Map<string, any>(
+                participantRows.map((participant) => [
                     participant.club_id || participant.id,
                     participant,
                 ])
             );
 
-            const table = (persistedRows || []).map((row) => {
+            const table = persistedStandingRows.map((row) => {
                 const participant = participantMap.get(row.club_id);
                 const participantClub = Array.isArray(participant?.clubs) ? participant.clubs[0] : participant?.clubs;
                 return {
@@ -350,7 +354,7 @@ export async function GET(
                 };
             });
 
-            const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], scopedGroupId);
+            const scopedMatches = filterMatchesForGroupScope(matchRows, participantRows, scopedGroupId);
             const metrics = {
                 counted_matches: scopedMatches.filter((match) => isFinalStandingsStatus(match.status)).length,
                 pending_results: scopedMatches.filter((match) => ['scheduled', 'live', 'suspended', 'delayed', 'postponed'].includes(String(match.status ?? ''))).length,

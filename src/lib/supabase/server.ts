@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase';
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
+import type { LooseSupabaseClient } from './loose';
 
 export async function createClient() {
     const startedAt = nowMs()
@@ -42,7 +43,7 @@ export async function createClient() {
                 fetch: instrumentedFetch,
             },
         }
-    )
+    ) as LooseSupabaseClient
 
     logPerf(
         ['SERVER', 'SUPABASE'],

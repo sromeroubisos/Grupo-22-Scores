@@ -359,7 +359,7 @@ export async function createEntity(
 export async function createEntitySafe(
     type: EntityType,
     payload: Record<string, any>
-): Promise<{ success: true; id: string } | { success: false; error: string }> {
+): Promise<{ success: true; id: string; error?: undefined } | { success: false; error: string; id?: undefined }> {
     try {
         return await createEntity(type, payload);
     } catch (error) {
@@ -465,7 +465,7 @@ export async function updateEntitySafe(
     type: EntityType,
     id: string,
     updates: Record<string, any>
-): Promise<{ success: true; id: string } | { success: false; error: string }> {
+): Promise<{ success: true; id: string; error?: undefined } | { success: false; error: string; id?: undefined }> {
     try {
         return await updateEntity(type, id, updates);
     } catch (error) {

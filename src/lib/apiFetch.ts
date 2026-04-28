@@ -46,7 +46,6 @@ export async function apiFetch<T = unknown>(
             headers,
             cache: cacheStrategy,
             signal: controller.signal,
-            // @ts-ignore - next specific options
             next: opts.cacheTtl ? { revalidate: opts.cacheTtl } : undefined,
         });
 

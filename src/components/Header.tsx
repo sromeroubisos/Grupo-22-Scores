@@ -122,7 +122,29 @@ export default function Header() {
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
     const isProdeRoute = pathname?.startsWith('/prode') ?? false;
     const isNotificationsRoute = pathname?.startsWith('/notifications') ?? false;
+    const isAuthRoute =
+        pathname?.startsWith('/login')
+        || pathname?.startsWith('/register')
+        || pathname?.startsWith('/auth/');
     const rankingsHref = `/rankings?sport=${encodeURIComponent(selectedSport.id)}`;
+
+    if (isAuthRoute) {
+        return (
+            <header className="g22-header">
+                <div className="g22-header-inner">
+                    <Link href="/" className="g22-logo">
+                        G22<span>Scores</span>
+                    </Link>
+
+                    <div className="g22-header-center-zone" />
+
+                    <div className="g22-header-actions">
+                        <ThemeToggle />
+                    </div>
+                </div>
+            </header>
+        );
+    }
 
     return (
         <header className="g22-header">

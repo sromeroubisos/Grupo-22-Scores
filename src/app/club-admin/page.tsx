@@ -23,7 +23,7 @@ export const dynamic = 'force-dynamic';
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 
 interface ClubAdminPageProps {
-    searchParams: Promise<{ club?: string; tab?: string }>;
+    searchParams: Promise<{ club?: string; tab?: string; type?: string }>;
 }
 
 type PreloadResult<T> = {
@@ -76,9 +76,13 @@ async function preloadResource<T>(
 }
 
 export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps) {
-    const { club: requestedClubId, tab: requestedTab } = await searchParams;
+    const {
+        club: requestedClubId,
+        tab: requestedTab,
+        type: requestedType,
+    } = await searchParams;
     const currentTab = normalizeClubManageTab(requestedTab);
-    const supabase = await createClient();
+    const [supabase, readClient] = await Promise.all([createClient(), getReadClient()]);
 
     const context = await requireUserAccessContext(supabase).catch(() => null);
     if (!context) {
@@ -86,10 +90,12 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
     }
 
     const managed = await getManagedClubSummaries(supabase as never, context.memberships);
-    const availableClubIds = new Set(managed.clubs.map((club) => club.id));
-    const targetClubId = requestedClubId && availableClubIds.has(requestedClubId)
-        ? requestedClubId
+    const requestedClubRef = typeof requestedClubId === 'string' ? requestedClubId.trim() : '';
+    const requestedEntityType = typeof requestedType === 'string' ? requestedType.trim().toLowerCase() : '';
+    const resolvedManagedClub = requestedClubRef
+        ? managed.clubs.find((club) => club.id === requestedClubRef || club.slug === requestedClubRef) ?? null
         : null;
+    const targetClubId = resolvedManagedClub?.id ?? null;
 
     if (!managed.clubs.length) {
         return (
@@ -99,6 +105,34 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
                     <h1 className="mt-4 text-3xl font-black tracking-tight">No hay clubes asignados</h1>
                     <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
                         Esta cuenta todavía no tiene memberships de club o familia de club con permisos operativos.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (requestedEntityType && requestedEntityType !== 'club') {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+                <div className="max-w-xl w-full rounded-[28px] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-[var(--shadow-card)]">
+                    <p className="text-xs uppercase tracking-[0.24em] text-[#00ff88] font-black">Club Admin</p>
+                    <h1 className="mt-4 text-3xl font-black tracking-tight">Tipo de entidad no compatible</h1>
+                    <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
+                        Esta vista solo admite `type=club`. Revisa la URL o vuelve a seleccionar un club real desde el panel.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (requestedClubRef && !targetClubId) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+                <div className="max-w-xl w-full rounded-[28px] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 shadow-[var(--shadow-card)]">
+                    <p className="text-xs uppercase tracking-[0.24em] text-[#00ff88] font-black">Club Admin</p>
+                    <h1 className="mt-4 text-3xl font-black tracking-tight">No pudimos resolver el club solicitado</h1>
+                    <p className="mt-4 text-sm text-[var(--color-text-secondary)]">
+                        El valor `club={requestedClubRef}` no corresponde a un club real con acceso para esta cuenta.
                     </p>
                 </div>
             </div>
@@ -119,6 +153,12 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
         || currentTab === 'entrenamientos';
     const shouldLoadSponsors = currentTab === 'sponsors';
 
+    const clubRowResultPromise = supabase
+        .from('clubs')
+        .select('*')
+        .eq('id', targetClubId)
+        .maybeSingle();
+
     const [
         { data: clubData },
         { data: unionsData },
@@ -127,19 +167,15 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
         peoplePreload,
         sponsorsPreload,
     ] = await Promise.all([
-        supabase
-            .from('clubs')
-            .select('*')
-            .eq('id', targetClubId)
-            .maybeSingle(),
+        clubRowResultPromise,
         supabase
             .from('unions')
             .select('id, name')
             .order('name'),
         preloadResource(shouldLoadDashboard, 'Dashboard', async () => {
-            const client = await getReadClient();
-            return getClubDashboardOverview(client as never, targetClubId, {
+            return getClubDashboardOverview(readClient as never, targetClubId, {
                 mode: getClubDashboardModeForTab(currentTab),
+                sharedClubRowResult: clubRowResultPromise,
             });
         }),
         preloadResource(shouldLoadDivisions, 'Division', () => fetchDivisions(targetClubId, supabase as never)),
@@ -174,6 +210,7 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
             data={clubData as ClubRow}
             unions={unionsData ?? []}
             managedClubs={managed.clubs}
+            initialTab={currentTab}
             navigationMode="club-admin"
             initialDashboardData={dashboardPreload.data}
             initialDashboardLoaded={dashboardPreload.loaded}

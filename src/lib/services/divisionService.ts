@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
@@ -64,6 +63,7 @@ const OPTIONAL_TEAM_COLUMNS = [
     'format',
     'regulation',
 ] as const;
+const LEGACY_DIVISION_COLUMNS_WITHOUT_FEATURED = 'id, club_id, name, slug, sport, gender, category, status, season, format, regulation';
 
 function isMissingTableError(error: any, tableName?: string) {
     if (tableName) {
@@ -363,9 +363,8 @@ async function listClubTeams(supabase: any, clubId: string): Promise<any[] | nul
 async function listLegacyDivisions(supabase: any, clubId: string): Promise<any[] | null> {
     const { data, error } = await supabase
         .from('club_divisions')
-        .select('*')
+        .select(LEGACY_DIVISION_COLUMNS_WITHOUT_FEATURED)
         .eq('club_id', clubId)
-        .order('featured', { ascending: false })
         .order('name');
 
     if (error) {
@@ -373,7 +372,10 @@ async function listLegacyDivisions(supabase: any, clubId: string): Promise<any[]
         throw error;
     }
 
-    return data ?? [];
+    return (data ?? []).map((division: any) => ({
+        ...division,
+        featured: false,
+    }));
 }
 
 async function fetchDivisionsFromTeams(supabase: any, clubId: string): Promise<Division[] | null> {
@@ -410,72 +412,30 @@ async function fetchDivisionsFromLegacy(supabase: any, clubId: string): Promise<
     return divisions.map((division) => mapLegacyDivision(division, roles ?? []));
 }
 
-async function syncClubCategories(
-    supabase: any,
-    clubId: string,
-    action: 'add' | 'rename' | 'remove',
-    nextName: string,
-    previousName?: string
-) {
-    const { data: club, error } = await supabase
-        .from('clubs')
-        .select('categories')
-        .eq('id', clubId)
-        .single();
-
-    if (error || !club) return;
-
-    const currentCategories = Array.isArray(club.categories) ? [...club.categories] : [];
-    let nextCategories = currentCategories;
-
-    if (action === 'add') {
-        if (!currentCategories.some((category) => category.toLowerCase() === nextName.toLowerCase())) {
-            nextCategories = [...currentCategories, nextName];
-        }
-    }
-
-    if (action === 'rename' && previousName) {
-        nextCategories = currentCategories.map((category) =>
-            category.toLowerCase() === previousName.toLowerCase() ? nextName : category
-        );
-    }
-
-    if (action === 'remove') {
-        const legacyIndex = nextName.startsWith('legacy-')
-            ? Number.parseInt(nextName.replace('legacy-', ''), 10)
-            : Number.NaN;
-
-        nextCategories = currentCategories.filter((category, index) => {
-            if (previousName) {
-                return category.toLowerCase() !== previousName.toLowerCase();
-            }
-
-            if (Number.isInteger(legacyIndex)) {
-                return index !== legacyIndex;
-            }
-
-            return category.toLowerCase() !== nextName.toLowerCase();
-        });
-    }
-
-    if (JSON.stringify(currentCategories) === JSON.stringify(nextCategories)) return;
-
-    await supabase.from('clubs').update({ categories: nextCategories }).eq('id', clubId);
+async function syncClubCategories() {
+    // `clubs.categories` was removed from the core schema. Divisions now live in
+    // club_teams / club_divisions, so keep this legacy sync as a no-op to avoid
+    // generating PostgREST 42703 errors in production.
 }
 
 async function fetchDivisionsFallback(clubId: string): Promise<Division[]> {
     const supabase = await createClient();
     const { data: club } = await supabase
         .from('clubs')
-        .select('categories, is_visible')
+        .select('category, is_visible')
         .eq('id', clubId)
         .single();
 
-    if (!club || !Array.isArray(club.categories)) return [];
+    if (!club) return [];
+
+    const categories = typeof club.category === 'string' && club.category.trim()
+        ? [club.category.trim()]
+        : [];
+    if (categories.length === 0) return [];
 
     const baseStatus = club.is_visible ? 'active' : 'draft';
 
-    return club.categories.map((category: string, index: number) => ({
+    return categories.map((category: string, index: number) => ({
         id: `legacy-${index}`,
         management_id: `legacy-${index}`,
         legacy_division_id: null,
@@ -643,7 +603,7 @@ export async function createDivision(
             }
         }
 
-        await syncClubCategories(supabase, clubId, 'add', normalized.name);
+        await syncClubCategories();
 
         const data = buildDivisionResponse(team, legacyDivision);
         if (data) return { success: true, data };
@@ -659,13 +619,15 @@ async function createDivisionFallback(clubId: string, name: string): Promise<Div
     const supabase = await createClient();
     const { data: club } = await supabase
         .from('clubs')
-        .select('categories, is_visible')
+        .select('category, is_visible')
         .eq('id', clubId)
         .single();
 
     if (!club) return { success: false, error: 'Club not found', code: 'not_found' };
 
-    const categories = Array.isArray(club.categories) ? club.categories : [];
+    const categories = typeof club.category === 'string' && club.category.trim()
+        ? [club.category.trim()]
+        : [];
     if (categories.some((category) => category.toLowerCase() === name.toLowerCase())) {
         return {
             success: false,
@@ -675,7 +637,10 @@ async function createDivisionFallback(clubId: string, name: string): Promise<Div
     }
 
     const nextCategories = [...categories, name];
-    const { error } = await supabase.from('clubs').update({ categories: nextCategories }).eq('id', clubId);
+    const { error } = await supabase
+        .from('clubs')
+        .update({ category: categories[0] ?? name })
+        .eq('id', clubId);
 
     if (error) return { success: false, error: error.message };
 
@@ -712,7 +677,7 @@ export async function updateDivision(
         const current = fallback.find((division) => division.id === divisionId);
         if (!current) return { success: false, code: 'not_found', error: 'Division not found' };
 
-        await syncClubCategories(supabase, clubId, 'rename', normalized.name, current.name);
+        await syncClubCategories();
         return {
             success: true,
             data: {
@@ -810,7 +775,7 @@ export async function updateDivision(
 
         const previousName = legacyDivision?.name || team?.name;
         if (previousName) {
-            await syncClubCategories(supabase, clubId, 'rename', normalized.name, previousName);
+            await syncClubCategories();
         }
 
         const data = buildDivisionResponse(nextTeam, nextLegacyDivision);
@@ -829,9 +794,10 @@ export async function deleteDivision(
 ): Promise<{ success: boolean; error?: string; code?: 'not_found' }> {
     const supabase = await createClient();
     const db = supabase as any;
+    void name;
 
     if (divisionId.startsWith('legacy-')) {
-        await syncClubCategories(supabase, clubId, 'remove', divisionId, name);
+        await syncClubCategories();
         return { success: true };
     }
 
@@ -865,13 +831,7 @@ export async function deleteDivision(
             }
         }
 
-        await syncClubCategories(
-            supabase,
-            clubId,
-            'remove',
-            divisionId,
-            name || legacyDivision?.name || team?.name
-        );
+        await syncClubCategories();
 
         return { success: true };
     } catch (error: any) {
@@ -912,7 +872,11 @@ export async function saveSquadAndPlayers(
             console.error('Error loading people for squad sync:', peopleError);
         }
 
-        const peopleById = new Map((people ?? []).map((person: any) => [person.id, person]));
+        type PersonPositionRow = { id: string; position: string | null };
+        const peopleRows = (people ?? []) as PersonPositionRow[];
+        const peopleById = new Map<string, PersonPositionRow>(
+            peopleRows.map((person) => [person.id, person]),
+        );
 
         const { error: rolesError } = await db
             .from('club_person_roles')

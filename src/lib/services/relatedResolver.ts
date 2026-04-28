@@ -43,6 +43,38 @@ const formatDate = (dateString: string) => {
     }
 };
 
+function mergeMatchRows(...rowGroups: Array<any[] | null | undefined>) {
+    const rowsById = new Map<string, any>();
+
+    for (const group of rowGroups) {
+        for (const row of group ?? []) {
+            if (row?.id && !rowsById.has(row.id)) {
+                rowsById.set(row.id, row);
+            }
+        }
+    }
+
+    return Array.from(rowsById.values()).sort((left, right) => {
+        const leftTime = left.date_time ? new Date(left.date_time).getTime() : 0;
+        const rightTime = right.date_time ? new Date(right.date_time).getTime() : 0;
+        return rightTime - leftTime;
+    });
+}
+
+function sumCounts(...counts: Array<number | null | undefined>) {
+    let total = 0;
+    let hasCount = false;
+
+    for (const count of counts) {
+        if (typeof count === 'number') {
+            total += count;
+            hasCount = true;
+        }
+    }
+
+    return hasCount ? total : undefined;
+}
+
 export async function getRelatedItems(
     entityType: EntityType,
     id: string,
@@ -97,16 +129,29 @@ export async function getRelatedItems(
     // ── CLUB ────────────────────────────────────────────────────────────────
     else if (entityType === 'club') {
         // 1. Matches for this club
-        const { data: matchesData, error: matchesError, count: matchesCount } = await supabase
-            .from('matches')
-            .select(`
+        const matchSelect = `
                 id, date_time, status, home_club_id, away_club_id,
                 home:clubs!matches_home_club_id_fkey(name),
                 away:clubs!matches_away_club_id_fkey(name)
-            `, { count: 'estimated' })
-            .or(`home_club_id.eq.${id},away_club_id.eq.${id}`)
-            .order('date_time', { ascending: false })
-            .range(offset, offset + limit - 1);
+            `;
+        const fetchLimit = offset + limit;
+        const [homeMatchesResult, awayMatchesResult] = await Promise.all([
+            supabase
+                .from('matches')
+                .select(matchSelect, { count: 'estimated' })
+                .eq('home_club_id', id)
+                .order('date_time', { ascending: false })
+                .limit(fetchLimit),
+            supabase
+                .from('matches')
+                .select(matchSelect, { count: 'estimated' })
+                .eq('away_club_id', id)
+                .order('date_time', { ascending: false })
+                .limit(fetchLimit),
+        ]);
+        const matchesError = homeMatchesResult.error || awayMatchesResult.error;
+        const matchesData = mergeMatchRows(homeMatchesResult.data, awayMatchesResult.data).slice(offset, offset + limit);
+        const matchesCount = sumCounts(homeMatchesResult.count, awayMatchesResult.count);
 
         if (!matchesError && matchesData) {
             sections.push({
@@ -157,11 +202,22 @@ export async function getRelatedItems(
         }
 
         // 3. Tournaments (via participating matches)
-        const { data: tourneyData } = await supabase
-            .from('matches')
-            .select(`tournament:tournaments(id, name, status)`)
-            .or(`home_club_id.eq.${id},away_club_id.eq.${id}`)
-            .not('tournament_id', 'is', null);
+        const [homeTourneyResult, awayTourneyResult] = await Promise.all([
+            supabase
+                .from('matches')
+                .select(`tournament:tournaments(id, name, status)`)
+                .eq('home_club_id', id)
+                .not('tournament_id', 'is', null),
+            supabase
+                .from('matches')
+                .select(`tournament:tournaments(id, name, status)`)
+                .eq('away_club_id', id)
+                .not('tournament_id', 'is', null),
+        ]);
+        const tourneyData = [
+            ...(homeTourneyResult.data ?? []),
+            ...(awayTourneyResult.data ?? []),
+        ];
 
         if (tourneyData) {
             const uniqueTourneys = new Map();
@@ -208,16 +264,26 @@ export async function getRelatedItems(
             });
 
             // Also show matches for their current club
-            const { data: matchesData } = await supabase
-                .from('matches')
-                .select(`
+            const playerClubMatchSelect = `
                     id, date_time, status, home_club_id, away_club_id,
                     home:clubs!matches_home_club_id_fkey(name),
                     away:clubs!matches_away_club_id_fkey(name)
-                `)
-                .or(`home_club_id.eq.${playerData.club.id},away_club_id.eq.${playerData.club.id}`)
-                .order('date_time', { ascending: false })
-                .limit(10);
+                `;
+            const [homePlayerClubMatches, awayPlayerClubMatches] = await Promise.all([
+                supabase
+                    .from('matches')
+                    .select(playerClubMatchSelect)
+                    .eq('home_club_id', playerData.club.id)
+                    .order('date_time', { ascending: false })
+                    .limit(10),
+                supabase
+                    .from('matches')
+                    .select(playerClubMatchSelect)
+                    .eq('away_club_id', playerData.club.id)
+                    .order('date_time', { ascending: false })
+                    .limit(10),
+            ]);
+            const matchesData = mergeMatchRows(homePlayerClubMatches.data, awayPlayerClubMatches.data).slice(0, 10);
 
             if (matchesData) {
                 sections.push({

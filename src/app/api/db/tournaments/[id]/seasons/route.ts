@@ -82,11 +82,12 @@ async function resolveSeasonAnchorRow(
     supabase: Awaited<ReturnType<typeof getReadClient>>,
     routeId: string,
 ): Promise<TournamentRow | null> {
-    const { data: byIdOrSlug } = await supabase
+    const { data: byIdOrSlugData } = await supabase
         .from('tournaments')
         .select(ANCHOR_SELECT)
         .or(`id.eq.${routeId},slug.eq.${routeId}`)
-        .maybeSingle<TournamentRow>();
+        .maybeSingle();
+    const byIdOrSlug = byIdOrSlugData as TournamentRow | null;
 
     if (byIdOrSlug) return byIdOrSlug;
 

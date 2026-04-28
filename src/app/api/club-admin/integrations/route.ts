@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import {
     ACCESS_VIEW_ROLE_SET,
@@ -60,7 +59,8 @@ export async function GET(request: NextRequest) {
         const [
             { data: rows, error: integrationError },
             { data: club, error: clubError },
-            { count: matchesCount, error: matchesError },
+            { count: homeMatchesCount, error: homeMatchesError },
+            { count: awayMatchesCount, error: awayMatchesError },
             { count: standingsCount, error: standingsError },
             { count: newsCount, error: newsError },
             { count: documentCount, error: documentError },
@@ -78,7 +78,11 @@ export async function GET(request: NextRequest) {
             admin
                 .from('matches')
                 .select('id', { count: 'exact', head: true })
-                .or(`home_club_id.eq.${clubId},away_club_id.eq.${clubId}`),
+                .eq('home_club_id', clubId),
+            admin
+                .from('matches')
+                .select('id', { count: 'exact', head: true })
+                .eq('away_club_id', clubId),
             admin
                 .from('tournament_standings')
                 .select('id', { count: 'exact', head: true })
@@ -100,13 +104,15 @@ export async function GET(request: NextRequest) {
 
         if (integrationError) throw integrationError;
         if (clubError) throw clubError;
-        if (matchesError) throw matchesError;
+        if (homeMatchesError) throw homeMatchesError;
+        if (awayMatchesError) throw awayMatchesError;
         if (standingsError) throw standingsError;
         if (newsError) throw newsError;
         if (documentError) throw documentError;
         if (sponsorError) throw sponsorError;
 
         const byKey = new Map<string, any>(((rows ?? []) as any[]).map((row) => [row.integration_key, row]));
+        const matchesCount = (homeMatchesCount ?? 0) + (awayMatchesCount ?? 0);
         const data = Object.entries(INTEGRATIONS).map(([key, meta]) => {
             const row = byKey.get(key);
             let observedStatus = 'Sin actividad detectada';

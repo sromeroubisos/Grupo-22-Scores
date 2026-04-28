@@ -129,7 +129,7 @@ function getLineupCount(match: ClubDashboardMatch) {
     return Math.max(homeCount, awayCount);
 }
 
-function getStatsCount(match: ClubDashboardMatch) {
+function getStatsCount(match: ClubDashboardMatch): number {
     if (typeof match.statsCount === 'number') return match.statsCount;
 
     const events = match.events;
@@ -137,7 +137,7 @@ function getStatsCount(match: ClubDashboardMatch) {
     if (!events || typeof events !== 'object') return 0;
 
     const values = Object.values(events as Record<string, unknown>);
-    return values.reduce((acc, value) => acc + (Array.isArray(value) ? value.length : 0), 0);
+    return values.reduce<number>((acc, value) => acc + (Array.isArray(value) ? value.length : 0), 0);
 }
 
 function hasMeaningfulNotes(notes: string | null) {
@@ -154,7 +154,7 @@ function inferOperationalState(match: ClubDashboardMatch): MatchOperationalState
     const played = isPlayedMatch(match);
     const stats = played ? getStatsCount(match) > 0 || hasScore(match) : false;
     const report = played ? hasNotes : false;
-    const state = {
+    const state: MatchOperationalState = {
         callup: lineupCount > 0,
         lineup: lineupCount > 0,
         notes: hasNotes,
@@ -765,12 +765,6 @@ export function ClubFixtureResultsTab({
                     );
                 })}
             </main>
-
-            {recentMatches.length > 0 ? (
-                <footer className="club-matches-footer-note">
-                    El estado operativo actual se infiere desde `matches` (`lineups`, `notes`, `events`, `score`) y queda listo para conectarse a `club_match_workspaces` cuando ese backend esté disponible.
-                </footer>
-            ) : null}
 
             {/* ── Create Internal Match Modal ── */}
             {createModalOpen && (

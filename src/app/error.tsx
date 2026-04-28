@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 
 interface ErrorProps {
@@ -63,12 +64,12 @@ export default function GlobalError({ error, reset }: ErrorProps) {
                 >
                     Reintentar
                 </button>
-                <a
+                <Link
                     href="/"
                     className="px-6 py-3 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
                 >
                     Ir al inicio
-                </a>
+                </Link>
             </div>
         </div>
     );

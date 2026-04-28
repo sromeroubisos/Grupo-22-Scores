@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense, useEffectEvent, type CSSProperties } from 'react';
+import dynamic from 'next/dynamic';
+import { startTransition, useState, useEffect, Suspense, useEffectEvent, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Database } from '@/lib/database.types';
 import {
@@ -8,33 +9,30 @@ import {
     normalizeClubManageTab,
     shouldLoadClubDashboardForTab,
     shouldLoadClubDivisionsForTab,
+    type ClubManageTabId,
 } from '@/lib/club-admin/manageTabs';
 import type { ClubSponsorItem } from '@/lib/club-admin/sponsors';
 import type { PersonWithRole } from '@/lib/services/personService';
 import { fetchDivisions, type Division } from '@/lib/services/divisionService';
 import type { ClubFull, ClubUpdateInput, ClubValidationError } from '@/lib/types/clubs';
 import { ClubContext } from './ClubContext';
-import { ClubContentStudioTab } from './ClubContentStudioTab';
-import { ClubCompetitionsPanel } from './ClubCompetitionsPanel';
-import { ClubPerformanceTab } from './ClubPerformanceTab';
-import { ClubPizarraTab } from './ClubPizarraTab';
-import { ClubEntrenamientosTab } from './ClubEntrenamientosTab';
+import { ClubAdminToast } from './ClubAdminToast';
 import { ClubDataHealthCard } from './ClubDataHealthCard';
-import { ClubFixtureResultsTab } from './ClubFixtureResultsTab';
 import { ClubIdentityTab } from './ClubIdentityTab';
 import { ClubManageHeader } from './ClubManageHeader';
 import { ClubManageTabs } from './ClubManageTabs';
 import { ClubNextMatchesCard } from './ClubNextMatchesCard';
 import { ClubSponsorsTab } from './ClubSponsorsTab';
 import { ClubSquadsCard } from './ClubSquadsCard';
-import { ClubSquadsTab } from './ClubSquadsTab';
 import { ClubStaffTab } from './ClubStaffTab';
 import { ClubStandingsCard } from './ClubStandingsCard';
 import { ClubSummaryHero } from './ClubSummaryHero';
 import type { ClubDashboardMode, ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
 import { EMPTY_CLUB_DASHBOARD_OVERVIEW } from '@/lib/club-admin/dashboard-types';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
-import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
+import { buildClubManageHref, pushClubManageHistoryState, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
+import { ClubMobileConsole } from './ClubMobileConsole';
+import { ClubMobileGeneralOverview } from './ClubMobileGeneralOverview';
 
 import './vitreous-club.css';
 
@@ -52,6 +50,7 @@ interface ClubManageShellProps {
     data: ClubRow | null;
     unions: { id: string; name: string }[];
     managedClubs: ManagedClubSummary[];
+    initialTab: ClubManageTabId;
     navigationMode?: ClubConsoleMode;
     initialDashboardData?: ClubDashboardOverview | null;
     initialDashboardLoaded?: boolean;
@@ -65,6 +64,93 @@ interface ClubManageShellProps {
     initialStaffLoaded?: boolean;
     initialSponsors?: ClubSponsorItem[];
     initialSponsorsLoaded?: boolean;
+}
+
+type DashboardDataByMode = Record<ClubDashboardMode, ClubDashboardOverview | null>;
+type DashboardFlagByMode = Record<ClubDashboardMode, boolean>;
+
+const PERSISTENT_CLUB_TABS = new Set<ClubManageTabId>([
+    'planteles',
+    'competencias',
+    'rendimiento',
+    'partidos',
+    'contenido',
+    'entrenamientos',
+    'configuracion',
+]);
+
+function TabModuleFallback({ label }: { label: string }) {
+    return (
+        <div className="club-tab-empty">
+            <span>Cargando {label}...</span>
+        </div>
+    );
+}
+
+const DynamicClubContentStudioTab = dynamic(
+    () => import('./ClubContentStudioTab').then((module) => module.ClubContentStudioTab),
+    { loading: () => <TabModuleFallback label="studio" /> }
+);
+const DynamicClubCompetitionsPanel = dynamic(
+    () => import('./ClubCompetitionsPanel').then((module) => module.ClubCompetitionsPanel),
+    { loading: () => <TabModuleFallback label="competencias" /> }
+);
+const DynamicClubEntrenamientosTab = dynamic(
+    () => import('./ClubEntrenamientosTab').then((module) => module.ClubEntrenamientosTab),
+    { loading: () => <TabModuleFallback label="entrenamientos" /> }
+);
+const DynamicClubFixtureResultsTab = dynamic(
+    () => import('./ClubFixtureResultsTab').then((module) => module.ClubFixtureResultsTab),
+    { loading: () => <TabModuleFallback label="partidos" /> }
+);
+const DynamicClubPerformanceTab = dynamic(
+    () => import('./ClubPerformanceTab').then((module) => module.ClubPerformanceTab),
+    { loading: () => <TabModuleFallback label="rendimiento" /> }
+);
+const DynamicClubPizarraTab = dynamic(
+    () => import('./ClubPizarraTab').then((module) => module.ClubPizarraTab),
+    { loading: () => <TabModuleFallback label="pizarra" /> }
+);
+const DynamicClubSquadsTab = dynamic(
+    () => import('./ClubSquadsTab').then((module) => module.ClubSquadsTab),
+    { loading: () => <TabModuleFallback label="planteles" /> }
+);
+
+function createEmptyDashboardDataByMode(): DashboardDataByMode {
+    return {
+        summary: null,
+        operational: null,
+    };
+}
+
+function createDashboardModeFlags(value = false): DashboardFlagByMode {
+    return {
+        summary: value,
+        operational: value,
+    };
+}
+
+function createInitialDashboardDataByMode(
+    hydratedMode: ClubDashboardMode | null,
+    initialDashboardData: ClubDashboardOverview | null
+): DashboardDataByMode {
+    const cache = createEmptyDashboardDataByMode();
+
+    if (hydratedMode) {
+        cache[hydratedMode] = initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW;
+    }
+
+    return cache;
+}
+
+function createInitialDashboardLoadedByMode(hydratedMode: ClubDashboardMode | null): DashboardFlagByMode {
+    const flags = createDashboardModeFlags(false);
+
+    if (hydratedMode) {
+        flags[hydratedMode] = true;
+    }
+
+    return flags;
 }
 
 async function readJsonOrThrow<T>(response: Response): Promise<T> {
@@ -223,6 +309,7 @@ export function ClubManageShell({
     data,
     unions,
     managedClubs,
+    initialTab,
     navigationMode = 'admin',
     initialDashboardData = null,
     initialDashboardLoaded = false,
@@ -240,22 +327,36 @@ export function ClubManageShell({
     const isCreate = id === 'new';
     const router = useRouter();
     const searchParams = useSearchParams();
-    const currentTab = normalizeClubManageTab(searchParams.get('tab'));
+    const urlTab = normalizeClubManageTab(searchParams.get('tab'));
+    const [currentTab, setCurrentTab] = useState<ClubManageTabId>(urlTab);
     const isPizarraFocus = currentTab === 'pizarra';
     const shouldUseDashboard = shouldLoadClubDashboardForTab(currentTab);
     const shouldUseDivisions = shouldLoadClubDivisionsForTab(currentTab);
     const dashboardMode = getClubDashboardModeForTab(currentTab);
+    const hydratedDashboardMode = initialDashboardLoaded && initialDashboardRequested
+        ? getClubDashboardModeForTab(initialTab)
+        : null;
+    const hydratedDivisionsLoaded = initialDivisionsLoaded && initialDivisionsRequested;
 
     const [isDirty, setIsDirty] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [form, setForm] = useState<ClubFormState>(createInitialClubForm(data));
-
-    const [dashboardData, setDashboardData] = useState<ClubDashboardOverview>(
-        initialDashboardLoaded && initialDashboardRequested ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW
+    const [mountedTabs, setMountedTabs] = useState<ClubManageTabId[]>(
+        PERSISTENT_CLUB_TABS.has(initialTab) ? [initialTab] : []
     );
-    const [isLoadingDashboard, setIsLoadingDashboard] = useState(!isCreate && shouldUseDashboard && !initialDashboardLoaded);
+    const [dashboardDataByMode, setDashboardDataByMode] = useState<DashboardDataByMode>(
+        createInitialDashboardDataByMode(hydratedDashboardMode, initialDashboardData)
+    );
+    const [dashboardLoadedByMode, setDashboardLoadedByMode] = useState<DashboardFlagByMode>(
+        createInitialDashboardLoadedByMode(hydratedDashboardMode)
+    );
+    const [dashboardLoadingByMode, setDashboardLoadingByMode] = useState<DashboardFlagByMode>(
+        createDashboardModeFlags(false)
+    );
     const [linkedDivisions, setLinkedDivisions] = useState<Division[]>(filterVisibleDivisions(initialLinkedDivisions));
-    const [isLoadingDivisions, setIsLoadingDivisions] = useState(!isCreate && shouldUseDivisions && !initialDivisionsLoaded);
+    const [divisionsLoaded, setDivisionsLoaded] = useState(hydratedDivisionsLoaded);
+    const [isFetchingDivisions, setIsFetchingDivisions] = useState(false);
 
     useEffect(() => {
         setForm(createInitialClubForm(data));
@@ -263,107 +364,169 @@ export function ClubManageShell({
     }, [data, id]);
 
     useEffect(() => {
-        if (isCreate || !shouldUseDashboard) {
-            setDashboardData(EMPTY_CLUB_DASHBOARD_OVERVIEW);
-            setIsLoadingDashboard(false);
+        setCurrentTab(urlTab);
+    }, [urlTab]);
+
+    useEffect(() => {
+        const syncTabFromLocation = () => {
+            const nextSearchParams = new URLSearchParams(window.location.search);
+            setCurrentTab(normalizeClubManageTab(nextSearchParams.get('tab')));
+        };
+
+        window.addEventListener('popstate', syncTabFromLocation);
+        return () => window.removeEventListener('popstate', syncTabFromLocation);
+    }, []);
+
+    useEffect(() => {
+        const nextHydratedDashboardMode = initialDashboardLoaded && initialDashboardRequested
+            ? getClubDashboardModeForTab(initialTab)
+            : null;
+
+        setMountedTabs(PERSISTENT_CLUB_TABS.has(initialTab) ? [initialTab] : []);
+        setDashboardDataByMode(createInitialDashboardDataByMode(nextHydratedDashboardMode, initialDashboardData));
+        setDashboardLoadedByMode(createInitialDashboardLoadedByMode(nextHydratedDashboardMode));
+        setDashboardLoadingByMode(createDashboardModeFlags(false));
+    }, [id, initialDashboardData, initialDashboardLoaded, initialDashboardRequested, initialTab]);
+
+    useEffect(() => {
+        setLinkedDivisions(hydratedDivisionsLoaded ? filterVisibleDivisions(initialLinkedDivisions) : []);
+        setDivisionsLoaded(hydratedDivisionsLoaded);
+        setIsFetchingDivisions(false);
+    }, [hydratedDivisionsLoaded, id, initialLinkedDivisions]);
+
+    useEffect(() => {
+        if (!PERSISTENT_CLUB_TABS.has(currentTab)) {
             return;
         }
 
-        setDashboardData(initialDashboardLoaded && initialDashboardRequested ? (initialDashboardData ?? EMPTY_CLUB_DASHBOARD_OVERVIEW) : EMPTY_CLUB_DASHBOARD_OVERVIEW);
-        setIsLoadingDashboard(!(initialDashboardLoaded && initialDashboardRequested));
-    }, [id, initialDashboardData, initialDashboardLoaded, initialDashboardRequested, isCreate, shouldUseDashboard]);
+        setMountedTabs((current) => (current.includes(currentTab) ? current : [...current, currentTab]));
+    }, [currentTab]);
 
-    useEffect(() => {
-        if (isCreate || !shouldUseDashboard || (initialDashboardLoaded && initialDashboardRequested)) return;
-
-        let isMounted = true;
-
-        const loadDashboard = async () => {
-            if (isMounted) {
-                setIsLoadingDashboard(true);
-            }
-            try {
-                const response = await fetchClubDashboardData(id, dashboardMode);
-                if (isMounted) {
-                    setDashboardData(response);
-                }
-            } catch (error) {
-                console.error('Dashboard load error:', error);
-            } finally {
-                if (isMounted) {
-                    setIsLoadingDashboard(false);
-                }
-            }
-        };
-
-        void loadDashboard();
-        return () => {
-            isMounted = false;
-        };
-    }, [dashboardMode, id, initialDashboardLoaded, initialDashboardRequested, isCreate, shouldUseDashboard]);
-
-    useEffect(() => {
-        if (isCreate || !shouldUseDivisions) {
-            setLinkedDivisions([]);
-            setIsLoadingDivisions(false);
+    const loadDashboardForMode = useEffectEvent(async (mode: ClubDashboardMode) => {
+        if (isCreate) {
             return;
         }
 
-        setLinkedDivisions(initialDivisionsLoaded && initialDivisionsRequested ? filterVisibleDivisions(initialLinkedDivisions) : []);
-        setIsLoadingDivisions(!(initialDivisionsLoaded && initialDivisionsRequested));
-    }, [id, initialDivisionsLoaded, initialDivisionsRequested, initialLinkedDivisions, isCreate, shouldUseDivisions]);
+        setDashboardLoadingByMode((current) => ({ ...current, [mode]: true }));
+
+        try {
+            const response = await fetchClubDashboardData(id, mode);
+            setDashboardDataByMode((current) => ({ ...current, [mode]: response }));
+            setDashboardLoadedByMode((current) => ({ ...current, [mode]: true }));
+        } catch (error) {
+            console.error('Dashboard load error:', error);
+        } finally {
+            setDashboardLoadingByMode((current) => ({ ...current, [mode]: false }));
+        }
+    });
 
     useEffect(() => {
-        let isMounted = true;
+        const hasDashboardForCurrentTab = dashboardMode === 'summary'
+            ? (dashboardLoadedByMode.summary || dashboardLoadedByMode.operational)
+            : dashboardLoadedByMode.operational;
 
-        const loadLinkedDivisions = async (force = false) => {
-            if (isCreate || !shouldUseDivisions) {
-                if (isMounted) {
-                    setLinkedDivisions([]);
-                    setIsLoadingDivisions(false);
-                }
-                return;
-            }
-
-            if (!force && initialDivisionsLoaded && initialDivisionsRequested) {
-                return;
-            }
-
-            if (isMounted) {
-                setIsLoadingDivisions(true);
-            }
-
-            try {
-                const divisions = await fetchDivisions(id);
-                if (isMounted) {
-                    setLinkedDivisions(divisions.filter((division) => !division.is_family_division));
-                }
-            } catch (error) {
-                console.error('Division load error:', error);
-                if (isMounted) {
-                    setLinkedDivisions([]);
-                }
-            } finally {
-                if (isMounted) {
-                    setIsLoadingDivisions(false);
-                }
-            }
-        };
-
-        if (!(initialDivisionsLoaded && initialDivisionsRequested)) {
-            void loadLinkedDivisions();
+        if (isCreate || !shouldUseDashboard || hasDashboardForCurrentTab || dashboardLoadingByMode[dashboardMode]) {
+            return;
         }
 
+        void loadDashboardForMode(dashboardMode);
+    }, [
+        currentTab,
+        dashboardLoadedByMode.operational,
+        dashboardLoadedByMode.summary,
+        dashboardLoadingByMode,
+        dashboardMode,
+        isCreate,
+        shouldUseDashboard,
+    ]);
+
+    const loadLinkedDivisions = useEffectEvent(async (force = false) => {
+        if (isCreate) {
+            return;
+        }
+
+        if (!force && divisionsLoaded) {
+            return;
+        }
+
+        setIsFetchingDivisions(true);
+
+        try {
+            const divisions = await fetchDivisions(id);
+            setLinkedDivisions(filterVisibleDivisions(divisions));
+            setDivisionsLoaded(true);
+        } catch (error) {
+            console.error('Division load error:', error);
+            if (!divisionsLoaded) {
+                setLinkedDivisions([]);
+            }
+            setDivisionsLoaded(false);
+        } finally {
+            setIsFetchingDivisions(false);
+        }
+    });
+
+    useEffect(() => {
+        if (isCreate || !shouldUseDivisions || divisionsLoaded || isFetchingDivisions) {
+            return;
+        }
+
+        void loadLinkedDivisions();
+    }, [divisionsLoaded, id, isCreate, isFetchingDivisions, shouldUseDivisions]);
+
+    useEffect(() => {
         const refreshDivisions = () => {
             void loadLinkedDivisions(true);
         };
 
         window.addEventListener('club:divisions-updated', refreshDivisions);
         return () => {
-            isMounted = false;
             window.removeEventListener('club:divisions-updated', refreshDivisions);
         };
-    }, [id, initialDivisionsLoaded, initialDivisionsRequested, isCreate, shouldUseDivisions]);
+    }, [id]);
+
+    useEffect(() => {
+        const warmClubTabs = () => {
+            void import('./ClubSquadsTab');
+            void import('./ClubFixtureResultsTab');
+            void import('./ClubPerformanceTab');
+            void import('./ClubEntrenamientosTab');
+            void import('./ClubCompetitionsPanel');
+        };
+
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        if ('requestIdleCallback' in window) {
+            const idleId = window.requestIdleCallback(warmClubTabs);
+            return () => window.cancelIdleCallback(idleId);
+        }
+
+        const timeoutId = setTimeout(warmClubTabs, 1200);
+        return () => clearTimeout(timeoutId);
+    }, []);
+
+    const navigateToClubTab = (tabId: ClubManageTabId) => {
+        if (tabId === currentTab) {
+            return;
+        }
+
+        startTransition(() => {
+            setCurrentTab(tabId);
+        });
+
+        pushClubManageHistoryState(id, tabId, navigationMode);
+    };
+
+    const summaryDashboardData = dashboardDataByMode.summary ?? dashboardDataByMode.operational ?? EMPTY_CLUB_DASHBOARD_OVERVIEW;
+    const operationalDashboardData = dashboardDataByMode.operational ?? EMPTY_CLUB_DASHBOARD_OVERVIEW;
+    const isLoadingSummaryDashboard = !dashboardLoadedByMode.summary
+        && !dashboardLoadedByMode.operational
+        && dashboardLoadingByMode.summary;
+    const isLoadingOperationalDashboard = !dashboardLoadedByMode.operational
+        && dashboardLoadingByMode.operational;
+    const isLoadingDivisions = !divisionsLoaded && isFetchingDivisions;
 
     const unionName = unions.find((union) => union.id === form.union_id)?.name;
     const legacyCategories = form.categories || [];
@@ -378,19 +541,20 @@ export function ClubManageShell({
         )
     );
     const configuredSportLabel = formatSportLabel(form.sport);
+    const currentManagedClub = managedClubs.find((club) => club.id === id) ?? null;
     const primarySportLabel = linkedSports.length > 1
         ? 'Multideporte'
         : linkedSports[0] || configuredSportLabel || (legacyCategories.length > 0 ? 'Rugby' : 'Deporte');
     const squadCount = linkedDivisions.length > 0 ? linkedDivisions.length : legacyCategories.length;
-    const competitionCount = dashboardData.competitions.length;
+    const competitionCount = summaryDashboardData.competitions.length;
+    const clubDisplayName = form.name || currentManagedClub?.name || 'Club';
 
     const summaryMetrics = {
         teams: squadCount,
-        upcomingMatches: dashboardData.stats.upcomingMatches,
-        competitions: dashboardData.stats.tournaments || competitionCount,
-        standings: dashboardData.standings.length,
+        upcomingMatches: summaryDashboardData.stats.upcomingMatches,
+        competitions: summaryDashboardData.stats.tournaments || competitionCount,
+        standings: summaryDashboardData.standings.length,
     };
-    const currentManagedClub = managedClubs.find((club) => club.id === id) ?? null;
     const clubFamilyCount = currentManagedClub
         ? managedClubs.filter((club) => club.familyRootId === currentManagedClub.familyRootId).length
         : managedClubs.length;
@@ -427,7 +591,7 @@ export function ClubManageShell({
 
     async function handleSave() {
         if (!form.name?.trim()) {
-            alert('El nombre del club es obligatorio');
+            setToast({ message: 'El nombre del club es obligatorio', type: 'error' });
             return;
         }
 
@@ -452,13 +616,14 @@ export function ClubManageShell({
                 throw new Error(buildSaveErrorMessage(payload));
             }
 
-            setForm(payload.data.core as ClubRow);
+            setForm(payload.data.core as unknown as ClubRow);
             setIsDirty(false);
             window.dispatchEvent(new CustomEvent('club:save-success'));
             router.refresh();
+            setToast({ message: 'Cambios guardados correctamente', type: 'success' });
         } catch (error) {
             console.error('Save error:', error);
-            alert(`Error al guardar: ${error instanceof Error ? error.message : String(error)}`);
+            setToast({ message: `Error al guardar: ${error instanceof Error ? error.message : String(error)}`, type: 'error' });
         } finally {
             setIsSaving(false);
         }
@@ -484,39 +649,65 @@ export function ClubManageShell({
                                 managedClubs={managedClubs}
                                 currentClubId={id}
                                 primarySportLabel={primarySportLabel}
+                                navigationMode={navigationMode}
+                                onTabChange={navigateToClubTab}
                             />
                         </Suspense>
                     </aside>
 
                     <main className="club-admin-main">
-                        <ClubManageHeader
-                            id={id}
-                            data={form}
-                            sportLabel={primarySportLabel}
-                            isDirty={isDirty}
-                            isSaving={isSaving}
-                            onSave={handleSave}
-                            unionName={unionName}
-                            managedClubs={managedClubs}
+                        <ClubMobileConsole
+                            currentTab={currentTab}
                             currentClubId={id}
-                            familyClubCount={clubFamilyCount}
+                            managedClubs={managedClubs}
+                            primarySportLabel={primarySportLabel}
+                            navigationMode={navigationMode}
+                            onTabChange={navigateToClubTab}
                         />
+
+                        <div className={`club-main-header-shell${currentTab === 'general' ? ' is-general' : ''}`}>
+                            <ClubManageHeader
+                                id={id}
+                                data={form}
+                                sportLabel={primarySportLabel}
+                                isDirty={isDirty}
+                                isSaving={isSaving}
+                                onSave={handleSave}
+                                unionName={unionName}
+                                managedClubs={managedClubs}
+                                currentClubId={id}
+                                familyClubCount={clubFamilyCount}
+                            />
+                        </div>
 
                         <div className="club-main-grid">
                             <section className="club-workspace">
                                 <div className="content-area">
                                     {currentTab === 'general' ? (
                                         <>
-                                            <div className="card col-12">
+                                            <ClubMobileGeneralOverview
+                                                clubId={id}
+                                                clubName={clubDisplayName}
+                                                sportLabel={primarySportLabel}
+                                                divisions={linkedDivisions}
+                                                health={summaryDashboardData.health}
+                                                upcomingMatches={summaryMetrics.upcomingMatches}
+                                                nextMatch={summaryDashboardData.upcomingMatches[0] ?? null}
+                                                navigationMode={navigationMode}
+                                                onTabChange={navigateToClubTab}
+                                            />
+
+                                            <div className="card col-12 club-general-hero-card">
                                                 <ClubSummaryHero
                                                     data={form}
                                                     unionName={unionName}
                                                     sportLabel={primarySportLabel}
                                                     metrics={summaryMetrics}
+                                                    onTabChange={navigateToClubTab}
                                                 />
                                             </div>
 
-                                            <div className="card col-7">
+                                            <div className="card col-7 club-general-card-squads">
                                                 <ClubSquadsCard
                                                     divisions={linkedDivisions}
                                                     fallbackCategories={legacyCategories}
@@ -524,34 +715,34 @@ export function ClubManageShell({
                                                 />
                                             </div>
 
-                                            <div className="card col-5">
-                                                <ClubDataHealthCard health={dashboardData.health} />
+                                            <div className="card col-5 club-general-card-health">
+                                                <ClubDataHealthCard health={summaryDashboardData.health} />
                                             </div>
 
-                                            <div className="card col-8">
+                                            <div className="card col-8 club-general-card-matches">
                                                 <ClubNextMatchesCard
                                                     categories={divisionFilterOptions}
-                                                    matches={dashboardData.upcomingMatches}
-                                                    loading={isLoadingDashboard}
+                                                    matches={summaryDashboardData.upcomingMatches}
+                                                    loading={isLoadingSummaryDashboard}
                                                 />
                                             </div>
 
-                                            <div className="card col-4">
+                                            <div className="card col-4 club-general-card-standings">
                                                 <ClubStandingsCard
                                                     clubId={id}
-                                                    tournamentName={dashboardData.standings[0]?.tournamentName}
-                                                    standings={dashboardData.standings.map((standing) => ({
+                                                    tournamentName={summaryDashboardData.standings[0]?.tournamentName}
+                                                    standings={summaryDashboardData.standings.map((standing) => ({
                                                         pos: standing.position ?? 0,
                                                         label: standing.tournamentName,
                                                         row_id: `${standing.tournamentId}-${standing.phaseId || 'base'}-${standing.groupId || 'all'}`,
                                                         pj: standing.played,
                                                         pts: standing.points,
                                                     }))}
-                                                    loading={isLoadingDashboard}
+                                                    loading={isLoadingSummaryDashboard}
                                                 />
                                             </div>
 
-                                            <div className="card col-12 club-surface-band">
+                                            <div className="card col-12 club-surface-band club-general-card-band">
                                                 <div className="club-surface-band-copy">
                                                     <span className="club-ui-pill">Sistema operativo del club</span>
                                                     <h3>La operacion del club vive en un solo tablero.</h3>
@@ -578,15 +769,9 @@ export function ClubManageShell({
                                         </>
                                     ) : null}
 
-                                                                        {currentTab === 'equipos' ? (
-                                        <div className="card col-12">
-                                            <ClubIdentityTab id={id} data={form as ClubRow} unions={unions} />
-                                        </div>
-                                    ) : null}
-
-                                    {currentTab === 'planteles' ? (
-                                        <div className="col-12">
-                                            <ClubSquadsTab
+                                    {currentTab === 'planteles' || mountedTabs.includes('planteles') ? (
+                                        <div className="col-12" hidden={currentTab !== 'planteles'}>
+                                            <DynamicClubSquadsTab
                                                 id={id}
                                                 data={form as ClubRow}
                                                 navigationMode={navigationMode}
@@ -598,60 +783,61 @@ export function ClubManageShell({
                                         </div>
                                     ) : null}
 
-                                    {currentTab === 'competencias' ? (
-                                        <div className="card col-12">
-                                            <ClubCompetitionsPanel
-                                                competitions={dashboardData.competitions}
-                                                standings={dashboardData.standings}
-                                                matches={dashboardData.matches}
+                                    {currentTab === 'competencias' || mountedTabs.includes('competencias') ? (
+                                        <div className="card col-12" hidden={currentTab !== 'competencias'}>
+                                            <DynamicClubCompetitionsPanel
+                                                competitions={summaryDashboardData.competitions}
+                                                standings={summaryDashboardData.standings}
+                                                matches={summaryDashboardData.matches}
                                                 clubName={form.name || currentManagedClub?.name || 'el club'}
-                                                loading={isLoadingDashboard}
+                                                loading={isLoadingSummaryDashboard}
                                             />
                                         </div>
                                     ) : null}
 
-                                    {currentTab === 'rendimiento' ? (
-                                        <div className="col-12">
-                                            <ClubPerformanceTab
+                                    {currentTab === 'rendimiento' || mountedTabs.includes('rendimiento') ? (
+                                        <div className="col-12" hidden={currentTab !== 'rendimiento'}>
+                                            <DynamicClubPerformanceTab
                                                 clubId={id}
                                                 clubName={form.name || currentManagedClub?.name || 'Club'}
                                                 sport={form.sport}
                                                 divisions={linkedDivisions}
                                                 players={initialPlayers ?? []}
                                                 staff={initialStaff ?? []}
-                                                dashboardData={dashboardData}
-                                                loading={isLoadingDashboard || isLoadingDivisions}
+                                                dashboardData={summaryDashboardData}
+                                                loading={isLoadingSummaryDashboard || isLoadingDivisions}
+                                                onTabChange={navigateToClubTab}
                                             />
                                         </div>
                                     ) : null}
 
-                                    {currentTab === 'partidos' ? (
-                                        <div className="card col-12">
-                                            <ClubFixtureResultsTab
+                                    {currentTab === 'partidos' || mountedTabs.includes('partidos') ? (
+                                        <div className="card col-12" hidden={currentTab !== 'partidos'}>
+                                            <DynamicClubFixtureResultsTab
                                                 clubId={id}
                                                 clubName={form.name || currentManagedClub?.name || 'Club'}
                                                 divisions={linkedDivisions}
-                                                upcomingMatches={dashboardData.upcomingMatches}
-                                                recentMatches={dashboardData.recentMatches}
-                                                pastMatches={dashboardData.pastMatches}
-                                                loading={isLoadingDashboard}
+                                                upcomingMatches={operationalDashboardData.upcomingMatches}
+                                                recentMatches={operationalDashboardData.recentMatches}
+                                                pastMatches={operationalDashboardData.pastMatches}
+                                                loading={isLoadingOperationalDashboard}
                                             />
                                         </div>
                                     ) : null}
 
-                                    {currentTab === 'contenido' ? (
-                                        <div className="col-12">
-                                            <ClubContentStudioTab
+                                    {currentTab === 'contenido' || mountedTabs.includes('contenido') ? (
+                                        <div className="col-12" hidden={currentTab !== 'contenido'}>
+                                            <DynamicClubContentStudioTab
                                                 data={form}
-                                                upcomingMatches={dashboardData.upcomingMatches}
-                                                standings={dashboardData.standings}
+                                                upcomingMatches={summaryDashboardData.upcomingMatches}
+                                                standings={summaryDashboardData.standings}
                                             />
                                         </div>
                                     ) : null}
 
                                     {currentTab === 'pizarra' ? (
                                         <div className="card col-12 club-pizarra-card">
-                                            <ClubPizarraTab
+                                            <DynamicClubPizarraTab
                                                 key={`${id}:${form.sport ?? 'rugby'}`}
                                                 clubId={id}
                                                 sport={form.sport}
@@ -659,37 +845,29 @@ export function ClubManageShell({
                                                 clubName={form.name || currentManagedClub?.name || 'Club'}
                                                 backHref={pizarraBackHref}
                                                 mobileCanvasFirst={isPizarraFocus}
+                                                onBack={() => navigateToClubTab('general')}
                                             />
                                         </div>
                                     ) : null}
 
-                                    {currentTab === 'sponsors' ? (
-                                        <div className="col-12">
-                                            <ClubSponsorsTab
-                                                clubId={id}
-                                                initialSponsors={initialSponsors}
-                                                initialSponsorsLoaded={initialSponsorsLoaded}
-                                            />
-                                        </div>
-                                    ) : null}
-
-                                    {currentTab === 'entrenamientos' ? (
-                                        <div className="col-12">
-                                            <ClubEntrenamientosTab
+                                    {currentTab === 'entrenamientos' || mountedTabs.includes('entrenamientos') ? (
+                                        <div className="col-12" hidden={currentTab !== 'entrenamientos'}>
+                                            <DynamicClubEntrenamientosTab
                                                 clubId={id}
                                                 clubName={form.name || currentManagedClub?.name || 'Club'}
                                                 sport={form.sport}
                                                 divisions={linkedDivisions}
                                                 players={initialPlayers ?? []}
                                                 staff={initialStaff ?? []}
-                                                dashboardData={dashboardData}
-                                                loading={isLoadingDashboard || isLoadingDivisions}
+                                                dashboardData={summaryDashboardData}
+                                                loading={isLoadingSummaryDashboard || isLoadingDivisions}
+                                                onTabChange={navigateToClubTab}
                                             />
                                         </div>
                                     ) : null}
 
-                                    {currentTab === 'configuracion' ? (
-                                        <>
+                                    {currentTab === 'configuracion' || mountedTabs.includes('configuracion') ? (
+                                        <div hidden={currentTab !== 'configuracion'}>
                                             <div className="card col-12">
                                                 <ClubIdentityTab id={id} data={form as ClubRow} unions={unions} />
                                             </div>
@@ -716,7 +894,15 @@ export function ClubManageShell({
                                                     </div>
                                                 </div>
                                             </div>
-                                        </>
+
+                                            <div className="card col-12">
+                                                <ClubSponsorsTab
+                                                    clubId={id}
+                                                    initialSponsors={initialSponsors}
+                                                    initialSponsorsLoaded={initialSponsorsLoaded}
+                                                />
+                                            </div>
+                                        </div>
                                     ) : null}
                                 </div>
                             </section>
@@ -725,6 +911,15 @@ export function ClubManageShell({
                     </main>
                 </div>
             </div>
+            {toast && (
+                <div className="club-admin-toast-container">
+                    <ClubAdminToast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(null)}
+                    />
+                </div>
+            )}
         </ClubContext.Provider>
     );
 }

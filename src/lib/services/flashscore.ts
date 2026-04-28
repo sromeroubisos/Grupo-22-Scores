@@ -365,9 +365,7 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
     const finalMatch: Match = {
         id: evt.match_id || evt.event_key || `fs-${Math.random()}`,
         tournamentId: `fs-${context.leagueId || 'unknown'}`,
-        // @ts-ignore
         leagueName: context.leagueName,
-        // @ts-ignore
         countryName: context.countryName,
 
         phaseId: 'group',

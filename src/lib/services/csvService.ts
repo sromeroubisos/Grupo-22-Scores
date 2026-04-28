@@ -102,14 +102,15 @@ export async function importPeopleFromCSV(clubId: string, rows: CSVRow[]): Promi
                 force_create_new: row.force_create_new,
             });
 
-            if (res.success) {
-                importedCount++;
-            } else {
+            if (res.success === false) {
+                const fallbackError = res.error;
                 errors.push(
                     res.code === 'identity_confirmation_required'
                         ? `Error en ${row.first_name} ${row.last_name}: requiere confirmacion manual por homonimo.`
-                        : `Error en ${row.first_name} ${row.last_name}: ${res.error}`
+                        : `Error en ${row.first_name} ${row.last_name}: ${fallbackError}`
                 );
+            } else {
+                importedCount++;
             }
         } catch (err) {
             errors.push(`Excepción en ${row.first_name} ${row.last_name}: ${String(err)}`);

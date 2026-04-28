@@ -27,7 +27,7 @@ export async function getClubSponsors(clubId: string): Promise<ClubSponsorItem[]
         return [];
     }
 
-    const admin = createAdminClient() as never;
+    const admin = createAdminClient();
     const { data, error } = await admin
         .from('club_sponsors')
         .select('id, name, tier, status, placement, logo_url, website, notes')

@@ -1090,7 +1090,10 @@ export function TournamentEditor({
         setIsCreatingOrganizerInline(true);
         setMessage('');
         try {
-            const unionResult = await createEntity('union', { name: trimmedName });
+            const unionResult = await createEntitySafe('union', { name: trimmedName });
+            if (unionResult.success === false) {
+                throw new Error(unionResult.error);
+            }
             const createdUnion = { id: unionResult.id, name: trimmedName };
 
             setAvailableUnions((prev) =>
@@ -1271,7 +1274,7 @@ export function TournamentEditor({
             };
             if (isCreate) {
                 const result = await createEntitySafe('tournament', payload);
-                if (!result.success) {
+                if (result.success === false) {
                     throw new Error(result.error);
                 }
                 await syncTournamentPhases(result.id, ruleset.phases);
@@ -1280,7 +1283,7 @@ export function TournamentEditor({
                 router.push(`/admin/entities/${result.id}/manage?type=tournament&tab=resumen`);
             } else {
                 const result = await updateEntitySafe('tournament', id, payload);
-                if (!result.success) {
+                if (result.success === false) {
                     throw new Error(result.error);
                 }
                 await syncTournamentPhases(id, ruleset.phases);

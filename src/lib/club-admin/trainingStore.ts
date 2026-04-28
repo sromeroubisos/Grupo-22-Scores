@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAdminClient } from '@/lib/supabase/admin';
 import { APP_TIMEZONE, ensureUtcDateTimeString } from '@/lib/timezone';
 import type {
@@ -100,18 +99,18 @@ function normalizeInteger(
     return Math.min(max, Math.max(min, Math.round(numeric)));
 }
 
-function normalizeTrainingType(value: unknown): TrainingType {
+function parsePersistedTrainingType(value: unknown): TrainingType | null {
     const normalized = normalizeText(value);
     return TRAINING_TYPES.has(normalized as TrainingType)
         ? normalized as TrainingType
-        : 'campo';
+        : null;
 }
 
-function normalizeTrainingStatus(value: unknown, fallback: TrainingStatus = 'planificado'): TrainingStatus {
+function parsePersistedTrainingStatus(value: unknown): TrainingStatus | null {
     const normalized = normalizeText(value);
     return TRAINING_STATUSES.has(normalized as TrainingStatus)
         ? normalized as TrainingStatus
-        : fallback;
+        : null;
 }
 
 function normalizeStaffNames(value: unknown) {
@@ -130,17 +129,22 @@ function normalizePlayersSnapshot(value: unknown): TrainingPlayer[] {
         return [];
     }
 
-    return value.flatMap((entry, index) => {
+    return value.flatMap((entry) => {
         if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
             return [];
         }
 
         const row = entry as Record<string, unknown>;
-        const name = normalizeText(row.name, `Jugador ${index + 1}`);
+        const id = normalizeText(row.id);
+        const name = normalizeText(row.name);
+        if (!id || !name) {
+            return [];
+        }
+
         return [{
-            id: normalizeText(row.id, `player-${index + 1}`),
+            id,
             name,
-            pos: normalizeText(row.pos, 'Sin puesto'),
+            pos: normalizeText(row.pos),
             divisionId: normalizeNullableText(row.divisionId),
             divisionName: normalizeNullableText(row.divisionName),
         }];
@@ -164,22 +168,23 @@ function normalizePlanBlocks(value: unknown): PlanBlock[] {
         return [];
     }
 
-    return value.flatMap((entry, index) => {
+    return value.flatMap((entry) => {
         if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
             return [];
         }
 
         const row = entry as Record<string, unknown>;
+        const id = normalizeText(row.id);
         const type = normalizeText(row.type);
-        if (!PLAN_BLOCK_TYPES.has(type as PlanBlockType)) {
+        if (!id || !PLAN_BLOCK_TYPES.has(type as PlanBlockType)) {
             return [];
         }
 
         return [{
-            id: normalizeText(row.id, `block-${index + 1}`),
+            id,
             type: type as PlanBlockType,
-            title: normalizeText(row.title, 'Bloque'),
-            duration: normalizeInteger(row.duration, 15, 1, 240),
+            title: normalizeText(row.title),
+            duration: normalizeInteger(row.duration, 0, 0, 240),
             notes: normalizeText(row.notes),
             intensity: normalizeNullableText(row.intensity) ?? undefined,
         }];
@@ -192,37 +197,81 @@ function normalizeEvaluation(value: unknown, defaultDuration: number): TrainingE
     }
 
     const row = value as Record<string, unknown>;
+    const rpe = Number(row.rpe);
+    const durationReal = Number(row.durationReal);
+    const loadTotal = Number(row.loadTotal);
+    const energy = Number(row.energy);
+    const fatigue = Number(row.fatigue);
+
+    if (
+        !Number.isFinite(rpe)
+        || !Number.isFinite(durationReal)
+        || !Number.isFinite(loadTotal)
+        || !Number.isFinite(energy)
+        || !Number.isFinite(fatigue)
+    ) {
+        return undefined;
+    }
+
     return {
-        rpe: normalizeInteger(row.rpe, 5, 1, 10),
-        durationReal: normalizeInteger(row.durationReal, defaultDuration, 1, 600),
-        loadTotal: normalizeInteger(row.loadTotal, 0, 0, 100000),
+        rpe: normalizeInteger(rpe, 0, 0, 10),
+        durationReal: normalizeInteger(durationReal, defaultDuration, 1, 600),
+        loadTotal: normalizeInteger(loadTotal, 0, 0, 100000),
         notes: normalizeText(row.notes),
-        energy: normalizeInteger(row.energy, 7, 1, 10),
-        fatigue: normalizeInteger(row.fatigue, 3, 1, 10),
+        energy: normalizeInteger(energy, 0, 0, 10),
+        fatigue: normalizeInteger(fatigue, 0, 0, 10),
         injuries: normalizeText(row.injuries),
     };
 }
 
 function mapRowToTrainingEntry(row: ClubTrainingRow): TrainingEntry {
     const players = normalizePlayersSnapshot(row.players_snapshot);
-    const duration = normalizeInteger(row.duration_minutes, 60, 1, 600);
+    const duration = normalizeInteger(row.duration_minutes, 0, 0, 600);
     const attendance = normalizeAttendance(row.attendance);
     const planBlocks = normalizePlanBlocks(row.plan_blocks);
     const sourceKey = normalizeNullableText(row.source_key);
-    const scheduledAt = ensureUtcDateTimeString(row.scheduled_at, APP_TIMEZONE) ?? new Date().toISOString();
+    const scheduledAt = ensureUtcDateTimeString(row.scheduled_at, APP_TIMEZONE);
+    const title = normalizeText(row.title);
+    const type = parsePersistedTrainingType(row.training_type);
+    const status = parsePersistedTrainingStatus(row.status);
+    const location = normalizeText(row.location);
+
+    if (!scheduledAt) {
+        throw new Error(`El entrenamiento ${row.id} no tiene una fecha valida en club_trainings.`);
+    }
+
+    if (!title) {
+        throw new Error(`El entrenamiento ${row.id} no tiene titulo real en club_trainings.`);
+    }
+
+    if (!type) {
+        throw new Error(`El entrenamiento ${row.id} tiene un training_type invalido en club_trainings.`);
+    }
+
+    if (!status) {
+        throw new Error(`El entrenamiento ${row.id} tiene un status invalido en club_trainings.`);
+    }
+
+    if (!location) {
+        throw new Error(`El entrenamiento ${row.id} no tiene ubicacion real en club_trainings.`);
+    }
+
+    if (duration <= 0) {
+        throw new Error(`El entrenamiento ${row.id} no tiene una duracion valida en club_trainings.`);
+    }
 
     return {
         id: sourceKey || row.id,
         persistedId: row.id,
         sourceKey,
-        sourceKind: normalizeNullableText(row.source_kind) ?? 'manual',
+        sourceKind: normalizeNullableText(row.source_kind),
         divisionId: normalizeNullableText(row.division_id),
-        title: normalizeText(row.title, 'Entrenamiento'),
+        title,
         date: scheduledAt,
         duration,
-        type: normalizeTrainingType(row.training_type),
-        location: normalizeText(row.location, 'Cancha principal'),
-        status: normalizeTrainingStatus(row.status),
+        type,
+        location,
+        status,
         objective: normalizeText(row.objective),
         staff: normalizeStaffNames(row.staff_names),
         convocados: normalizeInteger(row.convocados, players.length, 0, 200),
@@ -237,11 +286,40 @@ function mapRowToTrainingEntry(row: ClubTrainingRow): TrainingEntry {
 
 function mapTrainingToRow(clubId: string, training: TrainingEntry) {
     const players = normalizePlayersSnapshot(training.players ?? []);
-    const duration = normalizeInteger(training.duration, 60, 1, 600);
+    const duration = normalizeInteger(training.duration, 0, 0, 600);
     const scheduledAt = ensureUtcDateTimeString(training.date, APP_TIMEZONE);
+    const title = normalizeText(training.title);
+    const location = normalizeText(training.location);
+    const objective = normalizeText(training.objective);
+    const trainingType = parsePersistedTrainingType(training.type);
+    const trainingStatus = parsePersistedTrainingStatus(training.status);
 
     if (!scheduledAt) {
         throw new Error('Fecha de entrenamiento invalida');
+    }
+
+    if (!title) {
+        throw new Error('El entrenamiento necesita un titulo real.');
+    }
+
+    if (!location) {
+        throw new Error('El entrenamiento necesita una sede real.');
+    }
+
+    if (!objective) {
+        throw new Error('El entrenamiento necesita un objetivo real.');
+    }
+
+    if (duration <= 0) {
+        throw new Error('El entrenamiento necesita una duracion valida.');
+    }
+
+    if (!trainingType) {
+        throw new Error('El entrenamiento necesita un tipo valido.');
+    }
+
+    if (!trainingStatus) {
+        throw new Error('El entrenamiento necesita un estado valido.');
     }
 
     return {
@@ -250,13 +328,13 @@ function mapTrainingToRow(clubId: string, training: TrainingEntry) {
         source_kind: normalizeNullableText(training.sourceKind) ?? (training.sourceKey ? 'calendar' : 'manual'),
         source_match_id: normalizeNullableText(training.sourceMatchId),
         division_id: normalizeNullableText(training.divisionId),
-        title: normalizeText(training.title, 'Entrenamiento'),
+        title,
         scheduled_at: scheduledAt,
         duration_minutes: duration,
-        training_type: normalizeTrainingType(training.type),
-        status: normalizeTrainingStatus(training.status),
-        location: normalizeText(training.location, 'Cancha principal'),
-        objective: normalizeText(training.objective),
+        training_type: trainingType,
+        status: trainingStatus,
+        location,
+        objective,
         source_label: normalizeNullableText(training.sourceLabel),
         convocados: normalizeInteger(training.convocados, players.length, 0, 200),
         staff_names: normalizeStaffNames(training.staff),

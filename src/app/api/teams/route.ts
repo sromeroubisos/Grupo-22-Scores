@@ -30,6 +30,7 @@ import {
 import { fetchPeopleByClub, type PersonWithRole } from '@/lib/services/personService';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
@@ -502,6 +503,24 @@ function isMissingRelationError(error: unknown) {
     return isRecord(error) && typeof error.code === 'string' && MISSING_RELATION_CODES.has(error.code);
 }
 
+function mergeInternalMatchRows(...rowGroups: Array<InternalMatchRow[] | null | undefined>): InternalMatchRow[] {
+    const rowsById = new Map<string, InternalMatchRow>();
+
+    for (const group of rowGroups) {
+        for (const row of group ?? []) {
+            if (row?.id && !rowsById.has(row.id)) {
+                rowsById.set(row.id, row);
+            }
+        }
+    }
+
+    return Array.from(rowsById.values()).sort((left, right) => {
+        const leftTime = left.date_time ? new Date(left.date_time).getTime() : 0;
+        const rightTime = right.date_time ? new Date(right.date_time).getTime() : 0;
+        return rightTime - leftTime;
+    });
+}
+
 function calculateAge(birthDate?: string | null) {
     if (!birthDate) return null;
 
@@ -662,12 +681,19 @@ async function fetchInternalClubSquad(
     };
 
     try {
-        const { data: teams, error: teamsError } = await db
+        const teamsBaseQuery = () => db
             .from('club_teams')
             .select('id, legacy_division_id, name')
-            .eq('club_id', clubId)
+            .eq('club_id', clubId);
+        let { data: teams, error: teamsError } = await teamsBaseQuery()
             .order('featured', { ascending: false })
             .order('name');
+
+        if (teamsError && isMissingColumnError(teamsError, 'featured')) {
+            const fallback = await teamsBaseQuery().order('name');
+            teams = fallback.data;
+            teamsError = fallback.error;
+        }
 
         if (teamsError && !isMissingRelationError(teamsError)) {
             throw teamsError;
@@ -798,7 +824,6 @@ async function fetchInternalClubSquad(
             .from('club_divisions')
             .select('id, name')
             .eq('club_id', clubId)
-            .order('featured', { ascending: false })
             .order('name');
 
         if (divisionsError && !isMissingRelationError(divisionsError)) {
@@ -1052,19 +1077,23 @@ async function resolveInternalClubBySport(
 
     relatedIds.add(baseClubId);
 
-    try {
-        const { data: categoryCandidates } = await readClient
-            .from('clubs')
-            .select('*')
-            .contains('categories', [`base_club:${baseClubId}`]);
+    const shouldQueryLegacyCategories = Array.isArray(club.categories) && club.categories.length > 0;
 
-        (categoryCandidates ?? []).forEach((candidate: any) => {
-            if (candidate?.id) {
-                relatedIds.add(String(candidate.id));
-            }
-        });
-    } catch {
-        // Ignore and keep the current club.
+    if (shouldQueryLegacyCategories) {
+        try {
+            const { data: categoryCandidates } = await readClient
+                .from('clubs')
+                .select('*')
+                .contains('categories', [`base_club:${baseClubId}`]);
+
+            (categoryCandidates ?? []).forEach((candidate: any) => {
+                if (candidate?.id) {
+                    relatedIds.add(String(candidate.id));
+                }
+            });
+        } catch {
+            // Ignore and keep the current club.
+        }
     }
 
     const candidateIds = Array.from(relatedIds);
@@ -1263,7 +1292,7 @@ export async function GET(request: Request) {
             internalClubName = effectiveClub.name || '';
 
             // Query internal matches from Supabase
-            const { data: matchRows } = await readClient
+            const internalMatchesBaseQuery = () => readClient
                 .from('matches')
                 .select(`
                     id, date_time, status, score,
@@ -1271,11 +1300,25 @@ export async function GET(request: Request) {
                     home_club:clubs!matches_home_club_id_fkey(name, logo_url),
                     away_club:clubs!matches_away_club_id_fkey(name, logo_url),
                     tournament:tournaments(name, sport_id)
-                `)
-                .or(`home_club_id.eq.${effectiveClub.id},away_club_id.eq.${effectiveClub.id}`)
-                .order('date_time', { ascending: false });
+                `);
+            const [homeMatchesResult, awayMatchesResult] = await Promise.all([
+                internalMatchesBaseQuery()
+                    .eq('home_club_id', effectiveClub.id)
+                    .order('date_time', { ascending: false })
+                    .limit(300),
+                internalMatchesBaseQuery()
+                    .eq('away_club_id', effectiveClub.id)
+                    .order('date_time', { ascending: false })
+                    .limit(300),
+            ]);
 
-            const typedMatchRows = (matchRows ?? []) as InternalMatchRow[];
+            if (homeMatchesResult.error) throw homeMatchesResult.error;
+            if (awayMatchesResult.error) throw awayMatchesResult.error;
+
+            const typedMatchRows = mergeInternalMatchRows(
+                homeMatchesResult.data as InternalMatchRow[] | null,
+                awayMatchesResult.data as InternalMatchRow[] | null,
+            );
             if (typedMatchRows.length > 0) {
                 const FINISHED_STATUSES = new Set([
                     'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',

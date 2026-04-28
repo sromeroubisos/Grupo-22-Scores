@@ -455,15 +455,17 @@ async function loadClubFamily(
   }
 
   let categoryDerivedRows: ClubContextRow[] = [];
-  const { data: categoryDerivedClubs, error: categoryDerivedError } = await supabase
-    .from('clubs')
-    .select('*')
-    .contains('categories', [`base_club:${baseClubId}`]);
+  if (Array.isArray(currentClub.categories) && currentClub.categories.length > 0) {
+    const { data: categoryDerivedClubs, error: categoryDerivedError } = await supabase
+      .from('clubs')
+      .select('*')
+      .contains('categories', [`base_club:${baseClubId}`]);
 
-  if (!categoryDerivedError) {
-    categoryDerivedRows = (categoryDerivedClubs ?? []) as ClubContextRow[];
-  } else if (!isMissingClubCategoriesColumnError(categoryDerivedError)) {
-    throw new Error(categoryDerivedError.message);
+    if (!categoryDerivedError) {
+      categoryDerivedRows = (categoryDerivedClubs ?? []) as ClubContextRow[];
+    } else if (!isMissingClubCategoriesColumnError(categoryDerivedError)) {
+      throw new Error(categoryDerivedError.message);
+    }
   }
 
   const heuristicCandidates = relationRows.length === 0 && categoryDerivedRows.length === 0

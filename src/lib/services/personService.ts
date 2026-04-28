@@ -66,6 +66,9 @@ export type PersonMutationResult =
         success: true;
         data: any;
         reused_existing_person?: boolean;
+        error?: undefined;
+        code?: undefined;
+        matches?: undefined;
     }
     | {
         success: false;

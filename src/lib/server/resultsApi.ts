@@ -178,7 +178,7 @@ type ManualBonusResolution = {
 type PublishingPieceType = 'match_result' | 'match_schedule' | 'daily_matches' | 'standings';
 
 export type ResultsApiAuthResult =
-  | { ok: true }
+  | { ok: true; reason?: undefined }
   | { ok: false; reason: 'missing_secret' | 'unauthorized' };
 
 export class ResultsApiError extends Error {

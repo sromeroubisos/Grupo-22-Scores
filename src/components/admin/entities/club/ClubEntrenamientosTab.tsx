@@ -29,10 +29,10 @@ import {
 } from 'lucide-react';
 import { ClubTrainingCreateModal } from '@/components/admin/entities/club/ClubTrainingCreateModal';
 import type { ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
+import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
 import type { SavedPreset } from '@/lib/club-pizarra/types';
 import { buildSavedPresetsKey, loadSavedPresets, saveSavedPresets } from '@/lib/club-pizarra/persistence';
 import {
-    buildClubTrainingEntries,
     type AttendanceState,
     type PlanBlock,
     type PlanBlockType,
@@ -253,152 +253,6 @@ function isFuture(dateStr: string) {
     return d > now;
 }
 
-function _generateMockTrainings(): TrainingEntry[] {
-    const today = new Date();
-    const fmt = (d: Date) => d.toISOString();
-    const addDays = (n: number) => {
-        const d = new Date(today);
-        d.setDate(d.getDate() + n);
-        d.setHours(16, 30, 0, 0);
-        return d;
-    };
-
-    return [
-        {
-            id: 'tr-1',
-            title: 'Defensa Línea + Scrum',
-            date: fmt(addDays(0)),
-            duration: 90,
-            type: 'campo',
-            location: 'Cancha 1',
-            status: 'planificado',
-            objective: 'Trabajo de tackle frontal y salida de scrum',
-            staff: ['Juan Pérez', 'Martín López'],
-            convocados: 28,
-            plan: {
-                blocks: [
-                    { id: 'b1', type: 'warmup', title: 'Activación Dinámica + Bandas', duration: 15, notes: 'Foco en movilidad de cadera y activación de glúteo medio.' },
-                    { id: 'b2', type: 'tecnico', title: 'Drills de Tackling Frontal', duration: 30, notes: 'Circuito de 4 estaciones. Intensidad media-alta.', intensity: 'Media-Alta' },
-                    { id: 'b3', type: 'tactico', title: 'Defensa de Línea + Pizarra', duration: 25, notes: 'Revisar formación A vs formación B. Usar pizarra para mostrar ángulos de tackle.', intensity: 'Alta' },
-                    { id: 'b4', type: 'fisico', title: 'Scrum Machine + Empuje', duration: 15, notes: '5 series de 30 segundos. Carga controlada.', intensity: 'Alta' },
-                    { id: 'b5', type: 'cierre', title: 'Estiramientos y Feedback', duration: 5, notes: 'Foco en isquiotibiales y zona lumbar.' },
-                ],
-            },
-            attendance: {
-                'Jugador 1': 'confirmado',
-                'Jugador 2': 'confirmado',
-                'Jugador 3': 'dudoso',
-            },
-        },
-        {
-            id: 'tr-2',
-            title: 'Fuerza Explosiva A',
-            date: fmt(addDays(1)),
-            duration: 60,
-            type: 'gimnasio',
-            location: 'Gym Central',
-            status: 'planificado',
-            objective: 'Hipertrofia de tren inferior y core',
-            staff: ['Diego García'],
-            convocados: 32,
-        },
-        {
-            id: 'tr-3',
-            title: 'Análisis de Rival - Video',
-            date: fmt(addDays(2)),
-            duration: 45,
-            type: 'video',
-            location: 'Sala de video',
-            status: 'planificado',
-            objective: 'Revisar últimos 3 partidos del rival',
-            staff: ['Juan Pérez'],
-            convocados: 25,
-        },
-        {
-            id: 'tr-4',
-            title: 'Recuperación Activa',
-            date: fmt(addDays(-1)),
-            duration: 45,
-            type: 'recuperacion',
-            location: 'Cancha 2',
-            status: 'finalizado',
-            objective: 'Bajar carga acumulada previa al fin de semana',
-            staff: ['Martín López'],
-            convocados: 30,
-            plan: {
-                blocks: [
-                    { id: 'b1', type: 'warmup', title: 'Trote suave + movilidad', duration: 10, notes: '' },
-                    { id: 'b2', type: 'fisico', title: 'Pilates de campo', duration: 25, notes: 'Trabajo de core y estabilidad.', intensity: 'Baja' },
-                    { id: 'b3', type: 'cierre', title: 'Masaje grupal y charla', duration: 10, notes: '' },
-                ],
-            },
-            evaluation: {
-                rpe: 4,
-                durationReal: 42,
-                loadTotal: 340,
-                notes: 'Buena respuesta del grupo. Todos completaron.',
-                energy: 8,
-                fatigue: 3,
-                injuries: 'Ninguna',
-            },
-            attendance: {
-                'Jugador 1': 'confirmado',
-                'Jugador 2': 'confirmado',
-                'Jugador 3': 'confirmado',
-            },
-        },
-        {
-            id: 'tr-5',
-            title: 'Ataque - Patrones de juego',
-            date: fmt(addDays(-3)),
-            duration: 90,
-            type: 'campo',
-            location: 'Cancha 1',
-            status: 'sin_evaluar',
-            objective: 'Patrones 1-3-2 y kick de ataque',
-            staff: ['Juan Pérez'],
-            convocados: 26,
-            plan: {
-                blocks: [
-                    { id: 'b1', type: 'warmup', title: 'Juegos de habilidad', duration: 15, notes: '' },
-                    { id: 'b2', type: 'tecnico', title: 'Pase en movimiento', duration: 20, notes: '' },
-                    { id: 'b3', type: 'tactico', title: 'Patrón 1-3-2 y variantes', duration: 35, notes: 'Usar pizarra para diagramar las variantes.', intensity: 'Alta' },
-                    { id: 'b4', type: 'fisico', title: 'Sprints con balón', duration: 15, notes: '', intensity: 'Máxima' },
-                    { id: 'b5', type: 'cierre', title: 'Cool down', duration: 5, notes: '' },
-                ],
-            },
-            attendance: {
-                'Jugador 1': 'confirmado',
-                'Jugador 2': 'ausente',
-                'Jugador 3': 'confirmado',
-            },
-        },
-        {
-            id: 'tr-6',
-            title: 'HIIT - Circuito metabólico',
-            date: fmt(addDays(-5)),
-            duration: 50,
-            type: 'gimnasio',
-            location: 'Gym Central',
-            status: 'finalizado',
-            objective: 'Mantener capacidad anaeróbica',
-            staff: ['Diego García'],
-            convocados: 28,
-            evaluation: {
-                rpe: 8,
-                durationReal: 48,
-                loadTotal: 520,
-                notes: 'Muy exigente. 2 jugadores con fatiga alta.',
-                energy: 6,
-                fatigue: 7,
-                injuries: 'Dolor lumbar leve - Jugador 5',
-            },
-        },
-    ];
-}
-
-void _generateMockTrainings;
-
 function inferOperationalState(entry: TrainingEntry) {
     const hasPlan = (entry.plan?.blocks.length || 0) > 0;
     const hasAttendance = entry.attendance && Object.keys(entry.attendance).length > 0;
@@ -463,6 +317,7 @@ interface ClubEntrenamientosTabProps {
     staff: PersonWithRole[];
     dashboardData: ClubDashboardOverview;
     loading?: boolean;
+    onTabChange?: (tabId: ClubManageTabId) => void;
 }
 
 export function ClubEntrenamientosTab({
@@ -474,13 +329,9 @@ export function ClubEntrenamientosTab({
     staff,
     dashboardData,
     loading = false,
+    onTabChange,
 }: ClubEntrenamientosTabProps) {
-    const baseTrainings = useMemo(
-        () => buildClubTrainingEntries({ dashboard: dashboardData, divisions, players, staff }),
-        [dashboardData, divisions, players, staff]
-    );
-    const [trainingEdits, setTrainingEdits] = useState<Record<string, Partial<TrainingEntry>>>({});
-    const [manualTrainings, setManualTrainings] = useState<TrainingEntry[]>([]);
+    const [trainings, setTrainings] = useState<TrainingEntry[]>([]);
     const [activeSegment, setActiveSegment] = useState<TrainingSegment>('today');
     const [operationalFilter, setOperationalFilter] = useState<TrainingOperationalFilter>('all');
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -492,34 +343,22 @@ export function ClubEntrenamientosTab({
     const [persistError, setPersistError] = useState<string | null>(null);
     const [savingTrainingId, setSavingTrainingId] = useState<string | null>(null);
     const [deletingTrainingId, setDeletingTrainingId] = useState<string | null>(null);
-    const [hiddenTrainingKeys, setHiddenTrainingKeys] = useState<string[]>([]);
-    const baseTrainingIds = useMemo(() => new Set(baseTrainings.map((training) => training.id)), [baseTrainings]);
-    const trainings = useMemo(
-        () => sortTrainingsByDate([
-            ...baseTrainings
-                .filter((training) => !hiddenTrainingKeys.includes(training.id))
-                .map((training) => ({
-                ...training,
-                ...(trainingEdits[training.id] ?? {}),
-            })),
-            ...manualTrainings,
-        ]),
-        [baseTrainings, hiddenTrainingKeys, manualTrainings, trainingEdits]
-    );
     const connectedSummary = useMemo(() => {
-        const sourceMatches = new Set(
-            baseTrainings
-                .map((training) => training.sourceMatchId)
-                .filter((matchId): matchId is string => Boolean(matchId))
-        );
+        const fragments = [
+            `${players.length} jugadores`,
+            `${staff.length} integrantes de staff`,
+        ];
 
-        return `${sourceMatches.size} partidos del calendario · ${players.length} jugadores · ${staff.length} integrantes de staff`;
-    }, [baseTrainings, players.length, staff.length]);
+        if (divisions.length > 0) {
+            fragments.unshift(`${divisions.length} equipos vinculados`);
+        }
+
+        return fragments.join(' / ');
+    }, [divisions.length, players.length, staff.length]);
 
     useEffect(() => {
-        setTrainingEdits({});
-        setManualTrainings([]);
-        setHiddenTrainingKeys([]);
+        setTrainings([]);
+        setDetailOpen(null);
         setPersistError(null);
     }, [clubId]);
 
@@ -553,42 +392,22 @@ export function ClubEntrenamientosTab({
                 }
 
                 const persistedTrainings = Array.isArray(payload.data)
-                    ? payload.data.filter(isTrainingEntryPayload)
+                    ? payload.data
+                        .filter(isTrainingEntryPayload)
+                        .filter((training) => !isHiddenTraining(training))
                     : [];
 
                 if (cancelled) {
                     return;
                 }
 
-                const nextEdits: Record<string, Partial<TrainingEntry>> = {};
-                const nextManualTrainings: TrainingEntry[] = [];
-                const nextHiddenTrainingKeys = new Set<string>();
-
-                persistedTrainings.forEach((training) => {
-                    const baseKey = training.sourceKey || training.id;
-
-                    if (isHiddenTraining(training)) {
-                        nextHiddenTrainingKeys.add(baseKey);
-                        return;
-                    }
-
-                    if (baseTrainingIds.has(baseKey)) {
-                        nextEdits[baseKey] = training;
-                        return;
-                    }
-
-                    nextManualTrainings.push(training);
-                });
-
-                setTrainingEdits(nextEdits);
-                setManualTrainings(sortTrainingsByDate(nextManualTrainings));
-                setHiddenTrainingKeys(Array.from(nextHiddenTrainingKeys));
+                setTrainings(sortTrainingsByDate(persistedTrainings));
                 setDetailOpen((current) => {
                     if (!current) {
                         return current;
                     }
 
-                    return persistedTrainings.find((training) => !isHiddenTraining(training) && matchesTrainingIdentity(training, current)) ?? current;
+                    return persistedTrainings.find((training) => matchesTrainingIdentity(training, current)) ?? null;
                 });
             } catch (error) {
                 if (!cancelled) {
@@ -610,37 +429,23 @@ export function ClubEntrenamientosTab({
         return () => {
             cancelled = true;
         };
-    }, [baseTrainingIds, clubId]);
+    }, [clubId]);
 
     const applyPersistedTraining = (training: TrainingEntry) => {
-        const baseKey = training.sourceKey || training.id;
+        const nextVisibleTraining = isHiddenTraining(training) ? null : training;
 
-        if (baseTrainingIds.has(baseKey)) {
-            setTrainingEdits((prev) => ({
-                ...prev,
-                [baseKey]: training,
-            }));
-            setManualTrainings((prev) => prev.filter((entry) => !matchesTrainingIdentity(entry, training)));
-        } else {
-            setManualTrainings((prev) => sortTrainingsByDate([
-                ...prev.filter((entry) => !matchesTrainingIdentity(entry, training)),
-                training,
-            ]));
-
-            setTrainingEdits((prev) => {
-                if (!prev[baseKey]) {
-                    return prev;
-                }
-
-                const next = { ...prev };
-                delete next[baseKey];
-                return next;
-            });
-        }
+        setTrainings((current) => (
+            nextVisibleTraining
+                ? sortTrainingsByDate([
+                    ...current.filter((entry) => !matchesTrainingIdentity(entry, training)),
+                    nextVisibleTraining,
+                ])
+                : current.filter((entry) => !matchesTrainingIdentity(entry, training))
+        ));
 
         setDetailOpen((current) => (
             current && matchesTrainingIdentity(current, training)
-                ? training
+                ? nextVisibleTraining
                 : current
         ));
     };
@@ -723,20 +528,7 @@ export function ClubEntrenamientosTab({
                 );
             }
 
-            const baseKey = training.sourceKey || training.id;
-            setHiddenTrainingKeys((prev) => (
-                prev.includes(baseKey) ? prev : [...prev, baseKey]
-            ));
-            setManualTrainings((prev) => prev.filter((entry) => !matchesTrainingIdentity(entry, training)));
-            setTrainingEdits((prev) => {
-                if (!prev[baseKey]) {
-                    return prev;
-                }
-
-                const next = { ...prev };
-                delete next[baseKey];
-                return next;
-            });
+            setTrainings((current) => current.filter((entry) => !matchesTrainingIdentity(entry, training)));
             setDetailOpen((current) => (
                 current && matchesTrainingIdentity(current, training)
                     ? null
@@ -981,9 +773,11 @@ export function ClubEntrenamientosTab({
                 {filtered.length === 0 ? (
                     <div className="club-matches-empty">
                         {(loading || persistLoading) && trainings.length === 0
-                            ? 'Conectando la agenda real del club...'
-                            : trainings.length === 0
-                                ? 'Todavia no hay sesiones derivadas desde el calendario del club. Podes crear una manual o cargar mas partidos.'
+                            ? 'Cargando entrenamientos del club...'
+                            : persistError && trainings.length === 0
+                                ? 'No se pudieron cargar los entrenamientos del club.'
+                                : trainings.length === 0
+                                ? 'No hay entrenamientos cargados.'
                                 : 'No encontramos entrenamientos para los filtros actuales.'}
                     </div>
                 ) : null}
@@ -1177,6 +971,7 @@ export function ClubEntrenamientosTab({
                     onSaveEntry={handleSaveTrainingEntry}
                     onDeleteTraining={handleDeleteTraining}
                     onDuplicateTraining={handleDuplicateTraining}
+                    onTabChange={onTabChange}
                 />
             )}
         </div>
@@ -1251,20 +1046,6 @@ function TrainingDetailModal({
         });
     };
 
-    const mockPlayers = [
-        { name: 'Jugador 1', pos: 'Pilar' },
-        { name: 'Jugador 2', pos: 'Hooker' },
-        { name: 'Jugador 3', pos: 'Segunda' },
-        { name: 'Jugador 4', pos: 'Ala' },
-        { name: 'Jugador 5', pos: 'Número 8' },
-        { name: 'Jugador 6', pos: 'Medio scrum' },
-        { name: 'Jugador 7', pos: 'Apertura' },
-        { name: 'Jugador 8', pos: 'Centro' },
-        { name: 'Jugador 9', pos: 'Wing' },
-        { name: 'Jugador 10', pos: 'Fullback' },
-    ];
-
-    void mockPlayers;
     const rosterPlayers = useMemo(
         () => entry.players ?? [],
         [entry.players]
@@ -1378,7 +1159,11 @@ function TrainingDetailModal({
                                 ))}
                             </div>
                             <div className="flex gap-3 pt-2">
-                                <button className="btn" style={{ flex: 1 }} onClick={() => alert('Plantilla guardada')}>
+                                <button
+                                    className="btn"
+                                    style={{ flex: 1 }}
+                                    onClick={() => alert('TODO técnico: guardado de plantillas aún no implementado.')}
+                                >
                                     <Copy className="w-4 h-4" /> Guardar como plantilla
                                 </button>
                                 <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { void onSavePlan(entry.id, planBlocks); }}>
@@ -1548,18 +1333,11 @@ function TrainingDetailModal({
                                 </div>
                             </div>
                             <div className="club-training-plan-block">
-                                <div className="text-xs text-white/50 uppercase tracking-wider font-bold mb-2">Tendencia semanal (mock)</div>
-                                <div className="flex items-end gap-2 h-24">
-                                    {[320, 410, 280, 520, 340, 290, entry.evaluation?.loadTotal || 0].map((v, i) => (
-                                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                                            <div
-                                                className="w-full rounded-t-md bg-[#3b82f6]/40 hover:bg-[#3b82f6]/70 transition-colors"
-                                                style={{ height: `${Math.min((v / 600) * 100, 100)}%` }}
-                                            />
-                                            <span className="text-[10px] text-white/40">{['L', 'M', 'X', 'J', 'V', 'S', 'D'][i]}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                                <div className="text-xs text-white/50 uppercase tracking-wider font-bold mb-2">Serie histórica</div>
+                                <p className="text-sm text-white/55 leading-relaxed">
+                                    TODO técnico: conectar una serie histórica real desde `club_trainings`
+                                    antes de mostrar comparativas semanales de carga.
+                                </p>
                             </div>
                             <div className="club-training-plan-block">
                                 <div className="text-xs text-white/50 uppercase tracking-wider font-bold mb-2">Estado del equipo</div>
@@ -1602,6 +1380,7 @@ function TrainingWorkspaceModal({
     onSaveEntry,
     onDeleteTraining,
     onDuplicateTraining,
+    onTabChange,
 }: {
     entry: TrainingEntry;
     clubId: string;
@@ -1613,6 +1392,7 @@ function TrainingWorkspaceModal({
     onSaveEntry: (training: TrainingEntry) => Promise<TrainingEntry | null>;
     onDeleteTraining: (training: TrainingEntry) => Promise<void>;
     onDuplicateTraining: (training: TrainingEntry) => Promise<TrainingEntry | null>;
+    onTabChange?: (tabId: ClubManageTabId) => void;
 }) {
     const [tab, setTab] = useState<PlanTab>(initialTab);
     const [saving, setSaving] = useState(false);
@@ -1888,6 +1668,18 @@ function TrainingWorkspaceModal({
         () => `/club-admin?club=${encodeURIComponent(clubId)}&tab=pizarra`,
         [clubId]
     );
+    const handlePizarraLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        if (!onTabChange) {
+            return;
+        }
+
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        event.preventDefault();
+        onTabChange('pizarra');
+    };
     const tacticalBlocks = useMemo(
         () => planBlocks.filter((block) => block.type === 'tactico'),
         [planBlocks]
@@ -2576,7 +2368,12 @@ function TrainingWorkspaceModal({
                                                 : 'Desde aca ves la biblioteca de jugadas pre guardadas del club sin salir del panel de entrenamientos.'}
                                         </p>
                                         <div className="club-training-workspace-action-row">
-                                            <Link href={pizarraHref} className="btn btn-primary">
+                                            <Link
+                                                href={pizarraHref}
+                                                className="btn btn-primary"
+                                                prefetch={false}
+                                                onClick={handlePizarraLinkClick}
+                                            >
                                                 Abrir modulo Pizarra
                                                 <ChevronRight className="w-4 h-4" />
                                             </Link>

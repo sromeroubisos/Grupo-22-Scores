@@ -697,9 +697,16 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
         for (let i = 0; i < changedPredictions.length; i += PREDICTION_CHUNK) {
             const chunk = changedPredictions.slice(i, i + PREDICTION_CHUNK).map((row) => ({
                 id: toSafeString(row.id),
+                competition_id: toSafeString(row.competition_id),
+                event_id: toSafeString(row.event_id),
+                user_id: toSafeString(row.user_id),
+                predicted_outcome: toNullableString(row.predicted_outcome),
+                predicted_home_score: toNullableNumber(row.predicted_home_score),
+                predicted_away_score: toNullableNumber(row.predicted_away_score),
                 points_awarded: row.points_awarded,
                 status: row.status,
                 scoring_breakdown: row.scoring_breakdown,
+                submitted_at: toNullableString(row.submitted_at),
                 locked_at: row.locked_at,
                 scored_at: row.scored_at,
             }));

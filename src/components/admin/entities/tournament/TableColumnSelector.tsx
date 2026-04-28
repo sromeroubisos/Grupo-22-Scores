@@ -173,7 +173,7 @@ export function TableColumnSelector({
 
         {searchTerm && filteredCategories.length === 0 && (
           <div className="text-center py-8 text-[14px] text-[#666]">
-            No se encontraron columnas para "{searchTerm}"
+            No se encontraron columnas para &quot;{searchTerm}&quot;
           </div>
         )}
       </div>

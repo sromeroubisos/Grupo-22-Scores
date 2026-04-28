@@ -116,8 +116,11 @@ const BLOCK_TYPE_LABELS: Record<PlanBlockType, string> = {
     cierre: 'Recuperacion',
 };
 
+let localDraftIdCounter = 0;
+
 function createId(prefix: string) {
-    return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+    localDraftIdCounter += 1;
+    return `${prefix}-${Date.now()}-${localDraftIdCounter}`;
 }
 
 function getPersonName(person: PersonWithRole) {
@@ -646,10 +649,11 @@ export function ClubTrainingCreateModal({
 
     const handleSubmit = async () => {
         const resolvedLocation = location.trim() || suggestedLocation;
-        const resolvedObjective = objective.trim() || objectiveSuggestion;
+        const resolvedTitle = title.trim();
+        const resolvedObjective = objective.trim();
 
-        if (!date || !startTime || !endTime || !resolvedLocation || !resolvedObjective) {
-            alert('Completa fecha, horario, lugar y objetivo principal.');
+        if (!date || !startTime || !endTime || !resolvedLocation || !resolvedTitle || !resolvedObjective) {
+            alert('Completa nombre, objetivo, fecha, horario y lugar reales antes de publicar.');
             return;
         }
 
@@ -663,23 +667,13 @@ export function ClubTrainingCreateModal({
         const loadProfileLabel = LOAD_PROFILES.find((profile) => profile.id === loadProfile)?.label ?? loadProfile;
         const duration = (scheduledMinutes ?? totalBlockMinutes) || 60;
         const startDate = buildTrainingDate(date, startTime);
-        const finalTitle = title.trim() || `${focusMeta?.label ?? 'Sesion'} · ${selectedDivisionLabel}`;
         const objectiveSummary = [
-            objective.trim(),
-            specificGoals.length > 0 ? `Objetivos: ${specificGoals.join(', ')}` : null,
-            selectedScenario ? `Situacion: ${selectedScenario}` : null,
-        ]
-            .filter(Boolean)
-            .join(' • ');
-        const normalizedTitle = title.trim()
-            || titleSuggestion;
-        const normalizedObjectiveSummary = [
             resolvedObjective,
             specificGoals.length > 0 ? `Objetivos: ${specificGoals.join(', ')}` : null,
             selectedScenario ? `Situacion: ${selectedScenario}` : null,
         ]
             .filter(Boolean)
-            .join(' | ');
+            .join(' • ');
         const normalizedSourceLabel = [
             phaseLabel,
             focusMeta?.label ?? 'Mixto',
@@ -695,7 +689,7 @@ export function ClubTrainingCreateModal({
 
         const nextTraining: TrainingEntry = {
             id: `manual-${clubId}-${Date.now()}`,
-            title: finalTitle,
+            title: resolvedTitle,
             date: startDate,
             duration,
             type: focusMeta?.type ?? 'campo',
@@ -711,8 +705,6 @@ export function ClubTrainingCreateModal({
             plan: { blocks: plan },
             attendance: attendanceDraft,
         };
-        nextTraining.title = normalizedTitle;
-        nextTraining.objective = normalizedObjectiveSummary;
         nextTraining.sourceLabel = normalizedSourceLabel;
         nextTraining.sourceMatchId = nextMatch?.id ?? null;
 
@@ -1278,7 +1270,7 @@ export function ClubTrainingCreateModal({
                         <button
                             type="button"
                             className="btn"
-                            onClick={() => window.alert('La biblioteca de plantillas queda para el siguiente paso del modulo.')}
+                            onClick={() => window.alert('TODO técnico: guardado de plantillas aún no implementado.')}
                         >
                             <ClipboardList className="w-4 h-4" />
                             Guardar plantilla

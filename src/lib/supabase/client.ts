@@ -1,9 +1,9 @@
 import { createBrowserClient } from '@supabase/ssr'
-import { Database } from './types'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase'
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure'
+import type { LooseSupabaseClient } from './loose'
 
-let client: ReturnType<typeof createBrowserClient<Database>> | undefined
+let client: LooseSupabaseClient | undefined
 const SUPABASE_AUTH_TIMEOUT_MS = 15000
 
 function getSupabaseBrowserStorageKey() {
@@ -182,7 +182,7 @@ export function createClient() {
     }
 
     const startedAt = nowMs()
-    client = createBrowserClient<Database>(
+    client = createBrowserClient(
         url || 'https://placeholder.supabase.co',
         key || 'placeholder-key',
         {
@@ -193,7 +193,7 @@ export function createClient() {
                 fetch: browserFetch,
             },
         }
-    )
+    ) as LooseSupabaseClient
 
     logPerf(
         ['CLIENT', 'SUPABASE'],

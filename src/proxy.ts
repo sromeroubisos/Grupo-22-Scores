@@ -1,5 +1,5 @@
-// Middleware handler
-// This middleware handles Auth initialization via Supabase SSR (updateSession).
+// Proxy handler
+// This proxy handles Auth initialization via Supabase SSR (updateSession).
 // Because auth requires cookie interception on requests, this is kept here.
 
 import { NextResponse } from 'next/server'
@@ -9,7 +9,7 @@ import { measureAsync } from '@/lib/perf/measure';
 
 // Only refresh the Supabase session on routes that genuinely depend on auth.
 // This avoids hitting `auth/v1/user` on public traffic, which is what was
-// triggering long middleware stalls in production.
+// triggering long proxy stalls in production.
 const SESSION_REFRESH_REQUIRED_PREFIXES = [
     '/admin',
     '/club-admin',
@@ -42,7 +42,7 @@ function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): 
     return SESSION_REFRESH_REQUIRED_PREFIXES.some(prefix => pathname.startsWith(prefix))
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname, searchParams } = request.nextUrl;
 
     // 1. Skip proxy-level auth refresh for public routes.

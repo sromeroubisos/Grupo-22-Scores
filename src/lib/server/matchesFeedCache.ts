@@ -163,7 +163,7 @@ export async function readMatchesFeedSnapshotMetadata(
         return null;
     }
 
-    return mapRowToSnapshotMeta(data as PersistedMatchesFeedRow);
+    return mapRowToSnapshotMeta(data as unknown as PersistedMatchesFeedRow);
 }
 
 export async function readMatchesFeedSnapshotPayload<T>(
@@ -207,7 +207,7 @@ export async function readMatchesFeedSnapshotPayload<T>(
         return null;
     }
 
-    return mapRowToSnapshot<T>(data as PersistedMatchesFeedRow);
+    return mapRowToSnapshot<T>(data as unknown as PersistedMatchesFeedRow);
 }
 
 export async function readUsableMatchesFeedSnapshot<T>(
@@ -246,7 +246,7 @@ export async function readUsableMatchesFeedSnapshot<T>(
         return null;
     }
 
-    return mapRowToSnapshot<T>(data as PersistedMatchesFeedRow);
+    return mapRowToSnapshot<T>(data as unknown as PersistedMatchesFeedRow);
 }
 
 export async function upsertMatchesFeedSnapshot<T>(

@@ -115,7 +115,7 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
     const router = useRouter();
     const tournament = data as TournamentManageRow;
     const hasSidebar = currentTab === 'resumen';
-    const useWideWorkspace = !hasSidebar || currentTab === 'posiciones';
+    const useWideWorkspace = !hasSidebar;
     usePerfComponentLifecycle('TournamentManageShell', {
         tournamentId: id,
         tab: currentTab,

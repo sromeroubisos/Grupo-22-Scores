@@ -131,8 +131,16 @@ async function fetchTournamentLinkedRelationsWithClient(
         };
     }
 
-    const tournamentMap = new Map(
-        (tournamentsData ?? []).map((row: any) => [
+    type LinkedTournamentLookup = {
+        id: string;
+        name: string;
+        season: string | null;
+        sport: string | null;
+        status: string | null;
+    };
+
+    const tournamentMap = new Map<string, LinkedTournamentLookup>(
+        (tournamentsData ?? []).map((row: any): [string, LinkedTournamentLookup] => [
             row.id,
             {
                 id: row.id as string,

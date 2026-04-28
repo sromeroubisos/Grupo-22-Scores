@@ -22,6 +22,7 @@ import { Database } from '@/lib/database.types';
 import { getTournamentLinkedRelations, getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
 import { requireUserAccessContext } from '@/lib/auth/permissions';
 import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
+import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -242,6 +243,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                 data={result.data as ResolvedClubRow}
                 unions={unionsData ?? []}
                 managedClubs={managed.clubs}
+                initialTab={normalizeClubManageTab(tab)}
             />
         );
     }

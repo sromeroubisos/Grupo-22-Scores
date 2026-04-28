@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Activity, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, Users, UserSquare2, Workflow } from 'lucide-react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { Activity, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, Users } from 'lucide-react';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
+import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
+import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 
 interface ClubManageTabsProps {
     currentTab: string;
@@ -11,18 +12,18 @@ interface ClubManageTabsProps {
     managedClubs: ManagedClubSummary[];
     currentClubId: string;
     primarySportLabel?: string;
+    navigationMode?: ClubConsoleMode;
+    onTabChange?: (tabId: ClubManageTabId) => void;
 }
 
 export const CLUB_MANAGE_VISIBLE_TABS = [
     { id: 'general', label: 'General', Icon: Shield },
-    { id: 'equipos', label: 'Identidad', Icon: Workflow },
     { id: 'planteles', label: 'Jugadores', Icon: Users },
-    { id: 'rendimiento', label: 'Gimnasio', Icon: Activity },
+    { id: 'rendimiento', label: 'Rendimiento', Icon: Activity },
     { id: 'competencias', label: 'Competencias', Icon: Trophy },
     { id: 'partidos', label: 'Partidos', Icon: Radio, live: true },
     { id: 'contenido', label: 'Exports Sociales', Icon: Sparkles },
     { id: 'pizarra', label: 'Pizarra', Icon: Layout },
-    { id: 'sponsors', label: 'Sponsors', Icon: UserSquare2 },
     { id: 'entrenamientos', label: 'Entrenamientos', Icon: Dumbbell },
     { id: 'configuracion', label: 'Configuracion', Icon: Settings2 },
 ];
@@ -36,9 +37,9 @@ export function ClubManageTabs({
     managedClubs,
     currentClubId,
     primarySportLabel,
+    navigationMode = 'admin',
+    onTabChange,
 }: ClubManageTabsProps) {
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
     const currentClub = managedClubs.find((club) => club.id === currentClubId) ?? null;
 
     return (
@@ -63,11 +64,7 @@ export function ClubManageTabs({
                             className="club-selector-pill"
                             value={currentClubId}
                             onChange={(event) => {
-                                const params = new URLSearchParams(searchParams.toString());
-                                params.set('club', event.target.value);
-                                params.set('type', 'club');
-                                if (!params.get('tab')) params.set('tab', currentTab);
-                                window.location.assign(`${pathname}?${params.toString()}`);
+                                window.location.assign(buildClubManageHref(event.target.value, currentTab, navigationMode));
                             }}
                         >
                             {managedClubs.map((club) => (
@@ -83,16 +80,35 @@ export function ClubManageTabs({
             <nav className="club-side-nav">
                 <span className="club-nav-label">Modulos</span>
                 {CLUB_MANAGE_VISIBLE_TABS.map((tab) => {
-                    const params = new URLSearchParams(searchParams.toString());
-                    params.set('tab', tab.id);
-                    params.set('type', 'club');
                     const isActive = currentTab === tab.id;
+                    const href = buildClubManageHref(currentClubId, tab.id, navigationMode);
 
                     return (
                         <Link
                             key={tab.id}
-                            href={`${pathname}?${params.toString()}`}
+                            href={href}
+                            prefetch={false}
                             className={`club-side-link ${isActive ? 'active' : ''}`}
+                            aria-current={isActive ? 'page' : undefined}
+                            onClick={(event) => {
+                                if (!onTabChange) {
+                                    return;
+                                }
+
+                                if (
+                                    event.defaultPrevented
+                                    || event.button !== 0
+                                    || event.metaKey
+                                    || event.ctrlKey
+                                    || event.shiftKey
+                                    || event.altKey
+                                ) {
+                                    return;
+                                }
+
+                                event.preventDefault();
+                                onTabChange(tab.id as ClubManageTabId);
+                            }}
                         >
                             <span className="club-side-link-icon">
                                 <tab.Icon className="w-4 h-4" />
@@ -101,14 +117,12 @@ export function ClubManageTabs({
                                 <strong>{tab.label}</strong>
                                 <small>
                                     {tab.id === 'general' ? 'Resumen operativo' : null}
-                                    {tab.id === 'equipos' ? 'Identidad del equipo' : null}
                                     {tab.id === 'planteles' ? 'Jugadores y staff' : null}
-                                    {tab.id === 'rendimiento' ? 'Sesiones, plan, pesos y testeos' : null}
+                                    {tab.id === 'rendimiento' ? 'Analisis, planillas, gym y GPS' : null}
                                     {tab.id === 'competencias' ? 'Tablas y torneos' : null}
                                     {tab.id === 'partidos' ? 'Fixture y vivo' : null}
                                     {tab.id === 'contenido' ? 'Studio y redes' : null}
                                     {tab.id === 'pizarra' ? 'Táctica y jugadas' : null}
-                                    {tab.id === 'sponsors' ? 'Marcas activas' : null}
                                     {tab.id === 'entrenamientos' ? 'Planificacion y seguimiento' : null}
                                     {tab.id === 'configuracion' ? 'Identidad y roles' : null}
                                 </small>

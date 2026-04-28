@@ -67,6 +67,7 @@ interface ClubPizarraTabProps {
     clubName?: string;
     backHref?: string;
     mobileCanvasFirst?: boolean;
+    onBack?: () => void;
 }
 
 type StorageMode = 'club' | 'local';
@@ -107,6 +108,7 @@ export function ClubPizarraTab({
     clubName,
     backHref = '/club-admin',
     mobileCanvasFirst = false,
+    onBack,
 }: ClubPizarraTabProps) {
     const normalizedSport = normalizeSport(sport);
     const homeColor = HOME_TEAM_COLOR;
@@ -997,9 +999,15 @@ export function ClubPizarraTab({
         return (
             <div className="pizarra-shell pizarra-shell-mobile" style={{ '--app-header-height': `${appHeaderHeight}px` } as CSSProperties}>
                 <div className="pizarra-mobile-topbar">
-                    <Link href={backHref} className="pizarra-mobile-back">
-                        Volver
-                    </Link>
+                    {onBack ? (
+                        <button type="button" className="pizarra-mobile-back" onClick={onBack}>
+                            Volver
+                        </button>
+                    ) : (
+                        <Link href={backHref} className="pizarra-mobile-back">
+                            Volver
+                        </Link>
+                    )}
 
                     <div className="pizarra-mobile-title">
                         <strong>Pizarra</strong>

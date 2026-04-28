@@ -6,9 +6,34 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+type GenericSupabaseRelationship = {
+  foreignKeyName: string
+  columns: string[]
+  isOneToOne?: boolean
+  referencedRelation: string
+  referencedColumns: string[]
+}
+
+type GenericSupabaseTable = {
+  Row: Record<string, any>
+  Insert: Record<string, any>
+  Update: Record<string, any>
+  Relationships: GenericSupabaseRelationship[]
+}
+
+type GenericSupabaseView = GenericSupabaseTable | {
+  Row: Record<string, any>
+  Relationships: GenericSupabaseRelationship[]
+}
+
+type GenericSupabaseFunction = {
+  Args: Record<string, any> | never
+  Returns: any
+}
+
 export type Database = {
   public: {
-    Tables: {
+    Tables: Record<string, GenericSupabaseTable> & {
       categories: {
         Row: {
           created_at: string
@@ -133,6 +158,8 @@ export type Database = {
           region: string | null
           short_name: string | null
           slug: string | null
+          sport: string | null
+          sport_id: string | null
           union_id: string | null
           updated_at: string | null
         }
@@ -150,6 +177,7 @@ export type Database = {
           short_name?: string | null
           slug?: string | null
           sport?: string | null
+          sport_id?: string | null
           union_id?: string | null
           updated_at?: string | null
         }
@@ -167,6 +195,7 @@ export type Database = {
           short_name?: string | null
           slug?: string | null
           sport?: string | null
+          sport_id?: string | null
           union_id?: string | null
           updated_at?: string | null
         }
@@ -990,6 +1019,7 @@ export type Database = {
           country_id: string | null
           created_at: string
           display_name: string | null
+          external_id: string | null
           format: string | null
           id: string
           is_popular: boolean
@@ -1007,6 +1037,7 @@ export type Database = {
           status: string
           union_id: string | null
           updated_at: string
+          url: string | null
         }
         Insert: {
           age_grade?: string | null
@@ -1016,6 +1047,7 @@ export type Database = {
           country_id?: string | null
           created_at?: string
           display_name?: string | null
+          external_id?: string | null
           format?: string | null
           id?: string
           is_popular?: boolean
@@ -1033,6 +1065,7 @@ export type Database = {
           status?: string
           union_id?: string | null
           updated_at?: string
+          url?: string | null
         }
         Update: {
           age_grade?: string | null
@@ -1042,6 +1075,7 @@ export type Database = {
           country_id?: string | null
           created_at?: string
           display_name?: string | null
+          external_id?: string | null
           format?: string | null
           id?: string
           is_popular?: boolean
@@ -1059,6 +1093,7 @@ export type Database = {
           status?: string
           union_id?: string | null
           updated_at?: string
+          url?: string | null
         }
         Relationships: [
           { foreignKeyName: "tournaments_union_id_fkey"; columns: ["union_id"]; referencedRelation: "unions"; referencedColumns: ["id"] },
@@ -1407,10 +1442,8 @@ export type Database = {
         ]
       }
     }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
+    Views: Record<string, GenericSupabaseView>
+    Functions: Record<string, GenericSupabaseFunction> & {
       generate_rounds_for_phase: {
         Args: { p_phase_id: string; p_num_rounds: number }
         Returns: undefined

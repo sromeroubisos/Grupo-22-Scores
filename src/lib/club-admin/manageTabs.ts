@@ -1,6 +1,5 @@
 export type ClubManageTabId =
     | 'general'
-    | 'equipos'
     | 'planteles'
     | 'rendimiento'
     | 'competencias'
@@ -13,7 +12,6 @@ export type ClubManageTabId =
 
 export const CLUB_MANAGE_ALLOWED_TABS = new Set<ClubManageTabId>([
     'general',
-    'equipos',
     'planteles',
     'rendimiento',
     'competencias',
@@ -50,7 +48,6 @@ export const CLUB_MANAGE_TAB_ALIASES: Record<string, ClubManageTabId> = {
     rendimiento: 'rendimiento',
     fixture: 'partidos',
     posiciones: 'competencias',
-    relacionados: 'equipos',
     identidad: 'configuracion',
     staff: 'configuracion',
     medios: 'contenido',

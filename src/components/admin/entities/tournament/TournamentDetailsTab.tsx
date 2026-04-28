@@ -143,6 +143,12 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
     const isApiManaged = tournament.is_api_managed || false;
     const form = getSectionDraft<TournamentDetailsDraft>('details') ?? initialForm;
     const isDirty = hasDirtySection('details');
+    const bonusRules =
+        form.ruleset.bonusRules &&
+            typeof form.ruleset.bonusRules === 'object' &&
+            !Array.isArray(form.ruleset.bonusRules)
+            ? form.ruleset.bonusRules as Record<string, { enabled?: boolean }>
+            : {};
     const countryOptions = useMemo(() => {
         if (!form.country_id) return baseCountryOptions;
 
@@ -517,8 +523,8 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 details-bonus-grid">
                         <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)] details-bonus-panel">
                             <label className="checkbox-container !border-none !p-0 !bg-transparent mb-2">
-                                <input type="checkbox" checked={form.ruleset?.bonusRules?.offensiveBonus?.enabled || false} onChange={e => {
-                                    update('ruleset', { ...form.ruleset, bonusRules: { ...form.ruleset?.bonusRules, offensiveBonus: { enabled: e.target.checked, type: 'tries', threshold: 4 } } });
+                                <input type="checkbox" checked={bonusRules.offensiveBonus?.enabled || false} onChange={e => {
+                                    update('ruleset', { ...form.ruleset, bonusRules: { ...bonusRules, offensiveBonus: { enabled: e.target.checked, type: 'tries', threshold: 4 } } });
                                 }} disabled={isApiManaged} />
                                 <div className="checkmark"></div>
                                 <span className="text-white font-semibold flex items-center gap-2">Bonus Ofensivo <span className="text-xs bg-[var(--accent)]/20 text-[var(--accent)] px-2 py-0.5 rounded font-mono">4+ TRIES</span></span>
@@ -528,8 +534,8 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
 
                         <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)] details-bonus-panel">
                             <label className="checkbox-container !border-none !p-0 !bg-transparent mb-2">
-                                <input type="checkbox" checked={form.ruleset?.bonusRules?.defensiveBonus?.enabled || false} onChange={e => {
-                                    update('ruleset', { ...form.ruleset, bonusRules: { ...form.ruleset?.bonusRules, defensiveBonus: { enabled: e.target.checked, type: 'point_diff', threshold: 7 } } });
+                                <input type="checkbox" checked={bonusRules.defensiveBonus?.enabled || false} onChange={e => {
+                                    update('ruleset', { ...form.ruleset, bonusRules: { ...bonusRules, defensiveBonus: { enabled: e.target.checked, type: 'point_diff', threshold: 7 } } });
                                 }} disabled={isApiManaged} />
                                 <div className="checkmark"></div>
                                 <span className="text-white font-semibold flex items-center gap-2">Bonus Defensivo <span className="text-xs text-orange-400 bg-orange-400/20 px-2 py-0.5 rounded font-mono">≤ 7 PTS DIFF</span></span>

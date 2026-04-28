@@ -10,7 +10,6 @@
 //   - Sync arrays: diff add/remove
 // ============================================================
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import type {
   ClubCreateInput,
@@ -720,40 +719,6 @@ export async function linkDerivedClub(params: {
 
   if (params.baseClubId === params.derivedClubId) {
     return { success: false, error: 'El club base y el derivado deben ser distintos.' };
-  }
-
-  const { data: derivedClub, error: derivedClubError } = await supabase
-    .from('clubs')
-    .select('categories')
-    .eq('id', params.derivedClubId)
-    .maybeSingle();
-
-  if (derivedClubError && !(
-    derivedClubError.message.includes('column "categories"') ||
-    derivedClubError.message.includes("'categories' column") ||
-    (derivedClubError.message.includes('categories') && derivedClubError.message.includes('does not exist')) ||
-    derivedClubError.message.includes('schema cache')
-  )) {
-    return { success: false, error: derivedClubError.message };
-  }
-
-  const relationCategories = new Set<string>(Array.isArray(derivedClub?.categories) ? derivedClub.categories : []);
-  relationCategories.add(`base_club:${params.baseClubId}`);
-
-  const { error: categoryUpdateError } = derivedClubError
-    ? { error: null as { message: string } | null }
-    : await supabase
-      .from('clubs')
-      .update({ categories: Array.from(relationCategories) })
-      .eq('id', params.derivedClubId);
-
-  if (categoryUpdateError && !(
-    categoryUpdateError.message.includes('column "categories"') ||
-    categoryUpdateError.message.includes("'categories' column") ||
-    (categoryUpdateError.message.includes('categories') && categoryUpdateError.message.includes('does not exist')) ||
-    categoryUpdateError.message.includes('schema cache')
-  )) {
-    return { success: false, error: categoryUpdateError.message };
   }
 
   const relationClient = supabase as unknown as ClubDerivativeUpsertClient;

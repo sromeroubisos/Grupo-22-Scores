@@ -162,7 +162,7 @@ export async function readTournamentsFeedSnapshotMetadata(
         return null;
     }
 
-    return mapRowToSnapshotMeta(data as PersistedTournamentsFeedRow);
+    return mapRowToSnapshotMeta(data as unknown as PersistedTournamentsFeedRow);
 }
 
 export async function readTournamentsFeedSnapshotPayload<T>(
@@ -206,7 +206,7 @@ export async function readTournamentsFeedSnapshotPayload<T>(
         return null;
     }
 
-    return mapRowToSnapshot<T>(data as PersistedTournamentsFeedRow);
+    return mapRowToSnapshot<T>(data as unknown as PersistedTournamentsFeedRow);
 }
 
 export async function readUsableTournamentsFeedSnapshot<T>(
@@ -245,7 +245,7 @@ export async function readUsableTournamentsFeedSnapshot<T>(
         return null;
     }
 
-    return mapRowToSnapshot<T>(data as PersistedTournamentsFeedRow);
+    return mapRowToSnapshot<T>(data as unknown as PersistedTournamentsFeedRow);
 }
 
 export async function upsertTournamentsFeedSnapshot<T>(

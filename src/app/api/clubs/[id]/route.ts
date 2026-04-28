@@ -69,7 +69,7 @@ export async function PATCH(
         'name', 'short_name', 'city', 'region', 'country',
         'logo_url', 'primary_color', 'sport', 'union_id',
         'website', 'instagram', 'twitter',
-        'slug', 'is_visible', 'categories',
+        'slug', 'is_visible', 'category',
     ];
 
     const updates: Record<string, unknown> = {};
@@ -77,11 +77,22 @@ export async function PATCH(
         if (field in body) updates[field] = body[field];
     }
 
+    if ('categories' in body && !('category' in updates)) {
+        if (Array.isArray(body.categories)) {
+            const [category] = body.categories
+                .map((value) => typeof value === 'string' ? value.trim() : '')
+                .filter((value) => value && !value.includes(':'));
+            if (category) updates.category = category;
+        } else if (body.categories !== null && body.categories !== undefined) {
+            return err('Las categorias deben ser un arreglo de texto', 400);
+        }
+    }
+
     if (Object.keys(updates).length === 0) {
         return err('No se enviaron campos para actualizar', 400);
     }
 
-    const nullableTextFields = ['short_name', 'city', 'region', 'country', 'logo_url', 'primary_color', 'sport', 'union_id'];
+    const nullableTextFields = ['short_name', 'city', 'region', 'country', 'logo_url', 'primary_color', 'sport', 'union_id', 'category'];
     for (const field of nullableTextFields) {
         if (typeof updates[field] === 'string' && !String(updates[field]).trim()) {
             updates[field] = null;
@@ -101,16 +112,6 @@ export async function PATCH(
             return err('El slug no puede estar vacío', 400);
         }
         updates.slug = normalized;
-    }
-
-    if ('categories' in updates) {
-        if (Array.isArray(updates.categories)) {
-            updates.categories = updates.categories
-                .map((value) => typeof value === 'string' ? value.trim() : '')
-                .filter(Boolean);
-        } else if (updates.categories !== null && updates.categories !== undefined) {
-            return err('Las categorias deben ser un arreglo de texto', 400);
-        }
     }
 
     const { data, error } = await supabase

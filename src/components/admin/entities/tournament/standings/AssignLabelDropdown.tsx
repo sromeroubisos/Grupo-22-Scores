@@ -54,7 +54,7 @@ export function AssignLabelDropdown({ allLabels, assignedLabelIds, onAssign, onU
   return (
     <div ref={ref} className={styles.assignDropdown} role="menu" aria-label="Asignar etiquetas">
       {allLabels.length === 0 ? (
-        <p className={styles.assignDropdownEmpty}>No hay etiquetas. Creá una desde "Etiquetas".</p>
+        <p className={styles.assignDropdownEmpty}>No hay etiquetas. Creá una desde &quot;Etiquetas&quot;.</p>
       ) : (
         allLabels.map((label) => {
           const assigned = assignedLabelIds.has(label.id);

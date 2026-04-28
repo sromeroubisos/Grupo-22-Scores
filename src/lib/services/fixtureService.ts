@@ -395,10 +395,12 @@ export class FixtureService {
 
     // 6. Map everything together in-memory
     const mappedParticipants = (participants || []).map(p => this.mapParticipant(p));
-    const clubLogos = new Map(
+    const clubLogos = new Map<string, string | null>(
       mappedParticipants
-        .filter((participant) => participant.clubId)
-        .map((participant) => [participant.clubId, participant.logo ?? null]),
+        .filter((participant: any): participant is { clubId: string; logo?: string | null } =>
+          typeof participant.clubId === 'string' && participant.clubId.length > 0
+        )
+        .map((participant) => [participant.clubId, participant.logo ?? null] as [string, string | null]),
     );
     const mappedMatches = (allMatches || []).map(m => this.mapMatchWithClubs(m, clubLogos));
     const mappedRounds = (allRounds || []).map(r => this.mapRound(r));

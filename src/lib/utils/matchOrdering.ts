@@ -58,7 +58,7 @@ export function getMatchSortTimestamp(match: MatchLike): number {
     return 0;
 }
 
-export function sortMatchesByDate<T>(matches: T[] | null | undefined, direction: 'asc' | 'desc' = 'asc'): T[] {
+export function sortMatchesByDate<T extends MatchLike>(matches: T[] | null | undefined, direction: 'asc' | 'desc' = 'asc'): T[] {
     if (!Array.isArray(matches)) return [];
 
     const directionFactor = direction === 'desc' ? -1 : 1;

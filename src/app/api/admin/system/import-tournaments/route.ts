@@ -3,14 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import { getActiveSports } from '@/lib/data/sports';
 import { getAllCountries } from '@/lib/data/countries';
 import { getAllTournaments } from '@/lib/data/tournaments';
-import { Database } from '@/lib/database.types';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 // Use the service role key to bypass RLS for this admin import script
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-const supabase = createClient<Database>(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey) as any;
 
 export async function POST(request: Request) {
     // Basic protection: requiring a secret header or checking auth.
