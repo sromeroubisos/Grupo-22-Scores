@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Activity, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, Users } from 'lucide-react';
+import { Layout, Radio, Settings2, Shield, Sparkles, Trophy, Users } from 'lucide-react';
+import { Select } from '@/components/admin/ui';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
 import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
@@ -19,12 +20,10 @@ interface ClubManageTabsProps {
 export const CLUB_MANAGE_VISIBLE_TABS = [
     { id: 'general', label: 'General', Icon: Shield },
     { id: 'planteles', label: 'Jugadores', Icon: Users },
-    { id: 'rendimiento', label: 'Rendimiento', Icon: Activity },
     { id: 'competencias', label: 'Competencias', Icon: Trophy },
     { id: 'partidos', label: 'Partidos', Icon: Radio, live: true },
     { id: 'contenido', label: 'Exports Sociales', Icon: Sparkles },
     { id: 'pizarra', label: 'Pizarra', Icon: Layout },
-    { id: 'entrenamientos', label: 'Entrenamientos', Icon: Dumbbell },
     { id: 'configuracion', label: 'Configuracion', Icon: Settings2 },
 ];
 
@@ -59,21 +58,17 @@ export function ClubManageTabs({
                         <strong>{currentClub?.shortName || currentClub?.name || 'Club'}</strong>
                         <span>{primarySportLabel || 'Deporte'}</span>
                     </div>
-                    <div className="club-selector-pill-wrap">
-                        <select
-                            className="club-selector-pill"
-                            value={currentClubId}
-                            onChange={(event) => {
-                                window.location.assign(buildClubManageHref(event.target.value, currentTab, navigationMode));
-                            }}
-                        >
-                            {managedClubs.map((club) => (
-                                <option key={club.id} value={club.id}>
-                                    {club.shortName || club.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        className="club-selector-pill"
+                        value={currentClubId}
+                        onChange={(event) => {
+                            window.location.assign(buildClubManageHref(event.target.value, currentTab, navigationMode));
+                        }}
+                        options={managedClubs.map((club) => ({
+                            value: club.id,
+                            label: club.shortName || club.name,
+                        }))}
+                    />
                 </div>
             </div>
 
@@ -118,12 +113,10 @@ export function ClubManageTabs({
                                 <small>
                                     {tab.id === 'general' ? 'Resumen operativo' : null}
                                     {tab.id === 'planteles' ? 'Jugadores y staff' : null}
-                                    {tab.id === 'rendimiento' ? 'Analisis, planillas, gym y GPS' : null}
                                     {tab.id === 'competencias' ? 'Tablas y torneos' : null}
                                     {tab.id === 'partidos' ? 'Fixture y vivo' : null}
                                     {tab.id === 'contenido' ? 'Studio y redes' : null}
                                     {tab.id === 'pizarra' ? 'Táctica y jugadas' : null}
-                                    {tab.id === 'entrenamientos' ? 'Planificacion y seguimiento' : null}
                                     {tab.id === 'configuracion' ? 'Identidad y roles' : null}
                                 </small>
                             </span>

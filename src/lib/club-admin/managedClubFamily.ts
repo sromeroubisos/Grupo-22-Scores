@@ -4,16 +4,18 @@ import {
     type MembershipLike,
     type MembershipRole,
 } from '@/lib/auth/roles';
+import { buildTeamLogoProxyUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 const MISSING_TABLE_CODES = new Set(['PGRST204', '42P01']);
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+type ClubLogoDeliveryMode = 'source' | 'proxy';
 
 type ClubSummaryRow = {
     id: string;
     slug: string | null;
     name: string | null;
     short_name: string | null;
-    logo_url: string | null;
+    logo_url?: string | null;
     sport?: string | null;
     sport_id?: string | null;
 };
@@ -70,11 +72,21 @@ function toClubSummaryRows(data: unknown): ClubSummaryRow[] {
 
 async function fetchClubSummaryRows(
     supabase: SupabaseServerClient,
-    clubIds: string[]
+    clubIds: string[],
+    options: { includeLogoUrls?: boolean; logoMode?: ClubLogoDeliveryMode } = {}
 ): Promise<ClubSummaryRow[]> {
+    const logoMode = options.logoMode ?? (options.includeLogoUrls === false ? 'proxy' : 'source');
+    const includeLogoUrls = logoMode === 'source';
+    const fullSelect = includeLogoUrls
+        ? 'id, slug, name, short_name, logo_url, sport, sport_id'
+        : 'id, slug, name, short_name, sport, sport_id';
+    const fallbackSelect = includeLogoUrls
+        ? 'id, slug, name, short_name, logo_url'
+        : 'id, slug, name, short_name';
+
     const fullResult = await supabase
         .from('clubs')
-        .select('id, slug, name, short_name, logo_url, sport, sport_id')
+        .select(fullSelect)
         .in('id', clubIds);
 
     if (!fullResult.error) {
@@ -87,7 +99,7 @@ async function fetchClubSummaryRows(
 
     const fallbackResult = await supabase
         .from('clubs')
-        .select('id, slug, name, short_name, logo_url')
+        .select(fallbackSelect)
         .in('id', clubIds);
 
     if (fallbackResult.error) {
@@ -250,7 +262,8 @@ export async function resolveClubFamilyIds(supabase: SupabaseServerClient, clubI
 
 export async function getManagedClubSummaries(
     supabase: SupabaseServerClient,
-    memberships?: MembershipLike[] | null
+    memberships?: MembershipLike[] | null,
+    options: { includeLogoUrls?: boolean; logoMode?: ClubLogoDeliveryMode } = {}
 ): Promise<{
     clubs: ManagedClubSummary[];
     defaultClubId: string | null;
@@ -368,7 +381,10 @@ export async function getManagedClubSummaries(
         return { clubs: [], defaultClubId };
     }
 
-    const clubRows = await fetchClubSummaryRows(supabase, clubIds);
+    const clubRows = await fetchClubSummaryRows(supabase, clubIds, {
+        logoMode: options.logoMode,
+        includeLogoUrls: options.includeLogoUrls,
+    });
     const clubById = new Map(clubRows.map((club) => [club.id, club]));
 
     const summaries = clubIds
@@ -378,13 +394,18 @@ export async function getManagedClubSummaries(
             if (!access || !club) return null;
 
             const rootClub = clubById.get(access.familyRootId);
+            const clubName = club.name || 'Club';
+            const logoMode = options.logoMode ?? (options.includeLogoUrls === false ? 'proxy' : 'source');
+            const logoUrl = logoMode === 'proxy'
+                ? buildTeamLogoProxyUrl({ key: club.id, name: clubName })
+                : resolveSerializableLogoUrl(club.logo_url, { key: club.id, name: clubName });
 
             return {
                 id: club.id,
                 slug: club.slug || null,
-                name: club.name || 'Club',
+                name: clubName,
                 shortName: club.short_name || null,
-                logoUrl: club.logo_url || null,
+                logoUrl,
                 sport: club.sport || club.sport_id || null,
                 familyRootId: access.familyRootId,
                 familyRootName: rootClub?.name || null,
@@ -449,12 +470,13 @@ export async function getClubFamilySummary(
         .map((candidateId) => {
             const club = clubById.get(candidateId);
             if (!club) return null;
+            const clubName = club.name || 'Club';
 
             return {
                 id: club.id,
-                name: club.name || 'Club',
+                name: clubName,
                 shortName: club.short_name || null,
-                logoUrl: club.logo_url || null,
+                logoUrl: resolveSerializableLogoUrl(club.logo_url, { key: club.id, name: clubName }),
                 sport: club.sport || club.sport_id || null,
                 familyRootId: family.rootClubId,
                 parentClubId: parentById.get(candidateId) ?? null,

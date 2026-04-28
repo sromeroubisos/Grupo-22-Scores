@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { Lock } from 'lucide-react';
+import { EmptyState } from '@/components/admin/ui';
 import ClubMatchWorkspace from './ClubMatchWorkspace';
 import { checkClubMatchAccess } from '@/lib/club-admin/matchAccess';
 import { fetchMatchCenterMatch } from '@/lib/services/matchCenterService';
@@ -46,27 +48,13 @@ export default async function ClubMatchPage({ params, searchParams }: PageProps)
 
   if (!access.allowed) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center p-6">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-8 max-w-md w-full text-center">
-          <div className="text-red-400 text-4xl mb-4">Acceso</div>
-          <h1 className="text-xl font-bold mb-2">Acceso restringido</h1>
-          <p className="text-white/60 text-sm mb-2">
-            No tenés permisos para ver este partido desde el panel de club.
-          </p>
-          <p className="text-white/40 text-xs mb-2">
-            Club esperado: {clubIdFromQuery || 'no especificado'}
-          </p>
-          <p className="text-white/40 text-xs mb-6">
-            Si creaste el partido recientemente, espera unos segundos y recarga.
-          </p>
-          <a
-            href="/club-admin"
-            className="inline-block px-4 py-2 bg-white/10 rounded-lg text-sm hover:bg-white/20"
-          >
-            Volver al panel de club
-          </a>
-        </div>
-      </div>
+      <EmptyState
+        kicker="Acceso"
+        title="Acceso restringido"
+        description={`No tenés permisos para ver este partido desde el panel de club. Club esperado: ${clubIdFromQuery || 'no especificado'}. Si creaste el partido recientemente, espera unos segundos y recarga.`}
+        icon={<Lock className="h-8 w-8" />}
+        actions={[{ label: 'Volver al panel de club', href: '/club-admin' }]}
+      />
     );
   }
 

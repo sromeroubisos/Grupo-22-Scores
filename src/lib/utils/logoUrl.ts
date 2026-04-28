@@ -2,6 +2,7 @@ import { getAllCountries } from '@/lib/data/countries';
 import { normalizeText, normalizeUrl } from './normalize';
 
 const FLATICON_HOST_REGEX = /(^|\.)flaticon\./i;
+const INLINE_LOGO_PROXY_THRESHOLD = 4096;
 
 type ParsedMarkup = {
     extractedUrl: string | null;
@@ -163,4 +164,67 @@ export function resolveLogoPreviewSrc(value: unknown): string | null {
     }
 
     return normalized;
+}
+
+export function isOversizedInlineLogoUrl(value: unknown): value is string {
+    const raw = normalizeText(value);
+    if (!raw) return false;
+
+    const trimmed = raw.trim();
+    return /^data:image\//i.test(trimmed) && trimmed.length > INLINE_LOGO_PROXY_THRESHOLD;
+}
+
+export function buildTeamLogoProxyUrl(params: {
+    key?: string | null;
+    name?: string | null;
+    fallback?: string | null;
+}): string | null {
+    const key = normalizeText(params.key);
+    if (!key) return null;
+
+    const searchParams = new URLSearchParams({ key });
+    const name = normalizeText(params.name);
+    const fallback = normalizeText(params.fallback);
+
+    if (name) {
+        searchParams.set('name', name);
+    }
+
+    if (fallback && !isOversizedInlineLogoUrl(fallback)) {
+        searchParams.set('fallback', fallback);
+    }
+
+    return `/api/assets/team-logo?${searchParams.toString()}`;
+}
+
+export function isTeamLogoProxyUrl(value: unknown): boolean {
+    const raw = normalizeText(value);
+    if (!raw) return false;
+
+    if (raw.startsWith('/api/assets/team-logo')) {
+        return true;
+    }
+
+    try {
+        return new URL(raw).pathname === '/api/assets/team-logo';
+    } catch {
+        return false;
+    }
+}
+
+export function resolveSerializableLogoUrl(
+    value: unknown,
+    params: { key?: string | null; name?: string | null } = {}
+): string | null {
+    const raw = normalizeText(value);
+    if (!raw) return null;
+
+    if (isOversizedInlineLogoUrl(raw)) {
+        return buildTeamLogoProxyUrl({
+            key: params.key,
+            name: params.name,
+        });
+    }
+
+    return raw;
 }

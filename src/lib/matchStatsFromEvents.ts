@@ -65,6 +65,7 @@ export type CompleteMatchStats = {
     turnoversLost: TeamMetricPair;
     penaltiesWon: TeamMetricPair;
     penaltiesConceded: TeamMetricPair;
+    penaltiesCommitted: TeamMetricPair;
     freeKicks: TeamMetricPair;
     knockOns: TeamMetricPair;
     forwardPasses: TeamMetricPair;
@@ -164,6 +165,7 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
         turnoversLost: createTeamMetricPair(),
         penaltiesWon: createTeamMetricPair(),
         penaltiesConceded: createTeamMetricPair(),
+        penaltiesCommitted: createTeamMetricPair(),
         freeKicks: createTeamMetricPair(),
         knockOns: createTeamMetricPair(),
         forwardPasses: createTeamMetricPair(),
@@ -300,6 +302,11 @@ export function buildCompleteMatchStats(
                 bumpTeamMetric(stats.penaltiesWon, team);
                 break;
             case 'penalty_conceded':
+                bumpTeamMetric(stats.penaltiesConceded, team);
+                bumpTeamMetric(stats.penaltiesCommitted, team);
+                break;
+            case 'penalty_committed':
+                bumpTeamMetric(stats.penaltiesCommitted, team);
                 bumpTeamMetric(stats.penaltiesConceded, team);
                 break;
             case 'free_kick':
@@ -553,8 +560,7 @@ export function buildCompleteStatTabs(stats: CompleteMatchStats, homeName: strin
                     rows: [
                         { key: 'yellowCards', label: 'Amarillas', home: stats.yellowCards.home, away: stats.yellowCards.away },
                         { key: 'redCards', label: 'Rojas', home: stats.redCards.home, away: stats.redCards.away },
-                        { key: 'penaltiesWon', label: 'Penales ganados', home: stats.penaltiesWon.home, away: stats.penaltiesWon.away },
-                        { key: 'penaltiesConceded', label: 'Penales concedidos', home: stats.penaltiesConceded.home, away: stats.penaltiesConceded.away },
+                        { key: 'penaltiesCommitted', label: 'Penales cometidos', home: stats.penaltiesCommitted.home, away: stats.penaltiesCommitted.away },
                         { key: 'knockOns', label: 'Knock-on', home: stats.knockOns.home, away: stats.knockOns.away },
                         { key: 'forwardPasses', label: 'Pase forward', home: stats.forwardPasses.home, away: stats.forwardPasses.away },
                         { key: 'handlingErrors', label: 'Error de manejo', home: stats.handlingErrors.home, away: stats.handlingErrors.away },

@@ -77,7 +77,36 @@ export type MatchStatus = 'scheduled' | 'live' | 'final' | 'suspended' | 'postpo
 export type MatchEventTeam = 'home' | 'away' | null;
 export type LiveSubview = 'eventos' | 'datos';
 export type LivePhase = '1T' | 'HT' | '2T' | 'FT';
-export type LiveActionType = 'try' | 'conversion' | 'penalty' | 'tackle' | 'substitution' | 'scrum' | 'line' | 'card' | 'knock_on' | 'forward_pass' | 'free_kick' | 'penalty_try' | 'kick' | 'ruck' | 'pass' | 'match_start' | 'match_half' | 'match_end' | 'entradas_22';
+export type LiveActionType =
+  | 'try'
+  | 'penalty_try'
+  | 'conversion'
+  | 'penalty'
+  | 'drop_goal'
+  | 'card_yellow'
+  | 'card_red'
+  | 'penalty_committed'
+  | 'free_kick'
+  | 'knock_on'
+  | 'forward_pass'
+  | 'handling_error'
+  | 'turnover_lost'
+  | 'injury'
+  | 'scrum'
+  | 'line'
+  | 'tackle'
+  | 'ruck'
+  | 'maul'
+  | 'kick'
+  | 'recovery'
+  | 'turnover_won'
+  | 'entradas_22'
+  | 'pass'
+  | 'substitution'
+  | 'match_start'
+  | 'match_half'
+  | 'match_end'
+  | 'card';
 
 export interface ClubCallup {
   name: string;
@@ -162,6 +191,64 @@ export interface ClubLiveEvent {
   parentEventId?: string;
   sequence?: number;
   videoTime?: string;
+}
+
+export interface MatchStats {
+  tries: { home: number; away: number };
+  conversions: { home: number; away: number };
+  penalties: { home: number; away: number };
+  penaltyGoals: { home: number; away: number };
+  dropGoals: { home: number; away: number };
+  penaltyTries: { home: number; away: number };
+  entradas22: { home: number; away: number };
+  freeKicks: { home: number; away: number };
+  penaltiesCommitted: { home: number; away: number };
+  handlingErrors: { home: number; away: number };
+  turnoversWon: { home: number; away: number };
+  turnoversLost: { home: number; away: number };
+  recoveries: { home: number; away: number };
+  injuries: { home: number; away: number };
+  knockOns: { home: number; away: number };
+  forwardPasses: { home: number; away: number };
+  kicks: { home: number; away: number };
+  kickMeters: { home: number; away: number };
+  rucks: { home: number; away: number };
+  mauls: { home: { won: number; lost: number }; away: { won: number; lost: number } };
+  passes: { home: number; away: number };
+  scrums: { home: { won: number; lost: number }; away: { won: number; lost: number } };
+  lines: { home: { won: number; lost: number }; away: { won: number; lost: number } };
+  cards: { home: { yellow: number; red: number }; away: { yellow: number; red: number } };
+  tackles: { home: number; away: number };
+  substitutions: { home: number; away: number };
+}
+
+export interface PlayerEventStats {
+  name: string;
+  team: 'home' | 'away' | null;
+  points: number;
+  tries: number;
+  conversions: number;
+  penaltyTries: number;
+  convertedPenalties: number;
+  attackPenalties: number;
+  defensePenalties: number;
+  knockOns: number;
+  forwardPasses: number;
+  kicks: number;
+  kickMeters: number;
+  passes: number;
+  rucksFor: number;
+  rucksAgainst: number;
+  scrumsFor: number;
+  scrumsAgainst: number;
+  linesFor: number;
+  linesAgainst: number;
+  yellowCards: number;
+  redCards: number;
+  tackles: number;
+  substitutions: number;
+  notes: number;
+  total: number;
 }
 
 export interface MatchClockState {

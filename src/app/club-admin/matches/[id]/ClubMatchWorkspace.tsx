@@ -29,13 +29,16 @@ import styles from './ClubMatchWorkspace.module.css';
 import { formatMatchTimelineEventDescription } from '@/lib/matchEventStats';
 import type {
   ClubInfo,
+  ClubCallup,
   ClubLineupsState,
+  ClubLiveControl,
   ClubLiveEvent,
   ClubMediaPlan,
   Division,
   LiveActionType,
   LiveComposerState,
   LivePhase,
+  LiveSubview,
   MatchData,
   MatchDraftState,
   MatchEventTeam,
@@ -52,7 +55,8 @@ import {
   EVENT_TYPES,
   LIVE_SUBVIEWS,
   LIVE_PHASE_OPTIONS,
-  LIVE_EVENT_ACTIONS,
+  CLUB_EVENT_PANEL_ACTIONS,
+  CLUB_EVENT_PANEL_GROUPS,
   KICK_TYPES,
   PENALTY_REASONS,
   normalizeStatus,
@@ -93,6 +97,42 @@ import {
   serializeLiveEvent,
 } from './ClubMatchWorkspace.utils';
 import { ComparisonBarChart, MiniBarChart, RadarChart } from './ClubMatchWorkspace.charts';
+
+const PLAYER_SELECTION_ACTIONS = new Set<LiveActionType>([
+  'try',
+  'conversion',
+  'drop_goal',
+  'tackle',
+  'card_yellow',
+  'card_red',
+  'card',
+  'knock_on',
+  'forward_pass',
+  'handling_error',
+  'turnover_lost',
+  'injury',
+  'penalty_try',
+  'kick',
+  'ruck',
+  'maul',
+  'recovery',
+  'turnover_won',
+  'pass',
+  'entradas_22',
+]);
+
+const DETAIL_ACTION_LABELS: Partial<Record<LiveActionType, string>> = {
+  tackle: 'Contacto dominante, tackle salvador...',
+  handling_error: 'Pase bajo presion, pelota mojada...',
+  turnover_lost: 'Aislado en contacto, ruck perdido...',
+  injury: 'Zona del golpe, sale atendido...',
+  recovery: 'Pesca, pelota suelta, presion...',
+  turnover_won: 'Ruck ganado, jackal, contraataque...',
+};
+
+function isPlayerSelectionAction(action: LiveActionType) {
+  return PLAYER_SELECTION_ACTIONS.has(action);
+}
 
 export default function ClubMatchWorkspace({
   match,
@@ -748,7 +788,7 @@ export default function ClubMatchWorkspace({
       <div className={[styles.liveComposerCard, extraClassName].filter(Boolean).join(' ')}>
         <div className={styles.liveComposerHeader}>
           <div>
-            <h3>{liveComposer.mode === 'edit' ? 'Editar evento' : `Nuevo ${LIVE_EVENT_ACTIONS.find((action) => action.id === liveComposer.action)?.label || 'evento'}`}</h3>
+            <h3>{liveComposer.mode === 'edit' ? 'Editar evento' : `Nuevo ${CLUB_EVENT_PANEL_ACTIONS.find((action) => action.id === liveComposer.action)?.label || 'evento'}`}</h3>
             <p>Formulario corto para operar el partido con la menor fricción posible.</p>
           </div>
           <button className={styles.miniBtn} type="button" onClick={() => closeLiveComposer()}>
@@ -789,7 +829,7 @@ export default function ClubMatchWorkspace({
             </select>
           </label>
 
-          {(liveComposer.action === 'try' || liveComposer.action === 'conversion' || liveComposer.action === 'tackle' || liveComposer.action === 'card' || liveComposer.action === 'knock_on' || liveComposer.action === 'forward_pass' || liveComposer.action === 'penalty_try' || liveComposer.action === 'kick' || liveComposer.action === 'ruck' || liveComposer.action === 'pass' || liveComposer.action === 'entradas_22') ? (
+          {isPlayerSelectionAction(liveComposer.action) ? (
             <label className={styles.field}>
               <span>Jugador</span>
               <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
@@ -837,7 +877,7 @@ export default function ClubMatchWorkspace({
             </>
           ) : null}
 
-          {(liveComposer.action === 'scrum' || liveComposer.action === 'line') ? (
+          {(liveComposer.action === 'scrum' || liveComposer.action === 'line' || liveComposer.action === 'maul') ? (
             <>
               <label className={styles.field}>
                 <span>Jugador</span>
@@ -857,7 +897,7 @@ export default function ClubMatchWorkspace({
             </>
           ) : null}
 
-          {liveComposer.action === 'conversion' ? (
+          {(liveComposer.action === 'conversion' || liveComposer.action === 'drop_goal') ? (
             <label className={styles.field}>
               <span>Resultado</span>
               <select className={styles.select} value={liveComposer.outcome} onChange={(event) => setLiveComposer((current) => current ? { ...current, outcome: event.target.value } : current)}>
@@ -908,6 +948,18 @@ export default function ClubMatchWorkspace({
             </>
           ) : null}
 
+          {liveComposer.action === 'penalty_committed' ? (
+            <label className={styles.field}>
+              <span>Motivo del penal</span>
+              <select className={styles.select} value={liveComposer.penaltyReason} onChange={(event) => setLiveComposer((current) => current ? { ...current, penaltyReason: event.target.value } : current)}>
+                <option value="">Seleccionar motivo</option>
+                {PENALTY_REASONS.map((reason) => (
+                  <option key={reason.value} value={reason.value}>{reason.label}</option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
           {liveComposer.action === 'free_kick' ? (
             <>
               <label className={styles.field}>
@@ -946,7 +998,7 @@ export default function ClubMatchWorkspace({
             </label>
           ) : null}
 
-          {liveComposer.action === 'card' ? (
+          {(liveComposer.action === 'card' || liveComposer.action === 'card_yellow' || liveComposer.action === 'card_red') ? (
             <>
               <label className={styles.field}>
                 <span>Tipo</span>
@@ -973,7 +1025,7 @@ export default function ClubMatchWorkspace({
             </label>
           ) : null}
 
-          {liveComposer.action === 'line' ? (
+          {(liveComposer.action === 'line' || liveComposer.action === 'maul') ? (
             <label className={styles.field}>
               <span>Resultado</span>
               <select className={styles.select} value={liveComposer.followUpOutcome} onChange={(event) => setLiveComposer((current) => current ? { ...current, followUpOutcome: event.target.value as 'won' | 'lost' | '' } : current)}>
@@ -1073,10 +1125,10 @@ export default function ClubMatchWorkspace({
             </>
           ) : null}
 
-          {liveComposer.action === 'tackle' ? (
+          {DETAIL_ACTION_LABELS[liveComposer.action] ? (
             <label className={styles.field}>
               <span>Detalle</span>
-              <input className={styles.input} value={liveComposer.reason} onChange={(event) => setLiveComposer((current) => current ? { ...current, reason: event.target.value } : current)} placeholder="Contacto dominante, tackle salvador..." />
+              <input className={styles.input} value={liveComposer.reason} onChange={(event) => setLiveComposer((current) => current ? { ...current, reason: event.target.value } : current)} placeholder={DETAIL_ACTION_LABELS[liveComposer.action]} />
             </label>
           ) : null}
         </div>
@@ -1445,7 +1497,7 @@ export default function ClubMatchWorkspace({
                           {videoExpanded && (
                             <div className={styles.fullscreenActionsDock}>
                               <div className={styles.fullscreenActionsList}>
-                                {LIVE_EVENT_ACTIONS.map((action) => (
+                                {CLUB_EVENT_PANEL_ACTIONS.map((action) => (
                                   <button
                                     key={action.id}
                                     type="button"
@@ -1506,17 +1558,28 @@ export default function ClubMatchWorkspace({
 
                   {liveSubview === 'eventos' ? (
                     <div className={styles.liveConsole}>
-                      <div className={styles.liveActionGrid}>
-                        {LIVE_EVENT_ACTIONS.map((action) => (
-                          <button
-                            key={action.id}
-                            type="button"
-                            className={`${styles.liveActionBtn} ${styles[`liveActionBtn${action.tone.charAt(0).toUpperCase()}${action.tone.slice(1)}`]} ${liveComposer?.action === action.id ? styles.liveActionBtnActive : ''}`}
-                            onClick={() => openLiveComposer(action.id)}
-                          >
-                            <span className={styles.liveActionGlyph}>{action.glyph}</span>
-                            <span>{action.label}</span>
-                          </button>
+                      <div className={styles.liveEventPanel}>
+                        {CLUB_EVENT_PANEL_GROUPS.map((group) => (
+                          <section key={group.group} className={styles.liveEventGroup}>
+                            <div className={styles.liveEventGroupHeader}>
+                              <span>{group.group}</span>
+                              <small>{group.actions.length} eventos</small>
+                            </div>
+                            <div className={styles.liveActionGrid}>
+                              {group.actions.map((action) => (
+                                <button
+                                  key={action.id}
+                                  type="button"
+                                  className={`${styles.liveActionBtn} ${styles[`liveActionBtn${action.tone.charAt(0).toUpperCase()}${action.tone.slice(1)}`]} ${liveComposer?.action === action.id ? styles.liveActionBtnActive : ''}`}
+                                  onClick={() => openLiveComposer(action.id)}
+                                >
+                                  <span className={styles.liveActionGlyph}>{action.glyph}</span>
+                                  <span className={styles.liveActionLabel}>{action.label}</span>
+                                  <small className={styles.liveActionMeta}>{action.meta}</small>
+                                </button>
+                              ))}
+                            </div>
+                          </section>
                         ))}
                       </div>
 
@@ -1524,7 +1587,7 @@ export default function ClubMatchWorkspace({
                         <div className={styles.liveComposerCard}>
                           <div className={styles.liveComposerHeader}>
                             <div>
-                              <h3>{liveComposer.mode === 'edit' ? 'Editar evento' : `Nuevo ${LIVE_EVENT_ACTIONS.find((action) => action.id === liveComposer.action)?.label || 'evento'}`}</h3>
+                              <h3>{liveComposer.mode === 'edit' ? 'Editar evento' : `Nuevo ${CLUB_EVENT_PANEL_ACTIONS.find((action) => action.id === liveComposer.action)?.label || 'evento'}`}</h3>
                               <p>Formulario corto para operar el partido con la menor fricción posible.</p>
                             </div>
                             <button className={styles.miniBtn} type="button" onClick={() => setLiveComposer(null)}>
@@ -1565,7 +1628,7 @@ export default function ClubMatchWorkspace({
                               </select>
                             </label>
 
-                            {(liveComposer.action === 'try' || liveComposer.action === 'conversion' || liveComposer.action === 'tackle' || liveComposer.action === 'card' || liveComposer.action === 'knock_on' || liveComposer.action === 'forward_pass' || liveComposer.action === 'penalty_try' || liveComposer.action === 'kick' || liveComposer.action === 'ruck' || liveComposer.action === 'pass' || liveComposer.action === 'entradas_22') ? (
+                            {isPlayerSelectionAction(liveComposer.action) ? (
                               <label className={styles.field}>
                                 <span>Jugador</span>
                                 <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
@@ -1613,7 +1676,7 @@ export default function ClubMatchWorkspace({
                               </>
                             ) : null}
 
-                            {(liveComposer.action === 'scrum' || liveComposer.action === 'line') ? (
+                            {(liveComposer.action === 'scrum' || liveComposer.action === 'line' || liveComposer.action === 'maul') ? (
                               <>
                                 <label className={styles.field}>
                                   <span>Jugador</span>
@@ -1633,7 +1696,7 @@ export default function ClubMatchWorkspace({
                               </>
                             ) : null}
 
-                            {liveComposer.action === 'conversion' ? (
+                            {(liveComposer.action === 'conversion' || liveComposer.action === 'drop_goal') ? (
                               <label className={styles.field}>
                                 <span>Resultado</span>
                                 <select className={styles.select} value={liveComposer.outcome} onChange={(event) => setLiveComposer((current) => current ? { ...current, outcome: event.target.value } : current)}>
@@ -1684,6 +1747,18 @@ export default function ClubMatchWorkspace({
                               </>
                             ) : null}
 
+                            {liveComposer.action === 'penalty_committed' ? (
+                              <label className={styles.field}>
+                                <span>Motivo del penal</span>
+                                <select className={styles.select} value={liveComposer.penaltyReason} onChange={(event) => setLiveComposer((current) => current ? { ...current, penaltyReason: event.target.value } : current)}>
+                                  <option value="">Seleccionar motivo</option>
+                                  {PENALTY_REASONS.map((reason) => (
+                                    <option key={reason.value} value={reason.value}>{reason.label}</option>
+                                  ))}
+                                </select>
+                              </label>
+                            ) : null}
+
                             {liveComposer.action === 'free_kick' ? (
                               <>
                                 <label className={styles.field}>
@@ -1722,7 +1797,7 @@ export default function ClubMatchWorkspace({
                               </label>
                             ) : null}
 
-                            {liveComposer.action === 'card' ? (
+                            {(liveComposer.action === 'card' || liveComposer.action === 'card_yellow' || liveComposer.action === 'card_red') ? (
                               <>
                                 <label className={styles.field}>
                                   <span>Tipo</span>
@@ -1749,7 +1824,7 @@ export default function ClubMatchWorkspace({
                               </label>
                             ) : null}
 
-                            {liveComposer.action === 'line' ? (
+                            {(liveComposer.action === 'line' || liveComposer.action === 'maul') ? (
                               <label className={styles.field}>
                                 <span>Resultado</span>
                                 <select className={styles.select} value={liveComposer.followUpOutcome} onChange={(event) => setLiveComposer((current) => current ? { ...current, followUpOutcome: event.target.value as 'won' | 'lost' | '' } : current)}>
@@ -1849,10 +1924,10 @@ export default function ClubMatchWorkspace({
                               </>
                             ) : null}
 
-                            {liveComposer.action === 'tackle' ? (
+                            {DETAIL_ACTION_LABELS[liveComposer.action] ? (
                               <label className={styles.field}>
                                 <span>Detalle</span>
-                                <input className={styles.input} value={liveComposer.reason} onChange={(event) => setLiveComposer((current) => current ? { ...current, reason: event.target.value } : current)} placeholder="Contacto dominante, tackle salvador..." />
+                                <input className={styles.input} value={liveComposer.reason} onChange={(event) => setLiveComposer((current) => current ? { ...current, reason: event.target.value } : current)} placeholder={DETAIL_ACTION_LABELS[liveComposer.action]} />
                               </label>
                             ) : null}
                           </div>

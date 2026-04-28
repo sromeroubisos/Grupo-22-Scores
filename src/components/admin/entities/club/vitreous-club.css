@@ -7616,3 +7616,263 @@
         width: 100%;
     }
 }
+
+/* ── Club Season Stats Panel ── */
+.club-season-stats {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.club-season-stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.club-season-stats-header h3 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+
+.club-season-stats-sub {
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.club-season-stats-legend {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.club-season-stats-legend .legend-club {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #34d399;
+}
+
+.club-season-stats-legend .legend-club::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.club-season-stats-legend .legend-rivals {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #60a5fa;
+}
+
+.club-season-stats-legend .legend-rivals::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.club-season-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.9rem;
+}
+
+.club-season-kpi-card {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+        rgba(255, 255, 255, 0.015);
+    padding: 1rem;
+    display: grid;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.club-season-kpi-label {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.club-season-kpi-values {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.club-season-kpi-values .club {
+    color: #34d399;
+}
+
+.club-season-kpi-values .rivals {
+    color: #60a5fa;
+}
+
+.club-season-kpi-values .sep {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.club-season-categories {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.5rem;
+}
+
+.club-season-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.club-season-cat:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+}
+
+.club-season-cat.active {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.25);
+    color: #bfdbfe;
+}
+
+.club-season-category-body {
+    min-height: 200px;
+}
+
+.season-stat-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.season-stat-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 200px) 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.season-stat-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.season-stat-bar-wrap {
+    min-width: 0;
+}
+
+.season-stat-track {
+    position: relative;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+}
+
+.season-stat-track.dual {
+    gap: 2px;
+    background: transparent;
+}
+
+.season-stat-fill {
+    height: 100%;
+    transition: width 0.5s ease;
+    border-radius: 4px;
+}
+
+.season-stat-fill.club {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.season-stat-fill.rivals {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.season-stat-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.season-stat-values {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 80px;
+    justify-content: flex-end;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.season-stat-values .club-value {
+    color: #34d399;
+    min-width: 36px;
+    text-align: right;
+}
+
+.season-stat-values .rivals-value {
+    color: #60a5fa;
+    min-width: 36px;
+    text-align: right;
+}
+
+@media (max-width: 640px) {
+    .season-stat-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .season-stat-values {
+        justify-content: flex-start;
+    }
+
+    .club-season-stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

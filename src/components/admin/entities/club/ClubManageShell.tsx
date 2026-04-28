@@ -33,6 +33,7 @@ import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
 import { buildClubManageHref, pushClubManageHistoryState, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 import { ClubMobileConsole } from './ClubMobileConsole';
 import { ClubMobileGeneralOverview } from './ClubMobileGeneralOverview';
+import { buildTeamLogoProxyUrl, isTeamLogoProxyUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 import './vitreous-club.css';
 
@@ -68,6 +69,9 @@ interface ClubManageShellProps {
 
 type DashboardDataByMode = Record<ClubDashboardMode, ClubDashboardOverview | null>;
 type DashboardFlagByMode = Record<ClubDashboardMode, boolean>;
+type BuildClubManagePayloadOptions = {
+    includeLogoUrl?: boolean;
+};
 
 const PERSISTENT_CLUB_TABS = new Set<ClubManageTabId>([
     'planteles',
@@ -174,7 +178,7 @@ async function fetchClubDashboardData(clubId: string, mode: ClubDashboardMode): 
         });
         const response = await fetch(`/api/club-admin/dashboard?${params.toString()}`, {
             credentials: 'same-origin',
-            cache: 'no-store',
+            cache: 'force-cache',
         });
         const payload = await readJsonOrThrow<{ ok?: boolean; data?: ClubDashboardOverview; error?: string }>(response);
         return payload.data ?? EMPTY_CLUB_DASHBOARD_OVERVIEW;
@@ -229,21 +233,46 @@ function normalizeNullableText(value: unknown) {
     return trimmed.length > 0 ? trimmed : null;
 }
 
-function buildClubManagePayload(form: ClubFormState): ClubUpdateInput {
+function prepareClubFormForClient(data: ClubRow | null): ClubFormState {
+    const initialForm = createInitialClubForm(data);
+    const clubName = initialForm.name || initialForm.short_name || 'Club';
+    const logoUrl = resolveSerializableLogoUrl(initialForm.logo_url, {
+        key: initialForm.id,
+        name: clubName,
+    }) ?? buildTeamLogoProxyUrl({
+        key: initialForm.id,
+        name: clubName,
+    });
+
     return {
-        core: {
-            name: typeof form.name === 'string' ? form.name : '',
-            short_name: normalizeNullableText(form.short_name) as string | null,
-            slug: typeof form.slug === 'string' ? form.slug : '',
-            sport: typeof form.sport === 'string' ? form.sport : '',
-            country: typeof form.country === 'string' ? form.country : '',
-            region: normalizeNullableText(form.region) as string | null,
-            city: normalizeNullableText(form.city) as string | null,
-            union_id: normalizeNullableText(form.union_id) as string | null,
-            logo_url: normalizeNullableText(form.logo_url) as string | null,
-            primary_color: normalizeNullableText(form.primary_color) as string | null,
-            visibility: form.is_visible === false ? 'hidden' : 'visible',
-        },
+        ...initialForm,
+        logo_url: logoUrl ?? initialForm.logo_url,
+    };
+}
+
+function buildClubManagePayload(
+    form: ClubFormState,
+    options: BuildClubManagePayloadOptions = {}
+): ClubUpdateInput {
+    const core: NonNullable<ClubUpdateInput['core']> = {
+        name: typeof form.name === 'string' ? form.name : '',
+        short_name: normalizeNullableText(form.short_name) as string | null,
+        slug: typeof form.slug === 'string' ? form.slug : '',
+        sport: typeof form.sport === 'string' ? form.sport : '',
+        country: typeof form.country === 'string' ? form.country : '',
+        region: normalizeNullableText(form.region) as string | null,
+        city: normalizeNullableText(form.city) as string | null,
+        union_id: normalizeNullableText(form.union_id) as string | null,
+        primary_color: normalizeNullableText(form.primary_color) as string | null,
+        visibility: form.is_visible === false ? 'hidden' : 'visible',
+    };
+
+    if (options.includeLogoUrl && !isTeamLogoProxyUrl(form.logo_url)) {
+        core.logo_url = normalizeNullableText(form.logo_url) as string | null;
+    }
+
+    return {
+        core,
     };
 }
 
@@ -340,8 +369,9 @@ export function ClubManageShell({
 
     const [isDirty, setIsDirty] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [logoUrlTouched, setLogoUrlTouched] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-    const [form, setForm] = useState<ClubFormState>(createInitialClubForm(data));
+    const [form, setForm] = useState<ClubFormState>(prepareClubFormForClient(data));
     const [mountedTabs, setMountedTabs] = useState<ClubManageTabId[]>(
         PERSISTENT_CLUB_TABS.has(initialTab) ? [initialTab] : []
     );
@@ -359,8 +389,9 @@ export function ClubManageShell({
     const [isFetchingDivisions, setIsFetchingDivisions] = useState(false);
 
     useEffect(() => {
-        setForm(createInitialClubForm(data));
+        setForm(prepareClubFormForClient(data));
         setIsDirty(false);
+        setLogoUrlTouched(false);
     }, [data, id]);
 
     useEffect(() => {
@@ -565,6 +596,9 @@ export function ClubManageShell({
             const customEvent = event as CustomEvent<Partial<ClubRow>>;
             if (customEvent.detail) {
                 setForm((current) => ({ ...current, ...customEvent.detail }));
+                if (Object.prototype.hasOwnProperty.call(customEvent.detail, 'logo_url')) {
+                    setLogoUrlTouched(true);
+                }
                 setIsDirty(true);
             }
         };
@@ -608,7 +642,7 @@ export function ClubManageShell({
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',
-                body: JSON.stringify(buildClubManagePayload(form)),
+                body: JSON.stringify(buildClubManagePayload(form, { includeLogoUrl: logoUrlTouched })),
             });
             const payload = await response.json() as ManageClubRouteResponse;
 
@@ -616,8 +650,9 @@ export function ClubManageShell({
                 throw new Error(buildSaveErrorMessage(payload));
             }
 
-            setForm(payload.data.core as unknown as ClubRow);
+            setForm(prepareClubFormForClient(payload.data.core as unknown as ClubRow));
             setIsDirty(false);
+            setLogoUrlTouched(false);
             window.dispatchEvent(new CustomEvent('club:save-success'));
             router.refresh();
             setToast({ message: 'Cambios guardados correctamente', type: 'success' });

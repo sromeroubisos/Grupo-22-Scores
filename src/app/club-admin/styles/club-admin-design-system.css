@@ -1,0 +1,643 @@
+/* ==========================================================================
+   CLUB ADMIN DESIGN SYSTEM v1.0
+   --------------------------------------------------------------------------
+   Sistema visual unificado para Club Admin.
+
+   Principios:
+   - Hereda tokens globales de globals.css
+   - Sobrescribe solo lo necesario para consistencia de Club Admin
+   - Todos los colores usan variables CSS para soportar dark/light
+   - Un solo archivo de tokens; los componentes usan estas variables
+   ========================================================================== */
+
+/* ----- Club Admin Design Tokens ----- */
+.club-admin-scope,
+[data-club-admin="true"] {
+  /* Accent: usamos el azul del club como primario, pero conectado al sistema */
+  --ca-accent: #3b82f6;
+  --ca-accent-hover: #2563eb;
+  --ca-accent-glow: rgba(59, 130, 246, 0.35);
+  --ca-accent-subtle: rgba(59, 130, 246, 0.12);
+  --ca-accent-tertiary: #f43f5e;
+
+  /* Backgrounds (heredan del tema global) */
+  --ca-bg: var(--color-bg-primary, #0a0a0b);
+  --ca-surface: var(--color-bg-secondary, #121214);
+  --ca-surface-elevated: var(--color-bg-tertiary, #1c1c1f);
+  --ca-surface-hover: var(--color-bg-hover, #2a2a2e);
+
+  /* Borders */
+  --ca-border: var(--color-border, #2a2a2e);
+  --ca-border-light: var(--color-border-light, #3f3f46);
+  --ca-border-focus: rgba(59, 130, 246, 0.5);
+
+  /* Text */
+  --ca-text: var(--color-text-primary, #f2f2f2);
+  --ca-text-secondary: var(--color-text-secondary, #a1a1aa);
+  --ca-text-muted: var(--color-text-muted, #52525b);
+
+  /* Semantic */
+  --ca-success: var(--color-success, #22c55e);
+  --ca-warning: var(--color-warning, #f59e0b);
+  --ca-danger: var(--color-error, #ef4444);
+  --ca-info: var(--color-info, #3b82f6);
+
+  /* Shadows */
+  --ca-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ca-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --ca-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --ca-shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --ca-shadow-glow: 0 0 20px var(--ca-accent-glow);
+
+  /* Spacing scale (unificado) */
+  --ca-space-1: 0.25rem;  /* 4px */
+  --ca-space-2: 0.5rem;   /* 8px */
+  --ca-space-3: 0.75rem;  /* 12px */
+  --ca-space-4: 1rem;     /* 16px */
+  --ca-space-5: 1.25rem;  /* 20px */
+  --ca-space-6: 1.5rem;   /* 24px */
+  --ca-space-8: 2rem;     /* 32px */
+  --ca-space-10: 2.5rem;  /* 40px */
+  --ca-space-12: 3rem;    /* 48px */
+
+  /* Border radius */
+  --ca-radius-sm: 0.375rem;  /* 6px */
+  --ca-radius-md: 0.5rem;    /* 8px */
+  --ca-radius-lg: 0.75rem;   /* 12px */
+  --ca-radius-xl: 1rem;      /* 16px */
+  --ca-radius-2xl: 1.5rem;   /* 24px */
+  --ca-radius-full: 9999px;
+
+  /* Typography */
+  --ca-font-sans: 'Inter', 'Outfit', system-ui, sans-serif;
+  --ca-font-mono: 'JetBrains Mono', 'SFMono-Regular', ui-monospace, monospace;
+  --ca-text-xs: 0.75rem;     /* 12px */
+  --ca-text-sm: 0.875rem;    /* 14px */
+  --ca-text-base: 1rem;      /* 16px */
+  --ca-text-lg: 1.125rem;    /* 18px */
+  --ca-text-xl: 1.25rem;     /* 20px */
+  --ca-text-2xl: 1.5rem;     /* 24px */
+  --ca-text-3xl: 1.875rem;   /* 30px */
+
+  /* Transitions */
+  --ca-transition-fast: 150ms ease;
+  --ca-transition-base: 250ms ease;
+}
+
+/* ----- Light theme overrides ----- */
+[data-theme="light"] .club-admin-scope,
+[data-theme="light"] [data-club-admin="true"] {
+  --ca-accent: #2563eb;
+  --ca-accent-hover: #1d4ed8;
+  --ca-accent-glow: rgba(37, 99, 235, 0.25);
+  --ca-accent-subtle: rgba(37, 99, 235, 0.1);
+  --ca-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ==========================================================================
+   COMPONENT TOKENS
+   ========================================================================== */
+
+/* Buttons */
+.club-admin-scope .ca-btn,
+[data-club-admin="true"] .ca-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ca-space-2);
+  padding: var(--ca-space-2) var(--ca-space-4);
+  border-radius: var(--ca-radius-lg);
+  font-family: var(--ca-font-sans);
+  font-size: var(--ca-text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: all var(--ca-transition-fast);
+  white-space: nowrap;
+  border: 1px solid transparent;
+  text-decoration: none;
+  user-select: none;
+}
+
+.club-admin-scope .ca-btn:disabled,
+[data-club-admin="true"] .ca-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.club-admin-scope .ca-btn--secondary,
+[data-club-admin="true"] .ca-btn--secondary {
+  background: var(--ca-surface-elevated);
+  color: var(--ca-text);
+  border-color: var(--ca-border);
+}
+
+.club-admin-scope .ca-btn--secondary:hover:not(:disabled),
+[data-club-admin="true"] .ca-btn--secondary:hover:not(:disabled) {
+  background: var(--ca-surface-hover);
+  border-color: var(--ca-border-light);
+}
+
+.club-admin-scope .ca-btn--primary,
+[data-club-admin="true"] .ca-btn--primary {
+  background: var(--ca-accent);
+  color: #ffffff;
+  border-color: var(--ca-accent);
+}
+
+.club-admin-scope .ca-btn--primary:hover:not(:disabled),
+[data-club-admin="true"] .ca-btn--primary:hover:not(:disabled) {
+  background: var(--ca-accent-hover);
+  border-color: var(--ca-accent-hover);
+  box-shadow: var(--ca-shadow-glow);
+}
+
+.club-admin-scope .ca-btn--ghost,
+[data-club-admin="true"] .ca-btn--ghost {
+  background: transparent;
+  color: var(--ca-text-secondary);
+  border-color: transparent;
+}
+
+.club-admin-scope .ca-btn--ghost:hover:not(:disabled),
+[data-club-admin="true"] .ca-btn--ghost:hover:not(:disabled) {
+  background: var(--ca-surface);
+  color: var(--ca-text);
+}
+
+.club-admin-scope .ca-btn--danger,
+[data-club-admin="true"] .ca-btn--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--ca-danger);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.club-admin-scope .ca-btn--danger:hover:not(:disabled),
+[data-club-admin="true"] .ca-btn--danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Cards */
+.club-admin-scope .ca-card,
+[data-club-admin="true"] .ca-card {
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius-2xl);
+  padding: var(--ca-space-6);
+  box-shadow: var(--ca-shadow-card);
+  transition: border-color var(--ca-transition-fast), box-shadow var(--ca-transition-fast);
+}
+
+.club-admin-scope .ca-card:hover,
+[data-club-admin="true"] .ca-card:hover {
+  border-color: var(--ca-border-light);
+}
+
+.club-admin-scope .ca-card--interactive:hover,
+[data-club-admin="true"] .ca-card--interactive:hover {
+  border-color: var(--ca-accent-subtle);
+  box-shadow: 0 0 20px var(--ca-accent-glow);
+}
+
+/* Badges */
+.club-admin-scope .ca-badge,
+[data-club-admin="true"] .ca-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ca-space-1);
+  padding: var(--ca-space-1) var(--ca-space-3);
+  border-radius: var(--ca-radius-full);
+  font-family: var(--ca-font-sans);
+  font-size: var(--ca-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.club-admin-scope .ca-badge--default,
+[data-club-admin="true"] .ca-badge--default {
+  background: var(--ca-surface-elevated);
+  color: var(--ca-text-secondary);
+  border-color: var(--ca-border);
+}
+
+.club-admin-scope .ca-badge--success,
+[data-club-admin="true"] .ca-badge--success {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--ca-success);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.club-admin-scope .ca-badge--warning,
+[data-club-admin="true"] .ca-badge--warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--ca-warning);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.club-admin-scope .ca-badge--danger,
+[data-club-admin="true"] .ca-badge--danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--ca-danger);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.club-admin-scope .ca-badge--info,
+[data-club-admin="true"] .ca-badge--info {
+  background: var(--ca-accent-subtle);
+  color: var(--ca-accent);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.club-admin-scope .ca-badge--live,
+[data-club-admin="true"] .ca-badge--live {
+  background: rgba(244, 63, 94, 0.12);
+  color: #fecdd3;
+  border-color: rgba(244, 63, 94, 0.25);
+}
+
+[data-theme="light"] .club-admin-scope .ca-badge--live,
+[data-theme="light"] [data-club-admin="true"] .ca-badge--live {
+  color: #e11d48;
+}
+
+/* Inputs */
+.club-admin-scope .ca-input,
+[data-club-admin="true"] .ca-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 var(--ca-space-3);
+  border-radius: var(--ca-radius-lg);
+  border: 1px solid var(--ca-border);
+  background: var(--ca-surface-elevated);
+  color: var(--ca-text);
+  font-family: var(--ca-font-sans);
+  font-size: var(--ca-text-sm);
+  transition: border-color var(--ca-transition-fast), box-shadow var(--ca-transition-fast);
+  outline: none;
+}
+
+.club-admin-scope .ca-input::placeholder,
+[data-club-admin="true"] .ca-input::placeholder {
+  color: var(--ca-text-muted);
+}
+
+.club-admin-scope .ca-input:hover,
+[data-club-admin="true"] .ca-input:hover {
+  border-color: var(--ca-border-light);
+}
+
+.club-admin-scope .ca-input:focus,
+[data-club-admin="true"] .ca-input:focus {
+  border-color: var(--ca-accent);
+  box-shadow: 0 0 0 3px var(--ca-accent-subtle);
+}
+
+.club-admin-scope .ca-input:disabled,
+[data-club-admin="true"] .ca-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Select */
+.club-admin-scope .ca-select,
+[data-club-admin="true"] .ca-select {
+  width: 100%;
+  height: 42px;
+  padding: 0 var(--ca-space-3);
+  border-radius: var(--ca-radius-lg);
+  border: 1px solid var(--ca-border);
+  background: var(--ca-surface-elevated);
+  color: var(--ca-text);
+  font-family: var(--ca-font-sans);
+  font-size: var(--ca-text-sm);
+  transition: border-color var(--ca-transition-fast), box-shadow var(--ca-transition-fast);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.club-admin-scope .ca-select:focus,
+[data-club-admin="true"] .ca-select:focus {
+  border-color: var(--ca-accent);
+  box-shadow: 0 0 0 3px var(--ca-accent-subtle);
+}
+
+/* Textarea */
+.club-admin-scope .ca-textarea,
+[data-club-admin="true"] .ca-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: var(--ca-space-3);
+  border-radius: var(--ca-radius-lg);
+  border: 1px solid var(--ca-border);
+  background: var(--ca-surface-elevated);
+  color: var(--ca-text);
+  font-family: var(--ca-font-sans);
+  font-size: var(--ca-text-sm);
+  resize: vertical;
+  transition: border-color var(--ca-transition-fast), box-shadow var(--ca-transition-fast);
+  outline: none;
+}
+
+.club-admin-scope .ca-textarea:focus,
+[data-club-admin="true"] .ca-textarea:focus {
+  border-color: var(--ca-accent);
+  box-shadow: 0 0 0 3px var(--ca-accent-subtle);
+}
+
+/* Labels */
+.club-admin-scope .ca-label,
+[data-club-admin="true"] .ca-label {
+  display: block;
+  margin-bottom: var(--ca-space-2);
+  font-size: var(--ca-text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ca-text-secondary);
+}
+
+/* Modals / Overlays */
+.club-admin-scope .ca-modal-backdrop,
+[data-club-admin="true"] .ca-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ca-space-4);
+}
+
+.club-admin-scope .ca-modal,
+[data-club-admin="true"] .ca-modal {
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius-2xl);
+  padding: var(--ca-space-6);
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--ca-shadow-lg);
+}
+
+.club-admin-scope .ca-modal--sm,
+[data-club-admin="true"] .ca-modal--sm {
+  max-width: 400px;
+}
+
+.club-admin-scope .ca-modal--lg,
+[data-club-admin="true"] .ca-modal--lg {
+  max-width: 720px;
+}
+
+/* Empty / Error states */
+.club-admin-scope .ca-empty-state,
+[data-club-admin="true"] .ca-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--ca-space-8);
+  text-align: center;
+}
+
+.club-admin-scope .ca-empty-state__card,
+[data-club-admin="true"] .ca-empty-state__card {
+  max-width: 36rem;
+  width: 100%;
+}
+
+.club-admin-scope .ca-empty-state__kicker,
+[data-club-admin="true"] .ca-empty-state__kicker {
+  font-size: var(--ca-text-xs);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ca-accent);
+}
+
+.club-admin-scope .ca-empty-state__title,
+[data-club-admin="true"] .ca-empty-state__title {
+  margin-top: var(--ca-space-4);
+  font-size: var(--ca-text-3xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ca-text);
+  line-height: 1.2;
+}
+
+.club-admin-scope .ca-empty-state__text,
+[data-club-admin="true"] .ca-empty-state__text {
+  margin-top: var(--ca-space-3);
+  font-size: var(--ca-text-sm);
+  color: var(--ca-text-secondary);
+  line-height: 1.6;
+}
+
+.club-admin-scope .ca-empty-state__actions,
+[data-club-admin="true"] .ca-empty-state__actions {
+  margin-top: var(--ca-space-6);
+  display: flex;
+  gap: var(--ca-space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Tables */
+.club-admin-scope .ca-table,
+[data-club-admin="true"] .ca-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ca-text-sm);
+}
+
+.club-admin-scope .ca-table th,
+[data-club-admin="true"] .ca-table th {
+  text-align: left;
+  padding: var(--ca-space-3) var(--ca-space-4);
+  font-size: var(--ca-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ca-text-secondary);
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.club-admin-scope .ca-table td,
+[data-club-admin="true"] .ca-table td {
+  padding: var(--ca-space-3) var(--ca-space-4);
+  color: var(--ca-text);
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.club-admin-scope .ca-table tr:hover td,
+[data-club-admin="true"] .ca-table tr:hover td {
+  background: var(--ca-surface-hover);
+}
+
+/* Focus visible global para accesibilidad */
+.club-admin-scope *:focus-visible,
+[data-club-admin="true"] *:focus-visible {
+  outline: 2px solid var(--ca-accent);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+.club-admin-scope ::-webkit-scrollbar,
+[data-club-admin="true"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.club-admin-scope ::-webkit-scrollbar-track,
+[data-club-admin="true"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.club-admin-scope ::-webkit-scrollbar-thumb,
+[data-club-admin="true"] ::-webkit-scrollbar-thumb {
+  background: var(--ca-border);
+  border-radius: var(--ca-radius-full);
+}
+
+.club-admin-scope ::-webkit-scrollbar-thumb:hover,
+[data-club-admin="true"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--ca-border-light);
+}
+
+/* Toasts */
+.club-admin-scope .ca-toast-container,
+[data-club-admin="true"] .ca-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.club-admin-scope .ca-toast,
+[data-club-admin="true"] .ca-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: var(--ca-radius-lg);
+    font-size: var(--ca-text-sm);
+    font-weight: 600;
+    color: var(--ca-text);
+    background: var(--ca-surface-elevated);
+    border: 1px solid var(--ca-border);
+    box-shadow: var(--ca-shadow-lg);
+    backdrop-filter: blur(10px);
+    animation: caToastIn 0.3s ease;
+    pointer-events: auto;
+    min-width: 260px;
+    max-width: 400px;
+}
+
+.club-admin-scope .ca-toast--success,
+[data-club-admin="true"] .ca-toast--success {
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.club-admin-scope .ca-toast--success .ca-toast__icon,
+[data-club-admin="true"] .ca-toast--success .ca-toast__icon {
+    color: var(--ca-success);
+}
+
+.club-admin-scope .ca-toast--error,
+[data-club-admin="true"] .ca-toast--error {
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.club-admin-scope .ca-toast--error .ca-toast__icon,
+[data-club-admin="true"] .ca-toast--error .ca-toast__icon {
+    color: var(--ca-danger);
+}
+
+.club-admin-scope .ca-toast--info .ca-toast__icon,
+[data-club-admin="true"] .ca-toast--info .ca-toast__icon {
+    color: var(--ca-accent);
+}
+
+@keyframes caToastIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .club-admin-scope .ca-toast-container,
+    [data-club-admin="true"] .ca-toast-container {
+        top: auto;
+        bottom: 24px;
+        right: 16px;
+        left: 16px;
+    }
+
+    .club-admin-scope .ca-toast,
+    [data-club-admin="true"] .ca-toast {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .club-admin-scope *,
+  .club-admin-scope *::before,
+  .club-admin-scope *::after,
+  [data-club-admin="true"] *,
+  [data-club-admin="true"] *::before,
+  [data-club-admin="true"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .club-admin-scope .ca-empty-state,
+  [data-club-admin="true"] .ca-empty-state {
+    padding: var(--ca-space-4);
+  }
+
+  .club-admin-scope .ca-empty-state__title,
+  [data-club-admin="true"] .ca-empty-state__title {
+    font-size: var(--ca-text-2xl);
+  }
+
+  .club-admin-scope .ca-modal,
+  [data-club-admin="true"] .ca-modal {
+    margin: var(--ca-space-4);
+    padding: var(--ca-space-4);
+  }
+
+  .club-admin-scope .ca-card,
+  [data-club-admin="true"] .ca-card {
+    padding: var(--ca-space-4);
+  }
+}

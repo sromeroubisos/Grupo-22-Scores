@@ -111,10 +111,10 @@ export function ClubMobileGeneralOverview({
 
             <div className="club-mobile-quick-actions">
                 <Link
-                    href={buildClubManageHref(clubId, 'equipos', navigationMode)}
+                    href={buildClubManageHref(clubId, 'configuracion', navigationMode)}
                     className="club-mobile-action"
                     prefetch={false}
-                    onClick={(event) => handleTabLinkClick(event, 'equipos')}
+                    onClick={(event) => handleTabLinkClick(event, 'configuracion')}
                 >
                     <ShieldCheck className="w-4 h-4" />
                     <span>Editar identidad</span>

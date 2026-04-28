@@ -16,13 +16,16 @@ export function ClubAdminToast({ message, type = 'info', onClose, duration = 350
     return () => clearTimeout(t);
   }, [onClose, duration]);
 
-  const icon = type === 'success' ? <CheckCircle size={18} /> : type === 'error' ? <AlertCircle size={18} /> : <Info size={18} />;
-  const className = `club-admin-toast ${type}`;
+  const icon = type === 'success'
+    ? <CheckCircle size={18} className="ca-toast__icon" />
+    : type === 'error'
+    ? <AlertCircle size={18} className="ca-toast__icon" />
+    : <Info size={18} className="ca-toast__icon" />;
 
   return (
-    <div className={className} role="status" aria-live="polite">
-      <span className="club-admin-toast-icon">{icon}</span>
-      <span className="club-admin-toast-message">{message}</span>
+    <div className={`ca-toast ca-toast--${type}`} role="status" aria-live="polite">
+      <span className="ca-toast__icon">{icon}</span>
+      <span className="ca-toast__message">{message}</span>
     </div>
   );
 }

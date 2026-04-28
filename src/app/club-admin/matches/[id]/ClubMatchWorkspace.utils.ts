@@ -1,6 +1,6 @@
 import styles from './ClubMatchWorkspace.module.css';
 import {
-  formatMatchTimelineEventDescription,
+  formatGoalKickDetailPrefix,
   isGoalKickAttemptEvent,
   isGoalKickMade,
   parseKickMetersFromDetail,
@@ -12,10 +12,10 @@ import type {
   ClubLiveEvent,
   ClubLineupsState,
   ClubMediaPlan,
-  Division,
   LiveActionType,
   LiveComposerState,
   LivePhase,
+  LiveSubview,
   MatchClockState,
   MatchData,
   MatchDraftState,
@@ -49,6 +49,7 @@ export const LEGACY_EVENT_TYPES = [
   { value: 'try', label: 'Try' },
   { value: 'card_yellow', label: 'Amarilla' },
   { value: 'card_red', label: 'Roja' },
+  { value: 'penalty_committed', label: 'Penal cometido' },
   { value: 'substitution', label: 'Cambio' },
   { value: 'injury', label: 'Lesión' },
   { value: 'note', label: 'Nota' },
@@ -58,7 +59,9 @@ export const EVENT_TYPES = [
   { value: 'try', label: 'Try' },
   { value: 'penalty_try', label: 'Penalty Try' },
   { value: 'conversion', label: 'Conversión' },
-  { value: 'penalty', label: 'Penal' },
+  { value: 'penalty', label: 'Penal a los palos' },
+  { value: 'drop_goal', label: 'Drop' },
+  { value: 'penalty_committed', label: 'Penal cometido' },
   { value: 'scrum', label: 'Scrum' },
   { value: 'line', label: 'Line' },
   { value: 'free_kick', label: 'Free Kick' },
@@ -67,7 +70,13 @@ export const EVENT_TYPES = [
   { value: 'kick', label: 'Kick' },
   { value: 'knock_on', label: 'Knock On' },
   { value: 'forward_pass', label: 'Pase Forward' },
+  { value: 'handling_error', label: 'Error manejo' },
+  { value: 'turnover_lost', label: 'Turnover perdido' },
+  { value: 'injury', label: 'Lesion' },
   { value: 'tackle', label: 'Tackle' },
+  { value: 'maul', label: 'Maul' },
+  { value: 'recovery', label: 'Recuperacion' },
+  { value: 'turnover_won', label: 'Turnover ganado' },
   { value: 'pass', label: 'Pase' },
   { value: 'substitution', label: 'Sustitución' },
   { value: 'match_start', label: 'Inicio Partido' },
@@ -115,6 +124,74 @@ export const LIVE_EVENT_ACTIONS: Array<{
   { id: 'match_end', label: 'Fin', glyph: 'FN', tone: 'red' },
   { id: 'entradas_22', label: 'Entradas en 22', glyph: '22', tone: 'green' },
 ];
+
+type LiveEventActionTone = 'green' | 'yellow' | 'blue' | 'neutral' | 'red' | 'brown';
+
+export interface LiveEventPanelAction {
+  id: LiveActionType;
+  label: string;
+  glyph: string;
+  tone: LiveEventActionTone;
+  meta: string;
+}
+
+export const CLUB_EVENT_PANEL_GROUPS: Array<{ group: string; actions: LiveEventPanelAction[] }> = [
+  {
+    group: 'Marcador',
+    actions: [
+      { id: 'try', label: 'Try', glyph: 'TR', tone: 'green', meta: '5 puntos' },
+      { id: 'penalty_try', label: 'Try penal', glyph: 'PT', tone: 'green', meta: '7 puntos' },
+      { id: 'conversion', label: 'Conversion', glyph: 'CV', tone: 'blue', meta: 'Convertida / fallada' },
+      { id: 'penalty', label: 'Penal a los palos', glyph: 'PN', tone: 'yellow', meta: 'Convertida / fallada' },
+      { id: 'drop_goal', label: 'Drop', glyph: 'DG', tone: 'blue', meta: 'Convertida / fallada' },
+    ],
+  },
+  {
+    group: 'Disciplina',
+    actions: [
+      { id: 'card_yellow', label: 'Amarilla', glyph: 'TA', tone: 'red', meta: 'Equipo + jugador' },
+      { id: 'card_red', label: 'Roja', glyph: 'TR', tone: 'red', meta: 'Equipo + jugador' },
+      { id: 'knock_on', label: 'Knock-on', glyph: 'KO', tone: 'yellow', meta: 'Equipo + jugador' },
+      { id: 'forward_pass', label: 'Pase forward', glyph: 'PF', tone: 'yellow', meta: 'Equipo + jugador' },
+      { id: 'penalty_committed', label: 'Penal cometido', glyph: 'PC', tone: 'yellow', meta: 'Club + motivo' },
+      { id: 'free_kick', label: 'Free Kick', glyph: 'FK', tone: 'yellow', meta: 'Equipo + jugador' },
+      { id: 'handling_error', label: 'Error manejo', glyph: 'EM', tone: 'yellow', meta: 'Equipo + jugador' },
+      { id: 'turnover_lost', label: 'Turnover perdido', glyph: 'TP', tone: 'yellow', meta: 'Equipo + jugador' },
+    ],
+  },
+  {
+    group: 'Juego',
+    actions: [
+      { id: 'injury', label: 'Lesion', glyph: 'LE', tone: 'neutral', meta: 'Equipo + jugador' },
+      { id: 'scrum', label: 'Scrum', glyph: 'SC', tone: 'brown', meta: 'Ganado / perdido' },
+      { id: 'line', label: 'Line', glyph: 'LI', tone: 'neutral', meta: 'Ganado / perdido' },
+      { id: 'tackle', label: 'Tackle', glyph: 'TK', tone: 'neutral', meta: 'Equipo + jugador' },
+      { id: 'ruck', label: 'Ruck', glyph: 'RK', tone: 'brown', meta: 'Ganado / perdido' },
+      { id: 'maul', label: 'Maul', glyph: 'ML', tone: 'brown', meta: 'Ganado / perdido' },
+      { id: 'kick', label: 'Patada', glyph: 'PK', tone: 'blue', meta: 'Equipo + jugador' },
+      { id: 'recovery', label: 'Recuperacion', glyph: 'RC', tone: 'green', meta: 'Equipo + jugador' },
+      { id: 'turnover_won', label: 'Turnover ganado', glyph: 'TG', tone: 'green', meta: 'Equipo + jugador' },
+      { id: 'entradas_22', label: 'Entradas en 22', glyph: '22', tone: 'green', meta: 'Equipo + jugador' },
+      { id: 'pass', label: 'Pase', glyph: 'PS', tone: 'blue', meta: 'Equipo + jugador' },
+    ],
+  },
+  {
+    group: 'Plantel',
+    actions: [
+      { id: 'substitution', label: 'Cambio', glyph: 'CA', tone: 'blue', meta: 'Sale / entra' },
+    ],
+  },
+  {
+    group: 'Reloj',
+    actions: [
+      { id: 'match_start', label: 'Inicio partido', glyph: 'IN', tone: 'blue', meta: 'Sin jugador' },
+      { id: 'match_half', label: 'Entretiempo', glyph: 'HT', tone: 'blue', meta: 'Sin jugador' },
+      { id: 'match_end', label: 'Final partido', glyph: 'FN', tone: 'blue', meta: 'Sin jugador' },
+    ],
+  },
+];
+
+export const CLUB_EVENT_PANEL_ACTIONS = CLUB_EVENT_PANEL_GROUPS.flatMap((group) => group.actions);
 
 export const KICK_TYPES: Array<{ value: LiveComposerState['kickType']; label: string }> = [
   { value: 'touch', label: 'Al touch' },
@@ -463,7 +540,7 @@ export function createLiveComposer(action: LiveActionType, defaults?: Partial<Li
     team: 'home',
     playerName: '',
     secondaryPlayerName: '',
-    outcome: '',
+    outcome: action === 'card_red' ? 'red' : action === 'card_yellow' ? 'yellow' : '',
     zone: '',
     reason: '',
     followUpAction: '',
@@ -489,17 +566,24 @@ export function getEventGlyph(type: string) {
   if (type === 'penalty_try') return 'PT';
   if (type === 'conversion') return 'CV';
   if (type === 'penalty') return 'PN';
+  if (type === 'penalty_committed') return 'PC';
   if (type === 'free_kick') return 'FK';
   if (type === 'tackle') return 'TK';
-  if (type === 'substitution') return 'SU';
+  if (type === 'substitution') return 'CA';
   if (type === 'scrum') return 'SC';
-  if (type === 'line') return 'LN';
+  if (type === 'line') return 'LI';
   if (type === 'knock_on') return 'KO';
   if (type === 'forward_pass') return 'PF';
+  if (type === 'handling_error') return 'EM';
+  if (type === 'turnover_lost') return 'TP';
+  if (type === 'injury') return 'LE';
   if (type === 'card_yellow') return 'TA';
   if (type === 'card_red') return 'TR';
   if (type === 'kick') return 'PK';
-  if (type === 'ruck') return 'RC';
+  if (type === 'ruck') return 'RK';
+  if (type === 'maul') return 'ML';
+  if (type === 'recovery') return 'RC';
+  if (type === 'turnover_won') return 'TG';
   if (type === 'pass') return 'PS';
   if (type === 'match_start') return 'IN';
   if (type === 'match_half') return 'HT';
@@ -511,18 +595,12 @@ export function getEventGlyph(type: string) {
 }
 
 export function getEventTone(type: string) {
-  if (type === 'try' || type === 'penalty_try') return styles.liveToneGreen;
-  if (type === 'penalty' || type === 'card_yellow' || type === 'free_kick') return styles.liveToneYellow;
-  if (type === 'conversion' || type === 'substitution') return styles.liveToneBlue;
+  if (type === 'try' || type === 'penalty_try' || type === 'recovery' || type === 'turnover_won' || type === 'entradas_22') return styles.liveToneGreen;
+  if (type === 'penalty' || type === 'penalty_committed' || type === 'card_yellow' || type === 'free_kick' || type === 'knock_on' || type === 'forward_pass' || type === 'handling_error' || type === 'turnover_lost') return styles.liveToneYellow;
+  if (type === 'conversion' || type === 'drop_goal' || type === 'substitution' || type === 'kick' || type === 'pass') return styles.liveToneBlue;
   if (type === 'card_red') return styles.liveToneRed;
-  if (type === 'scrum') return styles.liveToneBrown;
-  if (type === 'kick') return styles.liveToneBlue;
-  if (type === 'ruck') return styles.liveToneBrown;
-  if (type === 'pass') return styles.liveToneBlue;
-  if (type === 'match_start') return styles.liveToneGreen;
-  if (type === 'match_half') return styles.liveToneYellow;
-  if (type === 'match_end') return styles.liveToneRed;
-  if (type === 'entradas_22') return styles.liveToneGreen;
+  if (type === 'scrum' || type === 'ruck' || type === 'maul') return styles.liveToneBrown;
+  if (type === 'match_start' || type === 'match_half' || type === 'match_end') return styles.liveToneBlue;
   if (type === 'penalty_goal' || type === 'drop_goal') return styles.liveToneBlue;
   return styles.liveToneNeutral;
 }
@@ -563,6 +641,14 @@ export function parseKickDistance(detail: string): string {
   return m > 0 ? String(m) : '';
 }
 
+function formatGoalKickDetail(label: string, made: boolean, extras: string[] = []) {
+  return [
+    formatGoalKickDetailPrefix(made),
+    `${label} ${made ? 'convertido' : 'fallado'}`,
+    ...extras.filter(Boolean),
+  ].join(' | ');
+}
+
 export function formatPenaltyDetail(outcome: string, zone: string, playerName: string, penaltyReason: string) {
   const labels: Record<string, string> = {
     converted: 'Penal convertido',
@@ -581,13 +667,20 @@ export function formatPenaltyDetail(outcome: string, zone: string, playerName: s
 }
 
 export function getEventSummary(event: ClubLiveEvent) {
-  if (event.type === 'conversion') {
-    const made = event.detail.toLowerCase().includes('convertida') || event.detail.toLowerCase().includes('acertada');
-    return `${getEventTypeLabel(event.type)} ${made ? 'OK' : 'X'}`;
+  if (event.type === 'conversion') return `${getEventTypeLabel(event.type)} ${isGoalKickMade(event.type, event.detail) ? 'OK' : 'X'}`;
+  if (event.type === 'penalty' && isGoalKickAttemptEvent(event)) {
+    return `Penal a los palos ${isGoalKickMade(event.type, event.detail) ? 'OK' : 'X'}`;
   }
+  if (event.type === 'drop_goal') return `Drop ${isGoalKickMade(event.type, event.detail) ? 'OK' : 'X'}`;
   if (event.type === 'card_yellow') return 'Tarjeta amarilla';
   if (event.type === 'card_red') return 'Tarjeta roja';
+  if (event.type === 'penalty_committed') return 'Penal cometido';
   if (event.type === 'penalty_try') return 'Penalty Try (+7)';
+  if (event.type === 'handling_error') return 'Error de manejo';
+  if (event.type === 'turnover_lost') return 'Turnover perdido';
+  if (event.type === 'turnover_won') return 'Turnover ganado';
+  if (event.type === 'recovery') return 'Recuperacion';
+  if (event.type === 'injury') return 'Lesion';
   if (event.type === 'entradas_22') return 'Entradas en 22';
   if (event.type === 'penalty_goal') return 'Penal a los palos';
   if (event.type === 'drop_goal') return 'Drop';
@@ -669,6 +762,18 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
     };
   }
 
+  if (composer.action === 'drop_goal') {
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'drop_goal',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: formatGoalKickDetail('Drop', composer.outcome === 'made'),
+    };
+  }
+
   if (composer.action === 'free_kick') {
     const labels: Record<string, string> = {
       touch: 'Free Kick al touch',
@@ -686,15 +791,29 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
     };
   }
 
-  if (composer.action === 'card') {
+  if (composer.action === 'card' || composer.action === 'card_yellow' || composer.action === 'card_red') {
     return {
       id: composer.eventId || crypto.randomUUID(),
       minute: composer.minute,
       videoTime: composer.videoTime,
-      type: composer.outcome === 'red' ? 'card_red' : 'card_yellow',
+      type: composer.action === 'card_red' || composer.outcome === 'red' ? 'card_red' : 'card_yellow',
       team: composer.team,
       playerName: composer.playerName.trim(),
       detail: composer.reason.trim(),
+    };
+  }
+
+  if (composer.action === 'penalty_committed') {
+    const reasonLabel = PENALTY_REASONS.find((reason) => reason.value === composer.penaltyReason)?.label;
+    const detail = reasonLabel || composer.reason.trim();
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'penalty_committed',
+      team: composer.team,
+      playerName: '',
+      detail: detail ? `Penal cometido: ${detail}` : 'Penal cometido',
     };
   }
 
@@ -761,6 +880,42 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
     };
   }
 
+  if (composer.action === 'handling_error') {
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'handling_error',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: composer.reason.trim() || 'Error de manejo',
+    };
+  }
+
+  if (composer.action === 'turnover_lost') {
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'turnover_lost',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: composer.reason.trim() || 'Turnover perdido',
+    };
+  }
+
+  if (composer.action === 'injury') {
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'injury',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: composer.reason.trim() || 'Lesion',
+    };
+  }
+
   if (composer.action === 'kick') {
     const kickTypeLabel = KICK_TYPES.find((t) => t.value === composer.kickType)?.label || 'Kick';
     const parts = [kickTypeLabel];
@@ -788,6 +943,43 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
       team: composer.team,
       playerName: composer.playerName.trim(),
       detail: outcome === 'won' ? 'Ruck ganado' : outcome === 'lost' ? 'Ruck perdido' : composer.zone.trim() || 'Ruck',
+    };
+  }
+
+  if (composer.action === 'maul') {
+    const outcome = composer.followUpOutcome;
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'maul',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: outcome === 'won' ? 'Maul ganado' : outcome === 'lost' ? 'Maul perdido' : composer.zone.trim() || 'Maul',
+    };
+  }
+
+  if (composer.action === 'recovery') {
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'recovery',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: composer.reason.trim() || 'Recuperacion',
+    };
+  }
+
+  if (composer.action === 'turnover_won') {
+    return {
+      id: composer.eventId || crypto.randomUUID(),
+      minute: composer.minute,
+      videoTime: composer.videoTime,
+      type: 'turnover_won',
+      team: composer.team,
+      playerName: composer.playerName.trim(),
+      detail: composer.reason.trim() || 'Turnover ganado',
     };
   }
 
@@ -831,7 +1023,7 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
       minute: composer.minute,
       videoTime: composer.videoTime,
       type: 'match_start',
-      team: composer.team,
+      team: null,
       playerName: '',
       detail: 'Inicio del partido',
     };
@@ -843,7 +1035,7 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
       minute: composer.minute,
       videoTime: composer.videoTime,
       type: 'match_half',
-      team: composer.team,
+      team: null,
       playerName: '',
       detail: 'Entretiempo',
     };
@@ -855,7 +1047,7 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
       minute: composer.minute,
       videoTime: composer.videoTime,
       type: 'match_end',
-      team: composer.team,
+      team: null,
       playerName: '',
       detail: 'Final del partido',
     };
@@ -885,6 +1077,18 @@ export function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
     });
   }
 
+  if (event.type === 'drop_goal') {
+    return createLiveComposer('drop_goal', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      outcome: isGoalKickMade('drop_goal', event.detail) ? 'made' : 'missed',
+    });
+  }
+
   if (event.type === 'penalty') {
     return createLiveComposer('penalty', {
       mode: 'edit',
@@ -900,7 +1104,7 @@ export function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
   }
 
   if (event.type === 'card_yellow' || event.type === 'card_red') {
-    return createLiveComposer('card', {
+    return createLiveComposer(event.type, {
       mode: 'edit',
       eventId: event.id,
       minute: event.minute,
@@ -909,6 +1113,17 @@ export function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
       playerName: event.playerName,
       outcome: event.type === 'card_red' ? 'red' : 'yellow',
       reason: event.detail,
+    });
+  }
+
+  if (event.type === 'penalty_committed') {
+    return createLiveComposer('penalty_committed', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      reason: event.detail.replace(/^Penal cometido:\s*/i, ''),
     });
   }
 
@@ -996,6 +1211,42 @@ export function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
     });
   }
 
+  if (event.type === 'handling_error') {
+    return createLiveComposer('handling_error', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      reason: event.detail,
+    });
+  }
+
+  if (event.type === 'turnover_lost') {
+    return createLiveComposer('turnover_lost', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      reason: event.detail,
+    });
+  }
+
+  if (event.type === 'injury') {
+    return createLiveComposer('injury', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      reason: event.detail,
+    });
+  }
+
   if (event.type === 'free_kick') {
     return createLiveComposer('free_kick', {
       mode: 'edit',
@@ -1031,6 +1282,43 @@ export function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
       playerName: event.playerName,
       followUpOutcome: event.detail.includes('ganado') ? 'won' : event.detail.includes('perdido') ? 'lost' : '',
       zone: event.detail,
+    });
+  }
+
+  if (event.type === 'maul') {
+    return createLiveComposer('maul', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      followUpOutcome: event.detail.includes('ganado') ? 'won' : event.detail.includes('perdido') ? 'lost' : '',
+      zone: event.detail,
+    });
+  }
+
+  if (event.type === 'recovery') {
+    return createLiveComposer('recovery', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      reason: event.detail,
+    });
+  }
+
+  if (event.type === 'turnover_won') {
+    return createLiveComposer('turnover_won', {
+      mode: 'edit',
+      eventId: event.id,
+      minute: event.minute,
+      videoTime: event.videoTime || '',
+      team: event.team || 'home',
+      playerName: event.playerName,
+      reason: event.detail,
     });
   }
 
@@ -1108,13 +1396,21 @@ export function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
 }
 
 export function getLiveActionFromEventType(type: string): LiveActionType {
-  if (type === 'card_yellow' || type === 'card_red') return 'card';
+  if (type === 'card_yellow' || type === 'card_red') return type;
+  if (type === 'drop_goal') return 'drop_goal';
+  if (type === 'penalty_committed') return 'penalty_committed';
+  if (type === 'handling_error') return 'handling_error';
+  if (type === 'turnover_lost') return 'turnover_lost';
+  if (type === 'injury') return 'injury';
   if (type === 'knock_on') return 'knock_on';
   if (type === 'forward_pass') return 'forward_pass';
   if (type === 'free_kick') return 'free_kick';
   if (type === 'penalty_try') return 'penalty_try';
   if (type === 'kick') return 'kick';
   if (type === 'ruck') return 'ruck';
+  if (type === 'maul') return 'maul';
+  if (type === 'recovery') return 'recovery';
+  if (type === 'turnover_won') return 'turnover_won';
   if (type === 'pass') return 'pass';
   if (type === 'match_start') return 'match_start';
   if (type === 'match_half') return 'match_half';
@@ -1164,28 +1460,6 @@ export function applyQuickCallupLoad(source: string, existing: ClubCallup[]) {
     attendance: '',
     note: `Carga rápida ${index + 1}`,
   }));
-}
-
-interface MatchStats {
-  tries: { home: number; away: number };
-  conversions: { home: number; away: number };
-  penalties: { home: number; away: number };
-  penaltyGoals: { home: number; away: number };
-  dropGoals: { home: number; away: number };
-  penaltyTries: { home: number; away: number };
-  entradas22: { home: number; away: number };
-  freeKicks: { home: number; away: number };
-  knockOns: { home: number; away: number };
-  forwardPasses: { home: number; away: number };
-  kicks: { home: number; away: number };
-  kickMeters: { home: number; away: number };
-  rucks: { home: number; away: number };
-  passes: { home: number; away: number };
-  scrums: { home: { won: number; lost: number }; away: { won: number; lost: number } };
-  lines: { home: { won: number; lost: number }; away: { won: number; lost: number } };
-  cards: { home: { yellow: number; red: number }; away: { yellow: number; red: number } };
-  tackles: { home: number; away: number };
-  substitutions: { home: number; away: number };
 }
 
 export function normalizeVideoUrl(url: string): { type: 'iframe' | 'video' | 'unsupported'; src: string; message?: string } {
@@ -1273,11 +1547,18 @@ export function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
     penaltyTries: { home: 0, away: 0 },
     entradas22: { home: 0, away: 0 },
     freeKicks: { home: 0, away: 0 },
+    penaltiesCommitted: { home: 0, away: 0 },
+    handlingErrors: { home: 0, away: 0 },
+    turnoversWon: { home: 0, away: 0 },
+    turnoversLost: { home: 0, away: 0 },
+    recoveries: { home: 0, away: 0 },
+    injuries: { home: 0, away: 0 },
     knockOns: { home: 0, away: 0 },
     forwardPasses: { home: 0, away: 0 },
     kicks: { home: 0, away: 0 },
     kickMeters: { home: 0, away: 0 },
     rucks: { home: 0, away: 0 },
+    mauls: { home: { won: 0, lost: 0 }, away: { won: 0, lost: 0 } },
     passes: { home: 0, away: 0 },
     scrums: { home: { won: 0, lost: 0 }, away: { won: 0, lost: 0 } },
     lines: { home: { won: 0, lost: 0 }, away: { won: 0, lost: 0 } },
@@ -1298,6 +1579,12 @@ export function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
     if (event.type === 'penalty_try') stats.penaltyTries[team]++;
     if (event.type === 'entradas_22') stats.entradas22[team]++;
     if (event.type === 'free_kick') stats.freeKicks[team]++;
+    if (event.type === 'penalty_committed') stats.penaltiesCommitted[team]++;
+    if (event.type === 'handling_error') stats.handlingErrors[team]++;
+    if (event.type === 'turnover_won') stats.turnoversWon[team]++;
+    if (event.type === 'turnover_lost') stats.turnoversLost[team]++;
+    if (event.type === 'recovery') stats.recoveries[team]++;
+    if (event.type === 'injury') stats.injuries[team]++;
     if (event.type === 'knock_on') stats.knockOns[team]++;
     if (event.type === 'forward_pass') stats.forwardPasses[team]++;
     if (event.type === 'kick') {
@@ -1305,6 +1592,11 @@ export function buildMatchStats(events: ClubLiveEvent[]): MatchStats {
       stats.kickMeters[team] += parseKickMetersFromDetail(event.detail);
     }
     if (event.type === 'ruck') stats.rucks[team]++;
+    if (event.type === 'maul') {
+      if (/ganado/i.test(event.detail)) stats.mauls[team].won++;
+      else if (/perdido/i.test(event.detail)) stats.mauls[team].lost++;
+      else { stats.mauls[team].won++; stats.mauls[team].lost++; }
+    }
     if (event.type === 'pass') stats.passes[team]++;
     if (event.type === 'scrum') {
       if (/ganado/i.test(event.detail)) stats.scrums[team].won++;
@@ -1337,45 +1629,23 @@ export function formatTasa22FromStats(stats: MatchStats, team: 'home' | 'away'):
   return `${((n / d) * 100).toFixed(1)}%`;
 }
 
-interface PlayerEventStats {
-  name: string;
-  team: 'home' | 'away' | null;
-  points: number;
-  tries: number;
-  conversions: number;
-  penaltyTries: number;
-  convertedPenalties: number;
-  attackPenalties: number;
-  defensePenalties: number;
-  knockOns: number;
-  forwardPasses: number;
-  kicks: number;
-  kickMeters: number;
-  passes: number;
-  rucksFor: number;
-  rucksAgainst: number;
-  scrumsFor: number;
-  scrumsAgainst: number;
-  linesFor: number;
-  linesAgainst: number;
-  yellowCards: number;
-  redCards: number;
-  tackles: number;
-  substitutions: number;
-  notes: number;
-  total: number;
-}
-
 export const PLAYER_ATTRIBUTABLE_EVENT_TYPES = new Set<ClubLiveEvent['type']>([
   'try',
   'conversion',
   'penalty',
+  'drop_goal',
   'penalty_try',
   'free_kick',
+  'handling_error',
+  'turnover_lost',
+  'injury',
   'knock_on',
   'forward_pass',
   'kick',
   'ruck',
+  'maul',
+  'recovery',
+  'turnover_won',
   'pass',
   'card_yellow',
   'card_red',
@@ -1555,10 +1825,13 @@ export function buildPostMatchStatGroups(stats: MatchStats) {
       { label: 'Penalty Tries', home: stats.penaltyTries.home, away: stats.penaltyTries.away },
       { label: 'Conversiones', home: stats.conversions.home, away: stats.conversions.away },
       { label: 'Penales', home: stats.penalties.home, away: stats.penalties.away },
+      { label: 'Drops', home: stats.dropGoals.home, away: stats.dropGoals.away },
       { label: 'Free Kicks', home: stats.freeKicks.home, away: stats.freeKicks.away },
     ],
     juego: [
       { label: 'Entradas en 22', home: stats.entradas22.home, away: stats.entradas22.away },
+      { label: 'Recuperaciones', home: stats.recoveries.home, away: stats.recoveries.away },
+      { label: 'Turnovers ganados', home: stats.turnoversWon.home, away: stats.turnoversWon.away },
     ],
     continuity: [
       { label: 'Kicks', home: stats.kicks.home, away: stats.kicks.away },
@@ -1567,18 +1840,24 @@ export function buildPostMatchStatGroups(stats: MatchStats) {
       { label: 'Rucks', home: stats.rucks.home, away: stats.rucks.away },
       { label: 'Knock Ons', home: stats.knockOns.home, away: stats.knockOns.away },
       { label: 'Pases Forward', home: stats.forwardPasses.home, away: stats.forwardPasses.away },
+      { label: 'Errores de manejo', home: stats.handlingErrors.home, away: stats.handlingErrors.away },
+      { label: 'Turnovers perdidos', home: stats.turnoversLost.home, away: stats.turnoversLost.away },
     ],
     setPiece: [
       { label: 'Scrums ganados', home: stats.scrums.home.won, away: stats.scrums.away.won },
       { label: 'Scrums perdidos', home: stats.scrums.home.lost, away: stats.scrums.away.lost },
       { label: 'Lines ganados', home: stats.lines.home.won, away: stats.lines.away.won },
       { label: 'Lines perdidos', home: stats.lines.home.lost, away: stats.lines.away.lost },
+      { label: 'Mauls ganados', home: stats.mauls.home.won, away: stats.mauls.away.won },
+      { label: 'Mauls perdidos', home: stats.mauls.home.lost, away: stats.mauls.away.lost },
     ],
     discipline: [
       { label: 'Tackles', home: stats.tackles.home, away: stats.tackles.away },
       { label: 'Tarjetas amarillas', home: stats.cards.home.yellow, away: stats.cards.away.yellow },
       { label: 'Tarjetas rojas', home: stats.cards.home.red, away: stats.cards.away.red },
       { label: 'Sustituciones', home: stats.substitutions.home, away: stats.substitutions.away },
+      { label: 'Penales cometidos', home: stats.penaltiesCommitted.home, away: stats.penaltiesCommitted.away },
+      { label: 'Lesiones', home: stats.injuries.home, away: stats.injuries.away },
       { label: 'Penales concedidos', home: stats.penalties.away, away: stats.penalties.home },
     ],
   };

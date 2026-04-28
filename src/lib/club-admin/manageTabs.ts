@@ -13,39 +13,32 @@ export type ClubManageTabId =
 export const CLUB_MANAGE_ALLOWED_TABS = new Set<ClubManageTabId>([
     'general',
     'planteles',
-    'rendimiento',
     'competencias',
     'partidos',
     'contenido',
     'pizarra',
-    'sponsors',
-    'entrenamientos',
     'configuracion',
 ]);
 
 export const CLUB_MANAGE_DASHBOARD_TABS = new Set<ClubManageTabId>([
     'general',
-    'rendimiento',
     'competencias',
     'partidos',
     'contenido',
-    'entrenamientos',
 ]);
 
 export const CLUB_MANAGE_DIVISION_TABS = new Set<ClubManageTabId>([
     'general',
-    'rendimiento',
     'partidos',
     'planteles',
-    'entrenamientos',
 ]);
 
 export const CLUB_MANAGE_TAB_ALIASES: Record<string, ClubManageTabId> = {
     resumen: 'general',
-    gimnasio: 'rendimiento',
-    testeos: 'rendimiento',
-    fisico: 'rendimiento',
-    rendimiento: 'rendimiento',
+    gimnasio: 'general',
+    testeos: 'general',
+    fisico: 'general',
+    rendimiento: 'general',
     fixture: 'partidos',
     posiciones: 'competencias',
     identidad: 'configuracion',

@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useDeferredValue, useState, startTransition } from 'react';
+import { useDeferredValue, useState, startTransition, useCallback, useEffect, useMemo } from 'react';
 import { Calendar, ChevronRight, ClipboardList, FileBarChart2, Filter, LayoutList, NotebookPen, ShieldAlert, Sparkles, Target, Users, X } from 'lucide-react';
+import { ClubSeasonStatsPanel } from './ClubSeasonStatsPanel';
 import { getStoredActiveTeamId, persistActiveTeamId } from '@/lib/club-admin/activeTeamSelection';
 import type { ClubDashboardMatch } from '@/lib/club-admin/dashboard-types';
 import type { Division } from '@/lib/services/divisionService';
@@ -17,7 +18,7 @@ interface ClubFixtureResultsTabProps {
     loading?: boolean;
 }
 
-type MatchTimelineTab = 'upcoming' | 'played' | 'pending';
+type MatchTimelineTab = 'upcoming' | 'played' | 'pending' | 'stats';
 type MatchConditionFilter = 'all' | 'home' | 'away' | 'neutral';
 type MatchOperationalFilter = 'all' | 'callup' | 'analysis' | 'stats' | 'load';
 
@@ -58,6 +59,7 @@ const TIMELINE_TABS: Array<{ id: MatchTimelineTab; label: string }> = [
     { id: 'upcoming', label: 'Próximos' },
     { id: 'played', label: 'Jugados' },
     { id: 'pending', label: 'Pendientes' },
+    { id: 'stats', label: 'Estadísticas' },
 ];
 
 function formatDateTime(value: string | null) {
@@ -258,7 +260,6 @@ export function ClubFixtureResultsTab({
     clubName,
     divisions,
     upcomingMatches,
-    recentMatches,
     pastMatches,
     loading,
 }: ClubFixtureResultsTabProps) {
@@ -290,27 +291,49 @@ export function ClubFixtureResultsTab({
     const [creating, setCreating] = useState(false);
     const deferredRivalFilter = useDeferredValue(rivalFilter);
 
-    const selectedDivision = divisions.find((division) => division.id === selectedDivisionId) ?? getDefaultDivision(divisions);
-    const allMatches = [...upcomingMatches, ...pastMatches].filter((match, index, source) => (
-        source.findIndex((candidate) => candidate.id === match.id) === index
-    ));
-    const canFilterBySelectedDivision = Boolean(
+    const [displayLimit, setDisplayLimit] = useState(50);
+    const [apiMatches, setApiMatches] = useState<ClubDashboardMatch[]>([]);
+    const [apiCursor, setApiCursor] = useState<string | null>(null);
+    const [apiHasMore, setApiHasMore] = useState(false);
+    const [apiLoading, setApiLoading] = useState(false);
+
+    const selectedDivision = useMemo(() => divisions.find((division) => division.id === selectedDivisionId) ?? getDefaultDivision(divisions), [divisions, selectedDivisionId]);
+
+    const initialMatches = useMemo(() => {
+        const combined = [...upcomingMatches, ...pastMatches];
+        const map = new Map<string, ClubDashboardMatch>();
+        combined.forEach((m) => { if (!map.has(m.id)) map.set(m.id, m); });
+        return Array.from(map.values());
+    }, [upcomingMatches, pastMatches]);
+
+    const allMatches = useMemo(() => {
+        const map = new Map<string, ClubDashboardMatch>();
+        initialMatches.forEach((m) => map.set(m.id, m));
+        apiMatches.forEach((m) => { if (!map.has(m.id)) map.set(m.id, m); });
+        return Array.from(map.values());
+    }, [initialMatches, apiMatches]);
+
+    const canFilterBySelectedDivision = useMemo(() => Boolean(
         selectedDivision?.id
         && allMatches.some((match) => matchHasDivisionMetadata(match))
         && allMatches.some((match) => matchBelongsToDivision(match, selectedDivision.id))
-    );
+    ), [selectedDivision, allMatches]);
+
     const effectiveDivision = canFilterBySelectedDivision ? selectedDivision : null;
-    const scopedMatches = canFilterBySelectedDivision
+
+    const scopedMatches = useMemo(() => canFilterBySelectedDivision
         ? allMatches.filter((match) => matchBelongsToDivision(match, selectedDivision?.id || null))
-        : allMatches;
-    const timelineEntries = scopedMatches.map((match) => buildTimelineEntry(match, effectiveDivision, clubName));
-    const tournamentOptions = Array.from(new Set(
+        : allMatches, [canFilterBySelectedDivision, allMatches, selectedDivision]);
+
+    const timelineEntries = useMemo(() => scopedMatches.map((match) => buildTimelineEntry(match, effectiveDivision, clubName)), [scopedMatches, effectiveDivision, clubName]);
+
+    const tournamentOptions = useMemo(() => Array.from(new Set(
         timelineEntries
             .map((entry) => entry.match.tournament?.name?.trim())
             .filter((value): value is string => Boolean(value))
-    )).sort((left, right) => left.localeCompare(right));
+    )).sort((left, right) => left.localeCompare(right)), [timelineEntries]);
 
-    const filteredEntries = timelineEntries.filter((entry) => {
+    const filteredEntries = useMemo(() => timelineEntries.filter((entry) => {
         if (activeTab === 'upcoming' && !entry.isUpcoming) return false;
         if (activeTab === 'played' && !entry.isPlayed) return false;
         if (activeTab === 'pending' && entry.operationalState.completed === 5) return false;
@@ -340,18 +363,19 @@ export function ClubFixtureResultsTab({
         }
 
         return true;
-    });
+    }), [timelineEntries, activeTab, dateFrom, dateTo, tournamentFilter, conditionFilter, statusFilter, operationalFilter, deferredRivalFilter]);
 
-    const sortedEntries = sortTimelineEntries(filteredEntries, activeTab);
-    const nextMatch = timelineEntries
+    const sortedEntries = useMemo(() => sortTimelineEntries(filteredEntries, activeTab), [filteredEntries, activeTab]);
+
+    const nextMatch = useMemo(() => timelineEntries
         .filter((entry) => entry.isUpcoming)
         .sort((left, right) => {
             const leftTime = left.match.dateTime ? new Date(left.match.dateTime).getTime() : Number.MAX_SAFE_INTEGER;
             const rightTime = right.match.dateTime ? new Date(right.match.dateTime).getTime() : Number.MAX_SAFE_INTEGER;
             return leftTime - rightTime;
-        })[0] ?? null;
+        })[0] ?? null, [timelineEntries]);
 
-    const kpis: MatchKpiCard[] = [
+    const kpis: MatchKpiCard[] = useMemo(() => [
         {
             id: 'next',
             label: 'Próximo partido',
@@ -436,7 +460,44 @@ export function ClubFixtureResultsTab({
             },
             active: activeTab === 'pending' && operationalFilter === 'load',
         },
-    ];
+    ], [nextMatch, timelineEntries, activeTab, operationalFilter, dateFrom, dateTo]);
+
+    const visibleEntries = useMemo(() => sortedEntries.slice(0, displayLimit), [sortedEntries, displayLimit]);
+    const hasMoreEntries = sortedEntries.length > displayLimit;
+
+    useEffect(() => {
+        setDisplayLimit(50);
+        setApiMatches([]);
+        setApiCursor(null);
+        setApiHasMore(true);
+    }, [activeTab]);
+
+    const handleLoadMoreApi = useCallback(async () => {
+        if (apiLoading) return;
+        setApiLoading(true);
+        try {
+            const status = activeTab === 'upcoming' ? 'upcoming' : activeTab === 'played' ? 'played' : 'all';
+            const params = new URLSearchParams({
+                club: clubId,
+                status,
+                limit: '25',
+                direction: activeTab === 'upcoming' ? 'asc' : 'desc',
+            });
+            if (apiCursor) params.set('cursor', apiCursor);
+            const res = await fetch(`/api/club-admin/matches-list?${params.toString()}`, { credentials: 'same-origin' });
+            const json = await res.json();
+            if (json.ok && json.data) {
+                const fetched = json.data.matches as ClubDashboardMatch[];
+                setApiMatches((prev) => [...prev, ...fetched]);
+                setApiCursor(json.data.nextCursor);
+                setApiHasMore(json.data.hasMore);
+            }
+        } catch (e) {
+            console.error('Error loading more matches:', e);
+        } finally {
+            setApiLoading(false);
+        }
+    }, [apiLoading, activeTab, clubId, apiCursor]);
 
     if (loading) {
         return (
@@ -596,13 +657,17 @@ export function ClubFixtureResultsTab({
             </nav>
 
             <main className="club-matches-timeline">
-                {sortedEntries.length === 0 ? (
-                    <div className="club-matches-empty">
-                        No encontramos partidos para el equipo y filtros actuales.
-                    </div>
-                ) : null}
+                {activeTab === 'stats' ? (
+                    <ClubSeasonStatsPanel clubId={clubId} clubName={clubName} />
+                ) : (
+                    <>
+                        {visibleEntries.length === 0 ? (
+                            <div className="club-matches-empty">
+                                No encontramos partidos para el equipo y filtros actuales.
+                            </div>
+                        ) : null}
 
-                {sortedEntries.map((entry) => {
+                        {visibleEntries.map((entry) => {
                     const when = formatDateTime(entry.match.dateTime);
                     const tone = statusTone(entry.match.status);
                     const pendingReport = entry.isPlayed && !entry.operationalState.report;
@@ -764,6 +829,33 @@ export function ClubFixtureResultsTab({
                         </article>
                     );
                 })}
+
+                {hasMoreEntries && (
+                    <div className="club-matches-load-more">
+                        <button
+                            type="button"
+                            className="club-matches-btn club-matches-btn-ghost"
+                            onClick={() => setDisplayLimit((prev) => prev + 50)}
+                        >
+                            Mostrar más partidos ({sortedEntries.length - displayLimit} restantes)
+                        </button>
+                    </div>
+                )}
+
+                {apiHasMore && (
+                    <div className="club-matches-load-more">
+                        <button
+                            type="button"
+                            className="club-matches-btn club-matches-btn-primary"
+                            onClick={handleLoadMoreApi}
+                            disabled={apiLoading}
+                        >
+                            {apiLoading ? 'Cargando desde base de datos...' : 'Cargar más partidos históricos'}
+                        </button>
+                    </div>
+                )}
+                    </>
+                )}
             </main>
 
             {/* ── Create Internal Match Modal ── */}

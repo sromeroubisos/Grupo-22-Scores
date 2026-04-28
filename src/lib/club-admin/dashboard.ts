@@ -10,6 +10,7 @@ import {
     type ClubDashboardStanding,
 } from '@/lib/club-admin/dashboard-types';
 import type { ClubCore, ClubProfile } from '@/lib/types/clubs';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { calculateClubHealth } from '@/lib/validation/clubValidation';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -53,8 +54,11 @@ type MatchRow = {
     venue: string | null;
     score: MatchScoreRow;
     notes: string | null;
-    lineups: unknown;
-    events: unknown;
+    lineups?: unknown;
+    events?: unknown;
+    lineup_home_count?: number | null;
+    lineup_away_count?: number | null;
+    events_count?: number | null;
     tournament_id: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
@@ -176,6 +180,15 @@ function isMissingTableError(error: unknown) {
     return typeof code === 'string' && MISSING_TABLE_CODES.has(code);
 }
 
+function isMissingColumnError(error: unknown) {
+    if (!error || typeof error !== 'object' || !('code' in error)) {
+        return false;
+    }
+
+    const code = (error as { code?: unknown }).code;
+    return code === '42703';
+}
+
 function unwrapRelationRow<T>(value: T | T[] | null | undefined): T | null {
     if (Array.isArray(value)) {
         return value[0] ?? null;
@@ -185,11 +198,13 @@ function unwrapRelationRow<T>(value: T | T[] | null | undefined): T | null {
 }
 
 function normalizeClub(row: ClubRow | null | undefined): ClubDashboardClubRef {
+    const clubName = row?.name ?? 'Club';
+
     return {
         id: row?.id ?? null,
-        name: row?.name ?? 'Club',
+        name: clubName,
         shortName: row?.short_name ?? null,
-        logoUrl: row?.logo_url ?? null,
+        logoUrl: resolveSerializableLogoUrl(row?.logo_url, { key: row?.id, name: clubName }),
         slug: row?.slug ?? null,
     };
 }
@@ -221,7 +236,7 @@ function countLineupEntries(lineups: unknown) {
     if (!lineups || typeof lineups !== 'object') return 0;
 
     const source = lineups as { home?: unknown; away?: unknown };
-    return Math.max(countArrayValue(source.home), countArrayValue(source.away));
+    return countArrayValue(source.home) + countArrayValue(source.away);
 }
 
 function countEventEntries(events: unknown): number {
@@ -308,14 +323,21 @@ function dedupeMatches(rows: ClubDashboardMatch[]) {
 function normalizeMatch(
     row: MatchRow,
     scopedClubIds: Set<string>,
-    divisionNameById: Map<string, string>,
-    includeOperationalPayload = false
+    divisionNameById: Map<string, string>
 ): ClubDashboardMatch {
     const isHome = row.home_club_id ? scopedClubIds.has(row.home_club_id) : false;
     const home = normalizeClub(unwrapRelationRow(row.home));
     const away = normalizeClub(unwrapRelationRow(row.away));
     const tournament = unwrapRelationRow(row.tournament);
     const opponent = isHome ? away : home;
+    const hasPrecomputedLineupCount =
+        typeof row.lineup_home_count === 'number' || typeof row.lineup_away_count === 'number';
+    const lineupCount = hasPrecomputedLineupCount
+        ? (row.lineup_home_count ?? 0) + (row.lineup_away_count ?? 0)
+        : countLineupEntries(row.lineups);
+    const statsCount = typeof row.events_count === 'number'
+        ? row.events_count
+        : countEventEntries(row.events);
 
     return {
         id: row.id,
@@ -324,10 +346,10 @@ function normalizeMatch(
         venue: row.venue ?? null,
         score: normalizeMatchScore(row.score),
         notes: row.notes ?? null,
-        lineups: includeOperationalPayload ? row.lineups ?? null : null,
-        events: includeOperationalPayload ? row.events ?? null : null,
-        lineupCount: countLineupEntries(row.lineups),
-        statsCount: countEventEntries(row.events),
+        lineups: null,
+        events: null,
+        lineupCount,
+        statsCount,
         isHome,
         homeDivisionId: row.home_division_id ?? null,
         awayDivisionId: row.away_division_id ?? null,
@@ -865,12 +887,18 @@ export async function getClubDashboardOverview(
         return EMPTY_CLUB_DASHBOARD_OVERVIEW;
     }
 
-    const includeOperationalPayload = options.mode === 'operational';
     const scopedClubIds = [clubId].filter((value): value is string => typeof value === 'string' && value.length > 0);
     const scopedClubIdSet = new Set(scopedClubIds);
     const nowIso = new Date().toISOString();
     const matchSelect = `
-        id, date_time, status, venue, score, notes${includeOperationalPayload ? ', lineups, events' : ''}, tournament_id, home_club_id, away_club_id, home_division_id, away_division_id,
+        id, date_time, status, venue, score, notes, tournament_id, home_club_id, away_club_id, home_division_id, away_division_id,
+        lineup_home_count, lineup_away_count, events_count,
+        home:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, slug),
+        away:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, slug),
+        tournament:tournaments(id, name, slug)
+    `;
+    const legacyMatchSelect = `
+        id, date_time, status, venue, score, notes, lineups, events, tournament_id, home_club_id, away_club_id, home_division_id, away_division_id,
         home:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url, slug),
         away:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url, slug),
         tournament:tournaments(id, name, slug)
@@ -902,19 +930,19 @@ export async function getClubDashboardOverview(
         scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'home_club_id', scopedClubIds)
             .gte('date_time', nowIso)
             .order('date_time', { ascending: true })
-            .limit(20),
+            .limit(10),
         scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'away_club_id', scopedClubIds)
             .gte('date_time', nowIso)
             .order('date_time', { ascending: true })
-            .limit(20),
+            .limit(10),
         scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'home_club_id', scopedClubIds)
             .in('status', [...FINAL_MATCH_STATUSES])
             .order('date_time', { ascending: false })
-            .limit(150),
+            .limit(20),
         scopeMatchSideQuery(supabase.from('matches').select(matchSelect), 'away_club_id', scopedClubIds)
             .in('status', [...FINAL_MATCH_STATUSES])
             .order('date_time', { ascending: false })
-            .limit(150),
+            .limit(20),
         scopeMatchSideQuery(supabase.from('matches').select('id', { count: 'exact', head: true }), 'home_club_id', scopedClubIds)
             .gte('date_time', nowIso),
         scopeMatchSideQuery(supabase.from('matches').select('id', { count: 'exact', head: true }), 'away_club_id', scopedClubIds)
@@ -934,7 +962,7 @@ export async function getClubDashboardOverview(
         )
             .not('tournament_id', 'is', null)
             .order('date_time', { ascending: false })
-            .limit(200),
+            .limit(20),
         scopeMatchSideQuery(
             supabase
                 .from('matches')
@@ -946,7 +974,7 @@ export async function getClubDashboardOverview(
         )
             .not('tournament_id', 'is', null)
             .order('date_time', { ascending: false })
-            .limit(200),
+            .limit(20),
         supabase
             .from('tournament_participants')
             .select('tournament_id, group_id, status, club_id')
@@ -974,11 +1002,49 @@ export async function getClubDashboardOverview(
             .eq('club_id', clubId),
     ]);
 
-    throwFirstQueryError([
+    const needsLegacyMatchPayload = [
         upcomingHomeMatchesResult,
         upcomingAwayMatchesResult,
         pastHomeMatchesResult,
         pastAwayMatchesResult,
+    ].some((result) => isMissingColumnError(result.error));
+
+    let effectiveUpcomingHomeMatchesResult = upcomingHomeMatchesResult;
+    let effectiveUpcomingAwayMatchesResult = upcomingAwayMatchesResult;
+    let effectivePastHomeMatchesResult = pastHomeMatchesResult;
+    let effectivePastAwayMatchesResult = pastAwayMatchesResult;
+
+    if (needsLegacyMatchPayload) {
+        [
+            effectiveUpcomingHomeMatchesResult,
+            effectiveUpcomingAwayMatchesResult,
+            effectivePastHomeMatchesResult,
+            effectivePastAwayMatchesResult,
+        ] = await Promise.all([
+            scopeMatchSideQuery(supabase.from('matches').select(legacyMatchSelect), 'home_club_id', scopedClubIds)
+                .gte('date_time', nowIso)
+                .order('date_time', { ascending: true })
+                .limit(10),
+            scopeMatchSideQuery(supabase.from('matches').select(legacyMatchSelect), 'away_club_id', scopedClubIds)
+                .gte('date_time', nowIso)
+                .order('date_time', { ascending: true })
+                .limit(10),
+            scopeMatchSideQuery(supabase.from('matches').select(legacyMatchSelect), 'home_club_id', scopedClubIds)
+                .in('status', [...FINAL_MATCH_STATUSES])
+                .order('date_time', { ascending: false })
+                .limit(20),
+            scopeMatchSideQuery(supabase.from('matches').select(legacyMatchSelect), 'away_club_id', scopedClubIds)
+                .in('status', [...FINAL_MATCH_STATUSES])
+                .order('date_time', { ascending: false })
+                .limit(20),
+        ]);
+    }
+
+    throwFirstQueryError([
+        effectiveUpcomingHomeMatchesResult,
+        effectiveUpcomingAwayMatchesResult,
+        effectivePastHomeMatchesResult,
+        effectivePastAwayMatchesResult,
         upcomingHomeMatchesCountResult,
         upcomingAwayMatchesCountResult,
         playedHomeMatchesCountResult,
@@ -997,12 +1063,12 @@ export async function getClubDashboardOverview(
     }
 
     const upcomingMatchRows = mergeMatchSideRows<MatchRow>([
-        upcomingHomeMatchesResult.data as MatchRow[] | null,
-        upcomingAwayMatchesResult.data as MatchRow[] | null,
+        effectiveUpcomingHomeMatchesResult.data as MatchRow[] | null,
+        effectiveUpcomingAwayMatchesResult.data as MatchRow[] | null,
     ], 'asc', 20);
     const pastMatchRows = mergeMatchSideRows<MatchRow>([
-        pastHomeMatchesResult.data as MatchRow[] | null,
-        pastAwayMatchesResult.data as MatchRow[] | null,
+        effectivePastHomeMatchesResult.data as MatchRow[] | null,
+        effectivePastAwayMatchesResult.data as MatchRow[] | null,
     ], 'desc', 150);
     const tournamentMatchRows = mergeMatchSideRows<CompetitionMatchRow>([
         tournamentHomeMatchesResult.data as CompetitionMatchRow[] | null,
@@ -1044,10 +1110,10 @@ export async function getClubDashboardOverview(
     }
 
     const upcomingMatches = upcomingMatchRows.map((row) =>
-        normalizeMatch(row, scopedClubIdSet, divisionNameById, includeOperationalPayload)
+        normalizeMatch(row, scopedClubIdSet, divisionNameById)
     );
     const pastMatches = pastMatchRows.map((row) =>
-        normalizeMatch(row, scopedClubIdSet, divisionNameById, includeOperationalPayload)
+        normalizeMatch(row, scopedClubIdSet, divisionNameById)
     );
     const recentMatches = pastMatches.slice(0, 5);
     const allMatches = dedupeMatches([...upcomingMatches, ...pastMatches]);

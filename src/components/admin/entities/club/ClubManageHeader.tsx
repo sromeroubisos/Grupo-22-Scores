@@ -1,6 +1,7 @@
 'use client';
 
-import { ExternalLink, Loader2, Save } from 'lucide-react';
+import { ExternalLink, Save } from 'lucide-react';
+import { Button, Badge } from '@/components/admin/ui';
 import { Database } from '@/lib/database.types';
 import Link from 'next/link';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
@@ -43,13 +44,13 @@ export function ClubManageHeader({
                     {sportLabel || (data.categories?.length ? 'Rugby' : 'Deporte')} / {data.city || 'Ciudad'} / {unionName || 'Sin union'}
                 </div>
                 <div className="badges">
-                    <span className={`badge ${data.is_visible ? 'badge-visible' : 'badge-draft'}`}>
+                    <Badge variant={data.is_visible ? 'success' : 'default'}>
                         {data.is_visible ? 'Publicado' : 'Borrador'}
-                    </span>
-                    <span className="badge badge-health">
-                        {familyClubCount > 1 ? `${familyClubCount} clubes en familia` : 'Operacion individual'}
-                    </span>
-                    <span className="badge badge-neutral">{id === 'new' ? 'Core pending' : 'Core synced'}</span>
+                    </Badge>
+                    <Badge variant="info">
+                        {familyClubCount > 1 ? `${familyClubCount} clubes en familia` : 'Operación individual'}
+                    </Badge>
+                    <Badge variant="default">{id === 'new' ? 'Core pending' : 'Core synced'}</Badge>
                 </div>
             </div>
 
@@ -62,25 +63,26 @@ export function ClubManageHeader({
                 ) : null}
 
                 {data.slug ? (
-                    <Link href={`/clubs/${data.slug}`} target="_blank" className="btn">
+                    <Link
+                        href={`/clubs/${data.slug}`}
+                        target="_blank"
+                        className="ca-btn ca-btn--secondary text-sm h-9 px-3"
+                    >
                         <ExternalLink className="w-4 h-4" />
-                        Portal publico
+                        Portal público
                     </Link>
                 ) : null}
 
-                <button
-                    type="button"
+                <Button
+                    variant="primary"
+                    size="sm"
                     onClick={onSave}
                     disabled={isSaving || (!isDirty && id !== 'new')}
-                    className="btn btn-primary"
+                    isLoading={isSaving}
+                    leftIcon={!isSaving ? <Save className="w-4 h-4" /> : undefined}
                 >
-                    {isSaving ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                        <Save className="w-4 h-4" />
-                    )}
                     {isSaving ? 'Guardando...' : 'Guardar'}
-                </button>
+                </Button>
             </div>
         </header>
     );
