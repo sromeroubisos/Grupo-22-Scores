@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useDeferredValue, useState, startTransition, useCallback, useEffect, useMemo } from 'react';
-import { Calendar, ChevronRight, ClipboardList, FileBarChart2, Filter, LayoutList, NotebookPen, ShieldAlert, Sparkles, Target, Users, X } from 'lucide-react';
+import { Calendar, ChevronRight, Filter, Sparkles, Users, X } from 'lucide-react';
 import { ClubSeasonStatsPanel } from './ClubSeasonStatsPanel';
 import { CreateInternalMatchModal } from './CreateInternalMatchModal';
 import { getStoredActiveTeamId, persistActiveTeamId } from '@/lib/club-admin/activeTeamSelection';
@@ -535,56 +535,42 @@ export function ClubFixtureResultsTab({
     return (
         <div className="club-matches-shell">
             <header className="club-matches-header">
-                <div className="club-matches-header-copy">
-                    <span className="club-matches-kicker">Módulo de competición</span>
-                    <div className="club-matches-heading-row">
-                        <div>
-                            <h2>Partidos - {effectiveDivision?.name || clubName}</h2>
-                            <p>Planificación, ejecución y análisis de los partidos del equipo</p>
-                        </div>
-
-                        {divisions.length > 1 ? (
-                            <label className="club-matches-team-selector">
-                                <span>Equipo activo</span>
-                                <select
-                                    value={selectedDivision?.id || ''}
-                                    onChange={(event) => {
-                                        const nextValue = event.target.value;
-                                        setSelectedDivisionId(nextValue);
-                                        persistActiveTeamId(clubId, nextValue || null);
-                                    }}
-                                >
-                                    {divisions.map((division) => (
-                                        <option key={division.id} value={division.id}>
-                                            {division.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        ) : null}
-                    </div>
-                </div>
-
-                <div className="club-matches-header-actions">
-                    <label className="club-matches-season-selector" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>Periodo</span>
+                <div className="club-matches-header-top">
+                    <h2>Partidos</h2>
+                    <label className="club-matches-season-selector">
+                        <span>Periodo</span>
                         <select
                             value={selectedSeason}
                             onChange={(e) => setSelectedSeason(e.target.value)}
-                            style={{
-                                background: 'rgba(255,255,255,0.08)',
-                                border: '1px solid rgba(255,255,255,0.12)',
-                                borderRadius: '6px',
-                                padding: '6px 10px',
-                                color: '#fff',
-                                fontSize: '0.85rem',
-                            }}
                         >
                             {seasonOptions.map((s) => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
                     </label>
+                </div>
+
+                {divisions.length > 1 ? (
+                    <label className="club-matches-team-selector">
+                        <span>Equipo activo</span>
+                        <select
+                            value={selectedDivision?.id || ''}
+                            onChange={(event) => {
+                                const nextValue = event.target.value;
+                                setSelectedDivisionId(nextValue);
+                                persistActiveTeamId(clubId, nextValue || null);
+                            }}
+                        >
+                            {divisions.map((division) => (
+                                <option key={division.id} value={division.id}>
+                                    {division.name}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                ) : null}
+
+                <div className="club-matches-header-actions">
                     <button
                         type="button"
                         className="club-matches-btn club-matches-btn-ghost"
@@ -720,8 +706,7 @@ export function ClubFixtureResultsTab({
                         {visibleEntries.map((entry) => {
                     const when = formatDateTime(entry.match.dateTime);
                     const tone = statusTone(entry.match.status);
-                    const pendingReport = entry.isPlayed && !entry.operationalState.report;
-                    const pendingStats = entry.isPlayed && !entry.operationalState.stats;
+
 
                     return (
                         <article
@@ -763,65 +748,12 @@ export function ClubFixtureResultsTab({
 
                                 <section className="club-match-operational">
                                     <div className="club-match-operational-head">
-                                        <div>
-                                            <span className="club-match-operational-label">Estado operativo</span>
-                                            <strong>Progreso {entry.operationalState.completed}/4</strong>
-                                        </div>
+                                        <div />
                                         {entry.hasUrgentPending ? (
                                             <span className="club-match-operational-alert">Requiere acción</span>
                                         ) : (
                                             <span className="club-match-operational-ok">Operativo</span>
                                         )}
-                                    </div>
-
-                                    <div className="club-match-triage-grid">
-                                        <button
-                                            type="button"
-                                            className={`club-match-triage-item${entry.operationalState.lineup ? ' complete' : ' pending'}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                window.location.href = `/club-admin/matches/${entry.match.id}?section=lineup&club=${clubId}`;
-                                            }}
-                                        >
-                                            <i /> Alineación
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`club-match-triage-item${entry.operationalState.notes ? ' complete' : ' pending'}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                window.location.href = `/club-admin/matches/${entry.match.id}?section=resumen&club=${clubId}`;
-                                            }}
-                                        >
-                                            <i /> Notas prepartido
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`club-match-triage-item${entry.operationalState.stats ? ' complete' : ' pending'}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                window.location.href = `/club-admin/matches/${entry.match.id}?section=stats&club=${clubId}`;
-                                            }}
-                                        >
-                                            <i /> Estadísticas
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`club-match-triage-item${entry.operationalState.report ? ' complete' : ' pending'}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                window.location.href = `/club-admin/matches/${entry.match.id}?section=postpartido&club=${clubId}`;
-                                            }}
-                                        >
-                                            <i /> Reporte final
-                                        </button>
-                                    </div>
-
-                                    <div className="club-match-indicators">
-                                        <span><Users className="w-3.5 h-3.5" /> {entry.lineupCount} convocados</span>
-                                        <span><LayoutList className="w-3.5 h-3.5" /> {entry.statsCount} registros de stats</span>
-                                        {pendingStats ? <span><ShieldAlert className="w-3.5 h-3.5" /> stats incompletas</span> : null}
-                                        {pendingReport ? <span><NotebookPen className="w-3.5 h-3.5" /> sin reporte final</span> : null}
                                     </div>
                                 </section>
                             </div>
@@ -831,49 +763,19 @@ export function ClubFixtureResultsTab({
                                     href={`/club-admin/matches/${entry.match.id}?club=${clubId}`}
                                     className="club-match-action primary"
                                     onClick={(e) => e.stopPropagation()}
+                                    title="Abrir ficha"
                                 >
-                                    Abrir ficha
                                     <ChevronRight className="w-4 h-4" />
-                                </Link>
-                                <Link
-                                    href={`/club-admin/matches/${entry.match.id}?section=convocatoria&club=${clubId}`}
-                                    className="club-match-action"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <ClipboardList className="w-4 h-4" />
-                                    Convocatoria
+                                    <span className="club-match-action-label">Abrir ficha</span>
                                 </Link>
                                 <Link
                                     href={`/club-admin/matches/${entry.match.id}?section=lineup&club=${clubId}`}
                                     className="club-match-action"
                                     onClick={(e) => e.stopPropagation()}
+                                    title="Alineación"
                                 >
                                     <Users className="w-4 h-4" />
-                                    Alineación
-                                </Link>
-                                <Link
-                                    href={`/club-admin/matches/${entry.match.id}?section=stats&club=${clubId}`}
-                                    className="club-match-action"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <FileBarChart2 className="w-4 h-4" />
-                                    Estadísticas
-                                </Link>
-                                <Link
-                                    href={`/club-admin/matches/${entry.match.id}?section=resumen&club=${clubId}`}
-                                    className="club-match-action"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <NotebookPen className="w-4 h-4" />
-                                    Prepartido
-                                </Link>
-                                <Link
-                                    href={`/club-admin/matches/${entry.match.id}?section=pizarron&club=${clubId}`}
-                                    className="club-match-action"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <Target className="w-4 h-4" />
-                                    Pizarrón
+                                    <span className="club-match-action-label">Alineación</span>
                                 </Link>
                             </div>
                         </article>

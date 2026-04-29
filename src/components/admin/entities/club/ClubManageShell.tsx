@@ -36,6 +36,7 @@ import { ClubMobileGeneralOverview } from './ClubMobileGeneralOverview';
 import { buildTeamLogoProxyUrl, isTeamLogoProxyUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 import './vitreous-club.css';
+import './club-admin-mobile.css';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
 type ClubFormState = Partial<ClubRow> & { sport?: string | null };

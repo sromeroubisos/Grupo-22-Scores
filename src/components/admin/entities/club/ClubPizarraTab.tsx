@@ -12,6 +12,7 @@ import type {
     TimelineFrame,
     PizarraUIMode,
     BoardMode,
+    MovementArrow,
     RugbyPreset,
     SavedPreset,
     PersistedBoardState,
@@ -29,11 +30,13 @@ import {
     normalizeSport,
     clonePlayers,
     cloneLines,
+    cloneArrows,
     cloneBall,
     cloneViewBox,
     cloneTimeline,
     buildTimelineSegments,
     resolveBoardStateAtTime,
+    resolveBallAnchorPosition,
     mapBaseViewBoxToDisplay,
     mapDisplayPointToBase,
     getSportLabel,
@@ -71,6 +74,13 @@ interface ClubPizarraTabProps {
 }
 
 type StorageMode = 'club' | 'local';
+
+type BoardUndoSnapshot = Pick<
+    PersistedBoardState,
+    'players' | 'lines' | 'ball' | 'viewBox' | 'showNumbers' | 'mode' | 'orientation' | 'lineColor' | 'lineWidth' | 'playbackSpeed'
+> & {
+    pendingArrows: MovementArrow[];
+};
 
 type PizarraWorkspaceResponse = {
     ok?: boolean;
@@ -141,6 +151,11 @@ export function ClubPizarraTab({
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackTime, setPlaybackTime] = useState(0);
     const [playbackSpeed, setPlaybackSpeed] = useState(initialBoardState.playbackSpeed);
+    const [editingFrameId, setEditingFrameId] = useState<string | null>(null);
+    const [pendingArrows, setPendingArrows] = useState<MovementArrow[]>([]);
+    const [currentArrow, setCurrentArrow] = useState<MovementArrow | null>(null);
+    const currentArrowRef = useRef<MovementArrow | null>(null);
+    const arrowTargetRef = useRef<{ type: 'player' | 'ball'; id: string } | null>(null);
     const rafRef = useRef<number | null>(null);
     const lastTimeRef = useRef<number>(0);
 
@@ -149,9 +164,12 @@ export function ClubPizarraTab({
     const [draggingBall, setDraggingBall] = useState(false);
     const [isPanning, setIsPanning] = useState(false);
     const panStartRef = useRef<{ x: number; y: number; vb: ViewBox } | null>(null);
+    const wheelUndoTimerRef = useRef<number | null>(null);
 
     /* ── Flash feedback ── */
     const [flashCapture, setFlashCapture] = useState(false);
+    const undoStackRef = useRef<BoardUndoSnapshot[]>([]);
+    const [undoDepth, setUndoDepth] = useState(0);
 
     /* ── Video export ── */
     const [exportState, setExportState] = useState<ExportProgress>({ status: 'idle', progress: 0, message: '' });
@@ -187,6 +205,11 @@ export function ClubPizarraTab({
             window.removeEventListener('resize', syncHeaderHeight);
             if (observer) observer.disconnect();
         };
+    }, []);
+    useEffect(() => () => {
+        if (wheelUndoTimerRef.current) {
+            window.clearTimeout(wheelUndoTimerRef.current);
+        }
     }, []);
 
     /* ── Presets drawer ── */
@@ -230,10 +253,78 @@ export function ClubPizarraTab({
         playbackSpeed,
     ]);
 
+    const buildUndoSnapshot = useCallback((): BoardUndoSnapshot => ({
+        players: clonePlayers(players),
+        lines: cloneLines(lines),
+        ball: cloneBall(ball),
+        viewBox: cloneViewBox(viewBox),
+        showNumbers,
+        mode,
+        orientation: boardOrientation,
+        lineColor,
+        lineWidth,
+        playbackSpeed,
+        pendingArrows: cloneArrows(pendingArrows),
+    }), [
+        players,
+        lines,
+        ball,
+        viewBox,
+        showNumbers,
+        mode,
+        boardOrientation,
+        lineColor,
+        lineWidth,
+        playbackSpeed,
+        pendingArrows,
+    ]);
+
+    const pushUndoSnapshot = useCallback(() => {
+        const snapshot = buildUndoSnapshot();
+        const signature = JSON.stringify(snapshot);
+        const stack = undoStackRef.current;
+        const last = stack[stack.length - 1];
+        if (last && JSON.stringify(last) === signature) return;
+        const nextStack = [...stack, snapshot].slice(-50);
+        undoStackRef.current = nextStack;
+        setUndoDepth(nextStack.length);
+    }, [buildUndoSnapshot]);
+
+    const handleUndoBoardChange = useCallback(() => {
+        const previous = undoStackRef.current.pop();
+        if (!previous) return;
+        setUndoDepth(undoStackRef.current.length);
+        setIsPlaying(false);
+        setPlaybackTime(0);
+        setCurrentLine(null);
+        currentArrowRef.current = null;
+        arrowTargetRef.current = null;
+        setCurrentArrow(null);
+        setDraggingId(null);
+        setDraggingBall(false);
+        setIsPanning(false);
+        panStartRef.current = null;
+        setPlayers(clonePlayers(previous.players));
+        setLines(cloneLines(previous.lines));
+        setBall(cloneBall(previous.ball));
+        setViewBox(cloneViewBox(previous.viewBox));
+        setShowNumbers(previous.showNumbers);
+        setMode(previous.mode);
+        setBoardOrientation(previous.orientation);
+        setLineColor(previous.lineColor);
+        setLineWidth(previous.lineWidth);
+        setPlaybackSpeed(previous.playbackSpeed);
+        setPendingArrows(cloneArrows(previous.pendingArrows));
+    }, []);
+
     const applyBoardStateSnapshot = useCallback((snapshot: PersistedBoardState) => {
         setIsPlaying(false);
         setPlaybackTime(0);
         setCurrentLine(null);
+        currentArrowRef.current = null;
+        setCurrentArrow(null);
+        setPendingArrows([]);
+        setEditingFrameId(null);
         setPlayers(clonePlayers(snapshot.players));
         setLines(cloneLines(snapshot.lines));
         setBall(cloneBall(snapshot.ball));
@@ -357,36 +448,55 @@ export function ClubPizarraTab({
         initialSavedPresets,
     ]);
 
-    const timelineSegments = useMemo(() => buildTimelineSegments(timeline), [timeline]);
+    const playbackTimeline = useMemo(() => {
+        const overlayFrameId = editingFrameId ?? (pendingArrows.length > 0 ? timeline[timeline.length - 1]?.id : null);
+        if (!overlayFrameId) return timeline;
+        return timeline.map((frame) =>
+            frame.id === overlayFrameId
+                ? {
+                    ...frame,
+                    players: clonePlayers(players),
+                    lines: cloneLines(lines),
+                    ball: cloneBall(ball),
+                    viewBox: cloneViewBox(viewBox),
+                    arrows: cloneArrows(pendingArrows),
+                }
+                : frame
+        );
+    }, [editingFrameId, timeline, players, lines, ball, viewBox, pendingArrows]);
+
+    const timelineSegments = useMemo(() => buildTimelineSegments(playbackTimeline), [playbackTimeline]);
     const totalDuration = useMemo(() => {
         if (timelineSegments.length === 0) return 0;
         return timelineSegments[timelineSegments.length - 1]?.segmentEnd ?? 0;
     }, [timelineSegments]);
-    const hasPlaybackFrames = timeline.length >= 2;
+    const hasPlaybackFrames = playbackTimeline.length >= 2;
     const isPlaybackPreview = hasPlaybackFrames && (isPlaying || playbackTime > 0);
     const isPlaybackLocked = hasPlaybackFrames && (isPlaying || playbackTime > 0);
 
     const resolvedPlaybackState = useMemo(() => {
         const fallbackPlayers = clonePlayers(players).map((p) => ({ ...p, opacity: 1 }));
-        const fallbackBall = { ...ball, opacity: ball.visible ? 1 : 0 };
+        const fallbackBall = { ...ball, ...resolveBallAnchorPosition(ball, players), opacity: ball.visible ? 1 : 0 };
+        const editorArrows = cloneArrows(pendingArrows);
         const fallbackState = {
             players: fallbackPlayers,
             ball: fallbackBall,
             viewBox: cloneViewBox(viewBox),
             lineLayers: [{ id: 'editor-lines', lines: cloneLines(lines), opacity: 1 }],
+            arrowLayers: [{ id: 'editor-arrows', arrows: editorArrows, opacity: 1 }],
         };
 
         if (!isPlaybackPreview) {
             return {
                 ...fallbackState,
                 activeSegmentIndex: -1,
-                focusFrameIndex: timeline.length > 0 ? timeline.length - 1 : -1,
+                focusFrameIndex: playbackTimeline.length > 0 ? playbackTimeline.length - 1 : -1,
                 localProgress: 0,
             };
         }
 
-        return resolveBoardStateAtTime(timeline, timelineSegments, playbackTime, fallbackState);
-    }, [isPlaybackPreview, players, ball, viewBox, lines, timeline, timelineSegments, playbackTime]);
+        return resolveBoardStateAtTime(playbackTimeline, timelineSegments, playbackTime, fallbackState);
+    }, [isPlaybackPreview, players, ball, viewBox, lines, playbackTimeline, timelineSegments, playbackTime, pendingArrows]);
 
     /* ── Playback loop ── */
     useEffect(() => {
@@ -558,6 +668,8 @@ export function ClubPizarraTab({
     const handleSvgPointerDown = useCallback(
         (e: React.PointerEvent<SVGSVGElement>) => {
             if (mode !== 'draw' || isPlaybackLocked) return;
+            // Cede el evento al pan si se usa boton medio o shift
+            if (e.button === 1 || e.button === 2 || e.shiftKey) return;
             const target = e.target as HTMLElement;
             if (target.closest('.pizarra-draggable')) return;
             const { x, y } = svgToPercent(e.clientX, e.clientY);
@@ -594,15 +706,21 @@ export function ClubPizarraTab({
     /* ── Pan ── */
     const startPan = useCallback(
         (e: React.PointerEvent<SVGSVGElement>) => {
-            if (mode !== 'select' || isPlaybackLocked || draggingId || draggingBall) return;
+            if (isPlaybackLocked || draggingId || draggingBall) return;
+            const isMiddleButton = e.button === 1;
+            const isPrimaryButton = e.button === 0;
+            const isShiftDrag = isPrimaryButton && e.shiftKey;
+            const allowDefaultPan = isPrimaryButton && (mode === 'select' || mode === 'arrow');
+            if (!isMiddleButton && !isShiftDrag && !allowDefaultPan) return;
             const target = e.target as HTMLElement;
-            if (target.closest('.pizarra-draggable')) return;
+            if (!isMiddleButton && !isShiftDrag && target.closest('.pizarra-draggable')) return;
+            pushUndoSnapshot();
             const { sx, sy } = svgXYToSvgPercent(e.clientX, e.clientY);
             panStartRef.current = { x: sx, y: sy, vb: { ...viewBox } };
             setIsPanning(true);
             (e.currentTarget as SVGSVGElement).setPointerCapture(e.pointerId);
         },
-        [mode, isPlaybackLocked, draggingId, draggingBall, svgXYToSvgPercent, viewBox]
+        [mode, isPlaybackLocked, draggingId, draggingBall, pushUndoSnapshot, svgXYToSvgPercent, viewBox]
     );
 
     const doPan = useCallback(
@@ -630,28 +748,101 @@ export function ClubPizarraTab({
         panStartRef.current = null;
     }, []);
 
+    /* ── Edicion de fotograma: derivados ── */
+    const editingFrameIndex = useMemo(() => {
+        if (!editingFrameId) return -1;
+        return timeline.findIndex((frame) => frame.id === editingFrameId);
+    }, [editingFrameId, timeline]);
+
+    const editingFrame = editingFrameIndex >= 0 ? timeline[editingFrameIndex] : null;
+    const previousEditingFrame = editingFrameIndex > 0 ? timeline[editingFrameIndex - 1] : null;
+
     /* ── Drag players / ball ── */
+    const capturePointerOnSvg = useCallback((event: React.PointerEvent<SVGGElement>) => {
+        const svg = (event.currentTarget as SVGGElement).ownerSVGElement;
+        if (svg) {
+            try { svg.setPointerCapture(event.pointerId); } catch { /* noop */ }
+        }
+    }, []);
+
     const handlePlayerPointerDown = useCallback(
-        (id: string) => {
+        (id: string, event: React.PointerEvent<SVGGElement>) => {
             if (isPlaybackLocked || mode === 'draw') return;
+            if (event.button !== 0) return;
+            pushUndoSnapshot();
+            if (mode === 'arrow') {
+                if (!players.some((p) => p.id === id)) return;
+                const start = svgToPercent(event.clientX, event.clientY);
+                const nextArrow: MovementArrow = {
+                    id: `arrow-${Date.now()}`,
+                    targetType: 'player',
+                    targetId: id,
+                    points: [start],
+                    color: lineColor,
+                    width: lineWidth,
+                };
+                arrowTargetRef.current = { type: 'player', id };
+                currentArrowRef.current = nextArrow;
+                setCurrentArrow(nextArrow);
+                capturePointerOnSvg(event);
+                return;
+            }
             setDraggingId(id);
+            capturePointerOnSvg(event);
         },
-        [isPlaybackLocked, mode]
+        [isPlaybackLocked, mode, players, pushUndoSnapshot, svgToPercent, lineColor, lineWidth, capturePointerOnSvg]
     );
 
-    const handleBallPointerDown = useCallback(() => {
-        if (isPlaybackLocked || mode === 'draw') return;
-        setDraggingBall(true);
-    }, [isPlaybackLocked, mode]);
+    const handleBallPointerDown = useCallback(
+        (event: React.PointerEvent<SVGGElement>) => {
+            if (isPlaybackLocked || mode === 'draw') return;
+            if (event.button !== 0) return;
+            pushUndoSnapshot();
+            if (mode === 'arrow') {
+                const start = svgToPercent(event.clientX, event.clientY);
+                const nextArrow: MovementArrow = {
+                    id: `arrow-${Date.now()}`,
+                    targetType: 'ball',
+                    targetId: 'ball',
+                    points: [start],
+                    color: lineColor,
+                    width: lineWidth,
+                };
+                arrowTargetRef.current = { type: 'ball', id: 'ball' };
+                currentArrowRef.current = nextArrow;
+                setCurrentArrow(nextArrow);
+                capturePointerOnSvg(event);
+                return;
+            }
+            setDraggingBall(true);
+            capturePointerOnSvg(event);
+        },
+        [isPlaybackLocked, mode, pushUndoSnapshot, svgToPercent, lineColor, lineWidth, capturePointerOnSvg]
+    );
 
     const handlePointerMove = useCallback(
         (e: React.PointerEvent<SVGSVGElement>) => {
             if (isPlaybackLocked) return;
+            if (isPanning) {
+                doPan(e);
+                return;
+            }
             if (mode === 'draw') {
                 handleSvgPointerMove(e);
                 return;
             }
             const { x, y } = svgToPercent(e.clientX, e.clientY);
+            if (mode === 'arrow' && currentArrowRef.current) {
+                const prev = currentArrowRef.current;
+                const last = prev.points[prev.points.length - 1];
+                const dist = Math.hypot(x - last.x, y - last.y);
+                if (dist >= 1.2) {
+                    const nextArrow = { ...prev, points: [...prev.points, { x, y }] };
+                    currentArrowRef.current = nextArrow;
+                    setCurrentArrow(nextArrow);
+                }
+                return;
+            }
             if (draggingId) {
                 setPlayers((prev) => {
                     let changed = false;
@@ -663,25 +854,80 @@ export function ClubPizarraTab({
                     });
                     return changed ? next : prev;
                 });
-            }
-            if (draggingBall) {
                 setBall((prev) => (
-                    prev.x === x && prev.y === y
-                        ? prev
-                        : { ...prev, x, y }
+                    prev.anchor?.playerId === draggingId
+                        ? {
+                            ...prev,
+                            x: Math.max(0, Math.min(100, x + prev.anchor.offsetX)),
+                            y: Math.max(0, Math.min(100, y + prev.anchor.offsetY)),
+                        }
+                        : prev
                 ));
             }
-            if (isPanning) doPan(e);
+            if (draggingBall) {
+                setBall((prev) => {
+                    if (prev.x === x && prev.y === y && !prev.anchor?.playerId) return prev;
+                    if (!prev.anchor?.playerId) return { ...prev, x, y };
+
+                    const anchorPlayer = players.find((player) => player.id === prev.anchor?.playerId);
+                    if (!anchorPlayer) return { ...prev, x, y, anchor: null };
+
+                    return {
+                        ...prev,
+                        x,
+                        y,
+                        anchor: {
+                            ...prev.anchor,
+                            offsetX: x - anchorPlayer.x,
+                            offsetY: y - anchorPlayer.y,
+                        },
+                    };
+                });
+            }
         },
-        [isPlaybackLocked, mode, draggingId, draggingBall, isPanning, svgToPercent, doPan, handleSvgPointerMove]
+        [isPlaybackLocked, mode, draggingId, draggingBall, isPanning, players, svgToPercent, doPan, handleSvgPointerMove]
     );
 
     const handlePointerUp = useCallback(() => {
+        const finishedArrow = currentArrowRef.current ?? currentArrow;
+        if (finishedArrow && arrowTargetRef.current) {
+            const target = arrowTargetRef.current;
+            const points = finishedArrow.points;
+            const last = points[points.length - 1];
+            const first = points[0];
+            const totalLen = points.slice(1).reduce((acc, p, idx) => acc + Math.hypot(p.x - points[idx].x, p.y - points[idx].y), 0);
+            const isMeaningful = points.length >= 2 && last && totalLen >= 2 && Math.hypot(last.x - first.x, last.y - first.y) >= 2;
+            if (isMeaningful) {
+                if (target.type === 'player') {
+                    setPlayers((prev) =>
+                        prev.map((p) => (p.id === target.id ? { ...p, x: last.x, y: last.y } : p))
+                    );
+                    setBall((prev) => (
+                        prev.anchor?.playerId === target.id
+                            ? {
+                                ...prev,
+                                x: Math.max(0, Math.min(100, last.x + prev.anchor.offsetX)),
+                                y: Math.max(0, Math.min(100, last.y + prev.anchor.offsetY)),
+                            }
+                            : prev
+                    ));
+                } else {
+                    setBall((prev) => ({ ...prev, x: last.x, y: last.y, anchor: null }));
+                }
+                setPendingArrows((prev) => [
+                    ...prev.filter((a) => !(a.targetType === target.type && a.targetId === target.id)),
+                    finishedArrow,
+                ]);
+            }
+            arrowTargetRef.current = null;
+            currentArrowRef.current = null;
+            setCurrentArrow(null);
+        }
         setDraggingId(null);
         setDraggingBall(false);
         handleSvgPointerUp();
         endPan();
-    }, [handleSvgPointerUp, endPan]);
+    }, [currentArrow, handleSvgPointerUp, endPan]);
 
     const handleCanvasPointerDown = useCallback(
         (e: React.PointerEvent<SVGSVGElement>) => {
@@ -691,37 +937,50 @@ export function ClubPizarraTab({
         [handleSvgPointerDown, startPan]
     );
 
-    /* ── Wheel zoom ── */
+    /* ── Wheel zoom (relativo al cursor) ── */
     const handleWheel = useCallback(
         (e: React.WheelEvent<SVGSVGElement>) => {
             e.preventDefault();
             if (isPlaybackLocked) return;
-            const factor = e.deltaY > 0 ? 1.08 : 0.92;
+            if (!wheelUndoTimerRef.current) {
+                pushUndoSnapshot();
+            } else {
+                window.clearTimeout(wheelUndoTimerRef.current);
+            }
+            wheelUndoTimerRef.current = window.setTimeout(() => {
+                wheelUndoTimerRef.current = null;
+            }, 350);
+            const factor = e.deltaY > 0 ? 1.1 : 0.9;
+            const { sx, sy } = svgXYToSvgPercent(e.clientX, e.clientY);
             setViewBox((prev) => {
                 const nw = Math.min(Math.max(prev.w * factor, 200), 800);
                 const nh = Math.min(Math.max(prev.h * factor, 200), 1100);
-                let nx = prev.x + (prev.w - nw) / 2;
-                let ny = prev.y + (prev.h - nh) / 2;
+                const ratioX = nw / prev.w;
+                const ratioY = nh / prev.h;
+                let nx = sx - (sx - prev.x) * ratioX;
+                let ny = sy - (sy - prev.y) * ratioY;
                 nx = Math.max(0, Math.min(800 - nw, nx));
                 ny = Math.max(0, Math.min(1100 - nh, ny));
                 return { x: nx, y: ny, w: nw, h: nh };
             });
         },
-        [isPlaybackLocked]
+        [isPlaybackLocked, pushUndoSnapshot, svgXYToSvgPercent]
     );
 
     /* ── Zoom controls ── */
     const zoomIn = useCallback(() => {
         if (isPlaybackLocked) return;
+        pushUndoSnapshot();
         setViewBox((prev) => {
             const nw = prev.w * 0.85;
             const nh = prev.h * 0.85;
             return { x: prev.x + (prev.w - nw) / 2, y: prev.y + (prev.h - nh) / 2, w: nw, h: nh };
         });
-    }, [isPlaybackLocked]);
+    }, [isPlaybackLocked, pushUndoSnapshot]);
 
     const zoomOut = useCallback(() => {
         if (isPlaybackLocked) return;
+        pushUndoSnapshot();
         setViewBox((prev) => {
             const nw = Math.min(prev.w * 1.15, 800);
             const nh = Math.min(prev.h * 1.15, 1100);
@@ -731,25 +990,73 @@ export function ClubPizarraTab({
             ny = Math.max(0, Math.min(1100 - nh, ny));
             return { x: nx, y: ny, w: nw, h: nh };
         });
-    }, [isPlaybackLocked]);
+    }, [isPlaybackLocked, pushUndoSnapshot]);
 
     const resetZoom = useCallback(() => {
         if (isPlaybackLocked) return;
+        pushUndoSnapshot();
         setViewBox(DEFAULT_VIEWBOX);
-    }, [isPlaybackLocked]);
+    }, [isPlaybackLocked, pushUndoSnapshot]);
 
     const applyZoomPreset = useCallback((preset: ViewBox) => {
         if (isPlaybackLocked) return;
+        pushUndoSnapshot();
         setViewBox(preset);
-    }, [isPlaybackLocked]);
+    }, [isPlaybackLocked, pushUndoSnapshot]);
+
+    const handleSetBoardOrientation = useCallback((orientation: BoardOrientation) => {
+        if (isPlaybackLocked) return;
+        if (boardOrientation === orientation) return;
+        pushUndoSnapshot();
+        setBoardOrientation(orientation);
+    }, [isPlaybackLocked, boardOrientation, pushUndoSnapshot]);
+
+    const handleToggleBoardOrientation = useCallback(() => {
+        if (isPlaybackLocked) return;
+        pushUndoSnapshot();
+        setBoardOrientation((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'));
+    }, [isPlaybackLocked, pushUndoSnapshot]);
+
+    const handleToggleNumbers = useCallback(() => {
+        if (isPlaybackLocked) return;
+        pushUndoSnapshot();
+        setShowNumbers((value) => !value);
+    }, [isPlaybackLocked, pushUndoSnapshot]);
+
+    const handleSetEditMode = useCallback((nextMode: BoardMode) => {
+        if (isPlaybackLocked) return;
+        if (mode === nextMode) return;
+        pushUndoSnapshot();
+        setMode(nextMode);
+    }, [isPlaybackLocked, mode, pushUndoSnapshot]);
+
+    const handleSetLineColor = useCallback((color: string) => {
+        if (lineColor === color) return;
+        pushUndoSnapshot();
+        setLineColor(color);
+    }, [lineColor, pushUndoSnapshot]);
+
+    const handleSetLineWidth = useCallback((width: number) => {
+        if (lineWidth === width) return;
+        pushUndoSnapshot();
+        setLineWidth(width);
+    }, [lineWidth, pushUndoSnapshot]);
+
+    const handleSetPlaybackSpeed = useCallback((speed: number) => {
+        if (playbackSpeed === speed) return;
+        pushUndoSnapshot();
+        setPlaybackSpeed(speed);
+    }, [playbackSpeed, pushUndoSnapshot]);
 
     /* ── Actions ── */
     const handleReset = useCallback(() => {
+        pushUndoSnapshot();
         applyBoardStateSnapshot(createDefaultBoardState(normalizedSport));
-    }, [applyBoardStateSnapshot, normalizedSport]);
+    }, [pushUndoSnapshot, applyBoardStateSnapshot, normalizedSport]);
 
     const handleAddPlayer = useCallback(() => {
         if (isPlaybackLocked) return;
+        pushUndoSnapshot();
         const homePlayers = players.filter((player) => player.team !== 'away');
         const awayPlayers = players.filter((player) => player.team === 'away');
         const nextTeam = homePlayers.length <= awayPlayers.length ? 'home' : 'away';
@@ -772,49 +1079,102 @@ export function ClubPizarraTab({
                 team: nextTeam,
             },
         ]);
-    }, [players, isPlaybackLocked]);
+    }, [players, isPlaybackLocked, pushUndoSnapshot]);
 
     const handleRemovePlayer = useCallback(() => {
         if (isPlaybackLocked) return;
-        setPlayers((prev) => {
-            if (prev.length === 0) return prev;
+        if (players.length === 0) return;
+        pushUndoSnapshot();
 
-            const homeCount = prev.filter((player) => player.team !== 'away').length;
-            const awayCount = prev.filter((player) => player.team === 'away').length;
-            const targetTeam = awayCount >= homeCount ? 'away' : 'home';
+        const homeCount = players.filter((player) => player.team !== 'away').length;
+        const awayCount = players.filter((player) => player.team === 'away').length;
+        const targetTeam = awayCount >= homeCount ? 'away' : 'home';
+        let targetIndex = players.length - 1;
 
-            for (let index = prev.length - 1; index >= 0; index -= 1) {
-                const player = prev[index];
-                const playerTeam = player.team === 'away' ? 'away' : 'home';
-                if (playerTeam === targetTeam) {
-                    return prev.filter((_, playerIndex) => playerIndex !== index);
-                }
+        for (let index = players.length - 1; index >= 0; index -= 1) {
+            const playerTeam = players[index].team === 'away' ? 'away' : 'home';
+            if (playerTeam === targetTeam) {
+                targetIndex = index;
+                break;
             }
+        }
 
-            return prev.slice(0, -1);
-        });
-    }, [isPlaybackLocked]);
+        const removedPlayerId = players[targetIndex]?.id;
+        setPlayers((prev) => prev.filter((_, playerIndex) => playerIndex !== targetIndex));
+        if (removedPlayerId) {
+            setBall((prev) => (
+                prev.anchor?.playerId === removedPlayerId
+                    ? { ...prev, anchor: null }
+                    : prev
+            ));
+        }
+    }, [players, isPlaybackLocked, pushUndoSnapshot]);
 
     const handleClearLines = useCallback(() => {
         if (isPlaybackLocked) return;
+        if (lines.length === 0) return;
+        pushUndoSnapshot();
         setLines([]);
         setCurrentLine(null);
-    }, [isPlaybackLocked]);
+    }, [isPlaybackLocked, lines.length, pushUndoSnapshot]);
 
     const handleUndoLine = useCallback(() => {
         if (isPlaybackLocked) return;
+        if (lines.length === 0) return;
+        pushUndoSnapshot();
         setLines((prev) => prev.slice(0, -1));
-    }, [isPlaybackLocked]);
+    }, [isPlaybackLocked, lines.length, pushUndoSnapshot]);
 
     const handleToggleBall = useCallback(() => {
         if (isPlaybackLocked) return;
+        pushUndoSnapshot();
         setBall((prev) => ({ ...prev, visible: !prev.visible }));
-    }, [isPlaybackLocked]);
+    }, [isPlaybackLocked, pushUndoSnapshot]);
+
+    const ballAnchorPlayer = useMemo(
+        () => ball.anchor?.playerId
+            ? players.find((player) => player.id === ball.anchor?.playerId) ?? null
+            : null,
+        [ball.anchor?.playerId, players]
+    );
+    const ballAnchorLabel = ballAnchorPlayer ? `#${ballAnchorPlayer.number}` : null;
+    const canAnchorBall = ball.visible && players.length > 0;
+
+    const handleToggleBallAnchor = useCallback(() => {
+        if (isPlaybackLocked || !ball.visible || players.length === 0) return;
+        pushUndoSnapshot();
+
+        if (ball.anchor?.playerId && players.some((player) => player.id === ball.anchor?.playerId)) {
+            setBall((prev) => ({ ...prev, anchor: null }));
+            return;
+        }
+
+        const closest = players.reduce((best, player) => {
+            const distance = Math.hypot(ball.x - player.x, ball.y - player.y);
+            if (!best || distance < best.distance) {
+                return { player, distance };
+            }
+            return best;
+        }, null as { player: PlayerChip; distance: number } | null);
+
+        if (!closest) return;
+
+        setBall((prev) => ({
+            ...prev,
+            visible: true,
+            anchor: {
+                playerId: closest.player.id,
+                offsetX: prev.x - closest.player.x,
+                offsetY: prev.y - closest.player.y,
+            },
+        }));
+    }, [isPlaybackLocked, ball, players, pushUndoSnapshot]);
 
     /* ── Presets ── */
     const applyPreset = useCallback(
         (preset: RugbyPreset | SavedPreset) => {
             if (isPlaybackLocked) return;
+            pushUndoSnapshot();
 
             if ('boardState' in preset) {
                 applyBoardStateSnapshot(normalizePersistedBoardState(preset.boardState, normalizedSport));
@@ -838,29 +1198,37 @@ export function ClubPizarraTab({
 
             applyBoardStateSnapshot(nextState);
         },
-        [isPlaybackLocked, applyBoardStateSnapshot, normalizedSport]
+        [isPlaybackLocked, pushUndoSnapshot, applyBoardStateSnapshot, normalizedSport]
     );
 
     /* ── Frames / Timeline ── */
+    const createCurrentFrameSnapshot = useCallback((name: string, index: number, id = `frame-${Date.now()}`): TimelineFrame => ({
+        id,
+        name,
+        players: clonePlayers(players),
+        lines: cloneLines(lines),
+        ball: cloneBall(ball),
+        viewBox: cloneViewBox(viewBox),
+        arrows: cloneArrows(pendingArrows),
+        duration: 800,
+        holdBefore: index === 0 ? 180 : 0,
+        holdAfter: 120,
+        easing: 'easeInOut' as const,
+    }), [players, lines, ball, viewBox, pendingArrows]);
+
     const handleCaptureFrame = useCallback(() => {
         if (isPlaybackLocked) return;
-        const nextNum = timeline.length + 1;
-        const transitionDefaults = { duration: 800, holdBefore: timeline.length === 0 ? 180 : 0, holdAfter: 120, easing: 'easeInOut' as const };
+        const nextIndex = timeline.length;
+        const nextName = nextIndex === 0 ? 'Configuracion base' : `Frame ${nextIndex + 1}`;
+        const nextFrame = createCurrentFrameSnapshot(nextName, nextIndex);
         setTimeline((prev) => [
             ...prev,
-            {
-                id: `frame-${Date.now()}`,
-                name: `Frame ${nextNum}`,
-                players: clonePlayers(players),
-                lines: cloneLines(lines),
-                ball: cloneBall(ball),
-                viewBox: cloneViewBox(viewBox),
-                ...transitionDefaults,
-            },
+            nextFrame,
         ]);
+        setPendingArrows([]);
         setFlashCapture(true);
         setTimeout(() => setFlashCapture(false), 350);
-    }, [players, lines, ball, viewBox, timeline.length, isPlaybackLocked]);
+    }, [createCurrentFrameSnapshot, timeline.length, isPlaybackLocked]);
 
     const handlePlayPause = useCallback(() => {
         if (!hasPlaybackFrames) return;
@@ -875,17 +1243,53 @@ export function ClubPizarraTab({
     const handleStop = useCallback(() => {
         setIsPlaying(false);
         setPlaybackTime(0);
+        setUiMode('edit');
     }, []);
 
     const handleClearTimeline = useCallback(() => {
         setIsPlaying(false);
-        setTimeline([]);
         setPlaybackTime(0);
-    }, []);
+        setEditingFrameId(null);
+        setPendingArrows([]);
+        currentArrowRef.current = null;
+        setCurrentArrow(null);
+        setCurrentLine(null);
+        setUiMode('edit');
+
+        const baseFrame = timeline[0];
+        if (!baseFrame) {
+            return;
+        }
+        pushUndoSnapshot();
+
+        const nextBaseFrame = {
+            ...baseFrame,
+            players: clonePlayers(baseFrame.players),
+            lines: cloneLines(baseFrame.lines),
+            ball: cloneBall(baseFrame.ball),
+            viewBox: cloneViewBox(baseFrame.viewBox),
+            arrows: cloneArrows(baseFrame.arrows ?? []),
+        };
+
+        setTimeline([nextBaseFrame]);
+        setPlayers(clonePlayers(nextBaseFrame.players));
+        setLines(cloneLines(nextBaseFrame.lines));
+        setBall(cloneBall(nextBaseFrame.ball));
+        setViewBox(cloneViewBox(nextBaseFrame.viewBox));
+    }, [timeline, pushUndoSnapshot]);
 
     const handleDeleteFrame = useCallback((frameId: string) => {
+        const frameIndex = timeline.findIndex((frame) => frame.id === frameId);
+        if (frameIndex <= 0) return;
+
         setTimeline((prev) => prev.filter((f) => f.id !== frameId));
-    }, []);
+        setEditingFrameId((prev) => (prev === frameId ? null : prev));
+        if (editingFrameId === frameId) {
+            setPendingArrows([]);
+            currentArrowRef.current = null;
+            setCurrentArrow(null);
+        }
+    }, [editingFrameId, timeline]);
 
     const handleDuplicateFrame = useCallback((frameId: string) => {
         setTimeline((prev) => {
@@ -900,6 +1304,7 @@ export function ClubPizarraTab({
                 lines: cloneLines(frame.lines),
                 ball: cloneBall(frame.ball),
                 viewBox: cloneViewBox(frame.viewBox),
+                arrows: cloneArrows(frame.arrows ?? []),
             };
             const next = [...prev];
             next.splice(idx + 1, 0, copy);
@@ -907,12 +1312,78 @@ export function ClubPizarraTab({
         });
     }, []);
 
+    const handleCreateEditableCopyFromFrame = useCallback((frameId: string) => {
+        const sourceFrame = editingFrameId === frameId
+            ? {
+                id: frameId,
+                name: editingFrame?.name ?? 'Fotograma',
+                players: clonePlayers(players),
+                lines: cloneLines(lines),
+                ball: cloneBall(ball),
+                viewBox: cloneViewBox(viewBox),
+                arrows: cloneArrows(pendingArrows),
+                duration: editingFrame?.duration ?? 800,
+                holdBefore: editingFrame?.holdBefore ?? 0,
+                holdAfter: editingFrame?.holdAfter ?? 120,
+                easing: editingFrame?.easing ?? 'easeInOut',
+            } satisfies TimelineFrame
+            : timeline.find((frame) => frame.id === frameId);
+        if (!sourceFrame) return;
+        pushUndoSnapshot();
+
+        const copyId = `frame-${Date.now()}`;
+        const copy: TimelineFrame = {
+            ...sourceFrame,
+            id: copyId,
+            name: `${sourceFrame.name} editable`,
+            players: clonePlayers(sourceFrame.players),
+            lines: cloneLines(sourceFrame.lines),
+            ball: cloneBall(sourceFrame.ball),
+            viewBox: cloneViewBox(sourceFrame.viewBox),
+            arrows: cloneArrows(sourceFrame.arrows ?? []),
+            holdBefore: 0,
+        };
+
+        setIsPlaying(false);
+        setPlaybackTime(0);
+        setCurrentLine(null);
+        currentArrowRef.current = null;
+        setCurrentArrow(null);
+        setTimeline((prev) => {
+            const saved = editingFrameId
+                ? prev.map((frame) => frame.id === editingFrameId
+                    ? {
+                        ...frame,
+                        players: clonePlayers(players),
+                        lines: cloneLines(lines),
+                        ball: cloneBall(ball),
+                        viewBox: cloneViewBox(viewBox),
+                        arrows: cloneArrows(pendingArrows),
+                    }
+                    : frame)
+                : prev;
+            const idx = saved.findIndex((frame) => frame.id === frameId);
+            if (idx < 0) return saved;
+            const next = [...saved];
+            next.splice(idx + 1, 0, copy);
+            return next;
+        });
+        setPlayers(clonePlayers(copy.players));
+        setLines(cloneLines(copy.lines));
+        setBall(cloneBall(copy.ball));
+        setViewBox(cloneViewBox(copy.viewBox));
+        setPendingArrows(cloneArrows(copy.arrows ?? []));
+        setEditingFrameId(copyId);
+        setMode('select');
+        setUiMode('animate');
+    }, [editingFrameId, editingFrame, timeline, players, lines, ball, viewBox, pendingArrows, pushUndoSnapshot]);
+
     const handleMoveFrame = useCallback((frameId: string, direction: -1 | 1) => {
         setTimeline((prev) => {
             const idx = prev.findIndex((f) => f.id === frameId);
             if (idx < 0) return prev;
             const newIdx = idx + direction;
-            if (newIdx < 0 || newIdx >= prev.length) return prev;
+            if (idx === 0 || newIdx <= 0 || newIdx >= prev.length) return prev;
             const next = [...prev];
             [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
             return next;
@@ -937,6 +1408,73 @@ export function ClubPizarraTab({
 
     const handleScrub = useCallback((time: number) => {
         setPlaybackTime(time);
+    }, []);
+
+    /* ── Edicion de fotograma individual ── */
+    const handleStartEditFrame = useCallback((frameId: string) => {
+        pushUndoSnapshot();
+        setIsPlaying(false);
+        setPlaybackTime(0);
+        setCurrentLine(null);
+        currentArrowRef.current = null;
+        setCurrentArrow(null);
+        setTimeline((prev) => {
+            const next = editingFrameId
+                ? prev.map((f) => f.id === editingFrameId
+                    ? { ...f, players: clonePlayers(players), lines: cloneLines(lines), ball: cloneBall(ball), viewBox: cloneViewBox(viewBox), arrows: cloneArrows(pendingArrows) }
+                    : f)
+                : prev;
+            const frame = next.find((f) => f.id === frameId);
+            if (frame) {
+                setPlayers(clonePlayers(frame.players));
+                setLines(cloneLines(frame.lines));
+                setBall(cloneBall(frame.ball));
+                setViewBox(cloneViewBox(frame.viewBox));
+                setPendingArrows(cloneArrows(frame.arrows ?? []));
+            }
+            return next;
+        });
+        setEditingFrameId(frameId);
+        setMode('select');
+    }, [editingFrameId, players, lines, ball, viewBox, pendingArrows, pushUndoSnapshot]);
+
+    const handleFinishEditFrame = useCallback(() => {
+        if (!editingFrameId) return;
+        setTimeline((prev) =>
+            prev.map((frame) =>
+                frame.id === editingFrameId
+                    ? {
+                        ...frame,
+                        players: clonePlayers(players),
+                        lines: cloneLines(lines),
+                        ball: cloneBall(ball),
+                        viewBox: cloneViewBox(viewBox),
+                        arrows: cloneArrows(pendingArrows),
+                    }
+                    : frame
+            )
+        );
+        setEditingFrameId(null);
+        setPendingArrows([]);
+        currentArrowRef.current = null;
+        setCurrentArrow(null);
+    }, [editingFrameId, players, lines, ball, viewBox, pendingArrows]);
+
+    const handleCancelEditFrame = useCallback(() => {
+        setEditingFrameId(null);
+        setPendingArrows([]);
+        currentArrowRef.current = null;
+        setCurrentArrow(null);
+        setCurrentLine(null);
+    }, []);
+
+    const handleClearArrowsForFrame = useCallback(() => {
+        if (!editingFrameId) return;
+        setPendingArrows([]);
+    }, [editingFrameId]);
+
+    const handleUndoArrow = useCallback(() => {
+        setPendingArrows((prev) => prev.slice(0, -1));
     }, []);
 
     /* ── Sport labels ── */
@@ -973,14 +1511,14 @@ export function ClubPizarraTab({
                     <button
                         type="button"
                         className={`pizarra-orientation-btn ${boardOrientation === 'horizontal' ? 'active' : ''}`}
-                        onClick={() => setBoardOrientation('horizontal')}
+                        onClick={() => handleSetBoardOrientation('horizontal')}
                     >
                         Horizontal
                     </button>
                     <button
                         type="button"
                         className={`pizarra-orientation-btn ${boardOrientation === 'vertical' ? 'active' : ''}`}
-                        onClick={() => setBoardOrientation('vertical')}
+                        onClick={() => handleSetBoardOrientation('vertical')}
                     >
                         Vertical
                     </button>
@@ -1025,7 +1563,43 @@ export function ClubPizarraTab({
 
                 <div className="pizarra-mobile-modebar">
                     <ModeSelector mode={uiMode} onChange={setUiMode} />
+                    <div className="pizarra-orientation-switch pizarra-orientation-switch-mobile">
+                        <button
+                            type="button"
+                            className={`pizarra-orientation-btn ${boardOrientation === 'horizontal' ? 'active' : ''}`}
+                            onClick={() => handleSetBoardOrientation('horizontal')}
+                            title="Horizontal"
+                        >
+                            H
+                        </button>
+                        <button
+                            type="button"
+                            className={`pizarra-orientation-btn ${boardOrientation === 'vertical' ? 'active' : ''}`}
+                            onClick={() => handleSetBoardOrientation('vertical')}
+                            title="Vertical"
+                        >
+                            V
+                        </button>
+                    </div>
                 </div>
+
+                {editingFrame ? (
+                    <div className="pizarra-frame-edit-banner is-mobile">
+                        <div className="pizarra-frame-edit-info">
+                            <strong>Editando: {editingFrame.name}</strong>
+                            <small>
+                                {previousEditingFrame
+                                    ? `Flechas desde "${previousEditingFrame.name}"`
+                                    : 'Sin fotograma anterior'}
+                                {pendingArrows.length > 0 ? ` · ${pendingArrows.length} flecha${pendingArrows.length === 1 ? '' : 's'}` : ''}
+                            </small>
+                        </div>
+                        <div className="pizarra-frame-edit-actions">
+                            <button type="button" className="pizarra-frame-edit-btn is-ghost" onClick={handleCancelEditFrame}>Cancelar</button>
+                            <button type="button" className="pizarra-frame-edit-btn is-primary" onClick={handleFinishEditFrame}>Guardar</button>
+                        </div>
+                    </div>
+                ) : null}
 
                 {uiMode === 'edit' && quickMobilePresets.length > 0 ? (
                     <div className="pizarra-mobile-presets" aria-label="Presets rapidos">
@@ -1053,7 +1627,9 @@ export function ClubPizarraTab({
                         players={resolvedPlaybackState.players}
                         ball={resolvedPlaybackState.ball}
                         lineLayers={resolvedPlaybackState.lineLayers}
+                        arrowLayers={resolvedPlaybackState.arrowLayers}
                         currentLine={currentLine}
+                        currentArrow={currentArrow}
                         viewBox={viewBox}
                         orientation={boardOrientation}
                         showNumbers={showNumbers}
@@ -1063,7 +1639,7 @@ export function ClubPizarraTab({
                         onZoomOut={zoomOut}
                         onResetZoom={resetZoom}
                         onApplyZoomPreset={applyZoomPreset}
-                        onToggleOrientation={() => setBoardOrientation((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
+                        onToggleOrientation={handleToggleBoardOrientation}
                         onPlayerDragStart={handlePlayerPointerDown}
                         onBallDragStart={handleBallPointerDown}
                         onPointerDown={handleCanvasPointerDown}
@@ -1086,13 +1662,17 @@ export function ClubPizarraTab({
                             isPlaybackLocked={isPlaybackLocked}
                             homeColor={homeColor}
                             orientation={boardOrientation}
+                            editingFrameId={editingFrameId}
                             onCaptureFrame={handleCaptureFrame}
                             onScrub={handleScrub}
                             onMoveFrame={handleMoveFrame}
                             onDuplicateFrame={handleDuplicateFrame}
                             onDeleteFrame={handleDeleteFrame}
+                            onCreateEditableCopyFromFrame={handleCreateEditableCopyFromFrame}
                             onRenameFrame={handleRenameFrame}
                             onUpdateFrameDuration={handleUpdateFrameDuration}
+                            onStartEditFrame={handleStartEditFrame}
+                            onFinishEditFrame={handleFinishEditFrame}
                         />
                     </div>
                 ) : null}
@@ -1111,28 +1691,33 @@ export function ClubPizarraTab({
                         isPlaying={isPlaying}
                         isPlaybackLocked={isPlaybackLocked}
                         hasPlaybackFrames={hasPlaybackFrames}
+                        canUndoBoard={undoDepth > 0}
                         showNumbers={showNumbers}
                         ballVisible={ball.visible}
+                        ballAnchorLabel={ballAnchorLabel}
+                        canAnchorBall={canAnchorBall}
                         lineColor={lineColor}
                         lineWidth={lineWidth}
                         playbackSpeed={playbackSpeed}
                         timelineLength={timeline.length}
                         linesCount={lines.length}
-                        onSetEditMode={setMode}
-                        onToggleNumbers={() => setShowNumbers((v) => !v)}
+                        onSetEditMode={handleSetEditMode}
+                        onUndoBoard={handleUndoBoardChange}
+                        onToggleNumbers={handleToggleNumbers}
                         onToggleBall={handleToggleBall}
+                        onToggleBallAnchor={handleToggleBallAnchor}
                         onAddPlayer={handleAddPlayer}
                         onRemovePlayer={handleRemovePlayer}
                         onReset={handleReset}
-                        onSetLineColor={setLineColor}
-                        onSetLineWidth={setLineWidth}
+                        onSetLineColor={handleSetLineColor}
+                        onSetLineWidth={handleSetLineWidth}
                         onUndoLine={handleUndoLine}
                         onClearLines={handleClearLines}
                         onPlayPause={handlePlayPause}
                         onStop={handleStop}
                         onCaptureFrame={handleCaptureFrame}
                         onClearTimeline={handleClearTimeline}
-                        onSetPlaybackSpeed={setPlaybackSpeed}
+                        onSetPlaybackSpeed={handleSetPlaybackSpeed}
                         onOpenPresets={() => setPresetsOpen(true)}
                         onExportVideo={async () => {
                             if (totalDuration <= 0 || isPlaying || exportState.status !== 'idle') return;
@@ -1238,6 +1823,34 @@ export function ClubPizarraTab({
                 <ModeSelector mode={uiMode} onChange={setUiMode} />
             </div>
 
+            {editingFrame ? (
+                <div className="pizarra-frame-edit-banner">
+                    <div className="pizarra-frame-edit-info">
+                        <strong>Editando: {editingFrame.name}</strong>
+                        <small>
+                            {previousEditingFrame
+                                ? `Las flechas se anclan a la posicion en "${previousEditingFrame.name}".`
+                                : 'No hay fotograma anterior; las flechas inician en la posicion actual.'}
+                            {pendingArrows.length > 0 ? ` ${pendingArrows.length} flecha${pendingArrows.length === 1 ? '' : 's'} en este frame.` : ''}
+                        </small>
+                    </div>
+                    <div className="pizarra-frame-edit-actions">
+                        <button type="button" className="pizarra-frame-edit-btn" onClick={handleUndoArrow} disabled={pendingArrows.length === 0}>
+                            Deshacer flecha
+                        </button>
+                        <button type="button" className="pizarra-frame-edit-btn" onClick={handleClearArrowsForFrame} disabled={pendingArrows.length === 0}>
+                            Limpiar flechas
+                        </button>
+                        <button type="button" className="pizarra-frame-edit-btn is-ghost" onClick={handleCancelEditFrame}>
+                            Cancelar
+                        </button>
+                        <button type="button" className="pizarra-frame-edit-btn is-primary" onClick={handleFinishEditFrame}>
+                            Guardar fotograma
+                        </button>
+                    </div>
+                </div>
+            ) : null}
+
             {/* Workspace */}
             <div className="pizarra-workspace">
                 {/* Toolbar lateral */}
@@ -1248,28 +1861,33 @@ export function ClubPizarraTab({
                         isPlaying={isPlaying}
                         isPlaybackLocked={isPlaybackLocked}
                         hasPlaybackFrames={hasPlaybackFrames}
+                        canUndoBoard={undoDepth > 0}
                         showNumbers={showNumbers}
                         ballVisible={ball.visible}
+                        ballAnchorLabel={ballAnchorLabel}
+                        canAnchorBall={canAnchorBall}
                         lineColor={lineColor}
                         lineWidth={lineWidth}
                         playbackSpeed={playbackSpeed}
                         timelineLength={timeline.length}
                         linesCount={lines.length}
-                        onSetEditMode={setMode}
-                        onToggleNumbers={() => setShowNumbers((v) => !v)}
+                        onSetEditMode={handleSetEditMode}
+                        onUndoBoard={handleUndoBoardChange}
+                        onToggleNumbers={handleToggleNumbers}
                         onToggleBall={handleToggleBall}
+                        onToggleBallAnchor={handleToggleBallAnchor}
                         onAddPlayer={handleAddPlayer}
                         onRemovePlayer={handleRemovePlayer}
                         onReset={handleReset}
-                        onSetLineColor={setLineColor}
-                        onSetLineWidth={setLineWidth}
+                        onSetLineColor={handleSetLineColor}
+                        onSetLineWidth={handleSetLineWidth}
                         onUndoLine={handleUndoLine}
                         onClearLines={handleClearLines}
                         onPlayPause={handlePlayPause}
                         onStop={handleStop}
                         onCaptureFrame={handleCaptureFrame}
                         onClearTimeline={handleClearTimeline}
-                        onSetPlaybackSpeed={setPlaybackSpeed}
+                        onSetPlaybackSpeed={handleSetPlaybackSpeed}
                         onOpenPresets={() => setPresetsOpen(true)}
                         onExportVideo={async () => {
                             if (totalDuration <= 0 || isPlaying || exportState.status !== 'idle') return;
@@ -1313,7 +1931,9 @@ export function ClubPizarraTab({
                     players={resolvedPlaybackState.players}
                     ball={resolvedPlaybackState.ball}
                     lineLayers={resolvedPlaybackState.lineLayers}
+                    arrowLayers={resolvedPlaybackState.arrowLayers}
                     currentLine={currentLine}
+                    currentArrow={currentArrow}
                     viewBox={viewBox}
                     orientation={boardOrientation}
                     showNumbers={showNumbers}
@@ -1323,7 +1943,7 @@ export function ClubPizarraTab({
                     onZoomOut={zoomOut}
                     onResetZoom={resetZoom}
                     onApplyZoomPreset={applyZoomPreset}
-                    onToggleOrientation={() => setBoardOrientation((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
+                    onToggleOrientation={handleToggleBoardOrientation}
                     onPlayerDragStart={handlePlayerPointerDown}
                     onBallDragStart={handleBallPointerDown}
                     onPointerDown={handleCanvasPointerDown}
@@ -1336,8 +1956,8 @@ export function ClubPizarraTab({
                 />
             </div>
 
-            {/* Config panel */}
-            {uiMode === 'config' && orientationControls}
+            {/* Config panel — orientation siempre visible */}
+            {orientationControls}
 
             {/* Timeline */}
             {uiMode === 'animate' && (
@@ -1349,13 +1969,17 @@ export function ClubPizarraTab({
                     isPlaybackLocked={isPlaybackLocked}
                     homeColor={homeColor}
                     orientation={boardOrientation}
+                    editingFrameId={editingFrameId}
                     onCaptureFrame={handleCaptureFrame}
                     onScrub={handleScrub}
                     onMoveFrame={handleMoveFrame}
                     onDuplicateFrame={handleDuplicateFrame}
                     onDeleteFrame={handleDeleteFrame}
+                    onCreateEditableCopyFromFrame={handleCreateEditableCopyFromFrame}
                     onRenameFrame={handleRenameFrame}
                     onUpdateFrameDuration={handleUpdateFrameDuration}
+                    onStartEditFrame={handleStartEditFrame}
+                    onFinishEditFrame={handleFinishEditFrame}
                 />
             )}
 

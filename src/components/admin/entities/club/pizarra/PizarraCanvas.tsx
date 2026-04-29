@@ -3,11 +3,13 @@
 import { useRef, useMemo, useEffect } from 'react';
 import type {
     LinePath,
+    MovementArrow,
     ViewBox,
     BoardOrientation,
     PizarraUIMode,
     BoardMode,
     ResolvedLineLayer,
+    ResolvedArrowLayer,
     ResolvedPlayerState,
     ResolvedBallState,
 } from '@/lib/club-pizarra/types';
@@ -38,7 +40,9 @@ interface PizarraCanvasProps {
     players: ResolvedPlayerState[];
     ball: ResolvedBallState;
     lineLayers: ResolvedLineLayer[];
+    arrowLayers: ResolvedArrowLayer[];
     currentLine: LinePath | null;
+    currentArrow: MovementArrow | null;
     viewBox: ViewBox;
     orientation: BoardOrientation;
     showNumbers: boolean;
@@ -49,8 +53,8 @@ interface PizarraCanvasProps {
     onResetZoom: () => void;
     onApplyZoomPreset: (preset: ViewBox) => void;
     onToggleOrientation: () => void;
-    onPlayerDragStart: (id: string) => void;
-    onBallDragStart: () => void;
+    onPlayerDragStart: (id: string, event: React.PointerEvent<SVGGElement>) => void;
+    onBallDragStart: (event: React.PointerEvent<SVGGElement>) => void;
     onPointerDown: (e: React.PointerEvent<SVGSVGElement>) => void;
     onPointerMove: (e: React.PointerEvent<SVGSVGElement>) => void;
     onPointerUp: (e: React.PointerEvent<SVGSVGElement>) => void;
@@ -67,7 +71,9 @@ export function PizarraCanvas({
     players,
     ball,
     lineLayers,
+    arrowLayers,
     currentLine,
+    currentArrow,
     viewBox,
     orientation,
     showNumbers,
@@ -91,16 +97,19 @@ export function PizarraCanvas({
     const fieldWrapRef = useRef<HTMLDivElement>(null);
 
     const isDrawing = editMode === 'draw';
+    const isArrowing = editMode === 'arrow';
 
     const canvasSize = getCanvasSize(orientation);
     const renderedViewBox = mapBaseViewBoxToDisplay(viewBox, orientation);
 
     const cursorClass = isPlaybackLocked
         ? 'default'
+        : isPanning
+            ? 'grabbing'
         : isDrawing
             ? 'crosshair'
-            : isPanning
-                ? 'grabbing'
+            : isArrowing
+                ? 'crosshair'
                 : draggingId || draggingBall
                     ? 'grabbing'
                     : 'grab';
@@ -178,6 +187,20 @@ export function PizarraCanvas({
                         />
                     )}
 
+                    {arrowLayers.map((layer) => (
+                        <g key={layer.id} opacity={layer.opacity} style={{ pointerEvents: 'none' }}>
+                            {layer.arrows.map((arrow) => (
+                                <ArrowShape key={arrow.id} arrow={arrow} />
+                            ))}
+                        </g>
+                    ))}
+
+                    {currentArrow && (
+                        <g style={{ pointerEvents: 'none' }}>
+                            <ArrowShape arrow={currentArrow} dashed />
+                        </g>
+                    )}
+
                     {players.map((player) => {
                         const px = FIELD_PAD.x + (player.x / 100) * FIELD_W;
                         const py = FIELD_PAD.y + (player.y / 100) * FIELD_H;
@@ -189,8 +212,9 @@ export function PizarraCanvas({
                                 className="pizarra-draggable"
                                 transform={`translate(${px}, ${py})`}
                                 onPointerDown={(e) => {
+                                    if (e.button === 1 || (e.button === 0 && e.shiftKey)) return;
                                     e.stopPropagation();
-                                    onPlayerDragStart(player.id);
+                                    onPlayerDragStart(player.id, e);
                                 }}
                                 style={{
                                     cursor: isPlaybackLocked ? 'default' : isDrawing ? 'default' : isDragging ? 'grabbing' : 'grab',
@@ -231,8 +255,9 @@ export function PizarraCanvas({
                             className="pizarra-draggable"
                             transform={`translate(${FIELD_PAD.x + (ball.x / 100) * FIELD_W}, ${FIELD_PAD.y + (ball.y / 100) * FIELD_H})`}
                             onPointerDown={(e) => {
+                                if (e.button === 1 || (e.button === 0 && e.shiftKey)) return;
                                 e.stopPropagation();
-                                onBallDragStart();
+                                onBallDragStart(e);
                             }}
                             style={{
                                 cursor: isPlaybackLocked ? 'default' : isDrawing ? 'default' : draggingBall ? 'grabbing' : 'grab',
@@ -240,6 +265,9 @@ export function PizarraCanvas({
                                 opacity: ball.opacity,
                             }}
                         >
+                            {ball.anchor?.playerId ? (
+                                <ellipse cx="0" cy="0" rx="14" ry="10" fill="none" stroke="#facc15" strokeWidth="2" strokeDasharray="4 3" opacity="0.9" />
+                            ) : null}
                             <ellipse cx="0" cy="3" rx="10" ry="7" fill="rgba(0,0,0,0.16)" />
                             <ellipse cx="0" cy="0" rx="10" ry="7" fill="#fff" stroke="#111" strokeWidth="1.5" />
                             <ellipse cx="0" cy="0" rx="10" ry="7" fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
@@ -262,5 +290,51 @@ export function PizarraCanvas({
                 disabled={isPlaybackLocked}
             />
         </div>
+    );
+}
+
+function ArrowShape({ arrow, dashed = false }: { arrow: MovementArrow; dashed?: boolean }) {
+    const points = arrow.points;
+    if (points.length < 2) return null;
+
+    const toAbs = (p: { x: number; y: number }) => ({
+        x: FIELD_PAD.x + (p.x / 100) * FIELD_W,
+        y: FIELD_PAD.y + (p.y / 100) * FIELD_H,
+    });
+
+    const last = toAbs(points[points.length - 1]);
+    let refIdx = points.length - 2;
+    let prev = toAbs(points[refIdx]);
+    while (refIdx > 0 && Math.hypot(last.x - prev.x, last.y - prev.y) < 6) {
+        refIdx -= 1;
+        prev = toAbs(points[refIdx]);
+    }
+    const angle = Math.atan2(last.y - prev.y, last.x - prev.x);
+    const headLen = Math.max(12, arrow.width * 4);
+    const headHalf = Math.max(8, arrow.width * 2.6);
+    const ax1 = last.x - headLen * Math.cos(angle) + headHalf * Math.sin(angle);
+    const ay1 = last.y - headLen * Math.sin(angle) - headHalf * Math.cos(angle);
+    const ax2 = last.x - headLen * Math.cos(angle) - headHalf * Math.sin(angle);
+    const ay2 = last.y - headLen * Math.sin(angle) + headHalf * Math.cos(angle);
+
+    return (
+        <g>
+            <path
+                d={pointsToSvgPath(points, FIELD_W, FIELD_H, FIELD_PAD.x, FIELD_PAD.y)}
+                fill="none"
+                stroke={arrow.color}
+                strokeWidth={arrow.width}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray={dashed ? `${arrow.width * 3} ${arrow.width * 2}` : undefined}
+            />
+            <polygon
+                points={`${last.x},${last.y} ${ax1},${ay1} ${ax2},${ay2}`}
+                fill={arrow.color}
+                stroke={arrow.color}
+                strokeLinejoin="round"
+                strokeWidth={Math.max(1, arrow.width * 0.4)}
+            />
+        </g>
     );
 }

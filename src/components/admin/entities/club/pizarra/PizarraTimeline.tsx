@@ -15,13 +15,17 @@ interface PizarraTimelineProps {
     isPlaybackLocked: boolean;
     homeColor: string;
     orientation: BoardOrientation;
+    editingFrameId: string | null;
     onCaptureFrame: () => void;
     onScrub: (time: number) => void;
     onMoveFrame: (frameId: string, direction: -1 | 1) => void;
     onDuplicateFrame: (frameId: string) => void;
     onDeleteFrame: (frameId: string) => void;
+    onCreateEditableCopyFromFrame: (frameId: string) => void;
     onRenameFrame: (index: number, name: string) => void;
     onUpdateFrameDuration: (index: number, duration: number) => void;
+    onStartEditFrame: (frameId: string) => void;
+    onFinishEditFrame: () => void;
 }
 
 export function PizarraTimeline({
@@ -32,13 +36,17 @@ export function PizarraTimeline({
     isPlaybackLocked,
     homeColor,
     orientation,
+    editingFrameId,
     onCaptureFrame,
     onScrub,
     onMoveFrame,
     onDuplicateFrame,
     onDeleteFrame,
+    onCreateEditableCopyFromFrame,
     onRenameFrame,
     onUpdateFrameDuration,
+    onStartEditFrame,
+    onFinishEditFrame,
 }: PizarraTimelineProps) {
     const scrubRef = useRef<HTMLDivElement>(null);
     const isDraggingScrub = useRef(false);
@@ -115,14 +123,19 @@ export function PizarraTimeline({
                         frame={frame}
                         index={idx}
                         isActive={idx === focusFrameIndex}
+                        isEditing={editingFrameId === frame.id}
                         isPlaybackLocked={isPlaybackLocked}
+                        isBaseFrame={idx === 0}
                         homeColor={homeColor}
                         orientation={orientation}
                         onMove={(dir) => onMoveFrame(frame.id, dir)}
                         onDuplicate={() => onDuplicateFrame(frame.id)}
                         onDelete={() => onDeleteFrame(frame.id)}
+                        onCreateEditableCopy={() => onCreateEditableCopyFromFrame(frame.id)}
                         onRename={(name) => onRenameFrame(idx, name)}
                         onUpdateDuration={(dur) => onUpdateFrameDuration(idx, dur)}
+                        onStartEdit={() => onStartEditFrame(frame.id)}
+                        onFinishEdit={onFinishEditFrame}
                     />
                 ))}
             </div>

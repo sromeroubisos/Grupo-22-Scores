@@ -18,10 +18,28 @@ export type LinePath = {
     width: number;
 };
 
+export type ArrowTargetType = 'player' | 'ball';
+
+export type MovementArrow = {
+    id: string;
+    targetType: ArrowTargetType;
+    targetId: string;
+    points: Point[];
+    color: string;
+    width: number;
+};
+
+export type BallAnchor = {
+    playerId: string;
+    offsetX: number;
+    offsetY: number;
+};
+
 export type BallState = {
     x: number;
     y: number;
     visible: boolean;
+    anchor?: BallAnchor | null;
 };
 
 export type ViewBox = {
@@ -40,6 +58,7 @@ export type TimelineFrame = {
     lines: LinePath[];
     ball: BallState;
     viewBox: ViewBox;
+    arrows: MovementArrow[];
     duration: number;
     holdBefore: number;
     holdAfter: number;
@@ -56,7 +75,7 @@ export type RugbyPreset = {
     viewBox: ViewBox;
 };
 
-export type BoardMode = 'select' | 'draw';
+export type BoardMode = 'select' | 'draw' | 'arrow';
 export type BoardOrientation = 'horizontal' | 'vertical';
 export type PizarraUIMode = 'edit' | 'animate' | 'config';
 
@@ -96,11 +115,18 @@ export type ResolvedLineLayer = {
     opacity: number;
 };
 
+export type ResolvedArrowLayer = {
+    id: string;
+    arrows: MovementArrow[];
+    opacity: number;
+};
+
 export type ResolvedBoardState = {
     players: ResolvedPlayerState[];
     ball: ResolvedBallState;
     viewBox: ViewBox;
     lineLayers: ResolvedLineLayer[];
+    arrowLayers: ResolvedArrowLayer[];
     activeSegmentIndex: number;
     focusFrameIndex: number;
     localProgress: number;

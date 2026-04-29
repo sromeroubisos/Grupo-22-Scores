@@ -1,0 +1,188 @@
+/* Crystalline Design System — Tokens & Utilities */
+/* Based on Flash UI / Crystalline Strata concept */
+
+:root {
+  --crys-bg-bedrock: #05070a;
+  --crys-bg-elevated: rgba(15, 20, 28, 0.7);
+  --crys-border: rgba(255, 255, 255, 0.08);
+  --crys-border-strong: rgba(255, 255, 255, 0.14);
+  --crys-text-primary: #f8fafc;
+  --crys-text-secondary: #94a3b8;
+  --crys-text-muted: #64748b;
+  --crys-accent-start: #00f2ff;
+  --crys-accent-mid: #006aff;
+  --crys-accent-end: #7000ff;
+  --crys-accent-gradient: linear-gradient(135deg, #00f2ff 0%, #006aff 50%, #7000ff 100%);
+  --crys-success: #10b981;
+  --crys-warning: #f59e0b;
+  --crys-error: #ef4444;
+  --crys-step-inactive: #1e293b;
+  --crys-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.crys-glass {
+  background: var(--crys-bg-elevated);
+  border: 1px solid var(--crys-border);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.crys-glass::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.crys-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 2px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--crys-transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.crys-btn-primary {
+  background: var(--crys-accent-gradient);
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 106, 255, 0.3);
+}
+
+.crys-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 106, 255, 0.5);
+}
+
+.crys-btn-ghost {
+  background: transparent;
+  color: var(--crys-text-primary);
+  border: 1px solid var(--crys-border);
+}
+
+.crys-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.crys-badge {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 2px;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.crys-badge-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--crys-warning);
+  border: 1px solid var(--crys-warning);
+}
+
+.crys-badge-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--crys-success);
+  border: 1px solid var(--crys-success);
+}
+
+.crys-badge-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--crys-error);
+  border: 1px solid var(--crys-error);
+}
+
+.crys-kpi-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--crys-text-primary);
+}
+
+.crys-kpi-label {
+  font-size: 0.75rem;
+  color: var(--crys-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.crys-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--crys-border);
+  padding: 0.5rem 1rem;
+  color: var(--crys-text-primary);
+  font-family: inherit;
+  border-radius: 2px;
+  outline: none;
+  transition: var(--crys-transition);
+  width: 100%;
+}
+
+.crys-input:focus {
+  border-color: var(--crys-accent-mid);
+  box-shadow: 0 0 0 2px rgba(0, 106, 255, 0.15);
+}
+
+.crys-input::placeholder {
+  color: var(--crys-text-muted);
+}
+
+.crys-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.crys-table th {
+  text-align: left;
+  padding: 1rem;
+  color: var(--crys-text-secondary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--crys-border);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.crys-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.crys-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.crys-sparkline {
+  width: 80px;
+  height: 20px;
+  stroke: url(#crys-sparkline-gradient);
+  fill: none;
+  stroke-width: 2;
+}
+
+.crys-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.crys-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.crys-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.crys-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

@@ -18,6 +18,9 @@ import {
     Minus as LineIcon,
     LayoutGrid,
     Video,
+    MoveUpRight,
+    Link2,
+    Undo2,
 } from 'lucide-react';
 import type { PizarraUIMode, BoardMode } from '@/lib/club-pizarra/types';
 import { DRAW_COLORS, PLAYBACK_SPEEDS } from '@/lib/club-pizarra/constants';
@@ -29,16 +32,21 @@ interface PizarraToolbarProps {
     isPlaying: boolean;
     isPlaybackLocked: boolean;
     hasPlaybackFrames: boolean;
+    canUndoBoard: boolean;
     showNumbers: boolean;
     ballVisible: boolean;
+    ballAnchorLabel: string | null;
+    canAnchorBall: boolean;
     lineColor: string;
     lineWidth: number;
     playbackSpeed: number;
     timelineLength: number;
     linesCount: number;
     onSetEditMode: (mode: BoardMode) => void;
+    onUndoBoard: () => void;
     onToggleNumbers: () => void;
     onToggleBall: () => void;
+    onToggleBallAnchor: () => void;
     onAddPlayer: () => void;
     onRemovePlayer: () => void;
     onReset: () => void;
@@ -63,16 +71,21 @@ export function PizarraToolbar({
     isPlaying,
     isPlaybackLocked,
     hasPlaybackFrames,
+    canUndoBoard,
     showNumbers,
     ballVisible,
+    ballAnchorLabel,
+    canAnchorBall,
     lineColor,
     lineWidth,
     playbackSpeed,
     timelineLength,
     linesCount,
     onSetEditMode,
+    onUndoBoard,
     onToggleNumbers,
     onToggleBall,
+    onToggleBallAnchor,
     onAddPlayer,
     onRemovePlayer,
     onReset,
@@ -90,6 +103,8 @@ export function PizarraToolbar({
     isExporting,
 }: PizarraToolbarProps) {
     const isDrawing = editMode === 'draw';
+    const isArrowing = editMode === 'arrow';
+    const isMoving = editMode === 'select';
 
     return (
         <div className="pizarra-toolbar">
@@ -99,7 +114,7 @@ export function PizarraToolbar({
                     <div className="pizarra-toolbar-segment">
                         <button
                             type="button"
-                            className={`pizarra-tool-btn ${!isDrawing ? 'active' : ''}`}
+                            className={`pizarra-tool-btn ${isMoving ? 'active' : ''}`}
                             onClick={() => onSetEditMode('select')}
                             disabled={isPlaybackLocked}
                             title="Mover"
@@ -116,6 +131,26 @@ export function PizarraToolbar({
                         >
                             <Pencil className="w-4 h-4" />
                             <span>Dibujar</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`pizarra-tool-btn ${isArrowing ? 'active' : ''}`}
+                            onClick={() => onSetEditMode('arrow')}
+                            disabled={isPlaybackLocked}
+                            title="Flecha de movimiento"
+                        >
+                            <MoveUpRight className="w-4 h-4" />
+                            <span>Flecha</span>
+                        </button>
+                        <button
+                            type="button"
+                            className="pizarra-tool-btn"
+                            onClick={onUndoBoard}
+                            disabled={isPlaybackLocked || !canUndoBoard}
+                            title="Deshacer movimiento o configuracion"
+                        >
+                            <Undo2 className="w-4 h-4" />
+                            <span>Deshacer</span>
                         </button>
                         <div className="pizarra-toolbar-divider" />
                         <button
@@ -137,6 +172,16 @@ export function PizarraToolbar({
                         >
                             <Circle className="w-4 h-4" />
                             <span>Pelota</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`pizarra-tool-btn ${ballAnchorLabel ? 'active' : ''}`}
+                            onClick={onToggleBallAnchor}
+                            disabled={isPlaybackLocked || !canAnchorBall}
+                            title={ballAnchorLabel ? `Soltar pelota de jugador ${ballAnchorLabel}` : 'Anclar pelota al jugador mas cercano'}
+                        >
+                            <Link2 className="w-4 h-4" />
+                            <span>{ballAnchorLabel ? `Anclada ${ballAnchorLabel}` : 'Anclar'}</span>
                         </button>
                         <div className="pizarra-toolbar-divider" />
                         <button type="button" className="pizarra-tool-btn" onClick={onAddPlayer} disabled={isPlaybackLocked} title="Agregar jugador">
@@ -198,9 +243,9 @@ export function PizarraToolbar({
                         {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                         <span>{isPlaying ? 'Pausa' : 'Play'}</span>
                     </button>
-                    <button type="button" className="pizarra-tool-btn" onClick={onStop} disabled={!isPlaying}>
+                    <button type="button" className="pizarra-tool-btn" onClick={onStop} disabled={!hasPlaybackFrames} title="Salir de la reproduccion">
                         <Square className="w-4 h-4" />
-                        {mobileCanvasFirst ? <span>Stop</span> : null}
+                        {mobileCanvasFirst ? <span>Salir</span> : null}
                     </button>
                     <div className="pizarra-toolbar-divider" />
                     <button
@@ -226,9 +271,9 @@ export function PizarraToolbar({
                         ))}
                     </div>
                     <div className="pizarra-toolbar-divider" />
-                    <button type="button" className="pizarra-tool-btn" onClick={onClearTimeline} disabled={timelineLength === 0}>
+                    <button type="button" className="pizarra-tool-btn" onClick={onClearTimeline} disabled={timelineLength === 0} title="Reiniciar fotogramas a la base">
                         <Trash2 className="w-4 h-4" />
-                        <span>{mobileCanvasFirst ? `${timelineLength} frames` : timelineLength}</span>
+                        <span>{mobileCanvasFirst ? 'Reiniciar' : timelineLength}</span>
                     </button>
                     {onExportVideo && (
                         <>

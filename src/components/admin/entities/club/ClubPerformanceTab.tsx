@@ -41,6 +41,7 @@ import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes
 import { resolveActiveSeason, persistActiveSeason } from '@/lib/club-admin/activeSeasonSelection';
 
 import styles from './ClubPerformanceTab.module.css';
+import '@/components/admin/ui/crystalline.css';
 
 type PerformanceSection = 'resumen' | 'tiempo' | 'jugador' | 'equipo' | 'trabajo' | 'rugby' | 'fisico' | 'gimnasio' | 'testeos' | 'pesos' | 'planillas';
 
@@ -110,13 +111,21 @@ interface ClubPerformanceTabProps {
     onTabChange?: (tabId: ClubManageTabId) => void;
 }
 
-const SECTION_TABS: Array<{ id: PerformanceSection; label: string }> = [
-    { id: 'resumen', label: 'Global' },
-    { id: 'tiempo', label: 'Evolucion' },
-    { id: 'jugador', label: 'Jugador' },
-    { id: 'equipo', label: 'Equipo' },
-    { id: 'trabajo', label: 'Trabajado' },
-    { id: 'rugby', label: 'Tecnico' },
+const SECTION_TABS: Array<{ id: PerformanceSection; label: string; group: 'core' | 'advanced' }> = [
+    { id: 'resumen', label: 'Carga', group: 'core' },
+    { id: 'tiempo', label: 'Asistencia', group: 'core' },
+    { id: 'jugador', label: 'Técnica', group: 'core' },
+    { id: 'equipo', label: 'Alertas', group: 'core' },
+    { id: 'trabajo', label: 'Próxima acción', group: 'core' },
+    { id: 'rugby', label: 'Técnico avanzado', group: 'core' },
+];
+
+const ADVANCED_TABS: Array<{ id: PerformanceSection; label: string }> = [
+    { id: 'fisico', label: 'Físico' },
+    { id: 'gimnasio', label: 'Gimnasio' },
+    { id: 'testeos', label: 'Testeos' },
+    { id: 'pesos', label: 'Pesos' },
+    { id: 'planillas', label: 'Planillas' },
 ];
 
 const PLAN_BLOCK_OPTIONS: Array<{ id: PlanBlockType; label: string }> = [
@@ -2133,11 +2142,11 @@ export function ClubPerformanceTab({
         <div className={styles.shell}>
             <section className={styles.hero}>
                 <div className={styles.heroCopy}>
-                    <span className={styles.kicker}>Analisis del club</span>
+                    <span className={styles.kicker}>Dashboard de rendimiento</span>
                     <h2>Rendimiento</h2>
                     <p>
-                        Analiza la evolucion fisica, tecnica y competitiva del club. Aca se consolidan datos de entrenamientos, gimnasio,
-                        testeos, partidos y planillas del staff.
+                        Interpretá y decidí a partir de carga, asistencia, técnica y alertas.
+                        El modo avanzado consolidá datos de gimnasio, testeos y planillas del staff.
                     </p>
                     <p>
                         {clubName}
@@ -2162,7 +2171,7 @@ export function ClubPerformanceTab({
                         onClick={() => setActiveSection('trabajo')}
                     >
                         <BarChart3 className="w-4 h-4" />
-                        Ver trabajado
+                        Ver técnica
                     </button>
                     <button
                         type="button"
@@ -2249,7 +2258,19 @@ export function ClubPerformanceTab({
             </section>
 
             <div className={styles.sectionTabs}>
-                {SECTION_TABS.map((section) => (
+                {SECTION_TABS.filter((s) => s.group === 'core').map((section) => (
+                    <button
+                        key={section.id}
+                        type="button"
+                        className={cn(styles.sectionTab, activeSection === section.id && styles.sectionTabActive)}
+                        aria-pressed={activeSection === section.id}
+                        onClick={() => setActiveSection(section.id)}
+                    >
+                        {section.label}
+                    </button>
+                ))}
+                <span style={{ width: 1, background: 'rgba(255,255,255,0.08)', margin: '4px 8px' }} />
+                {ADVANCED_TABS.map((section) => (
                     <button
                         key={section.id}
                         type="button"

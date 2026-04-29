@@ -1,7 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Loader2, Mail, ShieldCheck, Trash2, UserCog, UserPlus } from 'lucide-react';
+import {
+    AlertCircle,
+    CheckCircle2,
+    Copy,
+    Link as LinkIcon,
+    Loader2,
+    Mail,
+    ShieldCheck,
+    Trash2,
+    UserCog,
+    UserPlus,
+} from 'lucide-react';
 
 const MEMBERSHIP_ROLE_LABELS: Record<string, string> = {
     admin: 'Administrador',
@@ -57,6 +68,29 @@ interface UsersResponse {
     error?: string;
 }
 
+interface InviteLink {
+    id: string;
+    clubId: string;
+    scopeType: ScopeType;
+    scopeId: string;
+    scopeLabel: string;
+    role: MembershipRole;
+    token: string;
+    createdAt: string;
+    expiresAt: string | null;
+    maxUses: number | null;
+    useCount: number;
+    usedBy: string | null;
+    usedAt: string | null;
+    url: string;
+}
+
+interface InvitesResponse {
+    ok?: boolean;
+    data?: InviteLink[];
+    error?: string;
+}
+
 interface ClubUsersTabProps {
     clubId: string;
 }
@@ -95,11 +129,28 @@ export function ClubUsersTab({ clubId }: ClubUsersTabProps) {
     const [inviteError, setInviteError] = useState<string | null>(null);
     const [inviteNotice, setInviteNotice] = useState<string | null>(null);
 
+    // Invite links state
+    const [invites, setInvites] = useState<InviteLink[]>([]);
+    const [invitesLoading, setInvitesLoading] = useState(false);
+    const [invitesError, setInvitesError] = useState<string | null>(null);
+    const [linkScope, setLinkScope] = useState<string>('');
+    const [linkRole, setLinkRole] = useState<MembershipRole>('editor');
+    const [linkSubmitting, setLinkSubmitting] = useState(false);
+    const [linkNotice, setLinkNotice] = useState<string | null>(null);
+    const [copiedToken, setCopiedToken] = useState<string | null>(null);
+
     const applyResponse = useCallback((payload: UsersResponse) => {
         setUsers(payload.data ?? []);
         if (payload.meta) {
             setMeta(payload.meta);
             setInviteScope((current) => {
+                if (current && payload.meta!.scopes.some((scope) => scopeKey(scope) === current)) {
+                    return current;
+                }
+                const fallback = payload.meta!.scopes[0];
+                return fallback ? scopeKey(fallback) : '';
+            });
+            setLinkScope((current) => {
                 if (current && payload.meta!.scopes.some((scope) => scopeKey(scope) === current)) {
                     return current;
                 }
@@ -130,9 +181,30 @@ export function ClubUsersTab({ clubId }: ClubUsersTabProps) {
         }
     }, [applyResponse, clubId]);
 
+    const loadInvites = useCallback(async () => {
+        setInvitesLoading(true);
+        setInvitesError(null);
+        try {
+            const response = await fetch(`/api/club-admin/invites?club=${encodeURIComponent(clubId)}`, {
+                cache: 'no-store',
+                credentials: 'include',
+            });
+            const payload = await response.json() as InvitesResponse;
+            if (!response.ok || payload.ok === false) {
+                throw new Error(payload.error || 'No se pudieron cargar las invitaciones.');
+            }
+            setInvites(payload.data ?? []);
+        } catch (fetchError) {
+            setInvitesError(fetchError instanceof Error ? fetchError.message : 'No se pudieron cargar las invitaciones.');
+        } finally {
+            setInvitesLoading(false);
+        }
+    }, [clubId]);
+
     useEffect(() => {
         void loadUsers();
-    }, [loadUsers]);
+        void loadInvites();
+    }, [loadUsers, loadInvites]);
 
     const availableScopes = meta?.scopes ?? [];
     const availableRoles = useMemo<MembershipRole[]>(
@@ -243,6 +315,84 @@ export function ClubUsersTab({ clubId }: ClubUsersTabProps) {
             setInviteSubmitting(false);
         }
     }
+
+    async function handleCreateInviteLink(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setInvitesError(null);
+        setLinkNotice(null);
+
+        const selectedScope = availableScopes.find((scope) => scopeKey(scope) === linkScope);
+        if (!selectedScope) {
+            setInvitesError('Selecciona un alcance para el link.');
+            return;
+        }
+
+        setLinkSubmitting(true);
+        try {
+            const response = await fetch('/api/club-admin/invites', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    clubId,
+                    scopeType: selectedScope.scopeType,
+                    scopeId: selectedScope.scopeId,
+                    role: linkRole,
+                    expiresInDays: 7,
+                }),
+            });
+            const payload = await response.json() as InvitesResponse & { data?: InviteLink };
+            if (!response.ok || payload.ok === false) {
+                throw new Error(payload.error || 'No se pudo crear el link de invitacion.');
+            }
+            setLinkNotice('Link de invitacion creado. Compartilo por email o WhatsApp.');
+            void loadInvites();
+        } catch (postError) {
+            setInvitesError(postError instanceof Error ? postError.message : 'No se pudo crear el link de invitacion.');
+        } finally {
+            setLinkSubmitting(false);
+        }
+    }
+
+    async function handleDeleteInviteLink(inviteId: string) {
+        const confirmed = typeof window !== 'undefined'
+            ? window.confirm('¿Eliminar este link de invitacion? Los usuarios que aun no lo usaron no podran acceder.')
+            : true;
+        if (!confirmed) return;
+
+        setInvitesError(null);
+        try {
+            const params = new URLSearchParams({ clubId, inviteId });
+            const response = await fetch(`/api/club-admin/invites?${params.toString()}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+            const payload = await response.json() as InvitesResponse;
+            if (!response.ok || payload.ok === false) {
+                throw new Error(payload.error || 'No se pudo eliminar el link.');
+            }
+            void loadInvites();
+        } catch (deleteError) {
+            setInvitesError(deleteError instanceof Error ? deleteError.message : 'No se pudo eliminar el link.');
+        }
+    }
+
+    function copyToClipboard(url: string, token: string) {
+        navigator.clipboard.writeText(url).then(() => {
+            setCopiedToken(token);
+            setTimeout(() => setCopiedToken((current) => (current === token ? null : current)), 2000);
+        }).catch(() => {
+            // Fallback
+            setCopiedToken(token);
+            setTimeout(() => setCopiedToken((current) => (current === token ? null : current)), 2000);
+        });
+    }
+
+    const activeInvites = invites.filter((i) => {
+        if (i.expiresAt && new Date(i.expiresAt) < new Date()) return false;
+        if (i.maxUses !== null && i.maxUses !== undefined && i.useCount >= i.maxUses) return false;
+        return true;
+    });
 
     return (
         <div className="club-users-grid">
@@ -438,6 +588,134 @@ export function ClubUsersTab({ clubId }: ClubUsersTabProps) {
                         Otorgar acceso
                     </button>
                 </form>
+
+                {/* Links de invitacion */}
+                <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.5rem' }}>
+                    <div className="club-ops-panel-header" style={{ marginBottom: '1rem' }}>
+                        <div>
+                            <div className="card-title">Links de invitacion</div>
+                            <p className="club-ops-subtext">
+                                Crea links personalizados para que nuevos usuarios se registren y accedan con el rol asignado.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form className="club-users-form" onSubmit={handleCreateInviteLink}>
+                        <label className="club-users-field">
+                            <span>Alcance del link</span>
+                            <select
+                                className="club-users-input"
+                                value={linkScope}
+                                onChange={(event) => setLinkScope(event.target.value)}
+                                disabled={availableScopes.length === 0}
+                            >
+                                {availableScopes.length === 0 ? (
+                                    <option value="">Sin alcances disponibles</option>
+                                ) : (
+                                    availableScopes.map((scope) => (
+                                        <option key={scopeKey(scope)} value={scopeKey(scope)}>
+                                            {scope.scopeLabel}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </label>
+
+                        <label className="club-users-field">
+                            <span>Rol del link</span>
+                            <select
+                                className="club-users-input"
+                                value={linkRole}
+                                onChange={(event) => setLinkRole(event.target.value as MembershipRole)}
+                            >
+                                {availableRoles.map((role) => (
+                                    <option key={role} value={role}>
+                                        {membershipRoleLabel(role)}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <p className="club-users-role-hint">
+                            {MEMBERSHIP_ROLE_DESCRIPTIONS[linkRole] || ''}
+                        </p>
+
+                        {invitesError ? (
+                            <div className="club-users-alert" role="alert">
+                                <AlertCircle className="w-4 h-4" />
+                                <span>{invitesError}</span>
+                            </div>
+                        ) : null}
+
+                        {linkNotice ? (
+                            <div className="club-users-notice" role="status">
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>{linkNotice}</span>
+                            </div>
+                        ) : null}
+
+                        <button
+                            type="submit"
+                            className="btn btn-primary club-users-submit"
+                            disabled={linkSubmitting || availableScopes.length === 0}
+                        >
+                            {linkSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <LinkIcon className="w-4 h-4" />}
+                            Generar link
+                        </button>
+                    </form>
+
+                    {invitesLoading ? (
+                        <div className="club-users-empty" style={{ marginTop: '1rem' }}>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Cargando links...</span>
+                        </div>
+                    ) : activeInvites.length > 0 ? (
+                        <ul className="club-invite-list">
+                            {activeInvites.map((invite) => (
+                                <li key={invite.id} className="club-invite-row">
+                                    <div className="club-invite-info">
+                                        <div className="club-invite-scope">
+                                            <ShieldCheck className="w-3.5 h-3.5" />
+                                            <span>{invite.scopeLabel}</span>
+                                            <span className="club-invite-role">{membershipRoleLabel(invite.role)}</span>
+                                        </div>
+                                        <div className="club-invite-meta">
+                                            {invite.expiresAt ? `Expira: ${new Date(invite.expiresAt).toLocaleDateString('es-AR')}` : 'Sin expiracion'}
+                                            {invite.maxUses !== null ? ` · Usos: ${invite.useCount}/${invite.maxUses}` : ` · Usos: ${invite.useCount}`}
+                                        </div>
+                                    </div>
+                                    <div className="club-invite-actions">
+                                        <button
+                                            type="button"
+                                            className="club-invite-copy"
+                                            onClick={() => copyToClipboard(invite.url, invite.token)}
+                                            title="Copiar link"
+                                        >
+                                            {copiedToken === invite.token ? (
+                                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                            ) : (
+                                                <Copy className="w-3.5 h-3.5" />
+                                            )}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="club-users-remove"
+                                            onClick={() => void handleDeleteInviteLink(invite.id)}
+                                            title="Eliminar link"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="club-users-empty" style={{ marginTop: '1rem' }}>
+                            <LinkIcon className="w-5 h-5" />
+                            <span>No hay links de invitacion activos.</span>
+                        </div>
+                    )}
+                </div>
             </aside>
         </div>
     );

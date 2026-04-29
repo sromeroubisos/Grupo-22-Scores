@@ -21,7 +21,9 @@ import {
   Pause,
   Play,
   RotateCcw,
+  RotateCw,
   Save,
+  Settings,
   Undo2,
   X,
 } from 'lucide-react';
@@ -160,6 +162,195 @@ function formatPointValue(value: number) {
   return value.toFixed(2).replace(/\.?0+$/, '');
 }
 
+type EventPanelDensity = 'compact' | 'comfortable';
+type CustomEventTone = 'green' | 'yellow' | 'blue' | 'red' | 'neutral' | 'brown';
+type CustomEventCauseMode = 'none' | 'text' | 'options';
+type CustomEventOutcomeMode = 'none' | 'made_missed' | 'won_lost' | 'custom';
+type CustomEventPointsMode = 'none' | 'fixed' | 'by_outcome';
+
+interface CustomEventDef {
+  id: string;
+  label: string;
+  glyph: string;
+  tone: CustomEventTone;
+  group: string;
+  causeMode: CustomEventCauseMode;
+  causeOptions: string[];
+  hasPlayer: boolean;
+  outcomeMode: CustomEventOutcomeMode;
+  outcomeOptions: string[];
+  pointsMode: CustomEventPointsMode;
+  pointsFixed: number;
+  pointsByOutcome: Record<string, number>;
+}
+
+interface EventPanelConfig {
+  hidden: LiveActionType[];
+  desktopColumns: number;
+  mobileColumns: number;
+  density: EventPanelDensity;
+  customEvents: CustomEventDef[];
+}
+
+const EVENT_PANEL_CONFIG_STORAGE_KEY = 'clubAdmin:liveActionPanel:v1';
+
+const DEFAULT_EVENT_PANEL_CONFIG: EventPanelConfig = {
+  hidden: [],
+  desktopColumns: 5,
+  mobileColumns: 2,
+  density: 'comfortable',
+  customEvents: [],
+};
+
+const CUSTOM_EVENT_TONES: CustomEventTone[] = ['green', 'yellow', 'blue', 'red', 'neutral', 'brown'];
+const CUSTOM_EVENT_TONE_LABELS: Record<CustomEventTone, string> = {
+  green: 'Verde (positivo)',
+  yellow: 'Amarillo (atención)',
+  blue: 'Azul (neutro+)',
+  red: 'Rojo (sanción)',
+  neutral: 'Gris (informativo)',
+  brown: 'Marrón (forwards)',
+};
+const CUSTOM_EVENT_TONE_TO_STYLE: Record<CustomEventTone, string> = {
+  green: 'liveActionBtnGreen',
+  yellow: 'liveActionBtnYellow',
+  blue: 'liveActionBtnBlue',
+  red: 'liveActionBtnRed',
+  neutral: 'liveActionBtnNeutral',
+  brown: 'liveActionBtnBrown',
+};
+const CUSTOM_EVENT_TONE_TO_TIMELINE: Record<CustomEventTone, string> = {
+  green: 'liveToneGreen',
+  yellow: 'liveToneYellow',
+  blue: 'liveToneBlue',
+  red: 'liveToneRed',
+  neutral: 'liveToneNeutral',
+  brown: 'liveToneBrown',
+};
+
+const CUSTOM_EVENT_GROUPS = ['Marcador', 'Disciplina', 'Juego', 'Plantel', 'Reloj', 'Personalizado'] as const;
+
+const OUTCOME_PRESETS: Record<CustomEventOutcomeMode, string[]> = {
+  none: [],
+  made_missed: ['made', 'missed'],
+  won_lost: ['won', 'lost'],
+  custom: [],
+};
+
+const OUTCOME_PRESET_LABELS: Record<string, string> = {
+  made: 'Convertida',
+  missed: 'Fallada',
+  won: 'Ganado',
+  lost: 'Perdido',
+};
+
+function getOutcomeLabel(def: CustomEventDef, outcomeValue: string): string {
+  if (!outcomeValue) return '';
+  if (def.outcomeMode === 'custom') return outcomeValue;
+  return OUTCOME_PRESET_LABELS[outcomeValue] || outcomeValue;
+}
+
+function getOutcomeValuesForDef(def: CustomEventDef): string[] {
+  if (def.outcomeMode === 'none') return [];
+  if (def.outcomeMode === 'custom') return def.outcomeOptions;
+  return OUTCOME_PRESETS[def.outcomeMode];
+}
+
+function computeCustomEventPoints(def: CustomEventDef, outcomeValue: string): number {
+  if (def.pointsMode === 'fixed') return def.pointsFixed;
+  if (def.pointsMode === 'by_outcome') return def.pointsByOutcome[outcomeValue] ?? 0;
+  return 0;
+}
+
+function parseCustomEventStoredPoints(detail: string): number {
+  const match = detail.match(/Pts:\s*(-?\d+(?:\.\d+)?)/);
+  if (!match) return 0;
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function buildCustomEventDetail(def: CustomEventDef, cause: string, outcomeValue: string, points: number): string {
+  const parts: string[] = [];
+  if (cause) parts.push(`Causa: ${cause}`);
+  if (outcomeValue) parts.push(`Resultado: ${getOutcomeLabel(def, outcomeValue)}`);
+  if (points !== 0) parts.push(`Pts: ${points}`);
+  return parts.join(' | ');
+}
+
+function createEmptyCustomEventDef(): CustomEventDef {
+  return {
+    id: `custom:${typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`,
+    label: '',
+    glyph: '',
+    tone: 'neutral',
+    group: 'Personalizado',
+    causeMode: 'none',
+    causeOptions: [],
+    hasPlayer: false,
+    outcomeMode: 'none',
+    outcomeOptions: [],
+    pointsMode: 'none',
+    pointsFixed: 0,
+    pointsByOutcome: {},
+  };
+}
+
+function sanitizeCustomEventDef(input: unknown): CustomEventDef | null {
+  if (!input || typeof input !== 'object') return null;
+  const raw = input as Partial<CustomEventDef>;
+  if (typeof raw.id !== 'string' || !raw.id.startsWith('custom:')) return null;
+  if (typeof raw.label !== 'string' || !raw.label.trim()) return null;
+  const glyph = (typeof raw.glyph === 'string' && raw.glyph.trim().slice(0, 3).toUpperCase()) || raw.label.trim().slice(0, 2).toUpperCase();
+  const tone: CustomEventTone = CUSTOM_EVENT_TONES.includes(raw.tone as CustomEventTone) ? (raw.tone as CustomEventTone) : 'neutral';
+  const group = typeof raw.group === 'string' && (CUSTOM_EVENT_GROUPS as readonly string[]).includes(raw.group) ? raw.group : 'Personalizado';
+  const causeMode: CustomEventCauseMode = raw.causeMode === 'text' || raw.causeMode === 'options' ? raw.causeMode : 'none';
+  const causeOptions = Array.isArray(raw.causeOptions) ? raw.causeOptions.filter((v): v is string => typeof v === 'string' && Boolean(v.trim())).map((v) => v.trim()) : [];
+  const hasPlayer = Boolean(raw.hasPlayer);
+  const outcomeMode: CustomEventOutcomeMode = raw.outcomeMode === 'made_missed' || raw.outcomeMode === 'won_lost' || raw.outcomeMode === 'custom' ? raw.outcomeMode : 'none';
+  const outcomeOptions = Array.isArray(raw.outcomeOptions) ? raw.outcomeOptions.filter((v): v is string => typeof v === 'string' && Boolean(v.trim())).map((v) => v.trim()) : [];
+  const pointsMode: CustomEventPointsMode = raw.pointsMode === 'fixed' || raw.pointsMode === 'by_outcome' ? raw.pointsMode : 'none';
+  const pointsFixed = Number.isFinite(Number(raw.pointsFixed)) ? Number(raw.pointsFixed) : 0;
+  const pointsByOutcome: Record<string, number> = {};
+  if (raw.pointsByOutcome && typeof raw.pointsByOutcome === 'object') {
+    for (const [key, value] of Object.entries(raw.pointsByOutcome)) {
+      if (Number.isFinite(Number(value))) pointsByOutcome[key] = Number(value);
+    }
+  }
+  return {
+    id: raw.id,
+    label: raw.label.trim(),
+    glyph,
+    tone,
+    group,
+    causeMode,
+    causeOptions,
+    hasPlayer,
+    outcomeMode,
+    outcomeOptions,
+    pointsMode,
+    pointsFixed,
+    pointsByOutcome,
+  };
+}
+
+function sanitizeEventPanelConfig(input: unknown): EventPanelConfig {
+  if (!input || typeof input !== 'object') return DEFAULT_EVENT_PANEL_CONFIG;
+  const raw = input as Partial<EventPanelConfig>;
+  const validIds = new Set(CLUB_EVENT_PANEL_ACTIONS.map((action) => action.id));
+  const hidden = Array.isArray(raw.hidden)
+    ? (raw.hidden.filter((id): id is LiveActionType => typeof id === 'string' && validIds.has(id as LiveActionType)))
+    : [];
+  const desktopColumns = [3, 4, 5].includes(Number(raw.desktopColumns)) ? Number(raw.desktopColumns) : 5;
+  const mobileColumns = [2, 3].includes(Number(raw.mobileColumns)) ? Number(raw.mobileColumns) : 2;
+  const density: EventPanelDensity = raw.density === 'compact' ? 'compact' : 'comfortable';
+  const customEvents: CustomEventDef[] = Array.isArray(raw.customEvents)
+    ? raw.customEvents
+        .map((entry) => sanitizeCustomEventDef(entry))
+        .filter((entry): entry is CustomEventDef => entry !== null)
+    : [];
+  return { hidden, desktopColumns, mobileColumns, density, customEvents };
+}
+
 function buildLiveControlWithPoints(
   liveControl: ClubLiveControl,
   preview: MatchPointsPreview,
@@ -239,6 +430,104 @@ export default function ClubMatchWorkspace({
   const [videoExpanded, setVideoExpanded] = useState(false);
   const [eventsPanelCollapsed, setEventsPanelCollapsed] = useState(false);
   const [videoComposerOverlayOpen, setVideoComposerOverlayOpen] = useState(false);
+  const [eventPanelConfig, setEventPanelConfig] = useState<EventPanelConfig>(DEFAULT_EVENT_PANEL_CONFIG);
+  const [eventPanelConfigOpen, setEventPanelConfigOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(EVENT_PANEL_CONFIG_STORAGE_KEY);
+      if (raw) setEventPanelConfig(sanitizeEventPanelConfig(JSON.parse(raw)));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(EVENT_PANEL_CONFIG_STORAGE_KEY, JSON.stringify(eventPanelConfig));
+    } catch {
+      /* ignore */
+    }
+  }, [eventPanelConfig]);
+
+  const hiddenEventActions = useMemo(() => new Set(eventPanelConfig.hidden), [eventPanelConfig.hidden]);
+
+  const toggleEventActionVisibility = useCallback((id: LiveActionType) => {
+    setEventPanelConfig((current) => {
+      const isHidden = current.hidden.includes(id);
+      return {
+        ...current,
+        hidden: isHidden ? current.hidden.filter((entry) => entry !== id) : [...current.hidden, id],
+      };
+    });
+  }, []);
+
+  const resetEventPanelConfig = useCallback(() => {
+    setEventPanelConfig(DEFAULT_EVENT_PANEL_CONFIG);
+  }, []);
+
+  const [customEventDraft, setCustomEventDraft] = useState<CustomEventDef | null>(null);
+  const [customComposer, setCustomComposer] = useState<{
+    mode: 'create' | 'edit';
+    eventId?: string;
+    defId: string;
+    minute: string;
+    videoTime: string;
+    team: 'home' | 'away';
+    playerName: string;
+    cause: string;
+    outcome: string;
+  } | null>(null);
+
+  const customEventDefMap = useMemo(() => {
+    const map = new Map<string, CustomEventDef>();
+    for (const def of eventPanelConfig.customEvents) map.set(def.id, def);
+    return map;
+  }, [eventPanelConfig.customEvents]);
+
+  const upsertCustomEventDef = useCallback((def: CustomEventDef) => {
+    setEventPanelConfig((current) => {
+      const exists = current.customEvents.some((entry) => entry.id === def.id);
+      const customEvents = exists
+        ? current.customEvents.map((entry) => (entry.id === def.id ? def : entry))
+        : [...current.customEvents, def];
+      return { ...current, customEvents };
+    });
+  }, []);
+
+  const deleteCustomEventDef = useCallback((id: string) => {
+    setEventPanelConfig((current) => ({
+      ...current,
+      customEvents: current.customEvents.filter((entry) => entry.id !== id),
+    }));
+  }, []);
+
+  const resolveEventGlyph = useCallback((type: string) => {
+    const def = customEventDefMap.get(type);
+    return def ? def.glyph : getEventGlyph(type);
+  }, [customEventDefMap]);
+
+  const resolveEventTypeLabel = useCallback((type: string) => {
+    const def = customEventDefMap.get(type);
+    return def ? def.label : getEventTypeLabel(type);
+  }, [customEventDefMap]);
+
+  const resolveEventToneClass = useCallback((type: string) => {
+    const def = customEventDefMap.get(type);
+    if (def) return styles[CUSTOM_EVENT_TONE_TO_TIMELINE[def.tone]];
+    return getEventTone(type);
+  }, [customEventDefMap]);
+
+  const resolveEventSummary = useCallback((event: ClubLiveEvent) => {
+    const def = customEventDefMap.get(event.type);
+    if (!def) return getEventSummary(event);
+    const outcomeMatch = event.detail.match(/Resultado:\s*([^|]+)/);
+    const outcomeLabel = outcomeMatch?.[1]?.trim();
+    return outcomeLabel ? `${def.label} · ${outcomeLabel}` : def.label;
+  }, [customEventDefMap]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -707,6 +996,92 @@ export default function ClubMatchWorkspace({
     openLiveComposer(action);
   }, [openLiveComposer, pausePlaybackForComposer]);
 
+  const openCustomComposer = useCallback((def: CustomEventDef, existingEvent?: ClubLiveEvent) => {
+    if (existingEvent) {
+      setTimerRunning(false);
+      const causeMatch = existingEvent.detail.match(/Causa:\s*([^|]+)/);
+      const outcomeMatch = existingEvent.detail.match(/Resultado:\s*([^|]+)/);
+      const cause = causeMatch?.[1]?.trim() || '';
+      const outcomeLabel = outcomeMatch?.[1]?.trim() || '';
+      let outcomeValue = '';
+      if (outcomeLabel) {
+        const presetEntry = Object.entries(OUTCOME_PRESET_LABELS).find(([, label]) => label === outcomeLabel);
+        outcomeValue = presetEntry ? presetEntry[0] : outcomeLabel;
+      }
+      setCustomComposer({
+        mode: 'edit',
+        eventId: existingEvent.id,
+        defId: def.id,
+        minute: existingEvent.minute,
+        videoTime: existingEvent.videoTime || '',
+        team: (existingEvent.team === 'home' || existingEvent.team === 'away') ? existingEvent.team : 'home',
+        playerName: existingEvent.playerName,
+        cause,
+        outcome: outcomeValue,
+      });
+      return;
+    }
+    setCustomComposer({
+      mode: 'create',
+      defId: def.id,
+      minute: lineupsState.liveControl.minute || '',
+      videoTime: getCurrentVideoTime(),
+      team: lineupKey,
+      playerName: '',
+      cause: def.causeMode === 'options' && def.causeOptions[0] ? def.causeOptions[0] : '',
+      outcome: '',
+    });
+  }, [getCurrentVideoTime, lineupKey, lineupsState.liveControl.minute]);
+
+  const saveCustomComposer = useCallback(() => {
+    if (!customComposer) return;
+    const def = customEventDefMap.get(customComposer.defId);
+    if (!def) return;
+
+    const points = computeCustomEventPoints(def, customComposer.outcome);
+    const detail = buildCustomEventDetail(def, customComposer.cause.trim(), customComposer.outcome, points);
+    const eventId = customComposer.eventId || (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `evt-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    const newEvent: ClubLiveEvent = {
+      id: eventId,
+      minute: customComposer.minute,
+      videoTime: customComposer.videoTime,
+      type: def.id,
+      team: customComposer.team,
+      playerName: def.hasPlayer ? customComposer.playerName.trim() : '',
+      detail,
+    };
+
+    const scoreDelta = points;
+
+    if (customComposer.mode === 'edit') {
+      const previous = events.find((entry) => entry.id === eventId);
+      const previousPoints = previous ? parseCustomEventStoredPoints(previous.detail) : 0;
+      const previousTeam = previous?.team;
+      setEvents((current) => current.map((entry) => (entry.id === eventId ? newEvent : entry)));
+      setMatchDraft((current) => {
+        let nextScore = current.score;
+        if (previous && (previousTeam === 'home' || previousTeam === 'away') && previousPoints !== 0) {
+          nextScore = applyScoreDelta(nextScore, previousTeam, -previousPoints);
+        }
+        if (scoreDelta !== 0) {
+          nextScore = applyScoreDelta(nextScore, customComposer.team, scoreDelta);
+        }
+        return { ...current, score: nextScore };
+      });
+    } else {
+      setEvents((current) => [...current, newEvent]);
+      if (scoreDelta !== 0) {
+        setMatchDraft((current) => ({
+          ...current,
+          score: applyScoreDelta(current.score, customComposer.team, scoreDelta),
+        }));
+      }
+    }
+
+    setCustomComposer(null);
+    setFeedback({ tone: 'success', message: customComposer.mode === 'edit' ? 'Evento personalizado actualizado.' : 'Evento personalizado registrado.' });
+  }, [customComposer, customEventDefMap, events]);
+
   const openVideoEventComposer = useCallback((event: ClubLiveEvent) => {
     pausePlaybackForComposer(true);
     if (event.videoTime) {
@@ -840,13 +1215,18 @@ export default function ClubMatchWorkspace({
     const targetEvent = events[eventIndex];
     const childEvents = events.filter((event) => event.parentEventId === eventId);
     const removedCount = 1 + childEvents.length;
+    const resolvePoints = (entry: ClubLiveEvent) => (
+      entry.type.startsWith('custom:')
+        ? parseCustomEventStoredPoints(entry.detail)
+        : getEventPoints(entry)
+    );
     setLastRemovedEvent({ event: targetEvent, index: eventIndex });
     setEvents((current) => current.filter((event) => event.id !== eventId && event.parentEventId !== eventId));
     setMatchDraft((current) => {
       let nextScore = current.score;
-      nextScore = applyScoreDelta(nextScore, targetEvent.team, -getEventPoints(targetEvent));
+      nextScore = applyScoreDelta(nextScore, targetEvent.team, -resolvePoints(targetEvent));
       childEvents.forEach((child) => {
-        nextScore = applyScoreDelta(nextScore, child.team, -getEventPoints(child));
+        nextScore = applyScoreDelta(nextScore, child.team, -resolvePoints(child));
       });
       return { ...current, score: nextScore };
     });
@@ -865,10 +1245,16 @@ export default function ClubMatchWorkspace({
       next.splice(lastRemovedEvent.index, 0, lastRemovedEvent.event);
       return next;
     });
-    setMatchDraft((current) => ({
-      ...current,
-      score: applyScoreDelta(current.score, lastRemovedEvent.event.team, getEventPoints(lastRemovedEvent.event)),
-    }));
+    setMatchDraft((current) => {
+      const restored = lastRemovedEvent.event;
+      const points = restored.type.startsWith('custom:')
+        ? parseCustomEventStoredPoints(restored.detail)
+        : getEventPoints(restored);
+      return {
+        ...current,
+        score: applyScoreDelta(current.score, restored.team, points),
+      };
+    });
     setLastRemovedEvent(null);
     setFeedback({ tone: 'success', message: 'Se restaur\u00f3 el \u00faltimo evento.' });
   }, [lastRemovedEvent]);
@@ -1268,30 +1654,32 @@ export default function ClubMatchWorkspace({
             <span className={`${styles.statusBadge} ${getStatusClass(matchDraft.status)}`}>{getStatusLabel(matchDraft.status)}</span>
           </div>
 
-          <div className={styles.matchHero}>
-            <div className={`${styles.team} ${styles.teamLocal}`}>
-              <div className={styles.teamCopy}>
-                <span className={styles.teamMeta}>{isHome ? 'Tu club' : 'Local'}</span>
-                <span className={styles.teamName}>{homeClub?.short_name || homeClub?.name || 'Local'}</span>
+          <div className={styles.matchHeroBar}>
+            <div className={styles.matchHero}>
+              <div className={`${styles.team} ${styles.teamLocal}`}>
+                <div className={styles.teamCopy}>
+                  <span className={styles.teamMeta}>{isHome ? 'Tu club' : 'Local'}</span>
+                  <span className={styles.teamName}>{homeClub?.short_name || homeClub?.name || 'Local'}</span>
+                </div>
+                <TeamShield club={homeClub} />
               </div>
-              <TeamShield club={homeClub} />
-            </div>
-            <div className={`${styles.vsBox} ${hasResult ? styles.scoreBox : ''}`}>
-              {hasResult ? (
-                <>
-                  <span className={styles.scoreValue}>{matchDraft.score.home || '0'}</span>
-                  <span className={styles.scoreDivider}>-</span>
-                  <span className={styles.scoreValue}>{matchDraft.score.away || '0'}</span>
-                </>
-              ) : (
-                'VERSUS'
-              )}
-            </div>
-            <div className={`${styles.team} ${styles.teamVisitor}`}>
-              <TeamShield club={awayClub} />
-              <div className={styles.teamCopy}>
-                <span className={styles.teamMeta}>{!isHome ? 'Tu club' : 'Visitante'}</span>
-                <span className={styles.teamName}>{awayClub?.short_name || awayClub?.name || 'Visitante'}</span>
+              <div className={`${styles.vsBox} ${hasResult ? styles.scoreBox : ''}`}>
+                {hasResult ? (
+                  <>
+                    <span className={styles.scoreValue}>{matchDraft.score.home || '0'}</span>
+                    <span className={styles.scoreDivider}>-</span>
+                    <span className={styles.scoreValue}>{matchDraft.score.away || '0'}</span>
+                  </>
+                ) : (
+                  'VS'
+                )}
+              </div>
+              <div className={`${styles.team} ${styles.teamVisitor}`}>
+                <TeamShield club={awayClub} />
+                <div className={styles.teamCopy}>
+                  <span className={styles.teamMeta}>{!isHome ? 'Tu club' : 'Visitante'}</span>
+                  <span className={styles.teamName}>{awayClub?.short_name || awayClub?.name || 'Visitante'}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1634,10 +2022,10 @@ export default function ClubMatchWorkspace({
                                       key={event.id}
                                       type="button"
                                       onClick={() => openVideoEventComposer(event)}
-                                      title={`${getEventTypeLabel(event.type)} - ${event.minute} min${event.videoTime ? ` - Video: ${event.videoTime}` : ''}`}
+                                      title={`${resolveEventTypeLabel(event.type)} - ${event.minute} min${event.videoTime ? ` - Video: ${event.videoTime}` : ''}`}
                                       className={styles.fullscreenEventCard}
                                     >
-                                      <span className={styles.fullscreenEventGlyph}>{getEventGlyph(event.type)}</span>
+                                      <span className={styles.fullscreenEventGlyph}>{resolveEventGlyph(event.type)}</span>
                                       <span className={styles.fullscreenEventMinute}>{event.minute} min</span>
                                       {event.videoTime ? <span className={styles.fullscreenEventTime}>Video {event.videoTime}</span> : null}
                                     </button>
@@ -1653,29 +2041,101 @@ export default function ClubMatchWorkspace({
 
                   {liveSubview === 'eventos' ? (
                     <div className={styles.liveConsole}>
-                      <div className={styles.liveEventPanel}>
-                        {CLUB_EVENT_PANEL_GROUPS.map((group) => (
-                          <section key={group.group} className={styles.liveEventGroup}>
-                            <div className={styles.liveEventGroupHeader}>
-                              <span>{group.group}</span>
-                              <small>{group.actions.length} eventos</small>
-                            </div>
-                            <div className={styles.liveActionGrid}>
-                              {group.actions.map((action) => (
-                                <button
-                                  key={action.id}
-                                  type="button"
-                                  className={`${styles.liveActionBtn} ${styles[`liveActionBtn${group.tone.charAt(0).toUpperCase()}${group.tone.slice(1)}`]} ${liveComposer?.action === action.id ? styles.liveActionBtnActive : ''}`}
-                                  onClick={() => openLiveComposer(action.id)}
-                                >
-                                  <span className={styles.liveActionGlyph}>{action.glyph}</span>
-                                  <span className={styles.liveActionLabel}>{action.label}</span>
-                                  <small className={styles.liveActionMeta}>{action.meta}</small>
-                                </button>
-                              ))}
-                            </div>
-                          </section>
-                        ))}
+                      <div className={styles.eventPanelToolbar}>
+                        <div className={styles.eventPanelToolbarMeta}>
+                          <span>Botonera</span>
+                          <small>
+                            {CLUB_EVENT_PANEL_ACTIONS.length - hiddenEventActions.size} de {CLUB_EVENT_PANEL_ACTIONS.length} visibles
+                          </small>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.miniBtn}
+                          onClick={() => setEventPanelConfigOpen(true)}
+                          title="Personalizar botonera"
+                        >
+                          <Settings size={14} />
+                          Personalizar
+                        </button>
+                      </div>
+                      <div
+                        className={`${styles.liveEventPanel} ${eventPanelConfig.density === 'compact' ? styles.liveEventPanelCompact : ''}`}
+                        style={{
+                          ['--live-action-cols-desktop' as string]: String(eventPanelConfig.desktopColumns),
+                          ['--live-action-cols-mobile' as string]: String(eventPanelConfig.mobileColumns),
+                        }}
+                      >
+                        {CLUB_EVENT_PANEL_GROUPS.map((group) => {
+                          const visibleActions = group.actions.filter((action) => !hiddenEventActions.has(action.id));
+                          const customsForGroup = eventPanelConfig.customEvents.filter((def) => def.group === group.group);
+                          if (visibleActions.length === 0 && customsForGroup.length === 0) return null;
+                          return (
+                            <section key={group.group} className={styles.liveEventGroup}>
+                              <div className={styles.liveEventGroupHeader}>
+                                <span>{group.group}</span>
+                                <small>{visibleActions.length + customsForGroup.length} eventos</small>
+                              </div>
+                              <div className={styles.liveActionGrid}>
+                                {visibleActions.map((action) => (
+                                  <button
+                                    key={action.id}
+                                    type="button"
+                                    className={`${styles.liveActionBtn} ${styles[`liveActionBtn${group.tone.charAt(0).toUpperCase()}${group.tone.slice(1)}`]} ${liveComposer?.action === action.id ? styles.liveActionBtnActive : ''}`}
+                                    onClick={() => openLiveComposer(action.id)}
+                                  >
+                                    <span className={styles.liveActionGlyph}>{action.glyph}</span>
+                                    <span className={styles.liveActionLabel}>{action.label}</span>
+                                    <small className={styles.liveActionMeta}>{action.meta}</small>
+                                  </button>
+                                ))}
+                                {customsForGroup.map((def) => (
+                                  <button
+                                    key={def.id}
+                                    type="button"
+                                    className={`${styles.liveActionBtn} ${styles[CUSTOM_EVENT_TONE_TO_STYLE[def.tone]]} ${customComposer?.defId === def.id ? styles.liveActionBtnActive : ''}`}
+                                    onClick={() => openCustomComposer(def)}
+                                  >
+                                    <span className={styles.liveActionGlyph}>{def.glyph}</span>
+                                    <span className={styles.liveActionLabel}>{def.label}</span>
+                                    <small className={styles.liveActionMeta}>
+                                      {def.pointsMode === 'fixed' ? `+${def.pointsFixed} pts` : def.pointsMode === 'by_outcome' ? 'Pts por outcome' : 'Personalizado'}
+                                    </small>
+                                  </button>
+                                ))}
+                              </div>
+                            </section>
+                          );
+                        })}
+                        {(() => {
+                          const personalizedGroupExists = CLUB_EVENT_PANEL_GROUPS.some((group) => group.group === 'Personalizado');
+                          if (personalizedGroupExists) return null;
+                          const personalized = eventPanelConfig.customEvents.filter((def) => def.group === 'Personalizado');
+                          if (personalized.length === 0) return null;
+                          return (
+                            <section className={styles.liveEventGroup}>
+                              <div className={styles.liveEventGroupHeader}>
+                                <span>Personalizado</span>
+                                <small>{personalized.length} eventos</small>
+                              </div>
+                              <div className={styles.liveActionGrid}>
+                                {personalized.map((def) => (
+                                  <button
+                                    key={def.id}
+                                    type="button"
+                                    className={`${styles.liveActionBtn} ${styles[CUSTOM_EVENT_TONE_TO_STYLE[def.tone]]} ${customComposer?.defId === def.id ? styles.liveActionBtnActive : ''}`}
+                                    onClick={() => openCustomComposer(def)}
+                                  >
+                                    <span className={styles.liveActionGlyph}>{def.glyph}</span>
+                                    <span className={styles.liveActionLabel}>{def.label}</span>
+                                    <small className={styles.liveActionMeta}>
+                                      {def.pointsMode === 'fixed' ? `+${def.pointsFixed} pts` : def.pointsMode === 'by_outcome' ? 'Pts por outcome' : 'Personalizado'}
+                                    </small>
+                                  </button>
+                                ))}
+                              </div>
+                            </section>
+                          );
+                        })()}
                       </div>
 
                       {liveComposer ? (
@@ -2043,6 +2503,134 @@ export default function ClubMatchWorkspace({
                         </div>
                       )}
 
+                      {customComposer ? (() => {
+                        const def = customEventDefMap.get(customComposer.defId);
+                        if (!def) return null;
+                        const playerOptions = customComposer.team === 'home' ? lineupsState.home : lineupsState.away;
+                        const outcomeValues = getOutcomeValuesForDef(def);
+                        const previewPoints = computeCustomEventPoints(def, customComposer.outcome);
+                        return (
+                          <div className={styles.liveComposerCard}>
+                            <div className={styles.liveComposerHeader}>
+                              <div>
+                                <h3>{customComposer.mode === 'edit' ? 'Editar evento' : `Nuevo ${def.label}`}</h3>
+                                <p>Evento personalizado · {def.group}{previewPoints !== 0 ? ` · ${previewPoints > 0 ? '+' : ''}${previewPoints} pts` : ''}</p>
+                              </div>
+                              <button className={styles.miniBtn} type="button" onClick={() => setCustomComposer(null)}>
+                                Cancelar
+                              </button>
+                            </div>
+
+                            <div className={styles.liveComposerGrid}>
+                              <label className={styles.field}>
+                                <span>Minuto</span>
+                                <input className={styles.input} value={customComposer.minute} onChange={(event) => setCustomComposer((current) => current ? { ...current, minute: event.target.value } : current)} placeholder={currentMinute} />
+                              </label>
+                              <label className={styles.field}>
+                                <span>Tiempo video</span>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  <input
+                                    className={styles.input}
+                                    value={customComposer.videoTime}
+                                    onChange={(event) => setCustomComposer((current) => current ? { ...current, videoTime: event.target.value } : current)}
+                                    placeholder="MM:SS"
+                                    style={{ flex: 1 }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className={styles.miniBtn}
+                                    onClick={() => setCustomComposer((current) => current ? { ...current, videoTime: getCurrentVideoTime() } : current)}
+                                    title="Capturar tiempo actual del video"
+                                  >
+                                    <Clock3 size={14} />
+                                  </button>
+                                </div>
+                              </label>
+                              <label className={styles.field}>
+                                <span>Equipo</span>
+                                <select
+                                  className={styles.select}
+                                  value={customComposer.team}
+                                  onChange={(event) => setCustomComposer((current) => current ? { ...current, team: event.target.value as 'home' | 'away' } : current)}
+                                >
+                                  <option value="home">{homeClub?.short_name || homeClub?.name || 'Local'}</option>
+                                  <option value="away">{awayClub?.short_name || awayClub?.name || 'Visitante'}</option>
+                                </select>
+                              </label>
+
+                              {def.hasPlayer ? (
+                                <label className={styles.field}>
+                                  <span>Jugador</span>
+                                  <select
+                                    className={styles.select}
+                                    value={customComposer.playerName}
+                                    onChange={(event) => setCustomComposer((current) => current ? { ...current, playerName: event.target.value } : current)}
+                                  >
+                                    <option value="">Seleccionar jugador</option>
+                                    {playerOptions.map((player) => (
+                                      <option key={player.id || player.name} value={player.name}>
+                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                              ) : null}
+
+                              {def.causeMode === 'text' ? (
+                                <label className={styles.field}>
+                                  <span>Causa</span>
+                                  <input
+                                    className={styles.input}
+                                    value={customComposer.cause}
+                                    onChange={(event) => setCustomComposer((current) => current ? { ...current, cause: event.target.value } : current)}
+                                    placeholder="Detalle de la causa"
+                                  />
+                                </label>
+                              ) : null}
+
+                              {def.causeMode === 'options' ? (
+                                <label className={styles.field}>
+                                  <span>Causa</span>
+                                  <select
+                                    className={styles.select}
+                                    value={customComposer.cause}
+                                    onChange={(event) => setCustomComposer((current) => current ? { ...current, cause: event.target.value } : current)}
+                                  >
+                                    <option value="">Seleccionar causa</option>
+                                    {def.causeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                                  </select>
+                                </label>
+                              ) : null}
+
+                              {def.outcomeMode !== 'none' ? (
+                                <label className={styles.field}>
+                                  <span>Outcome</span>
+                                  <select
+                                    className={styles.select}
+                                    value={customComposer.outcome}
+                                    onChange={(event) => setCustomComposer((current) => current ? { ...current, outcome: event.target.value } : current)}
+                                  >
+                                    <option value="">Sin definir</option>
+                                    {outcomeValues.map((value) => (
+                                      <option key={value} value={value}>{getOutcomeLabel(def, value)}</option>
+                                    ))}
+                                  </select>
+                                </label>
+                              ) : null}
+                            </div>
+
+                            <div className={styles.liveComposerActions}>
+                              <button className={styles.btnGhost} type="button" onClick={() => setCustomComposer(null)}>
+                                Cerrar
+                              </button>
+                              <button className={styles.btnPrimary} type="button" onClick={saveCustomComposer}>
+                                {customComposer.mode === 'edit' ? 'Actualizar evento' : 'Guardar evento'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })() : null}
+
                       <div className={styles.liveTimelineCard}>
                         <div className={styles.liveTimelineHeader}>
                           <div>
@@ -2092,10 +2680,10 @@ export default function ClubMatchWorkspace({
                                   <Play size={12} /> {event.videoTime}
                                 </button>
                               ) : null}
-                              <div className={`${styles.timelineGlyph} ${getEventTone(event.type)}`}>{getEventGlyph(event.type)}</div>
+                              <div className={`${styles.timelineGlyph} ${resolveEventToneClass(event.type)}`}>{resolveEventGlyph(event.type)}</div>
                               <div className={styles.timelineBody}>
                                 <div className={styles.timelineTitleRow}>
-                                  <strong>{getEventSummary(event)}</strong>
+                                  <strong>{resolveEventSummary(event)}</strong>
                                   <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                 </div>
                                 <p>{detailLine}</p>
@@ -2109,7 +2697,11 @@ export default function ClubMatchWorkspace({
                                 })()}
                               </div>
                               <div className={styles.timelineActions}>
-                                <button className={styles.miniBtn} type="button" onClick={() => openLiveComposer(getLiveActionFromEventType(event.type), event)}>
+                                <button className={styles.miniBtn} type="button" onClick={() => {
+                                  const customDef = customEventDefMap.get(event.type);
+                                  if (customDef) openCustomComposer(customDef, event);
+                                  else openLiveComposer(getLiveActionFromEventType(event.type), event);
+                                }}>
                                   Editar
                                 </button>
                                 <button className={styles.miniBtn} type="button" onClick={() => removeLiveEvent(event.id)}>
@@ -2121,6 +2713,375 @@ export default function ClubMatchWorkspace({
                           })}
                         </div>
                       </div>
+
+                      {eventPanelConfigOpen ? (
+                        <div
+                          className={styles.eventPanelConfigBackdrop}
+                          role="dialog"
+                          aria-modal="true"
+                          aria-labelledby="event-panel-config-title"
+                          onClick={(event) => {
+                            if (event.target === event.currentTarget) setEventPanelConfigOpen(false);
+                          }}
+                        >
+                          <div className={styles.eventPanelConfigCard}>
+                            <div className={styles.eventPanelConfigHeader}>
+                              <div>
+                                <h3 id="event-panel-config-title">Personalizar botonera</h3>
+                                <p>Mostrá solo las acciones que tu equipo carga durante el partido. La configuración se guarda en este dispositivo.</p>
+                              </div>
+                              <button className={styles.miniBtn} type="button" onClick={() => setEventPanelConfigOpen(false)} aria-label="Cerrar">
+                                <X size={14} />
+                              </button>
+                            </div>
+
+                            <div className={styles.eventPanelConfigBody}>
+                              <section className={styles.eventPanelConfigSection}>
+                                <div className={styles.eventPanelConfigSectionHeader}>
+                                  <span>Layout</span>
+                                </div>
+                                <div className={styles.eventPanelConfigOptions}>
+                                  <label className={styles.field}>
+                                    <span>Columnas en mobile</span>
+                                    <select
+                                      className={styles.select}
+                                      value={eventPanelConfig.mobileColumns}
+                                      onChange={(event) => setEventPanelConfig((current) => ({ ...current, mobileColumns: Number(event.target.value) }))}
+                                    >
+                                      <option value={2}>2 columnas</option>
+                                      <option value={3}>3 columnas</option>
+                                    </select>
+                                  </label>
+                                  <label className={styles.field}>
+                                    <span>Columnas en desktop</span>
+                                    <select
+                                      className={styles.select}
+                                      value={eventPanelConfig.desktopColumns}
+                                      onChange={(event) => setEventPanelConfig((current) => ({ ...current, desktopColumns: Number(event.target.value) }))}
+                                    >
+                                      <option value={3}>3 columnas</option>
+                                      <option value={4}>4 columnas</option>
+                                      <option value={5}>5 columnas</option>
+                                    </select>
+                                  </label>
+                                  <label className={styles.field}>
+                                    <span>Tamaño</span>
+                                    <select
+                                      className={styles.select}
+                                      value={eventPanelConfig.density}
+                                      onChange={(event) => setEventPanelConfig((current) => ({ ...current, density: event.target.value as EventPanelDensity }))}
+                                    >
+                                      <option value="comfortable">Cómodo</option>
+                                      <option value="compact">Compacto</option>
+                                    </select>
+                                  </label>
+                                </div>
+                              </section>
+
+                              <section className={styles.eventPanelConfigSection}>
+                                <div className={styles.eventPanelConfigSectionHeader}>
+                                  <span>Acciones visibles</span>
+                                  <small>{CLUB_EVENT_PANEL_ACTIONS.length - hiddenEventActions.size} de {CLUB_EVENT_PANEL_ACTIONS.length}</small>
+                                </div>
+                                {CLUB_EVENT_PANEL_GROUPS.map((group) => (
+                                  <div key={`config-${group.group}`} className={styles.eventPanelConfigGroup}>
+                                    <div className={styles.eventPanelConfigGroupHeader}>
+                                      <span>{group.group}</span>
+                                      <div className={styles.eventPanelConfigGroupActions}>
+                                        <button
+                                          type="button"
+                                          className={styles.miniBtn}
+                                          onClick={() => setEventPanelConfig((current) => ({
+                                            ...current,
+                                            hidden: current.hidden.filter((id) => !group.actions.some((action) => action.id === id)),
+                                          }))}
+                                        >
+                                          Mostrar todo
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={styles.miniBtn}
+                                          onClick={() => setEventPanelConfig((current) => {
+                                            const groupIds = group.actions.map((action) => action.id);
+                                            const next = new Set([...current.hidden, ...groupIds]);
+                                            return { ...current, hidden: Array.from(next) };
+                                          })}
+                                        >
+                                          Ocultar todo
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <div className={styles.eventPanelConfigList}>
+                                      {group.actions.map((action) => {
+                                        const isHidden = hiddenEventActions.has(action.id);
+                                        return (
+                                          <label key={action.id} className={`${styles.eventPanelConfigItem} ${isHidden ? styles.eventPanelConfigItemHidden : ''}`}>
+                                            <input
+                                              type="checkbox"
+                                              checked={!isHidden}
+                                              onChange={() => toggleEventActionVisibility(action.id)}
+                                            />
+                                            <span className={styles.eventPanelConfigItemGlyph}>{action.glyph}</span>
+                                            <span className={styles.eventPanelConfigItemLabel}>{action.label}</span>
+                                          </label>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                ))}
+                              </section>
+
+                              <section className={styles.eventPanelConfigSection}>
+                                <div className={styles.eventPanelConfigSectionHeader}>
+                                  <span>Eventos personalizados</span>
+                                  <button
+                                    type="button"
+                                    className={styles.miniPrimary}
+                                    onClick={() => setCustomEventDraft(createEmptyCustomEventDef())}
+                                  >
+                                    + Nuevo evento
+                                  </button>
+                                </div>
+
+                                {eventPanelConfig.customEvents.length === 0 && !customEventDraft ? (
+                                  <div className={styles.emptyState} style={{ padding: 14, fontSize: 12 }}>
+                                    Creá tus propios eventos para registrar acciones específicas (causa, jugador, outcome y puntos a tu medida).
+                                  </div>
+                                ) : null}
+
+                                {!customEventDraft && eventPanelConfig.customEvents.length > 0 ? (
+                                  <div className={styles.customEventList}>
+                                    {eventPanelConfig.customEvents.map((def) => (
+                                      <div key={def.id} className={styles.customEventListItem}>
+                                        <div className={`${styles.liveActionGlyph} ${styles[CUSTOM_EVENT_TONE_TO_TIMELINE[def.tone]]}`}>{def.glyph}</div>
+                                        <div className={styles.customEventListInfo}>
+                                          <strong>{def.label}</strong>
+                                          <small>
+                                            {def.group}
+                                            {def.hasPlayer ? ' · jugador' : ''}
+                                            {def.causeMode !== 'none' ? ' · causa' : ''}
+                                            {def.outcomeMode !== 'none' ? ' · outcome' : ''}
+                                            {def.pointsMode === 'fixed' ? ` · +${def.pointsFixed} pts` : ''}
+                                            {def.pointsMode === 'by_outcome' ? ' · pts por outcome' : ''}
+                                          </small>
+                                        </div>
+                                        <div className={styles.customEventListActions}>
+                                          <button type="button" className={styles.miniBtn} onClick={() => setCustomEventDraft({ ...def })}>
+                                            Editar
+                                          </button>
+                                          <button type="button" className={styles.miniBtn} onClick={() => deleteCustomEventDef(def.id)}>
+                                            <X size={14} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : null}
+
+                                {customEventDraft ? (
+                                  <div className={styles.customEventEditor}>
+                                    <div className={styles.eventPanelConfigOptions}>
+                                      <label className={styles.field}>
+                                        <span>Nombre</span>
+                                        <input
+                                          className={styles.input}
+                                          value={customEventDraft.label}
+                                          onChange={(event) => setCustomEventDraft((current) => current ? { ...current, label: event.target.value } : current)}
+                                          placeholder="Tackle dominante"
+                                        />
+                                      </label>
+                                      <label className={styles.field}>
+                                        <span>Glyph (2-3 letras)</span>
+                                        <input
+                                          className={styles.input}
+                                          value={customEventDraft.glyph}
+                                          onChange={(event) => setCustomEventDraft((current) => current ? { ...current, glyph: event.target.value.toUpperCase().slice(0, 3) } : current)}
+                                          placeholder="TD"
+                                          maxLength={3}
+                                        />
+                                      </label>
+                                      <label className={styles.field}>
+                                        <span>Grupo</span>
+                                        <select
+                                          className={styles.select}
+                                          value={customEventDraft.group}
+                                          onChange={(event) => setCustomEventDraft((current) => current ? { ...current, group: event.target.value } : current)}
+                                        >
+                                          {CUSTOM_EVENT_GROUPS.map((group) => <option key={group} value={group}>{group}</option>)}
+                                        </select>
+                                      </label>
+                                      <label className={styles.field}>
+                                        <span>Color</span>
+                                        <select
+                                          className={styles.select}
+                                          value={customEventDraft.tone}
+                                          onChange={(event) => setCustomEventDraft((current) => current ? { ...current, tone: event.target.value as CustomEventTone } : current)}
+                                        >
+                                          {CUSTOM_EVENT_TONES.map((tone) => <option key={tone} value={tone}>{CUSTOM_EVENT_TONE_LABELS[tone]}</option>)}
+                                        </select>
+                                      </label>
+                                    </div>
+
+                                    <div className={styles.customEventEditorRow}>
+                                      <label className={styles.liveCheckbox}>
+                                        <input
+                                          type="checkbox"
+                                          checked={customEventDraft.hasPlayer}
+                                          onChange={(event) => setCustomEventDraft((current) => current ? { ...current, hasPlayer: event.target.checked } : current)}
+                                        />
+                                        Tiene jugador asociado
+                                      </label>
+                                    </div>
+
+                                    <div className={styles.eventPanelConfigOptions}>
+                                      <label className={styles.field}>
+                                        <span>Causa</span>
+                                        <select
+                                          className={styles.select}
+                                          value={customEventDraft.causeMode}
+                                          onChange={(event) => setCustomEventDraft((current) => current ? { ...current, causeMode: event.target.value as CustomEventCauseMode } : current)}
+                                        >
+                                          <option value="none">Sin causa</option>
+                                          <option value="text">Texto libre</option>
+                                          <option value="options">Lista de opciones</option>
+                                        </select>
+                                      </label>
+                                      {customEventDraft.causeMode === 'options' ? (
+                                        <label className={styles.field} style={{ gridColumn: 'span 2' }}>
+                                          <span>Opciones de causa (separadas por coma)</span>
+                                          <input
+                                            className={styles.input}
+                                            value={customEventDraft.causeOptions.join(', ')}
+                                            onChange={(event) => setCustomEventDraft((current) => current ? {
+                                              ...current,
+                                              causeOptions: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean),
+                                            } : current)}
+                                            placeholder="Offside, Maul tirado, Mano en ruck"
+                                          />
+                                        </label>
+                                      ) : null}
+                                    </div>
+
+                                    <div className={styles.eventPanelConfigOptions}>
+                                      <label className={styles.field}>
+                                        <span>Outcome</span>
+                                        <select
+                                          className={styles.select}
+                                          value={customEventDraft.outcomeMode}
+                                          onChange={(event) => {
+                                            const mode = event.target.value as CustomEventOutcomeMode;
+                                            setCustomEventDraft((current) => current ? {
+                                              ...current,
+                                              outcomeMode: mode,
+                                              pointsByOutcome: {},
+                                            } : current);
+                                          }}
+                                        >
+                                          <option value="none">Sin outcome</option>
+                                          <option value="made_missed">Convertida / Fallada</option>
+                                          <option value="won_lost">Ganado / Perdido</option>
+                                          <option value="custom">Personalizado</option>
+                                        </select>
+                                      </label>
+                                      {customEventDraft.outcomeMode === 'custom' ? (
+                                        <label className={styles.field} style={{ gridColumn: 'span 2' }}>
+                                          <span>Opciones outcome (separadas por coma)</span>
+                                          <input
+                                            className={styles.input}
+                                            value={customEventDraft.outcomeOptions.join(', ')}
+                                            onChange={(event) => setCustomEventDraft((current) => current ? {
+                                              ...current,
+                                              outcomeOptions: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean),
+                                            } : current)}
+                                            placeholder="Limpio, Sucio, Robado"
+                                          />
+                                        </label>
+                                      ) : null}
+                                    </div>
+
+                                    <div className={styles.eventPanelConfigOptions}>
+                                      <label className={styles.field}>
+                                        <span>Cálculo de puntos</span>
+                                        <select
+                                          className={styles.select}
+                                          value={customEventDraft.pointsMode}
+                                          onChange={(event) => setCustomEventDraft((current) => current ? { ...current, pointsMode: event.target.value as CustomEventPointsMode } : current)}
+                                        >
+                                          <option value="none">No suma puntos</option>
+                                          <option value="fixed">Puntos fijos</option>
+                                          <option value="by_outcome" disabled={customEventDraft.outcomeMode === 'none'}>Según outcome</option>
+                                        </select>
+                                      </label>
+                                      {customEventDraft.pointsMode === 'fixed' ? (
+                                        <label className={styles.field}>
+                                          <span>Puntos</span>
+                                          <input
+                                            className={styles.input}
+                                            type="number"
+                                            value={customEventDraft.pointsFixed}
+                                            onChange={(event) => setCustomEventDraft((current) => current ? { ...current, pointsFixed: Number(event.target.value) || 0 } : current)}
+                                          />
+                                        </label>
+                                      ) : null}
+                                    </div>
+
+                                    {customEventDraft.pointsMode === 'by_outcome' && customEventDraft.outcomeMode !== 'none' ? (
+                                      <div className={styles.eventPanelConfigOptions}>
+                                        {(customEventDraft.outcomeMode === 'custom'
+                                          ? customEventDraft.outcomeOptions
+                                          : OUTCOME_PRESETS[customEventDraft.outcomeMode]
+                                        ).map((outcomeValue) => (
+                                          <label key={outcomeValue} className={styles.field}>
+                                            <span>Puntos · {customEventDraft.outcomeMode === 'custom' ? outcomeValue : OUTCOME_PRESET_LABELS[outcomeValue] || outcomeValue}</span>
+                                            <input
+                                              className={styles.input}
+                                              type="number"
+                                              value={customEventDraft.pointsByOutcome[outcomeValue] ?? 0}
+                                              onChange={(event) => setCustomEventDraft((current) => current ? {
+                                                ...current,
+                                                pointsByOutcome: { ...current.pointsByOutcome, [outcomeValue]: Number(event.target.value) || 0 },
+                                              } : current)}
+                                            />
+                                          </label>
+                                        ))}
+                                      </div>
+                                    ) : null}
+
+                                    <div className={styles.customEventEditorActions}>
+                                      <button type="button" className={styles.miniBtn} onClick={() => setCustomEventDraft(null)}>
+                                        Cancelar
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className={styles.miniPrimary}
+                                        disabled={!customEventDraft.label.trim() || !customEventDraft.glyph.trim()}
+                                        onClick={() => {
+                                          if (!customEventDraft.label.trim() || !customEventDraft.glyph.trim()) return;
+                                          const sanitized = sanitizeCustomEventDef(customEventDraft);
+                                          if (!sanitized) return;
+                                          upsertCustomEventDef(sanitized);
+                                          setCustomEventDraft(null);
+                                        }}
+                                      >
+                                        Guardar evento
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </section>
+                            </div>
+
+                            <div className={styles.eventPanelConfigFooter}>
+                              <button type="button" className={styles.miniBtn} onClick={resetEventPanelConfig}>
+                                <RotateCw size={14} /> Restablecer
+                              </button>
+                              <button type="button" className={styles.miniPrimary} onClick={() => setEventPanelConfigOpen(false)}>
+                                Listo
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <div className={styles.liveDataGrid}>
@@ -2772,10 +3733,10 @@ export default function ClubMatchWorkspace({
                               return (
                               <div key={event.id} className={`${styles.timelineRow}${event.parentEventId ? ' ' + styles.timelineRowChild : ''}`}>
                                 <div className={styles.timelineMinute}>{event.minute || '--'}&apos;</div>
-                                <div className={`${styles.timelineGlyph} ${getEventTone(event.type)}`}>{getEventGlyph(event.type)}</div>
+                                <div className={`${styles.timelineGlyph} ${resolveEventToneClass(event.type)}`}>{resolveEventGlyph(event.type)}</div>
                                 <div className={styles.timelineBody}>
                                   <div className={styles.timelineTitleRow}>
-                                    <strong>{getEventSummary(event)}</strong>
+                                    <strong>{resolveEventSummary(event)}</strong>
                                     <span>{event.team === 'home' ? (homeClub?.short_name || 'Local') : event.team === 'away' ? (awayClub?.short_name || 'Visitante') : 'Neutral'}</span>
                                   </div>
                                   <p>{detailLine}</p>

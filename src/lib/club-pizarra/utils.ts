@@ -4,11 +4,13 @@ import type {
     BallState,
     ViewBox,
     EasingPreset,
+    MovementArrow,
     TimelineFrame,
     TimelineSegment,
     ResolvedPlayerState,
     ResolvedBallState,
     ResolvedLineLayer,
+    ResolvedArrowLayer,
     ResolvedBoardState,
     BoardOrientation,
 } from './types';
@@ -202,8 +204,17 @@ export function cloneLines(list: LinePath[]): LinePath[] {
     return list.map((l) => ({ ...l, points: l.points.map((p) => ({ ...p })) }));
 }
 
+export function cloneArrows(list: MovementArrow[]): MovementArrow[] {
+    return list.map((a) => ({ ...a, points: a.points.map((p) => ({ ...p })) }));
+}
+
 export function cloneBall(b: BallState): BallState {
-    return { ...b };
+    return {
+        ...b,
+        anchor: b.anchor
+            ? { ...b.anchor }
+            : b.anchor ?? null,
+    };
 }
 
 export function cloneViewBox(viewBox: ViewBox): ViewBox {
@@ -218,6 +229,7 @@ export function cloneTimelineFrame(frame: TimelineFrame, index = 0): TimelineFra
         lines: cloneLines(frame.lines),
         ball: cloneBall(frame.ball),
         viewBox: cloneViewBox(frame.viewBox ?? DEFAULT_VIEWBOX),
+        arrows: Array.isArray(frame.arrows) ? cloneArrows(frame.arrows) : [],
         duration: typeof frame.duration === 'number' && Number.isFinite(frame.duration) ? Math.max(100, frame.duration) : defaults.duration,
         holdBefore: typeof frame.holdBefore === 'number' && Number.isFinite(frame.holdBefore) ? Math.max(0, frame.holdBefore) : defaults.holdBefore,
         holdAfter: typeof frame.holdAfter === 'number' && Number.isFinite(frame.holdAfter) ? Math.max(0, frame.holdAfter) : defaults.holdAfter,
@@ -331,6 +343,112 @@ export function resolveBallBetweenFrames(fromBall: BallState, toBall: BallState,
     };
 }
 
+export function resolveBallAnchorPosition<T extends { id: string; x: number; y: number }>(
+    ball: BallState,
+    players: T[]
+): Pick<BallState, 'x' | 'y'> {
+    const anchor = ball.anchor;
+    if (!anchor?.playerId) {
+        return { x: ball.x, y: ball.y };
+    }
+
+    const player = players.find((candidate) => candidate.id === anchor.playerId);
+    if (!player) {
+        return { x: ball.x, y: ball.y };
+    }
+
+    return {
+        x: clamp(player.x + anchor.offsetX, 0, 100),
+        y: clamp(player.y + anchor.offsetY, 0, 100),
+    };
+}
+
+function resolveStaticBall(ball: BallState, players: Array<{ id: string; x: number; y: number }>): ResolvedBallState {
+    const anchored = resolveBallAnchorPosition(ball, players);
+    return {
+        ...ball,
+        ...anchored,
+        opacity: ball.visible ? 1 : 0,
+    };
+}
+
+function resolveTransitionBall(
+    fromBall: BallState,
+    toBall: BallState,
+    fromPlayers: Array<{ id: string; x: number; y: number }>,
+    currentPlayers: Array<{ id: string; x: number; y: number }>,
+    progress: number
+): ResolvedBallState {
+    const fromVisible = fromBall.visible ? 1 : 0;
+    const toVisible = toBall.visible ? 1 : 0;
+    const opacity = lerp(fromVisible, toVisible, progress);
+    const fromAnchor = fromBall.anchor;
+    const toAnchor = toBall.anchor;
+    const fromStart = resolveBallAnchorPosition(fromBall, fromPlayers);
+    const target = resolveBallAnchorPosition(toBall, currentPlayers);
+
+    if (fromAnchor?.playerId && toAnchor?.playerId && fromAnchor.playerId === toAnchor.playerId) {
+        const player = currentPlayers.find((candidate) => candidate.id === toAnchor.playerId);
+        if (player) {
+            return {
+                ...toBall,
+                x: clamp(player.x + lerp(fromAnchor.offsetX, toAnchor.offsetX, progress), 0, 100),
+                y: clamp(player.y + lerp(fromAnchor.offsetY, toAnchor.offsetY, progress), 0, 100),
+                visible: opacity > 0.01,
+                opacity,
+                anchor: { ...toAnchor },
+            };
+        }
+    }
+
+    return {
+        ...toBall,
+        x: lerp(fromStart.x, target.x, progress),
+        y: lerp(fromStart.y, target.y, progress),
+        visible: opacity > 0.01,
+        opacity,
+        anchor: toAnchor ? { ...toAnchor } : null,
+    };
+}
+
+export function samplePolylineAt(points: Array<{ x: number; y: number }>, t: number): { x: number; y: number } | null {
+    if (!points || points.length === 0) return null;
+    if (points.length === 1) return { x: points[0].x, y: points[0].y };
+    const clamped = clamp(t, 0, 1);
+    const segmentLengths: number[] = [];
+    let total = 0;
+    for (let i = 1; i < points.length; i += 1) {
+        const dx = points[i].x - points[i - 1].x;
+        const dy = points[i].y - points[i - 1].y;
+        const len = Math.hypot(dx, dy);
+        segmentLengths.push(len);
+        total += len;
+    }
+    if (total === 0) return { x: points[0].x, y: points[0].y };
+    const target = clamped * total;
+    let acc = 0;
+    for (let i = 0; i < segmentLengths.length; i += 1) {
+        const segLen = segmentLengths[i];
+        if (acc + segLen >= target) {
+            const localT = segLen === 0 ? 0 : (target - acc) / segLen;
+            const a = points[i];
+            const b = points[i + 1];
+            return { x: lerp(a.x, b.x, localT), y: lerp(a.y, b.y, localT) };
+        }
+        acc += segLen;
+    }
+    const last = points[points.length - 1];
+    return { x: last.x, y: last.y };
+}
+
+export function resolveArrowLayers(toArrows: MovementArrow[] | undefined, progress: number): ResolvedArrowLayer[] {
+    const arrows = Array.isArray(toArrows) ? toArrows : [];
+    if (arrows.length === 0) {
+        return [{ id: 'arrows-empty', arrows: [], opacity: 0 }];
+    }
+    return [{ id: 'arrows', arrows: cloneArrows(arrows), opacity: clamp(progress, 0, 1) }];
+}
+
 export function resolveLineLayers(fromLines: LinePath[], toLines: LinePath[], progress: number): ResolvedLineLayer[] {
     if (areLineSetsEquivalent(fromLines, toLines)) {
         return [{ id: 'stable', lines: cloneLines(toLines), opacity: 1 }];
@@ -383,11 +501,13 @@ export function resolveBoardStateAtTime(
         segments[segments.length - 1];
 
     if (clampedTime <= segment.motionStart) {
+        const staticPlayers = resolvePlayersBetweenFrames(segment.fromFrame.players, segment.fromFrame.players, 0);
         return {
-            players: resolvePlayersBetweenFrames(segment.fromFrame.players, segment.fromFrame.players, 0),
-            ball: { ...segment.fromFrame.ball, opacity: segment.fromFrame.ball.visible ? 1 : 0 },
+            players: staticPlayers,
+            ball: resolveStaticBall(segment.fromFrame.ball, staticPlayers),
             viewBox: cloneViewBox(segment.fromFrame.viewBox),
             lineLayers: [{ id: segment.fromFrame.id, lines: cloneLines(segment.fromFrame.lines), opacity: 1 }],
+            arrowLayers: resolveArrowLayers(segment.fromFrame.arrows, 1),
             activeSegmentIndex: segment.segmentIndex,
             focusFrameIndex: segment.segmentIndex,
             localProgress: 0,
@@ -395,11 +515,13 @@ export function resolveBoardStateAtTime(
     }
 
     if (clampedTime >= segment.motionEnd) {
+        const staticPlayers = resolvePlayersBetweenFrames(segment.toFrame.players, segment.toFrame.players, 1);
         return {
-            players: resolvePlayersBetweenFrames(segment.toFrame.players, segment.toFrame.players, 1),
-            ball: { ...segment.toFrame.ball, opacity: segment.toFrame.ball.visible ? 1 : 0 },
+            players: staticPlayers,
+            ball: resolveStaticBall(segment.toFrame.ball, staticPlayers),
             viewBox: cloneViewBox(segment.toFrame.viewBox),
             lineLayers: [{ id: segment.toFrame.id, lines: cloneLines(segment.toFrame.lines), opacity: 1 }],
+            arrowLayers: resolveArrowLayers(segment.toFrame.arrows, 1),
             activeSegmentIndex: segment.segmentIndex,
             focusFrameIndex: segment.segmentIndex + 1,
             localProgress: 1,
@@ -409,9 +531,82 @@ export function resolveBoardStateAtTime(
     const localProgress = clamp((clampedTime - segment.motionStart) / Math.max(segment.duration, 1), 0, 1);
     const eased = applyEasing(segment.easing, localProgress);
 
+    const interpolatedPlayers = resolvePlayersBetweenFrames(segment.fromFrame.players, segment.toFrame.players, eased);
+
+    const arrows = Array.isArray(segment.toFrame.arrows) ? segment.toFrame.arrows : [];
+    const playerArrowMap = new Map<string, MovementArrow>();
+    let ballArrow: MovementArrow | undefined;
+    for (const arrow of arrows) {
+        if (arrow.targetType === 'player') {
+            playerArrowMap.set(arrow.targetId, arrow);
+        } else if (arrow.targetType === 'ball') {
+            ballArrow = arrow;
+        }
+    }
+
+    const toPlayerMap = new Map(segment.toFrame.players.map((player) => [player.id, player]));
+    const exactPlayerArrowIds = new Set(
+        arrows
+            .filter((arrow) => arrow.targetType === 'player' && toPlayerMap.has(arrow.targetId))
+            .map((arrow) => arrow.id)
+    );
+    const fallbackPlayerArrowIds = new Set<string>();
+    const findPlayerArrowByEndpoint = (playerId: string) => {
+        const toPlayer = toPlayerMap.get(playerId);
+        if (!toPlayer) return undefined;
+
+        let bestArrow: MovementArrow | undefined;
+        let bestDistance = Number.POSITIVE_INFINITY;
+
+        for (const arrow of arrows) {
+            if (arrow.targetType !== 'player' || exactPlayerArrowIds.has(arrow.id) || fallbackPlayerArrowIds.has(arrow.id)) {
+                continue;
+            }
+            const last = arrow.points[arrow.points.length - 1];
+            if (!last) continue;
+            const distance = Math.hypot(last.x - toPlayer.x, last.y - toPlayer.y);
+            if (distance < bestDistance) {
+                bestArrow = arrow;
+                bestDistance = distance;
+            }
+        }
+
+        if (bestArrow && bestDistance <= 2) {
+            fallbackPlayerArrowIds.add(bestArrow.id);
+            return bestArrow;
+        }
+
+        return undefined;
+    };
+
+    const followedPlayers = playerArrowMap.size === 0
+        ? interpolatedPlayers
+        : interpolatedPlayers.map((player) => {
+            const arrow = playerArrowMap.get(player.id) ?? findPlayerArrowByEndpoint(player.id);
+            if (!arrow) return player;
+            const sample = samplePolylineAt(arrow.points, eased);
+            return sample ? { ...player, x: sample.x, y: sample.y } : player;
+        });
+
+    const fromStaticPlayers = resolvePlayersBetweenFrames(segment.fromFrame.players, segment.fromFrame.players, 0);
+    const transitionedBall = resolveTransitionBall(
+        segment.fromFrame.ball,
+        segment.toFrame.ball,
+        fromStaticPlayers,
+        followedPlayers,
+        eased
+    );
+
+    const followedBall = ballArrow
+        ? (() => {
+            const sample = samplePolylineAt(ballArrow.points, eased);
+            return sample ? { ...transitionedBall, x: sample.x, y: sample.y } : transitionedBall;
+        })()
+        : transitionedBall;
+
     return {
-        players: resolvePlayersBetweenFrames(segment.fromFrame.players, segment.toFrame.players, eased),
-        ball: resolveBallBetweenFrames(segment.fromFrame.ball, segment.toFrame.ball, eased),
+        players: followedPlayers,
+        ball: followedBall,
         viewBox: {
             x: lerp(segment.fromFrame.viewBox.x, segment.toFrame.viewBox.x, eased),
             y: lerp(segment.fromFrame.viewBox.y, segment.toFrame.viewBox.y, eased),
@@ -419,6 +614,7 @@ export function resolveBoardStateAtTime(
             h: lerp(segment.fromFrame.viewBox.h, segment.toFrame.viewBox.h, eased),
         },
         lineLayers: resolveLineLayers(segment.fromFrame.lines, segment.toFrame.lines, eased),
+        arrowLayers: resolveArrowLayers(segment.toFrame.arrows, eased),
         activeSegmentIndex: segment.segmentIndex,
         focusFrameIndex: eased < 0.5 ? segment.segmentIndex : segment.segmentIndex + 1,
         localProgress: eased,

@@ -6,6 +6,9 @@ import type {
     BallState,
     ViewBox,
     EasingPreset,
+    MovementArrow,
+    Point,
+    ArrowTargetType,
     SavedPreset,
 } from './types';
 import {
@@ -19,6 +22,7 @@ import {
 import {
     clonePlayers,
     cloneLines,
+    cloneArrows,
     cloneBall,
     cloneViewBox,
     cloneTimelineFrame,
@@ -72,6 +76,68 @@ export function createDefaultBoardState(sport: string): PersistedBoardState {
     };
 }
 
+function normalizeArrows(input: unknown): MovementArrow[] {
+    if (!Array.isArray(input)) return [];
+    return input
+        .map((raw, index): MovementArrow | null => {
+            if (!raw || typeof raw !== 'object') return null;
+            const arrow = raw as Partial<MovementArrow>;
+            const points = Array.isArray(arrow.points)
+                ? (arrow.points as Point[]).filter((point) =>
+                      point && typeof point === 'object'
+                          && typeof point.x === 'number' && Number.isFinite(point.x)
+                          && typeof point.y === 'number' && Number.isFinite(point.y)
+                  ).map((point) => ({ x: point.x, y: point.y }))
+                : [];
+            if (points.length < 2) return null;
+            const targetType: ArrowTargetType = arrow.targetType === 'ball' ? 'ball' : 'player';
+            const targetId = typeof arrow.targetId === 'string' && arrow.targetId.trim()
+                ? arrow.targetId
+                : targetType === 'ball' ? 'ball' : '';
+            if (!targetId) return null;
+            return {
+                id: typeof arrow.id === 'string' && arrow.id.trim() ? arrow.id : `arrow-restored-${index}`,
+                targetType,
+                targetId,
+                points,
+                color: typeof arrow.color === 'string' && arrow.color.trim() ? arrow.color : '#facc15',
+                width: typeof arrow.width === 'number' && Number.isFinite(arrow.width) ? Math.max(1, arrow.width) : 3,
+            };
+        })
+        .filter((value): value is MovementArrow => value !== null);
+}
+
+function normalizeBall(input: unknown, fallback = DEFAULT_BALL): BallState {
+    if (!input || typeof input !== 'object') {
+        return cloneBall(fallback);
+    }
+
+    const raw = input as Partial<BallState>;
+    const anchor = raw.anchor && typeof raw.anchor === 'object'
+        ? raw.anchor as Partial<NonNullable<BallState['anchor']>>
+        : null;
+    const normalizedAnchor = anchor
+        && typeof anchor.playerId === 'string'
+        && anchor.playerId.trim()
+        && typeof anchor.offsetX === 'number'
+        && Number.isFinite(anchor.offsetX)
+        && typeof anchor.offsetY === 'number'
+        && Number.isFinite(anchor.offsetY)
+        ? {
+            playerId: anchor.playerId,
+            offsetX: anchor.offsetX,
+            offsetY: anchor.offsetY,
+        }
+        : null;
+
+    return {
+        x: typeof raw.x === 'number' && Number.isFinite(raw.x) ? raw.x : fallback.x,
+        y: typeof raw.y === 'number' && Number.isFinite(raw.y) ? raw.y : fallback.y,
+        visible: typeof raw.visible === 'boolean' ? raw.visible : fallback.visible,
+        anchor: normalizedAnchor,
+    };
+}
+
 function normalizeTimeline(
     timeline: Array<Partial<TimelineFrame>> | undefined,
     fallback: PersistedBoardState,
@@ -88,8 +154,9 @@ function normalizeTimeline(
             ? ensurePlayersHaveBothTeams(frame.players as PlayerChip[], sport)
             : clonePlayers(fallback.players),
         lines: Array.isArray(frame.lines) ? cloneLines(frame.lines as LinePath[]) : [],
-        ball: frame.ball ? cloneBall(frame.ball as BallState) : cloneBall(DEFAULT_BALL),
+        ball: normalizeBall(frame.ball, DEFAULT_BALL),
         viewBox: frame.viewBox ? cloneViewBox(frame.viewBox as ViewBox) : cloneViewBox(fallback.viewBox),
+        arrows: cloneArrows(normalizeArrows((frame as { arrows?: unknown }).arrows)),
         duration: typeof frame.duration === 'number' && Number.isFinite(frame.duration)
             ? Math.max(100, frame.duration)
             : getDefaultFrameTransition(index).duration,
@@ -124,7 +191,7 @@ export function normalizePersistedBoardState(input: unknown, sport: string): Per
         version: BOARD_STORAGE_VERSION,
         players: persistedPlayers,
         lines: Array.isArray(parsed.lines) ? cloneLines(parsed.lines) : cloneLines(fallback.lines),
-        ball: parsed.ball ? cloneBall(parsed.ball) : cloneBall(fallback.ball),
+        ball: normalizeBall(parsed.ball, fallback.ball),
         viewBox: persistedViewBox,
         timeline: normalizeTimeline(
             parsed.timeline,

@@ -74,7 +74,7 @@ export function Modal({
       aria-labelledby={title ? 'modal-title' : undefined}
       aria-describedby={description ? 'modal-desc' : undefined}
     >
-      <div className={cn('ca-modal', sizeClass, className)}>
+      <div className={cn('ca-modal', 'ca-modal--responsive', sizeClass, className)}>
         {(title || showCloseButton) && (
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="min-w-0">

@@ -1712,12 +1712,12 @@ function TrainingWorkspaceModal({
 
     const tabs: Array<{ id: PlanTab; label: string; icon: ReactNode; hint: string }> = [
         { id: 'resumen', label: 'Resumen', icon: <LayoutDashboard className="w-4 h-4" />, hint: 'Panorama general' },
-        { id: 'plan', label: 'Plan', icon: <ClipboardList className="w-4 h-4" />, hint: 'Bloques y ritmo' },
-        { id: 'convocados', label: 'Convocados', icon: <Users className="w-4 h-4" />, hint: 'Asistencia y respuestas' },
-        { id: 'pizarra', label: 'Pizarra', icon: <Target className="w-4 h-4" />, hint: 'Secuencias tacticas' },
-        { id: 'evaluacion', label: 'Evaluacion', icon: <NotebookPen className="w-4 h-4" />, hint: 'Carga y cierre' },
-        { id: 'eventos', label: 'Eventos', icon: <FileBarChart2 className="w-4 h-4" />, hint: 'Patadas y jugadas' },
-        { id: 'stats', label: 'Stats', icon: <BarChart3 className="w-4 h-4" />, hint: 'Lectura rapida' },
+        { id: 'plan', label: 'Planificar', icon: <ClipboardList className="w-4 h-4" />, hint: 'Bloques y ritmo' },
+        { id: 'convocados', label: 'Convocar', icon: <Users className="w-4 h-4" />, hint: 'Asistencia y respuestas' },
+        { id: 'pizarra', label: 'Ejecutar', icon: <Target className="w-4 h-4" />, hint: 'Secuencias tacticas' },
+        { id: 'evaluacion', label: 'Evaluar', icon: <NotebookPen className="w-4 h-4" />, hint: 'Carga y cierre' },
+        { id: 'eventos', label: 'Eventos técnicos', icon: <FileBarChart2 className="w-4 h-4" />, hint: 'Patadas y jugadas' },
+        { id: 'stats', label: 'Cerrar', icon: <BarChart3 className="w-4 h-4" />, hint: 'Check-answers y lectura rapida' },
     ];
 
     const addBlock = (type: PlanBlockType) => {

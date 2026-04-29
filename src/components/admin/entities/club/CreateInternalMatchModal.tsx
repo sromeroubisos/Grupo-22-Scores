@@ -360,14 +360,54 @@ export function CreateInternalMatchModal({
                 }
 
                 @media (max-width: 640px) {
+                    .cim-backdrop {
+                        align-items: flex-start;
+                        padding: 8px;
+                    }
+                    .cim-glass {
+                        padding: 20px;
+                        border-radius: 20px;
+                        max-width: 100%;
+                    }
+                    .cim-header {
+                        margin-bottom: 24px;
+                    }
+                    .cim-header-content h1 {
+                        font-size: 1.35rem;
+                    }
+                    .cim-header-content p {
+                        font-size: 0.9rem;
+                    }
                     .cim-grid-3, .cim-grid-2 {
                         grid-template-columns: 1fr;
                     }
-                    .cim-glass {
-                        padding: 24px;
+                    .cim-new-panel .cim-grid-3 > .cim-input-group {
+                        grid-column: unset !important;
                     }
-                    .cim-header-content h1 {
-                        font-size: 1.5rem;
+                    .cim-section {
+                        margin-bottom: 24px;
+                    }
+                    .cim-section-label {
+                        font-size: 0.65rem;
+                        margin-bottom: 12px;
+                    }
+                    .cim-input-group input,
+                    .cim-input-group select,
+                    .cim-input-group textarea {
+                        padding: 16px;
+                        font-size: 1rem;
+                        border-radius: 14px;
+                    }
+                    .cim-actions {
+                        flex-direction: column;
+                        gap: 12px;
+                        margin-top: 32px;
+                        padding-top: 24px;
+                    }
+                    .cim-btn {
+                        width: 100%;
+                        padding: 14px 24px;
+                        border-radius: 14px;
                     }
                 }
 
