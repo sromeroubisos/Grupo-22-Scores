@@ -1,5 +1,8 @@
+import 'server-only'
+
 import { NextResponse, type NextRequest } from 'next/server';
 import { syncUserProfile } from '@/lib/auth/syncUserProfile';
+import { sanitizeNext } from '@/lib/auth/redirect'
 import { createClient } from '@/lib/supabase/server';
 import { rateLimitAuthCallback } from '@/lib/rateLimit';
 
@@ -12,32 +15,6 @@ function getClientIp(request: NextRequest | Request): string {
     // @ts-ignore
     if (req.socket?.remoteAddress) return req.socket.remoteAddress;
     return 'unknown';
-}
-
-export function sanitizeNext(raw: string | null): string {
-    if (!raw) return '/';
-    // Block open redirects: no protocol-like prefixes, no @, no double slashes
-    if (
-        !raw.startsWith('/') ||
-        raw.startsWith('//') ||
-        raw.includes('@') ||
-        raw.includes('\\') ||
-        /^(https?|javascript|data|file|ftp):/i.test(raw)
-    ) {
-        return '/';
-    }
-    // Prevent redirect loops back to auth pages
-    const lower = raw.toLowerCase();
-    if (
-        lower === '/login' ||
-        lower.startsWith('/login?') ||
-        lower === '/register' ||
-        lower.startsWith('/register?') ||
-        lower.startsWith('/auth/')
-    ) {
-        return '/';
-    }
-    return raw;
 }
 
 export async function handleAuthCallback(request: NextRequest | Request) {

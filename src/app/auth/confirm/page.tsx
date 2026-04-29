@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { sanitizeNext } from '@/lib/auth/redirect'
 import { createClient } from '@/lib/supabase/client'
-import { sanitizeNext } from '@/lib/auth/callbackHandler'
 
 export default function AuthConfirmPage() {
     const searchParams = useSearchParams()
