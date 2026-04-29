@@ -4,15 +4,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-    Calendar,
-    CheckCircle2,
     Loader2,
     Save,
-    Upload,
     User,
-    UserPlus,
     X,
-    XCircle,
 } from 'lucide-react';
 import {
     addPersonToClub,
@@ -78,18 +73,6 @@ function getAgeLabel(birthDate: string) {
     }
 
     return `${age} anos`;
-}
-
-function CompletionRow({ complete, label }: { complete: boolean; label: string }) {
-    return (
-        <div className="flex items-center justify-between gap-[10px] border-b border-slate-200/80 py-[10px] text-[13px] last:border-b-0">
-            <span className="font-semibold text-slate-600">{label}</span>
-            <span className={`inline-flex min-w-[72px] items-center justify-end gap-[10px] font-black ${complete ? 'text-emerald-500' : 'text-rose-400'}`}>
-                {complete ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
-                {complete ? 'OK' : 'Falta'}
-            </span>
-        </div>
-    );
 }
 
 export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSuccess, initialMode, lockDivisionId, person, submitMode = 'service' }: Props) {
@@ -317,52 +300,34 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         ? initialMode === 'player' ? 'Editar jugador' : 'Editar staff'
         : initialMode === 'player' ? 'Nuevo jugador' : 'Nuevo staff';
 
-    const sectionLabelClass = 'text-[11px] font-black uppercase tracking-[0.28em] text-emerald-400';
-    const panelClass = 'rounded-[5px] border border-slate-200/80 bg-white/72 p-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] backdrop-blur-xl';
-    const fieldClass = 'h-12 w-full rounded-[5px] border border-slate-300/85 bg-white/88 px-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-100';
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-[rgba(10,15,25,0.72)] px-3 py-4 backdrop-blur-xl animate-in fade-in duration-200">
-            <div className="pointer-events-none fixed left-1/2 top-1/2 h-[38rem] w-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-400/15 blur-3xl" />
-
-            <div className="relative w-full max-w-[1180px] overflow-hidden rounded-[5px] border border-white/55 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(244,247,251,0.9))] text-slate-900 shadow-[0_40px_120px_rgba(2,6,23,0.45)]">
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(74,222,128,0.12),transparent_28%),radial-gradient(circle_at_85%_20%,rgba(59,130,246,0.12),transparent_26%)]" />
-
-                <div className="relative border-b border-slate-200/80 px-[10px] py-[10px] md:px-[15px] md:py-[15px]">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex min-w-0 items-start gap-3">
-                            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[5px] border border-emerald-200 bg-emerald-50 text-emerald-500">
-                                <UserPlus className="h-5 w-5" />
-                            </div>
-                            <div className="min-w-0">
-                                <div className="text-[11px] font-black uppercase tracking-[0.32em] text-emerald-400">
-                                    Ficha de club
-                                </div>
-                                <div className="mt-[10px] text-[clamp(1.7rem,2.8vw,2.5rem)] font-black tracking-[-0.06em] text-slate-900 leading-none">
-                                    {formLabel}
-                                </div>
-                                <p className="mt-[10px] max-w-2xl text-sm font-medium text-slate-500">
-                                    Carga rapida, preview lateral y asignacion opcional a division.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-3">
-                            <div className="hidden rounded-[5px] border border-sky-200 bg-sky-50 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-sky-500 md:block">
-                                {isEditing ? 'Ficha en edicion' : 'Ficha de club v2.4'}
-                            </div>
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="grid h-12 w-12 place-items-center rounded-[5px] border border-slate-200 bg-white/70 text-slate-500 transition hover:border-slate-300 hover:bg-white hover:text-slate-800"
-                                aria-label="Cerrar formulario"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
+        <div className="registry-modal-overlay animate-in fade-in duration-200">
+            <div className="registry-modal-shell">
+                {/* HEADER */}
+                <header className="registry-header">
+                    <div className="registry-header-info">
+                        <h2>Ficha de club</h2>
+                        <h1>{formLabel}</h1>
+                        <p>Carga rapida con preview lateral y asignacion opcional</p>
                     </div>
-                </div>
+                    <div className="flex items-center">
+                        <span className="registry-version-badge">
+                            {isEditing ? 'FICHA EN EDICION' : 'FICHA DE CLUB V2.4'}
+                        </span>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="registry-close-btn"
+                            aria-label="Cerrar formulario"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div className="registry-rivet" style={{ top: 10, left: 10 }} />
+                    <div className="registry-rivet" style={{ top: 10, right: 10 }} />
+                </header>
 
-                <form noValidate onSubmit={handleSubmit} className="relative max-h-[calc(92vh-104px)] overflow-y-auto px-[10px] py-[10px] md:px-[15px] md:py-[15px]">
+                <form noValidate onSubmit={handleSubmit} className="registry-modal-scroll">
                     <input
                         id="photo-upload"
                         type="file"
@@ -371,386 +336,330 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                         className="hidden"
                     />
 
-                    <div className="grid items-start gap-[10px] xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.2fr)_270px]">
-                        <section className={panelClass}>
-                            <div className={sectionLabelClass}>Identidad</div>
-                            <div className="mt-[10px] grid gap-[10px] md:grid-cols-2">
-                                <label className="space-y-[10px]">
-                                    <span className="text-xs font-bold text-slate-600">Nombre</span>
-                                    <input
-                                        autoFocus
-                                        value={firstName}
-                                        onChange={e => setFirstName(e.target.value)}
-                                        className={fieldClass}
-                                        placeholder="Ej: Juan"
-                                        required
-                                    />
-                                </label>
-                                <label className="space-y-[10px]">
-                                    <span className="text-xs font-bold text-slate-600">Apellido</span>
-                                    <input
-                                        value={lastName}
-                                        onChange={e => setLastName(e.target.value)}
-                                        className={fieldClass}
-                                        placeholder="Ej: Perez"
-                                        required
-                                    />
-                                </label>
+                    <div className="registry-form-grid">
+                        {/* COL 1: IDENTIDAD */}
+                        <section className="registry-column">
+                            <div className="registry-column-title">Identidad</div>
+                            <div className="registry-field-group">
+                                <label>Nombre</label>
+                                <input
+                                    autoFocus
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    placeholder="Ej: Juan"
+                                />
+                            </div>
+                            <div className="registry-field-group">
+                                <label>Apellido</label>
+                                <input
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                    placeholder="Ej: Perez"
+                                />
                             </div>
 
-                            <div className="mt-[10px]">
-                                <div className={sectionLabelClass}>Biometria</div>
-                                <div className="mt-[10px] grid gap-[10px] md:grid-cols-2">
-                                    {initialMode === 'player' && (
-                                        <label className="space-y-[10px] md:col-span-2">
-                                            <span className="text-xs font-bold text-slate-600">Fecha de nacimiento</span>
-                                            <div className="relative">
-                                                <input
-                                                    type="date"
-                                                    value={birthDate}
-                                                    onChange={e => setBirthDate(e.target.value)}
-                                                    className={`${fieldClass} pr-11 font-mono`}
-                                                />
-                                                <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                                            </div>
-                                            <span className="block font-mono text-[11px] uppercase tracking-[0.12em] text-sky-500">
-                                                Edad: {getAgeLabel(birthDate)}
-                                            </span>
-                                        </label>
-                                    )}
-
-                                    {initialMode === 'player' ? (
-                                        <>
-                                            <label className="space-y-[10px]">
-                                                <span className="text-xs font-bold text-slate-600">Peso (KG)</span>
-                                                <div className="relative">
-                                                    <input
-                                                        type="number"
-                                                        step="0.1"
-                                                        value={weight}
-                                                        onChange={e => setWeight(e.target.value)}
-                                                        className={`${fieldClass} pr-14 font-mono`}
-                                                        placeholder="75.5"
-                                                    />
-                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">KG</span>
-                                                </div>
-                                            </label>
-                                            <label className="space-y-[10px]">
-                                                <span className="text-xs font-bold text-slate-600">Altura (CM)</span>
-                                                <div className="relative">
-                                                    <input
-                                                        type="number"
-                                                        step="0.1"
-                                                        value={height}
-                                                        onChange={e => setHeight(e.target.value)}
-                                                        className={`${fieldClass} pr-14 font-mono`}
-                                                        placeholder="180"
-                                                    />
-                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">CM</span>
-                                                </div>
-                                            </label>
-                                        </>
-                                    ) : (
-                                        <label className="space-y-[10px] md:col-span-2">
-                                            <span className="text-xs font-bold text-slate-600">Cargo</span>
-                                            <select
-                                                value={role}
-                                                onChange={e => setRole(e.target.value)}
-                                                className={fieldClass}
-                                            >
-                                                {STAFF_ROLES.map(([value, label]) => (
-                                                    <option key={value} value={value}>{label}</option>
-                                                ))}
-                                            </select>
-                                        </label>
-                                    )}
+                            <div className="registry-column-title" style={{ marginTop: '2.5rem' }}>Biometria</div>
+                            {initialMode === 'player' && (
+                                <div className="registry-field-group">
+                                    <label>Fecha de nacimiento</label>
+                                    <input
+                                        type="date"
+                                        value={birthDate}
+                                        onChange={(e) => setBirthDate(e.target.value)}
+                                    />
+                                    <div className="registry-age-indicator">
+                                        Edad: {getAgeLabel(birthDate)}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="mt-[10px] rounded-[5px] border border-sky-200/70 bg-sky-50/70 px-[10px] py-[10px]">
-                                <p className="text-xs leading-5 text-sky-700">
-                                    <strong>Asignacion:</strong> El alta queda en el plantel base del club. Si mas adelante necesitas otro destino operativo, puedes vincularlo o reasignarlo desde la estructura de planteles.
+                            {initialMode === 'player' ? (
+                                <div className="registry-biometry-grid">
+                                    <div className="registry-field-group">
+                                        <label>Peso (KG)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={weight}
+                                            onChange={(e) => setWeight(e.target.value)}
+                                            placeholder="00"
+                                        />
+                                    </div>
+                                    <div className="registry-field-group">
+                                        <label>Altura (CM)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={height}
+                                            onChange={(e) => setHeight(e.target.value)}
+                                            placeholder="000"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="registry-field-group">
+                                    <label>Cargo</label>
+                                    <select
+                                        value={role}
+                                        onChange={(e) => setRole(e.target.value)}
+                                    >
+                                        {STAFF_ROLES.map(([value, label]) => (
+                                            <option key={value} value={value}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            <div className="registry-info-note">
+                                <p>
+                                    📌 El jugador queda en el plantel base y puede asignarse luego a otras divisiones.
                                 </p>
                             </div>
                         </section>
 
-                        <section className={panelClass}>
-                            <div className={sectionLabelClass}>Perfil deportivo</div>
+                        {/* COL 2: PERFIL DEPORTIVO */}
+                        <section className="registry-column registry-column-alt">
+                            <div className="registry-column-title">Perfil Deportivo</div>
 
                             {initialMode === 'player' ? (
-                                <div className="mt-[10px] space-y-[10px]">
+                                <div className="registry-rugby-section">
                                     {RUGBY_POSITION_GROUPS.map((group) => (
                                         <div key={group.label}>
-                                            <div className="mb-[10px] flex items-center gap-[10px]">
-                                                <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-600">
-                                                    {group.label}
-                                                </span>
-                                                <div className="h-px flex-1 bg-slate-200" />
-                                            </div>
-                                            <div className="grid gap-[10px] sm:grid-cols-2 xl:grid-cols-3">
-                                                {group.positions.map((item) => {
-                                                    const selected = position === item;
-                                                    return (
-                                                        <button
-                                                            key={item}
-                                                            type="button"
-                                                            onClick={() => setPosition(item)}
-                                                            className={`min-h-[48px] rounded-[5px] border px-[10px] py-[10px] text-left text-[13px] font-extrabold leading-snug transition ${selected
-                                                                ? 'border-sky-500 bg-sky-500 text-white shadow-[0_12px_24px_rgba(59,130,246,0.22)]'
-                                                                : 'border-slate-200 bg-white/75 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-slate-900'
-                                                                }`}
-                                                        >
-                                                            {item}
-                                                        </button>
-                                                    );
-                                                })}
+                                            <h3>🔵 {group.label}</h3>
+                                            <div className="registry-pos-grid">
+                                                {group.positions.map((item) => (
+                                                    <button
+                                                        key={item}
+                                                        type="button"
+                                                        onClick={() => setPosition(item)}
+                                                        className={`registry-pos-btn ${position === item ? 'active' : ''}`}
+                                                    >
+                                                        {item}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="mt-[10px] space-y-[10px]">
-                                    <label className="space-y-[10px]">
-                                        <span className="text-xs font-bold text-slate-600">Perfil del staff</span>
-                                        <select
-                                            value={role}
-                                            onChange={e => setRole(e.target.value)}
-                                            className={fieldClass}
-                                        >
-                                            {STAFF_ROLES.map(([value, label]) => (
-                                                <option key={value} value={value}>{label}</option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                    <div className="rounded-[5px] border border-slate-200 bg-white/70 px-[10px] py-[10px] text-sm text-slate-500">
-                                        Se conserva el mismo flujo de alta, pero con una ficha lateral orientada a roles y validacion operativa.
+                                <div className="registry-field-group">
+                                    <label>Perfil del staff</label>
+                                    <select
+                                        value={role}
+                                        onChange={(e) => setRole(e.target.value)}
+                                    >
+                                        {STAFF_ROLES.map(([value, label]) => (
+                                            <option key={value} value={value}>{label}</option>
+                                        ))}
+                                    </select>
+                                    <div className="registry-info-note" style={{ marginTop: '1rem' }}>
+                                        <p>
+                                            Se conserva el mismo flujo de alta, pero con una ficha lateral orientada a roles y validacion operativa.
+                                        </p>
                                     </div>
                                 </div>
                             )}
                         </section>
 
-                        <aside className="self-start rounded-[5px] border border-slate-200/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(244,247,251,0.98))] p-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] xl:row-span-2">
-                            <div className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">
-                                Preview
+                        {/* COL 3: PREVIEW */}
+                        <section className="registry-column registry-preview-panel">
+                            <div className="registry-column-title">Live Preview</div>
+
+                            <label htmlFor="photo-upload" className="registry-avatar-container">
+                                {photoUrl ? (
+                                    <img src={photoUrl} alt="Preview" />
+                                ) : (
+                                    <>
+                                        <User className="w-8 h-8 text-[#666]" />
+                                        <span className="registry-upload-text">Upload Photo</span>
+                                    </>
+                                )}
+                            </label>
+
+                            <div className="registry-preview-name">
+                                {displayName.toUpperCase()}
+                            </div>
+                            <div className="registry-preview-status">
+                                <span className="registry-live-dot" />
+                                {previewMeta}
                             </div>
 
-                            <div className="mt-[10px] rounded-[5px] border border-slate-200 bg-white/85 p-[10px] text-center shadow-[0_16px_36px_rgba(148,163,184,0.16)]">
-                                <div className="mx-auto flex w-full flex-col items-center gap-[10px]">
-                                    <div className="grid h-24 w-24 place-items-center overflow-hidden rounded-[5px] border border-slate-200 bg-slate-50">
-                                        {photoUrl ? (
-                                            <img src={photoUrl} alt="Preview" className="h-full w-full object-cover" />
-                                        ) : (
-                                            <User className="h-11 w-11 text-slate-400" />
-                                        )}
-                                    </div>
-                                    <label
-                                        htmlFor="photo-upload"
-                                        className="inline-flex h-10 min-w-10 cursor-pointer items-center justify-center rounded-[5px] border border-emerald-300 bg-emerald-400 px-[10px] text-slate-950 shadow-[0_12px_24px_rgba(74,222,128,0.3)] transition hover:-translate-y-0.5"
-                                        title="Subir foto"
-                                    >
-                                        <Upload className="h-4 w-4" />
-                                    </label>
+                            <div className="registry-preview-data">
+                                <div className="registry-preview-row">
+                                    <span className="registry-preview-label">Plantel</span>
+                                    <span className="registry-preview-val">{assignmentLabel}</span>
                                 </div>
-
-                                <div className="mt-[10px] break-words text-[1.6rem] font-black leading-none tracking-[-0.05em] text-slate-900">
-                                    {displayName}
-                                </div>
-                                <div className="mt-[10px] font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-400">
-                                    {previewMeta}
-                                </div>
-                                <div className="mt-[10px] text-sm font-medium text-slate-500">
-                                    {assignmentLabel}
-                                </div>
-
                                 {initialMode === 'player' && (
-                                    <div className="mt-[10px] grid grid-cols-2 gap-[10px]">
-                                        <div className="rounded-[5px] bg-slate-50 px-[10px] py-[10px]">
-                                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Peso</div>
-                                            <div className="mt-1 font-mono text-sm font-bold text-slate-700">{weight ? `${weight} KG` : '-- KG'}</div>
-                                        </div>
-                                        <div className="rounded-[5px] bg-slate-50 px-[10px] py-[10px]">
-                                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Altura</div>
-                                            <div className="mt-1 font-mono text-sm font-bold text-slate-700">{height ? `${height} CM` : '-- CM'}</div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {linkedDivisionClubs.length > 0 && (
-                                    <div className="mt-[10px] rounded-[5px] border border-sky-200 bg-sky-50 px-[10px] py-[10px] text-left text-[11px] font-bold uppercase tracking-[0.08em] text-sky-600">
-                                        Comparte con: {linkedDivisionClubs.map((club) => club.name).join(', ')}
+                                    <div className="registry-preview-row">
+                                        <span className="registry-preview-label">Peso / Altura</span>
+                                        <span className="registry-preview-val">
+                                            {weight ? `${weight}kg` : '—'} / {height ? `${height}cm` : '—'}
+                                        </span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="mt-[10px]">
-                                <div className="mb-[10px] text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">
-                                    Estado
+                            <div className="registry-checklist">
+                                <div className="registry-check-item">
+                                    Identidad
+                                    <span className={`registry-status-led ${identityComplete ? 'ok' : 'fail'}`} />
                                 </div>
-                                <div className="rounded-[5px] border border-slate-200 bg-white/70 px-[10px] py-[10px]">
-                                    <CompletionRow label="Identidad" complete={identityComplete} />
-                                    <CompletionRow label="Deportivo" complete={sportsComplete} />
-                                    <CompletionRow label="Fisico" complete={physicalComplete} />
-                                    <CompletionRow label="Asignacion" complete={assignmentComplete} />
+                                <div className="registry-check-item">
+                                    Deportivo
+                                    <span className={`registry-status-led ${sportsComplete ? 'ok' : 'fail'}`} />
+                                </div>
+                                <div className="registry-check-item">
+                                    Fisico
+                                    <span className={`registry-status-led ${physicalComplete ? 'ok' : 'fail'}`} />
+                                </div>
+                                <div className="registry-check-item">
+                                    Asignacion
+                                    <span className={`registry-status-led ${assignmentComplete ? 'ok' : 'fail'}`} />
                                 </div>
                             </div>
-                        </aside>
-
-                        <section className={`${panelClass} xl:col-span-2`}>
-                            <div className={sectionLabelClass}>Asignacion</div>
-
-                            {!lockDivisionId && divisions && divisions.length > 0 ? (
-                                <div className="mt-[10px] grid gap-[10px] lg:grid-cols-[minmax(0,1fr)_260px]">
-                                    <label className="space-y-[10px]">
-                                        <span className="text-xs font-bold text-slate-600">Division</span>
-                                        <select
-                                            value={divisionId}
-                                            onChange={e => setDivisionId(e.target.value)}
-                                            className={fieldClass}
-                                        >
-                                            <option value="">Plantel base del club</option>
-                                            {divisions.map((division) => (
-                                                <option key={division.id} value={division.id}>
-                                                    {division.name.toUpperCase()} ({division.season})
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-
-                                    <div className="rounded-[5px] border border-slate-200 bg-white/70 px-[10px] py-[10px] text-sm leading-6 text-slate-500">
-                                        {linkedDivisionClubs.length > 0 ? (
-                                            <div className="space-y-2">
-                                                <p className="font-black uppercase tracking-[0.18em] text-sky-500">
-                                                    Roster compartido
-                                                </p>
-                                                <p>Este registro se replica para todos los equipos de la division.</p>
-                                                <div className="flex flex-wrap gap-[10px]">
-                                                    {linkedDivisionClubs.map((club) => (
-                                                        <span key={club.id} className="rounded-[5px] border border-sky-200 bg-sky-50 px-[10px] py-[10px] text-[10px] font-black uppercase tracking-[0.08em] text-sky-600">
-                                                            {club.name}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            'Si no eliges otro plantel, el jugador queda en el plantel base del club.'
-                                        )}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="mt-[10px] rounded-[5px] border border-slate-200 bg-white/70 px-[10px] py-[10px] text-sm leading-6 text-slate-500">
-                                    Se registra en el plantel base del club. Cuando existan otros planteles o vinculaciones operativas, vas a poder moverlo sin perder la pertenencia al club.
-                                </div>
-                            )}
                         </section>
                     </div>
 
+                    {/* IDENTITY PROMPT */}
                     {hasIdentityPrompt && (
-                        <div className="mt-[10px] rounded-[5px] border border-amber-200 bg-amber-50/90 px-[10px] py-[10px]">
-                            <div className="flex flex-col gap-[10px]">
-                                <div>
-                                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-amber-600">Posible misma persona</p>
-                                    <p className="mt-2 text-sm font-medium text-amber-900">
-                                        Encontramos fichas con el mismo nombre. Elige una para vincularla a este club o crea una nueva si no es la misma persona.
-                                    </p>
-                                </div>
+                        <div className="registry-identity-prompt">
+                            <div className="registry-identity-prompt-title">
+                                Posible misma persona
+                            </div>
+                            <p className="registry-identity-prompt-desc">
+                                Encontramos fichas con el mismo nombre. Elige una para vincularla a este club o crea una nueva si no es la misma persona.
+                            </p>
 
-                                <div className="grid gap-[10px]">
-                                    {identityMatches.map((match) => (
-                                        <div key={match.person_id} className="rounded-[5px] border border-amber-200 bg-white/90 p-[10px]">
-                                            <div className="flex flex-col gap-[10px] lg:flex-row lg:items-start lg:justify-between">
-                                                <div className="space-y-2">
-                                                    <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">{match.full_name}</div>
-                                                    <div className="text-xs font-medium text-slate-500">
-                                                        {match.birth_date ? `Nacimiento: ${match.birth_date}` : 'Sin fecha de nacimiento'}
-                                                        {match.id_number ? ` / DNI: ${match.id_number}` : ' / Sin DNI'}
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-[10px]">
-                                                        {match.already_linked_to_club ? (
-                                                            <span className="rounded-[5px] border border-emerald-200 bg-emerald-50 px-[10px] py-1 text-[10px] font-black uppercase tracking-[0.08em] text-emerald-600">
-                                                                Ya vinculado a este club
-                                                            </span>
-                                                        ) : null}
-                                                        {match.club_links.map((link) => (
-                                                            <span key={`${match.person_id}-${link.club_id}-${link.division_id || 'base'}-${link.role || 'role'}`} className="rounded-[5px] border border-slate-200 bg-slate-50 px-[10px] py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-600">
-                                                                {link.club_name}
-                                                                {link.division_name ? ` / ${link.division_name}` : ''}
-                                                                {link.role ? ` / ${link.role}` : ''}
-                                                            </span>
-                                                        ))}
-                                                        {match.club_links.length === 0 ? (
-                                                            <span className="rounded-[5px] border border-slate-200 bg-slate-50 px-[10px] py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-500">
-                                                                Sin vinculos visibles
-                                                            </span>
-                                                        ) : null}
-                                                    </div>
+                            <div className="grid gap-[10px]">
+                                {identityMatches.map((match) => (
+                                    <div key={match.person_id} className="registry-identity-match">
+                                        <div className="flex flex-col gap-[10px] lg:flex-row lg:items-start lg:justify-between">
+                                            <div className="space-y-2">
+                                                <div className="registry-identity-match-name">{match.full_name}</div>
+                                                <div className="registry-identity-match-meta">
+                                                    {match.birth_date ? `Nacimiento: ${match.birth_date}` : 'Sin fecha de nacimiento'}
+                                                    {match.id_number ? ` / DNI: ${match.id_number}` : ' / Sin DNI'}
                                                 </div>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() => void handleUseExistingPerson(match.person_id)}
-                                                    disabled={loading}
-                                                    className="inline-flex min-w-[210px] items-center justify-center rounded-[5px] border border-sky-300 bg-sky-500 px-[14px] py-[12px] text-sm font-black uppercase tracking-wide text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
-                                                >
-                                                    Usar esta ficha
-                                                </button>
+                                                <div className="flex flex-wrap gap-[10px]">
+                                                    {match.already_linked_to_club ? (
+                                                        <span className="registry-identity-tag registry-identity-tag-linked">
+                                                            Ya vinculado a este club
+                                                        </span>
+                                                    ) : null}
+                                                    {match.club_links.map((link) => (
+                                                        <span key={`${match.person_id}-${link.club_id}-${link.division_id || 'base'}-${link.role || 'role'}`} className="registry-identity-tag">
+                                                            {link.club_name}
+                                                            {link.division_name ? ` / ${link.division_name}` : ''}
+                                                            {link.role ? ` / ${link.role}` : ''}
+                                                        </span>
+                                                    ))}
+                                                    {match.club_links.length === 0 ? (
+                                                        <span className="registry-identity-tag">Sin vinculos visibles</span>
+                                                    ) : null}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
 
-                                <div className="flex flex-col gap-[10px] sm:flex-row sm:justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            resetIdentityPrompt();
-                                            setFormError(null);
-                                        }}
-                                        disabled={loading}
-                                        className="inline-flex items-center justify-center rounded-[5px] border border-slate-300 bg-white px-[14px] py-[12px] text-sm font-black uppercase tracking-wide text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                        Seguir editando
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => void handleCreateNewPerson()}
-                                        disabled={loading}
-                                        className="inline-flex items-center justify-center rounded-[5px] border border-amber-300 bg-amber-400 px-[14px] py-[12px] text-sm font-black uppercase tracking-wide text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                        Crear ficha nueva
-                                    </button>
-                                </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => void handleUseExistingPerson(match.person_id)}
+                                                disabled={loading}
+                                                className="registry-btn registry-btn-sky"
+                                            >
+                                                Usar esta ficha
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex flex-col gap-[10px] sm:flex-row sm:justify-end mt-[10px]">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        resetIdentityPrompt();
+                                        setFormError(null);
+                                    }}
+                                    disabled={loading}
+                                    className="registry-btn registry-btn-cancel"
+                                >
+                                    Seguir editando
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => void handleCreateNewPerson()}
+                                    disabled={loading}
+                                    className="registry-btn registry-btn-amber"
+                                >
+                                    Crear ficha nueva
+                                </button>
                             </div>
                         </div>
                     )}
 
-                    <div className="mt-[10px] flex flex-col-reverse gap-[10px] border-t border-slate-200/80 pt-[10px] sm:flex-row sm:items-center sm:justify-between">
-                        <div className="min-h-12 flex-1">
-                            {formError && (
-                                <div className="flex min-h-12 items-center rounded-[5px] border border-rose-200 bg-rose-50 px-4 text-sm font-bold text-rose-500">
-                                    {formError}
-                                </div>
+                    {/* FORM ERROR */}
+                    {formError && !hasIdentityPrompt && (
+                        <div className="registry-form-error">
+                            {formError}
+                        </div>
+                    )}
+                {/* FOOTER */}
+                <footer className="registry-footer">
+                    <div className="registry-division-selector">
+                        <div className="flex-1">
+                            <label className="registry-field-label" style={{ display: 'block', marginBottom: 6 }}>
+                                Asignacion de Division
+                            </label>
+                            {!lockDivisionId && divisions && divisions.length > 0 ? (
+                                <>
+                                    <select
+                                        value={divisionId}
+                                        onChange={(e) => setDivisionId(e.target.value)}
+                                    >
+                                        <option value="">Plantel base del club</option>
+                                        {divisions.map((division) => (
+                                            <option key={division.id} value={division.id}>
+                                                {division.name.toUpperCase()} ({division.season})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {linkedDivisionClubs.length > 0 && (
+                                        <div className="registry-division-shared">
+                                            Comparte con: {linkedDivisionClubs.map((club) => club.name).join(', ')}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <select disabled>
+                                    <option>Plantel base del club</option>
+                                </select>
                             )}
                         </div>
-
-                        <div className="flex flex-col gap-[10px] sm:flex-row">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="inline-flex min-w-[110px] items-center justify-center rounded-[5px] border border-slate-300 bg-white/80 px-[14px] py-[12px] text-sm font-black uppercase tracking-wide text-slate-800 transition hover:bg-white"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="inline-flex min-w-[190px] items-center justify-center gap-[10px] rounded-[5px] border border-emerald-300 bg-emerald-400 px-[16px] py-[12px] text-sm font-black uppercase tracking-wide text-slate-950 shadow-[0_14px_28px_rgba(74,222,128,0.26)] transition hover:-translate-y-0.5 hover:bg-emerald-300 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                                {isEditing ? 'Actualizar' : 'Guardar'} {initialMode === 'player' ? 'jugador' : 'miembro'}
-                            </button>
-                        </div>
+                        <p className="registry-division-hint">
+                            Si no se elige plantel, queda en el base.
+                        </p>
                     </div>
-                </form>
+
+                    <div className="registry-action-btns">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="registry-btn registry-btn-cancel"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="registry-btn registry-btn-save"
+                        >
+                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {isEditing ? 'Actualizar' : 'Guardar'} {initialMode === 'player' ? 'Jugador' : 'Miembro'}
+                        </button>
+                    </div>
+                    <div className="registry-rivet" style={{ bottom: 10, left: 10 }} />
+                    <div className="registry-rivet" style={{ bottom: 10, right: 10 }} />
+                </footer>
+            </form>
             </div>
         </div>
     );

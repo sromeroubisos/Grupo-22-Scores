@@ -1093,33 +1093,6 @@ export async function getClubDashboardOverview(
             .filter((value): value is string => typeof value === 'string' && value.length > 0)
     ));
     const divisionNameById = new Map<string, string>();
-
-    if (divisionIds.length > 0) {
-        const divisionsResult = await supabase
-            .from('club_divisions')
-            .select('id, name')
-            .in('id', divisionIds);
-
-        if (divisionsResult.error && !isMissingTableError(divisionsResult.error)) {
-            throw divisionsResult.error;
-        }
-
-        for (const division of (divisionsResult.data ?? []) as DivisionRow[]) {
-            divisionNameById.set(division.id, division.name ?? 'Division');
-        }
-    }
-
-    const upcomingMatches = upcomingMatchRows.map((row) =>
-        normalizeMatch(row, scopedClubIdSet, divisionNameById)
-    );
-    const pastMatches = pastMatchRows.map((row) =>
-        normalizeMatch(row, scopedClubIdSet, divisionNameById)
-    );
-    const recentMatches = pastMatches.slice(0, 5);
-    const allMatches = dedupeMatches([...upcomingMatches, ...pastMatches]);
-    const clubLookup = new Map<string, ClubRow>(
-        clubCore?.id ? [[clubCore.id, clubCore as unknown as ClubRow]] : []
-    );
     const linkedTournamentIds = new Set(
         tournamentMatchRows
             .map((row) => row.tournament_id)
@@ -1132,19 +1105,30 @@ export async function getClubDashboardOverview(
     const tournamentGroupsByTournament = new Map<string, TournamentGroupRow[]>();
     const groupNameById = new Map<string, string>();
 
-    if (linkedTournamentIds.size > 0) {
-        const tournamentIds = Array.from(linkedTournamentIds);
-        const [tournamentsResult, phasesResult] = await Promise.all([
-            supabase
-                .from('tournaments')
-                .select('id, name, slug')
-                .in('id', tournamentIds),
-            supabase
+    const tournamentIds = Array.from(linkedTournamentIds);
+    const [divisionsResult, tournamentsResult, phasesResult] = await Promise.all([
+        divisionIds.length > 0
+            ? supabase.from('club_divisions').select('id, name').in('id', divisionIds)
+            : Promise.resolve({ data: [], error: null } as const),
+        tournamentIds.length > 0
+            ? supabase.from('tournaments').select('id, name, slug').in('id', tournamentIds)
+            : Promise.resolve({ data: [], error: null } as const),
+        tournamentIds.length > 0
+            ? supabase
                 .from('tournament_phases')
                 .select('id, tournament_id, name, phase_type, order_index, is_active')
-                .in('tournament_id', tournamentIds),
-        ]);
+                .in('tournament_id', tournamentIds)
+            : Promise.resolve({ data: [], error: null } as const),
+    ]);
 
+    if (divisionsResult.error && !isMissingTableError(divisionsResult.error)) {
+        throw divisionsResult.error;
+    }
+    for (const division of (divisionsResult.data ?? []) as DivisionRow[]) {
+        divisionNameById.set(division.id, division.name ?? 'Division');
+    }
+
+    if (tournamentIds.length > 0) {
         if (tournamentsResult.error) {
             throw tournamentsResult.error;
         }
@@ -1189,6 +1173,18 @@ export async function getClubDashboardOverview(
             }
         }
     }
+
+    const upcomingMatches = upcomingMatchRows.map((row) =>
+        normalizeMatch(row, scopedClubIdSet, divisionNameById)
+    );
+    const pastMatches = pastMatchRows.map((row) =>
+        normalizeMatch(row, scopedClubIdSet, divisionNameById)
+    );
+    const recentMatches = pastMatches.slice(0, 5);
+    const allMatches = dedupeMatches([...upcomingMatches, ...pastMatches]);
+    const clubLookup = new Map<string, ClubRow>(
+        clubCore?.id ? [[clubCore.id, clubCore as unknown as ClubRow]] : []
+    );
 
     const standings = dedupeStandings(
         linkedTournamentIds.size > 0

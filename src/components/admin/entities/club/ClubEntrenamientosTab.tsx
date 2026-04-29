@@ -20,6 +20,7 @@ import {
     MoreHorizontal,
     NotebookPen,
     Plus,
+    RefreshCw,
     Save,
     Send,
     Shield,
@@ -30,6 +31,7 @@ import {
 } from 'lucide-react';
 import { ClubTrainingGymTab } from '@/components/admin/entities/club/ClubTrainingGymTab';
 import { ClubTrainingCreateModal } from '@/components/admin/entities/club/ClubTrainingCreateModal';
+import gymStyles from './ClubPerformanceTab.module.css';
 import type { ClubDashboardOverview } from '@/lib/club-admin/dashboard-types';
 import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
 import type { SavedPreset } from '@/lib/club-pizarra/types';
@@ -140,6 +142,10 @@ function getNormalizedIntensity(value?: string | null) {
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
+}
+
+function cn(...parts: Array<string | false | null | undefined>) {
+    return parts.filter(Boolean).join(' ');
 }
 
 function getAverageIntensity(blocks: PlanBlock[]) {
@@ -394,6 +400,7 @@ export function ClubEntrenamientosTab({
     const [persistError, setPersistError] = useState<string | null>(null);
     const [savingTrainingId, setSavingTrainingId] = useState<string | null>(null);
     const [deletingTrainingId, setDeletingTrainingId] = useState<string | null>(null);
+    const [reloadKey, setReloadKey] = useState(0);
     const connectedSummary = useMemo(() => {
         const fragments = [
             `${players.length} jugadores`,
@@ -480,7 +487,7 @@ export function ClubEntrenamientosTab({
         return () => {
             cancelled = true;
         };
-    }, [clubId]);
+    }, [clubId, reloadKey]);
 
     const applyPersistedTraining = (training: TrainingEntry) => {
         const nextVisibleTraining = isHiddenTraining(training) ? null : training;
@@ -753,24 +760,10 @@ export function ClubEntrenamientosTab({
                             Ir a campo
                         </button>
                     ) : (
-                        <>
-                            <button type="button" className="club-matches-btn club-matches-btn-ghost" onClick={() => setCreateOpen(true)}>
-                                <Plus className="w-4 h-4" />
-                                Crear entrenamiento
-                            </button>
-                            <button type="button" className="club-matches-btn club-matches-btn-ghost" onClick={() => setCalendarOpen(true)}>
-                                <Calendar className="w-4 h-4" />
-                                Ver calendario
-                            </button>
-                            <button type="button" className="club-matches-btn club-matches-btn-ghost">
-                                <ClipboardList className="w-4 h-4" />
-                                Plantillas
-                            </button>
-                            <button type="button" className="club-matches-btn club-matches-btn-primary" onClick={() => setFiltersOpen((c) => !c)}>
-                                <Filter className="w-4 h-4" />
-                                Filtros
-                            </button>
-                        </>
+                        <button type="button" className="club-matches-btn club-matches-btn-primary" onClick={() => setActiveMainTab('gimnasio')}>
+                            <Dumbbell className="w-4 h-4" />
+                            Ir a gimnasio
+                        </button>
                     )}
                 </div>
             </header>
@@ -804,74 +797,159 @@ export function ClubEntrenamientosTab({
             ) : null}
 
             {activeMainTab === 'entrenamientos' ? (
-                <>
+                <div className={cn(gymStyles.shell, gymStyles.gymFlashShell)}>
+                    <header className={gymStyles.gymFlashHeader}>
+                        <div className={gymStyles.gymFlashBrand}>
+                            <span className={gymStyles.gymFlashEyebrow}>Operative Field Architecture</span>
+                            <div className={gymStyles.gymFlashNav}>
+                                <span className={gymStyles.gymFlashTabActive}>Entrenamientos</span>
+                                <span className={gymStyles.gymFlashSlash}>/</span>
+                                <span className={gymStyles.gymFlashTabGhost}>Gimnasio</span>
+                            </div>
+                        </div>
 
-            {/* KPIs */}
-            <section className="club-matches-kpi-grid">
-                {kpis.map((kpi) => (
-                    <button
-                        key={kpi.id}
-                        type="button"
-                        className={`club-matches-kpi-card${kpi.active ? ' active' : ''}${kpi.tone === 'warning' ? ' warning' : ''}`}
-                        onClick={kpi.onClick}
-                    >
-                        <span className="club-matches-kpi-label">{kpi.label}</span>
-                        <strong className="club-matches-kpi-value">{kpi.value}</strong>
-                        <span className="club-matches-kpi-hint">{kpi.hint}</span>
-                    </button>
-                ))}
-            </section>
+                        <div className={gymStyles.gymFlashHeaderMeta}>
+                            <button
+                                type="button"
+                                className={gymStyles.gymSyncButton}
+                                onClick={() => setReloadKey((current) => current + 1)}
+                                disabled={persistLoading}
+                            >
+                                <RefreshCw className={cn('w-4 h-4', persistLoading && gymStyles.spinning)} />
+                                {persistLoading ? 'Sincronizando' : 'Sincronizar'}
+                            </button>
+                            <span className={gymStyles.gymConnectedState}>
+                                {`Club conectado: ${clubName} / ${connectedSummary}`}
+                            </span>
+                        </div>
+                    </header>
 
-            {/* Filters */}
-            <section className={`club-matches-filters${filtersOpen ? ' open' : ''}`}>
-                <div className="club-matches-filter-grid">
-                    <label>
-                        <span>Estado operativo</span>
-                        <select value={operationalFilter} onChange={(e) => setOperationalFilter(e.target.value as TrainingOperationalFilter)}>
-                            <option value="all">Todos</option>
-                            <option value="no_plan">Sin plan cargado</option>
-                            <option value="no_attendance">Sin asistencia</option>
-                            <option value="no_eval">Sin evaluación</option>
-                            <option value="no_load">Sin carga registrada</option>
-                        </select>
-                    </label>
-                </div>
-            </section>
+                    <section className={gymStyles.gymKpiContainer}>
+                        {kpis.map((kpi) => (
+                            <button
+                                key={kpi.id}
+                                type="button"
+                                className={cn(gymStyles.gymKpiCard, gymStyles.gymKpiCardInteractive)}
+                                onClick={kpi.onClick}
+                                style={kpi.active ? { boxShadow: 'inset 0 0 0 1px rgba(101, 243, 255, 0.45)' } : undefined}
+                            >
+                                <span className={gymStyles.gymKpiLabel}>{kpi.label}</span>
+                                <strong className={gymStyles.gymKpiValue}>{kpi.value}</strong>
+                                <span className={gymStyles.gymKpiHint}>{kpi.hint}</span>
+                            </button>
+                        ))}
+                    </section>
 
-            {/* Tabs */}
-            <nav className="club-matches-tabs" aria-label="Segmentación de entrenamientos">
-                {[...SEGMENT_TABS].sort((left, right) => {
-                    const segmentOrder: Record<TrainingSegment, number> = {
-                        today: 0,
-                        upcoming: 1,
-                        past: 2,
-                    };
-                    return segmentOrder[left.id] - segmentOrder[right.id];
-                }).map((tab) => (
-                    <button
-                        key={tab.id}
-                        type="button"
-                        className={`club-matches-tab${activeSegment === tab.id ? ' active' : ''}`}
-                        onClick={() => setActiveSegment(tab.id)}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </nav>
+                    {persistError ? (
+                        <div className={gymStyles.gymSoftNotice}>
+                            <span>{persistError}</span>
+                        </div>
+                    ) : null}
 
-            {/* Timeline */}
-            <main className="club-matches-timeline">
-                {filtered.length === 0 ? (
-                    <div className="club-matches-empty">
-                        {(loading || persistLoading) && trainings.length === 0
-                            ? 'Cargando entrenamientos del club...'
-                            : persistError && trainings.length === 0
-                                ? 'No se pudieron cargar los entrenamientos del club.'
-                                : trainings.length === 0
-                                ? 'No hay entrenamientos cargados.'
-                                : 'No encontramos entrenamientos para los filtros actuales.'}
-                    </div>
-                ) : null}
+                    <nav className={gymStyles.gymInternalNav} aria-label="Segmentacion de entrenamientos">
+                        {[...SEGMENT_TABS].sort((left, right) => {
+                            const segmentOrder: Record<TrainingSegment, number> = {
+                                today: 0,
+                                upcoming: 1,
+                                past: 2,
+                            };
+                            return segmentOrder[left.id] - segmentOrder[right.id];
+                        }).map((tab) => (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                className={cn(gymStyles.gymInternalTab, activeSegment === tab.id && gymStyles.gymInternalTabActive)}
+                                onClick={() => setActiveSegment(tab.id)}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+
+                    {(loading || persistLoading) && trainings.length === 0 ? (
+                        <div className={gymStyles.gymLoadingState}>Cargando entrenamientos...</div>
+                    ) : null}
+
+                    {filtersOpen ? (
+                        <section className={gymStyles.gymPanel}>
+                            <div className={gymStyles.gymPanelHeader}>
+                                <div className={gymStyles.gymPanelHeaderCopy}>
+                                    <span className={gymStyles.gymPanelEyebrow}>Filtros operativos</span>
+                                    <h3 className={gymStyles.gymPanelTitle}>Refinar agenda</h3>
+                                </div>
+                                <span className={gymStyles.gymStatusBadge}>
+                                    {operationalFilter === 'all' ? 'Sin filtros' : 'Filtro activo'}
+                                </span>
+                            </div>
+                            <div className={gymStyles.gymFieldGridCompact}>
+                                <label className={gymStyles.filterField}>
+                                    <span>Estado operativo</span>
+                                    <select
+                                        value={operationalFilter}
+                                        onChange={(event) => setOperationalFilter(event.target.value as TrainingOperationalFilter)}
+                                    >
+                                        <option value="all">Todos</option>
+                                        <option value="no_plan">Sin plan cargado</option>
+                                        <option value="no_attendance">Sin asistencia</option>
+                                        <option value="no_eval">Sin evaluacion</option>
+                                        <option value="no_load">Sin carga registrada</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </section>
+                    ) : null}
+
+                    <section className={gymStyles.gymPanel}>
+                        <div className={gymStyles.gymPanelHeader}>
+                            <div className={gymStyles.gymPanelHeaderCopy}>
+                                <span className={gymStyles.gymPanelEyebrow}>Agenda operativa</span>
+                                <h3 className={gymStyles.gymPanelTitle}>
+                                    {SEGMENT_TABS.find((tab) => tab.id === activeSegment)?.label || 'Sesiones'}
+                                </h3>
+                            </div>
+                            <div className={gymStyles.gymPanelHeaderActions}>
+                                <span className={gymStyles.gymStatusBadge}>
+                                    {`${filtered.length} sesion${filtered.length === 1 ? '' : 'es'}`}
+                                </span>
+                                <button
+                                    type="button"
+                                    className={gymStyles.gymSyncButton}
+                                    onClick={() => setFiltersOpen((current) => !current)}
+                                >
+                                    <Filter className="w-4 h-4" />
+                                    {filtersOpen ? 'Ocultar filtros' : 'Filtros'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={gymStyles.gymSyncButton}
+                                    onClick={() => setCalendarOpen(true)}
+                                >
+                                    <Calendar className="w-4 h-4" />
+                                    Calendario
+                                </button>
+                                <button
+                                    type="button"
+                                    className={gymStyles.gymPrimaryButton}
+                                    onClick={() => setCreateOpen(true)}
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Crear entrenamiento
+                                </button>
+                            </div>
+                        </div>
+
+                        <main className="club-matches-timeline">
+                            {filtered.length === 0 ? (
+                                <div className={gymStyles.gymTablePlaceholder}>
+                                    {(loading || persistLoading) && trainings.length === 0
+                                        ? 'Cargando entrenamientos del club...'
+                                        : persistError && trainings.length === 0
+                                            ? 'No se pudieron cargar los entrenamientos del club.'
+                                            : trainings.length === 0
+                                                ? 'No hay entrenamientos cargados.'
+                                                : 'No encontramos entrenamientos para los filtros actuales.'}
+                                </div>
+                            ) : null}
 
                 {filtered.map((entry) => {
                     const when = formatDateTime(entry.date);
@@ -991,21 +1069,22 @@ export function ClubEntrenamientosTab({
                         </article>
                     );
                 })}
-            </main>
+                        </main>
+                    </section>
 
-            <ClubTrainingCreateModal
-                key={`${clubId}-${createOpen ? 'open' : 'closed'}`}
-                open={createOpen}
-                clubId={clubId}
-                clubName={clubName}
-                sport={sport}
-                divisions={divisions}
-                players={players}
-                staff={staff}
-                dashboardData={dashboardData}
-                onClose={() => setCreateOpen(false)}
-                onCreate={handleCreate}
-            />
+                    <ClubTrainingCreateModal
+                        key={`${clubId}-${createOpen ? 'open' : 'closed'}`}
+                        open={createOpen}
+                        clubId={clubId}
+                        clubName={clubName}
+                        sport={sport}
+                        divisions={divisions}
+                        players={players}
+                        staff={staff}
+                        dashboardData={dashboardData}
+                        onClose={() => setCreateOpen(false)}
+                        onCreate={handleCreate}
+                    />
 
             {/* Calendar Modal */}
             {calendarOpen && (
@@ -1070,7 +1149,7 @@ export function ClubEntrenamientosTab({
                     onTabChange={onTabChange}
                 />
             )}
-                </>
+                </div>
             ) : null}
         </div>
     );

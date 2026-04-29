@@ -15,6 +15,616 @@
     color: var(--text-strong);
 }
 
+.gymFlashShell {
+    --gym-bg-deep: #0a0c10;
+    --gym-mineral-quartz: rgba(255, 255, 255, 0.03);
+    --gym-mineral-border: rgba(255, 255, 255, 0.08);
+    --gym-mineral-shine: rgba(255, 255, 255, 0.15);
+    --gym-purple: #5c2bff;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(92, 43, 255, 0.14), transparent 36%),
+        radial-gradient(circle at 100% 100%, rgba(101, 243, 255, 0.08), transparent 34%);
+}
+
+.gymTechnicalWarning,
+.gymSoftNotice {
+    display: flex;
+    align-items: center;
+    gap: 0.95rem;
+    padding: 0.9rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymTechnicalWarning {
+    background: rgba(255, 122, 136, 0.06);
+    border: 1px solid rgba(255, 122, 136, 0.22);
+    color: #ffb8c0;
+}
+
+.gymTechnicalWarning strong {
+    color: #ffd9de;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+.gymSoftNotice {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--gym-mineral-border);
+    color: var(--text-muted);
+}
+
+.gymFlashHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.gymFlashBrand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.gymFlashEyebrow {
+    font-size: 0.74rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(226, 232, 240, 0.52);
+}
+
+.gymFlashNav {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.gymFlashTabActive {
+    font-size: clamp(1.75rem, 2.5vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-strong);
+}
+
+.gymFlashSlash,
+.gymFlashTabGhost {
+    color: rgba(226, 232, 240, 0.5);
+}
+
+.gymFlashSlash {
+    font-size: 1rem;
+    transform: translateY(-0.1rem);
+}
+
+.gymFlashTabGhost {
+    font-size: 1rem;
+}
+
+.gymFlashHeaderMeta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.65rem;
+}
+
+.gymSyncButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.82rem 1.3rem;
+    border: 1px solid var(--gym-mineral-border);
+    background: var(--gym-mineral-quartz);
+    color: var(--text-strong);
+    font: inherit;
+    cursor: pointer;
+    backdrop-filter: blur(20px);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.gymSyncButton:hover {
+    transform: translateY(-1px);
+    border-color: rgba(101, 243, 255, 0.42);
+    box-shadow: 0 0 24px rgba(101, 243, 255, 0.1);
+}
+
+.gymSyncButton:disabled {
+    opacity: 0.72;
+    cursor: wait;
+}
+
+.gymConnectedState {
+    font-size: 0.72rem;
+    color: rgba(101, 243, 255, 0.88);
+    opacity: 0.9;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-align: right;
+}
+
+.gymKpiContainer {
+    display: grid;
+    grid-template-columns: 1.35fr repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--gym-mineral-border);
+    background: var(--gym-mineral-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.gymKpiCard {
+    min-height: 8.35rem;
+    padding: 1.2rem;
+    background: rgba(10, 12, 16, 0.96);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.gymKpiCardInteractive {
+    cursor: pointer;
+}
+
+.gymKpiLabel {
+    font-size: 0.7rem;
+    color: rgba(226, 232, 240, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymKpiValue {
+    font-size: clamp(1.45rem, 2vw, 1.95rem);
+    line-height: 1.08;
+    font-weight: 300;
+    color: var(--text-strong);
+}
+
+.gymKpiValue span {
+    color: var(--cyan);
+    font-weight: 600;
+}
+
+.gymKpiHint {
+    color: rgba(226, 232, 240, 0.52);
+    font-size: 0.82rem;
+    margin-top: auto;
+}
+
+.gymKpiSelect {
+    width: 100%;
+    margin-top: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-strong);
+    padding: 0.7rem 0.8rem;
+    font: inherit;
+}
+
+.gymInternalNav {
+    display: flex;
+    gap: 2rem;
+    border-bottom: 1px solid var(--gym-mineral-border);
+}
+
+.gymInternalTab {
+    border: 0;
+    padding: 1rem 0;
+    background: transparent;
+    color: rgba(226, 232, 240, 0.54);
+    font: inherit;
+    cursor: pointer;
+    position: relative;
+}
+
+.gymInternalTabActive {
+    color: var(--cyan);
+}
+
+.gymInternalTabActive::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--cyan);
+    box-shadow: 0 0 10px rgba(101, 243, 255, 0.55);
+}
+
+.gymLoadingState,
+.gymPanel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid var(--gym-mineral-border);
+    backdrop-filter: blur(20px);
+}
+
+.gymLoadingState {
+    min-height: 10rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.gymDashboardGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(20rem, 0.82fr);
+    gap: 2rem;
+}
+
+.gymPanel {
+    position: relative;
+    overflow: hidden;
+    padding: 1.6rem;
+}
+
+.gymPanel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gym-mineral-shine), transparent);
+}
+
+.gymPanelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.4rem;
+}
+
+.gymPanelHeaderCopy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.gymPanelEyebrow {
+    font-size: 0.72rem;
+    color: rgba(226, 232, 240, 0.48);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymPanelTitle {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.gymPanelHeaderActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.gymStatusBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border: 1px solid var(--gym-mineral-border);
+    border-radius: 999px;
+    color: rgba(226, 232, 240, 0.62);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymPrimaryButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.95rem 1.3rem;
+    border: 0;
+    background: var(--text-strong);
+    color: #0a0c10;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.gymPrimaryButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.36);
+}
+
+.gymPrimaryButton:disabled {
+    opacity: 0.68;
+    cursor: wait;
+    transform: none;
+    box-shadow: none;
+}
+
+.gymFieldGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    gap: 0.9rem;
+    align-items: end;
+    margin-bottom: 1.5rem;
+}
+
+.gymFieldGridCompact {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+
+.gymFieldAction {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.gymFacetGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.gymFacetCard {
+    width: 100%;
+    border: 1px solid var(--gym-mineral-border);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    padding: 1rem;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.42rem;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.gymFacetCard span {
+    font-size: 0.72rem;
+    color: rgba(226, 232, 240, 0.5);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymFacetCard strong {
+    font-size: 1.3rem;
+    line-height: 1.05;
+}
+
+.gymFacetCard p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.45;
+    font-size: 0.84rem;
+}
+
+.gymFacetCard:hover,
+.gymFacetCardActive {
+    transform: translateY(-1px);
+    border-color: rgba(101, 243, 255, 0.38);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+    box-shadow: 0 0 22px rgba(101, 243, 255, 0.08);
+}
+
+.gymEmptyLead {
+    border-left: 2px solid var(--cyan);
+    padding-left: 1.35rem;
+    margin-bottom: 2rem;
+    max-width: 30rem;
+}
+
+.gymEmptyLead p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.gymRosterSection {
+    border-top: 1px solid var(--gym-mineral-border);
+    padding-top: 1.5rem;
+}
+
+.gymRosterHeading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.gymRosterHeading h4 {
+    margin: 0 0 0.35rem;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(226, 232, 240, 0.48);
+}
+
+.gymRosterHeading p {
+    margin: 0;
+    max-width: 34rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.84rem;
+}
+
+.gymTablePlaceholder {
+    min-height: 11rem;
+    margin-top: 0.9rem;
+    border: 1px dashed var(--gym-mineral-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.gymHistoryCanvas {
+    min-height: 18rem;
+    border: 1px dashed var(--gym-mineral-border);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.gymHistoryCopy {
+    position: relative;
+    z-index: 1;
+    padding: 1rem;
+    text-align: center;
+    max-width: 24rem;
+}
+
+.gymHistoryCopy p {
+    margin: 0;
+    color: rgba(226, 232, 240, 0.7);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymHistoryCopy span {
+    display: block;
+    margin-top: 0.65rem;
+    color: rgba(226, 232, 240, 0.46);
+    font-size: 0.76rem;
+    line-height: 1.55;
+}
+
+.gymHistoryWave {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.24;
+}
+
+.gymHistoryWave path:first-child {
+    fill: none;
+    stroke: var(--cyan);
+    stroke-width: 0.7;
+}
+
+.gymHistoryWave path:last-child {
+    fill: none;
+    stroke: var(--gym-purple);
+    stroke-width: 0.7;
+}
+
+.gymNextSteps {
+    margin-top: 1.6rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--gym-mineral-border);
+}
+
+.gymNextSteps h4 {
+    margin: 0 0 1rem;
+    font-size: 0.72rem;
+    color: rgba(226, 232, 240, 0.48);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymStepList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.gymStepItem {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    opacity: 0.42;
+}
+
+.gymStepItem span {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.66rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gymStepItem p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.gymStepItemActive {
+    opacity: 1;
+}
+
+.gymStepItemActive span {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 16px rgba(101, 243, 255, 0.12);
+}
+
+.gymMiniTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.gymMiniTab {
+    border: 1px solid var(--gym-mineral-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(226, 232, 240, 0.6);
+    border-radius: 999px;
+    padding: 0.7rem 0.95rem;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.gymMiniTabActive,
+.gymMiniTab:hover {
+    border-color: rgba(101, 243, 255, 0.34);
+    background: rgba(101, 243, 255, 0.08);
+    color: var(--text-strong);
+}
+
+.gymExerciseSummary {
+    border: 1px solid var(--gym-mineral-border);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.gymExerciseSummary strong {
+    font-size: 1rem;
+}
+
+.gymExerciseSummary p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
 .hero,
 .filterBar,
 .connectionStrip,
@@ -538,6 +1148,86 @@
     text-align: center;
 }
 
+.metricBlankState {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem 1.2rem;
+    border-radius: 24px;
+    border: 1px solid rgba(101, 243, 255, 0.14);
+    background:
+        linear-gradient(180deg, rgba(12, 18, 32, 0.92), rgba(8, 12, 22, 0.96)),
+        radial-gradient(circle at top right, rgba(101, 243, 255, 0.14), transparent 42%);
+}
+
+.metricBlankCopy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    max-width: 42rem;
+}
+
+.metricBlankCopy strong {
+    font-size: 1.05rem;
+    letter-spacing: 0;
+}
+
+.metricBlankCopy p,
+.rosterHeader p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.metricBlankKicker {
+    color: rgba(101, 243, 255, 0.86);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.metricBlankMeta,
+.rosterMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-content: flex-start;
+    justify-content: flex-end;
+}
+
+.metricBlankPill,
+.rosterPill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-strong);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.rosterHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin: 1rem 0 0.9rem;
+}
+
+.rosterHeader h4 {
+    margin: 0 0 0.25rem;
+    font-size: 1.02rem;
+    letter-spacing: 0;
+}
+
+.rosterHintCell {
+    color: var(--text-muted);
+    min-width: 16rem;
+}
+
 .microcycleGrid,
 .planCalendar {
     display: grid;
@@ -1022,6 +1712,24 @@
 }
 
 @media (max-width: 1200px) {
+    .gymKpiContainer {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .gymKpiContainer > :first-child {
+        grid-column: 1 / -1;
+    }
+
+    .gymDashboardGrid,
+    .gymFieldGrid,
+    .gymFacetGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .gymFieldGridCompact {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .kpiGrid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -1043,16 +1751,52 @@
 }
 
 @media (max-width: 860px) {
+    .gymFlashHeader,
+    .gymPanelHeader,
+    .gymRosterHeading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .gymFlashHeaderMeta,
+    .gymPanelHeaderActions {
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .gymKpiContainer,
+    .gymDashboardGrid,
+    .gymFieldGrid,
+    .gymFieldGridCompact,
+    .gymFacetGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .gymConnectedState {
+        text-align: left;
+    }
+
+    .gymFieldAction {
+        justify-content: flex-start;
+    }
+
     .hero,
     .connectionStrip,
     .panelHead,
-    .filterBadgeRow {
+    .filterBadgeRow,
+    .metricBlankState,
+    .rosterHeader {
         flex-direction: column;
         align-items: flex-start;
     }
 
     .heroActions,
     .connectionLinks {
+        justify-content: flex-start;
+    }
+
+    .metricBlankMeta,
+    .rosterMeta {
         justify-content: flex-start;
     }
 
@@ -1085,6 +1829,20 @@
 }
 
 @media (max-width: 640px) {
+    .gymTechnicalWarning,
+    .gymSoftNotice,
+    .gymPanel,
+    .gymLoadingState {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .gymSyncButton,
+    .gymPrimaryButton {
+        width: 100%;
+        justify-content: center;
+    }
+
     .hero,
     .panel,
     .filterBar,

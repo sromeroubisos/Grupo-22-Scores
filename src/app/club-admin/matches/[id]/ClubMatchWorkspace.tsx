@@ -103,6 +103,8 @@ import {
   serializeLiveEvent,
 } from './ClubMatchWorkspace.utils';
 import { ComparisonBarChart, MiniBarChart, RadarChart } from './ClubMatchWorkspace.charts';
+import { ChartConfigPanel } from '@/components/admin/charts/ChartConfigPanel';
+import { STAT_CATALOG_POSTMATCH } from '@/components/admin/charts/statCatalogs';
 
 const PLAYER_SELECTION_ACTIONS = new Set<LiveActionType>([
   'try',
@@ -194,7 +196,7 @@ export default function ClubMatchWorkspace({
     (TABS.some((tab) => tab.id === initialSection) ? initialSection : 'resumen') as SectionTab
   );
   const [liveSubview, setLiveSubview] = useState<LiveSubview>('eventos');
-  const [postTab, setPostTab] = useState<'resumen' | 'estadisticas' | 'ataque' | 'defensa' | 'eventos' | 'comparativo'>('resumen');
+  const [postTab, setPostTab] = useState<'resumen' | 'estadisticas' | 'ataque' | 'defensa' | 'eventos' | 'comparativo' | 'graficos'>('resumen');
   const [playerStatsTab, setPlayerStatsTab] = useState<'ataque' | 'defensa'>('ataque');
   const [playerStatsTeamFilter, setPlayerStatsTeamFilter] = useState<'all' | 'home' | 'away'>('all');
   const [playerStatsSortMetric, setPlayerStatsSortMetric] = useState<
@@ -2647,6 +2649,7 @@ export default function ClubMatchWorkspace({
                         { id: 'defensa', label: 'Defensa' },
                         { id: 'eventos', label: 'Desglose' },
                         { id: 'comparativo', label: 'Comparativo' },
+                        { id: 'graficos', label: 'Mis gráficos' },
                       ].map((tab) => (
                         <button
                           key={tab.id}
@@ -2797,7 +2800,14 @@ export default function ClubMatchWorkspace({
                       <div className={styles.postGrid}>
                         <div className={styles.card} style={{ gridColumn: '1 / -1' }}>
                           <h4 style={{ marginBottom: 12, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6 }}>Radar comparativo</h4>
-                          <RadarChart stats={stats} />
+                          <RadarChart axes={[
+                            { label: 'Tries', home: stats.tries.home, away: stats.tries.away, max: 8 },
+                            { label: 'Conv', home: stats.conversions.home, away: stats.conversions.away, max: 8 },
+                            { label: 'Pen', home: stats.penalties.home, away: stats.penalties.away, max: 8 },
+                            { label: 'Tack', home: Math.min(stats.tackles.home, 20), away: Math.min(stats.tackles.away, 20), max: 20 },
+                            { label: 'Scrum', home: stats.scrums.home.won, away: stats.scrums.away.won, max: 15 },
+                            { label: 'Line', home: stats.lines.home.won, away: stats.lines.away.won, max: 15 },
+                          ]} />
                           <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 12, fontSize: '0.8rem' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 12, height: 12, background: '#10b981', borderRadius: 3 }} /> {homeClub?.short_name || 'Local'}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 12, height: 12, background: '#3b82f6', borderRadius: 3 }} /> {awayClub?.short_name || 'Visitante'}</span>
@@ -2826,6 +2836,19 @@ export default function ClubMatchWorkspace({
                           </div>
                         ))}
                       </div>
+                    )}
+
+                    {postTab === 'graficos' && (
+                      <ChartConfigPanel
+                        clubId={clubId}
+                        panelKey="postmatch"
+                        catalog={STAT_CATALOG_POSTMATCH}
+                        data={stats}
+                        homeLabel={homeClub?.short_name || homeClub?.name || 'Local'}
+                        awayLabel={awayClub?.short_name || awayClub?.name || 'Visitante'}
+                        sectionTitle="Mis gráficos del partido"
+                        emptyHint="Armá tus propios gráficos eligiendo el tipo y las estadísticas a comparar. Quedan guardados para todo el cuerpo técnico del club."
+                      />
                     )}
                   </>
                 );

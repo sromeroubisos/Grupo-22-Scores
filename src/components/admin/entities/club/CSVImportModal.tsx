@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
-import { AlertCircle, CheckCircle2, Download, FileText, Loader2, Upload, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Download, Loader2, Upload, X } from 'lucide-react';
 import {
     importPeopleFromCSV,
     previewPeopleImportConflicts,
@@ -356,76 +356,76 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="card scale-in w-full max-w-3xl p-8 shadow-2xl overflow-hidden border-blue-500/20 bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)]">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="space-y-1">
-                        <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-                            <Upload className="w-6 h-6 text-blue-500" />
-                            Importacion masiva
-                        </h2>
-                        <p className="text-[10px] font-mono text-[var(--color-text-muted)] uppercase tracking-widest">
-                            Pega datos o importa CSV / Excel para alta rapida de jugadores
-                        </p>
+        <div className="csv-modal-overlay">
+            <section className="csv-monolith">
+                {/* HEADER */}
+                <header className="csv-monolith-header">
+                    <div className="csv-title-group">
+                        <h1>Importacion Masiva</h1>
+                        <p>Agrega multiples jugadores al sistema mediante sincronizacion de datos planos.</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-[var(--color-bg-hover)] rounded-full transition" type="button">
-                        <X className="w-5 h-5 text-[var(--color-text-muted)]" />
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="csv-monolith-close"
+                        aria-label="Cerrar"
+                    >
+                        <X className="w-4 h-4" />
                     </button>
-                </div>
+                </header>
 
+                {/* CONTENT */}
                 {!result ? conflicts.length > 0 ? (
-                    <div className="space-y-6">
-                        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
-                            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-500">Revision de homonimos</p>
-                            <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+                    <>
+                        <div className="csv-conflict-banner">
+                            <div className="csv-conflict-banner-title">Revision de homonimos</div>
+                            <p className="csv-conflict-banner-desc">
                                 Encontramos jugadores con el mismo nombre en la base. Decide fila por fila si corresponde reutilizar una ficha existente o crear una nueva.
                             </p>
                         </div>
 
-                        <div className="max-h-[56vh] space-y-4 overflow-y-auto pr-1">
+                        <div className="csv-conflict-scroll">
                             {conflicts.map((conflict) => {
                                 const decision = conflictDecisions[conflict.rowIndex];
                                 const rowLabel = `${conflict.row.first_name} ${conflict.row.last_name}`.trim();
 
                                 return (
-                                    <div key={`${conflict.rowIndex}-${rowLabel}`} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-5">
-                                        <div className="flex flex-col gap-2 border-b border-[var(--color-border)] pb-4">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-amber-500">
-                                                    Fila {conflict.rowIndex + 2}
-                                                </span>
-                                                <span className="text-sm font-black uppercase tracking-[0.08em] text-[var(--color-text-primary)]">
-                                                    {rowLabel}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-[var(--color-text-secondary)]">
-                                                {conflict.row.birth_date ? `Nacimiento: ${conflict.row.birth_date}` : 'Sin fecha de nacimiento'}
-                                                {conflict.row.position ? ` / Posicion: ${conflict.row.position}` : ''}
-                                                {conflict.row.id_number ? ` / DNI: ${conflict.row.id_number}` : ''}
-                                            </p>
+                                    <div key={`${conflict.rowIndex}-${rowLabel}`} className="csv-conflict-card">
+                                        <div className="csv-conflict-row-header">
+                                            <span className="csv-conflict-row-badge">
+                                                Fila {conflict.rowIndex + 2}
+                                            </span>
+                                            <span className="csv-conflict-row-name">
+                                                {rowLabel}
+                                            </span>
                                         </div>
+                                        <p className="csv-conflict-row-meta" style={{ marginBottom: 16 }}>
+                                            {conflict.row.birth_date ? `Nacimiento: ${conflict.row.birth_date}` : 'Sin fecha de nacimiento'}
+                                            {conflict.row.position ? ` / Posicion: ${conflict.row.position}` : ''}
+                                            {conflict.row.id_number ? ` / DNI: ${conflict.row.id_number}` : ''}
+                                        </p>
 
-                                        <div className="mt-4 space-y-3">
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                             {conflict.matches.map((match) => {
                                                 const isSelected = decision?.mode === 'reuse' && decision.personId === match.person_id;
 
                                                 return (
-                                                    <div key={match.person_id} className={`rounded-xl border p-4 transition ${isSelected ? 'border-sky-500 bg-sky-500/5' : 'border-[var(--color-border)] bg-[var(--color-bg-primary)]'}`}>
-                                                        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                                                            <div className="space-y-2">
-                                                                <p className="text-sm font-black uppercase tracking-[0.08em] text-[var(--color-text-primary)]">{match.full_name}</p>
-                                                                <p className="text-xs text-[var(--color-text-secondary)]">
+                                                    <div key={match.person_id} className={`csv-conflict-match ${isSelected ? 'selected' : ''}`}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                            <div>
+                                                                <div className="csv-conflict-match-name">{match.full_name}</div>
+                                                                <div className="csv-conflict-match-meta">
                                                                     {match.birth_date ? `Nacimiento: ${match.birth_date}` : 'Sin fecha de nacimiento'}
                                                                     {match.id_number ? ` / DNI: ${match.id_number}` : ' / Sin DNI'}
-                                                                </p>
-                                                                <div className="flex flex-wrap gap-2">
+                                                                </div>
+                                                                <div className="csv-conflict-tags">
                                                                     {match.already_linked_to_club ? (
-                                                                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-500">
+                                                                        <span className="csv-conflict-tag csv-conflict-tag-linked">
                                                                             Ya vinculado a este club
                                                                         </span>
                                                                     ) : null}
                                                                     {match.club_links.map((link) => (
-                                                                        <span key={`${match.person_id}-${link.club_id}-${link.division_id || 'base'}-${link.role || 'role'}`} className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[var(--color-text-secondary)]">
+                                                                        <span key={`${match.person_id}-${link.club_id}-${link.division_id || 'base'}-${link.role || 'role'}`} className="csv-conflict-tag">
                                                                             {link.club_name}
                                                                             {link.division_name ? ` / ${link.division_name}` : ''}
                                                                             {link.role ? ` / ${link.role}` : ''}
@@ -437,7 +437,7 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleConflictDecision(conflict.rowIndex, { mode: 'reuse', personId: match.person_id })}
-                                                                className={`btn !h-10 ${isSelected ? '!bg-sky-500 !text-white' : ''}`}
+                                                                className={`csv-btn-small ${isSelected ? 'selected' : ''}`}
                                                             >
                                                                 Usar esta ficha
                                                             </button>
@@ -449,7 +449,7 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                             <button
                                                 type="button"
                                                 onClick={() => handleConflictDecision(conflict.rowIndex, { mode: 'create' })}
-                                                className={`btn !h-10 ${decision?.mode === 'create' ? '!bg-amber-400 !text-slate-950' : ''}`}
+                                                className={`csv-btn-small ${decision?.mode === 'create' ? 'selected-amber' : ''}`}
                                             >
                                                 Crear una ficha nueva para esta fila
                                             </button>
@@ -457,179 +457,175 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                     </div>
                                 );
                             })}
-                        </div>
 
-                        <div className="flex flex-col gap-4 pt-2">
                             {pendingParseErrors.length > 0 && (
-                                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
-                                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-500">
+                                <div className="csv-parse-warn">
+                                    <div className="csv-parse-warn-title">
                                         <AlertCircle className="w-3 h-3" />
                                         Advertencias de parseo ({pendingParseErrors.length})
                                     </div>
-                                    <div className="mt-2 max-h-24 space-y-1 overflow-y-auto">
+                                    <div style={{ maxHeight: 96, overflowY: 'auto' }}>
                                         {pendingParseErrors.map((error, index) => (
-                                            <p key={`${error}-${index}`} className="text-[10px] font-mono text-[var(--color-text-secondary)]">{error}</p>
+                                            <div key={`${error}-${index}`} className="csv-parse-warn-item">{error}</div>
                                         ))}
                                     </div>
                                 </div>
                             )}
-
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() => {
-                                        setConflicts([]);
-                                        setPendingRows([]);
-                                        setPendingParseErrors([]);
-                                        setConflictDecisions({});
-                                    }}
-                                    className="btn flex-1 h-12"
-                                    type="button"
-                                >
-                                    Volver
-                                </button>
-                                <button
-                                    onClick={handleConflictImport}
-                                    disabled={!allConflictsResolved || loading}
-                                    className="btn btn-primary flex-[2] h-12 gap-3"
-                                    type="button"
-                                >
-                                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                                    {loading ? 'Importando...' : 'Continuar importacion'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                            <div className="p-6 border border-[var(--color-border)] rounded-xl bg-[var(--color-bg-tertiary)] space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full bg-[var(--color-bg-primary)] flex items-center justify-center">
-                                        <FileText className="w-6 h-6 text-[var(--color-text-muted)]" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-[var(--color-text-primary)]">Pegar datos</p>
-                                        <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest font-mono">
-                                            Abre directo para escribir o pegar filas
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <textarea
-                                    autoFocus
-                                    value={rawInput}
-                                    onChange={(event) => setRawInput(event.target.value)}
-                                    className="min-h-[260px] w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-4 py-4 text-sm leading-6 text-[var(--color-text-primary)] outline-none focus:border-blue-500"
-                                    placeholder={`nombre,apellido,fecha_nacimiento,posicion,peso\nJuan,Perez,2004-05-11,Wing,82.5\nTomas,Gomez,,Apertura,\n\nTambien puedes pegar filas sin encabezado en ese mismo orden.`}
-                                />
-
-                                <div className="flex flex-wrap gap-3">
-                                    <input
-                                        type="file"
-                                        accept=".csv,.xlsx,.xls"
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                        id="csv-upload"
-                                    />
-                                    <label
-                                        htmlFor="csv-upload"
-                                        className="btn cursor-pointer !h-10"
-                                    >
-                                        {file ? file.name : 'Elegir archivo'}
-                                    </label>
-                                    <button type="button" className="btn gap-2 !h-10" onClick={handleDownloadTemplate}>
-                                        <Download className="w-4 h-4" />
-                                        Descargar plantilla
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-5">
-                                <div>
-                                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">Formato soportado</p>
-                                    <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                                        Formato rapido recomendado: <span className="font-mono text-[var(--color-text-primary)]">nombre</span>, <span className="font-mono text-[var(--color-text-primary)]">apellido</span>, <span className="font-mono text-[var(--color-text-primary)]">fecha_nacimiento</span>, <span className="font-mono text-[var(--color-text-primary)]">posicion</span>, <span className="font-mono text-[var(--color-text-primary)]">peso</span>.
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">Reglas</p>
-                                    <ul className="mt-2 space-y-1 text-sm text-[var(--color-text-secondary)]">
-                                        <li><span className="font-mono">nombre</span> y <span className="font-mono">apellido</span> son obligatorios.</li>
-                                        <li><span className="font-mono">fecha_nacimiento</span>, <span className="font-mono">posicion</span> y <span className="font-mono">peso</span> son opcionales.</li>
-                                        <li>Si no envias <span className="font-mono">division_id</span>, queda en el plantel base del club.</li>
-                                        <li>Tambien se aceptan columnas avanzadas como <span className="font-mono">division_id</span>, <span className="font-mono">jersey_number</span> y <span className="font-mono">squad_role</span>.</li>
-                                    </ul>
-                                </div>
-                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
-                                {fixedDivisionId ? 'Plantel de destino' : 'Asignar a plantel por defecto'}
-                            </label>
-                            <select
-                                value={selectedDivisionId}
-                                onChange={(e) => setSelectedDivisionId(e.target.value)}
-                                disabled={Boolean(fixedDivisionId)}
-                                className="w-full rounded-lg px-4 py-3 text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--color-bg-primary)] border border-[var(--color-border)] text-[var(--color-text-primary)] focus:border-blue-500"
-                            >
-                                {!fixedDivisionId && <option value="">-- PLANTEL BASE DEL CLUB --</option>}
-                                {divisions.map((division) => (
-                                    <option key={division.id} value={division.id}>
-                                        {division.name.toUpperCase()} ({division.season})
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] p-4">
-                            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">Plantilla rapida</p>
-                            <pre className="max-h-40 overflow-auto whitespace-pre-wrap text-[11px] leading-5 text-[var(--color-text-secondary)]">{templatePreview}</pre>
-                        </div>
-
-                        <div className="flex gap-4 pt-2">
-                            <button onClick={onClose} className="btn flex-1 h-12" type="button">Cancelar</button>
+                        <div className="csv-footer">
                             <button
-                                onClick={processFile}
-                                disabled={(!file && !rawInput.trim()) || loading}
-                                className="btn btn-primary flex-[2] h-12 gap-3"
                                 type="button"
+                                onClick={() => {
+                                    setConflicts([]);
+                                    setPendingRows([]);
+                                    setPendingParseErrors([]);
+                                    setConflictDecisions({});
+                                }}
+                                className="csv-btn-cancel"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                {loading ? 'Importando...' : 'Iniciar importacion'}
+                                Volver
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConflictImport}
+                                disabled={!allConflictsResolved || loading}
+                                className="csv-btn-primary"
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                                {loading ? 'Importando...' : 'Continuar importacion'}
                             </button>
                         </div>
-                    </div>
+                    </>
                 ) : (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <div className="p-6 rounded-xl bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-center">
-                            <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                            <h3 className="text-lg font-black uppercase mb-1">Carga finalizada</h3>
-                            <p className="text-sm text-[var(--color-text-secondary)]">
-                                Se importaron <span className="text-[var(--color-text-primary)] font-bold">{result.count}</span> jugadores correctamente.
-                            </p>
-                        </div>
-
-                        {result.errors.length > 0 && (
-                            <div className="p-4 rounded-lg bg-red-500/5 border border-red-500/20 space-y-2">
-                                <div className="flex items-center gap-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                                    <AlertCircle className="w-3 h-3" />
-                                    Errores detectados ({result.errors.length})
+                    <>
+                        <div className="csv-content-grid">
+                            {/* MAIN SLAB */}
+                            <div className="csv-main-section">
+                                <div className="csv-input-block">
+                                    <div className="csv-label-row">
+                                        <label>Pegar Datos de Origen</label>
+                                        <span className="csv-example-hint">nombre, apellido, fecha_nacimiento, posicion, peso</span>
+                                    </div>
+                                    <textarea
+                                        autoFocus
+                                        value={rawInput}
+                                        onChange={(e) => setRawInput(e.target.value)}
+                                        className="csv-monolith-textarea"
+                                        placeholder={`Pega aqui las filas de tu Excel o CSV...\nJuan, Perez, 1995-03-20, Delantero, 78`}
+                                    />
+                                    <div className="csv-action-row">
+                                        <input
+                                            type="file"
+                                            accept=".csv,.xlsx,.xls"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                            id="csv-upload"
+                                        />
+                                        <label htmlFor="csv-upload" className="csv-btn-ghost cursor-pointer">
+                                            <Upload className="w-3.5 h-3.5" />
+                                            {file ? file.name : 'Elegir Archivo'}
+                                        </label>
+                                        <button type="button" className="csv-btn-ghost" onClick={handleDownloadTemplate}>
+                                            <Download className="w-3.5 h-3.5" />
+                                            Descargar Plantilla
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="max-h-48 overflow-y-auto space-y-1">
-                                    {result.errors.map((error, index) => (
-                                        <p key={`${error}-${index}`} className="text-[10px] text-[var(--color-text-secondary)] font-mono">{error}</p>
-                                    ))}
+
+                                <div className="csv-template-block">
+                                    <div className="csv-template-label">Plantilla rapida</div>
+                                    <pre className="csv-template-pre">{templatePreview}</pre>
                                 </div>
                             </div>
-                        )}
 
-                        <button onClick={onClose} className="btn w-full h-12 !bg-[var(--color-bg-primary)] !text-[var(--color-text-primary)] border border-[var(--color-border)] font-black" type="button">
-                            Entendido
-                        </button>
-                    </div>
+                            {/* SIDEBAR */}
+                            <aside className="csv-sidebar">
+                                <div className="csv-help-group">
+                                    <h3>Estructura y Reglas</h3>
+                                    <ul className="csv-help-list">
+                                        <li><strong>Nombre y Apellido</strong> son estrictamente obligatorios para la creacion.</li>
+                                        <li>Formato de fecha recomendado: <code style={{ color: '#fff' }}>AAAA-MM-DD</code>.</li>
+                                        <li>Si el <code style={{ color: '#fff' }}>division_id</code> es omitido, el sistema asignara al plantel base.</li>
+                                    </ul>
+                                </div>
+
+                                <div className="csv-help-group">
+                                    <h3>Campos Avanzados</h3>
+                                    <div className="csv-tag-list">
+                                        <span className="csv-tag">jersey_number</span>
+                                        <span className="csv-tag">squad_role</span>
+                                        <span className="csv-tag">division_id</span>
+                                        <span className="csv-tag">photo_url</span>
+                                    </div>
+                                </div>
+
+                                <div className="csv-config-block">
+                                    <label>Asignacion por defecto</label>
+                                    <select
+                                        value={selectedDivisionId}
+                                        onChange={(e) => setSelectedDivisionId(e.target.value)}
+                                        disabled={Boolean(fixedDivisionId)}
+                                        className="csv-monolith-select"
+                                    >
+                                        {!fixedDivisionId && <option value="">Plantel base del club</option>}
+                                        {divisions.map((division) => (
+                                            <option key={division.id} value={division.id}>
+                                                {division.name.toUpperCase()} ({division.season})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </aside>
+                        </div>
+
+                        <footer className="csv-footer">
+                            <button type="button" onClick={onClose} className="csv-btn-cancel">
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={processFile}
+                                disabled={(!file && !rawInput.trim()) || loading}
+                                className="csv-btn-primary"
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                {loading ? 'Importando...' : 'Iniciar Importacion'}
+                            </button>
+                        </footer>
+                    </>
+                ) : (
+                    <>
+                        <div className="csv-result-center">
+                            <CheckCircle2 className="w-12 h-12 text-green-500" />
+                            <div className="csv-result-title">Carga finalizada</div>
+                            <p className="csv-result-desc">
+                                Se importaron <span className="csv-result-count">{result.count}</span> jugadores correctamente.
+                            </p>
+
+                            {result.errors.length > 0 && (
+                                <div className="csv-error-box">
+                                    <div className="csv-error-box-title">
+                                        <AlertCircle className="w-3 h-3" />
+                                        Errores detectados ({result.errors.length})
+                                    </div>
+                                    <div style={{ maxHeight: 192, overflowY: 'auto' }}>
+                                        {result.errors.map((error, index) => (
+                                            <div key={`${error}-${index}`} className="csv-error-item">{error}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <footer className="csv-footer" style={{ justifyContent: 'center' }}>
+                            <button type="button" onClick={onClose} className="csv-btn-primary">
+                                Entendido
+                            </button>
+                        </footer>
+                    </>
                 )}
-            </div>
+            </section>
         </div>
     );
 }

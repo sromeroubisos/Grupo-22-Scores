@@ -1,7 +1,5 @@
 'use client';
 
-import type { MatchStats } from './ClubMatchWorkspace.types';
-
 export function ComparisonBarChart({ home, away, max, homeLabel, awayLabel }: { home: number; away: number; max?: number; homeLabel?: string; awayLabel?: string }) {
   const total = Math.max(max ?? 0, home + away, 1);
   const homePct = (home / total) * 100;
@@ -55,37 +53,37 @@ export function MiniBarChart({ data }: { data: Array<{ label: string; home: numb
   );
 }
 
-export function RadarChart({ stats }: { stats: MatchStats }) {
-  const axes = [
-    { key: 'tries', label: 'Tries', max: 8 },
-    { key: 'conversions', label: 'Conv', max: 8 },
-    { key: 'penalties', label: 'Pen', max: 8 },
-    { key: 'tackles', label: 'Tack', max: 20 },
-    { key: 'scrumsWon', label: 'Scrum', max: 15 },
-    { key: 'linesWon', label: 'Line', max: 15 },
-  ];
-  const size = 280;
+export type RadarAxis = { label: string; home: number; away: number; max: number };
+
+export function RadarChart({ axes, size = 280 }: { axes: RadarAxis[]; size?: number }) {
+  const safeAxes = axes.length >= 3 ? axes : [];
   const cx = size / 2;
   const cy = size / 2;
-  const radius = 100;
+  const radius = size * 0.36;
   const levels = 4;
 
-  const getPoint = (value: number, max: number, index: number) => {
-    const angle = (Math.PI * 2 * index) / axes.length - Math.PI / 2;
-    const r = (value / max) * radius;
+  const getPoint = (value: number, max: number, index: number, total: number) => {
+    const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
+    const safeMax = max > 0 ? max : 1;
+    const r = (Math.max(0, Math.min(value, safeMax)) / safeMax) * radius;
     return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
   };
 
-  const homeValues = [stats.tries.home, stats.conversions.home, stats.penalties.home, Math.min(stats.tackles.home, 20), stats.scrums.home.won, stats.lines.home.won];
-  const awayValues = [stats.tries.away, stats.conversions.away, stats.penalties.away, Math.min(stats.tackles.away, 20), stats.scrums.away.won, stats.lines.away.won];
+  if (safeAxes.length === 0) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: size, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+        Necesitás al menos 3 estadísticas para un radar
+      </div>
+    );
+  }
 
-  const hasData = homeValues.some((v) => v > 0) || awayValues.some((v) => v > 0);
-
-  const homePoints = axes.map((axis, i) => getPoint(homeValues[i], axis.max, i));
-  const awayPoints = axes.map((axis, i) => getPoint(awayValues[i], axis.max, i));
+  const homePoints = safeAxes.map((axis, i) => getPoint(axis.home, axis.max, i, safeAxes.length));
+  const awayPoints = safeAxes.map((axis, i) => getPoint(axis.away, axis.max, i, safeAxes.length));
 
   const homePoly = homePoints.map((p) => `${p.x},${p.y}`).join(' ');
   const awayPoly = awayPoints.map((p) => `${p.x},${p.y}`).join(' ');
+
+  const hasData = safeAxes.some((a) => a.home > 0 || a.away > 0);
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
@@ -93,18 +91,18 @@ export function RadarChart({ stats }: { stats: MatchStats }) {
         {[...Array(levels)].map((_, i) => (
           <circle key={i} cx={cx} cy={cy} r={(radius * (i + 1)) / levels} fill="none" stroke="rgba(255,255,255,0.18)" />
         ))}
-        {axes.map((_, i) => {
-          const angle = (Math.PI * 2 * i) / axes.length - Math.PI / 2;
+        {safeAxes.map((_, i) => {
+          const angle = (Math.PI * 2 * i) / safeAxes.length - Math.PI / 2;
           const x = cx + radius * Math.cos(angle);
           const y = cy + radius * Math.sin(angle);
           return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="rgba(255,255,255,0.18)" />;
         })}
         <polygon points={homePoly} fill="rgba(16,185,129,0.25)" stroke="#10b981" strokeWidth={2} />
         <polygon points={awayPoly} fill="rgba(59,130,246,0.25)" stroke="#3b82f6" strokeWidth={2} />
-        {axes.map((axis, i) => {
-          const angle = (Math.PI * 2 * i) / axes.length - Math.PI / 2;
-          const x = cx + (radius + 16) * Math.cos(angle);
-          const y = cy + (radius + 16) * Math.sin(angle);
+        {safeAxes.map((axis, i) => {
+          const angle = (Math.PI * 2 * i) / safeAxes.length - Math.PI / 2;
+          const x = cx + (radius + 18) * Math.cos(angle);
+          const y = cy + (radius + 18) * Math.sin(angle);
           return (
             <text key={`label-${i}`} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.7)" fontSize={11} fontWeight={700}>
               {axis.label}

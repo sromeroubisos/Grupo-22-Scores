@@ -354,14 +354,21 @@ async function updatePersonRecord(supabase: any, personId: string, personData: {
         status: personData.status || 'active',
     };
 
+    const notFoundError = {
+        message: 'No se pudo actualizar el jugador. Verifica que el ID exista y que tengas permisos sobre el club.',
+    } as any;
+
     const { data, error } = await supabase
         .from('people')
         .update(richPayload)
         .eq('id', personId)
         .select()
-        .single();
+        .maybeSingle();
 
-    if (!error) return { data, error: null };
+    if (!error) {
+        if (data) return { data, error: null };
+        return { data: null, error: notFoundError };
+    }
 
     const safePayload = {
         first_name: personData.first_name,
@@ -371,12 +378,18 @@ async function updatePersonRecord(supabase: any, personId: string, personData: {
         avatar_url: personData.photo_url || null,
     };
 
-    return supabase
+    const fallback = await supabase
         .from('people')
         .update(safePayload)
         .eq('id', personId)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (fallback.error) return fallback;
+    if (!fallback.data) {
+        return { data: null, error: notFoundError };
+    }
+    return fallback;
 }
 
 async function resolveTeamReference(supabase: any, clubId: string, divisionId?: string) {

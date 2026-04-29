@@ -80,6 +80,7 @@ const PERSISTENT_CLUB_TABS = new Set<ClubManageTabId>([
     'partidos',
     'contenido',
     'entrenamientos',
+    'usuarios',
     'configuracion',
 ]);
 
@@ -118,6 +119,10 @@ const DynamicClubPizarraTab = dynamic(
 const DynamicClubSquadsTab = dynamic(
     () => import('./ClubSquadsTab').then((module) => module.ClubSquadsTab),
     { loading: () => <TabModuleFallback label="planteles" /> }
+);
+const DynamicClubUsersTab = dynamic(
+    () => import('./ClubUsersTab').then((module) => module.ClubUsersTab),
+    { loading: () => <TabModuleFallback label="usuarios" /> }
 );
 
 function createEmptyDashboardDataByMode(): DashboardDataByMode {
@@ -899,6 +904,12 @@ export function ClubManageShell({
                                                 loading={isLoadingSummaryDashboard || isLoadingDivisions}
                                                 onTabChange={navigateToClubTab}
                                             />
+                                        </div>
+                                    ) : null}
+
+                                    {currentTab === 'usuarios' || mountedTabs.includes('usuarios') ? (
+                                        <div className="col-12" hidden={currentTab !== 'usuarios'}>
+                                            <DynamicClubUsersTab clubId={id} />
                                         </div>
                                     ) : null}
 

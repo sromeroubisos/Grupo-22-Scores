@@ -7,6 +7,8 @@ import {
     type CompleteMatchStats,
     type CompleteStatRow,
 } from '@/lib/matchStatsFromEvents';
+import { ChartConfigPanel } from '@/components/admin/charts/ChartConfigPanel';
+import { STAT_CATALOG_SEASON } from '@/components/admin/charts/statCatalogs';
 
 type SeasonStatsData = {
     matchesCount: number;
@@ -276,6 +278,17 @@ export function ClubSeasonStatsPanel({
                     </div>
                 )}
             </section>
+
+            <ChartConfigPanel
+                clubId={clubId}
+                panelKey="season-stats"
+                catalog={STAT_CATALOG_SEASON}
+                data={comparisonStats}
+                homeLabel={clubName}
+                awayLabel="Rivales"
+                sectionTitle="Mis gráficos de temporada"
+                emptyHint="Armá tus propios gráficos comparativos del club vs rivales eligiendo el tipo y las estadísticas que querés visualizar."
+            />
         </div>
     );
 }

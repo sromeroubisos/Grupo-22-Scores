@@ -2,14 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-    BarChart3,
     Loader2,
     Plus,
     RefreshCw,
     Save,
 } from 'lucide-react';
 import {
-    TEST_METRIC_OPTIONS,
     type ClubPhysicalRecord,
     type ClubPhysicalRecordInput,
 } from '@/lib/club-admin/physicalRecords';
@@ -138,6 +136,11 @@ function formatMetricValue(value?: number | null, unit?: string | null) {
     return `${Math.round(value * 10) / 10}${unit ? ` ${unit}` : ''}`;
 }
 
+function formatCounterValue(value?: number | null, fallback = '00') {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
+    return String(value).padStart(2, '0');
+}
+
 function parseNumberInput(value: string) {
     if (!value.trim()) return null;
     const parsed = Number(value.replace(',', '.'));
@@ -212,36 +215,23 @@ async function requestJson(url: string) {
     return payload.data;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+    return error instanceof Error ? error.message : fallback;
+}
+
 function buildMetricDefinitions(definitions: ClubPhysicalTestDefinition[]): MetricDefinitionView[] {
-    const map = new Map<string, MetricDefinitionView>();
-
-    TEST_METRIC_OPTIONS.forEach((option) => {
-        map.set(option.key, {
-            id: `default-${option.key}`,
-            metricKey: option.key,
-            label: option.label,
-            unit: option.unit,
-            divisionId: null,
-            notes: null,
-            betterValueDirection: option.unit === 's' ? 'lower' : 'higher',
-        });
-    });
-
-    definitions
+    return definitions
         .filter((definition) => definition.isActive !== false)
-        .forEach((definition) => {
-            map.set(definition.metricKey, {
-                id: definition.id,
-                metricKey: definition.metricKey,
-                label: definition.label,
-                unit: definition.unit,
-                divisionId: definition.divisionId,
-                notes: definition.notes,
-                betterValueDirection: definition.betterValueDirection,
-            });
-        });
-
-    return Array.from(map.values()).sort((left, right) => left.label.localeCompare(right.label));
+        .map((definition) => ({
+            id: definition.id,
+            metricKey: definition.metricKey,
+            label: definition.label,
+            unit: definition.unit,
+            divisionId: definition.divisionId,
+            notes: definition.notes,
+            betterValueDirection: definition.betterValueDirection,
+        }))
+        .sort((left, right) => left.label.localeCompare(right.label));
 }
 
 function buildDayOptions(plans: ClubGymPlan[]) {
@@ -326,6 +316,7 @@ export function ClubTrainingGymTab({
     const [savingMetric, setSavingMetric] = useState(false);
     const [savingExercise, setSavingExercise] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [gymPlanDependencyWarning, setGymPlanDependencyWarning] = useState<string | null>(null);
     const [createMetricOpen, setCreateMetricOpen] = useState(false);
     const [metricDefinitionDraft, setMetricDefinitionDraft] = useState({
         label: '',
@@ -357,6 +348,13 @@ export function ClubTrainingGymTab({
         () => metricDefinitions.find((definition) => definition.metricKey === selectedMetricKey) ?? metricDefinitions[0] ?? null,
         [metricDefinitions, selectedMetricKey],
     );
+    const activeRosterLabel = selectedDivision ? getDivisionLabel(selectedDivision, clubName) : 'Todo el plantel';
+    const gymPerformanceRecordCount = useMemo(
+        () => performanceRecords.filter((record) => record.moduleKey === 'gym').length,
+        [performanceRecords],
+    );
+    const totalOperationalRecords = physicalRecords.length + gymPerformanceRecordCount;
+    const generalSyncError = error && error !== gymPlanDependencyWarning ? error : null;
 
     const metricRecords = useMemo(
         () => selectedMetric
@@ -395,6 +393,7 @@ export function ClubTrainingGymTab({
 
         setLoading(true);
         setError(null);
+        setGymPlanDependencyWarning(null);
 
         try {
             const [recordsResult, definitionsResult, plansResult, performanceResult] = await Promise.allSettled([
@@ -420,10 +419,21 @@ export function ClubTrainingGymTab({
                 setPerformanceRecords(performanceResult.value.filter(isPerformanceRecord));
             }
 
-            const rejected = [recordsResult, definitionsResult, plansResult, performanceResult]
-                .find((result) => result.status === 'rejected') as PromiseRejectedResult | undefined;
-            if (rejected) {
-                setError(rejected.reason instanceof Error ? rejected.reason.message : 'Algunos datos no pudieron sincronizarse.');
+            const rejectedMessages = [recordsResult, definitionsResult, performanceResult]
+                .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+                .map((result) => getErrorMessage(result.reason, 'Algunos datos no pudieron sincronizarse.'));
+
+            if (plansResult.status === 'rejected') {
+                const planMessage = getErrorMessage(plansResult.reason, 'No se pudieron cargar los planes de gimnasio.');
+                if (planMessage.includes('club_gym_plans')) {
+                    setGymPlanDependencyWarning(planMessage);
+                } else {
+                    rejectedMessages.unshift(planMessage);
+                }
+            }
+
+            if (rejectedMessages.length > 0) {
+                setError(rejectedMessages[0]);
             }
         } finally {
             setLoading(false);
@@ -436,7 +446,14 @@ export function ClubTrainingGymTab({
     }, [clubId]);
 
     useEffect(() => {
-        if (!selectedMetricKey && metricDefinitions[0]) {
+        if (metricDefinitions.length === 0) {
+            if (selectedMetricKey !== null) {
+                setSelectedMetricKey(null);
+            }
+            return;
+        }
+
+        if (!selectedMetricKey || !metricDefinitions.some((definition) => definition.metricKey === selectedMetricKey)) {
             setSelectedMetricKey(metricDefinitions[0].metricKey);
         }
     }, [metricDefinitions, selectedMetricKey]);
@@ -688,90 +705,125 @@ export function ClubTrainingGymTab({
     }
 
     return (
-        <div className={styles.sectionStack}>
-            <section className={styles.connectionStrip}>
-                <div className={styles.connectionLead}>
-                    <strong>Gimnasio conectado a {clubName}</strong>
-                    <span>Metricas fisicas, cargas por ejercicio y planes por dia quedan como datos operativos para Rendimiento.</span>
+        <div className={cn(styles.shell, styles.gymFlashShell)}>
+            {gymPlanDependencyWarning ? (
+                <div className={styles.gymTechnicalWarning}>
+                    <strong>CRITICAL_DEPENDENCY_MISSING</strong>
+                    <span>{gymPlanDependencyWarning}</span>
                 </div>
-                <div className={styles.connectionLinks}>
+            ) : null}
+
+            <header className={styles.gymFlashHeader}>
+                <div className={styles.gymFlashBrand}>
+                    <span className={styles.gymFlashEyebrow}>Physical Performance Architecture</span>
+                    <div className={styles.gymFlashNav}>
+                        <span className={styles.gymFlashTabActive}>Gimnasio</span>
+                        <span className={styles.gymFlashSlash}>/</span>
+                        <span className={styles.gymFlashTabGhost}>Entrenamientos</span>
+                    </div>
+                </div>
+
+                <div className={styles.gymFlashHeaderMeta}>
                     <button
                         type="button"
-                        className={styles.inlineLink}
+                        className={styles.gymSyncButton}
                         onClick={() => { void refreshAll(); }}
                         disabled={loading}
                     >
                         <RefreshCw className={cn('w-4 h-4', loading && styles.spinning)} />
-                        Sincronizar
+                        {loading ? 'Sincronizando' : 'Sincronizar'}
                     </button>
+                    <span className={styles.gymConnectedState}>
+                        {`Club conectado: ${clubName}${selectedDivision ? ` / ${activeRosterLabel}` : ''}`}
+                    </span>
                 </div>
-            </section>
+            </header>
 
-            {error ? (
-                <div className={styles.inlineNotice}>
-                    <span>{error}</span>
-                </div>
-            ) : null}
-
-            <section className={styles.filterBar}>
-                <label className={styles.filterField}>
-                    <span>Equipo</span>
-                    <select value={selectedDivisionId} onChange={(event) => setSelectedDivisionId(event.target.value)}>
+            <section className={styles.gymKpiContainer}>
+                <label className={cn(styles.gymKpiCard, styles.gymKpiCardInteractive)}>
+                    <span className={styles.gymKpiLabel}>Equipo</span>
+                    <strong className={styles.gymKpiValue}>
+                        Plantel <span>{activeRosterLabel}</span>
+                    </strong>
+                    <select className={styles.gymKpiSelect} value={selectedDivisionId} onChange={(event) => setSelectedDivisionId(event.target.value)}>
                         <option value="all">Todo el plantel</option>
                         {divisions.map((division) => (
                             <option key={division.id} value={division.id}>{getDivisionLabel(division, clubName)}</option>
                         ))}
                     </select>
                 </label>
-                <label className={styles.filterField}>
-                    <span>Jugadores</span>
-                    <input value={`${scopedPlayers.length} disponibles`} readOnly />
-                </label>
-                <label className={styles.filterField}>
-                    <span>Metricas</span>
-                    <input value={`${metricDefinitions.length} definidas`} readOnly />
-                </label>
-                <label className={styles.filterField}>
-                    <span>Planes gym</span>
-                    <input value={`${gymPlans.length} guardados`} readOnly />
-                </label>
-                <label className={styles.filterField}>
-                    <span>Registros</span>
-                    <input value={`${physicalRecords.length + performanceRecords.filter((record) => record.moduleKey === 'gym').length} filas`} readOnly />
-                </label>
+
+                <div className={styles.gymKpiCard}>
+                    <span className={styles.gymKpiLabel}>Jugadores</span>
+                    <strong className={styles.gymKpiValue}>{formatCounterValue(scopedPlayers.length)}</strong>
+                    <span className={styles.gymKpiHint}>Disponibles para carga</span>
+                </div>
+
+                <div className={styles.gymKpiCard}>
+                    <span className={styles.gymKpiLabel}>Metricas</span>
+                    <strong className={styles.gymKpiValue}>{formatCounterValue(metricDefinitions.length)}</strong>
+                    <span className={styles.gymKpiHint}>Definidas por el staff</span>
+                </div>
+
+                <div className={styles.gymKpiCard}>
+                    <span className={styles.gymKpiLabel}>Planes Gym</span>
+                    <strong className={styles.gymKpiValue}>
+                        {gymPlanDependencyWarning ? '--' : formatCounterValue(gymPlans.length)}
+                    </strong>
+                    <span className={styles.gymKpiHint}>
+                        {gymPlanDependencyWarning ? 'Dependencia pendiente' : 'Biblioteca operativa'}
+                    </span>
+                </div>
+
+                <div className={styles.gymKpiCard}>
+                    <span className={styles.gymKpiLabel}>Registros</span>
+                    <strong className={styles.gymKpiValue}>
+                        {totalOperationalRecords > 0 ? formatCounterValue(totalOperationalRecords) : '--'}
+                    </strong>
+                    <span className={styles.gymKpiHint}>Fisicos y de gimnasio</span>
+                </div>
             </section>
 
-            <div className={styles.sectionTabs}>
+            {generalSyncError ? (
+                <div className={styles.gymSoftNotice}>
+                    <span>{generalSyncError}</span>
+                </div>
+            ) : null}
+
+            <nav className={styles.gymInternalNav} aria-label="Segmentacion interna de gimnasio">
                 <button
                     type="button"
-                    className={cn(styles.sectionTab, activeTab === 'metricas' && styles.sectionTabActive)}
+                    className={cn(styles.gymInternalTab, activeTab === 'metricas' && styles.gymInternalTabActive)}
                     onClick={() => setActiveTab('metricas')}
                 >
-                    Metricas
+                    Metricas y tests
                 </button>
                 <button
                     type="button"
-                    className={cn(styles.sectionTab, activeTab === 'ejercicios' && styles.sectionTabActive)}
+                    className={cn(styles.gymInternalTab, activeTab === 'ejercicios' && styles.gymInternalTabActive)}
                     onClick={() => setActiveTab('ejercicios')}
                 >
-                    Ejercicios
+                    Biblioteca de ejercicios
                 </button>
-            </div>
+            </nav>
 
             {loading ? (
-                <div className={styles.emptyState}>Cargando gimnasio...</div>
+                <div className={styles.gymLoadingState}>Cargando gimnasio...</div>
             ) : null}
 
             {!loading && activeTab === 'metricas' ? (
-                <div className={styles.workspaceGrid}>
-                    <section className={styles.panel}>
-                        <div className={styles.panelHead}>
-                            <div>
-                                <span className={styles.panelKicker}>Metricas</span>
-                                <h3>Cards de testeos y metricas fisicas</h3>
+                <div className={styles.gymDashboardGrid}>
+                    <section className={styles.gymPanel}>
+                        <div className={styles.gymPanelHeader}>
+                            <div className={styles.gymPanelHeaderCopy}>
+                                <span className={styles.gymPanelEyebrow}>Metricas fisicas</span>
+                                <h3 className={styles.gymPanelTitle}>Metricas y tests</h3>
                             </div>
-                            <div className={styles.sheetActions}>
-                                <button type="button" className="btn btn-primary" onClick={() => setCreateMetricOpen((current) => !current)}>
+                            <div className={styles.gymPanelHeaderActions}>
+                                <span className={styles.gymStatusBadge}>
+                                    {selectedMetric ? 'Captura activa' : 'Configuracion inicial'}
+                                </span>
+                                <button type="button" className={styles.gymPrimaryButton} onClick={() => setCreateMetricOpen((current) => !current)}>
                                     <Plus className="w-4 h-4" />
                                     Definir metrica
                                 </button>
@@ -779,7 +831,7 @@ export function ClubTrainingGymTab({
                         </div>
 
                         {createMetricOpen ? (
-                            <div className={styles.sheetToolbar}>
+                            <div className={styles.gymFieldGrid}>
                                 <label className={styles.filterField}>
                                     <span>Nombre</span>
                                     <input
@@ -817,8 +869,8 @@ export function ClubTrainingGymTab({
                                         <option value="lower">Mas bajo</option>
                                     </select>
                                 </label>
-                                <div className={styles.sheetActions}>
-                                    <button type="button" className="btn btn-primary" onClick={() => { void handleCreateMetricDefinition(); }} disabled={savingMetric}>
+                                <div className={styles.gymFieldAction}>
+                                    <button type="button" className={styles.gymPrimaryButton} onClick={() => { void handleCreateMetricDefinition(); }} disabled={savingMetric}>
                                         {savingMetric ? <Loader2 className={cn('w-4 h-4', styles.spinning)} /> : <Save className="w-4 h-4" />}
                                         Guardar
                                     </button>
@@ -826,59 +878,105 @@ export function ClubTrainingGymTab({
                             </div>
                         ) : null}
 
-                        <div className={styles.cardGrid}>
-                            {metricCards.map((card) => (
-                                <button
-                                    key={card.definition.metricKey}
-                                    type="button"
-                                    className={cn(
-                                        styles.infoCard,
-                                        styles.testCardButton,
-                                        selectedMetric?.metricKey === card.definition.metricKey && styles.infoCardActive,
-                                    )}
-                                    onClick={() => setSelectedMetricKey(card.definition.metricKey)}
-                                >
-                                    <span>{card.definition.label}</span>
-                                    <strong>{card.playerCount}/{scopedPlayers.length || 0}</strong>
-                                    <p>{card.definition.unit || 'sin unidad'} / ultima carga {formatShortDate(card.latestDate)}</p>
-                                </button>
-                            ))}
-                        </div>
+                        {metricCards.length > 0 ? (
+                            <div className={styles.gymFacetGrid}>
+                                {metricCards.map((card) => (
+                                    <button
+                                        key={card.definition.metricKey}
+                                        type="button"
+                                        className={cn(
+                                            styles.gymFacetCard,
+                                            selectedMetric?.metricKey === card.definition.metricKey && styles.gymFacetCardActive,
+                                        )}
+                                        onClick={() => setSelectedMetricKey(card.definition.metricKey)}
+                                    >
+                                        <span>{card.definition.label}</span>
+                                        <strong>{card.playerCount}/{scopedPlayers.length || 0}</strong>
+                                        <p>{card.definition.unit || 'sin unidad'} / ultima carga {formatShortDate(card.latestDate)}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className={styles.gymEmptyLead}>
+                                <p>
+                                    Las metricas de rendimiento son definidas por el staff tecnico. Comienza creando los
+                                    parametros de medicion para habilitar la carga fisica del plantel.
+                                </p>
+                            </div>
+                        )}
 
                         {selectedMetric ? (
-                            <>
-                                <div className={styles.sheetToolbar}>
-                                    <label className={styles.filterField}>
-                                        <span>Metrica activa</span>
-                                        <input value={selectedMetric.label} readOnly />
-                                    </label>
-                                    <label className={styles.filterField}>
-                                        <span>Fecha</span>
-                                        <input type="date" value={metricDate} onChange={(event) => setMetricDate(event.target.value)} />
-                                    </label>
-                                    <label className={styles.filterField}>
-                                        <span>Responsable</span>
-                                        <input value={metricSource} onChange={(event) => setMetricSource(event.target.value)} />
-                                    </label>
-                                    <div className={styles.sheetActions}>
-                                        <button type="button" className="btn btn-primary" onClick={() => { void handleSaveMetricRows(); }} disabled={savingMetric}>
-                                            {savingMetric ? <Loader2 className={cn('w-4 h-4', styles.spinning)} /> : <Save className="w-4 h-4" />}
-                                            Guardar planilla
-                                        </button>
-                                    </div>
+                            <div className={styles.gymFieldGrid}>
+                                <label className={styles.filterField}>
+                                    <span>Metrica activa</span>
+                                    <input value={selectedMetric.label} readOnly />
+                                </label>
+                                <label className={styles.filterField}>
+                                    <span>Fecha</span>
+                                    <input type="date" value={metricDate} onChange={(event) => setMetricDate(event.target.value)} />
+                                </label>
+                                <label className={styles.filterField}>
+                                    <span>Responsable</span>
+                                    <input value={metricSource} onChange={(event) => setMetricSource(event.target.value)} />
+                                </label>
+                                <div className={styles.gymFieldAction}>
+                                    <button type="button" className={styles.gymPrimaryButton} onClick={() => { void handleSaveMetricRows(); }} disabled={savingMetric}>
+                                        {savingMetric ? <Loader2 className={cn('w-4 h-4', styles.spinning)} /> : <Save className="w-4 h-4" />}
+                                        Guardar planilla
+                                    </button>
                                 </div>
+                            </div>
+                        ) : null}
 
+                        <div className={styles.gymRosterSection}>
+                            <div className={styles.gymRosterHeading}>
+                                <div>
+                                    <h4>Plantel disponible</h4>
+                                    <p>
+                                        {selectedMetric
+                                            ? `Carga manual abierta para ${selectedMetric.label}.`
+                                            : 'Define una metrica para habilitar la carga individual por jugador.'}
+                                    </p>
+                                </div>
+                                <span className={styles.gymStatusBadge}>{formatCounterValue(scopedPlayers.length)} jugadores</span>
+                            </div>
+
+                            {scopedPlayers.length === 0 ? (
+                                <>
+                                    <table className={styles.dataTable}>
+                                        <thead>
+                                            <tr>
+                                                <th>Jugador</th>
+                                                <th>Plantel</th>
+                                                <th>{selectedMetric ? 'Ultimo valor' : 'Puesto'}</th>
+                                                <th>{selectedMetric ? 'Estado de carga' : 'Estado'}</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                    <div className={styles.gymTablePlaceholder}>No se han cargado jugadores para este club.</div>
+                                </>
+                            ) : (
                                 <div className={styles.tableWrap}>
                                     <table className={styles.dataTable}>
                                         <thead>
                                             <tr>
                                                 <th>Jugador</th>
                                                 <th>Plantel</th>
-                                                <th>Ultimo valor</th>
-                                                <th>Ultima fecha</th>
-                                                <th>Nuevo valor</th>
-                                                <th>Unidad</th>
-                                                <th>Nota</th>
+                                                {selectedMetric ? (
+                                                    <>
+                                                        <th>Ultimo valor</th>
+                                                        <th>Ultima fecha</th>
+                                                        <th>Nuevo valor</th>
+                                                        <th>Unidad</th>
+                                                        <th>Nota</th>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <th>Puesto</th>
+                                                        <th>Estado</th>
+                                                        <th>Accion</th>
+                                                    </>
+                                                )}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -889,51 +987,79 @@ export function ClubTrainingGymTab({
                                                         <td>
                                                             <button type="button" className={styles.tablePlayerButton}>
                                                                 <strong>{getPersonName(player)}</strong>
-                                                                <small>{player.position || 'Sin puesto'}</small>
+                                                                <small>{player.position || 'Disponible para carga'}</small>
                                                             </button>
                                                         </td>
-                                                        <td>{player.division_name || 'Sin plantel'}</td>
-                                                        <td>{formatMetricValue(latest?.valueNumeric ?? null, latest?.unit || selectedMetric.unit)}</td>
-                                                        <td>{formatShortDate(latest?.recordedAt)}</td>
-                                                        <td>
-                                                            <input
-                                                                className={styles.sheetInput}
-                                                                value={metricDrafts[player.id] || ''}
-                                                                onChange={(event) => setMetricDrafts((current) => ({ ...current, [player.id]: event.target.value }))}
-                                                                placeholder={selectedMetric.unit || 'valor'}
-                                                            />
-                                                        </td>
-                                                        <td>{selectedMetric.unit || '--'}</td>
-                                                        <td>
-                                                            <input
-                                                                className={styles.sheetInput}
-                                                                value={metricNotes[player.id] || ''}
-                                                                onChange={(event) => setMetricNotes((current) => ({ ...current, [player.id]: event.target.value }))}
-                                                                placeholder="Contexto, intento, protocolo"
-                                                            />
-                                                        </td>
+                                                        <td>{player.division_name || activeRosterLabel}</td>
+                                                        {selectedMetric ? (
+                                                            <>
+                                                                <td>{formatMetricValue(latest?.valueNumeric ?? null, latest?.unit || selectedMetric.unit)}</td>
+                                                                <td>{formatShortDate(latest?.recordedAt)}</td>
+                                                                <td>
+                                                                    <input
+                                                                        className={styles.sheetInput}
+                                                                        value={metricDrafts[player.id] || ''}
+                                                                        onChange={(event) => setMetricDrafts((current) => ({ ...current, [player.id]: event.target.value }))}
+                                                                        placeholder={selectedMetric.unit || 'valor'}
+                                                                    />
+                                                                </td>
+                                                                <td>{selectedMetric.unit || '--'}</td>
+                                                                <td>
+                                                                    <input
+                                                                        className={styles.sheetInput}
+                                                                        value={metricNotes[player.id] || ''}
+                                                                        onChange={(event) => setMetricNotes((current) => ({ ...current, [player.id]: event.target.value }))}
+                                                                        placeholder="Contexto, intento o protocolo"
+                                                                    />
+                                                                </td>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <td>{player.position || 'Sin puesto'}</td>
+                                                                <td>
+                                                                    <span className={cn(styles.statusBadge, styles.statusNeutral)}>
+                                                                        Esperando metrica
+                                                                    </span>
+                                                                </td>
+                                                                <td className={styles.rosterHintCell}>Defini una metrica para habilitar la planilla.</td>
+                                                            </>
+                                                        )}
                                                     </tr>
                                                 );
                                             })}
                                         </tbody>
                                     </table>
                                 </div>
-                            </>
-                        ) : (
-                            <div className={styles.emptyState}>Selecciona una card para abrir la planilla.</div>
-                        )}
+                            )}
+                        </div>
                     </section>
 
-                    <aside className={styles.panel}>
-                        <div className={styles.panelHead}>
-                            <div>
-                                <span className={styles.panelKicker}>Historial</span>
-                                <h3>{selectedMetric?.label || 'Metrica'} en el tiempo</h3>
+                    <aside className={styles.gymPanel}>
+                        <div className={styles.gymPanelHeader}>
+                            <div className={styles.gymPanelHeaderCopy}>
+                                <span className={styles.gymPanelEyebrow}>Historial</span>
+                                <h3 className={styles.gymPanelTitle}>Metrica en el tiempo</h3>
                             </div>
-                            <BarChart3 className="w-5 h-5" />
+                            <span className={styles.gymStatusBadge}>
+                                {selectedMetric ? selectedMetric.label : 'Sin seleccion'}
+                            </span>
                         </div>
+
                         {metricRecords.length === 0 ? (
-                            <div className={styles.emptyState}>Todavia no hay historial para esta metrica.</div>
+                            <div className={styles.gymHistoryCanvas}>
+                                <div className={styles.gymHistoryCopy}>
+                                    <p>SIN DATOS PARA VISUALIZAR</p>
+                                    <span>
+                                        {selectedMetric
+                                            ? 'Carga registros para ver la evolucion historica de esta metrica.'
+                                            : 'Selecciona una metrica y un jugador para ver su evolucion historica.'}
+                                    </span>
+                                </div>
+                                <svg className={styles.gymHistoryWave} viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true">
+                                    <path d="M0,50 Q50,20 100,50 T200,50 T300,50 T400,50" />
+                                    <path d="M0,62 Q50,34 100,62 T200,62 T300,62 T400,62" />
+                                </svg>
+                            </div>
                         ) : (
                             <div className={styles.metricList}>
                                 {metricRecords.slice(0, 8).map((record) => {
@@ -953,30 +1079,45 @@ export function ClubTrainingGymTab({
                                 })}
                             </div>
                         )}
+
+                        <div className={styles.gymNextSteps}>
+                            <h4>Proximos pasos</h4>
+                            <div className={styles.gymStepList}>
+                                <div className={cn(styles.gymStepItem, metricDefinitions.length > 0 && styles.gymStepItemActive)}>
+                                    <span>1</span>
+                                    <p>Definir estructura de metricas.</p>
+                                </div>
+                                <div className={cn(styles.gymStepItem, metricRecords.length > 0 && styles.gymStepItemActive)}>
+                                    <span>2</span>
+                                    <p>Cargar registros fisicos por jugador.</p>
+                                </div>
+                                <div className={cn(styles.gymStepItem, selectedMetric !== null && styles.gymStepItemActive)}>
+                                    <span>3</span>
+                                    <p>Analizar tendencias y cargas.</p>
+                                </div>
+                            </div>
+                        </div>
                     </aside>
                 </div>
             ) : null}
 
             {!loading && activeTab === 'ejercicios' ? (
-                <div className={styles.sectionStack}>
-                    <section className={styles.panel}>
-                        <div className={styles.panelHead}>
-                            <div>
-                                <span className={styles.panelKicker}>Ejercicios</span>
-                                <h3>Planilla por dia y ejercicio</h3>
+                <div className={styles.gymDashboardGrid}>
+                    <section className={styles.gymPanel}>
+                        <div className={styles.gymPanelHeader}>
+                            <div className={styles.gymPanelHeaderCopy}>
+                                <span className={styles.gymPanelEyebrow}>Biblioteca</span>
+                                <h3 className={styles.gymPanelTitle}>Planilla por dia y ejercicio</h3>
                             </div>
-                            <div className={styles.panelMeta}>
-                                <span>Dia activo</span>
-                                <strong>{selectedDay?.label || 'Dia'}</strong>
-                            </div>
+                            <span className={styles.gymStatusBadge}>{selectedDay?.label || 'Dia'}</span>
                         </div>
 
-                        <div className={styles.sectionTabs}>
+                        <div className={styles.gymMiniTabs}>
                             {dayOptions.map((day) => (
                                 <button
                                     key={day.id}
                                     type="button"
-                                    className={cn(styles.sectionTab, selectedDayId === day.id && styles.sectionTabActive)}
+                                    className={cn(styles.gymMiniTab, selectedDayId === day.id && styles.gymMiniTabActive)}
                                     onClick={() => setSelectedDayId(day.id)}
                                 >
                                     {day.label}
@@ -984,21 +1125,22 @@ export function ClubTrainingGymTab({
                             ))}
                         </div>
 
-                        <div className={styles.detailCard}>
+                        <div className={styles.gymExerciseSummary}>
                             <strong>{selectedDay?.title}</strong>
                             <p>{selectedDay?.detail}</p>
-                            {selectedDay?.planId ? <span className={styles.tag}>Plan guardado</span> : <span className={styles.tag}>Estructura base</span>}
+                            <span className={styles.gymStatusBadge}>
+                                {selectedDay?.planId ? 'Plan guardado' : 'Estructura base'}
+                            </span>
                         </div>
 
-                        <div className={styles.cardGrid}>
+                        <div className={styles.gymFacetGrid}>
                             {exerciseCards.map((card) => (
                                 <button
                                     key={card.exercise}
                                     type="button"
                                     className={cn(
-                                        styles.infoCard,
-                                        styles.testCardButton,
-                                        selectedExercise === card.exercise && styles.infoCardActive,
+                                        styles.gymFacetCard,
+                                        selectedExercise === card.exercise && styles.gymFacetCardActive,
                                     )}
                                     onClick={() => setSelectedExercise(card.exercise)}
                                 >
@@ -1010,91 +1152,109 @@ export function ClubTrainingGymTab({
                         </div>
                     </section>
 
-                    <section className={styles.panel}>
-                        <div className={styles.panelHead}>
-                            <div>
-                                <span className={styles.panelKicker}>Spreadsheet</span>
-                                <h3>{selectedExercise || 'Selecciona un ejercicio'}</h3>
+                    <section className={styles.gymPanel}>
+                        <div className={styles.gymPanelHeader}>
+                            <div className={styles.gymPanelHeaderCopy}>
+                                <span className={styles.gymPanelEyebrow}>Carga operativa</span>
+                                <h3 className={styles.gymPanelTitle}>{selectedExercise || 'Selecciona un ejercicio'}</h3>
                             </div>
-                            <div className={styles.sheetActions}>
-                                <button type="button" className="btn btn-primary" onClick={() => { void handleSaveExerciseRows(); }} disabled={savingExercise || !selectedExercise}>
+                            <div className={styles.gymPanelHeaderActions}>
+                                <span className={styles.gymStatusBadge}>
+                                    {selectedExercise ? 'Carga abierta' : 'Esperando seleccion'}
+                                </span>
+                                <button type="button" className={styles.gymPrimaryButton} onClick={() => { void handleSaveExerciseRows(); }} disabled={savingExercise || !selectedExercise}>
                                     {savingExercise ? <Loader2 className={cn('w-4 h-4', styles.spinning)} /> : <Save className="w-4 h-4" />}
                                     Guardar cargas
                                 </button>
                             </div>
                         </div>
 
-                        <div className={styles.sheetToolbar}>
-                            <label className={styles.filterField}>
-                                <span>Fecha</span>
-                                <input type="date" value={exerciseDate} onChange={(event) => setExerciseDate(event.target.value)} />
-                            </label>
-                            <label className={styles.filterField}>
-                                <span>Dia</span>
-                                <input value={selectedDay?.label || ''} readOnly />
-                            </label>
-                            <label className={styles.filterField}>
-                                <span>Plan</span>
-                                <input value={selectedDay?.title || ''} readOnly />
-                            </label>
-                        </div>
-
                         {!selectedExercise ? (
-                            <div className={styles.emptyState}>Selecciona una card de ejercicio para abrir la planilla.</div>
-                        ) : (
-                            <div className={styles.tableWrap}>
-                                <table className={styles.dataTable}>
-                                    <thead>
-                                        <tr>
-                                            <th>Jugador</th>
-                                            <th>Plantel</th>
-                                            <th>Ultima carga</th>
-                                            <th>Kg</th>
-                                            <th>Series</th>
-                                            <th>Reps</th>
-                                            <th>RPE</th>
-                                            <th>Notas</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {scopedPlayers.map((player) => {
-                                            const latest = latestGymByPlayer.get(player.id);
-                                            const draft = exerciseDrafts[player.id] ?? buildEmptyExerciseDraft();
-                                            return (
-                                                <tr key={player.id}>
-                                                    <td>
-                                                        <button type="button" className={styles.tablePlayerButton}>
-                                                            <strong>{getPersonName(player)}</strong>
-                                                            <small>{player.position || 'Sin puesto'}</small>
-                                                        </button>
-                                                    </td>
-                                                    <td>{player.division_name || 'Sin plantel'}</td>
-                                                    <td>
-                                                        {latest
-                                                            ? `${latest.payload.weight || 0}kg / ${latest.payload.sets || 0}x${latest.payload.reps || 0}`
-                                                            : '--'}
-                                                    </td>
-                                                    <td>
-                                                        <input className={styles.sheetInput} value={draft.weight} onChange={(event) => updateExerciseDraft(player.id, 'weight', event.target.value)} placeholder="kg" />
-                                                    </td>
-                                                    <td>
-                                                        <input className={styles.sheetInput} value={draft.sets} onChange={(event) => updateExerciseDraft(player.id, 'sets', event.target.value)} placeholder="4" />
-                                                    </td>
-                                                    <td>
-                                                        <input className={styles.sheetInput} value={draft.reps} onChange={(event) => updateExerciseDraft(player.id, 'reps', event.target.value)} placeholder="6" />
-                                                    </td>
-                                                    <td>
-                                                        <input className={styles.sheetInput} value={draft.rpe} onChange={(event) => updateExerciseDraft(player.id, 'rpe', event.target.value)} placeholder="8" />
-                                                    </td>
-                                                    <td>
-                                                        <input className={styles.sheetInput} value={draft.notes} onChange={(event) => updateExerciseDraft(player.id, 'notes', event.target.value)} placeholder="Variante, molestia o ajuste" />
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                            <div className={styles.gymHistoryCanvas}>
+                                <div className={styles.gymHistoryCopy}>
+                                    <p>SIN EJERCICIO SELECCIONADO</p>
+                                    <span>Elige una variante del dia para abrir la planilla de carga por jugador.</span>
+                                </div>
+                                <svg className={styles.gymHistoryWave} viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true">
+                                    <path d="M0,48 Q50,32 100,48 T200,48 T300,48 T400,48" />
+                                    <path d="M0,66 Q50,46 100,66 T200,66 T300,66 T400,66" />
+                                </svg>
                             </div>
+                        ) : (
+                            <>
+                                <div className={styles.gymFieldGridCompact}>
+                                    <label className={styles.filterField}>
+                                        <span>Fecha</span>
+                                        <input type="date" value={exerciseDate} onChange={(event) => setExerciseDate(event.target.value)} />
+                                    </label>
+                                    <label className={styles.filterField}>
+                                        <span>Dia</span>
+                                        <input value={selectedDay?.label || ''} readOnly />
+                                    </label>
+                                    <label className={styles.filterField}>
+                                        <span>Plan</span>
+                                        <input value={selectedDay?.title || ''} readOnly />
+                                    </label>
+                                </div>
+
+                                {scopedPlayers.length === 0 ? (
+                                    <div className={styles.gymTablePlaceholder}>No hay jugadores disponibles para cargar este ejercicio.</div>
+                                ) : (
+                                    <div className={styles.tableWrap}>
+                                        <table className={styles.dataTable}>
+                                            <thead>
+                                                <tr>
+                                                    <th>Jugador</th>
+                                                    <th>Plantel</th>
+                                                    <th>Ultima carga</th>
+                                                    <th>Kg</th>
+                                                    <th>Series</th>
+                                                    <th>Reps</th>
+                                                    <th>RPE</th>
+                                                    <th>Notas</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {scopedPlayers.map((player) => {
+                                                    const latest = latestGymByPlayer.get(player.id);
+                                                    const draft = exerciseDrafts[player.id] ?? buildEmptyExerciseDraft();
+                                                    return (
+                                                        <tr key={player.id}>
+                                                            <td>
+                                                                <button type="button" className={styles.tablePlayerButton}>
+                                                                    <strong>{getPersonName(player)}</strong>
+                                                                    <small>{player.position || 'Sin puesto'}</small>
+                                                                </button>
+                                                            </td>
+                                                            <td>{player.division_name || activeRosterLabel}</td>
+                                                            <td>
+                                                                {latest
+                                                                    ? `${latest.payload.weight || 0}kg / ${latest.payload.sets || 0}x${latest.payload.reps || 0}`
+                                                                    : '--'}
+                                                            </td>
+                                                            <td>
+                                                                <input className={styles.sheetInput} value={draft.weight} onChange={(event) => updateExerciseDraft(player.id, 'weight', event.target.value)} placeholder="kg" />
+                                                            </td>
+                                                            <td>
+                                                                <input className={styles.sheetInput} value={draft.sets} onChange={(event) => updateExerciseDraft(player.id, 'sets', event.target.value)} placeholder="4" />
+                                                            </td>
+                                                            <td>
+                                                                <input className={styles.sheetInput} value={draft.reps} onChange={(event) => updateExerciseDraft(player.id, 'reps', event.target.value)} placeholder="6" />
+                                                            </td>
+                                                            <td>
+                                                                <input className={styles.sheetInput} value={draft.rpe} onChange={(event) => updateExerciseDraft(player.id, 'rpe', event.target.value)} placeholder="8" />
+                                                            </td>
+                                                            <td>
+                                                                <input className={styles.sheetInput} value={draft.notes} onChange={(event) => updateExerciseDraft(player.id, 'notes', event.target.value)} placeholder="Variante, molestia o ajuste" />
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </section>
                 </div>

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Building2, Globe, Loader2, Megaphone, Star } from 'lucide-react';
 import type { ClubSponsorItem } from '@/lib/club-admin/sponsors';
+import { useClubAdminQuery } from '@/lib/club-admin/useClubAdminQuery';
 
 interface ClubSponsorsTabProps {
     clubId: string;
@@ -15,57 +15,21 @@ export function ClubSponsorsTab({
     initialSponsors,
     initialSponsorsLoaded = false,
 }: ClubSponsorsTabProps) {
-    const [sponsors, setSponsors] = useState<ClubSponsorItem[]>(initialSponsors ?? []);
-    const [loading, setLoading] = useState(!initialSponsorsLoaded);
-    const [error, setError] = useState<string | null>(null);
+    const endpoint = clubId ? `/api/club-admin/sponsors?club=${encodeURIComponent(clubId)}` : null;
+    const fallbackPayload = initialSponsorsLoaded
+        ? { data: initialSponsors ?? [] }
+        : undefined;
 
-    useEffect(() => {
-        setSponsors(initialSponsorsLoaded ? (initialSponsors ?? []) : []);
-        setLoading(!initialSponsorsLoaded);
-        setError(null);
-    }, [clubId, initialSponsors, initialSponsorsLoaded]);
+    const { data, error, isLoading } = useClubAdminQuery<{ data?: ClubSponsorItem[]; error?: string }>(
+        endpoint,
+        { fallbackData: fallbackPayload }
+    );
 
-    useEffect(() => {
-        if (initialSponsorsLoaded) {
-            return;
-        }
-
-        let cancelled = false;
-
-        const loadSponsors = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                const response = await fetch(`/api/club-admin/sponsors?club=${encodeURIComponent(clubId)}`, {
-                    cache: 'no-store',
-                    credentials: 'include',
-                });
-                const payload = await response.json() as { data?: ClubSponsorItem[]; error?: string };
-
-                if (!response.ok) {
-                    throw new Error(payload.error || 'No se pudieron cargar los sponsors.');
-                }
-
-                if (!cancelled) {
-                    setSponsors(payload.data ?? []);
-                }
-            } catch (fetchError) {
-                if (!cancelled) {
-                    setError(fetchError instanceof Error ? fetchError.message : 'No se pudieron cargar los sponsors.');
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        void loadSponsors();
-        return () => {
-            cancelled = true;
-        };
-    }, [clubId, initialSponsorsLoaded]);
+    const sponsors = data?.data ?? [];
+    const errorMessage = error
+        ? error.message || 'No se pudieron cargar los sponsors.'
+        : data?.error ?? null;
+    const loading = isLoading && sponsors.length === 0;
 
     return (
         <div className="club-ops-grid">
@@ -86,9 +50,9 @@ export function ClubSponsorsTab({
                         <Loader2 className="w-5 h-5 animate-spin" />
                         <span>Cargando sponsors...</span>
                     </div>
-                ) : error ? (
+                ) : errorMessage ? (
                     <div className="club-tab-empty error">
-                        <span>{error}</span>
+                        <span>{errorMessage}</span>
                     </div>
                 ) : sponsors.length === 0 ? (
                     <div className="club-tab-empty">

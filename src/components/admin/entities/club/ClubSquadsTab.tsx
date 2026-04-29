@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Database } from '@/lib/database.types';
-import { LayoutGrid, List, Plus, Search, Shield, Upload, Users } from 'lucide-react';
+import { LayoutGrid, List, Plus, Search, Shield, Upload } from 'lucide-react';
 import { Division, fetchDivisions } from '@/lib/services/divisionService';
 import { fetchPeopleByClub, PersonWithRole } from '@/lib/services/personService';
 import { PersonManagementModal } from './PersonManagementModal';
@@ -19,6 +19,12 @@ interface ClubSquadsTabProps {
     initialPlayersLoaded?: boolean;
     initialDivisions?: Division[];
     initialDivisionsLoaded?: boolean;
+}
+
+function getInitials(firstName?: string | null, lastName?: string | null): string {
+    const first = firstName?.trim().charAt(0).toUpperCase() ?? '';
+    const last = lastName?.trim().charAt(0).toUpperCase() ?? '';
+    return `${first}${last}` || '??';
 }
 
 async function loadClubPlayers(clubId: string): Promise<PersonWithRole[]> {
@@ -131,84 +137,85 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
     }), [players, searchQuery]);
 
     const playersAssignedToDivision = players.filter((person) => Boolean(person.division_id)).length;
-    const playersAtClubLevel = players.length - playersAssignedToDivision;
 
     return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
-            <div className="manager-card">
-                <header className="manager-header">
-                    <div className="manager-header-titles">
-                        <h1 className="flex items-center gap-3"><Shield className="w-6 h-6 text-[var(--accent)]" /> Jugadores</h1>
-                        <p>
-                            Altas, edicion, asignacion deportiva e importacion rapida de {data?.name || 'este club'}.
-                        </p>
+        <div className="players-module-shell animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
+            {/* MODULE INFO */}
+            <section className="players-module-info">
+                <div className="players-module-title-wrap">
+                    <h2>Jugadores</h2>
+                    <p>
+                        Sistema centralizado de gestión de altas, edición de perfiles,
+                        asignación deportiva e importación masiva de activos.
+                    </p>
+                </div>
+                <div className="players-metrics">
+                    <div className="players-metric-item">
+                        <span className="players-metric-label">Total</span>
+                        <span className="players-metric-value">{players.length}</span>
                     </div>
-                    <div className="manager-metadata-box" id="status-indicator">
-                        TOTAL: {players.length} | ASIGNADOS: {playersAssignedToDivision}
+                    <div className="players-metric-item">
+                        <span className="players-metric-label">Asignados</span>
+                        <span
+                            className="players-metric-value"
+                            style={{ color: 'var(--text-muted)', opacity: 0.5 }}
+                        >
+                            {String(playersAssignedToDivision).padStart(2, '0')}
+                        </span>
                     </div>
-                </header>
+                </div>
+            </section>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="manager-input-group">
-                        <label className="manager-field-label">Busqueda Rapida</label>
-                        <div className="relative flex items-center">
-                            <Search className="absolute left-4 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-                            <input
-                                type="text"
-                                className="manager-url-input pl-12"
-                                placeholder="Nombre, posicion o division..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="manager-input-group">
-                        <label className="manager-field-label">Modo de Vista</label>
-                        <div className="manager-tabs">
-                            <div className="manager-tab-indicator" style={{ transform: `translateX(${viewMode === 'cards' ? '0%' : '100%'})` }}></div>
-                            <button
-                                className={`manager-tab-btn ${viewMode === 'cards' ? 'active text-[var(--bg)]' : ''}`}
-                                onClick={(e) => { e.preventDefault(); setViewMode('cards'); }}
-                            >
-                                <LayoutGrid className="w-4 h-4 inline mr-1.5" /> Tarjetas
-                            </button>
-                            <button
-                                className={`manager-tab-btn ${viewMode === 'table' ? 'active text-[var(--bg)]' : ''}`}
-                                onClick={(e) => { e.preventDefault(); setViewMode('table'); }}
-                            >
-                                <List className="w-4 h-4 inline mr-1.5" /> Tabla
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="manager-input-group">
-                        <label className="manager-field-label">Acciones Rapidas</label>
-                        <div className="flex flex-col gap-3">
-                            <button
-                                onClick={handleRegisterPlayer}
-                                className="bg-[var(--accent)] text-[var(--bg)] px-4 py-3 font-bold uppercase tracking-widest text-xs border border-[var(--accent)] hover:opacity-80 transition-opacity flex items-center justify-center gap-2"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Registrar jugador
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setIsImportOpen(true)}
-                                className="px-4 py-3 border border-[var(--border)] font-bold uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2"
-                                style={{ background: 'var(--surface-soft-strong)', color: 'var(--text)' }}
-                                title="Importacion masiva"
-                            >
-                                <Upload className="w-4 h-4" />
-                                Importacion masiva
-                            </button>
-                        </div>
-                    </div>
+            {/* CONTROL BAR */}
+            <div className="players-control-bar">
+                <div className="players-search-zone">
+                    <Search className="players-search-zone-icon" />
+                    <input
+                        type="text"
+                        placeholder="Buscar por nombre, posición o división..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                <div className="players-view-mode">
+                    <button
+                        className={`players-view-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                        onClick={() => setViewMode('cards')}
+                    >
+                        <LayoutGrid className="w-3.5 h-3.5" />
+                        Tarjetas
+                    </button>
+                    <button
+                        className={`players-view-btn ${viewMode === 'table' ? 'active' : ''}`}
+                        onClick={() => setViewMode('table')}
+                    >
+                        <List className="w-3.5 h-3.5" />
+                        Tabla
+                    </button>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleRegisterPlayer}
+                        className="btn btn-primary"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Registrar Jugador
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setIsImportOpen(true)}
+                        className="btn"
+                        title="Importación masiva"
+                    >
+                        <Upload className="w-4 h-4" />
+                        Importación Masiva
+                    </button>
                 </div>
             </div>
 
+            {/* ACTION MESSAGE */}
             {actionMessage && (
-                <div className="manager-card border-[var(--accent)]/25">
+                <div className="card border-[var(--accent)]/25">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <p className="text-sm" style={{ color: 'var(--text)' }}>{actionMessage}</p>
                         <button
@@ -223,155 +230,168 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
                 </div>
             )}
 
+            {/* CONTENT */}
             {loading ? (
-                <div className="manager-card">
+                <div className="card">
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <div className="w-12 h-12 border-2 border-[var(--accent)]/20 border-t-[var(--accent)] rounded-full animate-spin"></div>
-                        <p className="uppercase text-xs tracking-widest" style={{ color: 'var(--text-muted)' }}>Cargando jugadores...</p>
+                        <p className="uppercase text-xs tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                            Cargando jugadores...
+                        </p>
                     </div>
                 </div>
             ) : viewMode === 'cards' ? (
-                <div className="manager-card">
-                    <div className="flex flex-col gap-6">
-                        <div className="flex flex-col gap-4 border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-6 md:flex-row md:items-center md:justify-between">
-                            <div className="max-w-3xl">
-                                <p className="uppercase text-[11px] font-black tracking-[0.24em]" style={{ color: 'var(--accent)' }}>
-                                    Vista del club
-                                </p>
-                                <h2 className="mt-3 text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--text)' }}>
-                                    Jugadores
-                                </h2>
-                                <p className="mt-3 text-sm leading-6" style={{ color: 'var(--text-muted)' }}>
-                                    Cada alta queda vinculada al club. Puedes asignarla a una division cuando haga falta, pero la vista principal muestra a las personas, no a los planteles.
-                                </p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3 sm:min-w-[240px]">
-                                <div className="rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
-                                    <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>Total</p>
-                                    <p className="mt-1 text-xl font-black" style={{ color: 'var(--text)' }}>{players.length}</p>
-                                </div>
-                                <div className="rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
-                                    <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>Club</p>
-                                    <p className="mt-1 text-xl font-black" style={{ color: 'var(--text)' }}>{playersAtClubLevel}</p>
-                                </div>
-                            </div>
-                        </div>
+                <>
+                    <div className="players-grid-header">
+                        <h3>
+                            Vista del Club
+                            <span className="players-grid-header-count">
+                                • {filteredPlayers.length} PERSONAS
+                            </span>
+                        </h3>
+                        <span className="player-tag-v2">
+                            Filtro: {searchQuery.trim() ? 'Búsqueda' : 'Todos'}
+                        </span>
+                    </div>
 
-                        {filteredPlayers.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                                {filteredPlayers.map((person) => (
-                                    <div
-                                        key={person.id}
-                                        className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-4 transition-colors hover:border-[var(--accent)]/40 hover:bg-[rgba(255,255,255,0.06)]"
-                                    >
-                                        <button
-                                            type="button"
-                                            className="flex w-full items-start gap-4 text-left"
+                    {filteredPlayers.length > 0 ? (
+                        <div className="players-grid">
+                            {filteredPlayers.map((person) => (
+                                <div
+                                    key={person.id}
+                                    className="player-card-v2"
+                                    onClick={() => {
+                                        setEditingPlayer(person);
+                                        setIsAddPlayerOpen(true);
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            setEditingPlayer(person);
+                                            setIsAddPlayerOpen(true);
+                                        }
+                                    }}
+                                >
+                                    <div className="player-avatar-v2">
+                                        {person.photo_url ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={person.photo_url}
+                                                alt={person.first_name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            getInitials(person.first_name, person.last_name)
+                                        )}
+                                    </div>
+                                    <div className="player-info-v2">
+                                        <div className="player-name-v2">
+                                            {person.first_name} {person.last_name}
+                                        </div>
+                                        <div className="player-meta-v2">
+                                            <span className="player-status-v2">
+                                                {person.position || 'SIN POSICIÓN'}
+                                            </span>
+                                            <span className="player-tag-v2">
+                                                {person.division_name || 'CLUB'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="players-empty-state">
+                            <Shield className="w-12 h-12 mx-auto opacity-50" style={{ color: 'var(--text-dim)' }} />
+                            <p className="mt-4 uppercase text-sm tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                                {players.length === 0 ? 'Aún no hay jugadores cargados' : 'No hay coincidencias para esta búsqueda'}
+                            </p>
+                            <p className="mt-2 text-xs uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
+                                {players.length === 0
+                                    ? 'El primer alta que registres quedará asociada a este club.'
+                                    : 'Prueba con otro nombre, posición o división.'}
+                            </p>
+                        </div>
+                    )}
+                </>
+            ) : (
+                <>
+                    <div className="players-grid-header">
+                        <h3>
+                            Vista del Club
+                            <span className="players-grid-header-count">
+                                • {filteredPlayers.length} PERSONAS
+                            </span>
+                        </h3>
+                        <span className="player-tag-v2">
+                            Filtro: {searchQuery.trim() ? 'Búsqueda' : 'Todos'}
+                        </span>
+                    </div>
+
+                    {filteredPlayers.length > 0 ? (
+                        <div className="players-table-wrap">
+                            <table className="players-table">
+                                <thead>
+                                    <tr>
+                                        <th>Jugador</th>
+                                        <th>Posición</th>
+                                        <th>División</th>
+                                        <th>Nacimiento</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredPlayers.map((person) => (
+                                        <tr
+                                            key={person.id}
                                             onClick={() => {
                                                 setEditingPlayer(person);
                                                 setIsAddPlayerOpen(true);
                                             }}
                                         >
-                                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0" style={{ background: 'var(--surface-row)', border: '1px solid var(--border-standard)' }}>
-                                                {person.photo_url ? (
-                                                    // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={person.photo_url} alt={person.first_name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Users className="w-5 h-5" style={{ color: 'var(--text-dim)' }} />
-                                                )}
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-sm font-black uppercase leading-tight" style={{ color: 'var(--text)' }}>
+                                            <td>
+                                                <div className="players-table-name">
                                                     {person.first_name} {person.last_name}
-                                                </p>
-                                                <p className="mt-2 text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-                                                    {person.position || 'Sin posicion'}
-                                                </p>
-                                                <div className="mt-4 flex flex-wrap gap-2">
-                                                    <span className="anodized-tag" style={{ color: 'var(--text-muted)' }}>
-                                                        {person.division_name || 'Club'}
-                                                    </span>
-                                                    {person.birth_date ? (
-                                                        <span className="anodized-tag" style={{ color: 'var(--text-muted)' }}>
-                                                            {new Date(person.birth_date).toLocaleDateString('es-AR')}
-                                                        </span>
-                                                    ) : null}
                                                 </div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="rounded-2xl border border-dashed border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] px-4 py-10 text-center">
-                                <Shield className="w-12 h-12 mx-auto opacity-50" style={{ color: 'var(--text-dim)' }} />
-                                <p className="mt-4 uppercase text-sm tracking-widest" style={{ color: 'var(--text-muted)' }}>
-                                    {players.length === 0 ? 'Aun no hay jugadores cargados' : 'No hay coincidencias para esta busqueda'}
-                                </p>
-                                <p className="mt-2 text-xs uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
-                                    {players.length === 0
-                                        ? 'El primer alta que registres quedara asociada a este club.'
-                                        : 'Prueba con otro nombre, posicion o division.'}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            ) : (
-                <div className="manager-card">
-                    <header className="manager-header">
-                        <div className="manager-header-titles">
-                            <h1>Vista Completa de Jugadores</h1>
-                            <p>Listado detallado de las personas registradas en el club.</p>
+                                            </td>
+                                            <td>
+                                                <span className="player-status-v2">
+                                                    {person.position || 'SIN POSICIÓN'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="player-tag-v2">
+                                                    {person.division_name || 'CLUB'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {person.birth_date ? new Date(person.birth_date).toLocaleDateString('es-AR') : 'Sin fecha'}
+                                            </td>
+                                            <td>
+                                                <span className="player-tag-v2" style={{ color: 'var(--success)', borderColor: 'rgba(34,197,94,0.3)' }}>
+                                                    {person.status || 'ACTIVE'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    </header>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="border-b border-[var(--border)]">
-                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Jugador</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Posicion</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Division</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Nacimiento</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredPlayers.map((person) => (
-                                    <tr
-                                        key={person.id}
-                                        className="border-b border-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.02)] transition-colors cursor-pointer"
-                                        onClick={() => {
-                                            setEditingPlayer(person);
-                                            setIsAddPlayerOpen(true);
-                                        }}
-                                    >
-                                        <td className="px-6 py-5">
-                                            <div className="font-bold text-sm uppercase tracking-tight" style={{ color: 'var(--text)' }}>
-                                                {person.first_name} {person.last_name}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5 text-sm font-medium uppercase" style={{ color: 'var(--text)' }}>
-                                            {person.position || 'Sin posicion'}
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="anodized-tag inline-block">{person.division_name || 'Club'}</div>
-                                        </td>
-                                        <td className="px-6 py-5 text-sm" style={{ color: 'var(--text)' }}>
-                                            {person.birth_date ? new Date(person.birth_date).toLocaleDateString('es-AR') : 'Sin fecha'}
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className="anodized-tag inline-flex items-center gap-2 text-[var(--success)] border-[var(--success)]/30">
-                                                {person.status || 'active'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                    ) : (
+                        <div className="players-empty-state">
+                            <Shield className="w-12 h-12 mx-auto opacity-50" style={{ color: 'var(--text-dim)' }} />
+                            <p className="mt-4 uppercase text-sm tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                                {players.length === 0 ? 'Aún no hay jugadores cargados' : 'No hay coincidencias para esta búsqueda'}
+                            </p>
+                            <p className="mt-2 text-xs uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>
+                                {players.length === 0
+                                    ? 'El primer alta que registres quedará asociada a este club.'
+                                    : 'Prueba con otro nombre, posición o división.'}
+                            </p>
+                        </div>
+                    )}
+                </>
             )}
 
             <PersonManagementModal
@@ -397,7 +417,7 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
                 onClose={() => setIsImportOpen(false)}
                 onSuccess={async () => {
                     await refreshPlayersData();
-                    setActionMessage('Importacion completada.');
+                    setActionMessage('Importación completada.');
                 }}
             />
         </div>

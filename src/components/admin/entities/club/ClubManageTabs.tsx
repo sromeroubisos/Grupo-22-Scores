@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Activity, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, Users } from 'lucide-react';
+import { Activity, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, UserCog, Users } from 'lucide-react';
 import { Select } from '@/components/admin/ui';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
 import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
@@ -26,6 +26,7 @@ export const CLUB_MANAGE_VISIBLE_TABS = [
     { id: 'partidos', label: 'Partidos', Icon: Radio, live: true },
     { id: 'contenido', label: 'Exports Sociales', Icon: Sparkles },
     { id: 'pizarra', label: 'Pizarra', Icon: Layout },
+    { id: 'usuarios', label: 'Usuarios', Icon: UserCog },
     { id: 'configuracion', label: 'Configuracion', Icon: Settings2 },
 ];
 
@@ -121,6 +122,7 @@ export function ClubManageTabs({
                                     {tab.id === 'contenido' ? 'Studio y redes' : null}
                                     {tab.id === 'pizarra' ? 'Táctica y jugadas' : null}
                                     {tab.id === 'entrenamientos' ? 'Gimnasio, campo y asistencia' : null}
+                                    {tab.id === 'usuarios' ? 'Accesos y permisos del club' : null}
                                     {tab.id === 'configuracion' ? 'Identidad y roles' : null}
                                 </small>
                             </span>

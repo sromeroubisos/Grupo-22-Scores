@@ -8,6 +8,7 @@ export type ClubManageTabId =
     | 'pizarra'
     | 'sponsors'
     | 'entrenamientos'
+    | 'usuarios'
     | 'configuracion';
 
 export const CLUB_MANAGE_ALLOWED_TABS = new Set<ClubManageTabId>([
@@ -17,6 +18,7 @@ export const CLUB_MANAGE_ALLOWED_TABS = new Set<ClubManageTabId>([
     'partidos',
     'contenido',
     'pizarra',
+    'usuarios',
     'configuracion',
 ]);
 

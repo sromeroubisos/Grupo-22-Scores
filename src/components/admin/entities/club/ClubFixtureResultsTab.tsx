@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useDeferredValue, useState, startTransition, useCallback, useEffect, useMemo } from 'react';
 import { Calendar, ChevronRight, ClipboardList, FileBarChart2, Filter, LayoutList, NotebookPen, ShieldAlert, Sparkles, Target, Users, X } from 'lucide-react';
 import { ClubSeasonStatsPanel } from './ClubSeasonStatsPanel';
+import { CreateInternalMatchModal } from './CreateInternalMatchModal';
 import { getStoredActiveTeamId, persistActiveTeamId } from '@/lib/club-admin/activeTeamSelection';
 import { resolveActiveSeason, persistActiveSeason } from '@/lib/club-admin/activeSeasonSelection';
 import type { ClubDashboardMatch } from '@/lib/club-admin/dashboard-types';
@@ -56,16 +57,7 @@ type MatchKpiCard = {
     active: boolean;
 };
 
-type ClubTournamentOption = {
-    id: string;
-    name: string;
-    originalName?: string | null;
-    seasonId?: string | null;
-    sportId?: string | null;
-    status?: string | null;
-    reviewStatus?: string | null;
-    isPending: boolean;
-};
+
 
 const TIMELINE_TABS: Array<{ id: MatchTimelineTab; label: string }> = [
     { id: 'upcoming', label: 'Próximos' },
@@ -289,25 +281,7 @@ export function ClubFixtureResultsTab({
     const [operationalFilter, setOperationalFilter] = useState<MatchOperationalFilter>('all');
     const [selectedSeason, setSelectedSeason] = useState(() => resolveActiveSeason(clubId));
 
-    // Create internal match form state
-    const [createForm, setCreateForm] = useState({
-        rival: '',
-        date: '',
-        time: '',
-        venue: '',
-        isHome: true,
-        matchType: 'amistoso',
-        tournamentId: '',
-        tournamentMode: 'none' as 'none' | 'existing' | 'new',
-        newTournamentName: '',
-        newTournamentSeasonId: String(new Date().getFullYear()),
-        divisionId: '',
-        notes: '',
-    });
-    const [creating, setCreating] = useState(false);
-    const [clubTournaments, setClubTournaments] = useState<ClubTournamentOption[]>([]);
-    const [loadingClubTournaments, setLoadingClubTournaments] = useState(false);
-    const [clubTournamentsError, setClubTournamentsError] = useState<string | null>(null);
+
     const deferredRivalFilter = useDeferredValue(rivalFilter);
 
     const [displayLimit, setDisplayLimit] = useState(50);
@@ -548,35 +522,7 @@ export function ClubFixtureResultsTab({
         }
     }, [apiLoading, activeTab, clubId, apiCursor]);
 
-    const loadClubTournamentOptions = useCallback(async () => {
-        setLoadingClubTournaments(true);
-        setClubTournamentsError(null);
 
-        try {
-            const params = new URLSearchParams({ club: clubId });
-            const response = await fetch(`/api/club-admin/tournaments?${params.toString()}`, {
-                credentials: 'same-origin',
-                cache: 'no-store',
-            });
-            const payload = await response.json().catch(() => null);
-
-            if (!response.ok || !payload?.ok) {
-                throw new Error(payload?.error || 'No se pudieron cargar los torneos');
-            }
-
-            setClubTournaments(Array.isArray(payload.data?.tournaments) ? payload.data.tournaments : []);
-        } catch (error) {
-            setClubTournaments([]);
-            setClubTournamentsError(error instanceof Error ? error.message : 'No se pudieron cargar los torneos');
-        } finally {
-            setLoadingClubTournaments(false);
-        }
-    }, [clubId]);
-
-    useEffect(() => {
-        if (!createModalOpen) return;
-        void loadClubTournamentOptions();
-    }, [createModalOpen, loadClubTournamentOptions]);
 
     if (loading) {
         return (
@@ -963,245 +909,17 @@ export function ClubFixtureResultsTab({
             </main>
 
             {/* ── Create Internal Match Modal ── */}
-            {createModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setCreateModalOpen(false)}>
-                    <div className="bg-[#111118] border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-white/10">
-                            <h3 className="text-lg font-bold">Crear partido interno</h3>
-                            <button onClick={() => setCreateModalOpen(false)} className="text-white/50 hover:text-white"><X className="w-5 h-5" /></button>
-                        </div>
-                        <div className="p-5 space-y-4">
-                            <label className="block">
-                                <span className="text-xs text-white/50 uppercase tracking-wider">Rival</span>
-                                <input
-                                    type="text"
-                                    value={createForm.rival}
-                                    onChange={(e) => setCreateForm({ ...createForm, rival: e.target.value })}
-                                    placeholder="Nombre del rival"
-                                    className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                />
-                            </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <label className="block">
-                                    <span className="text-xs text-white/50 uppercase tracking-wider">Fecha</span>
-                                    <input
-                                        type="date"
-                                        value={createForm.date}
-                                        onChange={(e) => setCreateForm({ ...createForm, date: e.target.value })}
-                                        className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                    />
-                                </label>
-                                <label className="block">
-                                    <span className="text-xs text-white/50 uppercase tracking-wider">Hora</span>
-                                    <input
-                                        type="time"
-                                        value={createForm.time}
-                                        onChange={(e) => setCreateForm({ ...createForm, time: e.target.value })}
-                                        className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                    />
-                                </label>
-                            </div>
-                            <label className="block">
-                                <span className="text-xs text-white/50 uppercase tracking-wider">Sede / Cancha</span>
-                                <input
-                                    type="text"
-                                    value={createForm.venue}
-                                    onChange={(e) => setCreateForm({ ...createForm, venue: e.target.value })}
-                                    placeholder="Nombre de la cancha"
-                                    className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                />
-                            </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <label className="block">
-                                    <span className="text-xs text-white/50 uppercase tracking-wider">Condición</span>
-                                    <select
-                                        value={createForm.isHome ? 'home' : 'away'}
-                                        onChange={(e) => setCreateForm({ ...createForm, isHome: e.target.value === 'home' })}
-                                        className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                    >
-                                        <option value="home">Local</option>
-                                        <option value="away">Visitante</option>
-                                    </select>
-                                </label>
-                                <label className="block">
-                                    <span className="text-xs text-white/50 uppercase tracking-wider">Tipo</span>
-                                    <select
-                                        value={createForm.matchType}
-                                        onChange={(e) => setCreateForm({ ...createForm, matchType: e.target.value })}
-                                        className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                    >
-                                        <option value="amistoso">Amistoso</option>
-                                        <option value="entrenamiento">Entrenamiento</option>
-                                        <option value="interno">Interno</option>
-                                        <option value="otro">Otro</option>
-                                    </select>
-                                </label>
-                            </div>
-                            <label className="block">
-                                <span className="text-xs text-white/50 uppercase tracking-wider">Torneo</span>
-                                <select
-                                    value={createForm.tournamentMode === 'new' ? '__new__' : createForm.tournamentId}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '__new__') {
-                                            setCreateForm({
-                                                ...createForm,
-                                                tournamentMode: 'new',
-                                                tournamentId: '',
-                                            });
-                                            return;
-                                        }
-                                        setCreateForm({
-                                            ...createForm,
-                                            tournamentMode: value ? 'existing' : 'none',
-                                            tournamentId: value,
-                                        });
-                                    }}
-                                    className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                >
-                                    <option value="">Sin torneo</option>
-                                    <option value="__new__">Crear torneo nuevo pendiente</option>
-                                    {clubTournaments.filter((tournament) => tournament.isPending).map((tournament) => (
-                                        <option key={tournament.id} value={tournament.id}>
-                                            {tournament.name} (pendiente)
-                                        </option>
-                                    ))}
-                                    {clubTournaments.filter((tournament) => !tournament.isPending).map((tournament) => (
-                                        <option key={tournament.id} value={tournament.id}>
-                                            {tournament.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {loadingClubTournaments ? (
-                                    <span className="mt-1 block text-xs text-white/40">Cargando torneos...</span>
-                                ) : null}
-                                {clubTournamentsError ? (
-                                    <span className="mt-1 block text-xs text-red-300">{clubTournamentsError}</span>
-                                ) : null}
-                            </label>
-                            {createForm.tournamentMode === 'new' ? (
-                                <div className="space-y-3 rounded-xl border border-[#00ff88]/20 bg-[#00ff88]/5 p-3">
-                                    <div className="grid grid-cols-[1fr_120px] gap-3">
-                                        <label className="block">
-                                            <span className="text-xs text-white/50 uppercase tracking-wider">Nombre del torneo</span>
-                                            <input
-                                                type="text"
-                                                value={createForm.newTournamentName}
-                                                onChange={(e) => setCreateForm({ ...createForm, newTournamentName: e.target.value })}
-                                                placeholder="Ej: Copa Apertura M19"
-                                                className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                            />
-                                        </label>
-                                        <label className="block">
-                                            <span className="text-xs text-white/50 uppercase tracking-wider">Temporada</span>
-                                            <input
-                                                type="text"
-                                                value={createForm.newTournamentSeasonId}
-                                                onChange={(e) => setCreateForm({ ...createForm, newTournamentSeasonId: e.target.value })}
-                                                placeholder="2026"
-                                                className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                            />
-                                        </label>
-                                    </div>
-                                    <p className="text-xs leading-relaxed text-white/55">
-                                        El torneo queda pendiente de revision y solo se usa dentro de tu club hasta que un Super Admin lo publique o lo vincule.
-                                    </p>
-                                </div>
-                            ) : null}
-                            <label className="block">
-                                <span className="text-xs text-white/50 uppercase tracking-wider">Equipo / División</span>
-                                <select
-                                    value={createForm.divisionId}
-                                    onChange={(e) => setCreateForm({ ...createForm, divisionId: e.target.value })}
-                                    className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50"
-                                >
-                                    <option value="">Seleccionar equipo...</option>
-                                    {divisions.map((division) => (
-                                        <option key={division.id} value={division.id}>{division.name}</option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label className="block">
-                                <span className="text-xs text-white/50 uppercase tracking-wider">Notas</span>
-                                <textarea
-                                    value={createForm.notes}
-                                    onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
-                                    rows={3}
-                                    placeholder="Notas opcionales..."
-                                    className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00ff88]/50 resize-none"
-                                />
-                            </label>
-                        </div>
-                        <div className="flex items-center gap-3 p-5 border-t border-white/10">
-                            <button
-                                onClick={() => setCreateModalOpen(false)}
-                                className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm font-medium hover:bg-white/5"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    if (!createForm.rival || !createForm.date || !createForm.time) {
-                                        alert('Completá rival, fecha y hora');
-                                        return;
-                                    }
-                                    if (createForm.tournamentMode === 'new' && !createForm.newTournamentName.trim()) {
-                                        alert('Completa el nombre del torneo');
-                                        return;
-                                    }
-                                    setCreating(true);
-                                    try {
-                                        const response = await fetch('/api/club-admin/matches', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({
-                                                clubId,
-                                                awayClubId: createForm.rival,
-                                                date: createForm.date,
-                                                time: createForm.time,
-                                                venue: createForm.venue,
-                                                isHome: createForm.isHome,
-                                                matchType: createForm.matchType,
-                                                tournamentId: createForm.tournamentMode === 'existing' ? createForm.tournamentId : null,
-                                                newTournament: createForm.tournamentMode === 'new'
-                                                    ? {
-                                                        name: createForm.newTournamentName,
-                                                        seasonId: createForm.newTournamentSeasonId,
-                                                    }
-                                                    : null,
-                                                divisionId: createForm.divisionId || null,
-                                                notes: createForm.notes,
-                                            }),
-                                        });
-                                        const payload = await response.json().catch(() => null);
-                                        if (!response.ok || !payload?.ok) {
-                                            throw new Error(payload?.error || 'Error al crear');
-                                        }
-                                        const data = payload.data;
-                                        setCreateModalOpen(false);
-                                        window.open(`/club-admin/matches/${data.id}?club=${encodeURIComponent(clubId)}`, '_blank');
-                                        // Refresh list after short delay
-                                        setTimeout(() => window.location.reload(), 500);
-                                    } catch (error) {
-                                        alert(error instanceof Error ? error.message : 'Error al crear el partido');
-                                    } finally {
-                                        setCreating(false);
-                                    }
-                                }}
-                                disabled={creating}
-                                className="flex-1 py-2.5 rounded-xl bg-[#00ff88] text-[#0a0a0f] text-sm font-bold hover:bg-[#00ff88]/90 disabled:opacity-50"
-                            >
-                                {creating ? 'Creando...' : 'Crear partido'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <CreateInternalMatchModal
+                open={createModalOpen}
+                clubId={clubId}
+                divisions={divisions}
+                onClose={() => setCreateModalOpen(false)}
+            />
 
             {/* ── Calendar Modal ── */}
             {calendarOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setCalendarOpen(false)}>
-                    <div className="bg-[#111118] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md" onClick={() => setCalendarOpen(false)}>
+                    <div className="bg-[#111118] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b border-white/10">
                             <h3 className="text-lg font-bold">Calendario del club</h3>
                             <button onClick={() => setCalendarOpen(false)} className="text-white/50 hover:text-white"><X className="w-5 h-5" /></button>

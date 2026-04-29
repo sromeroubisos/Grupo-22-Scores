@@ -49,6 +49,51 @@ async function resolveClubReference(admin: ReturnType<typeof createAdminClient>,
   return data?.id ? String(data.id) : null;
 }
 
+function normalizeRivalName(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+async function ensureClubRival(
+  admin: ReturnType<typeof createAdminClient>,
+  args: { clubId: string; name: string; userId: string }
+) {
+  const normalized = normalizeRivalName(args.name);
+  if (!normalized) return null;
+
+  const { data: existing } = await admin
+    .from('club_rivals')
+    .select('id, name, normalized_name, review_status')
+    .eq('club_id', args.clubId)
+    .eq('normalized_name', normalized)
+    .maybeSingle();
+
+  if (existing) return existing as { id: string; name: string; normalized_name: string; review_status: string };
+
+  const { data, error } = await admin
+    .from('club_rivals')
+    .insert({
+      club_id: args.clubId,
+      name: args.name,
+      normalized_name: normalized,
+      created_by_user_id: args.userId,
+      review_status: 'pending',
+    })
+    .select('id, name, normalized_name, review_status')
+    .single();
+
+  if (error) {
+    console.warn('[ClubAdmin CREATE match] could not ensure rival:', error.message);
+    return null;
+  }
+
+  return data as { id: string; name: string; normalized_name: string; review_status: string };
+}
+
 async function resolveRequestedTournament(
   admin: ReturnType<typeof createAdminClient>,
   tournamentId: unknown,
@@ -182,6 +227,15 @@ export async function POST(request: NextRequest) {
 
     const opponentClubId = await resolveClubReference(admin, awayClubId);
     const opponentLabel = normalizeText(rivalName) || normalizeText(awayClubId);
+
+    // Persist rival for club reuse and super-admin review (fire-and-forget; frontend already saves it)
+    if (opponentLabel && !opponentClubId) {
+      void ensureClubRival(admin, {
+        clubId: originClubId,
+        name: opponentLabel,
+        userId: context.userId,
+      });
+    }
 
     // Determine home/away based on isHome flag
     const resolvedHomeClubId = isHomeMatch ? originClubId : opponentClubId;
