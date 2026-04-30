@@ -15,6 +15,7 @@ import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getCountryById } from '@/lib/data/countries';
 import { memoryCache } from '@/lib/cache';
 import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
+import { isMatchVisibleToPublic } from '@/lib/matchReview';
 import {
     readMatchesFeedSnapshotMetadata,
     readUsableMatchesFeedSnapshot,
@@ -435,6 +436,8 @@ type PublicDbMatchRow = {
     away_club_id: string | null;
     sport_id?: string | null;
     sport?: string | null;
+    is_visible?: boolean | null;
+    review_status?: string | null;
 };
 
 type PublicDbMatchesResult = {
@@ -586,6 +589,9 @@ async function fetchPublicSupabaseMatches(options: {
                 const homeTeam = clubMap.get(match.home_club_id || '');
                 const awayTeam = clubMap.get(match.away_club_id || '');
 
+                if (!isMatchVisibleToPublic(match)) {
+                    return false;
+                }
                 if (match.tournament_id && (!tournament || !isTournamentPubliclyVisible(tournament))) {
                     return false;
                 }
@@ -699,7 +705,7 @@ type MatchesTraceContext = {
 
 // Bump the cache namespace when response-shaping logic changes so we don't
 // keep serving stale persisted snapshots for historical dates.
-const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v4';
+const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v5';
 const EXTERNAL_MATCHES_PERSIST_TTL_MS = 10 * 60 * 1000;
 const MATCHES_DB_SELECT_COLUMNS = [
     'id',
@@ -714,9 +720,13 @@ const MATCHES_DB_SELECT_COLUMNS = [
     'away_club_id',
     'sport_id',
     'sport',
+    'is_visible',
+    'review_status',
 ].join(', ');
 const MATCHES_DB_SELECT_VARIANTS = [
     MATCHES_DB_SELECT_COLUMNS,
+    'id, tournament_id, date_time, status, score, round_label, round_id, venue, home_club_id, away_club_id, sport_id, sport, is_visible',
+    'id, tournament_id, date_time, status, score, round_label, round_id, venue, home_club_id, away_club_id, sport_id, sport, review_status',
     'id, tournament_id, date_time, status, score, round_label, round_id, venue, home_club_id, away_club_id, sport_id',
     'id, tournament_id, date_time, status, score, round_label, round_id, venue, home_club_id, away_club_id, sport',
     'id, tournament_id, date_time, status, score, round_label, venue, home_club_id, away_club_id',
@@ -744,6 +754,8 @@ const MATCHES_DB_SCHEMA_FALLBACK_COLUMNS = [
     'away_club_id',
     'sport_id',
     'sport',
+    'is_visible',
+    'review_status',
 ];
 const matchesRefreshLocks = new Map<string, Promise<void>>();
 const matchesInFlightResponses = new Map<string, Promise<MatchesPayload>>();

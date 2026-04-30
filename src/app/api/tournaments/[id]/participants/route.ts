@@ -15,6 +15,7 @@ import {
 } from '@/lib/clubDerivatives';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { normalizeSlug } from '@/lib/utils/normalize';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { logOverfetchWarning } from '@/lib/perf/measure';
@@ -199,6 +200,37 @@ const MALE_PATTERNS = [
 
 const VARIANT_CATEGORY_PREFIXES = ['gender:', 'age_grade:', 'audience:', 'variant:', 'sport:'];
 let tournamentParticipantDivisionIdSupport: boolean | null = null;
+
+function serializeClubLogoUrl(input: {
+  id?: string | null;
+  name?: string | null;
+  logo?: string | null;
+}) {
+  return resolveSerializableLogoUrl(input.logo, {
+    key: input.id ?? null,
+    name: input.name ?? null,
+  });
+}
+
+function serializeParticipantRecord(participant: TournamentParticipantRecord): TournamentParticipantRecord {
+  const club = participant.clubs;
+  if (!club) return participant;
+
+  const logo = serializeClubLogoUrl({
+    id: club.id || participant.club_id,
+    name: club.name || participant.name,
+    logo: club.logo_url || club.logo || null,
+  });
+
+  return {
+    ...participant,
+    clubs: {
+      ...club,
+      logo_url: logo,
+      logo,
+    },
+  };
+}
 
 async function supportsTournamentParticipantDivisionId(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -706,7 +738,7 @@ export async function GET(
         id: club.id,
         name: club.name,
         short_name: club.short_name,
-        logo: club.logo_url,
+        logo: serializeClubLogoUrl({ id: club.id, name: club.name, logo: club.logo_url }),
         externalId: null,
       }));
 
@@ -725,6 +757,7 @@ export async function GET(
             name: c.name,
             short_name: c.short_name,
             logo: c.logo,
+            logo_url: c.logo,
           },
           division: null,
         })));
@@ -801,7 +834,7 @@ export async function GET(
         id: club.id,
         name: club.name,
         short_name: club.short_name,
-        logo: club.logo_url,
+        logo: serializeClubLogoUrl({ id: club.id, name: club.name, logo: club.logo_url }),
         externalId: null
       }));
 
@@ -821,7 +854,8 @@ export async function GET(
             id: c.id,
             name: c.name,
             short_name: c.short_name,
-            logo: c.logo
+            logo: c.logo,
+            logo_url: c.logo
           },
           division: null,
         })));
@@ -869,11 +903,13 @@ export async function GET(
       );
     }
 
+    const serializedParticipants = (participants || []).map(serializeParticipantRecord);
+
     // Return full participant data if requested, otherwise just club info
     if (full) {
-      return perf.json(participants || []);
+      return perf.json(serializedParticipants);
     } else {
-      const clubs = (participants || [])
+      const clubs = serializedParticipants
         .filter((participant) => participant.status === 'active' && participant.clubs)
         .map((participant) => ({
           id: participant.clubs?.id,

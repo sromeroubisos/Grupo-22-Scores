@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canManageMatchContext, getMatchManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES, MANAGEMENT_MEMBERSHIP_ROLES, hasFederationAdminAccess } from '@/lib/auth/roles';
+import { isMatchVisibleToPublic } from '@/lib/matchReview';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
@@ -288,6 +289,15 @@ async function ensureMatchAccess(
   }
 }
 
+async function canReadHiddenMatch(matchId: string) {
+  try {
+    await ensureMatchAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -351,6 +361,13 @@ export async function GET(
     const { data: match, error: matchError } = await fetchMatchCenterMatch(readClient, matchId);
 
     if (matchError || !match) {
+      return jsonNoStore(
+        { error: 'Match not found' },
+        { status: 404 }
+      );
+    }
+
+    if (!isMatchVisibleToPublic(match) && !(await canReadHiddenMatch(matchId))) {
       return jsonNoStore(
         { error: 'Match not found' },
         { status: 404 }

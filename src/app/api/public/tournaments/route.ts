@@ -37,7 +37,7 @@ const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITHOUT_LEGACY
 const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_status`;
 const SELECT_WITHOUT_LEGACY_SPORT_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT}, review_status`;
 const FLAT_CACHE_CONTROL = 'public, max-age=300, stale-while-revalidate=600';
-const CATALOG_CACHE_CONTROL = 'no-store, no-cache, must-revalidate';
+const CATALOG_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300';
 
 type PublicTournamentRow = {
     id: string;

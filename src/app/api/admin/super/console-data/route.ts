@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 type QueryError = {
@@ -170,6 +171,12 @@ type MatchConsoleRow = {
     away_club_id: string | null;
     sport?: string | null;
     sport_id?: string | null;
+    is_visible?: boolean | null;
+    review_status?: string | null;
+    created_by_user_id?: string | null;
+    created_by_club_id?: string | null;
+    reviewed_at?: string | null;
+    review_notes?: string | null;
 };
 
 type ClubConsoleRow = {
@@ -317,6 +324,7 @@ export async function GET(request: NextRequest) {
             const unionMap = new Map(((unionsError ? [] : unions) ?? []).map((union) => [union.id, union]));
             const data = (clubs ?? []).map((club) => ({
                 ...club,
+                logo_url: resolveSerializableLogoUrl(club.logo_url, { key: club.id, name: club.name }),
                 sport: club.sport || club.sport_id || null,
                 union: club.union_id ? unionMap.get(club.union_id) ?? null : null,
                 followers_count: 0,
@@ -395,6 +403,9 @@ export async function GET(request: NextRequest) {
         const matchesResult = await selectWithFallback<MatchConsoleRow>(
             readClient.from('matches'),
             [
+                'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport, is_visible, review_status, created_by_user_id, created_by_club_id, reviewed_at, review_notes',
+                'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport, is_visible, review_status',
+                'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport, review_status',
                 'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport',
                 'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id',
                 'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport',
@@ -471,7 +482,13 @@ export async function GET(request: NextRequest) {
                 season_id: tournament.season_id,
             }
         ]));
-        const clubMap = new Map((clubs ?? []).map((club) => [club.id, club]));
+        const clubMap = new Map((clubs ?? []).map((club) => [
+            club.id,
+            {
+                ...club,
+                logo_url: resolveSerializableLogoUrl(club.logo_url, { key: club.id, name: club.name }),
+            },
+        ]));
 
         const data = (matches ?? []).map((match) => {
             const tournament = match.tournament_id ? tournamentMap.get(match.tournament_id) ?? null : null;

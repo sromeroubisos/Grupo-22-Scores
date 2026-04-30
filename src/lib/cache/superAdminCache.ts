@@ -250,6 +250,12 @@ export interface MatchRow {
     sport_id: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
+    is_visible?: boolean | null;
+    review_status?: string | null;
+    created_by_user_id?: string | null;
+    created_by_club_id?: string | null;
+    reviewed_at?: string | null;
+    review_notes?: string | null;
     tournament: { id: string; name: string; sport_id: string | null; season_id: string | null } | null;
     home_team: { id: string; name: string; logo_url: string | null; primary_color: string | null } | null;
     away_team: { id: string; name: string; logo_url: string | null; primary_color: string | null } | null;

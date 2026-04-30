@@ -4,12 +4,14 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { useSuperConsole } from '../SuperConsoleContext';
-import { RefreshCw, Plus, Radio, CheckCircle, Clock, AlertTriangle, CalendarDays, Trash2 } from 'lucide-react';
+import { RefreshCw, Plus, Radio, CheckCircle, Clock, AlertTriangle, CalendarDays, Trash2, XCircle } from 'lucide-react';
 import type { MatchRow } from '@/lib/cache/superAdminCache';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
+import { MATCH_REVIEW_STATUS } from '@/lib/matchReview';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 
 type MatchStatus = 'scheduled' | 'live' | 'final' | 'postponed' | 'suspended';
+type ReviewFilter = 'all' | 'pending' | 'approved' | 'rejected';
 const PAGE_SIZE = 20;
 
 type PaginatedMatchesResponse = {
@@ -73,11 +75,46 @@ function StatusBadge({ status }: { status: string }) {
     );
 }
 
+function ReviewBadge({ match }: { match: MatchRow }) {
+    const reviewStatus = match.review_status || MATCH_REVIEW_STATUS.approved;
+
+    if (reviewStatus === MATCH_REVIEW_STATUS.pending) {
+        return (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4, fontSize: 11, background: 'rgba(234,179,8,0.1)', color: '#eab308', border: '1px solid rgba(234,179,8,0.3)', fontFamily: 'var(--font-mono)' }}>
+                <AlertTriangle size={10} /> Pendiente SA
+            </span>
+        );
+    }
+
+    if (reviewStatus === MATCH_REVIEW_STATUS.rejected) {
+        return (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4, fontSize: 11, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', fontFamily: 'var(--font-mono)' }}>
+                <XCircle size={10} /> Rechazado
+            </span>
+        );
+    }
+
+    if (match.is_visible === false) {
+        return (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4, fontSize: 11, background: 'rgba(148,163,184,0.1)', color: '#94a3b8', border: '1px solid rgba(148,163,184,0.3)', fontFamily: 'var(--font-mono)' }}>
+                Oculto
+            </span>
+        );
+    }
+
+    return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4, fontSize: 11, background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'var(--font-mono)' }}>
+            <CheckCircle size={10} /> Publico
+        </span>
+    );
+}
+
 export default function SuperadminPartidosPage() {
     // ─── Read from shared context (already prefetched by layout) ─────────────────
     const { filters } = useSuperConsole();
 
     const [statusFilter, setStatusFilter] = useState<MatchStatus | 'all'>('all');
+    const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all');
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageMatches, setPageMatches] = useState<MatchRow[]>([]);
@@ -89,6 +126,7 @@ export default function SuperadminPartidosPage() {
     // Optimistic local state
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
     const [statusOverrides, setStatusOverrides] = useState<Map<string, string>>(new Map());
+    const [reviewOverrides, setReviewOverrides] = useState<Map<string, { review_status: string | null; is_visible: boolean | null }>>(new Map());
 
     const loadMatchesPage = useCallback(async (page = currentPage) => {
         setIsLoading(true);
@@ -101,6 +139,7 @@ export default function SuperadminPartidosPage() {
             });
 
             if (statusFilter !== 'all') params.set('status', statusFilter);
+            if (reviewFilter !== 'all') params.set('review', reviewFilter);
             if (filters.sport !== 'all') params.set('sport', filters.sport);
 
             const response = await fetch(`/api/admin/super/matches?${params.toString()}`, {
@@ -144,6 +183,7 @@ export default function SuperadminPartidosPage() {
                 const baseMatches = Array.isArray(fallbackPayload.data) ? fallbackPayload.data : [];
                 const serverEquivalentMatches = baseMatches.filter(match => {
                     if (statusFilter !== 'all' && match.status !== statusFilter) return false;
+                    if (reviewFilter !== 'all' && (match.review_status || MATCH_REVIEW_STATUS.approved) !== reviewFilter) return false;
                     if (filters.sport !== 'all') {
                         const sportId = resolveMatchSportId(match);
                         if (!sportId || !getSportVariants(filters.sport).includes(sportId)) return false;
@@ -176,11 +216,11 @@ export default function SuperadminPartidosPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [currentPage, filters.sport, statusFilter]);
+    }, [currentPage, filters.sport, reviewFilter, statusFilter]);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [filters.search, filters.sport, statusFilter]);
+    }, [filters.search, filters.sport, reviewFilter, statusFilter]);
 
     useEffect(() => {
         void loadMatchesPage(currentPage);
@@ -225,17 +265,48 @@ export default function SuperadminPartidosPage() {
         refreshPage();
     };
 
+    const handleReviewAction = async (id: string, action: 'approve' | 'reject') => {
+        const optimistic = action === 'approve'
+            ? { review_status: MATCH_REVIEW_STATUS.approved, is_visible: true }
+            : { review_status: MATCH_REVIEW_STATUS.rejected, is_visible: false };
+
+        setReviewOverrides(prev => new Map([...prev, [id, optimistic]]));
+        const response = await fetch(`/api/admin/super/matches/${encodeURIComponent(id)}/approval`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ action }),
+        });
+
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            setReviewOverrides(prev => { const m = new Map(prev); m.delete(id); return m; });
+            alert('Error al revisar partido: ' + (payload?.error || 'No se pudo actualizar la revision.'));
+            return;
+        }
+
+        invalidateCache('matches_list');
+        refreshPage();
+    };
+
     const enrichedMatches = useMemo(() =>
         pageMatches
             .filter(m => !deletedIds.has(m.id))
-            .map(m => ({
-                ...m,
-                status: statusOverrides.has(m.id) ? statusOverrides.get(m.id)! : (m.status ?? 'scheduled'),
-            })),
-        [pageMatches, deletedIds, statusOverrides]);
+            .map(m => {
+                const reviewOverride = reviewOverrides.get(m.id);
+                return {
+                    ...m,
+                    status: statusOverrides.has(m.id) ? statusOverrides.get(m.id)! : (m.status ?? 'scheduled'),
+                    review_status: reviewOverride?.review_status ?? m.review_status,
+                    is_visible: reviewOverride?.is_visible ?? m.is_visible,
+                };
+            }),
+        [pageMatches, deletedIds, statusOverrides, reviewOverrides]);
 
     const filtered = useMemo(() => enrichedMatches.filter(m => {
         if (statusFilter !== 'all' && m.status !== statusFilter) return false;
+        if (reviewFilter !== 'all' && (m.review_status || MATCH_REVIEW_STATUS.approved) !== reviewFilter) return false;
         if (filters.sport !== 'all') {
             const sportId = resolveMatchSportId(m);
             if (!sportId || !getSportVariants(filters.sport).includes(sportId)) return false;
@@ -246,7 +317,7 @@ export default function SuperadminPartidosPage() {
             if (!text.includes(term)) return false;
         }
         return true;
-    }), [enrichedMatches, statusFilter, filters.search, filters.sport]);
+    }), [enrichedMatches, statusFilter, reviewFilter, filters.search, filters.sport]);
 
     const grouped = useMemo(() => filtered.reduce<Record<string, Record<string, MatchRow[]>>>((acc, m) => {
         const tournament = m.tournament?.name || 'Sin torneo';
@@ -258,6 +329,7 @@ export default function SuperadminPartidosPage() {
     }, {}), [filtered]);
 
     const liveCount = enrichedMatches.filter(m => m.status === 'live').length;
+    const pendingReviewCount = enrichedMatches.filter(m => m.review_status === MATCH_REVIEW_STATUS.pending).length;
     const loadedFrom = totalMatches === 0 ? 0 : ((currentPage - 1) * PAGE_SIZE) + 1;
     const loadedTo = totalMatches === 0 ? 0 : Math.min(currentPage * PAGE_SIZE, totalMatches);
 
@@ -274,6 +346,7 @@ export default function SuperadminPartidosPage() {
                                     {loadedFrom}-{loadedTo} de {totalMatches}
                                 </span>
                                 {liveCount > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>● {liveCount} en vivo</span>}
+                                {pendingReviewCount > 0 && <span style={{ color: '#eab308', marginLeft: 8 }}>{pendingReviewCount} pendientes SA</span>}
                             </span>
                         )}
                     </div>
@@ -294,6 +367,13 @@ export default function SuperadminPartidosPage() {
                     <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as MatchStatus | 'all')} className={styles.filterControl} style={{ fontSize: 12, padding: '6px 10px' }}>
                         <option value="all">Todos los estados</option>
                         {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                    </select>
+
+                    <select value={reviewFilter} onChange={e => setReviewFilter(e.target.value as ReviewFilter)} className={styles.filterControl} style={{ fontSize: 12, padding: '6px 10px' }}>
+                        <option value="all">Todas las revisiones</option>
+                        <option value="pending">Pendientes Super Admin</option>
+                        <option value="approved">Aprobados</option>
+                        <option value="rejected">Rechazados</option>
                     </select>
 
                     <button className={styles.cardAction} onClick={refreshPage} disabled={isLoading}>
@@ -334,7 +414,7 @@ export default function SuperadminPartidosPage() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--surface-edge)' }}>
-                                {['Partido', 'Torneo / Fecha', 'Horario', 'Sede', 'Estado', 'Acciones'].map(h => (
+                                {['Partido', 'Torneo / Fecha', 'Horario', 'Sede', 'Revision', 'Estado', 'Acciones'].map(h => (
                                     <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--basalt-400)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</th>
                                 ))}
                             </tr>
@@ -373,6 +453,7 @@ export default function SuperadminPartidosPage() {
                                         </td>
                                         <td style={{ padding: '12px 16px', color: 'var(--basalt-400)', fontSize: 12, fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>{formatDateTime(match.date_time)}</td>
                                         <td style={{ padding: '12px 16px', color: 'var(--basalt-400)', fontSize: 12, maxWidth: 130 }}>{match.venue || '—'}</td>
+                                        <td style={{ padding: '12px 16px' }}><ReviewBadge match={match} /></td>
                                         <td style={{ padding: '12px 16px' }}><StatusBadge status={match.status || 'scheduled'} /></td>
                                         <td style={{ padding: '12px 16px' }}>
                                             <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -383,6 +464,24 @@ export default function SuperadminPartidosPage() {
                                                 >
                                                     {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                                                 </select>
+                                                {match.review_status === MATCH_REVIEW_STATUS.pending && (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleReviewAction(match.id, 'approve')}
+                                                            style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.1)', color: '#10b981', cursor: 'pointer' }}
+                                                        >
+                                                            Aprobar
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleReviewAction(match.id, 'reject')}
+                                                            style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}
+                                                        >
+                                                            Rechazar
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <Link href={`/admin/super/partidos/${match.id}`} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px' }}>Gestionar</Link>
                                                 {match.status !== 'final' && (
                                                     <Link href={`/admin/super/partidos/${match.id}`} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`} style={{ fontSize: 11, padding: '4px 10px' }}>Consola</Link>
@@ -424,7 +523,10 @@ export default function SuperadminPartidosPage() {
                                         const score = match.score as { home: number; away: number } | null;
                                         const isFinalOrLive = match.status === 'final' || match.status === 'live';
                                         return (
-                                            <div key={match.id} className={styles.cardItem} style={{ paddingTop: 36, position: 'relative' }}>
+                                            <div key={match.id} className={styles.cardItem} style={{ paddingTop: 48, position: 'relative' }}>
+                                                <div style={{ position: 'absolute', top: 10, left: 10 }}>
+                                                    <ReviewBadge match={match} />
+                                                </div>
                                                 <div style={{ position: 'absolute', top: 10, right: 10 }}>
                                                     <StatusBadge status={match.status || 'scheduled'} />
                                                 </div>
@@ -460,6 +562,24 @@ export default function SuperadminPartidosPage() {
                                                     >
                                                         {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                                                     </select>
+                                                    {match.review_status === MATCH_REVIEW_STATUS.pending && (
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleReviewAction(match.id, 'approve')}
+                                                                className={styles.actionBtn}
+                                                            >
+                                                                Aprobar
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleReviewAction(match.id, 'reject')}
+                                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 7px', borderRadius: 4, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer', fontSize: 11 }}
+                                                            >
+                                                                Rechazar
+                                                            </button>
+                                                        </>
+                                                    )}
                                                     <Link href={`/admin/super/partidos/${match.id}`} className={styles.actionBtn}>Gestionar</Link>
                                                     {match.status !== 'final' && <Link href={`/admin/super/partidos/${match.id}`} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>Consola</Link>}
                                                     <button
