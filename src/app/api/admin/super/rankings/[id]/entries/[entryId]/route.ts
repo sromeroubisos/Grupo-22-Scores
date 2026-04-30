@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import {
     deleteClubRankingEntry,
     updateClubRankingEntry,
@@ -31,7 +31,7 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string; entryId: string }> },
 ) {
     try {
-        const actorUserId = await requireAdminApiUser();
+        const actorUserId = await requireGlobalAdminApiUser();
         const body = await request.json();
         const { id, entryId } = await params;
 
@@ -82,7 +82,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string; entryId: string }> },
 ) {
     try {
-        const actorUserId = await requireAdminApiUser();
+        const actorUserId = await requireGlobalAdminApiUser();
         const { id, entryId } = await params;
         const data = await deleteClubRankingEntry(id, entryId, actorUserId);
         return NextResponse.json({ data });

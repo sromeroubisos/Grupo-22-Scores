@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
@@ -173,9 +173,9 @@ async function selectManyWithFallback<T>(
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdminApiUser();
-  } catch {
-    return jsonError('Unauthorized', 401);
+    await requireGlobalAdminApiUser();
+  } catch (error) {
+    return jsonError('Unauthorized', getApiErrorStatus(error, 401));
   }
 
   try {

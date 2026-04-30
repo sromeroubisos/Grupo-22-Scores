@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
 import { TOURNAMENT_REVIEW_STATUS } from '@/lib/tournamentReview';
 
@@ -9,9 +9,9 @@ function jsonError(message: string, status = 500, details?: unknown) {
 
 export async function GET() {
     try {
-        await requireAdminApiUser();
-    } catch {
-        return jsonError('Unauthorized', 401);
+        await requireGlobalAdminApiUser();
+    } catch (error) {
+        return jsonError('Unauthorized', getApiErrorStatus(error, 401));
     }
 
     try {

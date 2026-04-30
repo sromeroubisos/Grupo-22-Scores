@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getClubRankingDetail, updateClubRankingMetadata } from '@/lib/server/clubRankings';
 
 function jsonError(message: string, status = 500, details?: unknown) {
@@ -21,7 +21,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> },
 ) {
     try {
-        await requireAdminApiUser();
+        await requireGlobalAdminApiUser();
         const { id } = await params;
         const data = await getClubRankingDetail(id);
         return NextResponse.json({ data });
@@ -38,7 +38,7 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> },
 ) {
     try {
-        const actorUserId = await requireAdminApiUser();
+        const actorUserId = await requireGlobalAdminApiUser();
         const { id } = await params;
         const body = await request.json().catch(() => ({}));
         const data = await updateClubRankingMetadata(id, {

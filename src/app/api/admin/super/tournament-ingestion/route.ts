@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { TournamentIngestionService } from '@/lib/services/tournamentIngestionService';
 
 export async function GET(req: NextRequest) {
     try {
-        await requireAdminApiUser();
+        await requireGlobalAdminApiUser();
         
         const { searchParams } = new URL(req.url);
         const action = searchParams.get('action');
@@ -45,13 +45,13 @@ export async function GET(req: NextRequest) {
         }
     } catch (error: any) {
         console.error('[Tournament Ingestion API] GET Error:', error);
-        return NextResponse.json({ error: error.message }, { status: error.message === 'Unauthorized' ? 401 : 500 });
+        return NextResponse.json({ error: error.message }, { status: getApiErrorStatus(error, 500) });
     }
 }
 
 export async function POST(req: NextRequest) {
     try {
-        await requireAdminApiUser();
+        await requireGlobalAdminApiUser();
         
         const body = await req.json();
         const { action, ...params } = body;
@@ -74,6 +74,6 @@ export async function POST(req: NextRequest) {
         }
     } catch (error: any) {
         console.error('[Tournament Ingestion API] POST Error:', error);
-        return NextResponse.json({ error: error.message }, { status: error.message === 'Unauthorized' ? 401 : 500 });
+        return NextResponse.json({ error: error.message }, { status: getApiErrorStatus(error, 500) });
     }
 }

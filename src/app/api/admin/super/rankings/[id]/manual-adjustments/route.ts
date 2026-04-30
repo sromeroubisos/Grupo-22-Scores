@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { applyManualClubRankingAdjustment } from '@/lib/server/clubRankings';
 
 function jsonError(message: string, status = 500, details?: unknown) {
@@ -23,7 +23,7 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> },
 ) {
     try {
-        const actorUserId = await requireAdminApiUser();
+        const actorUserId = await requireGlobalAdminApiUser();
         const { id } = await params;
         const body = await request.json();
 

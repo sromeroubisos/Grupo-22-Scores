@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { importClubRankingBase, listClubRankings } from '@/lib/server/clubRankings';
 
 function jsonError(message: string, status = 500, details?: unknown) {
@@ -24,7 +24,7 @@ function getStatusCode(error: unknown) {
 
 export async function GET() {
     try {
-        await requireAdminApiUser();
+        await requireGlobalAdminApiUser();
         const data = await listClubRankings();
         return NextResponse.json({ data });
     } catch (error) {
@@ -37,7 +37,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
-        const actorUserId = await requireAdminApiUser();
+        const actorUserId = await requireGlobalAdminApiUser();
         const body = await request.json();
 
         const detail = await importClubRankingBase({

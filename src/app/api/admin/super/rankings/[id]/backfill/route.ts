@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { backfillClubRankingSeason } from '@/lib/server/clubRankings';
 
 function jsonError(message: string, status = 500, details?: unknown) {
@@ -21,7 +21,7 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> },
 ) {
     try {
-        const actorUserId = await requireAdminApiUser();
+        const actorUserId = await requireGlobalAdminApiUser();
         const { id } = await params;
         const data = await backfillClubRankingSeason(id, actorUserId);
         return NextResponse.json({ data });

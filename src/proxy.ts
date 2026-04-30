@@ -33,11 +33,6 @@ const AUTH_CALLBACK_PATHS = new Set([
 const PROTECTED_ROUTE_PREFIXES = ['/admin', '/club-admin', '/profile', '/prode/ligas/crear'];
 const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
 
-const SUPER_ADMIN_EMAILS = new Set([
-    'superadmin@g22scores.com',
-    'sromeroubisos@gmail.com',
-]);
-
 function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): boolean {
     if (pathname === '/' && searchParams.has('code')) {
         return true
@@ -52,10 +47,6 @@ function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): 
 
 function isProtectedRoute(pathname: string): boolean {
     return PROTECTED_ROUTE_PREFIXES.some(prefix => pathname.startsWith(prefix));
-}
-
-function isSuperAdminEmail(email: string): boolean {
-    return SUPER_ADMIN_EMAILS.has(email.toLowerCase());
 }
 
 function hasGuestClubAccess(request: NextRequest): boolean {
@@ -131,9 +122,6 @@ export async function proxy(request: NextRequest) {
         if (!user) {
             return redirectToLogin(request);
         }
-        if (pathname.startsWith('/admin/super') && !isSuperAdminEmail(user.email)) {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
         return NextResponse.next();
     }
 
@@ -145,10 +133,6 @@ export async function proxy(request: NextRequest) {
 
             if (protectedRoute && !user) {
                 return redirectToLogin(request);
-            }
-
-            if (pathname.startsWith('/admin/super') && (!user || !isSuperAdminEmail(user.email))) {
-                return NextResponse.redirect(new URL('/', request.url));
             }
 
             return response;
